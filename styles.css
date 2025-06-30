@@ -1,0 +1,243 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    background-color: #f4f4f4;
+}
+
+.banner {
+    background-color: #005f73;
+    color: white;
+    padding: 20px;
+    font-size: 50px;
+    font-weight: bold;
+ 
+    align-items: center;
+}
+
+.logo {
+    max-width: 150px;
+    display: block;
+    margin: 10px auto 20px; /* Adds space below the logo */
+}
+    
+
+
+
+
+.content {
+    padding: 30px; /* Adds more padding inside the content area */
+    max-width: 900px; /* Expands the width for larger screens */
+    margin: 20px auto; /* Centers content and adds top/bottom margin */
+    background: #fafafa;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Slightly softer shadow for depth */
+    border-radius: 10px; /* Adds rounded corners for a smoother appearance */
+}
+
+.content img {
+    max-width:800px;
+    align-items: center;
+}
+
+.authors {
+    padding: 30px; /* Adds more padding inside the content area */
+   
+    margin: 20px auto; /* Centers content and adds top/bottom margin */
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Slightly softer shadow for depth */
+    border-radius: 10px; /* Adds rounded corners for a smoother appearance */
+    text-align: left;
+}
+
+.authors h2 {
+    color: #d9534f; /* A subtle red highlight for important points */
+}
+.authors h3 {
+    color: #d9534f; /* A subtle red highlight for important points */
+}
+
+.authors img {
+    max-width: 800px;
+    align-items: center;
+    text-align: center;
+}
+
+.blog-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.blog-list li {
+    margin: 10px 0;
+}
+
+.blog-list a {
+    color: #005f73;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.blog-list a:hover {
+    color: #0a9396; /* Slight color change on hover for emphasis */
+    text-decoration: underline;
+}
+
+
+.nav {
+    background-color: #0a9396;
+    padding: 15px 0; /* Adds more padding for a cleaner look */
+    display: flex;
+    justify-content: center; /* Centers nav items */
+}
+
+.nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 20px; /* Increases space between links */
+    font-size: 18px;
+    transition: all 0.3s ease; /* Smooth hover transition */
+}
+
+.nav a:hover {
+    text-decoration: underline;
+    color: #94d2bd; /* Adds a color change on hover for emphasis */
+}
+
+
+.video-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.video-item {
+    background-color: #f9f9f9;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 360px;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.video-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.video-item iframe {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    border: none;
+}
+
+.video-item p {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #333;
+}
+
+.meta {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.blog-list li {
+    background: #f0f4f8;
+    margin-bottom: 15px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    transition: transform 0.2s ease, background 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.blog-list li:hover {
+    background: #e1ecf4;
+    transform: translateY(-3px);
+}
+
+.blog-list a {
+    text-decoration: none;
+    color: #2a4d69;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.blog-list a:hover {
+    color: #1b3550;
+    text-decoration: underline;
+}
+
+.snippet {
+    font-size: 1rem;
+    color: #555;
+}
+
+@media (max-width: 768px) {
+    .banner {
+        font-size: 36px; /* Reduces font size for smaller screens */
+        height: 120px; /* Adjusts banner height for mobile */
+    }
+    
+    .nav {
+        flex-direction: column; /* Stacks nav items vertically on smaller screens */
+        padding: 10px;
+    }
+    
+    .nav a {
+        margin: 10px 0; /* Adds vertical spacing for nav items */
+        font-size: 16px;
+    }
+    
+    .content {
+        padding: 15px; /* Less padding on mobile */
+        max-width: 100%; /* Ensures content fits within the screen */
+    }
+}
+main {
+    flex: 1; /* Pushes the footer down */
+    min-height: 50vh;
+}
+
+footer {
+    background-color: #005f73;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    margin-top: auto;
+    width: 100%;
+}
+
+footer a {
+    color: #ffcc80;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+}
+
+footer a:hover {
+    color: #ff9800;
+}
+
+/* Social media icon styling */
+.social-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.fa-instagram {
+    margin-right: 5px;
+    font-size: 18px;
+}
