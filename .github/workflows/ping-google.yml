@@ -1,0 +1,16 @@
+name: Ping Google After Deployment
+
+on:
+  push:
+    branches:
+      - main  # or your deployment branch
+
+jobs:
+  ping-google:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Google of sitemap update
+        run: |
+          curl 
+"https://www.google.com/ping?sitemap=https://vetcardiohub.com/sitemap.xml"
+

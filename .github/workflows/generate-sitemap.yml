@@ -1,0 +1,34 @@
+name: Generate Sitemap and Ping Google
+
+on:
+  push:
+    branches:
+      - main  # or your deployment branch
+
+jobs:
+  sitemap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install sitemap-generator-cli
+        run: npm install -g sitemap-generator-cli
+
+      - name: Generate sitemap from live site
+        run: |
+          sitemap-generator https://yourdomain.com --output ./sitemap.xml
+
+      - name: Commit sitemap
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add sitemap.xml
+          git commit -m "Update sitemap"
+          git push
+
+      - name: Ping Google
+        run: |
+          curl "https://www.google.com/ping?sitemap=https://yourdomain.com/sitemap.xml"
+
