@@ -21,9 +21,9 @@ jobs:
           sitemap-generator https://www.vetcardiohub.com --output ./sitemap.xml
 
       - name: Setup Git Authentication
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Commit sitemap
         env:
