@@ -20,13 +20,19 @@ jobs:
         run: |
           sitemap-generator https://www.vetcardiohub.com --output ./sitemap.xml
 
+      - name: Setup Git Authentication
+          run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
       - name: Commit sitemap
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add sitemap.xml
-          git commit -m "Update sitemap"
-          git push
+          git diff --cached --quiet || git commit -m "Update sitemap"
+          git push origin HEAD:${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: Ping Google
         run: |
