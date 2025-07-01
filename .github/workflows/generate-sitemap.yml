@@ -18,7 +18,7 @@ jobs:
 
       - name: Generate sitemap from live site
         run: |
-          sitemap-generator https://www.vetcardiohub.com --output ./sitemap.xml
+          sitemap-generator https://www.vetcardiohub.com --output ./sitemap.xml --maxDepth 10
 
       - name: Setup Git Authentication
         env:
