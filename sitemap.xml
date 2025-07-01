@@ -1,6 +1,51 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://vetcardiohub-3wg.pages.dev/--output</loc>
+    <loc>https://vetcardiohub-3wg.pages.dev/</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/about</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/videos</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/post1</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/post2</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/post3</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/post4</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/post5</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/post6</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/post7</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/post8.html</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/index.html</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/about.html</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/videos.html</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub-3wg.pages.dev/blog-posts/blog.html</loc>
   </url>
 </urlset>
