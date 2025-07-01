@@ -11,6 +11,5 @@ jobs:
     steps:
       - name: Notify Google of sitemap update
         run: |
-          curl 
-"https://www.google.com/ping?sitemap=https://vetcardiohub.com/sitemap.xml"
+          curl "https://www.google.com/ping?sitemap=https://www.vetcardiohub.com/sitemap.xml"
 
