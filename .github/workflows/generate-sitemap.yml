@@ -3,10 +3,12 @@ name: Generate Sitemap and Ping Google
 on:
   push:
     branches:
-      - main  # or your deployment branch
+      - main
+  workflow_dispatch:
 
 jobs:
   sitemap:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
@@ -16,10 +18,9 @@ jobs:
       - name: Install sitemap-generator-cli
         run: npm install -g sitemap-generator-cli
 
-      - name: Generate sitemap from live site
+      - name: Generate sitemap from Cloudflare Pages URL
         run: |
-          sitemap-generator https://www.vetcardiohub.com/ --output ./sitemap.xml --maxDepth 10
-
+          sitemap-generator https://vetcardiohub-3wg.pages.dev/ --output ./sitemap.xml --maxDepth 10
 
       - name: Setup Git Authentication
         env:
@@ -36,9 +37,6 @@ jobs:
           git diff --cached --quiet || git commit -m "Update sitemap"
           git push origin HEAD:${{ github.ref }}
 
-
-
       - name: Ping Google
         run: |
-          curl "https://www.google.com/ping?sitemap=https://www.vetcardiohub.com/sitemap.xml"
-
+          curl "https://www.google.com/ping?sitemap=https://vetcardiohub.com/sitemap.xml"
