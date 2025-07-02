@@ -21,6 +21,7 @@ jobs:
       - name: Generate sitemap from Cloudflare Pages URL
         run: |
           sitemap-generator https://vetcardiohub-3wg.pages.dev/ --output ./sitemap.xml --maxDepth 10
+          sed -i 's|https://vetcardiohub-3wg.pages.dev|https://vetcardiohub.com|g' sitemap.xml
 
       - name: Setup Git Authentication
         env:
