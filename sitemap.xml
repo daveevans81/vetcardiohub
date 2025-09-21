@@ -13,6 +13,12 @@
     <loc>https://vetcardiohub.com/blog</loc>
   </url>
   <url>
+    <loc>https://vetcardiohub.com/action-plan</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/emailsignup</loc>
+  </url>
+  <url>
     <loc>https://vetcardiohub.com/blog-posts/post1</loc>
   </url>
   <url>
@@ -40,6 +46,9 @@
     <loc>https://vetcardiohub.com/blog-posts/post9</loc>
   </url>
   <url>
+    <loc>https://vetcardiohub.com/privacy</loc>
+  </url>
+  <url>
     <loc>https://vetcardiohub.com/blog-posts/post10.html</loc>
   </url>
   <url>
@@ -53,5 +62,11 @@
   </url>
   <url>
     <loc>https://vetcardiohub.com/blog-posts/blog.html</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/blog-posts/action-plan.html</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/blog-posts/emailsignup.html</loc>
   </url>
 </urlset>
