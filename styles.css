@@ -114,9 +114,7 @@ body {
     color: #94d2bd; /* Adds a color change on hover for emphasis */
 }
 
-.nav a:hover, .nav .dropbtn:hover {
-    background:#f4f4f4; /* hover highlight */
-}
+
 
 /* Dropdown container */
 .dropdown {
@@ -128,7 +126,7 @@ body {
 .dropdown-content {
     display:none;
     position:absolute;
-    background:#ffffff;
+    background:#0a9396;
     min-width:220px;
     box-shadow:0 4px 8px rgba(0,0,0,0.1);
     z-index:10;
@@ -138,13 +136,14 @@ body {
 .dropdown-content a {
     display:block;
     padding:0.5rem 1rem;
-    color:#333;
+    color: white;
     text-decoration:none;
-    background:#fff;
+    background:#0a9396;
 }
 
 .dropdown-content a:hover {
-    background:#f4f4f4;
+    text-decoration: underline;
+    color: #94d2bd; /* Adds a color change on hover for emphasis */
 }
 
 /* Show on hover */
