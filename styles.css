@@ -100,9 +100,56 @@ body {
     transition: all 0.3s ease; /* Smooth hover transition */
 }
 
+
+
+
+
+.nav a, .nav .dropbtn {
+    display:inline-block;
+    text-decoration:none;
+}
+
 .nav a:hover {
     text-decoration: underline;
     color: #94d2bd; /* Adds a color change on hover for emphasis */
+}
+
+.nav a:hover, .nav .dropbtn:hover {
+    background:#f4f4f4; /* hover highlight */
+}
+
+/* Dropdown container */
+.dropdown {
+    position:relative;
+    display:inline-block;
+}
+
+/* Dropdown content hidden by default */
+.dropdown-content {
+    display:none;
+    position:absolute;
+    background:#ffffff;
+    min-width:220px;
+    box-shadow:0 4px 8px rgba(0,0,0,0.1);
+    z-index:10;
+}
+
+/* Dropdown links */
+.dropdown-content a {
+    display:block;
+    padding:0.5rem 1rem;
+    color:#333;
+    text-decoration:none;
+    background:#fff;
+}
+
+.dropdown-content a:hover {
+    background:#f4f4f4;
+}
+
+/* Show on hover */
+.dropdown:hover .dropdown-content {
+    display:block;
 }
 
 
