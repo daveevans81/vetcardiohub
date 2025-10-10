@@ -7,16 +7,17 @@ body {
 }
 
 .banner {
-
-    color: white;
-    padding: 20px;
-    font-size: 50px;
-    font-weight: bold;
-       background: linear-gradient(135deg, #16325F, #005f73);
-      /* Optional: make it smooth */
-      background-size: 400% 400%;
-      animation: gradientShift 8s ease infinite;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* helps if there's a logo + text */
+  text-align: center;
+  padding: 20px;
+  color: white;
+  font-size: clamp(24px, 5vw, 50px); /* scales between 24px–50px */
+  font-weight: bold;
+  background: linear-gradient(135deg, #16325F, #005f73);
+  overflow: hidden; /* prevent text spill */
 }
 
     @keyframes gradientShift {
@@ -44,10 +45,7 @@ body {
     border-radius: 10px; /* Adds rounded corners for a smoother appearance */
 }
 
-.content img {
-    max-width:800px;
-    align-items: center;
-}
+
 
 .authors {
     padding: 30px; /* Adds more padding inside the content area */
@@ -66,10 +64,13 @@ body {
     color: #d9534f; /* A subtle red highlight for important points */
 }
 
+.content img,
 .authors img {
-    max-width: 800px;
-    align-items: center;
-    text-align: center;
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }
 
 .blog-list {
