@@ -8,16 +8,42 @@ body {
 
 .banner {
   display: flex;
+  flex-direction: column; /* stack logo and title */
   justify-content: center;
   align-items: center;
-  flex-direction: column; /* helps if there's a logo + text */
   text-align: center;
-  padding: 20px;
   color: white;
-  font-size: clamp(24px, 5vw, 50px); /* scales between 24px–50px */
+  padding: 2rem 1rem;
   font-weight: bold;
   background: linear-gradient(135deg, #16325F, #005f73);
-  overflow: hidden; /* prevent text spill */
+  background-size: cover;
+  overflow: visible; /* prevent cutting off content */
+}
+
+.banner-logo img {
+  max-width: 120px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.banner-title span {
+  display: inline-block;
+  font-size: clamp(1.5rem, 6vw, 3.5rem); /* scales dynamically */
+  line-height: 1.2;
+  white-space: nowrap; /* optional — keeps title in one line */
+}
+
+/* 📱 Responsive fix for landscape mobile (short height) */
+@media (max-height: 500px) and (orientation: landscape) {
+  .banner {
+    padding: 1rem;
+  }
+  .banner-logo img {
+    max-width: 80px;
+  }
+  .banner-title span {
+    font-size: clamp(1rem, 5vw, 2.5rem);
+  }
 }
 
     @keyframes gradientShift {
