@@ -1,0 +1,743 @@
+Intro / Hook
+Has your vet mentioned a heart murmur or hypertrophic cardiomyopathy
+—usually shortened to HCM
+—in your cat?
+
+It sounds scary, 
+but let’s break down what this really means, 
+how it’s diagnosed, 
+and what you can do to help your cat live their best life.
+
+HCM in cats is one of the most important
+—and often misunderstood—
+conditions in feline medicine.
+ It can be tricky to get your head around, 
+but it’s surprisingly common.
+
+Studies suggest that as many as one in seven cats 
+may have some degree of HCM.
+The good news? Only a small number ever develop serious symptoms.
+
+This is a disease that exists on a wide spectrum—
+from cats who remain completely unaffected for life, 
+to those who sadly develop life-threatening heart disease.
+
+I'll explain the staging system vets use to guide treatment -
+so you'll know what terms like 'stage B2' actually mean.
+
+
+
+So here’s a typical example. 
+Luna comes into the vet’s for a vaccination and check up, 
+no concerns at all. 
+Five years old. Playful, healthy, the queen of her household.
+
+But during her exam, the vet hears something unexpected…
+a faint heart murmur. Barely a whisper.
+That tiny sound changes everything.
+
+Here’s the twist:
+Many people think ‘no murmur means no heart problem’,
+or that a quiet murmur must mean a mild problem.
+Both are myths.
+Today we’re going to uncover the truth about 
+Hypertrophic Cardiomyopathy, or HCM—
+the most common heart disease in cats and one of the hardest to spot.
+
+Step one is understanding what is going on in HCM:
+
+
+ 
+
+Part 1: What is HCM?
+HCM is a thickening of the heart muscle. The name hypertrophic just means ‘thick’. And ‘cardiomyopathy’ literally means ‘heart muscle disease’
+
+This thick muscle becomes stiff and less elastic, 
+That makes it harder for the heart to relax 
+and it struggles to pump blood efficiently.
+
+It also takes up space inside the heart’s chambers—
+like a room where the walls have thickened and the space inside has shrunk.
+
+We can see this in the animation. 
+The left ventricle is the hearts powerhouse, 
+doing all the work pumping blood right around the body. 
+It gets no rest, 
+and so defects in the muscle add up more here than anywhere else.
+
+So now we get a very small heart chamber 
+unable to fill easily with blood coming in from the left atrium.
+Eventually this triggers the left atrium to struggle as well, 
+and this is a turning point in the disease. More on this later.
+
+
+But what causes this thickening?
+HCM is genetic in origin.
+The heart’s muscle fibres
+—tiny filaments of actin and myosin—
+are responsible for contracting and relaxing with every heartbeat.
+
+Even a small mutation in the proteins that control these fibres can make the heart muscle less efficient.
+
+Because the heart works constantly and never rests, 
+these defects show up here more than anywhere else.
+
+We believe there are many different genetic mutations 
+that can all cause the same appearance of heart thickening.
+So far only a few have been definitively identified.
+Meanwhile in humans with HCM they have found around one thousand!
+I think we have a long way to go in veterinary cardiology to catch up.
+
+Some mutations lead to very mild changes that never cause symptoms.
+Others cause rapid, severe thickening—even in young cats.
+
+Who Gets It?
+Certain breeds have a higher risk, 
+including Maine Coons, Ragdolls, and British Shorthairs, 
+but HCM can occur in any breed and at any age.
+Because it’s genetic, it can run in families.
+If a parent, sibling, or littermate has been diagnosed, 
+screening your cat
+—even if they seem healthy—
+is worth discussing with your vet, 
+
+Also this is something you should also strongly consider before breeding.
+
+So going back to Luna’s story, 
+we have a situation where a very quiet murmur is present, 
+but she seems completely fine. 
+What is the best thing to do?
+
+Unfortunately, while it is tempting to ignore the murmur, 
+as it is so quiet, this is a dangerous approach.
+
+
+Not all heart disease makes noise.
+In fact, some cats with advanced HCM have completely silent hearts.
+The heart muscle thickens, but the blood flow stays smooth, so there’s nothing for a stethoscope to hear.
+A perfectly quiet chest does not guarantee a healthy heart.”
+(Visual: side-by-side of a normal heart vs thickened wall on ultrasound.)
+
+
+Also, related to this, is the myth that the loudness of a murmur
+Is related to the severity of the disease.
+Unfortunately, a heart murmur just
+ tells us about the sound of turbulence,
+not the severity of disease.
+
+In fact, most cats with a heart murmur are affected by an issue very indirectly related to the muscle thickening. The heart murmur is usually being caused by an obstructive outflow tract issue.
+
+What is that?
+
+Well on this animation you can see how a thickening 
+of the upper septum can make it harder for blood 
+to get out of the left ventricle during each power stroke. 
+We call it a dynamic obstruction, 
+because the narrowing worsens during the squeeze. 
+When we measure blood flow velocity, 
+we see a characteristic spike in flow speed 
+as the narrowing gets really bad 
+right at the end of the power stroke. 
+
+And this is what causes the murmur in most cats.
+
+So actually it relates to a very specific region of muscle thickening. 
+And cats with HCM can show thickening all over the heart
+ in a very variable manner. 
+Severe thickening at the apex of the heart, 
+for example, might be silent. 
+While very isolated thickening just at the outflow might be very noisy, 
+but might be fairly insignificant clinically. 
+
+ 
+Part 2: Signs and Symptoms
+
+And does the fact that Luna has no problems 
+mean that there is nothing to worry about?
+
+
+Early HCM is often completely silent clinically. 
+No outward signs of problems at all. 
+Unfortunately even severe HCM can also be clinically silent.
+
+Unfortunately, many cats give no warning at all.
+Some only show subtle clues:
+• rapid breathing while resting
+• stopping suddenly during play
+• occasional open-mouth breathing.
+Others appear perfectly normal until a crisis strikes.
+
+One of the most frightening complications is a blood clot,
+which can suddenly block blood flow to the back legs—
+a painful and life-threatening emergency.
+
+And we still can’t reliably predict which cats are most at risk.”
+It is a bit like a ticking time bomb,
+and one which can be largely turned off,
+by using the right medications 
+but only if we know about it. 
+
+The other concerning complication is congestive heart failure, 
+Again which many cats are very good at hiding until a crisis has developed.
+
+Because early signs are so hard to spot, 
+regular veterinary checkups are vital.
+A heart murmur is one of the most useful early clues—but remember, 
+not all cats with HCM will have a murmur, 
+and not all murmurs mean HCM.
+
+
+ 
+Part 3: Diagnosis
+Because this disease is so complex and variable, 
+it can take some serious detective work to get to the bottom of.
+
+Most investigations start with Stethoscope exam: 
+Detecting a murmur is one common reason for investigation,
+But also a vet will sometimes hear what’s called a “gallop” rhythm
+Or even an arrhythmia. All should raise suspicion.
+
+Blood tests (NT-proBNP) are a good next step. 
+These are now available in simple kit form in many countries 
+to run ‘in house’ for your vet.
+
+If normal then a severe problem is much less likely. 
+
+This can detect stress on the heart and are useful for screening, especially if a relative has HCM or before anaesthesia.
+
+An Echocardiogram (or ultrasound of the heart) 
+is the gold standard and best test by far,
+ and the only way to confirm HCM and assess severity.
+As a cardiologist, its what I do for every feline patient, 
+And without one I am usually just completely guessing.
+It’s the biggest piece of the puzzle by far,
+And usually gets our detective work most of the way to a resolution.
+
+Are x-rays any good? 
+Well, they can show some evidence of heart enlargement 
+for a skilled radiologist. 
+But x-rays only show a heart in silhouette. 
+Like trying to judge the room sizes of a house just from its outline. 
+Cat heart muscle changes are often subtle 
+and the muscle is thickening inwardly not outwardly. 
+So changes are often invisible.
+
+So what happened to Luna?
+Her ProBNP blood test showed an abnormal reading.
+So she was scanned, and the cardiologist found a thickened heart muscle
+Diagnostic for HCM
+She also had a large left atrium with poor function and ‘smoke’ present
+This is a warning sign for possible clot formation.
+This is what we call ‘Stage B2’ 
+and you may often hear these stages being used in HCM.
+But what do they mean?
+
+HCM stages
+So we use a staging system to describe the disease progression. 
+This is borrowed from the ACVIM staging system 
+originally used to talk about dogs with mitral valve disease.
+IT helps understand what treatments to use and how to monitor them best.
+
+A cat with a thick heart muscle but no left atrial changes is in stage B1. 
+At this point, as far as well can tell, 
+nearly all cats remain completely unaffected 
+and never show any problems.
+
+When the muscle thickening starts interfering with the filling process too much, 
+the left atrium starts to enlarge. 
+This is stage B2. Where Luna is.
+A large left atrium is considered to be a major risk factor in the disease 
+for developing problems. 
+Cardiologists can look for lots of subtle signs on an echo, 
+such as smoke formation,
+and add them all up to determine the risks 
+of getting blood clot development, 
+and of going into heart failure.
+
+If they go into heart failure, they enter Stage C. 
+This is where the poor filling in the ventricles 
+is causing such poor flow 
+that back pressure starts building up in the left atrium. 
+This back pressure is then responsible for fluid 
+starting to leak out, 
+both in the lungs 
+and sometimes in the spaces around the lungs.
+However, we can counteract this tendancy with diuretics, 
+usually one called frusemide.
+
+These boost the urine output 
+and relieve the congestion and back pressure in the heart and lungs.
+
+And finally stage D occurs, when the back pressure builds up 
+Despite a significant level of diuretics being used.
+This is a difficult stage, usually higher doses of diuretic are helpful
+But not always safe and easy to use in cats. 
+Torasemide is a new favourite that is much more potent than frusemide
+
+ 
+Part 4: Treatment & Management
+Currently, there is no cure 
+and no proven medication 
+to prevent the disease from developing.
+
+However, as you can see from the discussion on stages, 
+there are some key steps for intervention.
+
+treatment can:
+Control symptoms in advanced stages, such as Stage C and D.
+And also reduce risks such as blood clots or heart failure. 
+This can be useful from stage B2 onwards
+
+Common medications include:
+Beta-blockers to slow the heart rate 
+and reduce the tendency to get obstruction in the outflow tract
+
+Anti-clotting medication 
+like clopridogrel, rivaroxaban and aspirin 
+to help prevent clots
+
+Diuretics if heart failure occurs
+And occasionally ACE inhibitors, like benazepril, 
+but these are less commonly used these days.
+
+Monitoring is the key:
+•	At home: count your cat’s resting breathing rate while sleeping.
+Often called the sleeping respiratory rate, we cardiologists love it
+because its simple, free, and very effective
+Take a look at our video describing it in more detail
+
+
+•	At the vet: regular checkups and repeat echocardiograms.
+Lifestyle adjustments:
+•	No special diet is proven to help, though stress reduction is always beneficial.
+•	Omega-3 supplements may be considered, but evidence is limited.
+
+Luna was sent home on a new medication to take every day,
+Called clopridogrel, it is an anticlotting medication as we mentioned above, 
+And stops platelets from sticking together in places they should be doing it.
+Platelets are tiny cell fragments in the blood 
+and are one of the first steps in forming a clot 
+So by inhibiting them we hope to stop clots from forming where they shouldn’t do.
+
+It was also advised that her owners start counting her sleeping respiratory rate, 
+or SRR, 
+to monitor for any early signs of congestive heart failure starting up. 
+She still has a good prognosis and may never tip into heart failure, 
+so as long as we manage her risk of blood clots she hopefully will do well.
+
+And thankfully many cats that present this way 
+with an incidental murmur 
+might even be earlier on in the process 
+and may not need anti-clotting medication either.
+ 
+ 
+Part 5: Prognosis
+HCM is one of the most variable conditions in veterinary cardiology:
+•	Some cats live normal lifespans without ever showing symptoms.
+•	Others develop mild to moderate disease that remains stable for years.
+•	A small number develop severe, 
+life-threatening disease, sometimes at a young age.
+
+Early detection offers the best chance to manage risk a
+nd keep your cat comfortable.
+Discuss this in detail with your cardiologist, 
+but remember without an echo it is all complete guesswork unfortunately, 
+as we can’t diagnose the disease or stage it at all.
+
+ 
+Key Takeaways
+1. Don’t panic if your vet hears a murmur.
+2. A murmur is a reason to investigate—not a diagnosis or a death sentence.
+3. An echocardiogram or at least an NT-proBNP blood test is the next step.
+4. Regular checkups and early detection are the most powerful tools to protect your cat’s health.
+
+Thanks so much for watching. 
+I hope you found the information useful, 
+and please have a look at some of the other related
+topics we cover. 
+
+Such as what a heart murmur is all about
+counting the sleeping respiratory rate
+how to use the cardalis app
+and a deeper dive into congestive heart failure.
+ 
+Please don't forget to like to video 
+and subscribe to the channel
+to help other pet owners find the information they need 
+to help their cats out as well.
+
+00:00 Introduction to HCM
+02:08 What is HCM?
+03:23 What Causes HCM?
+04:25 Who Gets It?
+04:55 Decision Making - Luna's Dilemma
+05:15 Heart Murmurs and HCM
+06:03 Obstructive Outflow Tract Disease
+07:22 Signs and Symptoms
+09:01 Diagnosis
+11:15 Luna's Diagnosis
+11:42 ACVIM Stages of HCM
+14:11 Treatment and Management
+16:01 Luna's treatment plan
+17:06 Rapamycin
+17:22 Prognosis
+18:02 Key Takeaways
+18:30 Next Steps
+
+
+Subtitles:
+
+Perhaps your vet mentioned a heart murmur in your cat or used the words hypertrophic cardiomyopathy, which is usually shortened to HCM
+It does sounds scary, 
+but let’s break down what this really means, 
+how it’s diagnosed, 
+and what you can do to help your cat live their best life.
+I'll also explain the staging system that vets use to guide treatment -
+so you'll know what terms like 'stage B2' actually mean.
+HCM in cats is one of the most important
+—but often really misunderstood—
+conditions in feline medicine.
+ It can be tricky to get your head around, 
+but it’s really a surprisingly common problem.
+
+Studies suggest that as many as one in seven cats 
+may have some degree of HCM.
+The good news? Only a small number ever develop serious problems.
+
+This is a disease that exists on a wide spectrum—
+from cats who remain completely unaffected for life, 
+to those who sadly develop life-threatening heart disease at a young age.
+
+So here’s a typical example. 
+Luna comes into the vet’s for a vaccination and check up, 
+no concerns at all. 
+Five years old. Playful, healthy, the queen of her household.
+
+But during her exam, the vet hears something unexpected…
+a faint heart murmur. Barely a whisper.
+But. That tiny sound changes everything.
+And here’s the twist:
+Most people think ‘no murmur means no heart problem’,
+or that a 'quiet murmur must mean a mild problem'.
+But sadly, both are myths.
+Today we’re going to uncover the truth about 
+ HCM— and why its one of 
+the hardest to spot.
+
+Step one of this is understanding what's actually going on in HCM:
+
+
+ 
+
+Part 1: So What is HCM?
+HCM is a thickening of the heart muscle. The name hypertrophic just means ‘thick’. And ‘cardiomyopathy’ literally means ‘heart muscle disease’
+
+This thick muscle becomes stiff and less elastic, 
+That makes it harder for the heart to relax 
+and it struggles to pump the blood efficiently.
+
+This muscle thickening also takes up space inside the heart’s chambers—
+like a room where the walls have thickened and the space inside has shrunk.
+
+We can see this in the animation. 
+The left ventricle is the heart's powerhouse, 
+its doing all the work pumping blood right around the body. 
+It gets no rest, 
+and so defects in the muscle add up more here than anywhere else.
+
+So now we get a very small heart chamber 
+unable to fill easily with blood, and this is coming in from the left atrium.
+Eventually this triggers the left atrium to struggle as well, 
+and this is a turning point in the disease. More on that later.
+
+
+And what causes this thickening?
+HCM is genetic in origin.
+The heart’s muscle fibres
+— are tiny filaments of actin and myosin—
+and they're responsible for contracting and relaxing with every heartbeat.
+
+Even a small mutation in the proteins that control these fibres can make the heart muscle less efficient.
+
+And because the heart works constantly and never rests, 
+these defects show up here more than anywhere else.
+
+We believe there are many different genetic mutations 
+that can all cause the same appearance of heart thickening.
+So far only a few have been definitively identified in cats.
+But meanwhile in humans with HCM they have found around one thousand!
+I think we have a long way to go in veterinary cardiology to catch up with the medical side.
+
+Some mutations lead to very mild changes that never cause symptoms.
+But others cause rapid, severe thickening.
+
+Who Gets It?
+Certain breeds have a higher risk, 
+including Maine Coons, Ragdolls, and British Shorthairs, 
+but actually HCM can occur in any breed and at any age.
+Because it’s genetic, it can even run in families.
+So if a parent, sibling, or littermate has been diagnosed, 
+screening your cat
+—even if they seem healthy—
+is really worth discussing with your vet, 
+
+Also this is something you should definitely consider before breeding.
+
+So going back to Luna’s story, 
+we have a situation where a very quiet murmur is present, 
+but she seems completely fine. 
+What is the best thing to do?
+
+Unfortunately, while it is tempting to ignore the murmur, 
+as it is so quiet, this is a dangerous approach.
+
+Not all heart disease makes noise.
+In fact, some cats with advanced HCM can have completely silent hearts.
+The heart muscle thickens, but the blood flow can stay smooth, so there’s nothing for a stethoscope to hear.
+A perfectly quiet chest does not guarantee a healthy heart.”
+
+Also, related to this, is the myth that the loudness of a murmur
+Is related to the severity of the disease.
+Unfortunately, a heart murmur just
+tells us about the sound of turbulence in the heart,
+and nothing about the severity of disease.
+
+In fact, most cats with a heart murmur are affected by an issue very indirectly related to the muscle thickening. The heart murmur is usually being caused by an obstructive outflow tract issue.
+
+And what is that?
+
+Well lets have a look at the animation again, and you can see how a thickening 
+of the upper septum can make it harder for blood 
+to get out of the left ventricle during each power stroke. 
+We call it a dynamic obstruction, 
+because the narrowing worsens during the squeeze. 
+When we measure blood flow velocity, 
+we see a characteristic spike in flow speed 
+as the narrowing gets really bad 
+right at the end of the power stroke. 
+
+And this is what causes the murmur in most cats.
+
+So it actually it relates to a very specific region of muscle thickening. 
+And cats with HCM can have muscle thickening all over the heart, in all sorts of different areas
+its a very variable thing. 
+Severe thickening at the apex of the heart, which is the very tip,
+might be completely silent. 
+While very isolated thickening just at this outflow tract might make a lot of noise, 
+but could be completely insignificant clinically. 
+
+ 
+Part 2: And what about Signs and Symptoms
+
+And does the fact that Luna has no problems 
+mean that there is nothing to worry about?
+
+
+Early HCM is often completely silent clinically. 
+With no outward signs of problems at all. 
+But unfortunately even severe HCM can also be clinically silent.
+
+Also, many cats give no warning at all. They';e very good at hiding problems.
+Some might show subtle clues:
+• such as rapid breathing while resting
+• or stopping suddenly during play
+• or even open-mouth breathing.
+But others can appear completely normal until a crisis strikes.
+
+One of the most frightening complications is a blood clot,
+which can suddenly block blood flow to the back legs— which is
+a painful and life-threatening emergency.
+
+And yet we still can’t reliably predict which cats are most at risk of this.
+It is a bit like a ticking time bomb,
+and one which can be largely turned off,
+by using the right medications 
+but only if we know about it. 
+
+The other concerning complication is congestive heart failure, 
+But again which many cats are very good at hiding until a crisis has developed.
+
+Because early signs are so hard to spot, 
+regular veterinary checkups are vital.
+A heart murmur is one of the most useful early clues—but remember, 
+not all cats with HCM will have a murmur, 
+and not all murmurs mean HCM.
+
+
+ 
+Part 3: So What About Diagnosis?
+Because this disease is so complex and variable, 
+it can take some serious detective work to get to the bottom of.
+
+Most investigations start with Stethoscope exam and heart auscultation: 
+Detecting a murmur is one common reason for investigation,
+But also a vet will sometimes hear what’s called a “gallop” rhythm
+Or even an arrhythmia. All should raise suspicion.
+
+Blood tests (such as proBNP) are a good next step. 
+These are now available in simple kit form in many countries 
+to run ‘in house’ for your vet.
+
+If normal then a severe problem is much less likely. 
+
+The blood test can detect stress on the heart and are very useful for screening purposes, especially if a relative has HCM or if you're considering anaesthesia on your heart.
+
+An Echocardiogram (or ultrasound of the heart) 
+is the gold standard and best test by far,
+ its one of the only ways to confirm HCM and assess severity.
+As a cardiologist, its what I do for every feline patient, 
+And without one I am pretty much just guessing.
+It’s the biggest piece of the puzzle by far,
+And usually gets our detective work most of the way towards a resolution.
+
+Are x-rays any good? 
+Well, they can show some evidence of heart enlargement 
+for a skilled radiologist. 
+But actually x-rays only show a heart in silhouette. 
+It's like trying to judge the room sizes of a house just from the house's outline. 
+Cat heart muscle changes are often quite subtle 
+and the muscle is  often thickening inwardly not outwardly. 
+So changes are often invisible on x-ray.
+
+So what happened to Luna?
+Her ProBNP blood test showed an abnormal reading.
+So she was scanned, and the cardiologist found a thickened heart muscle
+And this is diagnostic for HCM
+She also had a large left atrium with poor function and there was ‘smoke’ present
+This is a warning sign for clot formation.
+This is what we call ‘Stage B2’ 
+you may often hear these stages being used in HCM.
+But what do they mean?
+
+So we use a staging system to describe the disease progression. 
+This is borrowed from the ACVIM staging system 
+originally used to talk about dogs with mitral valve disease.
+It helps us understand what treatments to use and how to monitor them best.
+
+A cat with a thick heart muscle but no other changes, for example aleft atrial enlargement, is in stage B1. 
+At this point, as far as well can tell, 
+nearly all cats remain completely unaffected 
+and often never show any problems.
+
+But when the muscle thickening starts interfering with the filling too much, 
+the left atrium starts to enlarge. 
+And this is stage B2. Where Luna is.
+A large left atrium is considered to be a major risk factor in the disease  for developing problems. 
+Cardiologists can look for lots of subtle signs on an echo, 
+such as the smoke formation we mentioned before,
+which is spontaneous contrast appearing in the left atrium
+which you can see on echo
+The cardiologists add all these risk factors up to determine the risks 
+of getting blood clot development, 
+and of going into heart failure.
+
+If they go into heart failure, they enter Stage C. 
+This is where the poor filling in the ventricles 
+is causing such poor flow 
+that back pressure starts building up in the left atrium. 
+This back pressure is then responsible for fluid 
+starting to leak out, 
+both in the lungs 
+and sometimes in the spaces around the lungs.
+However, we can counteract this tendancy with diuretics, 
+usually one called frusemide.
+
+Diuretics boost the urine output 
+and relieve the congestion and back pressure in the heart and therefore in the lungs.
+
+And finally stage D occurs, when the back pressure builds up 
+Despite a significant level of diuretics being used.
+This is a difficult stage, usually higher doses of diuretics are helpful
+But not always safe and easy to use in cats. 
+Torasemide is a new favourite that is much more potent than frusemide
+
+ 
+Part 4: And what about treatment and Management
+Currently, there is no cure 
+and no proven medication 
+to prevent the disease from developing.
+
+However, as you can see from the discussion on stages, 
+there are some key steps for intervention.
+
+Treatment can:
+Control symptoms in advanced stages, such as Stage C and D.
+And also reduce risks such as blood clots or heart failure. 
+They can be useful from stage B2 onwards which is while the disease is still silent
+
+Common medications can include:
+Beta-blockers to slow the heart rate 
+and reduce the tendency to get obstruction in the outflow tract
+
+Anti-clotting medication 
+like clopridogrel, rivaroxaban and aspirin 
+all help prevent clot formation, and this can prevent thromboembolus
+
+Diuretics are also essential if heart failure occurs
+But also ACE inhibitors, like benazepril, 
+although less commonly used these days.
+
+Monitoring is the key:
+•	At home: count your cat’s resting breathing rate while sleeping.
+Often called the sleeping respiratory rate, and us cardiologists love it
+because its simple, free, and very effective
+Take a look at our video here describing it in more detail
+
+
+Also monitoring at the vet is important: with regular checkups and repeat echocardiograms.
+And what about lifestyle adjustments:
+•	Unfortunately no special diet is proven to help at all, although stress reduction is probably beneficial.
+•	Omega-3 supplements may be considered, but the evidence is also limited.
+And what about Luna
+Luna was sent home on a new medication to take every day,
+Called clopridogrel, and it is an anticlotting medication as we mentioned above, 
+It stops platelets from sticking together in places they should be doing it.
+Platelets are tiny cell fragments in the blood 
+and are one of the first steps in forming a clot 
+So by inhibiting them we hope to stop clots from forming where they shouldn’t do.
+
+It was also advised that her owners start counting her sleeping respiratory rate, 
+or SRR, 
+to monitor for any early signs of congestive heart failure starting up. 
+She still has a very good prognosis and may never tip into heart failure, 
+so as long as we manage her risk of blood clots she will hopefully do really well.
+
+And thankfully many cats that present this way 
+with an incidental murmur 
+might be earlier on in the process than her
+and they may not need anti-clotting medication at all.
+ Finally there is some new medication that is possibly in the pipeline. You may hear things about rapamycin. Have a look at our video on this. And it is certainly a medication to keep an eye on, but we're not recommending it just yet.
+ 
+Part 5: And what about Prognosis
+HCM is one of the most variable conditions in veterinary cardiology:
+•	Some cats live normal lifespans and never show problems.
+•	But Others develop mild to moderate disease can  remain stable for years.
+•	And a small number develop severe, 
+life-threatening disease, sometimes from a very young age.
+
+Early detection offers the best chance to manage risk and keep your cat comfortable.
+Discuss this in detail with your cardiologist, 
+but remember without an echo it is all complete guesswork, 
+as we can’t diagnose the disease or stage it at all.
+
+ 
+So Our Key Takeaways
+1. Don’t panic if your vet hears a murmur.
+2. A murmur is a reason to investigate—its not a diagnosis and its definitely not a death sentence.
+3. An echocardiogram or at least an NT-proBNP blood test is the next step.
+4. Regular checkups and early detection are the most powerful tools in protecting your cat’s health.
+
+Thanks so much for watching. 
+I hope you found the information useful, 
+and please have a look at some of the other related
+topics we cover. 
+
+Such as what is a heart murmur is all about
+counting the sleeping respiratory rate
+how to use the cardalis app
+and a deeper dive into congestive heart failure.
+ 
+Also don't forget to like to video 
+and subscribe to the channel
+to help other pet owners find the information they need 
+to help their cats out as well.

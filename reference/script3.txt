@@ -1,0 +1,91 @@
+
+🎬 YouTube Script: “Should I Give My Cat Rapamycin for HCM?”
+
+[Opening Scene — VetCardioHub logo animation + soft music]
+ “Welcome to VetCardioHub — where we explore the heart of veterinary cardiology for pet owners who want answers. I’m Dr. Dave Evans, and today we’re talking about a hot topic in feline cardiology: Rapamycin. Also known by its new name: Felycin-CA1. Should you be giving it to your cat with HCM? Let’s have a look.”
+ 
+First things first, I am making this video in the middle of 2025 and this is a fast changing topic, so be prepared for new information to appear. I will update my corresponding blog article, linked in the description below, as needed. Also vetcardiohub is totally independent, with no links to any of the researchers or pharmaceutical companies involved.
+
+[Cut to: You speaking or animated title: “What is HCM?”]
+ “Hypertrophic cardiomyopathy, or HCM, is the most common heart condition in cats. It is a genetic condition that results in gradually progressive thickening of the heart muscle over time.  Around 1 in 7 cats may be affected. But some cats show no symptoms. Others develop heart failure, blood clots, or even suffer sudden death.
+ 
+Sadly, detection rates are still quite poor, and we still have little way to predict outcomes”
+ 
+Visuals:
+	•	Animated cat with heart graphic
+	•	Pie chart showing 14% prevalence
+	•	Medical illustrations of a normal vs. thickened heart
+	•	Photo or video of a healthy, relaxed cat vs. one at the vet
+ 
+
+[Cut to: “Why Rapamycin?”]
+ “Recently, a drug called Rapamycin — now conditionally approved in the US under the name Felycin-CA1 — has been gaining attention. It was originally developed as an anti-fungal and immune-modulating drug, but researchers discovered it also affects something called mTOR, a pathway involved in cell growth and stress.”
+ 
+Visuals:
+	•	Chemical structure of rapamycin (brief)
+	•	Animation: molecule interacting with a heart cell
+	•	Timeline: from antifungal to heart research
+	•	FDA “Conditional Approval” stamp overlay
+ 
+ 
+
+[Cut to: “How Could It Help?”]
+ “In HCM, the heart muscle becomes abnormally thick. One theory is that this is caused by oxidative stress and a breakdown in normal cell recycling — something Rapamycin might help regulate. That’s the science behind the hype.”
+ 
+ 
+Visuals:
+	•	Animation: heart muscle thickening over time
+	•	Keywords like “oxidative stress” and “autophagy” pop in
+	•	Animation of mTOR inhibition
+	•	Simplified “before and after” diagram of a heart muscle cell
+
+[Cut to: RAPACAT trial chart visual]
+ “The RAPACAT trial was a small but promising study. Forty-three cats with subclinical HCM were given either a placebo, a low dose, or a high dose of Rapamycin for 6 months. The result? Wall thickness increased in the placebo group — but stayed stable or slightly improved in the treatment groups.”
+ 
+Visuals:
+	•	List of limitations as animated bullet points:
+	◦	“Small study (43 cats)”
+	◦	“Short timeline (6 months)”
+	◦	“Unclear clinical outcomes”
+	•	Cat on an echocardiogram table
+	•	Subtle skeptical shrug emoji or animation
+ 
+
+[Cut to: “So... is it a wonder drug?”]
+ “Maybe, maybe not. We really don’t know yet. There are a few big caveats:
+	•	The trial was small — just 43 cats
+	•	It only ran for 6 months
+	•	It measured subtle changes in heart wall thickness — not actual outcomes like lifespan or quality of life”
+As a cardiologist that sees lots of these cases, this is so far too short a timescale to make judgements on. Lots of cats spend years in this early phase of the disease. Also we don’t tend to find the wall thickens and changes in a predictable way, or is even particularly related to the eventual outcomes – either good or bad.
+ 
+Visuals:
+	•	Blood glucose monitor animation
+	•	Vet drawing blood from a cat (stock clip)
+	•	Warning sign or “monitor closely” message
+	•	Visual of a calendar for regular blood checks
+ 
+
+[Cut to: “What about side effects?”]
+ “One of the treated cats developed diabetes — and glucose intolerance is a known side effect of Rapamycin in other species. So, if your cat is on it, regular bloodwork is a must. In my personal opinion, this risk of side effects with no convincing improvement in outcome is the real concern here. 
+
+[Cut to: “Our Takeaway”]
+ “Right now, most cardiologists are cautiously optimistic — but not prescribing Rapamycin widely yet. We need longer studies with more cats to understand its real benefits and risks. If you’re considering it, have a detailed conversation with your vet, and make sure your cat is being closely monitored.
+ 
+I know a lot of you are desperately concerned for your cat’s wellbeing and we all urgently wish there was something to do that can safely and effectively slow or reduce this nasty disease. BUT -  I would strongly recommend waiting for a little more safety and efficacy data to come out before taking a gamble with your cat’s health.
+ 
+Visuals:
+	•	Calm cat being examined by a vet
+	•	Overlay text: “Talk to your vet. Monitor regularly.”
+	•	Chart showing treatment plan (visits, tests, signs to watch)
+	•	Optional: you speaking directly to camera
+ 
+ 
+
+[Closing Scene — VetCardioHub logo & contact]
+ “Thanks for watching VetCardioHub. If you found this helpful, hit like and subscribe for more clear, vet-led insight into your pet’s heart health. And remember — we’re here to help you make the best choices for your beloved pets.”
+ 
+**Credits & Attributions:**
+*”Obstructive HCM diagram” by Blausen.com staff (2014). "Medical gallery of Blausen Medical 2014". WikiJournal of Medicine 1, licensed under CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/).
+*”mTOR pathway diagram” by Filip em, CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/), via Wikimedia Commons
+ 
+*RAPACAT Trial: Kaplan JL, Rivas VN, Walker AL, Grubb L, Farrell A, Fitzgerald S, Kennedy S, Jauregui CE, Crofton AE, McLaughlin C, Van Zile R, DeFrancesco TC, Meurs KM, Stern JA. “Delayed-release rapamycin halts progression of left ventricular hypertrophy in subclinical feline hypertrophic cardiomyopathy: results of the RAPACAT trial”. J Am Vet Med Assoc. 2023 Jul 26;261(11):1628-1637.
