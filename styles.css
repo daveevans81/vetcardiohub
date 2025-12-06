@@ -482,6 +482,7 @@ footer a:hover {
   text-align: left;
   margin-bottom: 0.4rem;
 }
+
 /* hero header */
 header.hero {
   background: linear-gradient(135deg,#16325F,#005f73);
@@ -491,6 +492,7 @@ header.hero {
   box-shadow: 0 6px 18px rgba(6,30,60,0.12);
   margin-bottom: 20px;
 }
+
 header.hero h1 { margin: 0; font-size: clamp(1.5rem, 3vw, 2.4rem); }
 header.hero p { margin: 10px 0 0; color: rgba(255,255,255,0.95); line-height:1.45; }
 
