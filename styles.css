@@ -6,45 +6,50 @@ body {
     background-color: #f4f4f4;
 }
 
+
+
+
 .banner {
   display: flex;
-  flex-direction: column; /* stack logo and title */
+  flex-direction: column; /* mobile: stacked layout */
   justify-content: center;
   align-items: center;
-  text-align: center;
-  color: white;
-  padding: 2rem 1rem;
-  font-weight: bold;
+  padding: 1.5rem;
   background: linear-gradient(135deg, #16325F, #005f73);
-  background-size: cover;
-  overflow: visible; /* prevent cutting off content */
+  color: white;
+  text-align: center;
 }
 
-.banner-logo img {
-  max-width: 120px;
+/* Logo */
+.banner-logo {
+  width: clamp(80px, 18vw, 150px);
   height: auto;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
-.banner-title span {
-  display: inline-block;
-  font-size: clamp(1.5rem, 6vw, 3.5rem); /* scales dynamically */
-  line-height: 1.2;
-  white-space: nowrap; /* optional — keeps title in one line */
+/* Title */
+.banner-title {
+  font-size: clamp(1.6rem, 6vw, 3.2rem);
+  font-weight: bold;
+  white-space: nowrap;
 }
 
-/* 📱 Responsive fix for landscape mobile (short height) */
-@media (max-height: 500px) and (orientation: landscape) {
+/* 📏 Desktop layout: logo + text on one line */
+@media (min-width: 700px) {
   .banner {
-    padding: 1rem;
+    flex-direction: row; /* side-by-side */
+    text-align: left;
+    padding: 1.5rem 2rem;
   }
-  .banner-logo img {
-    max-width: 80px;
-  }
-  .banner-title span {
-    font-size: clamp(1rem, 5vw, 2.5rem);
+
+  .banner-logo {
+    margin: 0 1rem 0 0; /* space between logo + title */
   }
 }
+
+
+
+
 
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
