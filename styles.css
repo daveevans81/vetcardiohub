@@ -445,6 +445,9 @@ footer a:hover {
     text-decoration: none;
 }
 
+
+
+
 /* MONITORING page extras */
 /* page container (centres content and limits width) */
 .container {
@@ -453,7 +456,32 @@ footer a:hover {
   padding: 28px;
   box-sizing: border-box;
 }
+.container a {
+  color: #16325F;
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
 
+.container a:hover {
+  color: #0a9396;
+  border-bottom-color: #0a9396;
+  text-decoration: none;
+}
+
+/* Left-align lists inside article content only */
+.container ul,
+.container ol {
+  text-align: left;
+  margin-left: 1.2rem;
+  padding-left: 0.5rem;
+}
+
+.container li {
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
 /* hero header */
 header.hero {
   background: linear-gradient(135deg,#16325F,#005f73);
