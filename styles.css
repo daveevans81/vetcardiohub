@@ -571,6 +571,21 @@ aside { display: block; }
   margin-top: 10px;
 }
 
+.example-graph {
+    display: flex;
+    flex-direction: column;   /* stack images vertically */
+    align-items: center;      /* centre them nicely */
+    gap: 1.5rem;              /* spacing between graphs */
+    width: 100%;
+}
+
+.example-graph img {
+    max-width: 100%;          /* ensure they never overflow */
+    height: auto;
+    border-radius: 8px;       /* optional: nice rounded corners */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
 /* downloads area */
 .download-grid {
   display: grid;
