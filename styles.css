@@ -444,3 +444,158 @@ footer a:hover {
     color: white !important;
     text-decoration: none;
 }
+
+/* MONITORING page extras */
+/* page container (centres content and limits width) */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px;
+  box-sizing: border-box;
+}
+
+/* hero header */
+header.hero {
+  background: linear-gradient(135deg,#16325F,#005f73);
+  color: #fff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(6,30,60,0.12);
+  margin-bottom: 20px;
+}
+header.hero h1 { margin: 0; font-size: clamp(1.5rem, 3vw, 2.4rem); }
+header.hero p { margin: 10px 0 0; color: rgba(255,255,255,0.95); line-height:1.45; }
+
+/* breadcrumb style */
+nav.breadcrumb { font-size: 13px; color: #6b7280; margin: 12px 0; }
+
+/* basic card (used throughout page) */
+/* You already have a .card; this strengthens and unifies it for this page */
+.card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(12,20,40,0.04);
+  box-sizing: border-box;
+}
+
+/* two-column grid for main layout (main + aside) */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* main / aside semantics */
+main { min-height: 0; } /* no forced height */
+aside { display: block; }
+
+/* reusable .small helper */
+.small { font-size: 0.95rem; color: #6b7280; line-height:1.5; }
+
+/* two-column inside a card (used for lists) */
+.two-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+/* feature box / note */
+.note {
+  background: #fff8e6;
+  border-left: 4px solid #ffdd57;
+  padding: 12px;
+  border-radius: 6px;
+  color: #6b4b00;
+  margin-top: 12px;
+  box-sizing: border-box;
+}
+
+/* check list compact layout (dot + content) */
+.check { display:flex; gap:12px; align-items:flex-start; margin: 10px 0; }
+.check .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #005f73;
+  margin-top: 6px;
+  flex: 0 0 10px;
+}
+
+/* Example trend graphic placeholder */
+.example-graph {
+  height: 120px;
+  background: linear-gradient(90deg,#e8f6ff 0%, #fff 65%);
+  border-radius: 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color: #16325F;
+  font-weight:700;
+  box-shadow: inset 0 -8px 24px rgba(0,0,0,0.02);
+  margin-top: 10px;
+}
+
+/* downloads area */
+.download-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.download-link {
+  display:block;
+  padding:10px;
+  border-radius:8px;
+  border: 1px dashed #e6e9ef;
+  background: #fff;
+  text-decoration:none;
+  color:#16325F;
+  font-weight:600;
+  text-align:center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.download-link:hover {
+  background:#f7fbff;
+  border-color:#d6e8ff;
+}
+
+/* generic table used on the page */
+.table {
+  width:100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+.table th, .table td {
+  border:1px solid #eef2f6;
+  padding:10px;
+  text-align:left;
+  vertical-align: top;
+}
+.table th {
+  background:#f7fafc;
+  color: #16325F;
+  font-weight:600;
+}
+
+/* a little spacing utility for card children */
+.card > * + * { margin-top: 12px; }
+
+/* responsive tweaks */
+@media (max-width: 600px) {
+  header.hero { padding: 20px; }
+  .container { padding: 16px; }
+  .card { padding: 14px; }
+  .example-graph { height: 100px; font-size: 0.95rem; }
+}
+
+/* footer small tweak to make page footer consistent if present */
+footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font-size:0.95rem; }
+
+/* small accessible focus styling for links inside the article */
+.card a:focus, .download-link:focus { outline: 3px solid rgba(21,101,192,0.14); outline-offset: 2px; }
