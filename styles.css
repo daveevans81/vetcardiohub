@@ -436,10 +436,11 @@ footer a:hover {
     text-decoration: none;
 }
 
-.btn a {
-    color: white;
-}
-
-.btn a:hover {
-    color: white;
+.btn,
+.btn:link,
+.btn:visited,
+.btn:hover,
+.btn:active {
+    color: white !important;
+    text-decoration: none;
 }
