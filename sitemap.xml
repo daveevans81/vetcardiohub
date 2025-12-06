@@ -70,9 +70,6 @@
     <loc>https://vetcardiohub.com/blog-posts/emailsignup.html</loc>
   </url>
   <url>
-    <loc>https://vetcardiohub.com/blog-posts/post13.html</loc>
-  </url>
-  <url>
     <loc>https://vetcardiohub.com/blog-posts/index.html</loc>
   </url>
   <url>
@@ -83,5 +80,11 @@
   </url>
   <url>
     <loc>https://vetcardiohub.com/blog-posts/blog.html</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/blog-posts/trackers.html</loc>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/blog-posts/post13</loc>
   </url>
 </urlset>
