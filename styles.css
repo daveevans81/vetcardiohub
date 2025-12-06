@@ -398,12 +398,12 @@ footer a:hover {
 .indexscroll section:nth-child(even) {
     background: #f0f4f8;
 }
-.indexscroll a {
+.card a {
     text-decoration: none;
     color: black;
 }
 
-.indexscroll a:hover {
+.card a:hover {
     color: #0a9396; /* Slight color change on hover for emphasis */
     text-decoration: underline;
 }
