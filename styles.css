@@ -372,14 +372,31 @@ footer a:hover {
 
 /*New Index Page Scrolling Bits */
 .indexscroll section {
-    padding: 4rem 1rem;
+    padding: 4rem 2rem;
     max-width: 900px;
-    margin: auto;
+    margin: 2rem auto;
     text-align: left;
+    border-radius: 1.5rem;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    background: #fff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .indexscroll section:nth-child(even) {
-    background: #000000;
+    background: #f0f4f8; /* soft blue-grey */
+}
+
+.indexscroll section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+}
+
+.indexscroll section:nth-child(odd) {
+    background: #ffffff; /* white */
+}
+
+.indexscroll section:nth-child(even) {
+    background: #f0f4f8;
 }
 
 .indexscroll h2 {
