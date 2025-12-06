@@ -265,6 +265,47 @@ body {
     color: #555;
 }
 
+.smart-table th,
+.smart-table td {
+  text-align: left;              /* left-justify text */
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e8f0; /* subtle line separators */
+}
+
+.smart-table th {
+  background: #f0f4f8;           /* soft header background */
+  font-weight: 600;
+  color: #0b3b5a;
+}
+
+.smart-table tr:nth-child(even) {
+  background: #fafbfc;           /* alternating row colour */
+}
+
+.smart-table tr:hover {
+  background: #eef6ff;           /* highlight on hover (optional) */
+}
+
+table ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+table ul li {
+    position: relative;
+    padding-left: 1rem;
+}
+
+table ul li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #555;
+}
+
+
+
 @media (max-width: 768px) {
     .banner {
         font-size: 36px; /* Reduces font size for smaller screens */
@@ -323,3 +364,6 @@ footer a:hover {
     margin-right: 5px;
     font-size: 18px;
 }
+
+
+
