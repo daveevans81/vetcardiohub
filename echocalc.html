@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="VetCardioHub Echo Calculator">
+    
+    <title>VetCardioHub Echo Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<!-- Standard favicon -->
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="MyWebSite" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+  
+        .reference { color: #050505; font-size: 8px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input { 
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; 
+            box-sizing: border-box; /* Ensures padding doesn't break width */
+        }
+        .results-box { 
+            margin-top: 20px; padding: 20px; background: #eef2ff; 
+            border-radius: 6px; border: 1px solid #c7d2fe; 
+        }
+        .result-row { 
+            display: flex; justify-content: space-between; margin-bottom: 10px; 
+            padding-bottom: 10px; border-bottom: 1px solid #dcdcdc; 
+        }
+        .result-row:last-child { border-bottom: none; margin-bottom: 0; }
+        .abnormal { color: #d9534f; font-weight: bold; }
+        .normal { color: #5cb85c; font-weight: bold; }
+  
+    </style>
+
+</head>
+
+<body>
+<div class="banner">
+    <img src="logo-placeholder.png" alt="VetCardioHub Logo" class="banner-logo">
+    <span class="banner-title">VetCardioHub</span>
+</div>
+    <div class="nav">
+  
+    <a href="index.html" title="Go to the homepage">Home</a>
+    <a href="about.html" title="Learn more about VetCardioHub">About</a>
+    <a href="videos.html" title="Watch educational videos">Videos</a>
+    <a href="monitoring.html" title="Our Complete Guide to Monitoring CHF">Monitoring</a>
+    <a href="blog.html" title="Read our latest blog posts">Blog</a>
+<div class="dropdown">
+        <a href="#" class="dropbtn" title="Free guides and downloads">Resources ▾</a>
+        <div class="dropdown-content">
+            <a href="action-plan.html">
+                Dog Murmur Action Plan Download
+            </a>
+<a href="cat-action-plan.html">
+                Cat Murmur Action Plan Download
+            </a>
+            <a href="emailsignup.html" title="Sign up for email tips">
+                Email Signup
+            </a>
+            <a href="trackers.html" title="Tracking Collars - Complete Guide">
+                Guide to Trackable Collars
+            </a>
+            <!-- Future resources can be added here -->
+            <!-- <a href="#">Another Resource</a> -->
+        </div>
+    </div>
+</div>
+
+
+
+<main>
+    <div class="content">
+      <div class="container">
+       <header class="hero card">
+      <h1>Echo Calculator</h1>
+      <p class="lead">Enter your echo measurements here to calculate normalised values and see reference ranges.</p>
+    </header>
+
+    <div class="grid">
+      <!-- Main column -->
+      <main>
+        <section class="card">
+         
+
+          <div style="margin-top:10px" >
+<div class="calculator-card" 
+     x-data="{ 
+        weight: '', 
+        lvidd: '', 
+        lvids: '', 
+        la: '', 
+        ao: '',
+        lad: '',
+        
+        // Calculation Logic
+        get lviddn() {
+            if(!this.weight || !this.lvidd) return 0;
+            // Formula: (LVIDd/10) / (Weight ^ 0.294)
+            // FIXED: changed this.(lvidd/10) to (this.lvidd / 10)
+            return ((this.lvidd / 10) / Math.pow(this.weight, 0.294)).toFixed(2);
+        },
+        get fs() {
+            if(!this.lvidd || !this.lvids) return 0;
+            // Formula: ((LVIDd - LVIDs) / LVIDd) * 100
+            return (((this.lvidd - this.lvids) / this.lvidd) * 100).toFixed(1);
+        },
+        get laAo() {
+            if(!this.la || !this.ao) return 0;
+            return (this.la / this.ao).toFixed(2);
+        },
+        get ladn() {
+            if(!this.weight || !this.lad) return 0;
+            // Formula: (lad/10) / (Weight ^ 0.309)
+    
+            return ((this.lad / 10) / Math.pow(this.weight, 0.309)).toFixed(2);
+        }
+     }">
+
+    
+    <p style="color: #666; font-size: 0.9em;">Enter measurements in <strong>mm</strong> and weight in <strong>kg</strong>.</p>
+
+    <div class="input-group">
+        <label>Body Weight (kg)</label>
+        <input type="number" step="0.1" x-model="weight" placeholder="e.g. 10.5">
+    </div>
+
+    <div style="display: flex; gap: 15px;">
+        <div class="input-group" style="flex: 1;">
+            <label>LVIDd (mm)</label>
+            <input type="number" step="0.01" x-model="lvidd" placeholder="e.g. 32">
+        </div>
+        <div class="input-group" style="flex: 1;">
+            <label>LVIDs (mm)</label>
+            <input type="number" step="0.01" x-model="lvids" placeholder="e.g. 21">
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 15px;">
+        <div class="input-group" style="flex: 1;">
+            <label>LA Diameter (mm)</label>
+            <input type="number" step="0.01" x-model="la" placeholder="e.g. 20">
+        </div>
+        <div class="input-group" style="flex: 1;">
+            <label>Ao Diameter (mm)</label>
+            <input type="number" step="0.01" x-model="ao" placeholder="e.g. 15">
+        </div>
+    </div>
+
+   <div class="input-group">
+        <label>LAD (mm) - Long Axis</label>
+        <input type="number" step="0.1" x-model="lad" placeholder="e.g. 20">
+    </div>
+
+    <div class="results-box" x-show="weight > 0" x-transition>
+        
+        <div class="result-row">
+            <span><strong>LVIDDN</strong> (Cornell)</span>
+            <span>
+                <span x-text="lviddn"></span>
+                <span x-show="lviddn >= 1.7" class="abnormal">(Enlarged)</span>
+                <span x-show="lviddn < 1.7 && lviddn > 0" class="normal">(Normal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.7) </span>
+            </span>
+        </div>
+
+        <div class="result-row">
+            <span><strong>Fractional Shortening</strong></span>
+            <span><span x-text="fs"></span>%</span>
+        </div>
+
+        <div class="result-row">
+            <span><strong>LA:Ao Ratio</strong></span>
+            <span>
+                <span x-text="laAo"></span>
+                <span x-show="laAo >= 1.65" class="abnormal">(Enlarged)</span>
+                <span x-show="laAo < 1.65 && laAo > 0" class="normal">(Normal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.65) </span>
+            </span>
+        </div>
+        
+        <div class="result-row">
+            <span><strong>LADN</strong></span>
+            <span>
+                <span x-text="ladn"></span>
+                <span x-show="ladn >= 1.6" class="abnormal">(Enlarged)</span>
+                <span x-show="ladn < 1.6 && ladn > 0" class="normal">(Normal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.6) </span>
+            </span>
+        </div>
+        
+    </div>
+</div>
+
+
+
+
+          </div>
+        </section>
+
+        <section class="card" style="margin-top:18px">
+         
+
+
+          <article style="margin-top:12px">
+
+
+
+
+          </article>
+
+          <article style="margin-top:14px">
+
+
+
+          </article>
+
+        </section>
+
+        <section class="card" id="how-to-count-srr" style="margin-top:18px">
+
+        </section>
+
+        <section class="card" id="tech-overview" style="margin-top:18px">
+ 
+        </section>
+
+
+      </main>
+
+      <!-- Right column -->
+      <aside>
+        <div class="card">
+          <h3>Measurement Guide</h3>
+<p>Cornell Allometric Scaling:</p>
+<p class="reference">Cornell et al. Allometric scaling of M-mode cardiac measurements in normal adult dogs. J Vet Intern Med. 2004</p>
+
+        </div>
+
+
+        <div class="card" style="margin-top:16px">
+<p>LAD measurement:</p>
+<img src="https://cdn.ncbi.nlm.nih.gov/pmc/blobs/fd71/6895628/656006a5667e/jvms-81-1655-g001.jpg" alt="LAD measurement">
+<p class="reference">Reference: Marchesotti et al Left atrial anteroposterior diameter in dogs: reference interval, allometric scaling, and agreement with the left atrial-to-aortic root ratio. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6895628/">Journal of Veterinary Medicine and Science</a> 2019</p>
+
+
+
+        </div>
+      </aside>
+    </div>
+    </div>
+
+
+<div class="small">This guide and calculator is designed for assistance in interpretation of echo results, but can't replace expert clinical judgement.</div>
+</div>
+</main>
+    <footer>
+        <p>&copy; 2025 VetCardioHub | Follow us on 
+            <a href="https://www.instagram.com/vetcardiohub/" target="_blank" class="instagram-link">
+                <i class="fa-brands fa-instagram"></i> Instagram
+            </a>
+        </p>
+    </footer>
+</body>
+</html>
