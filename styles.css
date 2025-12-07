@@ -521,6 +521,9 @@ nav.breadcrumb { font-size: 13px; color: #6b7280; margin: 12px 0; }
   border-radius: 10px;
   box-shadow: 0 1px 6px rgba(12,20,40,0.04);
   box-sizing: border-box;
+    overflow: visible !important;   /* FORCE EXPANSION */
+    height: auto !important;
+    max-height: none !important;
 }
 
 /* two-column grid for main layout (main + aside) */
@@ -573,24 +576,22 @@ aside { display: block; }
 
 /* Example trend graphic placeholder */
 .example-graph {
-  height: 120px;
+
   background: linear-gradient(90deg,#e8f6ff 0%, #fff 65%);
   border-radius: 8px;
-  display:flex;
-  align-items:center;
+
   justify-content:center;
   color: #16325F;
   font-weight:700;
   box-shadow: inset 0 -8px 24px rgba(0,0,0,0.02);
   margin-top: 10px;
-}
-
-.example-graph {
-    display: flex;
     flex-direction: column;   /* stack images vertically */
     align-items: center;      /* centre them nicely */
     gap: 1.5rem;              /* spacing between graphs */
+    display: flow-root;
     width: 100%;
+
+    margin-bottom: 2rem;    /* space before next card */
 }
 
 .example-graph img {
@@ -599,11 +600,29 @@ aside { display: block; }
     border-radius: 8px;       /* optional: nice rounded corners */
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     display: block;
-    margin: 1rem 0;
-    float: none;
+    clear: both;
+    float: none !important; /* stop old float rules */
+    margin: 1rem auto;      /* space + centre */
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto 1rem;
+}
+
+
+/* Clear floats if any images inside are still floating */
+.example-graph::after {
+    content: "";
+    display: block;
     clear: both;
 }
 
+.example-caption {
+    text-align: center;
+    font-style: italic;
+    margin-top: -6px;
+    margin-bottom: 1.5rem;
+}
 
 /* downloads area */
 .download-grid {
