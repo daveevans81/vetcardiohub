@@ -8,10 +8,10 @@ body {
 
 
 
-
+/* Banner (cleaned + fixed breakpoints) */
 .banner {
   display: flex;
-  flex-direction: column; /* mobile: stacked layout */
+  flex-direction: column;      /* mobile default */
   justify-content: center;
   align-items: center;
   padding: 1.5rem;
@@ -22,31 +22,45 @@ body {
 
 /* Logo */
 .banner-logo {
-  width: clamp(80px, 18vw, 150px);
+  width: clamp(80px, 20vw, 150px);
   height: auto;
   margin-bottom: 0.8rem;
 }
 
 /* Title */
 .banner-title {
-  font-size: clamp(1.6rem, 6vw, 3.2rem);
+  font-size: clamp(1.8rem, 6vw, 3rem);
   font-weight: bold;
-  white-space: nowrap;
+  white-space: normal;         /* allow wrapping */
 }
 
-/* 📏 Desktop layout: logo + text on one line */
-@media (min-width: 700px) {
+/* Desktop layout */
+@media (min-width: 768px) {
   .banner {
-    flex-direction: row; /* side-by-side */
+    flex-direction: row;
     text-align: left;
     padding: 1.5rem 2rem;
   }
 
   .banner-logo {
-    margin: 0 1rem 0 0; /* space between logo + title */
+    margin: 0 1rem 0 0;
+  }
+
+  .banner-title {
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
   }
 }
 
+/* Mobile tweaks — FIXED */
+@media (max-width: 767px) {
+  .banner {
+    height: auto;              /* prevent forced compression */
+  }
+
+  .banner-title {
+    font-size: 1.8rem;         /* safe readable mobile size */
+  }
+}
 
 
 
@@ -584,7 +598,12 @@ aside { display: block; }
     height: auto;
     border-radius: 8px;       /* optional: nice rounded corners */
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    display: block;
+    margin: 1rem 0;
+    float: none;
+    clear: both;
 }
+
 
 /* downloads area */
 .download-grid {
