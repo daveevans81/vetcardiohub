@@ -25,14 +25,8 @@ body {
     /* --- LAYER & POSITIONING FIXES --- */
     position: relative;        /* CRITICAL: Anchors the absolute .banner-gradient */
     z-index: 10;               /* FIX: Ensures the image and content float over z-index: 1 gradient */
-    min-height: 180px;         /* Ensure minimum height for the banner */
-    
-    /* --- IMAGE LAYER (Dogs on top of the gradient) --- */
-    background-image: url('/banner_image.png'); /* FIX: The image must be here */
-background-size: auto 100%;
-background-position: center center;
-    
-    background-repeat: no-repeat;
+    min-height: 160px;         /* Ensure minimum height for the banner */
+
 
     /* --- FLEX LAYOUT (Mobile Default: Stacked) --- */
     display: flex;
@@ -46,7 +40,8 @@ justify-content: space-between;
     color: white;
     text-align: center;
 background-color: #005f73;
-
+    background-image: linear-gradient(135deg, #16325F, #005f73); 
+    animation: gradientShift 15s ease-in-out infinite; 
 }
 
 /* ================================================= */
@@ -78,6 +73,13 @@ background-color: #005f73;
     height: auto;
     position: relative; /* Keep relative positioning for stacking context */
     z-index: 10;
+}
+
+.banner-image {
+    height: 100%;
+    width: auto;
+    position: relative; /* Keep relative positioning for stacking context */
+    z-index: 8;
 }
 
 .banner-title {
