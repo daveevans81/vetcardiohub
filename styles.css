@@ -25,15 +25,15 @@ body {
     /* --- LAYER & POSITIONING FIXES --- */
     position: relative;        /* CRITICAL: Anchors the absolute .banner-gradient */
     z-index: 10;               /* FIX: Ensures the image and content float over z-index: 1 gradient */
-    min-height: 160px;         /* Ensure minimum height for the banner */
-
+    min-height: 120px;         /* Ensure minimum height for the banner */
+    max-height: 160px;
 
     /* --- FLEX LAYOUT (Mobile Default: Stacked) --- */
     display: flex;
 flex-direction: row;
         text-align: left;
         padding: 1.5rem 2rem;    /* Mobile Default: Stacked */
-justify-content: space-between;
+justify-content: center;
 
     align-items: center;
     gap: 20px;                 /* Space between logo and title */
@@ -44,62 +44,12 @@ background-color: #005f73;
     animation: gradientShift 15s ease-in-out infinite; 
 }
 
-/* ================================================= */
-/* 3. ANIMATED GRADIENT LAYER (.banner-gradient) */
-/* This handles the shifting background */
-/* ================================================= */
-.banner-gradient {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1; /* Sits behind the .banner content/image */
-    
-    /* FIX: Must be wider than the container for the shift animation to work */
-    background-size: 200% 100%;
-    background-image: linear-gradient(135deg, #16325F, #005f73); 
-    animation: gradientShift 15s ease-in-out infinite; 
-}
 
-
-/* ================================================= */
-/* 4. CONTENT STYLES (.banner-logo, .banner-title) */
-/* These are fine, only minor z-index/position cleanup */
-/* ================================================= */
-
-.banner-logo {
-    width: clamp(80px, 20vw, 150px);
-    height: auto;
-    position: relative; /* Keep relative positioning for stacking context */
-    z-index: 10;
-}
-
-.banner-image {
-    height: 100%;
-    width: auto;
-    position: relative; /* Keep relative positioning for stacking context */
-    z-index: 8;
-}
-
-.banner-title {
-    font-size: clamp(1.8rem, 6vw, 3rem);
-    font-weight: bold;
-    white-space: normal;
-    position: relative; /* Keep relative positioning */
-    z-index: 10;
-text-align: right;
-}
-
-/* ================================================= */
-/* 5. MEDIA QUERIES (Desktop Layout) */
-/* These rules override the mobile defaults */
-/* ================================================= */
 
 @media (min-width: 768px) {
     .banner {
         flex-direction: row; /* Desktop: side-by-side */
-        text-align: left;
+        text-align: center;
         padding: 1.5rem 2rem;
         /* Remove the background properties from here */
     }
@@ -117,20 +67,35 @@ text-align: right;
 .banner-logo {
     width: clamp(80px, 20vw, 150px);
     height: auto;
-    position: relative; /* Keep relative positioning for stacking context */
-    z-index: 10;
+/* Step 1: Set positioning */
+    position: absolute; 
+    z-index: 100; /* Must be high to ensure it floats over the gradient/image */
+
+    /* Step 2: Pin to the corner */
+    top: 15px;  /* Adjust this value for vertical distance from top edge */
+    left: 20px; /* Adjust this value for horizontal distance from left edge */
+}
+
+
+
+.banner-image {
+    height: 100%;
+    width: auto;
+    position: center; /* Keep relative positioning for stacking context */
+    z-index: 8;
 }
 
 .banner-title {
     font-size: clamp(1.8rem, 6vw, 3rem);
     font-weight: bold;
     white-space: normal;
-    position: relative; /* Keep relative positioning */
-    z-index: 10;
+    position: absolute; 
+    z-index: 100; /* Must be high to ensure it floats over the gradient/image */
+
+    /* Step 2: Pin to the corner */
+    top: 15px;  /* Adjust this value for vertical distance from top edge */
+    left: 200px; /* Adjust this value for horizontal distance from left edge */
 }
-
-
-
 
 
 
