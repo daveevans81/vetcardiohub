@@ -92,6 +92,182 @@ body {
 
 
 
+
+
+
+
+
+
+/* NAVIGATION BAR */
+.nav {
+    background-color: #0a9396;
+    padding: 15px 0; /* Adds more padding for a cleaner look */
+    display: flex;
+    justify-content: center; /* Centers nav items */
+}
+
+.nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 20px; /* Increases space between links */
+    font-size: 18px;
+    transition: all 0.3s ease; /* Smooth hover transition */
+}
+
+
+
+
+
+/* Navigation Links and Buttons */
+.nav a, .nav .dropbtn {
+    display: inline-block;
+    text-decoration: none;
+    padding: 10px 15px; /* Added padding for better clickability */
+
+}
+
+.nav a:hover, .dropdown:hover .dropbtn {
+    text-decoration: underline;
+    color: #94d2bd; 
+}
+
+/* Dropdown Container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #0a9396;
+    min-width: 160px; /* Made slightly wider for text */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    display: block;
+    padding: 10px 12px; /* Standardized padding */
+    color: white;
+    text-decoration: none;
+    font-size: 14px; /* Slightly larger for readability */
+    background: #0a9396;
+    text-align: left;
+}
+
+/* Hover effects inside dropdown */
+.dropdown-content a:hover {
+    background-color: #077b7e; /* Slightly darker background on hover looks nice */
+    color: #94d2bd;
+    text-decoration: none;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Add Positioning Context for Tooltips on simple links */
+.nav-item {
+    position: relative;
+    display: inline-block; /* Keeps them horizontal */
+    /* Add any padding or margin needed to space them correctly */
+}
+
+/* Ensure the link inside the nav-item is also displayed correctly */
+.nav-item a {
+    display: block; /* Allows the link to fill the nav-item div */
+    padding: 10px 15px; /* Adjust as necessary to match your dropdown buttons */
+}
+
+/* Hide the pseudo-element by default */
+[data-title]::after {
+    content: attr(data-title); /* Pulls content from the data-title attribute */
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0s 0.3s; /* Smooth transition */
+    
+    /* Styling and Positioning */
+    position: absolute;
+    bottom: 100%; /* Positions the tooltip above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20; /* Ensure it stays above other elements */
+
+    /* Custom Look */
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap; /* Keeps text on one line */
+    font-size: 12px;
+}
+
+/* Show the pseudo-element on hover */
+[data-title]:hover::after {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+
+
+
+/* VIDEO PAGE */
+
+.video-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.video-item {
+    background-color: #f9f9f9;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 360px;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.video-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.video-item iframe {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    border: none;
+}
+
+.video-item p {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #333;
+}
+
+.meta {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+
+
+
+/* BLOG PAGE */
+
+
 .authors {
     padding: 30px; /* Adds more padding inside the content area */
    
@@ -137,118 +313,6 @@ body {
 .blog-list a:hover {
     color: #0a9396; /* Slight color change on hover for emphasis */
     text-decoration: underline;
-}
-
-
-.nav {
-    background-color: #0a9396;
-    padding: 15px 0; /* Adds more padding for a cleaner look */
-    display: flex;
-    justify-content: center; /* Centers nav items */
-}
-
-.nav a {
-    color: white;
-    text-decoration: none;
-    margin: 0 20px; /* Increases space between links */
-    font-size: 18px;
-    transition: all 0.3s ease; /* Smooth hover transition */
-}
-
-
-
-
-
-.nav a, .nav .dropbtn {
-    display:inline-block;
-    text-decoration:none;
-}
-
-.nav a:hover {
-    text-decoration: underline;
-    color: #94d2bd; /* Adds a color change on hover for emphasis */
-}
-
-
-
-/* Dropdown container */
-.dropdown {
-    position:relative;
-    display:inline-block;
-}
-
-/* Dropdown content hidden by default */
-.dropdown-content {
-    display:none;
-    position:absolute;
-    background:#0a9396;
-    min-width:220px;
-    box-shadow:0 4px 8px rgba(0,0,0,0.1);
-    z-index:10;
-}
-
-/* Dropdown links */
-.dropdown-content a {
-    display:block;
-    padding:0.5rem 1rem;
-    color: white;
-    text-decoration:none;
-    background:#0a9396;
-}
-
-.dropdown-content a:hover {
-    text-decoration: underline;
-    color: #94d2bd; /* Adds a color change on hover for emphasis */
-}
-
-/* Show on hover */
-.dropdown:hover .dropdown-content {
-    display:block;
-}
-
-
-.video-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    justify-content: center;
-    padding: 2rem 0;
-}
-
-.video-item {
-    background-color: #f9f9f9;
-    border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    max-width: 360px;
-    width: 100%;
-    padding: 1rem;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.video-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.video-item iframe {
-    width: 100%;
-    height: 200px;
-    border-radius: 12px;
-    border: none;
-}
-
-.video-item p {
-    margin-top: 1rem;
-    font-size: 1rem;
-    color: #333;
-}
-
-.meta {
-    font-size: 0.85rem;
-    color: #888;
-    margin-bottom: 5px;
 }
 
 .blog-list li {
@@ -384,7 +448,9 @@ footer a:hover {
     font-size: 18px;
 }
 
-/*New Index Page Scrolling Bits */
+
+
+/*New INDEX PAGE - Scrolling Bits */
 .indexscroll section {
     padding: 2rem 2rem;
     max-width: 900px;

@@ -51,28 +51,36 @@
 </div>
     <div class="nav">
   
-    <a href="index.html" title="Go to the homepage">Home</a>
-    <a href="about.html" title="Learn more about VetCardioHub">About</a>
-    <a href="videos.html" title="Watch educational videos">Videos</a>
-    <a href="monitoring.html" title="Our Complete Guide to Monitoring CHF">Monitoring</a>
-    <a href="blog.html" title="Read our latest blog posts">Blog</a>
-<div class="dropdown">
-        <a href="#" class="dropbtn" title="Free guides and downloads">Resources ▾</a>
+    <div class="nav-item"> 
+        <a href="/index.html" data-title="Go to the homepage">Home</a>
+    </div>
+    <div class="nav-item">
+        <a href="/about.html" data-title="Learn more about VetCardioHub">About</a>
+    </div>
+    <div class="nav-item">
+        <a href="/videos.html" data-title="Watch educational videos">Videos</a>
+    </div>
+    <div class="nav-item">
+        <a href="/monitoring.html" data-title="Our Complete Guide to Monitoring CHF">Monitoring</a>
+    </div>
+    <div class="nav-item">
+        <a href="/blog.html" data-title="Read our latest blog posts">Blog</a>
+    </div>
+    
+    <div class="dropdown">
+        <a href="#" class="dropbtn" data-title="Free guides and downloads">Resources ▾</a>
         <div class="dropdown-content">
-            <a href="action-plan.html">
-                Dog Murmur Action Plan Download
-            </a>
-<a href="cat-action-plan.html">
-                Cat Murmur Action Plan Download
-            </a>
-            <a href="emailsignup.html" title="Sign up for email tips">
-                Email Signup
-            </a>
-            <a href="trackers.html" title="Tracking Collars - Complete Guide">
-                Guide to Trackable Collars
-            </a>
-            <!-- Future resources can be added here -->
-            <!-- <a href="#">Another Resource</a> -->
+            <a href="/action-plan.html">Dog Murmur Action Plan Download</a>
+            <a href="/cat-action-plan.html">Cat Murmur Action Plan Download</a>
+            <a href="/emailsignup.html" title="Sign up for email tips">Email Signup</a>
+            <a href="/trackers.html" title="Tracking Collars - Complete Guide">Guide to Trackable Collars</a>
+        </div>
+    </div>
+
+    <div class="dropdown">
+        <a href="#" class="dropbtn" data-title="Resource Section for Vets">Vets ▾</a>
+        <div class="dropdown-content">
+            <a href="/echocalc.html">Echo Calculator</a>
         </div>
     </div>
 </div>
@@ -122,8 +130,12 @@
         get ladn() {
             if(!this.weight || !this.lad) return 0;
             // Formula: (lad/10) / (Weight ^ 0.309)
-    
             return ((this.lad / 10) / Math.pow(this.weight, 0.309)).toFixed(2);
+        },
+        get ladao() {
+            if(!this.la || !this.lad) return 0;
+            // Formula: lad / ao
+            return ((this.lad ) / this.ao).toFixed(3);
         }
      }">
 
@@ -198,7 +210,15 @@
                 <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.6) </span>
             </span>
         </div>
-        
+             <div class="result-row">
+            <span><strong>LAD : Ao(short axis)</strong></span>
+            <span>
+                <span x-text="ladao"></span>
+                <span x-show="ladao >= 2.1" class="abnormal">(Enlarged)</span>
+                <span x-show="ladao < 2.1 && ladao > 0" class="normal">(Normal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &lt;2.1) </span>
+            </span>
+        </div>
     </div>
 </div>
 
@@ -241,7 +261,7 @@
       <!-- Right column -->
       <aside>
         <div class="card">
-          <h3>Measurement Guide</h3>
+          <h3>Measurement Guide and References</h3>
 <p>Cornell Allometric Scaling:</p>
 <p class="reference">Cornell et al. Allometric scaling of M-mode cardiac measurements in normal adult dogs. J Vet Intern Med. 2004</p>
 
