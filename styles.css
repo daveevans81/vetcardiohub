@@ -24,7 +24,6 @@ body {
 .banner-logo {
   width: clamp(80px, 20vw, 150px);
   height: auto;
-  margin-bottom: 0.8rem;
   position: relative; /* REQUIRED: Ensures Z-index works on these elements */
     z-index: 10;
 }
@@ -94,7 +93,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #16325F, #005f73);
+
   color: white;
   text-align: center;
     position: relative; /* CRITICAL: Anchors the absolute .banner-gradient */
