@@ -219,6 +219,13 @@ body {
 /* These rules apply to all screens, but will be overridden for mobile */
 /* ================================================= */
 
+.header-container {
+    position: relative; /* This anchors the absolutely positioned menu panel */
+    display: flex;      /* Optional: Helps align the toggle button and logo */
+    align-items: center; 
+background-color: #0a9396;
+}
+
 .nav-links-container {
     /* DEFAULT: Always visible on desktop */
     display: block; 
@@ -247,6 +254,9 @@ body {
     /* Show the Hamburger Button */
     .menu-toggle {
         display: block; 
+/* --- COLOR FIX --- */
+        background-color: #0a9396; /* Set the background color */
+        color: white;              /* Set the text (hamburger symbol) color */
         
         /* --- SIZE FIXES START HERE --- */
         font-size: 2rem; /* Make the symbol itself larger */
