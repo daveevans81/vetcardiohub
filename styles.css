@@ -246,8 +246,20 @@ body {
     
     /* Show the Hamburger Button */
     .menu-toggle {
-        display: block;
-        position: relative; /* Ensure it stays in the flow of the header */
+        display: block; 
+        
+        /* --- SIZE FIXES START HERE --- */
+        font-size: 2rem; /* Make the symbol itself larger */
+        padding: 15px 20px; /* Increase the hit area padding */
+        min-height: 48px; /* Ensure it meets recommended tap target size */
+        /* --- SIZE FIXES END HERE --- */
+        
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        
+        /* Optional: Align button to the right */
+        margin-left: auto;
     }
 
     /* Stack the Navigation Links vertically and hide them by default */

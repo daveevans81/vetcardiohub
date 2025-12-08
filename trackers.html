@@ -17,6 +17,8 @@
 <link rel="manifest" href="/site.webmanifest" />
 
 
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 </head>
 
 <body>
@@ -25,10 +27,9 @@
     <span class="banner-title">VetCardioHub</span>
 </div>
 
-<div class="header-container">
-    <button class="menu-toggle" 
-            x-data="{ open: false }" 
-            @click="open = !open">
+<div class="header-container" x-data="{ open: false }"> 
+    
+    <button class="menu-toggle" @click="open = !open">
         ☰
     </button>
     
