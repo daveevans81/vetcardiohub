@@ -28,12 +28,6 @@ body {
     z-index: 10;               /* FIX: Ensures the image and content float over z-index: 1 gradient */
     min-height: 180px;         /* Ensure minimum height for the banner */
     
-    /* --- IMAGE LAYER (Dogs on top of the gradient) --- */
-    background-image: url('/banner_image.png'); /* FIX: The image must be here */
-    background-size: 100% auto;
-    background-position: center bottom;
-    background-repeat: no-repeat;
-
     /* --- FLEX LAYOUT (Mobile Default: Stacked) --- */
     display: flex;
     flex-direction: column;    /* Mobile Default: Stacked */
@@ -50,17 +44,30 @@ body {
 /* This handles the shifting background */
 /* ================================================= */
 .banner-gradient {
+    /* Make the gradient container fill the entire parent banner */
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1; /* Sits behind the .banner content/image */
+    z-index: 1; /* Sits behind the content (z-index: 10) */
     
-    /* FIX: Must be wider than the container for the shift animation to work */
-    background-size: 200% 100%;
-    background-image: linear-gradient(135deg, #16325F, #005f73); 
-    animation: gradientShift 15s ease-in-out infinite; 
+    /* --- CRITICAL FIX: Layer the image over the shifting gradient --- */
+    background-image: 
+        url('/banner_image.png'), /* Layer 1: The dog image (transparent background) */
+        linear-gradient(135deg, #16325F, #005f73); /* Layer 2: The shifting gradient */
+
+    /* The sizing must match the layers: image first, gradient second */
+    background-size: 100% auto, 200% 100%;
+    
+    /* The positioning must match the layers: image position, gradient animation start */
+    background-position: center bottom, 0% 50%;
+    
+    /* Ensure the image doesn't repeat; the gradient should not repeat */
+    background-repeat: no-repeat, repeat-x; 
+    
+    /* Apply the animation here */
+    animation: gradientShift 15s ease-in-out infinite;  
 }
 
 
