@@ -63,13 +63,54 @@ body {
 }
 
 
+/*BANNER gradient and banner image*/
+.banner-gradient {
+    /* Make the gradient container fill the entire parent banner */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Place it below the content (Z-index 2 or higher) */
+    
+    /* Apply the gradient here */
+    background-image: linear-gradient(135deg, #16325F, #005f73);
+    background-size: 200% 100%; /* Important: Must be wider than the container for shifting */
+    
+    /* Apply the animation here */
+    animation: gradientShift 15s ease-in-out infinite; 
+}
 
 
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+
+/* Banner (cleaned + fixed breakpoints) */
+.banner {
+  display: flex;
+  flex-direction: column;      /* mobile default */
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #16325F, #005f73);
+  color: white;
+  text-align: center;
+    position: relative; /* CRITICAL: Anchors the absolute .banner-gradient */
+    
+    /* Keep the transparent dog image here only */
+    background-image: url('/banner_image.png');
+    background-size: 100% auto;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    
+    /* Ensure all content (logo/text) floats above the gradient */
+    z-index: 10;
+}
+
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 
 .logo {
     max-width: 150px;
@@ -258,17 +299,15 @@ background-color: #0a9396;
         background-color: #0a9396; /* Set the background color */
         color: white;              /* Set the text (hamburger symbol) color */
         
-        /* --- SIZE FIXES START HERE --- */
         font-size: 2rem; /* Make the symbol itself larger */
         padding: 15px 20px; /* Increase the hit area padding */
         min-height: 48px; /* Ensure it meets recommended tap target size */
-        /* --- SIZE FIXES END HERE --- */
         
         background: transparent;
         border: none;
         cursor: pointer;
         
-        /* Optional: Align button to the right */
+        /* Align button to the right */
         margin-left: auto;
     }
 
