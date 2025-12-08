@@ -281,12 +281,16 @@ text-align: right;
     display: flex;      /* Optional: Helps align the toggle button and logo */
     align-items: center; 
 background-color: #0a9396;
+    width: 100%; /* Ensure it spans the full width of the screen */
+    text-align: center; /* This helps center the child items */
 }
 
 .nav-links-container {
     /* DEFAULT: Always visible on desktop */
     display: block; 
     width: auto;
+margin: 0 auto;
+max-width: 1200px;
 }
 
 .nav .nav-item,
