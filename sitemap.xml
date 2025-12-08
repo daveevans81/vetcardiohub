@@ -10,6 +10,9 @@
     <loc>https://vetcardiohub.com/videos</loc>
   </url>
   <url>
+    <loc>https://vetcardiohub.com/monitoring</loc>
+  </url>
+  <url>
     <loc>https://vetcardiohub.com/blog</loc>
   </url>
   <url>
@@ -25,13 +28,13 @@
     <loc>https://vetcardiohub.com/trackers</loc>
   </url>
   <url>
+    <loc>https://vetcardiohub.com/echocalc</loc>
+  </url>
+  <url>
     <loc>https://vetcardiohub.com/blog-posts/post12</loc>
   </url>
   <url>
     <loc>https://vetcardiohub.com/blog-posts/post9</loc>
-  </url>
-  <url>
-    <loc>https://vetcardiohub.com/monitoring</loc>
   </url>
   <url>
     <loc>https://vetcardiohub.com/blog-posts/post1</loc>
@@ -68,8 +71,5 @@
   </url>
   <url>
     <loc>https://vetcardiohub.com/blog-posts/post13</loc>
-  </url>
-  <url>
-    <loc>https://vetcardiohub.com/echocalc</loc>
   </url>
 </urlset>
