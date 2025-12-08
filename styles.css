@@ -7,108 +7,10 @@ body {
 }
 
 
-
-/* Banner (cleaned + fixed breakpoints) */
-.banner {
-  display: flex;
-  flex-direction: column;      /* mobile default */
-  justify-content: center;
-  align-items: center;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #16325F, #005f73);
-  color: white;
-  text-align: center;
-}
-
-/* Logo */
-.banner-logo {
-  width: clamp(80px, 20vw, 150px);
-  height: auto;
-  position: relative; /* REQUIRED: Ensures Z-index works on these elements */
-    z-index: 10;
-}
-
-/* Title */
-.banner-title {
-  font-size: clamp(1.8rem, 6vw, 3rem);
-  font-weight: bold;
-  white-space: normal;         /* allow wrapping */
-  position: relative; /* REQUIRED: Ensures Z-index works on these elements */
-   z-index: 10;
-}
-
-/* Desktop layout */
-@media (min-width: 768px) {
-  .banner {
-    flex-direction: row;
-    text-align: left;
-    padding: 1.5rem 2rem;
-  }
-
-  .banner-logo {
-    margin: 0 1rem 0 0;
-  }
-
-  .banner-title {
-    font-size: clamp(2.2rem, 4vw, 3.2rem);
-  }
-}
-
-/* Mobile tweaks — FIXED */
-@media (max-width: 767px) {
-  .banner {
-    height: auto;              /* prevent forced compression */
-  }
-
-  .banner-title {
-    font-size: 1.8rem;         /* safe readable mobile size */
-  }
-}
-
-
-/*BANNER gradient and banner image*/
-.banner-gradient {
-    /* Make the gradient container fill the entire parent banner */
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1; /* Place it below the content (Z-index 2 or higher) */
-    
-    /* Apply the gradient here */
-    background-image: linear-gradient(135deg, #16325F, #005f73);
-    background-size: 200% 100%; /* Important: Must be wider than the container for shifting */
-    
-    /* Apply the animation here */
-    animation: gradientShift 15s ease-in-out infinite; 
-}
-
-
-
-/* Banner (cleaned + fixed breakpoints) */
-.banner {
-  display: flex;
-  flex-direction: column;      /* mobile default */
-  justify-content: center;
-  align-items: center;
-  padding: 1.5rem;
-
-  color: white;
-  text-align: center;
-    position: relative; /* CRITICAL: Anchors the absolute .banner-gradient */
-    
-    /* Keep the transparent dog image here only */
-    background-image: url('/banner_image.png');
-    background-size: 100% auto;
-    background-position: center bottom;
-    background-repeat: no-repeat;
-    
-    /* Ensure all content (logo/text) floats above the gradient */
-    z-index: 10;
-gap:20px;
-}
-
+/* BANNER CSS */
+/* ================================================= */
+/* 1. KEYFRAMES (Keep Unchanged) */
+/* ================================================= */
 
 @keyframes gradientShift {
     0% { background-position: 0% 50%; }
@@ -116,12 +18,97 @@ gap:20px;
     100% { background-position: 0% 50%; }
 }
 
-.logo {
-    max-width: 150px;
-    display: block;
-    margin: 10px auto 20px; /* Adds space below the logo */
-}
+/* ================================================= */
+/* 2. BANNER CONTAINER (.banner) - CONSOLIDATED DEFINITION */
+/* This handles the image, positioning anchor, and Flexbox layout */
+/* ================================================= */
+.banner {
+    /* --- LAYER & POSITIONING FIXES --- */
+    position: relative;        /* CRITICAL: Anchors the absolute .banner-gradient */
+    z-index: 10;               /* FIX: Ensures the image and content float over z-index: 1 gradient */
+    min-height: 180px;         /* Ensure minimum height for the banner */
     
+    /* --- IMAGE LAYER (Dogs on top of the gradient) --- */
+    background-image: url('/banner_image.png'); /* FIX: The image must be here */
+    background-size: 100% auto;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+
+    /* --- FLEX LAYOUT (Mobile Default: Stacked) --- */
+    display: flex;
+    flex-direction: column;    /* Mobile Default: Stacked */
+    justify-content: center;
+    align-items: center;
+    gap: 20px;                 /* Space between logo and title */
+    padding: 1.5rem;
+    color: white;
+    text-align: center;
+}
+
+/* ================================================= */
+/* 3. ANIMATED GRADIENT LAYER (.banner-gradient) */
+/* This handles the shifting background */
+/* ================================================= */
+.banner-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Sits behind the .banner content/image */
+    
+    /* FIX: Must be wider than the container for the shift animation to work */
+    background-size: 200% 100%;
+    background-image: linear-gradient(135deg, #16325F, #005f73); 
+    animation: gradientShift 15s ease-in-out infinite; 
+}
+
+
+/* ================================================= */
+/* 4. CONTENT STYLES (.banner-logo, .banner-title) */
+/* These are fine, only minor z-index/position cleanup */
+/* ================================================= */
+
+.banner-logo {
+    width: clamp(80px, 20vw, 150px);
+    height: auto;
+    position: relative; /* Keep relative positioning for stacking context */
+    z-index: 10;
+}
+
+.banner-title {
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    font-weight: bold;
+    white-space: normal;
+    position: relative; /* Keep relative positioning */
+    z-index: 10;
+}
+
+/* ================================================= */
+/* 5. MEDIA QUERIES (Desktop Layout) */
+/* These rules override the mobile defaults */
+/* ================================================= */
+
+@media (min-width: 768px) {
+    .banner {
+        flex-direction: row; /* Desktop: side-by-side */
+        text-align: left;
+        padding: 1.5rem 2rem;
+        /* Remove the background properties from here */
+    }
+
+    .banner-logo {
+        margin: 0 1rem 0 0; /* Add separation on desktop */
+    }
+
+    .banner-title {
+        font-size: clamp(2.2rem, 4vw, 3.2rem);
+    }
+}
+
+
+
+
 
 
 
