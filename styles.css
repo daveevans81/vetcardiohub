@@ -107,6 +107,7 @@ body {
     
     /* Ensure all content (logo/text) floats above the gradient */
     z-index: 10;
+gap:20px;
 }
 
 
