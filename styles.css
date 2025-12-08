@@ -213,6 +213,75 @@ body {
     transition: opacity 0.3s;
 }
 
+/* Hamburger Menu code */
+/* ================================================= */
+/* 1. DESKTOP / BASE STYLES (Default State) */
+/* These rules apply to all screens, but will be overridden for mobile */
+/* ================================================= */
+
+.nav-links-container {
+    /* DEFAULT: Always visible on desktop */
+    display: block; 
+    width: auto;
+}
+
+.nav .nav-item,
+.nav .dropdown {
+    /* DEFAULT: Keep items horizontal */
+    display: inline-block; 
+}
+
+.menu-toggle {
+    /* DEFAULT: Hide the hamburger button on desktop */
+    display: none; 
+}
+
+
+/* ================================================= */
+/* 2. MOBILE OVERRIDE (max-width: 768px) */
+/* These rules ONLY apply when the screen is small */
+/* ================================================= */
+
+@media (max-width: 768px) {
+    
+    /* Show the Hamburger Button */
+    .menu-toggle {
+        display: block;
+        position: relative; /* Ensure it stays in the flow of the header */
+    }
+
+    /* Stack the Navigation Links vertically and hide them by default */
+    .nav-links-container {
+        display: none; /* HIDE the full menu on load */
+        position: absolute;
+        top: 100%; 
+        left: 0;
+        background-color: #f4f4f9;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        z-index: 5;
+        width: 100%;
+        min-height: auto;
+    }
+    
+    /* Show the menu when the 'is-open' class is toggled by Alpine */
+    .nav-links-container.is-open {
+        display: block;
+    }
+    
+    /* Make all main links vertical (stacked) */
+    .nav .nav-item,
+    .nav .dropdown {
+        display: block; /* Changes them to full-width blocks */
+        border-bottom: 1px solid #eee;
+    }
+    
+    /* Make dropdowns open vertically (fixes mobile tapping) */
+    .dropdown-content {
+        position: static; /* Removes absolute positioning */
+        box-shadow: none; 
+        min-width: 100%;
+    }
+}
 
 
 
@@ -348,18 +417,13 @@ body {
     color: #555;
 }
 
-.smart-table th,
-.smart-table td {
-  text-align: left;              /* left-justify text */
-  padding: 12px 14px;
-  border-bottom: 1px solid #e2e8f0; /* subtle line separators */
-}
 
-.smart-table th {
-  background: #f0f4f8;           /* soft header background */
-  font-weight: 600;
-  color: #0b3b5a;
-}
+
+
+/*TRACKING PAGE TABLES*/
+
+
+
 
 .smart-table tr:nth-child(even) {
   background: #fafbfc;           /* alternating row colour */
@@ -367,6 +431,32 @@ body {
 
 .smart-table tr:hover {
   background: #eef6ff;           /* highlight on hover (optional) */
+}
+
+/* --- Table Container Fix --- */
+.smart-table {
+    width: 100%; /* Ensure the table fills its container */
+    table-layout: fixed; /* CRITICAL: Forces columns to fit within the table's width */
+    border-collapse: collapse; /* Optional: Makes borders cleaner */
+}
+
+/* --- Cell & Header Fix --- */
+.smart-table th,
+.smart-table td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    
+    /* CRITICAL: Allows long strings (like stars) to wrap onto the next line */
+    word-wrap: break-word; /* Older browser support */
+    word-break: break-word; 
+}
+
+/* --- Your Existing Styling (Simplified) --- */
+.smart-table th {
+    background: #f0f4f8;
+    font-weight: 600;
+    color: #0b3b5a;
 }
 
 table ul {
