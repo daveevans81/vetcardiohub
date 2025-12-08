@@ -27,7 +27,7 @@ body {
     position: relative;        /* CRITICAL: Anchors the absolute .banner-gradient */
     z-index: 10;               /* FIX: Ensures the image and content float over z-index: 1 gradient */
     min-height: 180px;         /* Ensure minimum height for the banner */
-    
+    background-image: url('/banner_image.png'); /* Layer 1: The dog image (transparent background) */
     /* --- FLEX LAYOUT (Mobile Default: Stacked) --- */
     display: flex;
     flex-direction: column;    /* Mobile Default: Stacked */
@@ -38,7 +38,16 @@ body {
     color: white;
     text-align: center;
 }
-
+.banner {
+    position: relative;
+    z-index: 10; /* Ensures this element's content is on top */
+    background-image: url('/banner_image.png');
+    background-size: 100% auto;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    /* FIX: Temporarily add the static gradient as the fallback color */
+    background-color: #16325F;
+}
 /* ================================================= */
 /* 3. ANIMATED GRADIENT LAYER (.banner-gradient) */
 /* This handles the shifting background */
@@ -54,12 +63,11 @@ body {
     
     /* --- CRITICAL FIX: Layer the image over the shifting gradient --- */
     background-image: 
-        url('/banner_image.png'), /* Layer 1: The dog image (transparent background) */
         linear-gradient(135deg, #16325F, #005f73); /* Layer 2: The shifting gradient */
 
     /* The sizing must match the layers: image first, gradient second */
     background-size: 100% auto, 200% 100%;
-    
+    background-color: rgba(0, 0, 0, 0.2)
     /* The positioning must match the layers: image position, gradient animation start */
     background-position: center bottom, 0% 50%;
     
