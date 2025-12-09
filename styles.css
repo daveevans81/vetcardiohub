@@ -813,7 +813,7 @@ nav.breadcrumb { font-size: 13px; color: #6b7280; margin: 12px 0; }
 
 /* basic card (used throughout page) */
 /* You already have a .card; this strengthens and unifies it for this page */
-.card {
+.monitoring .card {
   background: #ffffff;
   padding: 18px;
   border-radius: 10px;
