@@ -563,6 +563,7 @@ min-width: 600px;
 .smart-table2 td {
     text-align: left;
     padding: 12px 14px;
+    font-size: 16px;
     border-bottom: 1px solid #e2e8f0;
     
     /* CRITICAL: Allows long strings (like stars) to wrap onto the next line */
@@ -591,6 +592,16 @@ min-width: 600px;
     background: #f0f4f8;
     font-weight: 600;
     color: #0b3b5a;
+}
+@media (max-width: 767px) {
+    /* Target the cells and headers in the smart table */
+    .smart-table2 th,
+    .smart-table2 td {
+        /* Adjust the font size to something smaller than the default (e.g., 14px or 0.85rem) */
+        font-size: 14px; 
+        /* Optional: You can also slightly reduce padding if needed */
+        padding: 8px 10px;
+    }
 }
 
 table ul {
