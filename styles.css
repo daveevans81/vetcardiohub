@@ -226,7 +226,7 @@ body {
     bottom: -50%; /* Positions the tooltip above the button */
     left: 50%;
     transform: translateX(-50%);
-    z-index: 20; /* Ensure it stays above other elements */
+    z-index: 200; /* Ensure it stays above other elements */
 
     /* Custom Look */
     background-color: #333;
