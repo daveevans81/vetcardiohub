@@ -506,10 +506,11 @@ max-width: 1200px;
   text-align: left;              /* left-justify text */
   padding: 12px 14px;
   border-bottom: 1px solid #e2e8f0; /* subtle line separators */
-
 }
 
-
+.smart-table a {
+  text-decoration: none;
+}
 
 .smart-table th {
   background: #f0f4f8;           /* soft header background */
@@ -819,10 +820,8 @@ aside { display: block; }
 
 /* Example trend graphic placeholder */
 .example-graph {
-
   background: linear-gradient(90deg,#e8f6ff 0%, #fff 65%);
   border-radius: 8px;
-
   justify-content:center;
   color: #16325F;
   font-weight:700;
@@ -833,7 +832,6 @@ aside { display: block; }
     gap: 1.5rem;              /* spacing between graphs */
     display: flow-root;
     width: 100%;
-
     margin-bottom: 2rem;    /* space before next card */
 }
 
