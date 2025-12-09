@@ -898,11 +898,10 @@ aside { display: block; }
     display: block;
     clear: both;
     float: none !important; /* stop old float rules */
-    margin: 1rem auto;      /* space + centre */
-    display: block;
     width: 100%;
     max-width: 480px;
     margin: 0 auto 1rem;
+    margin-bottom: 12px;
 }
 
 
