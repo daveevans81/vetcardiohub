@@ -62,7 +62,7 @@ body {
     left: 20px;        /* Horizontal distance from the left edge */
     display: flex;
     align-items: center; /* Vertically aligns the logo and text */
-    gap: 10px;           /* Adds space between the logo and the title */
+    gap: 2px;           /* Adds space between the logo and the title */
 }
 
 .banner-image {
