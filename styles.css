@@ -93,7 +93,7 @@ justify-content: center;
 
     /* Step 2: Pin to the corner */
     top: 15px;  /* Adjust this value for vertical distance from top edge */
-    left: 80px; /* Adjust this value for horizontal distance from left edge */
+    left: 100px; /* Adjust this value for horizontal distance from left edge */
 }
 
 
