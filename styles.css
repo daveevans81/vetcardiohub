@@ -612,7 +612,13 @@ min-width: 600px;
         padding: 8px 10px;
     }
 }
+.smart-table2 tr:nth-child(even) {
+  background: #fafbfc;           /* alternating row colour */
+}
 
+.smart-table2 tr:hover {
+  background: #eef6ff;           /* highlight on hover (optional) */
+}
 table ul {
     list-style: none;
     margin: 0;
