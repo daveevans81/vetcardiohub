@@ -221,7 +221,7 @@ body {
     
     /* Styling and Positioning */
     position: absolute;
-    bottom: -50%; /* Positions the tooltip above the button */
+    bottom: 0%; /* Positions the tooltip above the button */
     left: 50%;
     transform: translateX(-50%);
     z-index: 200; /* Ensure it stays above other elements */
