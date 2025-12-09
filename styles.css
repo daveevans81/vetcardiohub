@@ -551,9 +551,11 @@ max-width: 1200px;
 
 /* --- Table Container Fix --- */
 .smart-table2 {
-    width: 100%; /* Ensure the table fills its container */
-    table-layout: fixed; /* CRITICAL: Forces columns to fit within the table's width */
+/*    width: 100%;  Ensure the table fills its container */
+/*    table-layout: fixed;  CRITICAL: Forces columns to fit within the table's width */
     border-collapse: collapse; /* Optional: Makes borders cleaner */
+    width: auto;
+min-width: 600px;
 }
 
 /* --- Cell & Header Fix --- */
@@ -566,6 +568,22 @@ max-width: 1200px;
     /* CRITICAL: Allows long strings (like stars) to wrap onto the next line */
     word-wrap: break-word; /* Older browser support */
     word-break: break-word; 
+}
+
+/* ---Wrapper for Scrolling on Mobile --- */
+.table-scroll-wrapper {
+    /* Always ensure the wrapper takes up the full width */
+    width: 100%;
+}
+
+@media (max-width: 767px) {
+    .table-scroll-wrapper {
+        /* CRITICAL: Allows content wider than the screen to be scrolled */
+        overflow-x: auto; 
+        
+        /* Ensures the scrollbar itself is confined to the wrapper */
+        -webkit-overflow-scrolling: touch; 
+    }
 }
 
 /* --- Your Existing Styling (Simplified) --- */
@@ -804,6 +822,7 @@ aside { display: block; }
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
+
 @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
 
 /* feature box / note */
