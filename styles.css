@@ -26,14 +26,19 @@ body {
 .banner {
     /* --- LAYER & POSITIONING FIXES --- */
     position: relative;      
+<<<<<<< HEAD
  /*   min-height: 60px;     */     
     max-height: 160px; 
+=======
+ /*   min-height: 120px;          Ensure minimum height for the banner */
+    max-height: 160px;
+>>>>>>> parent of 1b67997 (Update styles.css)
 
     /* --- FLEX LAYOUT (Mobile Default: Stacked) --- */
     display: flex;
     flex-direction: row;
-    text-align: left;
- /* padding: 1.5rem 2rem;     Mobile Default: Stacked */
+        text-align: left;
+        padding: 1.5rem 2rem;    /* Mobile Default: Stacked */
     justify-content: center;
     background-size: 200% 100%;
     align-items: center;
@@ -43,7 +48,10 @@ body {
     background-image: linear-gradient(135deg, #16325F, #005f73); 
     animation: gradientShift 15s ease-in-out infinite; 
     background-repeat: repeat-x;
+<<<<<<< HEAD
  /*   overflow-x: hidden; */
+=======
+>>>>>>> parent of 1b67997 (Update styles.css)
 }
 
 
@@ -51,14 +59,16 @@ body {
 .banner-logo {
     width: clamp(10px, 20vw, 80px);
     height: auto;
+ /*   top: 8px;   Adjust this value for vertical distance from top edge */
+ /*   left: 10px;  Adjust this value for horizontal distance from left edge */
 
 }
 
 .header-logo-section {
     position: absolute; 
     z-index: 100;      /* Ensure it floats above the background image/gradient */
-    top: 5px;         /* Vertical distance from the top edge */
-    left: 10px;        /* Horizontal distance from the left edge */
+    top: 8px;         /* Vertical distance from the top edge */
+    left: 15px;        /* Horizontal distance from the left edge */
     display: flex;
     align-items: center; /* Vertically aligns the logo and text */
     gap: 2px;           /* Adds space between the logo and the title */
@@ -68,16 +78,21 @@ body {
 .banner-image {
     height: 100%;
     width: auto;
+<<<<<<< HEAD
     position: center;  Keep relative positioning for stacking context 
     z-index: 8;
 /*     position: absolute;     */
 /*     top: 0;                 */
 /*     left: 50%; Start at 50% */
 /*    transform: translateX(-50%);  */
+=======
+    position: center; /* Keep relative positioning for stacking context */
+    z-index: 8;
+>>>>>>> parent of 1b67997 (Update styles.css)
 }
 
 .banner-title {
-    font-size: clamp(0.4rem, 4vw, 1.6rem);
+    font-size: clamp(0.4rem, 6vw, 1.6rem);
     font-weight: bold;
     white-space: normal;
     transform: translateY(-10px);
@@ -88,8 +103,12 @@ body {
     .banner {
         flex-direction: row; /* Desktop: side-by-side */
         text-align: center;
+<<<<<<< HEAD
  /*       min-height: 100px; */
         max-height: 160px;
+=======
+        padding: 1.5rem 2rem;
+>>>>>>> parent of 1b67997 (Update styles.css)
         /* Remove the background properties from here */
     }
 
@@ -98,7 +117,11 @@ body {
     }
 
     .banner-title {
+<<<<<<< HEAD
        font-size: clamp(0.7rem, 6vw, 2.0rem);  
+=======
+ /*       font-size: clamp(2.2rem, 4vw, 3.2rem);  */
+>>>>>>> parent of 1b67997 (Update styles.css)
     }
 }
 
