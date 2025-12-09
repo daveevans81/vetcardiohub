@@ -88,13 +88,9 @@ body {
     .banner {
         flex-direction: row; /* Desktop: side-by-side */
         text-align: center;
-
  /*       min-height: 100px; */
  /*       max-height: 160px;  */
-
         padding: 1.5rem 2rem; 
-
-        /* Remove the background properties from here */
     }
 
     .banner-logo {
@@ -102,7 +98,6 @@ body {
     }
 
     .banner-title {
-
     font-size: clamp(0.7rem, 6vw, 2.0rem);  
     transform: translateY(-10px);
     }
@@ -117,10 +112,6 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Slightly softer shadow for depth */
     border-radius: 10px; /* Adds rounded corners for a smoother appearance */
 }
-
-
-
-
 
 
 
@@ -142,8 +133,6 @@ body {
     font-size: 18px;
     transition: all 0.3s ease; /* Smooth hover transition */
 }
-
-
 
 
 
@@ -346,6 +335,11 @@ max-width: 1200px;
         height: 70px; Adjusts banner height for mobile 
     }
     
+.banner-image {
+    height: 80px; /* Slight overflow */
+    width: auto;
+}
+
     .nav {
         flex-direction: column; /* Stacks nav items vertically on smaller screens */
  /*       padding: 5px;   */
