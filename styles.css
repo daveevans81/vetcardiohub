@@ -44,6 +44,7 @@ body {
     animation: gradientShift 15s ease-in-out infinite; 
     background-repeat: repeat-x;
     z-index: 20;
+    margin-bottom: -15px;
 }
 
 
@@ -179,7 +180,7 @@ body {
 /* Links inside the dropdown */
 .dropdown-content a {
     display: block;
-    padding: 10px 12px; /* Standardized padding */
+    padding: 5px 10px; /* Standardized padding */
     color: white;
     text-decoration: none;
     font-size: 14px; /* Slightly larger for readability */
@@ -209,7 +210,7 @@ body {
 /* Ensure the link inside the nav-item is also displayed correctly */
 .nav-item a {
     display: block; /* Allows the link to fill the nav-item div */
-    padding: 10px 15px; /* Adjust as necessary to match your dropdown buttons */
+    padding: 10px 5px; /* Adjust as necessary to match your dropdown buttons */
 }
 
 /* Hide the pseudo-element by default */
@@ -221,7 +222,7 @@ body {
     
     /* Styling and Positioning */
     position: absolute;
-    bottom: 100%; /* Positions the tooltip above the button */
+    bottom: -50%; /* Positions the tooltip above the button */
     left: 50%;
     transform: translateX(-50%);
     z-index: 20; /* Ensure it stays above other elements */
@@ -252,10 +253,12 @@ body {
     position: relative; /* This anchors the absolutely positioned menu panel */
     display: flex;      /* Optional: Helps align the toggle button and logo */
     align-items: center; 
-background-color: #0a9396;
+    background-color: #0a9396;
     width: 100%; /* Ensure it spans the full width of the screen */
     text-align: center; /* This helps center the child items */
      margin-top: -15px; /* Adjust this negative value to control the overlap amount */
+    padding-top: 5px;
+    padding-bottom: 0px;
     z-index: 5; /* Give it a low z-index */
 }
 
@@ -294,7 +297,7 @@ max-width: 1200px;
         color: white;              /* Set the text (hamburger symbol) color */
         
         font-size: 2rem; /* Make the symbol itself larger */
-        padding: 15px 20px; /* Increase the hit area padding */
+        padding: 15px 10px; /* Increase the hit area padding */
         min-height: 38px; /* Ensure it meets recommended tap target size */
         
         background: transparent;
