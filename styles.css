@@ -33,7 +33,7 @@ body {
     display: flex;
     flex-direction: row;
         text-align: left;
-        padding: 1.5rem 2rem;    /* Mobile Default: Stacked */
+        padding: 0.5rem 1rem;    /* Mobile Default: Stacked */
     justify-content: center;
     background-size: 200% 100%;
     align-items: center;
