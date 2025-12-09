@@ -554,7 +554,6 @@ max-width: 1200px;
 /*    width: 100%;  Ensure the table fills its container */
 /*    table-layout: fixed;  CRITICAL: Forces columns to fit within the table's width */
     border-collapse: collapse; /* Optional: Makes borders cleaner */
-    width: auto;
 min-width: 600px;
 }
 
@@ -562,15 +561,24 @@ min-width: 600px;
 .smart-table2 th,
 .smart-table2 td {
     text-align: left;
-    padding: 12px 14px;
-    font-size: 16px;
+    padding: 10px 10px;
+    font-size: 14px;
     border-bottom: 1px solid #e2e8f0;
     
-    /* CRITICAL: Allows long strings (like stars) to wrap onto the next line */
-    word-wrap: break-word; /* Older browser support */
-    word-break: break-word; 
+/* REMOVE or set to normal: word-break: break-word; */
+    word-break: normal; /* Use 'normal' or simply remove the property */
+    word-wrap: normal;
+    
+    /* Ensure long strings like the star rating still wrap if they are massive */
+    overflow-wrap: break-word; /* A gentler alternative for overflow */
 }
 
+/* --- Your Existing Styling (Simplified) --- */
+.smart-table2 th {
+    background: #f0f4f8;
+    font-weight: 600;
+    color: #0b3b5a;
+}
 /* ---Wrapper for Scrolling on Mobile --- */
 .table-scroll-wrapper {
     /* Always ensure the wrapper takes up the full width */
@@ -585,20 +593,21 @@ min-width: 600px;
         /* Ensures the scrollbar itself is confined to the wrapper */
         -webkit-overflow-scrolling: touch; 
     }
+
+.smart-table2 {
+        min-width: 600px; /* Adjust this value if needed, e.g., 700px */
+        width: auto;      /* Allow the width to be determined by content */
+        table-layout: auto; /* Allow column widths to be flexible */
+    }
 }
 
-/* --- Your Existing Styling (Simplified) --- */
-.smart-table2 th {
-    background: #f0f4f8;
-    font-weight: 600;
-    color: #0b3b5a;
-}
+
 @media (max-width: 767px) {
     /* Target the cells and headers in the smart table */
     .smart-table2 th,
     .smart-table2 td {
         /* Adjust the font size to something smaller than the default (e.g., 14px or 0.85rem) */
-        font-size: 14px; 
+        font-size: 12px; 
         /* Optional: You can also slightly reduce padding if needed */
         padding: 8px 10px;
     }
