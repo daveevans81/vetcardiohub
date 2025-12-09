@@ -24,31 +24,25 @@ body {
 
 
 .banner {
+
     /* --- LAYER & POSITIONING FIXES --- */
     position: relative;      
- /*   min-height: 60px;     */     
-    max-height: 160px; 
  /*   min-height: 120px;          Ensure minimum height for the banner */
     max-height: 160px;
-
-
     /* --- FLEX LAYOUT (Mobile Default: Stacked) --- */
     display: flex;
     flex-direction: row;
         text-align: left;
- /*       padding: 1.5rem 2rem;     Mobile Default: Stacked */
+        padding: 1.5rem 2rem;    /* Mobile Default: Stacked */
     justify-content: center;
     background-size: 200% 100%;
     align-items: center;
-    gap: 10px;                 /* Space between logo and title */
+    gap: 20px;                 /* Space between logo and title */
     color: white;
     text-align: center;
     background-image: linear-gradient(135deg, #16325F, #005f73); 
     animation: gradientShift 15s ease-in-out infinite; 
     background-repeat: repeat-x;
-
- /*   overflow-x: hidden; */
-
 }
 
 
@@ -56,9 +50,6 @@ body {
 .banner-logo {
     width: clamp(10px, 20vw, 80px);
     height: auto;
- /*   top: 8px;   Adjust this value for vertical distance from top edge */
- /*   left: 10px;  Adjust this value for horizontal distance from left edge */
-
 }
 
 .header-logo-section {
@@ -81,8 +72,6 @@ body {
 /*     top: 0;                 */
 /*     left: 50%; Start at 50% */
 /*    transform: translateX(-50%);  */
-    position: center; /* Keep relative positioning for stacking context */
-    z-index: 8;
 }
 
 .banner-title {
@@ -99,9 +88,9 @@ body {
         text-align: center;
 
  /*       min-height: 100px; */
-        max-height: 160px;
+ /*       max-height: 160px;  */
 
-/*        padding: 1.5rem 2rem; */
+        padding: 1.5rem 2rem; 
 
         /* Remove the background properties from here */
     }
