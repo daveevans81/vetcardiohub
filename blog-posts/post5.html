@@ -16,16 +16,27 @@
 <meta name="apple-mobile-web-app-title" content="MyWebSite" />
 <link rel="manifest" href="/site.webmanifest" />
 
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
 </head>
 
 <body>
 <div class="banner">
-    <img src="/logo-placeholder.png" alt="VetCardioHub Logo" class="banner-logo">
-    <span class="banner-title">VetCardioHub</span>
+    <div class="header-logo-section">
+       <img src="/logo-placeholder.png" alt="VetCardioHub Logo" class="banner-logo"><span class="banner-title">VetCardioHub</span>
+    </div>
+    <img src="/banner_image.png" alt="VetCardioHub Background Image" class="banner-image">
 </div>
-  
-<div class="nav">
+
+<div class="header-container" x-data="{ open: false }"> 
+    
+    <button class="menu-toggle" @click="open = !open">
+        ☰
+    </button>
+    
+    <div class="nav-links-container" :class="{ 'is-open': open }">
+        
+        <div class="nav">
   
     <div class="nav-item"> 
         <a href="/index.html" data-title="Go to the homepage">Home</a>
@@ -57,9 +68,13 @@
         <a href="#" class="dropbtn" data-title="Resource Section for Vets">Vets ▾</a>
         <div class="dropdown-content">
             <a href="/echocalc.html">Echo Calculator</a>
+            <a href="/trackers.html">Tracking Collars for CHF</a>
         </div>
     </div>
 </div>
+</div>
+</div>
+
 
 <main>
 
