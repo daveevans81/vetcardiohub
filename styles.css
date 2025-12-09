@@ -508,8 +508,12 @@ max-width: 1200px;
   border-bottom: 1px solid #e2e8f0; /* subtle line separators */
 }
 
-.smart-table a {
+.smart-table2 a {
   text-decoration: none;
+  color: #d9534f;
+}
+.smart-table2 a:hover {
+  text-decoration: underline;
 }
 
 .smart-table th {
