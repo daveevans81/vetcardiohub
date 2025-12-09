@@ -48,7 +48,7 @@ body {
 
 
 .banner-logo {
-    width: clamp(30px, 20vw, 80px);
+    width: clamp(15px, 20vw, 80px);
     height: auto;
  /*   top: 8px;   Adjust this value for vertical distance from top edge */
  /*   left: 10px;  Adjust this value for horizontal distance from left edge */
@@ -58,13 +58,14 @@ body {
 .header-logo-section {
     position: absolute; 
     z-index: 100;      /* Ensure it floats above the background image/gradient */
-    top: 15px;         /* Vertical distance from the top edge */
-    left: 20px;        /* Horizontal distance from the left edge */
+    top: 8px;         /* Vertical distance from the top edge */
+    left: 15px;        /* Horizontal distance from the left edge */
     display: flex;
     align-items: center; /* Vertically aligns the logo and text */
     gap: 2px;           /* Adds space between the logo and the title */
 }
 
+/* Image of pets in background */
 .banner-image {
     height: 100%;
     width: auto;
@@ -73,10 +74,10 @@ body {
 }
 
 .banner-title {
-    font-size: clamp(0.8rem, 6vw, 1.6rem);
+    font-size: clamp(0.4rem, 6vw, 1.6rem);
     font-weight: bold;
     white-space: normal;
-    transform: translateY(-8px);
+    transform: translateY(-10px);
 }
 
 
