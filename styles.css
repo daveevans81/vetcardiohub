@@ -86,7 +86,7 @@ background-color: #005f73;
 }
 
 .banner-title {
-    font-size: clamp(1.2rem, 6vw, 3rem);
+    font-size: clamp(0.8rem, 6vw, 1.6rem);
     font-weight: bold;
     white-space: normal;
     position: absolute; 
@@ -94,7 +94,7 @@ background-color: #005f73;
 
     /* Step 2: Pin to the corner */
     top: 15px;  /* Adjust this value for vertical distance from top edge */
-    left: 200px; /* Adjust this value for horizontal distance from left edge */
+    left: 180px; /* Adjust this value for horizontal distance from left edge */
 }
 
 
