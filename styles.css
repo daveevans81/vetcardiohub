@@ -340,6 +340,28 @@ max-width: 1200px;
     }
 }
 
+/* MEDIA FIXES FOR SMALL SCREENS */
+@media (max-width: 768px) {
+    .banner {
+        font-size: 36px; /* Reduces font size for smaller screens */
+/*        height: 120px; Adjusts banner height for mobile */
+    }
+    
+    .nav {
+        flex-direction: column; /* Stacks nav items vertically on smaller screens */
+ /*       padding: 10px;   */
+    }
+    
+    .nav a {
+/*        margin: 10px 0;  Adds vertical spacing for nav items */
+        font-size: 16px;
+    }
+    
+    .content {
+        padding: 15px; /* Less padding on mobile */
+        max-width: 100%; /* Ensures content fits within the screen */
+    }
+}
 
 
 /* VIDEO PAGE */
@@ -536,27 +558,9 @@ table ul li::before {
 
 
 
-@media (max-width: 768px) {
-    .banner {
-        font-size: 36px; /* Reduces font size for smaller screens */
-        height: 120px; /* Adjusts banner height for mobile */
-    }
-    
-    .nav {
-        flex-direction: column; /* Stacks nav items vertically on smaller screens */
-        padding: 10px;
-    }
-    
-    .nav a {
-        margin: 10px 0; /* Adds vertical spacing for nav items */
-        font-size: 16px;
-    }
-    
-    .content {
-        padding: 15px; /* Less padding on mobile */
-        max-width: 100%; /* Ensures content fits within the screen */
-    }
-}
+
+
+
 main {
     flex: 1; /* Pushes the footer down */
     min-height: 50vh;
