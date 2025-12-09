@@ -72,7 +72,7 @@ body {
 
     /* Step 2: Pin to the corner */
     top: 8px;  /* Adjust this value for vertical distance from top edge */
-    left: 20px; /* Adjust this value for horizontal distance from left edge */
+    left: 10px; /* Adjust this value for horizontal distance from left edge */
 }
 
 
@@ -93,7 +93,7 @@ body {
 
     /* Step 2: Pin to the corner */
     top: 25px;  /* Adjust this value for vertical distance from top edge */
-    left: 100px; /* Adjust this value for horizontal distance from left edge */
+    left: 110px; /* Adjust this value for horizontal distance from left edge */
 }
 
 
