@@ -7,9 +7,11 @@ body {
 }
 
 
-/* ================================================= */
-/* 1. KEYFRAMES (Keep Unchanged) */
-/* ================================================= */
+
+
+
+/* 1. KEYFRAMES  */
+
 
 @keyframes gradientShift {
     0% { background-position: 0% 50%; }
@@ -17,10 +19,10 @@ body {
     100% { background-position: 0% 50%; }
 }
 
-/* ================================================= */
-/* 2. BANNER CONTAINER (.banner) - CONSOLIDATED DEFINITION */
-/* This handles the image, positioning anchor, and Flexbox layout */
-/* ================================================= */
+
+/* 2. BANNER CONTAINER (.banner)  */
+
+
 .banner {
     /* --- LAYER & POSITIONING FIXES --- */
     position: relative;      
@@ -45,32 +47,12 @@ body {
 
 
 
-@media (min-width: 768px) {
-    .banner {
-        flex-direction: row; /* Desktop: side-by-side */
-        text-align: center;
-        padding: 1.5rem 2rem;
-        /* Remove the background properties from here */
-    }
-
-    .banner-logo {
-        margin: 0 1rem 0 0; /* Add separation on desktop */
-    }
-
-    .banner-title {
- /*       font-size: clamp(2.2rem, 4vw, 3.2rem);  */
-    }
-}
-
-/* The max-width media queries are fine and can remain */
 .banner-logo {
     width: clamp(30px, 20vw, 80px);
     height: auto;
  /*   top: 8px;   Adjust this value for vertical distance from top edge */
  /*   left: 10px;  Adjust this value for horizontal distance from left edge */
-display: flex;
-    align-items: center; /* Vertically aligns the logo and text */
-    gap: 10px;           /* Adds space between the logo and the title */
+
 }
 
 .header-logo-section {
@@ -78,6 +60,9 @@ display: flex;
     z-index: 100;      /* Ensure it floats above the background image/gradient */
     top: 15px;         /* Vertical distance from the top edge */
     left: 20px;        /* Horizontal distance from the left edge */
+    display: flex;
+    align-items: center; /* Vertically aligns the logo and text */
+    gap: 10px;           /* Adds space between the logo and the title */
 }
 
 .banner-image {
@@ -95,7 +80,22 @@ display: flex;
 }
 
 
+@media (min-width: 768px) {
+    .banner {
+        flex-direction: row; /* Desktop: side-by-side */
+        text-align: center;
+        padding: 1.5rem 2rem;
+        /* Remove the background properties from here */
+    }
 
+    .banner-logo {
+        margin: 0 1rem 0 0; /* Add separation on desktop */
+    }
+
+    .banner-title {
+ /*       font-size: clamp(2.2rem, 4vw, 3.2rem);  */
+    }
+}
 
 
 
