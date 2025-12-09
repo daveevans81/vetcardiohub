@@ -344,7 +344,7 @@ max-width: 1200px;
 @media (max-width: 768px) {
     .banner {
         font-size: 36px; /* Reduces font size for smaller screens */
-/*        height: 120px; Adjusts banner height for mobile */
+        height: 70px; Adjusts banner height for mobile 
     }
     
     .nav {
@@ -501,6 +501,21 @@ max-width: 1200px;
 
 /*TRACKING PAGE TABLES*/
 
+.smart-table th,
+.smart-table td {
+  text-align: left;              /* left-justify text */
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e8f0; /* subtle line separators */
+
+}
+
+
+
+.smart-table th {
+  background: #f0f4f8;           /* soft header background */
+  font-weight: 600;
+  color: #0b3b5a;
+}
 
 
 
@@ -508,20 +523,31 @@ max-width: 1200px;
   background: #fafbfc;           /* alternating row colour */
 }
 
+
+
 .smart-table tr:hover {
   background: #eef6ff;           /* highlight on hover (optional) */
 }
 
+/* SUMMARY TABLE */
+.smart-table2 tr:nth-child(even) {
+  background: #fafbfc;           /* alternating row colour */
+}
+
+.smart-table2 tr:hover {
+  background: #eef6ff;           /* highlight on hover (optional) */
+}
+
 /* --- Table Container Fix --- */
-.smart-table {
+.smart-table2 {
     width: 100%; /* Ensure the table fills its container */
     table-layout: fixed; /* CRITICAL: Forces columns to fit within the table's width */
     border-collapse: collapse; /* Optional: Makes borders cleaner */
 }
 
 /* --- Cell & Header Fix --- */
-.smart-table th,
-.smart-table td {
+.smart-table2 th,
+.smart-table2 td {
     text-align: left;
     padding: 12px 14px;
     border-bottom: 1px solid #e2e8f0;
@@ -532,7 +558,7 @@ max-width: 1200px;
 }
 
 /* --- Your Existing Styling (Simplified) --- */
-.smart-table th {
+.smart-table2 th {
     background: #f0f4f8;
     font-weight: 600;
     color: #0b3b5a;
