@@ -65,7 +65,7 @@ background-color: #005f73;
 
 /* The max-width media queries are fine and can remain */
 .banner-logo {
-    width: clamp(80px, 20vw, 150px);
+    width: clamp(30px, 20vw, 80px);
     height: auto;
 /* Step 1: Set positioning */
     position: absolute; 
