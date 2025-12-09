@@ -39,7 +39,6 @@ justify-content: center;
     gap: 20px;                 /* Space between logo and title */
     color: white;
     text-align: center;
-background-color: #005f73;
     background-image: linear-gradient(135deg, #16325F, #005f73); 
     animation: gradientShift 15s ease-in-out infinite; 
 }
@@ -94,7 +93,7 @@ background-color: #005f73;
 
     /* Step 2: Pin to the corner */
     top: 15px;  /* Adjust this value for vertical distance from top edge */
-    left: 180px; /* Adjust this value for horizontal distance from left edge */
+    left: 80px; /* Adjust this value for horizontal distance from left edge */
 }
 
 
