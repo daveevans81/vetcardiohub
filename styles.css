@@ -48,7 +48,7 @@ body {
 
 
 .banner-logo {
-    width: clamp(10px, 20vw, 80px);
+    width: clamp(10px, 10vw, 80px);
     height: auto;
 }
 
