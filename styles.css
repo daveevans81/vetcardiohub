@@ -67,7 +67,7 @@ body {
     height: 100%;
     width: auto;
     position: center;  Keep relative positioning for stacking context 
-    z-index: 12;
+    z-index: 20;
 /*     position: absolute;     */
 /*     top: 0;                 */
 /*     left: 50%; Start at 50% */
