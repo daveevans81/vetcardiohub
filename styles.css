@@ -343,7 +343,6 @@ max-width: 1200px;
 /* MEDIA FIXES FOR SMALL SCREENS */
 @media (max-width: 768px) {
     .banner {
-
         height: 70px; Adjusts banner height for mobile 
     }
     
