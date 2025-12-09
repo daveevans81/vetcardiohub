@@ -349,7 +349,7 @@ max-width: 1200px;
     }
     
 .banner-image {
-    height: 80px; /* Slight overflow */
+    height: 100px; /* Slight overflow */
     width: auto;
 }
 
