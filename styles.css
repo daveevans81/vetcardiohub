@@ -75,7 +75,7 @@ body {
 }
 
 .banner-title {
-    font-size: clamp(0.4rem, 6vw, 1.6rem);
+    font-size: clamp(0.3rem, 6vw, 0.9rem);
     font-weight: bold;
     white-space: normal;
     transform: translateY(-10px);
@@ -103,7 +103,6 @@ body {
 
        font-size: clamp(0.7rem, 6vw, 2.0rem);  
 
- /*       font-size: clamp(2.2rem, 4vw, 3.2rem);  */
     }
 }
 
