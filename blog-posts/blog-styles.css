@@ -22,6 +22,7 @@ header p {
 
 header .subtitle {
     margin-bottom: 5px; 
+    margin-top: 5px;
 }
 
 .blog-container {
@@ -74,7 +75,7 @@ strong {
 
 .author {
     font-size: 0.8em;
-
+    margin-top: 4px;
 }
 
 .author a {
