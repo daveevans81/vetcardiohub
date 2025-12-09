@@ -71,7 +71,7 @@ body {
     z-index: 100; /* Must be high to ensure it floats over the gradient/image */
 
     /* Step 2: Pin to the corner */
-    top: 15px;  /* Adjust this value for vertical distance from top edge */
+    top: 8px;  /* Adjust this value for vertical distance from top edge */
     left: 20px; /* Adjust this value for horizontal distance from left edge */
 }
 
@@ -92,7 +92,7 @@ body {
     z-index: 100; /* Must be high to ensure it floats over the gradient/image */
 
     /* Step 2: Pin to the corner */
-    top: 15px;  /* Adjust this value for vertical distance from top edge */
+    top: 25px;  /* Adjust this value for vertical distance from top edge */
     left: 100px; /* Adjust this value for horizontal distance from left edge */
 }
 
