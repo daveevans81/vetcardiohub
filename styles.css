@@ -68,12 +68,12 @@ body {
 .banner-image {
     height: 100%;
     width: auto;
- /*   position: center;  Keep relative positioning for stacking context */
+    position: center;  Keep relative positioning for stacking context 
     z-index: 8;
-    position: absolute;
-    top: 0;
-    left: 50%; /* Start at 50% */
-    transform: translateX(-50%);
+/*     position: absolute;     */
+/*     top: 0;                 */
+/*     left: 50%; Start at 50% */
+/*    transform: translateX(-50%);  */
 }
 
 .banner-title {
