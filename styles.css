@@ -286,7 +286,7 @@ max-width: 1200px;
         
         font-size: 2rem; /* Make the symbol itself larger */
         padding: 15px 20px; /* Increase the hit area padding */
-        min-height: 48px; /* Ensure it meets recommended tap target size */
+        min-height: 38px; /* Ensure it meets recommended tap target size */
         
         background: transparent;
         border: none;
