@@ -131,7 +131,8 @@ body {
 /* NAVIGATION BAR */
 .nav {
     background-color: #0a9396;
-    padding: 15px 0; /* Adds more padding for a cleaner look */
+    padding: 0px 0; /* Adds more padding for a cleaner look */
+    padding-top: 8px;
     display: flex;
     justify-content: center; /* Centers nav items */
 }
