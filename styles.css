@@ -327,6 +327,19 @@ max-width: 1200px;
         box-shadow: none; 
         min-width: 100%;
     }
+ 
+    /*Change tooltips locations*/
+   [data-title]::after {
+    content: attr(data-title); /* Pulls content from the data-title attribute */
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0s 0.3s; /* Smooth transition */
+    /* Styling and Positioning */
+    position: absolute;
+    bottom: 100%; /* Positions the tooltip above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    }
 }
 
 /* MEDIA FIXES FOR SMALL SCREENS */
