@@ -970,7 +970,7 @@ aside { display: block; }
   header.hero { padding: 20px; }
   .container { padding: 16px; }
   .card { padding: 14px; }
-  .example-graph { height: 100px; font-size: 0.95rem; }
+  .example-graph { height: auto; font-size: 0.95rem; }
 }
 
 /* footer small tweak to make page footer consistent if present */
