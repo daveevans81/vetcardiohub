@@ -25,7 +25,7 @@ body {
     /* --- LAYER & POSITIONING FIXES --- */
     position: relative;        /* CRITICAL: Anchors the absolute .banner-gradient */
     z-index: 10;               /* FIX: Ensures the image and content float over z-index: 1 gradient */
-    min-height: 120px;         /* Ensure minimum height for the banner */
+ /*   min-height: 120px;          Ensure minimum height for the banner */
     max-height: 160px;
 
     /* --- FLEX LAYOUT (Mobile Default: Stacked) --- */
@@ -59,7 +59,7 @@ background-color: #005f73;
     }
 
     .banner-title {
-        font-size: clamp(2.2rem, 4vw, 3.2rem);
+ /*       font-size: clamp(2.2rem, 4vw, 3.2rem);  */
     }
 }
 
@@ -86,7 +86,7 @@ background-color: #005f73;
 }
 
 .banner-title {
-    font-size: clamp(1.8rem, 6vw, 3rem);
+    font-size: clamp(1.2rem, 6vw, 3rem);
     font-weight: bold;
     white-space: normal;
     position: absolute; 
