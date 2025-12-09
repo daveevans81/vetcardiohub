@@ -66,16 +66,19 @@ body {
 .banner-logo {
     width: clamp(30px, 20vw, 80px);
     height: auto;
-/* Step 1: Set positioning */
-    position: absolute; 
-    z-index: 100; /* Must be high to ensure it floats over the gradient/image */
-
-    /* Step 2: Pin to the corner */
-    top: 8px;  /* Adjust this value for vertical distance from top edge */
-    left: 10px; /* Adjust this value for horizontal distance from left edge */
+ /*   top: 8px;   Adjust this value for vertical distance from top edge */
+ /*   left: 10px;  Adjust this value for horizontal distance from left edge */
+display: flex;
+    align-items: center; /* Vertically aligns the logo and text */
+    gap: 10px;           /* Adds space between the logo and the title */
 }
 
-
+.header-logo-section {
+    position: absolute; 
+    z-index: 100;      /* Ensure it floats above the background image/gradient */
+    top: 15px;         /* Vertical distance from the top edge */
+    left: 20px;        /* Horizontal distance from the left edge */
+}
 
 .banner-image {
     height: 100%;
@@ -88,12 +91,6 @@ body {
     font-size: clamp(0.8rem, 6vw, 1.6rem);
     font-weight: bold;
     white-space: normal;
-    position: absolute; 
-    z-index: 100; /* Must be high to ensure it floats over the gradient/image */
-
-    /* Step 2: Pin to the corner */
-    top: 25px;  /* Adjust this value for vertical distance from top edge */
-    left: 110px; /* Adjust this value for horizontal distance from left edge */
 }
 
 
