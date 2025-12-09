@@ -254,6 +254,8 @@ body {
 background-color: #0a9396;
     width: 100%; /* Ensure it spans the full width of the screen */
     text-align: center; /* This helps center the child items */
+     margin-top: -15px; /* Adjust this negative value to control the overlap amount */
+    z-index: 5; /* Give it a low z-index */
 }
 
 .nav-links-container {
