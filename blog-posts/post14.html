@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Monitoring Heart Failure at Home - a review of the Maven smart collar">
+    <title>Maven Smart Collar - Review | VetCardioHub</title>
+    <link rel="stylesheet" href="/styles.css">  <!-- Main site styles (for banner & navigation) -->
+    <link rel="stylesheet" href="blog-styles.css">  <!-- Blog-specific styles (for readability) -->
+
+<!-- Standard favicon -->
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="MyWebSite" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+</head>
+
+<body>
+<div class="banner">
+    <div class="header-logo-section">
+       <img src="/logo-placeholder.png" alt="VetCardioHub Logo" class="banner-logo"><span class="banner-title">VetCardioHub</span>
+    </div>
+    <img src="/banner_image.png" alt="VetCardioHub Background Image" class="banner-image">
+</div>
+
+<div class="header-container" x-data="{ open: false }"> 
+    
+    <button class="menu-toggle" @click="open = !open">
+        ☰
+    </button>
+    
+    <div class="nav-links-container" :class="{ 'is-open': open }">
+        
+        <div class="nav">
+  
+    <div class="nav-item"> 
+        <a href="/index.html" data-title="Go to the homepage">Home</a>
+    </div>
+    <div class="nav-item">
+        <a href="/about.html" data-title="Learn more about VetCardioHub">About</a>
+    </div>
+    <div class="nav-item">
+        <a href="/videos.html" data-title="Watch educational videos">Videos</a>
+    </div>
+    <div class="nav-item">
+        <a href="/monitoring.html" data-title="Our Complete Guide to Monitoring CHF">Monitoring</a>
+    </div>
+    <div class="nav-item">
+        <a href="/blog.html" data-title="Read our latest blog posts">Blog</a>
+    </div>
+    
+    <div class="dropdown">
+        <a href="#" class="dropbtn" data-title="Free guides and downloads">Resources ▾</a>
+        <div class="dropdown-content">
+            <a href="/action-plan.html">Dog Murmur Action Plan Download</a>
+            <a href="/cat-action-plan.html">Cat Murmur Action Plan Download</a>
+            <a href="/emailsignup.html" title="Sign up for email tips">Email Signup</a>
+            <a href="/trackers.html" title="Tracking Collars - Complete Guide">Guide to Trackable Collars</a>
+        </div>
+    </div>
+
+    <div class="dropdown">
+        <a href="#" class="dropbtn" data-title="Resource Section for Vets">Vets ▾</a>
+        <div class="dropdown-content">
+            <a href="/echocalc.html">Echo Calculator</a>
+            <a href="/trackers.html">Tracking Collars for CHF</a>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+
+<main>
+
+      
+
+    
+        <header>
+          <h1 id="the-maven-smart-collar-a-veterinary-cardiologist’s-in-depth-review">The Maven Smart Collar: A Veterinary Cardiologist’s In-Depth Review</h1>
+            <p class="subtitle"> <strong>How does it measure up to the traditional approach?</strong> </p>
+        
+
+   <p class="published"><strong>Published on:</strong> January 12, 2026</p>
+   <p class="published"><strong>Reviewed on:</strong> January 12, 2026</p>
+<p class="author"> <strong>Author:</strong><a href="../about.html#daveevans"> Dave Evans <span class="qualifications">MA VetMB PgC(SADI) PgC(SAC) MRCVS</a></span></p>
+</header>
+
+<div class="blog-container">
+
+
+
+
+<p>“Is it serious? Should I be worried?”</p>
+<p>These are the questions I hear most often from pet owners when we discuss heart disease. In veterinary cardiology, our biggest hurdle is that we often do not spot the signs of congestive heart failure (CHF) until a crisis occurs. By the time a pet is “gasping” for air, we are already in an emergency situation.</p>
+<p>We have talked extensively on this channel about the importance of monitoring the <strong>sleeping respiratory rate (SRR)</strong> as the “gold standard” for home care. But let’s be honest: manual counting is hard to do consistently. Between the pet moving and the owner’s own anxiety, getting a clean 30-second count is a challenge.</p>
+<p>I have been genuinely excited at the possibilities raised by the invention of decent tracking devices to help monitor pet health. They can solve many of the tricky problems that lead to missed early warning signs. Today, I am taking an in-depth look at the <strong>Maven Smart Collar</strong>. It is the first device I have been able to test that has published peer-reviewed research verifying its ability to monitor SRR, with further data pending regarding heart rates in dogs.</p>
+<p>While formal publications for cats are still awaited, my experience using it with my own cat has been eye-opening. </p>
+
+<hr>
+
+
+
+<h2 id="getting-set-up-hardware-and-fit">1. Getting Set Up: Hardware and Fit</h2>
+<p>The Maven arrives in a neat presentation box and the setup is quite straightforward. It is important to note that the unit does not come with its own collar; instead, it provides multiple adapters to fit your existing collar.</p>
+
+
+<p>[Insert Image: Maven box contents and adapters]</p>
+
+
+
+<h3 id="technical-specifications--fitting">Technical Specifications &amp; Fitting</h3>
+<ul>
+<li>
+<p><strong>Charging:</strong> Standard USB-C port, covered with a plug to aid water-proofing. I haven’t tested how waterproof the device is - but it coped fine in the typical wet Welsh weather during testing</p>
+</li>
+<li>
+<p><strong>Collar Adapters:</strong> It includes two white adapters with a 17mm cut-out (ideal for most standard collars) and metal adapters for larger widths (25mm and 36mm).</p>
+</li>
+<li>
+<p><strong>Dimensions:</strong> Approximately 30mm x 40mm x 15mm (1.2  x 1.5 x 0.6 inches). This is small - but not tiny. It may still feel slightly bulky on smaller cats and toy breed dogs.</p>
+</li>
+<li>
+<p><strong>Weight:</strong> Roughly 15g, or half an ounce. Which is remarkably light.</p>
+</li>
+<li>
+<p><strong>Orientation:</strong> This is crucial for accuracy. The side with the Maven logo and the green LED must face away from the pet and sit against the collar. So the device sits in between the collar and your pet’s fur.</p>
+</li>
+</ul>
+<p><strong>Key Tip for Cats:</strong> I strongly recommend a <em>quick-release safety collar</em> for cats. However, ensure it is robust enough that it won’t come away too easily. Because the device lacks GPS, if it is lost in a field, there are no “find my pet” features in the app to help you track it down.</p>
+
+
+
+<p>[Insert Image: Maven device placement]</p>
+
+
+<hr>
+<h2 id="basic-use-and-connectivity">2. Basic Use and Connectivity</h2>
+<p>The Maven is designed to stay on permanently, apart from brief charging breaks. Unlike many consumer trackers, it does <em>not</em> have a cellular data connection or GPS.</p>
+<p>From a clinical perspective, this is a clever trade-off. By removing GPS, the manufacturer has minimised weight and maximised battery life. The device simply updates your data via the app whenever the pet is back within your home Wi-Fi network.</p>
+<p>The Maven team claim up to 7 days of battery life is possible, which probably depends on things like how active your pet is and how much time they spend in and out of wifi range. I found the battery lasted about <em>five days</em> but that is with an outdoorsy cat that probably isn’t in wifi range much at all.</p>
+<p><strong>Note on Data Latency:</strong> Because it relies on Wi-Fi, you won’t get “real-time” updates during a walk. I found the data in the app is typically about an hour behind real-time.</p>
+
+
+<hr>
+
+
+
+<h2 id="the-clinical-gold-standard-sleeping-respiratory-rate-srr">3. The Clinical “Gold Standard”: Sleeping Respiratory Rate (SRR)</h2>
+<p>The primary reason I recommend this device is its ability to accurately count the SRR. As we have discussed, this is one of the most useful cardiology markers we have.</p>
+<p>The Maven performs multiple SRR counts throughout the day and night. In my testing, the data looked very reliable. I cross-referenced the app data with manual counts of my own test subject, and the results were consistently close.</p>
+<p><strong>Key Takeaway:</strong> For any pet at risk of CHF, seeing a stable trend line <em>below 30 bpm</em> provides immense peace of much-needed peace of mind.</p>
+
+
+<p><em>[Insert Screenshot: Maven App showing SRR Trend Line]</em></p>
+
+
+<p>There is a published peer-reviewed study documenting the accuracy of the device already, for those interested parties. I’m super pleased to see the manufacturer claims being backed up properly with clinical trials [1].</p>
+<hr>
+
+
+
+
+
+<h2 id="resting-heart-rate-hr">4. Resting Heart Rate (HR)</h2>
+<p>The Maven also tracks resting heart rate. Usually, pets in a hospital environment have very abnormal heart rates due to stress. Obtaining a true “at-home” resting heart rate is a significant clinical advantage.</p>
+<p>While we are still defining exactly how to use this data clinically (especially in cats, where we rarely see true “rest” heart rates without a Holter monitor), it offers fascinating future possibilities.</p>
+<p><em>The Early Warning System:</em> In theory, we should see resting heart rates climbing <em>before</em> changes appear in the SRR. The heart works harder to control pressures until it can no longer manage, at which point lung fluid builds and the SRR rises. Therefore, elevations in resting HR may serve as an extra early warning to schedule a recheck or an echocardiogram.</p>
+<p>A clinical study comparing heart rate counts is apparently being finalised currently.</p>
+<hr>
+
+
+
+
+<h2 id="activity-and-sleep-quality">5. Activity and Sleep Quality</h2>
+<p>The activity monitoring revealed some of the most surprising data. As the owner of an outdoor cat, I was fascinated to see his peak activity occurred in the early hours before dawn. This explains why he seems so lazy during the day!</p>
+<p>[Image - activity graph from app]</p>
+<p>For a pet with heart disease, a slow “drift” downward in activity or an increase in night-time restlessness can be an early “red flag.”</p>
+
+
+
+
+<h3 id="how-maven-reports-data">How Maven Reports Data:</h3>
+<ol>
+<li>
+<p><strong>Activity Goal:</strong> A percentage based on the pet’s age and health. This can be seen hour by hour or day by day or week by week.</p>
+</li>
+<li>
+<p><strong>Flow Chart:</strong> A step-by-step detail of their day/night activity.</p>
+</li>
+<li>
+<p><strong>Sleep Info:</strong> An overall “time spent resting” figure, which is helpful for spotting discomfort or dyspnoea.</p>
+</li>
+</ol>
+<p>The sleep data may be a bit less useful for cat’s - as their constant ‘cat napping’ can be hard to separate from true restlessness. But it does do a daily sleep count, which is very hard to do any other way and should prove another useful health marker.</p>
+
+
+<p><em>[Insert Screenshot: Maven Activity Flow Chart and Sleep Data]</em></p>
+
+
+<h2 id="extras">Extras:</h2>
+<p>The device also monitors head shaking. Given that ear disease is one of the most common problems in dogs this is also potentially quite useful information. Usually this is something people can see easily for themselves but I believe having an objective measure would be very useful for pets with severe chronic ear issues.</p>
+
+<p>The use of the device for tracking activity in dogs and cats with osteoarthritis, is another interesting area. A pioneering study has already looked at this. I can see a lot of benefit again, although maybe if you were chiefly worried about exercise patterns a collar with GPS might be a better fit to consider [2].</p>
+
+<p>There's even been a study looking at the sleep data as a marker for canine dementia (canine cognitive dysfunction). Which is really fascinating for future applications.</p>
+<hr>
+<h2 id="separating-signal-from-noise">6. Separating Signal from Noise</h2>
+<p>The challenge with any smart device is “data overload.” The Maven does a good job of learning your pet’s typical levels and alerting you to changes. After spending the 1st week ‘learning’ your pet, it gives a short summary on the app home screen.</p>
+
+
+<p>[image - app home screen]</p>
+
+
+<p>However, you must learn to separate the <strong>signal</strong> from the <strong>noise</strong>.</p>
+<p>If the SRR jumps above 30 once and then returns to normal, it likely indicates the pet was awake or anxious at that moment. The power of the device is in seeing a whole night’s worth of counts. This helps you and your vet decide if a problem is truly brewing or if it was just a temporary upset (like fireworks, or outside intruder, or weather changes, or one of many other things).</p>
+<p>This is why I would probably encourage pet parents to focus on the mean data line, rather than get too worried about the maximum and minimum numbers.</p>
+
+
+
+<p>[image - blip in SRR]</p>
+
+
+<hr>
+<h2 id="the-maven-collar-pros-and-cons">7. The Maven Collar: Pros and Cons</h2>
+
+
+<div class="table-scroll-wrapper">
+  <table class="smart-table2">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>The "Good"</th>
+        <th>The "Could Be Better"</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>SRR Tracking</strong></td>
+        <td>Multiple reliable counts; peer-reviewed validation.</td>
+        <td>Occasional outliers if pet is awake. But this is to be expected.</td>
+      </tr>
+      <tr>
+        <td><strong>Battery & Charging</strong></td>
+        <td>Solid 5-day life; standard USB-C.</td>
+        <td>Charging can be "fussy" sometimes; may need to watch the LED.</td>
+      </tr>
+      <tr>
+        <td><strong>Connectivity</strong></td>
+        <td>No expensive data plan needed (Wi-Fi based).</td>
+        <td>No updates while away from home Wi-Fi.</td>
+      </tr>
+      <tr>
+        <td><strong>Physical Design</strong></td>
+        <td>Very lightweight (15g).</td>
+        <td>A little bulky for cats. No GPS; difficult to find if lost outside.</td>
+      </tr>
+      <tr>
+        <td><strong>Activity</strong></td>
+        <td>Sets a benchmark target and constantly assesses whether being met.</td>
+        <td>No step count, or distance/calorie info.</td>
+      </tr>
+      <tr>
+        <td><strong>Clinical Insights</strong></td>
+        <td>Tracks Resting HR and Night Restlessness.</td>
+        <td>No Heart Rate Variability (HRV) or arrhythmia detection.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+
+
+<hr>
+<h2 id="final-verdict-is-it-worth-it">8. Final Verdict: Is it worth it?</h2>
+<p><strong>So, who is this for?</strong></p>
+<p>If your pet is in <em>ACVIM Stage B2</em> (high risk of future heart failure) or has previously suffered from heart failure and is currently on diuretics, the Maven is a powerful adjunct to your care plan. Even if your pet is earlier in the disease, or just had a heart murmur detected, I can see a lot of benefit in using one.</p>
+<p>It does not replace an echocardiogram - that remains mandatory for diagnosis, but it makes the home monitoring part of our partnership much easier. The power is in the <em>trend</em>, not the single number. If you see that SRR baseline starting to creep up, you can call your vet <em>before</em> the crisis hits.</p>
+<p>But don’t forget, in many cases there are preventative steps and medications you can be using before your pet reaches heart failure, so don’t assume that nothing needs doing, just because a device is giving an all clear. These devices will only be useful as <em>congestive heart failure</em> approaches.</p>
+<p>I am hoping to get some real-world comparisons with some of the other available devices soon, but for now I can see a huge benefit in using this device in keeping a constant check on your pet. Mainly if you have specific cardiac worries, but potentially useful for keeping an eye on ear disease, osteoarthritis and even cognitive function, as well as general health in all pets.</p>
+
+<h3>And what about costs?</h3>
+<p>The Maven device currently relies on a subscription model.</p>
+<p>The device is currently provided completely <strong>free of charge</strong>. You then pay a monthly or annual fee to subscribe to it's cloud services (currently around $20 / £15 per month, cheaper on the annual plan). Get 10% off with our codes below, or watch out for special offers too. As a way to test the device out for yourself, at minimum commitment, this is pretty reasonable I think.</p>
+
+
+<h3 id="clinical-summary">Clinical Summary</h3>
+<ul>
+<li>
+<p><strong>For CHF Risk:</strong> Highly recommended for SRR and activity trends.</p>
+</li>
+<li>
+<p><strong>For Arrhythmias:</strong> If you are specifically looking to detect rhythm disturbances (like Atrial Fibrillation), you may need a device with HRV capabilities or a clinical Holter monitor.</p>
+</li>
+</ul>
+<p><strong>Partnership with your vet is how we keep our pets healthy for longer.</strong></p>
+
+<p>Interested in the Maven? You can use the link below to receive a discount on your subscription and support the VetCardioHub channel.</p>
+
+<p><em>For transparency, Maven sent me this unit free of charge for testing. If you choose to sign up via the link at the end of this article, the hub receives a small commission to help with our running costs.</em></p>
+
+<a href="https://www.dpbolvw.net/click-101594735-17155747" target="_top">
+<img src="https://www.ftjcfx.com/image-101594735-17155747" width="728" height="90" alt="" border="0"/></a>
+<a href="https://www.kqzyfj.com/click-101594735-17155790" target="_top">
+<img src="https://www.ftjcfx.com/image-101594735-17155790" width="728" height="90" alt="" border="0"/></a>
+
+
+<p>Check out my video review here:</p>
+<div class="video-item">
+
+
+
+</div>
+
+<h3 id="references">References:</h3>
+<ol>
+<li>Murphy KE, Benjamin EJ, Leigh R, Adin D. (2025) The Maven Pet Smart Collar system shows small bias compared to manually counted resting respiratory rates in healthy dogs. <em>Am J Vet Res.</em> 87(1):ajvr.25.06.0220.</li>
+<li>Sacoor C, Leitão S, Domingues C, Babo J, Sá CM, Cabeças R, Queiroga FL. (2025) Continuous Activity Monitoring Using a Wearable Sensor in Dogs with Osteoarthritis: An Exploratory Case Series. <em>Animals (Basel).</em> 15(18):2639.</li>
+<li>Sacoor C, Leitão S, Domingues C, Babo J, Sá CM, Cabeças R, Queiroga FL. (2025) Continuous Activity Monitoring Using a Wearable Sensor in Dogs with Osteoarthritis: An Exploratory Case Series. <em>Animals.</em>  15(18):2639.</li>
+</ol>
+
+<div class="article-navigation">
+  <a href="post12.html" class="nav-button prev-article">← Previous Article</a>
+  <a href="post14.html" class="nav-button next-article">Next Article →</a>
+</div>
+
+        <a href="../blog.html">← Back to Blog</a>
+    </div>
+</main>
+    <footer>
+        <p>&copy; 2026 VetCardioHub | Follow us on 
+            <a href="https://www.instagram.com/vetcardiohub/" target="_blank" class="instagram-link">
+                <i class="fa-brands fa-instagram"></i> Instagram
+            </a>
+        </p>
+    </footer>
+</body>
+</html>
+
