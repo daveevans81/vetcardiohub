@@ -39,7 +39,12 @@
         .result-row:last-child { border-bottom: none; margin-bottom: 0; }
         .abnormal { color: #d9534f; font-weight: bold; }
         .normal { color: #5cb85c; font-weight: bold; }
-  
+
+  /* Feedback for suspicious entries */
+.input-warning { border: 2px solid #f59e0b !important; background-color: #fffbeb !important; }
+.input-error { border: 2px solid #ef4444 !important; background-color: #fef2f2 !important; }
+.warning-text { color: #d97706; font-size: 0.75rem; font-weight: bold; margin-top: 4px; }
+
     </style>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -101,7 +106,62 @@
 </div>
 
 
-
+<div x-data="{ 
+        weight: '', 
+        lvidd: '', 
+        lvids: '', 
+        la: '', 
+        ao: '',
+        lad: '',
+        lvpwd: '',
+        lvedv: '',
+        lvesv: '',
+        
+        get lviddn() {
+            if(!this.weight || !this.lvidd) return 0;
+            return ((this.lvidd / 10) / Math.pow(this.weight, 0.294)).toFixed(2);
+        },
+        get lvidsn() {
+            if(!this.weight || !this.lvids) return 0;
+            return ((this.lvids / 10) / Math.pow(this.weight, 0.315)).toFixed(2);
+        },
+        get lvedvbw() {
+            if(!this.weight || !this.lvedv) return 0;
+           return ((this.lvedv) / (this.weight)).toFixed(2);
+        },
+        get lvesvbw() {
+            if(!this.weight || !this.lvesv) return 0;
+            return ((this.lvesv) / (this.weight)).toFixed(2);
+        },
+        get fs() {
+            if(!this.lvidd || !this.lvids) return 0;
+            return (((this.lvidd - this.lvids) / this.lvidd) * 100).toFixed(1);
+        },
+        get ef() {
+            if(!this.lvedv || !this.lvesv) return 0;
+            return (((this.lvedv - this.lvesv) / this.lvedv) * 100).toFixed(1);
+        },
+        get laAo() {
+            if(!this.la || !this.ao) return 0;
+            return (this.la / this.ao).toFixed(2);
+        },
+        get lan() {
+            if(!this.weight || !this.la) return 0;
+            return ((this.la / 10) / Math.pow(this.weight, 0.355)).toFixed(2);
+        },
+        get ladn() {
+            if(!this.weight || !this.lad) return 0;
+            return ((this.lad / 10) / Math.pow(this.weight, 0.309)).toFixed(2);
+        },
+        get RWT() {
+            if(!this. lvpwd || !this.lvidd) return 0;
+            return ((2 * this.lvpwd) / this.lvidd).toFixed(2);
+        },
+        get ladao() {
+            if(!this.la || !this.lad || !this.ao) return 0;
+            return ((this.lad ) / this.ao).toFixed(3);
+        }
+     }">
 <main>
     <div class="content">
       <div class="container">
@@ -118,72 +178,14 @@
 
           <div style="margin-top:10px" >
 <div class="calculator-card" 
-     x-data="{ 
-        weight: '', 
-        lvidd: '', 
-        lvids: '', 
-        la: '', 
-        ao: '',
-        lad: '',
-        lvpwd: '',
-        lvedv: '',
-        lvesv: '',
-        
-        // Calculation Logic
-        get lviddn() {
-            if(!this.weight || !this.lvidd) return 0;
-            // Formula: (LVIDd/10) / (Weight ^ 0.294)
-            return ((this.lvidd / 10) / Math.pow(this.weight, 0.294)).toFixed(2);
-        },
-        get lvidsn() {
-            if(!this.weight || !this.lvids) return 0;
-            // Formula: (LVIDs/10) / (Weight ^ 0.315)
-            return ((this.lvids / 10) / Math.pow(this.weight, 0.315)).toFixed(2);
-        },
-        get lvedvbw() {
-            if(!this.weight || !this.lvedv) return 0;
-           return ((this.lvedv) / (this.weight)).toFixed(2);
-        },
-        get lvesvbw() {
-            if(!this.weight || !this.lvesv) return 0;
-            return ((this.lvesv) / (this.weight)).toFixed(2);
-        },
-        get fs() {
-            if(!this.lvidd || !this.lvids) return 0;
-            // Formula: ((LVIDd - LVIDs) / LVIDd) * 100
-            return (((this.lvidd - this.lvids) / this.lvidd) * 100).toFixed(1);
-        },
-        get ef() {
-            if(!this.lvedv || !this.lvesv) return 0;
-            // Formula: ((lvedv - lvesv) / lvedv) * 100
-            return (((this.lvedv - this.lvesv) / this.lvedv) * 100).toFixed(1);
-        },
-        get laAo() {
-            if(!this.la || !this.ao) return 0;
-            return (this.la / this.ao).toFixed(2);
-        },
-        get lan() {
-            if(!this.weight || !this.la) return 0;
-            return ((this.la / 10) / Math.pow(this.weight, 0.355)).toFixed(2);
-        },
-        get ladn() {
-            if(!this.weight || !this.lad) return 0;
-            // Formula: (lad/10) / (Weight ^ 0.309)
-            return ((this.lad / 10) / Math.pow(this.weight, 0.309)).toFixed(2);
-        },
-        get RWT() {
-            if(!this. lvpwd || !this.lvidd) return 0;
-            return ((2 * this.lvpwd) / this.lvidd).toFixed(2);
-        },
-        get ladao() {
-            if(!this.la || !this.lad) return 0;
-            // Formula: lad / ao
-            return ((this.lad ) / this.ao).toFixed(3);
-        }
-     }">
+     >
 
     
     <p style="color: #666; font-size: 0.9em;">Enter measurements in <strong>mm</strong> and weight in <strong>kg</strong>.</p>
+<button @click="weight = ''; lvidd = ''; lvids = ''; la = ''; ao = ''; lad = ''; lvpwd = ''; lvedv = ''; lvesv = ''" 
+        style="background: #fca5a5; padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; margin-bottom: 10px;">
+    Clear All Measurements
+</button>
 
     <div class="input-group">
         <label>Body Weight (kg)</label>
@@ -193,11 +195,36 @@
     <div style="display: flex; gap: 15px;">
         <div class="input-group" style="flex: 1;">
             <label>LVIDd (mm)</label>
-            <input type="number" step="0.01" x-model="lvidd" placeholder="e.g. 32">
+            <input type="number" step="0.01" x-model="lvidd" 
+        placeholder="e.g. 32"
+        :class="{ 
+            'input-warning': lvidd > 0 && lvidd < 8, 
+            'input-error': lvidd > 100 
+        }">
+    
+    <template x-if="lvidd > 0 && lvidd < 8">
+        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+    </template>
+    
+    <template x-if="lvidd > 100">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+    </template>
+
         </div>
         <div class="input-group" style="flex: 1;">
             <label>LVIDs (mm)</label>
-            <input type="number" step="0.01" x-model="lvids" placeholder="e.g. 21">
+            <input type="number" step="0.01" x-model="lvids" placeholder="e.g. 21" :class="{ 
+            'input-warning': lvids > 0 && lvids < 8, 
+            'input-error': lvids > 100 
+        }">
+    
+    <template x-if="lvids > 0 && lvids < 6">
+        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+    </template>
+    
+    <template x-if="lvids > 100">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+    </template>
         </div>
         <div class="input-group" style="flex: 1;">
             <label>LVPWd (mm)</label>
@@ -219,18 +246,51 @@
 <h2>LA Measurements:</h2>
     <div style="display: flex; gap: 15px;">
         <div class="input-group" style="flex: 1;">
-            <label>LA Diameter (mm)</label>
-            <input type="number" step="0.01" x-model="la" placeholder="e.g. 20">
+            <label>LA short-axis (mm)</label>
+            <input type="number" step="0.01" x-model="la" placeholder="e.g. 20" :class="{ 
+            'input-warning': la > 0 && la < 6, 
+            'input-error': la > 100 
+        }">
+    
+    <template x-if="la > 0 && la < 6">
+        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+    </template>
+    
+    <template x-if="la > 100">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+    </template>
         </div>
         <div class="input-group" style="flex: 1;">
             <label>Ao Diameter (mm)</label>
-            <input type="number" step="0.01" x-model="ao" placeholder="e.g. 15">
+            <input type="number" step="0.01" x-model="ao" placeholder="e.g. 15" :class="{ 
+            'input-warning': ao > 0 && ao < 4, 
+            'input-error': ao > 100 
+        }">
+    
+    <template x-if="ao > 0 && ao < 4">
+        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+    </template>
+    
+    <template x-if="ao > 100">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+    </template>
         </div>
     </div>
 
    <div class="input-group">
-        <label>LAD (mm) - Long Axis</label>
-        <input type="number" step="0.1" x-model="lad" placeholder="e.g. 20">
+        <label>LA Long Axis (LAD) (mm)</label>
+        <input type="number" step="0.1" x-model="lad" placeholder="e.g. 20" :class="{ 
+            'input-warning': lad > 0 && lad < 8, 
+            'input-error': lad > 100 
+        }">
+    
+    <template x-if="lad > 0 && lad < 8">
+        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+    </template>
+    
+    <template x-if="lad > 100">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+    </template>
     </div>
 
     <div class="results-box" x-transition>
@@ -243,7 +303,7 @@
                 <span x-show="lviddn >= 1.7 && lviddn < 1.85" class="abnormal">(Borderline Enlarged)</span>
                 <span x-show="lviddn < 1.7 && lviddn >= 1.27" class="normal">(Normal)</span>
                 <span x-show="lviddn < 1.27 && lviddn > 0" class="abnormal">(Underfilled)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 1.27 - 1.85, EPIC cut off &lt;1.7) </span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 1.27 - 1.7) </span>
             </span>
         </div>
 
@@ -357,27 +417,46 @@
 
 
           <article style="margin-top:12px">
+<h2>EPIC CHECK:</h2>
+<p>(Applicable to <strong>Degenerative Mitral Valve Disease</strong> cases only)</p>
+<p><span>Left Atrial Enlargement (LA:Ao > 1.65) - </span>
+<span x-show="laAo >= 1.9" class="abnormal">Very Enlarged</span>
+<span x-show="laAo >= 1.65 && laAo <1.85" class="abnormal">Slightly Enlarged - Check LAD</span>
+<span x-show="laAo < 1.65 && laAo >0" class="normal">Normal</span>
+<span x-show="laAo == 0 || laAo == ''" style="color: #666;">Awaiting measurements...</span></p>
 
+<p>
+                    <span>LV Enlargement (LVIDDN > 1.7) - </span>
+                    <span x-show="lviddn >= 1.85" class="abnormal">Very Enlarged</span>
+<span x-show="lviddn >= 1.7 && lviddn <1.85" class="abnormal">Slightly Enlarged - Check Breed Normal</span>
+                    <span x-show="lviddn < 1.7 && lviddn > 0" class="normal">Normal</span>
+<span x-show="lviddn == 0 || lviddn == ''" style="color: #666;">Awaiting measurements...</span>
+                </p>
 
+<p>
+                    <span>EPIC - </span>
+<span x-show="lviddn >= 1.7 && laAo >= 1.65" class="abnormal">
+    Meets Echo Criteria for Stage B2
+</span>
 
+<span x-show="(lviddn > 0 && laAo > 0) && (lviddn < 1.7 || laAo < 1.65)" class="normal">
+    Does Not Meet Criteria
+</span>
 
+<span x-show="lviddn == 0 || laAo == 0" style="color: #666;">
+    Awaiting measurements...
+</span>
+                </p>
+<div x-show="lviddn >= 1.7 && laAo >= 1.6" 
+     style="background-color: #fef2f2; border: 2px solid #ef4444; padding: 15px; border-radius: 8px; margin-top: 20px;">
+    <h3 style="color: #b91c1c; margin-top: 0;">⚠️ Stage B2 Potential</h3>
+    <p style="margin: 0;">This patient meets the <strong>EPIC Trial</strong> echo criteria for Stage B2. In the presence of a grade &ge;3/6 murmur, pimobendan may be indicated.</p>
+</div>
           </article>
 
-          <article style="margin-top:14px">
-
-
-
-          </article>
-
         </section>
 
-        <section class="card" id="how-to-count-srr" style="margin-top:18px">
 
-        </section>
-
-        <section class="card" id="tech-overview" style="margin-top:18px">
- 
-        </section>
 
 
       </main>
@@ -408,6 +487,7 @@
 <div class="small">This guide and calculator is designed for assistance in interpretation of echo results, but can't replace expert clinical judgement.</div>
 </div>
 </main>
+</div>
     <footer>
         <p>&copy; 2026 VetCardioHub | Follow us on 
             <a href="https://www.instagram.com/vetcardiohub/" target="_blank" class="instagram-link">
