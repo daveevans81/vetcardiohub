@@ -143,7 +143,7 @@
             return (this.la / this.ao).toFixed(2);
         },
         get lan() {
-            if(!this.la || !this.ao) return 0;
+            if(!this.weight || !this.la) return 0;
             return ((this.lan / 10) / Math.pow(this.weight, 0.355)).toFixed(2);
         },
         get ladn() {
