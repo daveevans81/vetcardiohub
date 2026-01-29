@@ -125,18 +125,38 @@
         la: '', 
         ao: '',
         lad: '',
+        lvpwd: '',
+        lvedv: '',
+        lvesv: '',
         
         // Calculation Logic
         get lviddn() {
             if(!this.weight || !this.lvidd) return 0;
             // Formula: (LVIDd/10) / (Weight ^ 0.294)
-            // FIXED: changed this.(lvidd/10) to (this.lvidd / 10)
             return ((this.lvidd / 10) / Math.pow(this.weight, 0.294)).toFixed(2);
+        },
+        get lvidsn() {
+            if(!this.weight || !this.lvids) return 0;
+            // Formula: (LVIDs/10) / (Weight ^ 0.315)
+            return ((this.lvids / 10) / Math.pow(this.weight, 0.315)).toFixed(2);
+        },
+        get lvedvbw() {
+            if(!this.weight || !this.lvedv) return 0;
+           return ((this.lvedv) / (this.weight)).toFixed(2);
+        },
+        get lvesvbw() {
+            if(!this.weight || !this.lvesv) return 0;
+            return ((this.lvesv) / (this.weight)).toFixed(2);
         },
         get fs() {
             if(!this.lvidd || !this.lvids) return 0;
             // Formula: ((LVIDd - LVIDs) / LVIDd) * 100
             return (((this.lvidd - this.lvids) / this.lvidd) * 100).toFixed(1);
+        },
+        get ef() {
+            if(!this.lvedv || !this.lvesv) return 0;
+            // Formula: ((lvedv - lvesv) / lvedv) * 100
+            return (((this.lvedv - this.lvesv) / this.lvedv) * 100).toFixed(1);
         },
         get laAo() {
             if(!this.la || !this.ao) return 0;
@@ -150,6 +170,10 @@
             if(!this.weight || !this.lad) return 0;
             // Formula: (lad/10) / (Weight ^ 0.309)
             return ((this.lad / 10) / Math.pow(this.weight, 0.309)).toFixed(2);
+        },
+        get RWT() {
+            if(!this. lvpwd || !this.lvidd) return 0;
+            return ((2 * this.lvpwd) / this.lvidd).toFixed(2);
         },
         get ladao() {
             if(!this.la || !this.lad) return 0;
@@ -165,7 +189,7 @@
         <label>Body Weight (kg)</label>
         <input type="number" step="0.1" x-model="weight" placeholder="e.g. 10.5">
     </div>
-
+<h2>LV Measurements:</h2>
     <div style="display: flex; gap: 15px;">
         <div class="input-group" style="flex: 1;">
             <label>LVIDd (mm)</label>
@@ -175,8 +199,24 @@
             <label>LVIDs (mm)</label>
             <input type="number" step="0.01" x-model="lvids" placeholder="e.g. 21">
         </div>
+        <div class="input-group" style="flex: 1;">
+            <label>LVPWd (mm)</label>
+            <input type="number" step="0.01" x-model="lvpwd" placeholder="e.g. 8">
+        </div>
     </div>
+<div style="display: flex; gap: 15px;">
+        <div class="input-group" style="flex: 1;">
+            <label>LVEDV modified Simpsons (ml)</label>
+            <input type="number" step="0.01" x-model="lvedv" placeholder="e.g. 65">
+        </div>
+        <div class="input-group" style="flex: 1;">
+            <label>LVESV modified Simpsons (ml)</label>
+            <input type="number" step="0.01" x-model="lvesv" placeholder="e.g. 35">
+        </div>
+</div>
 
+
+<h2>LA Measurements:</h2>
     <div style="display: flex; gap: 15px;">
         <div class="input-group" style="flex: 1;">
             <label>LA Diameter (mm)</label>
@@ -193,23 +233,78 @@
         <input type="number" step="0.1" x-model="lad" placeholder="e.g. 20">
     </div>
 
-    <div class="results-box" x-show="weight > 0" x-transition>
+    <div class="results-box" x-transition>
         
         <div class="result-row">
             <span><strong>LVIDDN</strong> (Cornell)</span>
             <span>
                 <span x-text="lviddn"></span>
-                <span x-show="lviddn >= 1.7" class="abnormal">(Enlarged)</span>
-                <span x-show="lviddn < 1.7 && lviddn > 0" class="normal">(Normal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.7) </span>
+                <span x-show="lviddn >= 1.85" class="abnormal">(Enlarged)</span>
+                <span x-show="lviddn >= 1.7 && lviddn < 1.85" class="abnormal">(Borderline Enlarged)</span>
+                <span x-show="lviddn < 1.7 && lviddn >= 1.27" class="normal">(Normal)</span>
+                <span x-show="lviddn < 1.27 && lviddn > 0" class="abnormal">(Underfilled)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 1.27 - 1.85, EPIC cut off &lt;1.7) </span>
+            </span>
+        </div>
+
+        <div class="result-row">
+            <span><strong>LVIDSN</strong> (Cornell)</span>
+            <span>
+                <span x-text="lvidsn"></span>
+                <span x-show="lvidsn >= 1.26" class="abnormal">(Enlarged)</span>
+                <span x-show="lvidsn < 1.26 && lvidsn >= 0.71" class="normal">(Normal)</span>
+                <span x-show="lvidsn < 0.71 && lvidsn > 0" class="abnormal">(Underfilled)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 0.71 - 1.26) </span>
             </span>
         </div>
 
         <div class="result-row">
             <span><strong>Fractional Shortening</strong></span>
             <span><span x-text="fs"></span>%</span>
+                <span x-show="fs >= 25" class="normal">(Normal)</span>
+                <span x-show="fs < 25 && fs > 0" class="abnormal">(Abnormal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &gt;25) </span>
         </div>
 
+        <div class="result-row">
+            <span><strong>Relative Wall Thickness</strong></span>
+            <span><span x-text="RWT"></span>
+                <span x-show="RWT >= 0.43" class="abnormal">(Thick Walls)</span>
+                <span x-show="RWT < 0.43 && RWT > 0.31" class="normal">(Normal Walls)</span>
+                <span x-show="RWT <= 0.31 && RWT > 0" class="abnormal">(Thin Walls)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 0.32-0.42) </span>
+</span>
+        </div>
+
+        <div class="result-row">
+            <span><strong>Ejection Fraction</strong></span>
+            <span><span x-text="ef"></span>%</span>
+                <span x-show="ef >= 50" class="normal">(Normal)</span>
+                <span x-show="fs < 50 && fs > 0" class="abnormal">(Abnormal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &gt;50) </span>
+        </div>
+
+        <div class="result-row">
+            <span><strong>LVEDV / BW</strong></span>
+            <span>
+                <span x-text="lvedvbw"></span>
+                <span x-show="lvedvbw >= 3" class="abnormal">(Enlarged)</span>
+                <span x-show="lvedvbw < 3 && lvedvbw >= 1.25" class="normal">(Normal)</span>
+                <span x-show="lvedvbw < 1.25 && lvedvbw > 0" class="abnormal">(Underfilled)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 1.25 - 3.00) </span>
+            </span>
+        </div>
+
+        <div class="result-row">
+            <span><strong>LVESV / BW</strong></span>
+            <span>
+                <span x-text="lvesvbw"></span>
+                <span x-show="lvesvbw >= 1.35" class="abnormal">(Enlarged)</span>
+                <span x-show="lvesvbw < 1.35 && lvesvbw >= 0.3" class="normal">(Normal)</span>
+                <span x-show="lvesvbw < 0.3 && lvesvbw > 0" class="abnormal">(Underfilled)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 0.3 - 1.35) </span>
+            </span>
+        </div>
         <div class="result-row">
             <span><strong>LA:Ao Ratio</strong></span>
             <span>
@@ -221,7 +316,7 @@
         </div>
  
         <div class="result-row">
-            <span><strong>LA short axis normalised to bw</strong></span>
+            <span><strong>LA (short axis) Normalised</strong></span>
             <span>
                 <span x-text="lan"></span>
                 <span x-show="lan >= 1.17" class="abnormal">(Enlarged)</span>
