@@ -144,7 +144,7 @@
         },
         get lan() {
             if(!this.weight || !this.la) return 0;
-            return ((this.lan / 10) / Math.pow(this.weight, 0.355)).toFixed(2);
+            return ((this.la / 10) / Math.pow(this.weight, 0.355)).toFixed(2);
         },
         get ladn() {
             if(!this.weight || !this.lad) return 0;
