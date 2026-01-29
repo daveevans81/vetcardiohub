@@ -142,6 +142,10 @@
             if(!this.la || !this.ao) return 0;
             return (this.la / this.ao).toFixed(2);
         },
+        get lan() {
+            if(!this.la || !this.ao) return 0;
+            return ((this.lan / 10) / Math.pow(this.weight, 0.355)).toFixed(2);
+        },
         get ladn() {
             if(!this.weight || !this.lad) return 0;
             // Formula: (lad/10) / (Weight ^ 0.309)
@@ -215,7 +219,17 @@
                 <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.65) </span>
             </span>
         </div>
-        
+ 
+        <div class="result-row">
+            <span><strong>LA short axis normalised to bw</strong></span>
+            <span>
+                <span x-text="lan"></span>
+                <span x-show="lan >= 1.17" class="abnormal">(Enlarged)</span>
+                <span x-show="lan < 1.17 && laAo > 0" class="normal">(Normal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.17) </span>
+            </span>
+        </div>
+
         <div class="result-row">
             <span><strong>LADN</strong></span>
             <span>
