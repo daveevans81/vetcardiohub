@@ -45,6 +45,35 @@
 .input-error { border: 2px solid #ef4444 !important; background-color: #fef2f2 !important; }
 .warning-text { color: #d97706; font-size: 0.75rem; font-weight: bold; margin-top: 4px; }
 
+/* ACVIM stages */
+
+.stage-card {
+    background: linear-gradient(135deg, #2B66AE 0%, #183A63 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stage-image {
+    max-width: 100%;
+    height: auto;
+    margin-top: 15px;
+    filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.3)); /* Adds depth to your transparent PNG */
+}
+
+.stage-card h3 {
+    color: #fff;
+    margin-top: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+    width: 100%;
+}
+
     </style>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -478,6 +507,15 @@
 
 
 
+        </div>
+
+        <div class="card" style="margin-top:16px">
+<div class="stage-card">
+<h3>ACVIM Stages Guide</p>
+<img src="blog-posts/acvim_stages.png" alt="ACVIM Stages" class="stage-image">
+
+<p class="reference" style="color: white;">Reference: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6524084/" style="color: white;">Keene et al (2019) ACVIM consensus guidelines for the diagnosis and treatment of myxomatous mitral valve disease in dogs. J Vet Intern Med. 33(3):1127-1140.J</a></p>
+</div>
         </div>
       </aside>
     </div>
