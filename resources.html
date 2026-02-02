@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="VetCardioHub Summary of Monitoring Patients in CHF">
+    
+    <title>VetCardioHub - Patient Monitoring Summary</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<!-- Standard favicon -->
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="MyWebSite" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #f4f7f6; /* Soft clinical grey/white */
+            --accent-color: #008080; /* Teal/Professional Green */
+            --text-color: #333;
+            --button-bg: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .profile-img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        .link-button {
+            display: block;
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .link-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: var(--accent-color);
+        }
+
+        /* Special style for the most important link */
+        .featured {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: 700;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="banner">
+    <div class="header-logo-section">
+       <img src="logo-placeholder.png" alt="VetCardioHub Logo" class="banner-logo"><span class="banner-title">VetCardioHub</span>
+    </div>
+    <img src="banner_image.png" alt="VetCardioHub Background Image" class="banner-image">
+</div>
+
+<div class="header-container" x-data="{ open: false }"> 
+    
+    <button class="menu-toggle" @click="open = !open">
+        ☰
+    </button>
+    
+    <div class="nav-links-container" :class="{ 'is-open': open }">
+        
+        <div class="nav">
+  
+    <div class="nav-item"> 
+        <a href="/index.html" title="Go to the homepage">Home</a>
+    </div>
+    <div class="nav-item">
+        <a href="/about.html" title="Learn more about VetCardioHub">About</a>
+    </div>
+    <div class="nav-item">
+        <a href="/videos.html" title="Watch educational videos">Videos</a>
+    </div>
+    <div class="nav-item">
+        <a href="/monitoring.html" title="Our Complete Guide to Monitoring CHF">Monitoring</a>
+    </div>
+    <div class="nav-item">
+        <a href="/blog.html" title="Read our latest blog posts">Blog</a>
+    </div>
+    
+    <div class="dropdown">
+        <a href="/resources.html" class="dropbtn" title="Free guides and downloads">Resources ▾</a>
+        <div class="dropdown-content">
+            <a href="/action-plan.html">Dog Murmur Action Plan Download</a>
+            <a href="/cat-action-plan.html">Cat Murmur Action Plan Download</a>
+            <a href="/emailsignup.html" title="Sign up for email tips">Email Signup</a>
+            <a href="/trackers.html" title="Tracking Collars - Complete Guide">Guide to Trackable Collars</a>
+        </div>
+    </div>
+
+    <div class="dropdown">
+        <a href="#" class="dropbtn" title="Resource Section for Vets">Vets ▾</a>
+        <div class="dropdown-content">
+            <a href="/echocalc.html">Echo Calculator</a>
+            <a href="/trackers.html">Tracking Collars for CHF</a>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<main>
+
+<div class="container">
+
+          <h1>Free downloads & quick tools</h1>
+          <p class="small">Use these printable resources to make monitoring easy. </p>
+
+        <a  class="link-button featured" href="action-plan.html">Dog Murmur Action Plan (PDF)</a>
+<a  class="link-button featured" href="cat-action-plan.html">Cat Murmur Action Plan (PDF)</a>
+
+<a class="link-button" href="/downloads/SRR_Sheet.pdf" download>SRR Recording Chart (PDF)</a>
+            <a class="link-button" href="/downloads/Monitoring_Checklist.pdf" download>Daily Monitoring Checklist (PDF)</a>
+            <a class="link-button" href="/downloads/Cardiology_Appointment.pdf" download>Before Your Cardiology Appointment (Checklist)</a>
+            <a class="link-button" href="/downloads/Daily_Activity_Log_Template(Dog).csv" download>Activity Log Template for Dogs(CSV)</a>
+            <a class="link-button" href="/downloads/Daily_Activity_Log_Template(Cat).csv" download>Activity Log Template for Cats(CSV)</a>
+
+        <a href="https://www.vetcardiohub.com/videos.html" class="link-button">📺 Full Video List</a>
+
+        <a href="https://www.youtube.com/@VetCardioHub" class="link-button">📺 Subscribe on YouTube</a>
+
+        <a href="mailto:info@vetcardiohub.com" class="link-button">📧 Get in Touch</a>
+
+    </div>
+</main>
+    <footer>
+        <p>&copy; 2026 VetCardioHub | Follow us on 
+            <a href="https://www.instagram.com/vetcardiohub/" target="_blank" class="instagram-link">
+                <i class="fa-brands fa-instagram"></i> Instagram
+            </a>
+        </p>
+    </footer>
+</div>
+</body>
+</html>
