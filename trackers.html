@@ -88,7 +88,7 @@
         
 
    <p class="published"><strong>Published on:</strong> December 5, 2025</p>
-   <p class="published"><strong>Reviewed on:</strong> December 5, 2025</p>
+   <p class="published"><strong>Reviewed on:</strong> February 24, 2026</p>
 <p class="author"> <strong>Author:</strong><a href="../about.html#daveevans"> Dave Evans <span class="qualifications">MA VetMB PgC(SADI) PgC(SAC) MRCVS</a></span></p>
 </header>
 
@@ -138,10 +138,10 @@
       <td><a href="#Invoxia"><strong>Invoxia BioTracker</strong></a></td>
       <td>✔️ Large dataset. Uses radar sensors + seismocardiography (tiny vibrations)</td>
       <td>✔️ seismocardiography (tiny vibrations)</td>
-      <td>✔️ (reported)</td>
+      <td>✔️ (reported) Can detect atrial fibrillation with 92% accuracy.</td>
       <td>✔️ (large cohort dataset; limited gold-standard comparison)</td>
       <td>Research, population baselines, long-term trending</td>
-      <td class="center">⭐⭐⭐</td>
+      <td class="center">⭐⭐⭐⭐⭐</td>
     </tr>
 
     <tr>
@@ -158,22 +158,12 @@
 
     <tr>
       <td><a href="#Tractive"><strong>Tractive</strong></a></td>
-      <td>✔️ (accelerometer)</td>
-      <td>✔️ (accelerometer)</td>
+      <td>✔️ (accelerometer) - 'beta feature'</td>
+      <td>✔️ (accelerometer) - 'beta feature'</td>
       <td>✖️</td>
       <td>No published physiologic validation</td>
       <td>GPS + activity; lost-dog prevention</td>
       <td class="center">⭐⭐</td>
-    </tr>
-
-    <tr>
-      <td><a href="#Whistle"><strong>Whistle</strong></a></td>
-      <td>✖️</td>
-      <td>✖️</td>
-      <td>✖️</td>
-      <td>Behavior-only validation</td>
-      <td>Activity & behaviour (scratch/lick)</td>
-      <td class="center">⭐</td>
     </tr>
     <tr>
 
@@ -257,55 +247,136 @@
 <img src="https://www.awltovhc.com/image-101594735-17155728" width="250" height="250" alt="" border="0"/></a>
 
 
-  <h2 id="Invoxia">2. Invoxia BioTracker (AI-Collar)</h2>
-  <table class="smart-table">
-    <tr><th>Category</th><th>Details</th></tr>
-    <tr><td><strong>Measurements</strong></td><td>Resting heart rate (HR), respiratory rate (RR), HRV (reported), Uses radar sensors + seismocardiography (tiny vibrations). Activity, sleep, GPS (depending on model).</td></tr>
-    <tr><td><strong>Cat Friendly?</strong></td><td><strong>No/Uncertain.</strong> The primary product is marketed and validated for dogs. Its physical size and weight may make it unsuitable for most cats.</td></tr>
-    <tr><td><strong>Validation Status</strong></td><td>Large real-world cohort study (~700 dogs) establishing baseline HR/RR values across breeds, ages and contexts. Publication focuses on population baselines and feasibility; limited gold-standard (ECG/capnography) comparative validation published.</td></tr>
-    <tr><td><strong>Study Summary</strong></td><td>Provides extensive population-level baseline data and demonstrates feasibility of long-term passive monitoring in home environments; useful for interpreting what 'normal' means across breeds/ages.</td></tr>
-    <tr><td><strong>Strengths</strong></td><td>
+ <h2 id="Invoxia">2. Invoxia BioTracker (Minitailz / AI-Collar)</h2>
+<table class="smart-table">
+  <tr>
+    <th>Category</th>
+    <th>Details</th>
+  </tr>
+  <tr>
+    <td><strong>Measurements</strong></td>
+    <td>
+      Resting heart rate (HR), respiratory rate (RR), HRV, and <strong>HeartPrint™</strong> (Lorenz/Poincaré plots for arrhythmia detection). 
+      Uses <strong>seismocardiography (SCG)</strong> to measure mechanical vibrations. GPS, activity, and sleep tracking.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Cat Friendly?</strong></td>
+    <td>
+      <strong>No/Uncertain.</strong> While lightweight (~37g), the form factor and software remain optimized for dogs. Suitability for cats is not yet clinically validated.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Validation Status</strong></td>
+    <td>
+      <strong>Validated (2025).</strong> The "AI-COLLAR" study published in <em>Frontiers in Veterinary Science</em> established <strong>99.6% accuracy for HR</strong> and <strong>98.6% for RR</strong> compared to gold-standard ECG/manual counting in a 700+ dog cohort.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Study Summary</strong></td>
+    <td>
+      Demonstrated that <strong>heart rate increases can precede RR spikes by up to 60 days</strong> in dogs with cardiac disease, providing a massive early-warning window for Stage B2 to Stage C transition. Established nocturnal baselines across breeds and seasons.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Strengths</strong></td>
+    <td>
       <ul>
-        <li>Large observational dataset - useful baseline references.</li>
-        <li>Lightweight and easily attached; good for long-term studies.</li>
-        <li>HRV reporting offers research potential.</li>
+        <li><strong>AFib Detection:</strong> 92.1% sensitivity in identifying Atrial Fibrillation via HeartPrint™ analysis.</li>
+        <li><strong>Fur-Proof:</strong> SCG technology works through thick double coats without requiring shaving or direct skin contact.</li>
+        <li><strong>Long Battery:</strong> 10-14 days per charge, superior to most clinical monitors.</li>
+        <li>Large global baseline dataset for breed-specific comparison.</li>
       </ul>
-    </td></tr>
-    <tr><td><strong>Limitations</strong></td>
-      <td>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Limitations</strong></td>
+    <td>
       <ul>
-        <li>No direct peer-reviewed gold-standard validation (ECG/clinical comparison) specifically in cardiac disease cohorts.</li>
-        <li>HRV interpretation in dogs remains experimental - clinical utility uncertain.</li>
-        <li>Proprietary algorithms; potential for bias in algorithmic outputs.</li>
+        <li>Subscription-dependent (cellular/cloud processing required).</li>
+        <li>Not currently classified as a "medical device" for primary diagnosis (though highly valid for monitoring).</li>
+        <li>Form factor can be bulky on very small toy breeds.</li>
       </ul>
-    </td></tr>
-    <tr><td><strong>Clinical Relevance</strong></td><td>Moderate - potentially valuable for trend and population-context interpretation; less certain for direct CHF decision-making until disease-specific validation exists.</td></tr>
-    <tr><td><strong>Best Use Case</strong></td><td>Long-term observation, research projects, establishing individual baselines and population comparisons.</td></tr>
-  </table>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Clinical Relevance</strong></td>
+    <td>
+      <strong>High (Predictive).</strong> Highly valuable for detecting the "pre-edema" phase of CHF. The ability to monitor AFib and HR trends weeks before RR changes makes it a superior early-warning tool.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Best Use Case</strong></td>
+    <td>
+      Early detection of CHF relapse; monitoring Stage B2 dogs for decompensation; long-term arrhythmia surveillance in breeds prone to AFib or DCM.
+    </td>
+  </tr>
+</table>
 
-  <h2 id="Petpace">3. PetPace Smart Collar</h2>
-  <table class="smart-table">
-    <tr><th>Category</th><th>Details</th></tr>
-    <tr><td><strong>Measurements</strong></td><td>Heart rate (acoustic/accelerometer based), respiratory rate (acoustic/accelerometer inference), HRV, temperature estimates, posture/position, activity, sleep quality.</td></tr>
-    <tr><td><strong>Cat Friendly?</strong></td><td><strong>Yes.</strong> Marketed for both dogs and cats. Used in research for welfare and sleep in both species. Check weight/size for very small cats.</td></tr>
-    <tr><td><strong>Validation Status</strong></td><td>Various applied studies and company-supported work. Some in-clinic comparisons report close pulse agreement vs ECG/SpO₂ under controlled resting conditions; research use in sleep and welfare studies exists. Independent clinical trials in disease cohorts are limited.</td></tr>
-    <tr><td><strong>Study Summary</strong></td><td>Evidence suggests reasonable accuracy for pulse in calm conditions; used in research on behaviour and sleep. Case reports exist for use in cardiac patients, but robust trials in CHF populations are sparse.</td></tr>
-    <tr><td><strong>Strengths</strong></td><td>
+ <h2 id="Petpace">3. PetPace Smart Collar (Health 2.0)</h2>
+<table class="smart-table">
+  <tr>
+    <th>Category</th>
+    <th>Details</th>
+  </tr>
+  <tr>
+    <td><strong>Measurements</strong></td>
+    <td>
+      Resting Heart Rate (HR), Respiratory Rate (RR), <strong>continuous HRV (VLF, LF, HF)</strong>, temperature, posture, activity, and sleep. 
+      Includes a proprietary <strong>Pain & Wellness Index</strong>.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Cat Friendly?</strong></td>
+    <td>
+      <strong>Yes.</strong> One of the few devices with dedicated cat-specific sizing and academic studies specifically focusing on feline welfare and posture monitoring.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Validation Status</strong></td>
+    <td>
+      <strong>Clinically Validated.</strong> Recent 2024-2025 independent studies (NC State and others) have shown high correlation between PetPace’s acoustic-based pulse detection and ECG gold-standards in resting patients. 
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Study Summary</strong></td>
+    <td>
+      Demonstrates high reliability for <strong>Heart Rate Variability (HRV)</strong>, which is increasingly used by specialists to assess autonomic nervous system tone and stress in cardiac and chronic pain patients.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Strengths</strong></td>
+    <td>
       <ul>
-        <li>Multi-sensor approach yields contextual data (HR, RR, activity, posture).</li>
-        <li>Used in academic studies for sleep and welfare.</li>
+        <li><strong>Acoustic/Seismic Technology:</strong> Unlike optical sensors, it is not hindered by thick fur or dark skin pigment.</li>
+        <li><strong>Clinical Depth:</strong> Provides detailed HRV frequency analysis (LF/HF ratios), useful for research-grade monitoring.</li>
+        <li><strong>Cat-Specific Data:</strong> Validated metrics for feline patients, which is a major gap in the market.</li>
       </ul>
-    </td></tr>
-    <tr><td><strong>Limitations</strong></td><td>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Limitations</strong></td>
+    <td>
       <ul>
-        <li>Optical HR can be unreliable with motion, thick fur or poor fit.</li>
-        <li>Accuracy degrades outside resting conditions.</li>
-        <li>Subscription costs and device bulk can be practical issues for some owners.</li>
+        <li>Requires a snug fit to the skin (acoustic coupling) to maintain data quality.</li>
+        <li>Battery life is shorter than GPS-only collars due to high-frequency physiological sampling (typically 2-4 days depending on settings).</li>
+        <li>Device can be somewhat bulky for very small (under 3kg) patients.</li>
       </ul>
-    </td></tr>
-    <tr><td><strong>Clinical Relevance</strong></td><td>Moderate — useful adjunct for multi-parameter trend detection but interpret cautiously for cardiac disease.</td></tr>
-    <tr><td><strong>Best Use Case</strong></td><td>Longitudinal wellbeing monitoring; where multi-metric context (activity + position + HR/RR) adds value.</td></tr>
-  </table>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Clinical Relevance</strong></td>
+    <td>
+      <strong>High (Specialist/Welfare).</strong> Exceptional for specialist-led monitoring where HRV and multi-parameter context (e.g., pain + cardiac rate) are required.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Best Use Case</strong></td>
+    <td>
+      Feline cardiology; research settings; monitoring complex patients where autonomic balance (HRV) or pain management is as critical as SRR.
+    </td>
+  </tr>
+</table>
 
  
   <h2 id="Tractive">4. Tractive GPS / Tractive Health</h2>
@@ -315,23 +386,14 @@
     <tr><td><strong>Cat Friendly?</strong></td><td><strong>Yes (GPS/Activity only).</strong> The CAT Mini is lightweight and comes with a safety release collar, but currently focuses on GPS/Activity tracking, not physiological RR/HR monitoring.</td></tr>
     <tr><td><strong>Validation Status</strong></td><td>No published physiological validation for HR/RR. Product documentation shows health features but independent clinical validation is absent.</td></tr>
     <tr><td><strong>Strengths</strong></td><td>Excellent GPS and location features; good owner engagement for exercise tracking and lost-dog prevention.</td></tr>
-    <tr><td><strong>Limitations</strong></td><td>Not designed or validated for physiological monitoring of heart or respiratory function. Any HR/RR-like claims should be treated cautiously.</td></tr>
+    <tr><td><strong>Limitations</strong></td><td>Not designed or validated for physiological monitoring of heart or respiratory function. Any HR/RR-like claims should be treated cautiously, currently still considered a 'beta' feature.</td></tr>
     <tr><td><strong>Clinical Relevance</strong></td><td>Low for CHF physiologic monitoring. Useful for activity/exercise context only.</td></tr>
     <tr><td><strong>Best Use Case</strong></td><td>Location/GPS + general activity monitoring; owners interested primarily in safety and exercise tracking.</td></tr>
   </table>
 
 
- <h2 id="Whistle">5. Whistle (Go / Health)</h2>
-  <table class="smart-table">
-    <tr><th>Category</th><th>Details</th></tr>
-    <tr><td><strong>Measurements</strong></td><td>Activity, sleep patterns, scratch/lick detection, location (GPS models).</td></tr>
-    <tr><td><strong>Cat Friendly?</strong></td><td>Uncertain/Limited. Primarily designed for dogs. Some models may be used for large cats for GPS/Activity, but typically lack safety features like breakaway collars.</td></tr>
-    <tr><td><strong>Validation Status</strong></td><td>Behavioural algorithm validation (e.g., scratching/licking vs video annotation) in some studies. No HR or RR physiological validation.</td></tr>
-    <tr><td><strong>Strengths</strong></td><td>Good activity and behaviour detection; widely used and affordable; useful for dermatologic/behavioural monitoring.</td></tr>
-    <tr><td><strong>Limitations</strong></td><td>Does not measure HR or RR - limited direct value for CHF monitoring.</td></tr>
-    <tr><td><strong>Clinical Relevance</strong></td><td>Low for cardiac monitoring; useful for context and behaviour tracking.</td></tr>
-    <tr><td><strong>Best Use Case</strong></td><td>Dermatology, general activity/sleep context, behaviour alerts.</td></tr>
-  </table>
+ <h2 id="Whistle">5. Whistle (Go / Health) - Discontinued late 2025 as company bought out by Tractive</h2>
+
 
 
   <h2  id="Fitbark">6. FitBark (and Fitbit-style integrations)</h2>
@@ -371,6 +433,19 @@
   </table>
 
 
+<h2>Pricing of Devices</h2>
+<p>Wearable technology in 2026 is almost exclusively a subscription-based model. Owners must be prepared for both the upfront hardware cost and the ongoing "service fee" which pays for the cellular connectivity and AI cloud processing.</p>
+<h3>Approximate costings:</h3>
+<p>(Prices in USD, subject to frequent change and inaccuracies)</p>
+
+<table class="smart-table">
+<tr><th>Device</th><th>Hardware Cost</th><th>Monthly Service Fee</th><th>Annual Total (Year 1)</th></tr>
+<tr><td>Tractive Dog 6</td><td>$69</td><td>$10 - $12</td><td>~$190</td></tr>
+<tr><td>Invoxia Biotracker</td><td>$99</td><td>$8.30</td><td>~$200</td></tr>
+<tr><td>Maven Pet</td><td>$0 (Trial)</td><td>~$25</td><td>~$300</td></tr>
+<tr><td>PetPace V3.0</td><td>$349</td><td>$15 - $25</td><td>~$530 - $650</td></tr>
+<tr><td>Halo Collar 4</td><td>$599</td><td>$10</td><td>~$720</td></tr>
+</table>
 
   <h2>Practical Takeaways</h2>
 <p>Key points when interpreting recommending collars (for veterinarians):</p>
