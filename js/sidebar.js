@@ -7,7 +7,7 @@ if (typeof posts !== "undefined") {
     container.innerHTML = `
       <section class="sidebar-card">
         <div class="sidebar-badge">Resource Hub</div>
-        <h3 id="sidebar-title">Start Here</h3>
+        <h3 id="sidebar-title">Must Read Articles:</h3>
         
         <div class="search-container">
           <input type="text" id="sidebar-search" placeholder="Search heart topics..." />
