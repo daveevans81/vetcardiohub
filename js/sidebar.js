@@ -1,6 +1,9 @@
 // sidebar.js
 
-const featured = posts.filter(p => p.featured);
+
+if (typeof posts !== "undefined") {
+  const featured = posts.filter(p => p.featured);
+
 
 const container = document.getElementById("featured-posts");
 
@@ -15,4 +18,5 @@ if (container) {
       </ul>
     </section>
   `;
+}
 }
