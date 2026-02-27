@@ -139,6 +139,20 @@ strong {
 }
 
 
+@media (max-width: 768px) {
+  .article-navigation {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .nav-button {
+    width: 100%;
+    text-align: center;
+    white-space: normal; /* Allow wrapping on mobile where there's more vertical space */
+  }
+  .nav-zone {
+    width: 100%;
+  }
+}
 
 .blog-layout {
   display: grid;
