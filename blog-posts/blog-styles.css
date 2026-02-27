@@ -229,16 +229,24 @@ strong {
   margin: 0 -12px; /* Pulls hover effect slightly wider than text */
 }
 
+
+
 .sidebar-card a {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  text-align: left; /* Ensures text aligns left if it wraps to 2 lines */
   text-decoration: none;
   color: #334155;
   font-weight: 500;
   padding: 12px 16px;
-  border-radius: 12px; /* Rounded corners for the hover background */
+  border-radius: 12px;
   transition: all 0.2s ease;
+  gap: 12px; /* Adds space between text and arrow */
+}
+
+.sidebar-card a .link-text {
+  flex: 1; /* Allows text to take up all available space, pushing arrow to the end */
 }
 
 /* Hover States - THE "IMPRESSIVE" PART */
