@@ -170,20 +170,90 @@ strong {
     margin-top: -2px;
 }
 
+/* The Main Container */
+#article-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 60px 0;
+  padding: 30px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee; /* Added for a more "framed" look */
+  gap: 10px;
+}
+
+/* 1. The Side Zones: These act as equal-width anchors */
+.nav-zone {
+  flex: 1; /* This is the magic: makes left and right equal width */
+  display: flex;
+  min-width: 0; /* Prevents flex items from overflowing */
+}
+
+.nav-zone.right {
+  justify-content: flex-end;
+}
+
+/* 2. The Center Hub: Stays in the middle */
+.nav-hub {
+  flex: 0 0 auto; /* Won't grow, won't shrink */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 15px;
+}
+
+/* 3. The Buttons */
+.nav-button {
+  background: white;
+  border: 1px solid #e5e5e5;
+  padding: 12px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #111;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  
+  /* Text handling to prevent the "weird wrapping" */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-button:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+/* 4. Center Links */
+.nav-link-center {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Mobile Fix: Only stack when there truly isn't room */
 @media (max-width: 768px) {
-  .article-navigation {
+  #article-navigation {
     flex-direction: column;
-    gap: 10px;
+    padding: 20px;
+  }
+  .nav-zone {
+    width: 100%;
+    justify-content: center !important;
   }
   .nav-button {
     width: 100%;
     text-align: center;
-    white-space: normal; /* Allow wrapping on mobile where there's more vertical space */
-  }
-  .nav-zone {
-    width: 100%;
+    white-space: normal; /* Allow wrap on mobile */
   }
 }
+
 
 .blog-layout {
   display: grid;
