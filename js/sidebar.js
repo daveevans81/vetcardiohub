@@ -12,7 +12,7 @@ if (typeof posts !== "undefined") {
           ${featured.map(p =>
             // Fixed the URL path here
             `<li>
-              <a href="/blog-posts/${p.slug}.html">
+              <a href="/blog-posts/${p.slug}">
                 <span class="link-text">${p.title}</span>
                 <span class="arrow">→</span>
               </a>

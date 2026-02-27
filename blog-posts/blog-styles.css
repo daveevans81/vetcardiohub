@@ -174,18 +174,19 @@ strong {
   }
 }
 
-* Sidebar Container Styling */
+/* Sidebar Card Container */
 .sidebar-card {
   padding: 30px 24px;
-  background: #ffffff;
+  background: #ffffff; /* Pure white background */
   border-radius: 20px;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+  border: 1px solid #e2e8f0; /* Subtle but visible border */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); /* Soft shadow to separate from background */
   position: relative;
   overflow: hidden;
+  margin-bottom: 24px;
 }
 
-/* Add a subtle accent line at the top */
+/* Accent line at the top */
 .sidebar-card::before {
   content: '';
   position: absolute;
@@ -193,13 +194,14 @@ strong {
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  background: #2563eb; /* Your primary blue */
 }
 
+/* Must Read Badge */
 .sidebar-badge {
   display: inline-block;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #f8fafc; /* Very light grey/blue */
+  color: #64748b; /* Professional slate colour */
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -207,21 +209,24 @@ strong {
   padding: 4px 10px;
   border-radius: 20px;
   margin-bottom: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .sidebar-card h3 {
   font-size: 1.25rem;
+  font-weight: 700;
   color: #0f172a;
   margin-bottom: 20px;
 }
 
+/* List Item Styling */
 .sidebar-card ul {
   list-style: none;
   padding: 0;
 }
 
 .sidebar-card li {
-  margin-bottom: 0; /* Removing bottom margin to use padding on links */
+  margin: 0 -12px; /* Pulls hover effect slightly wider than text */
 }
 
 .sidebar-card a {
@@ -231,26 +236,22 @@ strong {
   text-decoration: none;
   color: #334155;
   font-weight: 500;
-  padding: 12px 0;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 12px 16px;
+  border-radius: 12px; /* Rounded corners for the hover background */
   transition: all 0.2s ease;
 }
 
-.sidebar-card li:last-child a {
-  border-bottom: none;
+/* Hover States - THE "IMPRESSIVE" PART */
+.sidebar-card a:hover {
+  background-color: #f0f7ff; /* Soft blue background on hover */
+  color: #2563eb; /* Text turns primary blue */
 }
 
 .sidebar-card a .arrow {
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateX(-5px);
   transition: all 0.2s ease;
-  color: #2563eb;
-}
-
-/* Hover States */
-.sidebar-card a:hover {
-  color: #2563eb;
-  padding-left: 4px; /* Subtle movement on hover */
+  font-weight: bold;
 }
 
 .sidebar-card a:hover .arrow {
