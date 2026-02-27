@@ -98,40 +98,21 @@ strong {
 .article-navigation {
   display: flex;
   justify-content: space-between;
-  margin: 40px 0;
-  padding: 20px;
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
-}
-
-.nav-button {
-  background-color: #f5f5f5;
-  color: #333;
-  text-decoration: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-  font-weight: 500;
-}
-
-.nav-button:hover {
-  background-color: #e0e0e0;
-}
-
-.prev-article {
-  text-align: left;
-}
-
-.next-article {
-  text-align: right;
-}
-
-.article-navigation {
-  display: flex;
-  justify-content: space-between;
+  align-items: center; /* Vertically centers the buttons */
   margin: 60px 0;
   padding: 30px 0;
   border-top: 1px solid #eee;
+  gap: 15px; /* Adds a safety gap between elements */
+}
+
+/* We create three "zones" so the center is always centered */
+.nav-zone {
+  flex: 1; /* Makes left and right zones equal width */
+  display: flex;
+}
+
+.nav-zone.right {
+  justify-content: flex-end; /* Pushes the 'Next' button to the far right */
 }
 
 .nav-button {
@@ -141,14 +122,23 @@ strong {
   border-radius: 12px;
   text-decoration: none;
   color: #111;
-  max-width: 45%;
+  /* Removed the aggressive max-width 45% */
   transition: all 0.2s ease;
+  white-space: nowrap; /* Prevents text from wrapping */
+  overflow: hidden;    /* Clips text if it's truly too long */
+  text-overflow: ellipsis; /* Adds '...' if the title is massive */
 }
 
-.nav-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+.nav-link-center {
+  flex: 0 0 auto; /* Don't let the center link grow or shrink */
+  text-decoration: none;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0 10px;
 }
+
+
 
 .blog-layout {
   display: grid;
