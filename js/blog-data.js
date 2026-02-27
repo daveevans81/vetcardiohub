@@ -1,4 +1,4 @@
-const posts = [
+window.posts = [
   {
     slug: "post18.html",
     title: "The 60-Day Warning",

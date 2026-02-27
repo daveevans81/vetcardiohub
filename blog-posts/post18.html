@@ -83,29 +83,6 @@
 
 
 <div id="article-navigation"></div>
-<script src="/js/blog-data.js"></script>
-<script>
-const current = window.location.pathname.split("/").pop();
-const index = posts.findIndex(p => p.slug === current);
-
-let html = `<div class="article-navigation">`;
-
-if (index > 0) {
-  html += `<a href="${posts[index-1].slug}" class="nav-button prev-article">
-    ← ${posts[index-1].title}
-  </a>`;
-}
-
-if (index < posts.length - 1) {
-  html += `<a href="${posts[index+1].slug}" class="nav-button next-article">
-    ${posts[index+1].title} →
-  </a>`;
-}
-
-html += `</div>`;
-
-document.getElementById("article-navigation").innerHTML = html;
-</script>
 
         <a href="../blog.html">← Back to Blog</a>
     </div>
@@ -125,6 +102,30 @@ document.getElementById("article-navigation").innerHTML = html;
 <script src="/js/blog-data.js"></script>
 <script src="/js/sidebar.js"></script>
 <script src="/js/load-partials.js"></script>
+<script>
+const current = window.location.pathname.split("/").pop();
+const index = posts.findIndex(p => p.slug === current);
+
+if (index !== -1) {
+  let html = `<div class="article-navigation">`;
+
+  if (index > 0) {
+    html += `<a href="${posts[index-1].slug}" class="nav-button prev-article">
+      ← ${posts[index-1].title}
+    </a>`;
+  }
+
+  if (index < posts.length - 1) {
+    html += `<a href="${posts[index+1].slug}" class="nav-button next-article">
+      ${posts[index+1].title} →
+    </a>`;
+  }
+
+  html += `</div>`;
+
+  document.getElementById("article-navigation").innerHTML = html;
+}
+</script>
 
 </body>
 </html>
