@@ -3,8 +3,7 @@
 
 
 if (typeof posts !== "undefined") {
-  const featured = posts.filter(p => p.featured);
-
+const featured = posts.filter(p => p.featured);
 
 const container = document.getElementById("featured-posts");
 
@@ -14,7 +13,7 @@ if (container) {
       <h3>Start Here</h3>
       <ul>
         ${featured.map(p =>
-          `<li><a href="${post.slug}">${p.title}</a></li>`
+          `<li><a href="/${p.slug}">${p.title}</a></li>`
         ).join("")}
       </ul>
     </section>
