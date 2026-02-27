@@ -1,5 +1,6 @@
 // sidebar.js
 
+const BASE_PATH = "/blog-posts/";
 
 if (typeof posts !== "undefined") {
   const featured = posts.filter(p => p.featured);
@@ -13,7 +14,7 @@ if (container) {
       <h3>Start Here</h3>
       <ul>
         ${featured.map(p =>
-          `<li><a href="/${p.slug}">${p.title}</a></li>`
+          `<li><a href="${BASE_PATH + post.slug}">">${p.title}</a></li>`
         ).join("")}
       </ul>
     </section>
