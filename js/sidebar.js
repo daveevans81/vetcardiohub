@@ -14,7 +14,7 @@ if (container) {
       <h3>Start Here</h3>
       <ul>
         ${featured.map(p =>
-          `<li><a href="${BASE_PATH + post.slug}">">${p.title}</a></li>`
+          `<li><a href="${BASE_PATH + post.slug}">${p.title}</a></li>`
         ).join("")}
       </ul>
     </section>
