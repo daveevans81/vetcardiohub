@@ -7,7 +7,7 @@ if (typeof posts !== "undefined") {
     container.innerHTML = `
       <section class="sidebar-card">
         <div class="sidebar-badge">Must Read</div>
-        <h3>Start Here</h3>
+   
         <ul>
           ${featured.map(p =>
             // Fixed the URL path here
