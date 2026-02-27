@@ -266,3 +266,50 @@ strong {
   opacity: 1;
   transform: translateX(0);
 }
+
+/* Search Bar Styling */
+.search-container {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+#sidebar-search {
+  width: 100%;
+  padding: 12px 12px 12px 40px; /* Space for the icon on the left */
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+#sidebar-search:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+/* Styling for the search highlights */
+.highlight {
+  background-color: #dbeafe; /* Very light blue */
+  color: #1e40af; /* Deep blue */
+  font-weight: 700;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Ensure the link text remains readable when highlighted */
+.sidebar-card a:hover .highlight {
+  background-color: #2563eb;
+  color: #ffffff;
+}
