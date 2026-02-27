@@ -22,59 +22,8 @@
 </head>
 
 <body>
-<div class="banner">
-    <div class="header-logo-section">
-       <img src="/logo-placeholder.png" alt="VetCardioHub Logo" class="banner-logo"><span class="banner-title">VetCardioHub</span>
-    </div>
-    <img src="/banner_image.png" alt="VetCardioHub Background Image" class="banner-image">
-</div>
 
-<div class="header-container" x-data="{ open: false }"> 
-    
-    <button class="menu-toggle" @click="open = !open">
-        ☰
-    </button>
-    
-    <div class="nav-links-container" :class="{ 'is-open': open }">
-        
-        <div class="nav">
-  
-    <div class="nav-item"> 
-        <a href="/index.html" title="Go to the homepage">Home</a>
-    </div>
-    <div class="nav-item">
-        <a href="/about.html" title="Learn more about VetCardioHub">About</a>
-    </div>
-    <div class="nav-item">
-        <a href="/videos.html" title="Watch educational videos">Videos</a>
-    </div>
-    <div class="nav-item">
-        <a href="/monitoring.html" title="Our Complete Guide to Monitoring CHF">Monitoring</a>
-    </div>
-    <div class="nav-item">
-        <a href="/blog.html" title="Read our latest blog posts">Blog</a>
-    </div>
-    
-    <div class="dropdown">
-        <a href="#" class="dropbtn" title="Free guides and downloads">Resources ▾</a>
-        <div class="dropdown-content">
-            <a href="/action-plan.html">Dog Murmur Action Plan Download</a>
-            <a href="/cat-action-plan.html">Cat Murmur Action Plan Download</a>
-            <a href="/emailsignup.html" title="Sign up for email tips">Email Signup</a>
-            <a href="/trackers.html" title="Tracking Collars - Complete Guide">Guide to Trackable Collars</a>
-        </div>
-    </div>
-
-    <div class="dropdown">
-        <a href="#" class="dropbtn" title="Resource Section for Vets">Vets ▾</a>
-        <div class="dropdown-content">
-            <a href="/echocalc.html">Echo Calculator</a>
-            <a href="/trackers.html">Tracking Collars for CHF</a>
-        </div>
-    </div>
-</div>
-</div>
-</div>
+<div id="site-header"></div>
 
 <main>
     <div class="content">
@@ -183,12 +132,9 @@ What does that mean for your pet’s care, and for your wallet?</p>
         </ul>
     </div>
 </main>
-    <footer>
-        <p>&copy; 2026 VetCardioHub | Follow us on 
-            <a href="https://www.instagram.com/vetcardiohub/" target="_blank" class="instagram-link">
-                <i class="fa-brands fa-instagram"></i> Instagram
-            </a>
-        </p>
-    </footer>
+
+<div id="site-footer"></div>
+
+<script src="/js/load-partials.js"></script>
 </body>
 </html>
