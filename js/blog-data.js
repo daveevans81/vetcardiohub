@@ -18,7 +18,7 @@ window.posts = [
     slug: "post15.html",
     title: "Why Heart Failure Happens Suddenly",
     featured: false
-  }
+  },
   {
     slug: "post14.html",
     title: "The Maven Smart Collar - Full Review",
