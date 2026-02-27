@@ -45,8 +45,48 @@ const posts = [
     featured: true
   },
   {
-    slug: "post09.html",
+    slug: "post9.html",
     title: "What is congestive heart failure (CHF)?",
-    featured: true
+    featured: false
   },
+  {
+    slug: "post8.html",
+    title: "What does pimobendan do to help in degenerative mitral valve disease?",
+    featured: false
+  },
+  {
+    slug: "post7.html",
+    title: "The different stages of Degenerative Mitral Valve Disease.",
+    featured: false
+  },
+  {
+    slug: "post6.html",
+    title: "Degenerative Mitral Valve Disease Explained",
+    featured: false
+  },
+  {
+    slug: "post5.html",
+    title: "Should I give my cat with HCM Rapamycin?",
+    featured: false
+  },
+  {
+    slug: "post4.html",
+    title: "Coughing in dogs and cats",
+    featured: false
+  },
+  {
+    slug: "post3.html",
+    title: "What is an echo?",
+    featured: false
+  },
+  {
+    slug: "post2.html",
+    title: "Sleeping Respiratory Rate",
+    featured: false
+  },
+  {
+    slug: "post1.html",
+    title: "Understanding Heart Murmurs in Pets",
+    featured: false
+  }
 ];
