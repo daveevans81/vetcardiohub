@@ -103,7 +103,7 @@
 <script src="/js/sidebar.js"></script>
 <script src="/js/load-partials.js"></script>
 <script>
-const BASE_PATH = "/blog-posts/";
+
 
 let current = window.location.pathname.split("/").pop();
 
@@ -117,13 +117,13 @@ if (index !== -1) {
   let html = `<div class="article-navigation">`;
 
   if (index > 0) {
-    html += `<a href="${BASE_PATH + posts[index-1].slug}" class="nav-button prev-article">
+    html += `<a href="${posts[index-1].slug}" class="nav-button prev-article">
       ← ${posts[index-1].title}
     </a>`;
   }
 
   if (index < posts.length - 1) {
-    html += `<a href="${BASE_PATH + posts[index+1].slug}" class="nav-button next-article">
+    html += `<a href="${posts[index+1].slug}" class="nav-button next-article">
       ${posts[index+1].title} →
     </a>`;
   }
