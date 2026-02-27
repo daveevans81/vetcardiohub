@@ -84,7 +84,7 @@
 
 <div id="article-navigation"></div>
 
-        <a href="../blog.html">← Back to Blog</a>
+       
     </div>
 
 </article>
@@ -102,41 +102,7 @@
 <script src="/js/blog-data.js"></script>
 <script src="/js/sidebar.js"></script>
 <script src="/js/load-partials.js"></script>
-<script>
-// 1. Create a reversed copy so Index 0 is the OLDEST post
-const chronologicalPosts = [...posts].reverse();
-
-let current = window.location.pathname.split("/").pop();
-
-if (!current.endsWith(".html")) {
-  current += ".html";
-}
-
-// 2. Find the index in our new chronological list
-const index = chronologicalPosts.findIndex(p => p.slug === current);
-
-if (index !== -1) {
-  let html = `<div class="article-navigation">`;
-
-  // 3. Now "index - 1" is truly the previous (older) article
-  if (index > 0) {
-    html += `<a href="/blog-posts/${chronologicalPosts[index-1].slug}" class="nav-button prev-article">
-      ← ${chronologicalPosts[index-1].title}
-    </a>`;
-  }
-
-  // 4. And "index + 1" is the next (newer) article
-  if (index < chronologicalPosts.length - 1) {
-    html += `<a href="/blog-posts/${chronologicalPosts[index+1].slug}" class="nav-button next-article">
-      ${chronologicalPosts[index+1].title} →
-    </a>`;
-  }
-
-  html += `</div>`;
-
-  document.getElementById("article-navigation").innerHTML = html;
-}
-</script>
+<script src="/js/article-nav.js"></script>
 
 </body>
 </html>
