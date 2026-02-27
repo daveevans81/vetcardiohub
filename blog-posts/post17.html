@@ -158,7 +158,8 @@ Wellness-Grade (Beta Vitals)</td>
 <script src="/js/sidebar.js"></script>
 <script src="/js/load-partials.js"></script>
 <script>
-
+// 1. Create a reversed copy so Index 0 is the OLDEST post
+const chronologicalPosts = [...posts].reverse();
 
 let current = window.location.pathname.split("/").pop();
 
@@ -166,20 +167,23 @@ if (!current.endsWith(".html")) {
   current += ".html";
 }
 
-const index = posts.findIndex(p => p.slug === current);
+// 2. Find the index in our new chronological list
+const index = chronologicalPosts.findIndex(p => p.slug === current);
 
 if (index !== -1) {
   let html = `<div class="article-navigation">`;
 
+  // 3. Now "index - 1" is truly the previous (older) article
   if (index > 0) {
-    html += `<a href="${posts[index-1].slug}" class="nav-button prev-article">
-      ← ${posts[index-1].title}
+    html += `<a href="/blog-posts/${chronologicalPosts[index-1].slug}" class="nav-button prev-article">
+      ← ${chronologicalPosts[index-1].title}
     </a>`;
   }
 
-  if (index < posts.length - 1) {
-    html += `<a href="${posts[index+1].slug}" class="nav-button next-article">
-      ${posts[index+1].title} →
+  // 4. And "index + 1" is the next (newer) article
+  if (index < chronologicalPosts.length - 1) {
+    html += `<a href="/blog-posts/${chronologicalPosts[index+1].slug}" class="nav-button next-article">
+      ${chronologicalPosts[index+1].title} →
     </a>`;
   }
 
