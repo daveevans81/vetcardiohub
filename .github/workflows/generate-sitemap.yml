@@ -29,15 +29,13 @@ jobs:
         run: git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
 
       - name: Commit sitemap
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add sitemap.xml
-          git diff --cached --quiet || git commit -m "Update sitemap"
-          git push origin HEAD:${{ github.ref }}
-
-      - name: Ping Google
-        run: |
-          curl "https://www.google.com/ping?sitemap=https://vetcardiohub.com/sitemap.xml"
+          # Check if file exists before adding
+          if [ -f sitemap.xml ]; then
+            git add sitemap.xml
+            git diff --cached --quiet || (git commit -m "Update sitemap" && git push)
+          else
+            echo "Sitemap was not generated. Skipping commit."
+          fi
