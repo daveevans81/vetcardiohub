@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   sitemap:
     if: github.actor != 'github-actions[bot]'
@@ -77,3 +80,16 @@ jobs:
               f.write(sitemap_content)
           print(f"Sitemap successfully written to {OUTPUT_FILE}")
           EOF
+
+      - name: Commit sitemap
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          if [ -f sitemap.xml ]; then
+            git add sitemap.xml
+            git diff --cached --quiet || (git commit -m "Auto-update sitemap" && git push)
+          else
+            echo "sitemap.xml not found"
+            exit 1
+          fi
