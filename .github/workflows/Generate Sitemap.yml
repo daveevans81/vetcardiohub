@@ -1,0 +1,73 @@
+name: Generate Sitemap
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sitemap:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run Python Sitemap Generator
+        run: |
+          python3 - <<EOF
+          import os
+          from datetime import datetime
+
+          SITE_URL = "https://www.vetcardiohub.com"
+          BLOG_DIR = "./blog"
+          OUTPUT_FILE = "sitemap.xml" # Saving to root for easier GitHub Pages/Cloudflare access
+
+          urls = []
+          static_pages = [
+              ("", "1.0"),
+              ("about.html", "0.8"),
+              ("videos.html", "0.9"),
+              ("blog.html", "0.8")
+          ]
+
+          # Static Pages
+          for page, priority in static_pages:
+              # Prevent double slashes
+              clean_url = f"{SITE_URL}/{page}" if page else SITE_URL
+              urls.append(f"  <url>\n    <loc>{clean_url}</loc>\n    <lastmod>{datetime.today().date()}</lastmod>\n    <priority>{priority}</priority>\n  </url>")
+
+          # Blog Posts
+          if os.path.exists(BLOG_DIR):
+              for filename in os.listdir(BLOG_DIR):
+                  if filename.endswith(".html"):
+                      url = f"{SITE_URL}/blog/{filename}"
+                      path = os.path.join(BLOG_DIR, filename)
+                      lastmod = datetime.fromtimestamp(os.path.getmtime(path)).date()
+                      urls.append(f"  <url>\n    <loc>{url}</loc>\n    <lastmod>{lastmod}</lastmod>\n    <priority>0.7</priority>\n  </url>")
+
+          sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
+          sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+          sitemap_content += "\n".join(urls)
+          sitemap_content += "\n</urlset>"
+
+          with open(OUTPUT_FILE, "w") as f:
+              f.write(sitemap_content)
+          EOF
+
+      - name: Commit and Push Sitemap
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add sitemap.xml
+          # Only commit if the sitemap actually changed
+          git diff --cached --quiet || (git commit -m "Update sitemap" && git push origin HEAD:main)
