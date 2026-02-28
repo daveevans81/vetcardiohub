@@ -29,10 +29,12 @@ jobs:
           from datetime import datetime
 
           SITE_URL = "https://www.vetcardiohub.com"
-          BLOG_DIR = "./blog"
-          OUTPUT_FILE = "sitemap.xml" # Saving to root for easier GitHub Pages/Cloudflare access
+          # UPDATED: Pointing to your actual directory
+          BLOG_DIR = "./blog-posts" 
+          OUTPUT_FILE = "sitemap.xml"
 
           urls = []
+          # Home, About, Videos, Blog (The main listing page)
           static_pages = [
               ("", "1.0"),
               ("about.html", "0.8"),
@@ -40,34 +42,38 @@ jobs:
               ("blog.html", "0.8")
           ]
 
-          # Static Pages
+          print(f"Starting sitemap generation...")
+
+          # 1. Process Static Pages
           for page, priority in static_pages:
-              # Prevent double slashes
               clean_url = f"{SITE_URL}/{page}" if page else SITE_URL
               urls.append(f"  <url>\n    <loc>{clean_url}</loc>\n    <lastmod>{datetime.today().date()}</lastmod>\n    <priority>{priority}</priority>\n  </url>")
 
-          # Blog Posts
+          # 2. Process Blog Posts (Recursive Search)
           if os.path.exists(BLOG_DIR):
-              for filename in os.listdir(BLOG_DIR):
-                  if filename.endswith(".html"):
-                      url = f"{SITE_URL}/blog/{filename}"
-                      path = os.path.join(BLOG_DIR, filename)
-                      lastmod = datetime.fromtimestamp(os.path.getmtime(path)).date()
-                      urls.append(f"  <url>\n    <loc>{url}</loc>\n    <lastmod>{lastmod}</lastmod>\n    <priority>0.7</priority>\n  </url>")
+              print(f"Found {BLOG_DIR} folder. Searching for posts...")
+              for root, dirs, files in os.walk(BLOG_DIR):
+                  for filename in files:
+                      if filename.endswith(".html"):
+                          # Calculate the path relative to the blog-posts folder
+                          relative_path = os.path.relpath(os.path.join(root, filename), BLOG_DIR)
+                          
+                          # This creates: https://www.vetcardiohub.com/blog-posts/your-post.html
+                          full_url = f"{SITE_URL}/blog-posts/{relative_path}"
+                          
+                          path = os.path.join(root, filename)
+                          lastmod = datetime.fromtimestamp(os.path.getmtime(path)).date()
+                          
+                          print(f"Adding: {full_url}")
+                          urls.append(f"  <url>\n    <loc>{full_url}</loc>\n    <lastmod>{lastmod}</lastmod>\n    <priority>0.7</priority>\n  </url>")
+          else:
+              print(f"ERROR: {BLOG_DIR} directory not found!")
 
-          sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
-          sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+          sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           sitemap_content += "\n".join(urls)
           sitemap_content += "\n</urlset>"
 
           with open(OUTPUT_FILE, "w") as f:
               f.write(sitemap_content)
+          print(f"Sitemap successfully written to {OUTPUT_FILE}")
           EOF
-
-      - name: Commit and Push Sitemap
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add sitemap.xml
-          # Only commit if the sitemap actually changed
-          git diff --cached --quiet || (git commit -m "Update sitemap" && git push origin HEAD:main)
