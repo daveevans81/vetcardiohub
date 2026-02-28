@@ -1,23 +1,21 @@
-      - name: Generate sitemap from Cloudflare Pages URL
-        run: |
-          sitemap-generator https://vetcardiohub-3wg.pages.dev/ \
-            --output ./sitemap.xml \
-            --maxDepth 3 \
-            --ignore "/search*, *?*, /calendar*, /tag*"
-          
-          FILESIZE=$(stat -c%s "sitemap.xml")
-          if [ $FILESIZE -gt 50000000 ]; then
-            echo "Error: Sitemap is still too large ($FILESIZE bytes). Potential loop detected."
-            exit 1
-          fi
+   - name: Generate sitemap from Cloudflare Pages URL
+    run: |
+      sitemap-generator https://vetcardiohub-3wg.pages.dev/ \
+        --output ./sitemap.xml \
+        --maxDepth 3 \
+        --ignore "/search*, *?*, /calendar*, /tag*"
+      FILESIZE=$(stat -c%s "sitemap.xml")
+      if [ $FILESIZE -gt 50000000 ]; then
+        echo "Error: Sitemap is still too large ($FILESIZE bytes). Potential loop detected."
+        exit 1
+      fi
+      sed -i 's|https://vetcardiohub-3wg.pages.dev|https://vetcardiohub.com|g' sitemap.xml
 
-          sed -i 's|https://vetcardiohub-3wg.pages.dev|https://vetcardiohub.com|g' sitemap.xml
-
-      - name: Commit sitemap
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          if [ -f sitemap.xml ]; then
-            git add sitemap.xml
-            git diff --cached --quiet || (git commit -m "Update sitemap" && git push origin HEAD:${{ github.ref }})
-          fi
+   - name: Commit sitemap
+    run: |
+      git config user.name "GitHub Actions"
+      git config user.email "actions@github.com"
+      if [ -f sitemap.xml ]; then
+        git add sitemap.xml
+        git diff --cached --quiet || (git commit -m "Update sitemap" && git push origin HEAD:${{ github.ref }})
+      fi
