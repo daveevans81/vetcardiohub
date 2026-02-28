@@ -25,59 +25,76 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Run Python Sitemap Generator
+      - name: Generate sitemap
         run: |
           python3 - <<EOF
           import os
           from datetime import datetime
 
           SITE_URL = "https://www.vetcardiohub.com"
-          # UPDATED: Pointing to your actual directory
-          BLOG_DIR = "./blog-posts" 
+          BLOG_DIR = "./blog-posts"
           OUTPUT_FILE = "sitemap.xml"
 
-          urls = []
-          # Home, About, Videos, Blog (The main listing page)
-          static_pages = [
-              ("", "1.0"),
-              ("about.html", "0.8"),
-              ("videos.html", "0.9"),
-              ("blog.html", "0.8")
-          ]
+          EXCLUDE_FILES = ["404.html"]
 
-          print(f"Starting sitemap generation...")
+          urls = {}
+          today = datetime.today().date()
 
-          # 1. Process Static Pages
-          for page, priority in static_pages:
-              clean_url = f"{SITE_URL}/{page}" if page else SITE_URL
-              urls.append(f"  <url>\n    <loc>{clean_url}</loc>\n    <lastmod>{datetime.today().date()}</lastmod>\n    <priority>{priority}</priority>\n  </url>")
+          def build_url(path):
+              if path == "index.html":
+                  return SITE_URL
+              elif path.endswith(".html"):
+                  clean_path = path.replace("\\\\", "/")
+                  return f"{SITE_URL}/{clean_path.replace('.html','')}"
+              return None
 
-          # 2. Process Blog Posts (Recursive Search)
+          print("Starting sitemap generation...")
+
+          # 1️⃣ Root-level pages
+          for filename in os.listdir("."):
+              if filename.endswith(".html") and filename not in EXCLUDE_FILES:
+                  url = build_url(filename)
+                  if url:
+                      lastmod = datetime.fromtimestamp(os.path.getmtime(filename)).date()
+                      priority = "1.0" if filename == "index.html" else "0.8"
+                      urls[url] = (lastmod, priority)
+                      print(f"Added root page: {url}")
+
+          # 2️⃣ Blog posts (recursive)
           if os.path.exists(BLOG_DIR):
-              print(f"Found {BLOG_DIR} folder. Searching for posts...")
               for root, dirs, files in os.walk(BLOG_DIR):
                   for filename in files:
                       if filename.endswith(".html"):
-                          # Calculate the path relative to the blog-posts folder
-                          relative_path = os.path.relpath(os.path.join(root, filename), BLOG_DIR)
-                          
-                          # This creates: https://www.vetcardiohub.com/blog-posts/your-post.html
-                          full_url = f"{SITE_URL}/blog-posts/{relative_path}"
-                          
-                          path = os.path.join(root, filename)
-                          lastmod = datetime.fromtimestamp(os.path.getmtime(path)).date()
-                          
-                          print(f"Adding: {full_url}")
-                          urls.append(f"  <url>\n    <loc>{full_url}</loc>\n    <lastmod>{lastmod}</lastmod>\n    <priority>0.7</priority>\n  </url>")
+                          full_path = os.path.join(root, filename)
+                          relative_path = os.path.relpath(full_path, ".")
+                          url = build_url(relative_path)
+                          if url:
+                              lastmod = datetime.fromtimestamp(os.path.getmtime(full_path)).date()
+                              urls[url] = (lastmod, "0.7")
+                              print(f"Added blog post: {url}")
           else:
-              print(f"ERROR: {BLOG_DIR} directory not found!")
+              print(f"Warning: {BLOG_DIR} not found.")
 
-          sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-          sitemap_content += "\n".join(urls)
-          sitemap_content += "\n</urlset>"
+          # 3️⃣ Sort URLs alphabetically
+          sorted_urls = sorted(urls.items(), key=lambda x: x[0])
+
+          # 4️⃣ Build sitemap XML
+          sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\\n'
+          sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\\n'
+
+          for url, (lastmod, priority) in sorted_urls:
+              sitemap_content += f"""  <url>
+            <loc>{url}</loc>
+            <lastmod>{lastmod}</lastmod>
+            <priority>{priority}</priority>
+          </url>
+          """
+
+          sitemap_content += "</urlset>"
 
           with open(OUTPUT_FILE, "w") as f:
               f.write(sitemap_content)
+
           print(f"Sitemap successfully written to {OUTPUT_FILE}")
           EOF
 
