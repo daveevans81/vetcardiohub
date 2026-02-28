@@ -1,41 +1,25 @@
-name: Generate Sitemap and Ping Google
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-  sitemap:
-    if: github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Install sitemap-generator-cli
-        run: npm install -g sitemap-generator-cli
-
       - name: Generate sitemap from Cloudflare Pages URL
         run: |
-          sitemap-generator https://vetcardiohub-3wg.pages.dev/ --output ./sitemap.xml --maxDepth 10
-          sed -i 's|https://vetcardiohub-3wg.pages.dev|https://vetcardiohub.com|g' sitemap.xml
+          # Use --ignore to skip common "trap" patterns
+          sitemap-generator https://vetcardiohub-3wg.pages.dev/ \
+            --output ./sitemap.xml \
+            --maxDepth 3 \
+            --ignore "/search*, *?*, /calendar*, /tag*"
+          
+          # Only proceed if the file is a sane size (less than 50MB)
+          FILESIZE=$(stat -c%s "sitemap.xml")
+          if [ $FILESIZE -gt 50000000 ]; then
+            echo "Error: Sitemap is still too large ($FILESIZE bytes). Potential loop detected."
+            exit 1
+          fi
 
-      - name: Setup Git Authentication
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          sed -i 's|https://vetcardiohub-3wg.pages.dev|https://vetcardiohub.com|g' sitemap.xml
 
       - name: Commit sitemap
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          # Check if file exists before adding
           if [ -f sitemap.xml ]; then
             git add sitemap.xml
-            git diff --cached --quiet || (git commit -m "Update sitemap" && git push)
-          else
-            echo "Sitemap was not generated. Skipping commit."
+            git diff --cached --quiet || (git commit -m "Update sitemap" && git push origin HEAD:${{ github.ref }})
           fi
