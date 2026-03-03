@@ -56,18 +56,31 @@
   const relatedContainer = document.getElementById('sidebar-related-container');
   const sidebarRelatedList = document.getElementById('sidebar-related-list');
 
-  const renderMainList = (postsToDisplay, term = "") => {
+const renderMainList = (postsToDisplay, term = "") => {
     sidebarList.innerHTML = postsToDisplay.map(p => {
       let title = p.title;
+      let category = p.category || 'Article';
+      
       if (term) {
         const regex = new RegExp(`(${term})`, 'gi');
         title = title.replace(regex, `<mark class="highlight">$1</mark>`);
+        // Also highlight the category if it matches
+        category = category.replace(regex, `<mark class="highlight">$1</mark>`);
       }
+
+      const thumb = p.image || '/images/thumbnails/default-placeholder.jpg';
+
       return `
-        <li class="featured-item">
-          <a href="/blog-posts/${p.slug}">
-            <span class="link-text">${title}</span>
-            <span class="arrow">→</span>
+        <li class="sidebar-main-item">
+          <a href="/blog-posts/${p.slug}" class="sidebar-item-link">
+            <div class="sidebar-item-thumb">
+              <img src="${thumb}" alt="">
+            </div>
+            <div class="sidebar-item-info">
+              <h4 class="sidebar-item-title">${title}</h4>
+              <span class="sidebar-item-cat">${category}</span>
+            </div>
+            <span class="sidebar-item-arrow">→</span>
           </a>
         </li>`;
     }).join("");
@@ -90,17 +103,28 @@
   }
 
   // 4. SEARCH LOGIC
-  searchInput.addEventListener('input', (e) => {
+searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
+    
     if (term === "") {
       sidebarTitle.innerText = "Must Read Articles";
       renderMainList(featured);
       if (relatedPosts.length > 0) relatedContainer.style.display = "block";
     } else {
       sidebarTitle.innerText = "Search Results";
-      relatedContainer.style.display = "none";
-      const matches = posts.filter(p => p.title.toLowerCase().includes(term)).slice(0, 6);
-      renderMainList(matches, term);
+      relatedContainer.style.display = "none"; 
+      
+      // Search BOTH Title and Category
+      const matches = posts.filter(p => {
+        const inTitle = p.title.toLowerCase().includes(term);
+        const inCategory = (p.category || "").toLowerCase().includes(term);
+        return inTitle || inCategory;
+      }).slice(0, 6);
+      
+      if (matches.length > 0) {
+        renderMainList(matches, term);
+      } else {
+        sidebarList.innerHTML = `<li class="no-results">No matches found for "${term}"</li>`;
+      }
     }
   });
-})();

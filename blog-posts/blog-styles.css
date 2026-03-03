@@ -514,3 +514,73 @@ strong {
     line-height: 1.4;
     font-weight: 600;
 }
+
+/* Unified Sidebar Item Styling */
+.sidebar-item-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  padding: 10px;
+  margin: 4px -10px; /* Slight pull for hover effect */
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sidebar-item-link:hover {
+  background: #f0f7ff;
+}
+
+.sidebar-item-thumb {
+  flex: 0 0 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.sidebar-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sidebar-item-info {
+  flex: 1;
+  min-width: 0; /* Prevents text from pushing box wider */
+}
+
+.sidebar-item-title {
+  font-size: 13px;
+  color: #1e293b;
+  margin: 0 0 2px 0;
+  line-height: 1.3;
+  font-weight: 600;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limits title to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sidebar-item-cat {
+  font-size: 10px;
+  color: #2563eb;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Hover Arrow */
+.sidebar-item-arrow {
+  font-size: 14px;
+  color: #2563eb;
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: all 0.2s ease;
+}
+
+.sidebar-item-link:hover .sidebar-item-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
