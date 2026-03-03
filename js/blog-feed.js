@@ -4,7 +4,7 @@
   const searchInput = document.getElementById("blog-search");
   const filterButtons = document.querySelectorAll(".filter-btn");
 
-// --- NEW: Calculate Counts ---
+// --- Calculate Counts ---
   const counts = posts.reduce((acc, post) => {
     acc[post.category] = (acc[post.category] || 0) + 1;
     acc["all"] = (acc["all"] || 0) + 1;
@@ -28,7 +28,13 @@
       return;
     }
 
+// Define the path to your fallback image
+const defaultImage = "/images/thumbnails/default-placeholder.jpg";
+
 feedContainer.innerHTML = postsToDisplay.map(post => {
+// Use the specific image if it exists, otherwise use the fallback
+  const thumbnailToUse = post.image ? post.image : defaultImage;
+
   let audienceHtml = post.audience === 'both' 
     ? '<span class="badge audience-tag owner">OWNER</span><span class="badge audience-tag vet">VET</span>'
     : `<span class="badge audience-tag ${post.audience}">${post.audience.toUpperCase()}</span>`;
