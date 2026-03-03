@@ -55,5 +55,23 @@
         document.addEventListener("click", (e) => {
             if (!homeSearch.contains(e.target)) searchResults.style.display = "none";
         });
+
+const trendingTags = document.querySelectorAll(".trend-tag");
+
+trendingTags.forEach(tag => {
+    tag.addEventListener("click", () => {
+        const term = tag.getAttribute("data-term");
+        
+        // 1. Fill the search bar
+        homeSearch.value = term;
+        
+        // 2. Manually trigger the 'input' event to show results
+        homeSearch.dispatchEvent(new Event('input'));
+        
+        // 3. Focus the search bar for the user
+        homeSearch.focus();
+        });
+    });
+
     }
 })();

@@ -824,6 +824,52 @@ footer a:hover {
 .res-title { color: #1e293b; font-weight: 600; font-size: 0.95rem; }
 .res-cat { color: #2563eb; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
 
+.trending-topics {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+#trending-tags-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.trend-tag {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #2563eb;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.trend-tag:hover {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    transform: translateY(-1px);
+}
+
+/* Mobile Tweaks */
+@media (max-width: 600px) {
+    .trending-topics {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+
+
+
+
 /* MONITORING page extras */
 /* page container (centres content and limits width) */
 .container {
