@@ -28,20 +28,36 @@
       return;
     }
 
-feedContainer.innerHTML = postsToDisplay.map(post => `
-  <li class="${post.featured ? 'featured-item-highlight' : ''}">
-    <div class="meta">
-      ${post.featured ? '<span class="badge featured-badge">★ Featured</span>' : ''}
-      <span class="audience-tag ${post.audience}">${post.audience.toUpperCase()}</span>
-      <span>${post.date}</span>
-    </div>
-    <a href="blog-posts/${post.slug}">${post.title}</a>
-    <p class="snippet">${post.snippet}</p>
-    <div class="topic-footer">
-      <span class="category-tag">${post.category}</span>
-    </div>
-  </li>
-`).join("");
+feedContainer.innerHTML = postsToDisplay.map(post => {
+  // Logic to handle "both" by showing two badges
+  let audienceHtml = '';
+  if (post.audience === 'both') {
+    audienceHtml = `
+      <span class="badge audience-tag owner">OWNER</span>
+      <span class="badge audience-tag vet">VET</span>`;
+  } else {
+    audienceHtml = `<span class="badge audience-tag ${post.audience}">${post.audience.toUpperCase()}</span>`;
+  }
+
+  return `
+    <li class="${post.featured ? 'featured-item-highlight' : ''}">
+      <div class="meta">
+        ${post.featured ? '<span class="badge featured-badge">★ Featured</span>' : ''}
+        ${audienceHtml}
+        <span class="badge date-badge">${post.date}</span>
+      </div>
+      
+      <a href="blog-posts/${post.slug}" class="post-title">${post.title}</a>
+      
+      <p class="snippet">${post.snippet}</p>
+      
+      <div class="topic-footer">
+        <span class="category-label">Category:</span>
+        <span class="category-tag">${post.category}</span>
+      </div>
+    </li>
+  `;
+}).join("");
   }
 
   // Initial Render

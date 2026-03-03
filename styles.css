@@ -1133,3 +1133,46 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
   border: 1px solid #e2e8f0;
   font-weight: 500; /* Lighter font for the date */
 }
+
+.topic-footer {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-label {
+  font-size: 12px;
+  color: #94a3b8; /* Subtle slate grey */
+  font-weight: 500;
+}
+
+.category-tag {
+  font-size: 12px;
+  color: #2563eb;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Ensure the badges align perfectly when there are multiple */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* Small adjustment to the post title for better spacing */
+.post-title {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111;
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+
+.post-title:hover {
+  color: #2563eb;
+}
