@@ -5,15 +5,31 @@
   const container = document.getElementById("featured-posts");
   if (!container) return;
 
-  // 1. Setup Data
-  const featured = posts.filter(p => p.featured);
-  const currentSlug = window.location.pathname.split("/").pop() || "";
-  const currentPost = posts.find(p => p.slug === currentSlug);
-  
-  // Find related posts (same category, not current post)
-  const relatedPosts = currentPost 
-    ? posts.filter(p => p.category === currentPost.category && p.slug !== currentSlug).slice(0, 3)
-    : [];
+
+  // 1. Get the current filename (e.g., "post18.html")
+let currentSlug = window.location.pathname.split("/").pop();
+
+// Handle cases where the URL might end in a slash or be empty
+if (!currentSlug || currentSlug === "") {
+    currentSlug = "index.html"; 
+}
+
+// 2. Find the post in your data
+const currentPost = posts.find(p => p.slug === currentSlug);
+
+// DEBUG LOG: Open your browser console (F12) to see if this is working
+console.log("Current Filename:", currentSlug);
+console.log("Found Post Data:", currentPost);
+
+// 3. Filter for Related (Same category, but NOT the current post)
+let relatedPosts = [];
+if (currentPost) {
+    relatedPosts = posts.filter(p => 
+        p.category === currentPost.category && 
+        p.slug !== currentPost.slug
+    ).slice(0, 3);
+}
+
 
   // 2. Inject HTML Structure
   container.innerHTML = `
