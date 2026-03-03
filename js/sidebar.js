@@ -1,25 +1,23 @@
 // sidebar.js
 (function() {
-  // Check if posts exist
-  if (typeof posts === "undefined") {
-    console.error("Sidebar Error: 'posts' array not found. Check blog-data.js.");
-    return;
-  }
+  if (typeof posts === "undefined") return;
 
   const container = document.getElementById("featured-posts");
   if (!container) return;
 
-  // --- 1. SETUP DATA ---
-  // Create the 'featured' list that was missing
   const featured = posts.filter(p => p.featured);
 
-  // Get current filename (strips paths and handles index/empty cases)
-  let currentSlug = window.location.pathname.split("/").pop() || "index.html";
+  // 1. IMPROVED URL MATCHING
+  // This looks for the filename anywhere in the path
+  const pathParts = window.location.pathname.split("/");
+  const currentFileName = pathParts[pathParts.length - 1] || "index.html";
   
-  // Find the current post data
-  const currentPost = posts.find(p => p.slug === currentSlug);
+  const currentPost = posts.find(p => p.slug === currentFileName);
 
-  // Filter for Related (Same category, but NOT the current post)
+  // Debugging: These will show you exactly what is happening
+  console.log("Looking for slug:", currentFileName);
+  console.log("Match found:", currentPost ? "YES" : "NO");
+
   let relatedPosts = [];
   if (currentPost && currentPost.category) {
     relatedPosts = posts.filter(p => 
@@ -28,36 +26,33 @@
     ).slice(0, 3);
   }
 
-  // --- 2. INJECT HTML STRUCTURE ---
+  // 2. INJECT HTML
   container.innerHTML = `
     <section class="sidebar-card">
       <div class="sidebar-badge">Resource Hub</div>
       
       <div class="search-container">
         <input type="text" id="sidebar-search" placeholder="Search heart topics..." />
-        <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
+        <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
       </div>
 
       <h3 id="sidebar-title" class="sidebar-subheading">Must Read Articles</h3>
-      <ul id="sidebar-list" class="sidebar-link-list"></ul>
+      <ul id="sidebar-list"></ul>
 
-      <div id="sidebar-related-container" style="${relatedPosts.length > 0 ? 'display:block' : 'display:none'}">
-        <h3 class="sidebar-subheading related-divider">Related in ${currentPost?.category || 'Topic'}</h3>
+      <div id="sidebar-related-container" style="display: ${relatedPosts.length > 0 ? 'block' : 'none'};">
+        <h3 class="sidebar-subheading related-divider">Related in ${currentPost?.category || ''}</h3>
         <ul id="sidebar-related-list" class="sidebar-thumb-list"></ul>
       </div>
     </section>
   `;
 
-  // --- 3. UI REFERENCES ---
+  // 3. UI REFERENCES & RENDER
   const sidebarList = document.getElementById('sidebar-list');
   const sidebarTitle = document.getElementById('sidebar-title');
   const searchInput = document.getElementById('sidebar-search');
   const relatedContainer = document.getElementById('sidebar-related-container');
   const sidebarRelatedList = document.getElementById('sidebar-related-list');
 
-  // --- 4. RENDER FUNCTIONS ---
   const renderMainList = (postsToDisplay, term = "") => {
     sidebarList.innerHTML = postsToDisplay.map(p => {
       let title = p.title;
@@ -75,8 +70,9 @@
     }).join("");
   };
 
-  const renderRelatedList = () => {
-    if (relatedPosts.length === 0) return;
+  renderMainList(featured);
+
+  if (relatedPosts.length > 0) {
     sidebarRelatedList.innerHTML = relatedPosts.map(p => `
       <li>
         <a href="/blog-posts/${p.slug}" class="related-sidebar-item">
@@ -88,34 +84,20 @@
         </a>
       </li>
     `).join("");
-  };
+  }
 
-  // --- 5. INITIAL EXECUTION ---
-  renderMainList(featured);
-  renderRelatedList();
-
-  // --- 6. SEARCH EVENT LISTENER ---
+  // 4. SEARCH LOGIC
   searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
-    
     if (term === "") {
       sidebarTitle.innerText = "Must Read Articles";
       renderMainList(featured);
       if (relatedPosts.length > 0) relatedContainer.style.display = "block";
     } else {
       sidebarTitle.innerText = "Search Results";
-      relatedContainer.style.display = "none"; 
-      
-      const matches = posts.filter(p => 
-        p.title.toLowerCase().includes(term) || 
-        p.category.toLowerCase().includes(term)
-      ).slice(0, 6);
-      
-      if (matches.length > 0) {
-        renderMainList(matches, term);
-      } else {
-        sidebarList.innerHTML = `<li class="no-results">No matches found...</li>`;
-      }
+      relatedContainer.style.display = "none";
+      const matches = posts.filter(p => p.title.toLowerCase().includes(term)).slice(0, 6);
+      renderMainList(matches, term);
     }
   });
 })();
