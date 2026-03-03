@@ -5,18 +5,21 @@
   const container = document.getElementById("featured-posts");
   if (!container) return;
 
+  // --- 1. SETUP DATA ---
   const featured = posts.filter(p => p.featured);
 
-  // 1. IMPROVED URL MATCHING
-  // This looks for the filename anywhere in the path
-  const pathParts = window.location.pathname.split("/");
-  const currentFileName = pathParts[pathParts.length - 1] || "index.html";
-  
-  const currentPost = posts.find(p => p.slug === currentFileName);
+  // Get the current filename and strip the extension for a "clean" comparison
+  let currentPath = window.location.pathname.split("/").pop() || "index.html";
+  let cleanSlug = currentPath.replace(".html", ""); 
 
-  // Debugging: These will show you exactly what is happening
-  console.log("Looking for slug:", currentFileName);
-  console.log("Match found:", currentPost ? "YES" : "NO");
+  // Find the post by checking if the post.slug (e.g. "post14.html") 
+  // contains our cleanSlug (e.g. "post14")
+  const currentPost = posts.find(p => p.slug.replace(".html", "") === cleanSlug);
+
+  // Updated Debug Logs
+  console.log("URL Filename:", currentPath);
+  console.log("Cleaned Slug:", cleanSlug);
+  console.log("Match found:", currentPost ? "YES - " + currentPost.title : "NO");
 
   let relatedPosts = [];
   if (currentPost && currentPost.category) {
