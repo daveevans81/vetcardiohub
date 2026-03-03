@@ -1,92 +1,182 @@
 window.posts = [
   {
     slug: "post18.html",
-    title: "The 60-Day Warning",
-    featured: true
+    title: "The 60-Day Warning: How Pet Wearables are Rewriting the Rules of Cardiac Care",
+    date: "February 28, 2026",
+    category: "Monitoring",
+    group: "management",
+    audience: "both",
+    featured: true,
+    snippet: "For years, the management of dogs with degenerative mitral valve disease (DMVD) has relied on a single, vital metric: the Sleeping Respiratory Rate (SRR). But as any cardiologist will tell you, a spike in respiratory rate is a late-stage indicator. By the time the breathing changes, the crisis of congestive heart failure (CHF) has often already started."
   },
   {
     slug: "post17.html",
     title: "The State of Pet Wearables in 2026",
-    featured: true
+    date: "February 27, 2026",
+    category: "Monitoring",
+    group: "management",
+    audience: "both",
+    featured: true,
+    snippet: "As we move into early 2026, the landscape of pet wearable technology has reached a definitive tipping point. The era of the “pet Fitbit” - simple accelerometers that merely count steps - is officially over."
   },
   {
     slug: "post16.html",
-    title: "Monitor Your Pet's Breathing at Home",
-    featured: false
+    title: "Monitoring Your Pet's Breathing at Home",
+    date: "February 24, 2026",
+    category: "Monitoring",
+    group: "management",
+    audience: "both",
+    featured: false,
+    snippet: "Home monitoring of the Sleeping Respiratory Rate (SRR) is one of the most powerful tools we have in managing heart disease. However, it only works if the data is clean. If we measure breathing at the wrong time, we get “noise” instead of clinical insight."
   },
   {
     slug: "post15.html",
-    title: "Why Heart Failure Happens Suddenly",
-    featured: false
+    title: "Why Heart Failure Happens Suddenly: The 'Parachute' Problem",
+    date: "January 18, 2026",
+    category: "Diagnosis",
+    group: "foundations",
+    audience: "owner",
+    featured: false,
+    snippet: "Why does a healthy dog sometimes go into a respiratory crisis out of the blue? The physics of the heart changes when a chordae tendineae ruptures."
   },
   {
     slug: "post14.html",
     title: "The Maven Smart Collar - Full Review",
-    featured: false
+    date: "January 12, 2026",
+    category: "Monitoring",
+    group: "management",
+    audience: "owner",
+    featured: false,
+    snippet: "A full look into the Maven Smart Collar device and how it can be used for continuous monitoring of Congestive Heart Failure."
   },
   {
     slug: "post13.html",
     title: "Smart Collars - Are they Worth It?",
-    featured: true
+    date: "January 6, 2026",
+    category: "Monitoring",
+    group: "management",
+    audience: "owner",
+    featured: true,
+    snippet: "How do you really monitor your pet’s heart disease at home? We look at whether tracking collars and smart monitors are worth the investment."
   },
   {
     slug: "post12.html",
     title: "Understanding Heart Murmurs in Cats",
-    featured: false
+    date: "November 9, 2025",
+    category: "Murmurs",
+    group: "foundations",
+    audience: "owner",
+    featured: false,
+    snippet: "Has your vet heard a murmur in your cat's heart? Is it serious? Should you be worried? We break down why feline murmurs are different from dogs."
   },
   {
     slug: "post11.html",
     title: "The Rise of the Corporate Vet Clinic",
-    featured: false
+    date: "October 31, 2025",
+    category: "Industry",
+    group: "foundations",
+    audience: "both",
+    featured: false,
+    snippet: "Over 60% of UK vet practices are now corporate-owned. What does this shift mean for your pet's care and your wallet?"
   },
   {
     slug: "post10.html",
     title: "Hypertrophic Cardiomyopathy in Cats",
-    featured: true
+    date: "September 22, 2025",
+    category: "Diagnosis",
+    group: "foundations",
+    audience: "both",
+    featured: true,
+    snippet: "Hypertrophic Cardiomyopathy is the most common heart condition in cats, and the most common reason for a murmur. But there is lots of misunderstanding surrounding this condition, and we tackle a few of the myths that exist."
   },
   {
     slug: "post9.html",
     title: "What is congestive heart failure (CHF)?",
-    featured: false
+    date: "August 5, 2025",
+    category: "Diagnosis",
+    group: "foundations",
+    audience: "owner",
+    featured: false,
+    snippet: "Heart failure is a scary term, but it doesn't always mean the end of the road. We explain what CHF actually is and how it's managed."
   },
   {
     slug: "post8.html",
     title: "What does pimobendan do to help in degenerative mitral valve disease?",
-    featured: false
+    date: "July 13, 2025",
+    category: "Medication",
+    group: "management",
+    audience: "both",
+    featured: false,
+    snippet: "Pimobendan (Vetmedin or Cardisure) has amazing benefits for heart disease. BShould all dogs with a heart murmur get pimobendan? When should I put my dog on it? We discuss the complexities behind this drug and when it should be started."
   },
   {
     slug: "post7.html",
     title: "The different stages of Degenerative Mitral Valve Disease.",
-    featured: false
+    date: "July 1, 2025",
+    category: "Diagnosis",
+    group: "foundations",
+    audience: "both",
+    featured: false,
+    snippet: "Veterinary cardiologists use stages to describe Degenerative Mitral Valve Disease (DMVD). Understanding where your pet sits helps guide treatment and management."
   },
   {
     slug: "post6.html",
     title: "Degenerative Mitral Valve Disease Explained",
-    featured: false
+    date: "June 30, 2025",
+    category: "Diagnosis",
+    group: "foundations",
+    audience: "owner",
+    featured: false,
+    snippet: "DMVD is the most common heart disease in dogs. We explain the underlying cause and what it means for your pet's future."
   },
   {
     slug: "post5.html",
     title: "Should I give my cat with HCM Rapamycin?",
-    featured: false
+    date: "May 29, 2025",
+    category: "Medication",
+    group: "management",
+    audience: "vet",
+    featured: false,
+    snippet: "Why all the hype? Is Rapamycin (Felycin) the future of HCM treatment, or is it just another social media trend?"
   },
   {
     slug: "post4.html",
     title: "Coughing in dogs and cats",
-    featured: false
+    date: "April 29, 2025",
+    category: "Diagnosis",
+    group: "foundations",
+    audience: "owner",
+    featured: false,
+    snippet: "Does your dog sound like it’s trying to clear its throat? Or maybe your cat is making a strange, retching sound? Coughing in pets can be alarming—but what does it actually mean? We look at the difference between heart-related and lung-related coughs."
   },
   {
     slug: "post3.html",
     title: "What is an echo?",
-    featured: false
+    date: "March 11, 2025",
+    category: "Diagnosis",
+    group: "foundations",
+    audience: "owner",
+    featured: false,
+    snippet: "Has your vet recommended an 'echo'? Learn what this ultrasound involves and why it's the gold standard for cardiac diagnosis."
   },
   {
     slug: "post2.html",
     title: "Sleeping Respiratory Rate",
-    featured: false
+    date: "March 3, 2025",
+    category: "Monitoring",
+    group: "management",
+    audience: "owner",
+    featured: false,
+    snippet: "Monitoring breathing rate during sleep provides early clues to heart problems. Find out how to perform this vital check at home."
   },
   {
     slug: "post1.html",
     title: "Understanding Heart Murmurs in Pets",
-    featured: false
+    date: "March 3, 2025",
+    category: "Murmurs",
+    group: "foundations",
+    audience: "owner",
+    featured: false,
+    snippet: "Heart murmurs are often the first sign of heart disease. Learn how they are diagnosed and what they mean for your pet's health."
   }
 ];
