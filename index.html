@@ -79,17 +79,18 @@
   <h2>Latest Blog Posts</h2>
   <div class="blog-cards">
 
-<div class="card">
-<a href="blog-posts/post15.html"><h3>Why Heart Failure Happens Suddenly: The “Parachute” Problem</h3></a>
-            <p>Why does a healthy dog sometimes go into a respiratory crisis out of the blue? The rupture of the chordae tendineae...</p>
-</div>
-
-      <div class="card"><a href="blog-posts/post12.html"><h3>Understanding Heart Murmurs in Cats.</h3></a><p>Has your vet heard a murmur in your cat’s heart? Perhaps your pet appears completely healthy and you had no prior indication that anything was wrong. Hearing the words “heart murmur” can be alarming and raise a lot of questions: Is it serious? Should you be worried?</p></div>
-      <div class="card"><a href="blog-posts/post9.html"><h3>What is congestive heart failure (CHF) and what does it mean for my pet?</h3></a><p>Heart failure is a scary sounding term. You never want to hear it applied to your beloved cat or dog. It fills everyone with anxiety and makes it sound as though this could be the end of the road for their pet. We explain why this isn't the case.</p></div>
-  </div>
+<div id="featured-cards-container" class="card-grid">
+        </div>
   <a href="/blog.html" class="btn">Read the Blog</a>
 </section>
 
+<section class="home-hero-search">
+    <h2>Search the Cardio Knowledge Base</h2>
+    <div class="main-search-wrapper">
+        <input type="text" id="home-search" placeholder="Search for heart conditions, medications, or symptoms...">
+        <div id="home-search-results" class="search-results-overlay"></div>
+    </div>
+</section>
 
 <section class="tracking-preview">
   <h2>Monitoring Heart Disease</h2>
@@ -168,5 +169,8 @@ There's so much you can do to monitor your pet at home when they are at risk or 
 <div id="site-footer"></div>
 
 <script src="/js/load-partials.js"></script>
+<script src="js/blog-data.js"></script>
+<script src="js/home-logic.js"></script>
+
 </body>
 </html>
