@@ -29,31 +29,32 @@
     }
 
 feedContainer.innerHTML = postsToDisplay.map(post => {
-  // Logic to handle "both" by showing two badges
-  let audienceHtml = '';
-  if (post.audience === 'both') {
-    audienceHtml = `
-      <span class="badge audience-tag owner">OWNER</span>
-      <span class="badge audience-tag vet">VET</span>`;
-  } else {
-    audienceHtml = `<span class="badge audience-tag ${post.audience}">${post.audience.toUpperCase()}</span>`;
-  }
+  let audienceHtml = post.audience === 'both' 
+    ? '<span class="badge audience-tag owner">OWNER</span><span class="badge audience-tag vet">VET</span>'
+    : `<span class="badge audience-tag ${post.audience}">${post.audience.toUpperCase()}</span>`;
 
   return `
     <li class="${post.featured ? 'featured-item-highlight' : ''}">
-      <div class="meta">
-        ${post.featured ? '<span class="badge featured-badge">★ Featured</span>' : ''}
-        ${audienceHtml}
-        <span class="badge date-badge">${post.date}</span>
-      </div>
-      
-      <a href="blog-posts/${post.slug}" class="post-title">${post.title}</a>
-      
-      <p class="snippet">${post.snippet}</p>
-      
-      <div class="topic-footer">
-        <span class="category-label">Category:</span>
-        <span class="category-tag">${post.category}</span>
+      <div class="post-content-wrapper">
+        <div class="post-text">
+          <div class="meta">
+            ${post.featured ? '<span class="badge featured-badge">★ Featured</span>' : ''}
+            ${audienceHtml}
+            <span class="badge date-badge">${post.date}</span>
+          </div>
+          <a href="blog-posts/${post.slug}" class="post-title">${post.title}</a>
+          <p class="snippet">${post.snippet}</p>
+          <div class="topic-footer">
+            <span class="category-label">Category:</span>
+            <span class="category-tag">${post.category}</span>
+          </div>
+        </div>
+        
+        ${post.image ? `
+          <div class="post-thumbnail">
+            <img src="${post.image}" alt="${post.title}" loading="lazy">
+          </div>
+        ` : ''}
       </div>
     </li>
   `;
