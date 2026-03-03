@@ -1072,3 +1072,64 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
   border-color: #cbd5e1;
   background: #f8fafc;
 }
+
+/* Container for all meta elements on the card */
+#blog-list li .meta {
+  display: flex;
+  flex-wrap: wrap; /* Allows wrap on small screens */
+  align-items: center;
+  gap: 8px; /* Consistent space between badges */
+  margin-bottom: 12px;
+  font-family: sans-serif; /* Cleaner font for meta */
+}
+
+/* Base style for ALL badges */
+.meta .badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 20px; /* Fully rounded "pill" shape */
+  white-space: nowrap; /* Prevents badge text wrapping */
+}
+
+/* 1. Featured Badge */
+.featured-badge {
+  background: #fef3c7; /* Subtle Amber/Gold */
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
+/* 2. Audience Badge: Base Style */
+.audience-tag {
+  background: white; /* Clean white background */
+  border: 1px solid #e2e8f0;
+}
+
+/* Audience Badge: Color Coding */
+.audience-tag.owner {
+  color: #059669; /* Green for Owners (Growth) */
+  border-color: #d1fae5;
+  background: #f0fdf4;
+}
+
+.audience-tag.vet {
+  color: #2563eb; /* Blue for Vets (Clinical) */
+  border-color: #dbeafe;
+  background: #eff6ff;
+}
+
+.audience-tag.both {
+  color: #7c3aed; /* Purple for Both (Collaboration) */
+  border-color: #ede9fe;
+  background: #f5f3ff;
+}
+
+/* 3. Date Badge (A soft fallback for the date) */
+.date-badge {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  font-weight: 500; /* Lighter font for the date */
+}
