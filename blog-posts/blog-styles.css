@@ -593,3 +593,37 @@ strong {
   border-radius: 3px;
   letter-spacing: 0.01em;
 }
+
+/* 1. Ensure the layout allows the sidebar to 'travel' */
+.blog-layout {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 40px auto;
+    align-items: start; /* CRITICAL: Prevents sidebar from stretching to full height */
+}
+
+/* 2. The Sidebar Column */
+.sidebar {
+    height: 100%; /* Allows the sticky child to move within this track */
+}
+
+/* 3. The Actual Sticky Card */
+#featured-posts {
+    position: -webkit-sticky; /* Support for Safari */
+    position: sticky;
+    top: 20px; /* How far from the top edge it stops */
+    z-index: 10;
+}
+
+/* 4. Mobile adjustment: Disable stickiness on small screens */
+@media (max-width: 900px) {
+    .sidebar {
+        position: static;
+        height: auto;
+    }
+    #featured-posts {
+        position: static;
+    }
+}
