@@ -758,7 +758,64 @@ footer a:hover {
     color: white !important;
     text-decoration: none;
 }
+/* INDEX HERO IMAGE */
+.hero-z-layout {
+  padding: 40px 0;
+  background: white; /* Or match your site background */
+  overflow: hidden; /* Safety net */
+}
 
+.hero-container {
+  display: flex;
+  align-items: center; /* Vertically centers text with image */
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.hero-image {
+  flex: 0 0 250px; /* Adjust size as needed */
+}
+
+.hero-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.hero-text {
+  flex: 1;
+  text-align: left;
+}
+
+.hero-text h1 {
+  margin: 0 0 10px 0;
+  font-size: 2.5rem;
+  color: #1e293b;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .hero-container {
+    flex-direction: column; /* Stacks image on top of text */
+    text-align: center;
+    gap: 20px;
+  }
+  .hero-text {
+    text-align: center;
+  }
+  .hero-image {
+    flex: 0 0 auto;
+    width: 200px;
+  }
+}
 
 /* INDEX SEARCHBAR and BLOG FEATURED POSTS */
 
