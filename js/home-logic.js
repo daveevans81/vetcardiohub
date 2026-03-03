@@ -10,18 +10,20 @@
     const featuredPosts = posts.filter(p => p.featured).slice(0, 3);
 
     if (cardContainer) {
-        cardContainer.innerHTML = featuredPosts.map(p => `
-            <div class="card">
-                <div class="card-image">
-                    <img src="${p.image || 'images/thumbnails/default-placeholder.jpg'}" alt="">
-                </div>
-                <div class="card-content">
-                    <span class="card-cat">${p.category}</span>
-                    <a href="blog-posts/${p.slug}"><h3>${p.title}</h3></a>
-                    <p>${p.snippet}</p>
-                </div>
-            </div>
-        `).join('');
+cardContainer.innerHTML = featuredPosts.map(p => `
+    <article class="bp-card">
+        <div class="bp-card-thumb">
+            <img src="${p.image || 'images/thumbnails/default-placeholder.jpg'}" alt="${p.title}">
+        </div>
+        <div class="bp-card-body">
+            <span class="bp-card-category">${p.category}</span>
+            <a href="blog-posts/${p.slug}" class="bp-card-link">
+                <h3 class="bp-card-title">${p.title}</h3>
+            </a>
+            <p class="bp-card-snippet">${p.snippet}</p>
+        </div>
+    </article>
+`).join('');
     }
 
     // 2. Home Search Logic (Instant Overlay)
