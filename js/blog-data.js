@@ -7,6 +7,7 @@ window.posts = [
     group: "management",
     audience: "both",
     featured: true,
+    image: "/images/dogjump.jpeg",
     snippet: "For years, the management of dogs with degenerative mitral valve disease (DMVD) has relied on a single, vital metric: the Sleeping Respiratory Rate (SRR). But as any cardiologist will tell you, a spike in respiratory rate is a late-stage indicator. By the time the breathing changes, the crisis of congestive heart failure (CHF) has often already started."
   },
   {
@@ -17,6 +18,7 @@ window.posts = [
     group: "management",
     audience: "both",
     featured: true,
+    image: "/images/wearingcollar.jpg",
     snippet: "As we move into early 2026, the landscape of pet wearable technology has reached a definitive tipping point. The era of the “pet Fitbit” - simple accelerometers that merely count steps - is officially over."
   },
   {
@@ -27,6 +29,7 @@ window.posts = [
     group: "management",
     audience: "both",
     featured: false,
+    image: "/images/srrcount.jpg",
     snippet: "Home monitoring of the Sleeping Respiratory Rate (SRR) is one of the most powerful tools we have in managing heart disease. However, it only works if the data is clean. If we measure breathing at the wrong time, we get “noise” instead of clinical insight."
   },
   {
@@ -37,6 +40,7 @@ window.posts = [
     group: "foundations",
     audience: "owner",
     featured: false,
+    image: "/images/rupturedchordae.jpg",
     snippet: "Why does a healthy dog sometimes go into a respiratory crisis out of the blue? The physics of the heart changes when a chordae tendineae ruptures."
   },
   {
@@ -47,6 +51,7 @@ window.posts = [
     group: "management",
     audience: "owner",
     featured: false,
+    image: "/images/mavenbox2.jpg",
     snippet: "A full look into the Maven Smart Collar device and how it can be used for continuous monitoring of Congestive Heart Failure."
   },
   {
@@ -57,6 +62,7 @@ window.posts = [
     group: "management",
     audience: "owner",
     featured: true,
+    image: "",
     snippet: "How do you really monitor your pet’s heart disease at home? We look at whether tracking collars and smart monitors are worth the investment."
   },
   {
@@ -67,6 +73,7 @@ window.posts = [
     group: "foundations",
     audience: "owner",
     featured: false,
+    image: "/images/cat_laptop.jpeg",
     snippet: "Has your vet heard a murmur in your cat's heart? Is it serious? Should you be worried? We break down why feline murmurs are different from dogs."
   },
   {
@@ -77,6 +84,7 @@ window.posts = [
     group: "foundations",
     audience: "both",
     featured: false,
+    image: "/images/blog11piechart.jpg",
     snippet: "Over 60% of UK vet practices are now corporate-owned. What does this shift mean for your pet's care and your wallet?"
   },
   {
@@ -87,6 +95,7 @@ window.posts = [
     group: "foundations",
     audience: "both",
     featured: true,
+    image: "/images/cat_laptop.jpeg",
     snippet: "Hypertrophic Cardiomyopathy is the most common heart condition in cats, and the most common reason for a murmur. But there is lots of misunderstanding surrounding this condition, and we tackle a few of the myths that exist."
   },
   {
@@ -97,6 +106,7 @@ window.posts = [
     group: "foundations",
     audience: "owner",
     featured: false,
+    image: "/images/dogjump.jpeg",
     snippet: "Heart failure is a scary term, but it doesn't always mean the end of the road. We explain what CHF actually is and how it's managed."
   },
   {
@@ -107,6 +117,7 @@ window.posts = [
     group: "management",
     audience: "both",
     featured: false,
+    image: "/images/medications.jpeg",
     snippet: "Pimobendan (Vetmedin or Cardisure) has amazing benefits for heart disease. BShould all dogs with a heart murmur get pimobendan? When should I put my dog on it? We discuss the complexities behind this drug and when it should be started."
   },
   {
@@ -117,6 +128,7 @@ window.posts = [
     group: "foundations",
     audience: "both",
     featured: false,
+    image: "/images/acvim_stages.png",
     snippet: "Veterinary cardiologists use stages to describe Degenerative Mitral Valve Disease (DMVD). Understanding where your pet sits helps guide treatment and management."
   },
   {
@@ -127,6 +139,7 @@ window.posts = [
     group: "foundations",
     audience: "owner",
     featured: false,
+    image: "/images/ckcs2.jpg",
     snippet: "DMVD is the most common heart disease in dogs. We explain the underlying cause and what it means for your pet's future."
   },
   {
@@ -137,6 +150,7 @@ window.posts = [
     group: "management",
     audience: "vet",
     featured: false,
+    image: "/images/rapacat.jpeg",
     snippet: "Why all the hype? Is Rapamycin (Felycin) the future of HCM treatment, or is it just another social media trend?"
   },
   {
@@ -147,6 +161,7 @@ window.posts = [
     group: "foundations",
     audience: "owner",
     featured: false,
+    image: "/images/dog_glasses.jpg",
     snippet: "Does your dog sound like it’s trying to clear its throat? Or maybe your cat is making a strange, retching sound? Coughing in pets can be alarming—but what does it actually mean? We look at the difference between heart-related and lung-related coughs."
   },
   {
@@ -157,6 +172,7 @@ window.posts = [
     group: "foundations",
     audience: "owner",
     featured: false,
+    image: "/images/kittenecho_sm.jpg",
     snippet: "Has your vet recommended an 'echo'? Learn what this ultrasound involves and why it's the gold standard for cardiac diagnosis."
   },
   {
@@ -167,6 +183,7 @@ window.posts = [
     group: "management",
     audience: "owner",
     featured: false,
+    image: "/images/srrgraph.jpg",
     snippet: "Monitoring breathing rate during sleep provides early clues to heart problems. Find out how to perform this vital check at home."
   },
   {
@@ -177,6 +194,7 @@ window.posts = [
     group: "foundations",
     audience: "owner",
     featured: false,
+    image: "/images/ckcs.jpeg",
     snippet: "Heart murmurs are often the first sign of heart disease. Learn how they are diagnosed and what they mean for your pet's health."
   }
 ];
