@@ -1,4 +1,6 @@
 (function() {
+
+
     // Wait for the page to be fully loaded before running
     document.addEventListener("DOMContentLoaded", function() {
         if (typeof posts === "undefined") return;
@@ -73,6 +75,9 @@
                         alert("Link copied to clipboard!");
                     }
                 });
+
+
+
             }
         }
     });
