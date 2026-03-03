@@ -217,14 +217,37 @@ strong {
 
 
 
-
+/* 1. Base Layout (Desktop) */
 .blog-layout {
-  display: grid;
-  grid-template-columns: 3fr 1fr;
-  gap: 40px;
-  max-width: 1100px;
-  margin: auto;
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 40px auto;
+    align-items: start;
 }
+
+/* 2. Mobile Logic (The Fix) */
+@media (max-width: 900px) {
+    .blog-layout {
+        /* Switch to one column */
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 15px; /* Add some padding so text doesn't hit the screen edge */
+    }
+
+    .sidebar {
+        /* Remove stickiness on mobile so it flows naturally at the bottom */
+        position: static; 
+        width: 100%;
+        margin-top: 40px; /* Space between article and sidebar */
+    }
+
+    #featured-posts {
+        position: static; /* Ensure the inner card isn't sticky either */
+    }
+}
+
 
 .sidebar {
   position: sticky;
