@@ -118,7 +118,7 @@ window.posts = [
     audience: "both",
     featured: false,
     image: "/images/medications.jpeg",
-    snippet: "Pimobendan (Vetmedin or Cardisure) has amazing benefits for heart disease. BShould all dogs with a heart murmur get pimobendan? When should I put my dog on it? We discuss the complexities behind this drug and when it should be started."
+    snippet: "Pimobendan (Vetmedin or Cardisure) has amazing benefits for heart disease. Should all dogs with a heart murmur get pimobendan? When should I put my dog on it? We discuss the complexities behind this drug and when it should be started."
   },
   {
     slug: "post7.html",
