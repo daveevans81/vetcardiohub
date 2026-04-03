@@ -1,5 +1,16 @@
 window.posts = [
   {
+    slug: "post19.html",
+    title: "Navigating the DMVD Journey: A Clinical Guide to Diet and Supplements",
+    date: "April 3, 2026",
+    category: "Murmurs",
+    group: "management",
+    audience: "both",
+    featured: true,
+    image: "/images/foodandsupplements.jpg",
+    snippet: "If you have recently returned from the vet and heard the words “heart murmur” - or they have specifically diagnosed “Degenerative Mitral Valve Disease (DMVD)”, you are likely feeling a mix of anxiety - and a strong desire to act. Let’s have a look at how diet and supplements can help."
+  },
+  {
     slug: "post18.html",
     title: "The 60-Day Warning: How Pet Wearables are Rewriting the Rules of Cardiac Care",
     date: "February 28, 2026",
