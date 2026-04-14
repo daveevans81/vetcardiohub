@@ -1,98 +1,64 @@
 // sidebar.js
 (function() {
   document.addEventListener("DOMContentLoaded", function() {
-    if (typeof posts === "undefined") {
-      console.error("Sidebar Error: 'posts' data not found.");
-      return;
-    }
+    if (typeof posts === "undefined") return;
 
     const container = document.getElementById("featured-posts");
     if (!container) return;
 
-    // 1. Data Preparation
+    // --- (Logic for series/featured/related remains the same as previous version) ---
     const pathParts = window.location.pathname.split("/");
     const currentFileName = pathParts[pathParts.length - 1] || "index.html";
     const cleanSlug = currentFileName.replace(".html", "");
     const currentPost = posts.find(p => p.slug.replace(".html", "") === cleanSlug);
     const isSeries = currentPost && currentPost.series;
     
-    let displayPosts = [];
-    let listTitle = "Must Read Articles";
-    let sidebarBadge = "Resource Hub";
+    let displayPosts = isSeries ? posts.filter(p => p.series === currentPost.series).sort((a,b) => (a.seriesOrder || 0)-(b.seriesOrder || 0)) : posts.filter(p => p.featured).slice(0, 5);
+    let listTitle = isSeries ? currentPost.series : "Must Read Articles";
+    let sidebarBadge = isSeries ? "Course Modules" : "Resource Hub";
+    let relatedPosts = (currentPost && !isSeries) ? posts.filter(p => p.category === currentPost.category && p.slug !== currentPost.slug).slice(0, 3) : [];
 
-    if (isSeries) {
-      displayPosts = posts
-        .filter(p => p.series === currentPost.series)
-        .sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
-      listTitle = currentPost.series;
-      sidebarBadge = "Course Modules";
-    } else {
-      displayPosts = posts.filter(p => p.featured).slice(0, 5);
-    }
-
-    let relatedPosts = [];
-    if (currentPost && currentPost.category && !isSeries) {
-      relatedPosts = posts.filter(p => 
-        p.category === currentPost.category && 
-        p.slug !== currentPost.slug
-      ).slice(0, 3);
-    }
-
-    // 2. Inject HTML (Including Newsletter Card)
+    // --- Inject HTML Structure ---
     container.innerHTML = `
       <section class="sidebar-card">
         <div class="sidebar-badge">${sidebarBadge}</div>
-        
         <div class="search-container">
           <input type="text" id="sidebar-search" placeholder="Search heart topics..." />
-          <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
-
         <h3 id="sidebar-title" class="sidebar-subheading">${listTitle}</h3>
         <ul id="sidebar-list"></ul>
-
-        ${isSeries ? `
-          <div class="series-progress-container">
-            <div class="progress-text">Series Progress: ${Math.round((currentPost.seriesOrder / displayPosts.length) * 100)}%</div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill" style="width: ${(currentPost.seriesOrder / displayPosts.length) * 100}%"></div>
-            </div>
-          </div>
-        ` : ''}
-
-        <div id="sidebar-related-container" style="display: ${relatedPosts.length > 0 ? 'block' : 'none'};">
-          <h3 class="sidebar-subheading related-divider">Related in ${currentPost?.category || ''}</h3>
-          <ul id="sidebar-related-list" class="sidebar-thumb-list"></ul>
-        </div>
+        ${isSeries ? `<div class="series-progress-container"><div class="progress-text">Series Progress: ${Math.round((currentPost.seriesOrder / displayPosts.length) * 100)}%</div><div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${(currentPost.seriesOrder / displayPosts.length) * 100}%"></div></div></div>` : ''}
+        <div id="sidebar-related-container" style="display: ${relatedPosts.length > 0 ? 'block' : 'none'};"><h3 class="sidebar-subheading related-divider">Related in ${currentPost?.category || ''}</h3><ul id="sidebar-related-list" class="sidebar-thumb-list"></ul></div>
       </section>
 
       <section class="sidebar-card newsletter-card">
-        <div class="sidebar-badge">Join the Community</div>
+        <div class="sidebar-badge">Stay Updated</div>
         <h3>Cardiac Insights</h3>
-        <p class="newsletter-sub">Get clinical updates and owner guides delivered monthly.</p>
+        <p class="newsletter-sub">Clinical updates for Vets and guides for Owners.</p>
         
-        <form id="brevo-form" action="YOUR_BREVO_POST_URL" method="POST">
-          <div class="input-wrapper">
-            <input type="email" name="EMAIL" placeholder="your@email.com" required />
-          </div>
+        <form id="sib-form" method="POST" action="https://0c4998da.sibforms.com/serve/MUIFAENr5i33tSrO5Jn-UyOjX28DQfxonP35cKdnRS-z6sbjqVOFldL8RU_6Q1rAAANPwuayLOw8aNfsbpCSsK-JkoROdVR6mmbp8csGmVryMIPA768fd22yojbs4uk6VaGucfJhY_3yiXLTI6NM1xdWXBVv4_a0M4YGF0L54m0jjE93GCCP405kHigikSGibACx_o05b28gkXr4">
+          
+          <input type="email" name="EMAIL" placeholder="Email Address" required class="newsletter-input" />
 
           <div class="segment-selector">
             <label class="segment-option">
-              <input type="radio" name="SEGMENT" value="vet" checked>
-              <span>Vet / Tech</span>
+              <input type="radio" name="SEGMENT" value="vet" checked> <span>Vet</span>
             </label>
             <label class="segment-option">
-              <input type="radio" name="SEGMENT" value="owner">
-              <span>Pet Owner</span>
+              <input type="radio" name="SEGMENT" value="owner"> <span>Owner</span>
             </label>
           </div>
 
           <div class="gdpr-box">
             <label class="gdpr-label">
-              <input type="checkbox" name="OPT_IN" required>
-              <span>I agree to receive clinical updates. I can unsubscribe at any time. View <a href="/privacy.html">Privacy Policy</a>.</span>
+              <input type="checkbox" name="OPT_IN" value="1" required>
+              <span>I agree to receive cardiac updates and news. View <a href="https://www.brevo.com/en/legal/privacypolicy/" target="_blank">Privacy Policy</a>.</span>
             </label>
           </div>
+
+          <input type="text" name="email_address_check" value="" style="display:none;">
+          <input type="hidden" name="locale" value="en">
 
           <button type="submit" class="btn-newsletter">Subscribe</button>
         </form>
