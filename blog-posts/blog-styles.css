@@ -190,6 +190,54 @@ strong {
 
 }
 
+/* Professional Clinical Table Style */
+.table-container {
+  width: 100%;
+  overflow-x: auto; /* Responsive scroll for mobile */
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Clean sans-serif */
+  font-size: 0.95rem;
+  background-color: #ffffff;
+  color: #333;
+}
+
+.clinical-table thead tr {
+  background-color: #2274A5; /* Deep clinical blue */
+  color: #ffffff;
+  text-align: left;
+  font-weight: 600;
+}
+
+.clinical-table th, 
+.clinical-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.clinical-table tbody tr:nth-of-type(even) {
+  background-color: #f8f9fa; /* Subtle zebra striping for readability */
+}
+
+.clinical-table tbody tr:last-of-type {
+  border-bottom: 2px solid #2274A5;
+}
+
+.clinical-table tbody tr:hover {
+  background-color: #f1f4f6; /* Hover effect to help tracking rows */
+}
+
+/* Specific styling for key clinical terms */
+.clinical-table td strong {
+  color: #2274A5;
+}
+
 
 
 /* Consolidated Article Navigation Style */
