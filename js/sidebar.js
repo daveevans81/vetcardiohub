@@ -62,17 +62,19 @@
           category = category.replace(regex, `<mark class="highlight">$1</mark>`);
         }
         const thumb = p.image || '/images/thumbnails/default-placeholder.jpg';
-        return `
-          <li class="sidebar-main-item">
-            <a href="/blog-posts/${p.slug}" class="sidebar-item-link">
-              <div class="sidebar-item-thumb"><img src="${thumb}" alt=""></div>
-              <div class="sidebar-item-info">
-                <h4 class="sidebar-item-title">${title}</h4>
-                <span class="sidebar-item-cat">${category}</span>
-              </div>
-              <span class="sidebar-item-arrow">→</span>
-            </a>
-          </li>`;
+return `
+  <li class="sidebar-main-item">
+    <a href="/blog-posts/${p.slug}" class="sidebar-item-link">
+      <div class="sidebar-item-thumb"><img src="${thumb}" alt=""></div>
+      <div class="sidebar-item-info">
+        <h4 class="sidebar-item-title">${title}</h4>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="sidebar-item-cat">${category}</span>
+            <span style="font-size: 9px; color: #94a3b8;">${p.readTime || '5m'}</span>
+        </div>
+      </div>
+    </a>
+  </li>`;
       }).join("");
     };
 

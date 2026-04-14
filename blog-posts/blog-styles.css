@@ -1451,6 +1451,21 @@ h4 {
     }
 }
 
+.bp-card-readtime {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #94a3b8;
+    background: #f8fafc;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.bp-card-readtime i {
+    font-size: 10px;
+}
+
 /* Container for the Cards */
 .nav-visual-wrapper {
     display: grid;

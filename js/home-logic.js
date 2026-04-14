@@ -16,7 +16,12 @@ cardContainer.innerHTML = featuredPosts.map(p => `
             <img src="${p.image || 'images/thumbnails/default-placeholder.jpg'}" alt="${p.title}">
         </div>
         <div class="bp-card-body">
-            <span class="bp-card-category">${p.category}</span>
+            <div class="bp-card-meta" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span class="bp-card-category">${p.category}</span>
+                <span class="bp-card-readtime" style="font-size: 10px; color: #94a3b8; font-weight: 600;">
+                    <i class="fa-regular fa-clock"></i> ${p.readTime || '5 min'}
+                </span>
+            </div>
             <a href="blog-posts/${p.slug}" class="bp-card-link">
                 <h3 class="bp-card-title">${p.title}</h3>
             </a>
