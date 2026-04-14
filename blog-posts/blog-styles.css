@@ -238,6 +238,52 @@ strong {
   color: #2274A5;
 }
 
+/* Professional Image Comparison Grid */
+.comparison-container {
+  width: 100%;
+  overflow-x: auto; /* Enable horizontal swiping on mobile */
+  -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling for iOS */
+  margin: 25px 0;
+  padding-bottom: 10px; /* Space for the scrollbar */
+}
+
+.comparison-flex {
+  display: flex;
+  flex-wrap: nowrap; /* Forces images to stay side-by-side */
+  gap: 15px; /* Professional spacing between images */
+  min-width: min-content; /* Ensures container expands to fit images */
+}
+
+.comparison-item {
+  flex: 0 0 300px; /* Fixed width on mobile to ensure detail is visible */
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+@media (min-width: 768px) {
+ .comparison-item {
+    flex: 1; /* Allow images to grow/equalise on desktop screens */
+    min-width: 0;
+  }
+}
+
+.comparison-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.comparison-caption {
+  padding: 10px;
+  font-size: 0.85rem;
+  color: #555;
+  background: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
 
 
 /* Consolidated Article Navigation Style */
