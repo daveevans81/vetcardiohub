@@ -1,5 +1,26 @@
 window.posts = [
   {
+    slug: "post21.html",
+    title: "Echocardiography Basics 2: The Left Atrium to Aorta Ratio (LA:Ao)",
+    date: "April 14, 2026",
+    category: "Echo",
+    group: "diagnosis",
+    audience: "vet",
+    featured: false,
+    image: "/images/LAAo-whale.jpg",
+    snippet: "Left atrial size is a window into cardiac health, in both dogs and cats. Heart failure results from to much pressure in the left atrium, and size is directly linked to this pressure. But how do we measure it?"
+  },  {
+    slug: "post20.html",
+    title: "Echocardiography Basics 1: The Views",
+    date: "April 13, 2026",
+    category: "Echo",
+    group: "diagnosis",
+    audience: "vet",
+    featured: false,
+    image: "/images/heart-dog-sax.jpg",
+    snippet: "Understanding the dog’s heart positioning is crucial. Echo is full of confusing terms, but let’s break them down."
+  },
+  {
     slug: "post19.html",
     title: "Navigating the DMVD Journey: A Clinical Guide to Diet and Supplements",
     date: "April 3, 2026",
