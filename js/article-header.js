@@ -34,3 +34,5 @@ header.innerHTML = `
         </div>
     </div>
 `;
+}); // End of DOMContentLoaded listener
+})();

@@ -14,7 +14,7 @@ window.posts = [
     audience: "vet",
     featured: false,
     image: "/images/LAAo-whale.jpg",
-    snippet: "Left atrial size is a window into cardiac health, in both dogs and cats. Heart failure results from to much pressure in the left atrium, and size is directly linked to this pressure. But how do we measure it?"
+    snippet: "Left atrial size is a window into cardiac health, in both dogs and cats. Heart failure results from too much pressure in the left atrium, and size is directly linked to this pressure. But how do we measure it?"
   },  
   {
     slug: "post20.html",
@@ -273,7 +273,7 @@ window.posts = [
   },
   {
     slug: "post5.html",
-    title: "hould I give my cat with HCM Rapamycin (Felycin-CA1)?",
+    title: "Should I give my cat with HCM Rapamycin (Felycin-CA1)?",
     subtitle: "Why all the hype? What should we be doing? Is Felycin the future of this disease?",
     date: "May 29, 2025",
     reviewed: "June 2, 2025",
