@@ -61,11 +61,11 @@ feedContainer.innerHTML = postsToDisplay.map(post => {
           </div>
         </div>
         
-        ${post.image ? `
-          <div class="post-thumbnail">
-            <img src="${post.image}" alt="${post.title}" loading="lazy">
-          </div>
-        ` : ''}
+ ${thumbnailToUse ? `
+  <div class="post-thumbnail">
+    <img src="${thumbnailToUse}" alt="${post.title}" loading="lazy">
+  </div>
+` : ''}
       </div>
     </li>
   `;
