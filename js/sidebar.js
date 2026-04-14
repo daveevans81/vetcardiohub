@@ -37,31 +37,32 @@
         <h3>Cardiac Insights</h3>
         <p class="newsletter-sub">Clinical updates for Vets and guides for Owners.</p>
         
-        <form id="sib-form" method="POST" action="https://0c4998da.sibforms.com/serve/MUIFAENr5i33tSrO5Jn-UyOjX28DQfxonP35cKdnRS-z6sbjqVOFldL8RU_6Q1rAAANPwuayLOw8aNfsbpCSsK-JkoROdVR6mmbp8csGmVryMIPA768fd22yojbs4uk6VaGucfJhY_3yiXLTI6NM1xdWXBVv4_a0M4YGF0L54m0jjE93GCCP405kHigikSGibACx_o05b28gkXr4">
-          
-          <input type="email" name="EMAIL" placeholder="Email Address" required class="newsletter-input" />
+<form id="sib-form" method="POST" action="https://0c4998da.sibforms.com/serve/MUIFAENr5i33tSrO5Jn-UyOjX28DQfxonP35cKdnRS-z6sbjqVOFldL8RU_6Q1rAAANPwuayLOw8aNfsbpCSsK-JkoROdVR6mmbp8csGmVryMIPA768fd22yojbs4uk6VaGucfJhY_3yiXLTI6NM1xdWXBVv4_a0M4YGF0L54m0jjE93GCCP405kHigikSGibACx_o05b28gkXr4">
+  
+  <input type="email" name="EMAIL" placeholder="Email Address" required class="newsletter-input" />
 
-          <div class="segment-selector">
-            <label class="segment-option">
-              <input type="radio" name="SEGMENT" value="vet" checked> <span>Vet</span>
-            </label>
-            <label class="segment-option">
-              <input type="radio" name="SEGMENT" value="owner"> <span>Owner</span>
-            </label>
-          </div>
+  <div class="segment-selector">
+    <label class="segment-option">
+      <input type="radio" name="SEGMENT" value="vet" checked> <span>Vet</span>
+    </label>
+    <label class="segment-option">
+      <input type="radio" name="SEGMENT" value="owner"> <span>Owner</span>
+    </label>
+  </div>
 
-          <div class="gdpr-box">
-            <label class="gdpr-label">
-              <input type="checkbox" name="OPT_IN" value="1" required>
-              <span>I agree to receive cardiac updates and news. View <a href="https://www.brevo.com/en/legal/privacypolicy/" target="_blank">Privacy Policy</a>.</span>
-            </label>
-          </div>
+  <div class="gdpr-box">
+    <label class="gdpr-label">
+      <input type="checkbox" name="OPT_IN" value="1" required>
+      <span>I agree to receive cardiac updates. View <a href="https://www.brevo.com/en/legal/privacypolicy/" target="_blank">Privacy</a>.</span>
+    </label>
+  </div>
 
-          <input type="text" name="email_address_check" value="" style="display:none;">
-          <input type="hidden" name="locale" value="en">
+  <input type="text" name="email_address_check" value="" style="display:none !important;">
+  <input type="hidden" name="locale" value="en">
+  <input type="hidden" name="html_type" value="simple">
 
-          <button type="submit" class="btn-newsletter">Subscribe</button>
-        </form>
+  <button type="submit" class="btn-newsletter">Subscribe</button>
+</form>
       </section>
     `;
 
