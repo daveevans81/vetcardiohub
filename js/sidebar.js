@@ -69,7 +69,7 @@
         <h3>Cardiac Insights</h3>
         <p class="newsletter-sub">Join our community for clinical updates, echo resources, and pet owner guides.</p>
         
-        <a href="/signup.html" class="btn-newsletter" style="text-decoration: none; display: block;">
+        <a href="/emailsignup.html" class="btn-newsletter" style="text-decoration: none; display: block;">
           Subscribe for Updates
         </a>
       </section>
