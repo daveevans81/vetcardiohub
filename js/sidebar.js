@@ -6,7 +6,7 @@
     const container = document.getElementById("featured-posts");
     if (!container) return;
 
-    // --- (Logic for series/featured/related remains the same as previous version) ---
+    // 1. Data Prep
     const pathParts = window.location.pathname.split("/");
     const currentFileName = pathParts[pathParts.length - 1] || "index.html";
     const cleanSlug = currentFileName.replace(".html", "");
@@ -18,7 +18,7 @@
     let sidebarBadge = isSeries ? "Course Modules" : "Resource Hub";
     let relatedPosts = (currentPost && !isSeries) ? posts.filter(p => p.category === currentPost.category && p.slug !== currentPost.slug).slice(0, 3) : [];
 
-    // --- Inject HTML Structure ---
+    // 2. Inject HTML Structure
     container.innerHTML = `
       <section class="sidebar-card">
         <div class="sidebar-badge">${sidebarBadge}</div>
@@ -34,45 +34,46 @@
 
       <section class="sidebar-card newsletter-card">
         <div class="sidebar-badge">Stay Updated</div>
-        <h3>Cardiac Insights</h3>
-        <p class="newsletter-sub">Clinical updates for Vets and guides for Owners.</p>
-        
-<form id="sib-form" method="POST" action="https://0c4998da.sibforms.com/serve/MUIFAENr5i33tSrO5Jn-UyOjX28DQfxonP35cKdnRS-z6sbjqVOFldL8RU_6Q1rAAANPwuayLOw8aNfsbpCSsK-JkoROdVR6mmbp8csGmVryMIPA768fd22yojbs4uk6VaGucfJhY_3yiXLTI6NM1xdWXBVv4_a0M4YGF0L54m0jjE93GCCP405kHigikSGibACx_o05b28gkXr4">
-  
-  <input type="email" name="EMAIL" placeholder="Email Address" required class="newsletter-input" />
+        <div id="newsletter-status">
+            <h3>Cardiac Insights</h3>
+            <p class="newsletter-sub">Clinical updates for Vets and guides for Owners.</p>
+            
+            <form id="sidebar-brevo-form">
+              <input type="email" name="EMAIL" placeholder="Email Address" required class="newsletter-input" />
 
-  <div class="segment-selector">
-    <label class="segment-option">
-      <input type="radio" name="SEGMENT" value="vet" checked> <span>Vet</span>
-    </label>
-    <label class="segment-option">
-      <input type="radio" name="SEGMENT" value="owner"> <span>Owner</span>
-    </label>
-  </div>
+              <div class="segment-selector">
+                <label class="segment-option">
+                  <input type="radio" name="SEGMENT" value="vet"> <span>Vet</span>
+                </label>
+                <label class="segment-option">
+                  <input type="radio" name="SEGMENT" value="owner" checked> <span>Owner</span>
+                </label>
+              </div>
 
-  <div class="gdpr-box">
-    <label class="gdpr-label">
-      <input type="checkbox" name="OPT_IN" value="1" required>
-      <span>I agree to receive cardiac updates. View <a href="https://www.brevo.com/en/legal/privacypolicy/" target="_blank">Privacy</a>.</span>
-    </label>
-  </div>
+              <div class="gdpr-box">
+                <label class="gdpr-label">
+                  <input type="checkbox" name="OPT_IN" value="1" required>
+                  <span>I agree to receive cardiac updates.</span>
+                </label>
+              </div>
 
-  <input type="text" name="email_address_check" value="" style="display:none !important;">
-  <input type="hidden" name="locale" value="en">
-  <input type="hidden" name="html_type" value="simple">
+              <input type="text" name="email_address_check" value="" style="display:none !important;">
+              <input type="hidden" name="locale" value="en">
 
-  <button type="submit" class="btn-newsletter">Subscribe</button>
-</form>
+              <button type="submit" class="btn-newsletter" id="sub-btn">Subscribe</button>
+            </form>
+        </div>
       </section>
     `;
 
-    // 3. UI References & Logic
+    // 3. UI References
     const sidebarList = document.getElementById('sidebar-list');
     const sidebarTitle = document.getElementById('sidebar-title');
     const searchInput = document.getElementById('sidebar-search');
     const relatedContainer = document.getElementById('sidebar-related-container');
     const sidebarRelatedList = document.getElementById('sidebar-related-list');
 
+    // 4. Render Function
     const renderMainList = (postsToDisplay, term = "") => {
       if (!sidebarList) return;
       sidebarList.innerHTML = postsToDisplay.map(p => {
@@ -106,6 +107,7 @@
 
     renderMainList(displayPosts);
 
+    // 5. Related Posts Logic
     if (relatedPosts.length > 0 && sidebarRelatedList) {
       sidebarRelatedList.innerHTML = relatedPosts.map(p => `
         <li>
@@ -119,6 +121,7 @@
         </li>`).join("");
     }
 
+    // 6. Search Event Listener
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase().trim();
@@ -142,5 +145,37 @@
         }
       });
     }
-  });
+
+    // 7. NEW: Brevo Form Submission Logic (Inside the listener)
+    const form = document.getElementById('sidebar-brevo-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            const btn = document.getElementById('sub-btn');
+            const statusBox = document.getElementById('newsletter-status');
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            const formData = new FormData(form);
+            
+            fetch("https://0c4998da.sibforms.com/serve/MUIFAENr5i33tSrO5Jn-UyOjX28DQfxonP35cKdnRS-z6sbjqVOFldL8RU_6Q1rAAANPwuayLOw8aNfsbpCSsK-JkoROdVR6mmbp8csGmVryMIPA768fd22yojbs4uk6VaGucfJhY_3yiXLTI6NM1xdWXBVv4_a0M4YGF0L54m0jjE93GCCP405kHigikSGibACx_o05b28gkXr4", {
+                method: "POST",
+                body: formData,
+                mode: 'no-cors' 
+            }).then(() => {
+                statusBox.innerHTML = `
+                    <div style="text-align: center; padding: 20px 0;">
+                        <i class="fa-solid fa-circle-check" style="color: #22c55e; font-size: 40px; margin-bottom: 15px;"></i>
+                        <h3 style="margin-bottom: 10px;">Check your Inbox!</h3>
+                        <p style="font-size: 13px; color: #64748b;">We've sent a confirmation link to your email. Please click it to finish signing up.</p>
+                    </div>
+                `;
+            }).catch(() => {
+                btn.innerText = "Error. Try again?";
+                btn.disabled = false;
+            });
+        });
+    }
+  }); // End of DOMContentLoaded
 })();
