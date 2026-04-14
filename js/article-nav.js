@@ -21,22 +21,25 @@
             const nextPost = index < chronologicalPosts.length - 1 ? chronologicalPosts[index + 1] : null;
 
             // 2. The NEW Visual Card Generator
-            const renderNavCard = (post, label, direction) => {
-                if (!post) return `<div class="nav-card-placeholder"></div>`;
-                
-                return `
-                    <a href="/blog-posts/${post.slug}" class="nav-card ${direction}">
-                        <div class="nav-card-label">${label}</div>
-                        <div class="nav-card-body">
-                            <img src="${post.image || '/images/thumbnails/default-placeholder.jpg'}" class="nav-card-thumb" alt="">
-                            <div class="nav-card-info">
-                                <h4 class="nav-card-title">${post.title}</h4>
-                                <p class="nav-card-snippet">${post.snippet ? post.snippet.substring(0, 65) + '...' : ''}</p>
-                            </div>
-                        </div>
-                    </a>
-                `;
-            };
+const renderNavCard = (post, label, direction) => {
+    if (!post) return `<div class="nav-card-placeholder"></div>`;
+    
+    return `
+        <a href="/blog-posts/${post.slug}" class="nav-card ${direction}">
+            <div class="nav-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div class="nav-card-label" style="margin:0;">${label}</div>
+                <span class="nav-read-time" style="font-size: 10px; color: #94a3b8; font-weight: 600;">${post.readTime || '5 min read'}</span>
+            </div>
+            <div class="nav-card-body">
+                <img src="${post.image || '/images/thumbnails/default-placeholder.jpg'}" class="nav-card-thumb" alt="">
+                <div class="nav-card-info">
+                    <h4 class="nav-card-title">${post.title}</h4>
+                    <p class="nav-card-snippet">${post.snippet ? post.snippet.substring(0, 65) + '...' : ''}</p>
+                </div>
+            </div>
+        </a>
+    `;
+};
 
             // 3. Updated HTML Structure
             navContainer.innerHTML = `
