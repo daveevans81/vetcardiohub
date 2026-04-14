@@ -32,7 +32,6 @@
 const defaultImage = "/images/thumbnails/default-placeholder.jpg";
 
 feedContainer.innerHTML = postsToDisplay.map(post => {
-// Use the specific image if it exists, otherwise use the fallback
   const thumbnailToUse = post.image ? post.image : defaultImage;
 
   let audienceHtml = post.audience === 'both' 
@@ -47,9 +46,15 @@ feedContainer.innerHTML = postsToDisplay.map(post => {
             ${post.featured ? '<span class="badge featured-badge">★ Featured</span>' : ''}
             ${audienceHtml}
             <span class="badge date-badge">${post.date}</span>
+            
+            <span class="badge read-badge">
+                <i class="fa-regular fa-clock"></i> ${post.readTime || '5 min read'}
+            </span>
           </div>
+          
           <a href="blog-posts/${post.slug}" class="post-title">${post.title}</a>
           <p class="snippet">${post.snippet}</p>
+          
           <div class="topic-footer">
             <span class="category-label">Category:</span>
             <span class="category-tag">${post.category}</span>
