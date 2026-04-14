@@ -1400,6 +1400,51 @@ h4 {
 
 }
 
+/* Active Module Styling */
+.active-module {
+    background: #f0f7ff;
+    border-left: 4px solid #2563eb;
+    border-radius: 0 8px 8px 0;
+}
+
+.active-play-icon {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #2563eb;
+    font-size: 14px;
+}
+
+/* Progress Bar Styling */
+.series-progress-container {
+    margin-top: 15px;
+    padding: 15px 0 5px 0;
+    border-top: 1px solid #f1f5f9;
+}
+
+.progress-text {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+
+.progress-bar-bg {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #2563eb;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .blog-layout {
     display: grid;
     grid-template-columns: 3fr 1fr; /* 2 Columns */
