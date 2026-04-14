@@ -1556,3 +1556,63 @@ h4 {
         padding-bottom: 15px;
     }
 }
+
+
+header {
+    background-color: #f8fafc; /* Lighter, more modern than the old teal */
+    border-left: 5px solid #a8dadc;
+    max-width: 800px;
+    margin: 20px auto 40px;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+.header-meta-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.header-cat {
+    background: #2563eb;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.header-read-time {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+header h1 {
+    font-size: 2.2rem;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    color: #1e293b;
+}
+
+.header-auth-block {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.author-info .author { margin: 0; font-size: 0.9rem; }
+.date-block .published { margin: 0; font-size: 0.8rem; color: #64748b; text-align: right; }
+
+@media (max-width: 600px) {
+    .header-auth-block {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .date-block .published { text-align: left; }
+}
