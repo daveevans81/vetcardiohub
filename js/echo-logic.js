@@ -3,48 +3,52 @@
     const echoFeed = document.getElementById("echo-feed");
     const filterBtns = document.querySelectorAll(".echo-filter-btn");
 
-    // Unified function name: renderEchoPortal
     function renderEchoPortal(groupFilter = "all") {
         if (!echoFeed) return;
 
-        // 1. Filter for Echo AND Vets
         let echoPosts = posts.filter(p => p.category === "Echocardiography" && p.audience === "vet");
 
-        // 2. Filter by Group (Foundations, Diagnosis, etc.) if a specific group is selected
         if (groupFilter !== "all") {
             echoPosts = echoPosts.filter(p => p.group === groupFilter);
         }
 
-        // 3. Sort by Series Order
         echoPosts.sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
 
-        // 4. Render to HTML
         echoFeed.innerHTML = echoPosts.map(post => `
-            <div class="echo-module">
-                <div class="echo-module-header">
-                    <span class="level-badge ${post.level ? post.level.toLowerCase() : 'beginner'}">${post.level || 'Beginner'}</span>
-                    ${post.series ? `<span class="series-name">${post.series}</span>` : ''}
+            <article class="echo-card">
+                <div class="echo-card-image">
+                    <img src="${post.image || '/images/thumbnails/default-placeholder.jpg'}" alt="${post.title}">
+                    <div class="echo-card-level ${post.level ? post.level.toLowerCase() : 'beginner'}">${post.level || 'Beginner'}</div>
                 </div>
-                <a href="blog-posts/${post.slug}" class="echo-module-link">
-                    <h3>${post.seriesOrder ? `${post.seriesOrder}. ` : ''}${post.title}</h3>
-                </a>
-                <div class="technique-tag"><i class="fa-solid fa-probe"></i> ${post.technique || 'General Echo'}</div>
-            </div>
+                <div class="echo-card-content">
+                    <div class="echo-card-meta">
+                        <span class="echo-series">${post.series || 'Echo Module'}</span>
+                        <span class="echo-date">${post.date}</span>
+                    </div>
+                    <a href="blog-posts/${post.slug}" class="echo-card-link">
+                        <h3 class="echo-card-title">
+                            ${post.seriesOrder ? `<span class="order-num">${post.seriesOrder}</span>` : ''}
+                            ${post.title}
+                        </h3>
+                    </a>
+                    <p class="echo-card-subtitle">${post.subtitle || ''}</p>
+                    <p class="echo-card-snippet">${post.snippet ? post.snippet.substring(0, 100) + '...' : ''}</p>
+                    <div class="echo-card-footer">
+                        <span class="echo-technique"><i class="fa-solid fa-probe"></i> ${post.technique || 'General Echo'}</span>
+                        <span class="echo-time"><i class="fa-regular fa-clock"></i> ${post.readTime || '5m'}</span>
+                    </div>
+                </div>
+            </article>
         `).join('');
     }
 
-    // Filter Logic
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
-            // Calling the CORRECTED function name here
-            const group = btn.getAttribute('data-group');
-            renderEchoPortal(group);
+            renderEchoPortal(btn.getAttribute('data-group'));
         });
     });
 
-    // Initial load - calling the CORRECTED function name
     renderEchoPortal(); 
 })();
