@@ -190,6 +190,10 @@ strong {
 
 }
 
+h4 {
+  text-align: left;
+}
+
 /* Professional Clinical Table Style */
 .table-container {
   width: 100%;
