@@ -9,7 +9,8 @@ window.posts = [
     featured: false,
     image: "/images/LAAo-whale.jpg",
     snippet: "Left atrial size is a window into cardiac health, in both dogs and cats. Heart failure results from to much pressure in the left atrium, and size is directly linked to this pressure. But how do we measure it?"
-  },  {
+  },  
+  {
     slug: "post20.html",
     title: "Echocardiography Basics 1: The Views",
     date: "April 13, 2026",
