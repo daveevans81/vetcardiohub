@@ -80,15 +80,23 @@
         <i class="fa-solid fa-heart-pulse" style="font-size: 1.8rem; color: #ed8936; margin-bottom: 10px;"></i>
         <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 5px;">Support Our Mission</h3>
         <p style="font-size: 11px; color: #64748b; line-height: 1.4; margin-bottom: 15px;">
-            Help keep this clinical resource open-access for everyone.
+            Your support keeps these clinical resources open-access and ad-free for vets and owners worldwide.
         </p>
         
         <div class="support-tiers" style="display: flex; flex-direction: column; gap: 8px;">
             <a href="https://paypal.me/vetcardiohub/2" target="_blank" class="btn-support-tier">
-                <span>☕</span> <strong>£2</strong> <small>Buy a Coffee</small>
+                <span>☕</span> 
+                <div class="tier-info">
+                    <strong>£2 <small>(~$2.50)</small></strong>
+                    <p>Buy us a Coffee</p>
+                </div>
             </a>
             <a href="https://paypal.me/vetcardiohub/5" target="_blank" class="btn-support-tier">
-                <span>📚</span> <strong>£5</strong> <small>Support a Module</small>
+                <span>📚</span> 
+                <div class="tier-info">
+                    <strong>£5 <small>(~$6.25)</small></strong>
+                    <p>Support a Module</p>
+                </div>
             </a>
             <a href="https://paypal.me/vetcardiohub" target="_blank" class="btn-support-tier choose-own">
                 Choose your own amount

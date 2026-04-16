@@ -1823,7 +1823,7 @@ h4 {
 
 
 header {
-    background-color: #f9f9f9 ; /* Lighter, more modern than the old teal #f8fafc */
+    background-color: #ffffff ; /* Lighter, more modern than the old teal #f8fafc */
     border-left: 5px solid #a8dadc;
     max-width: 800px;
     margin: 20px auto 40px;
@@ -1903,20 +1903,24 @@ header,
     z-index: 1; /* Keeping it grounded */
 }
 
-/* Tiered Support Buttons */
 .btn-support-tier {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    gap: 12px;
     background-color: #ffffff;
     border: 2px solid #ed8936;
-    color: #ed8936 !important;
-    padding: 8px 15px;
-    border-radius: 10px;
+    color: #1e293b !important;
+    padding: 10px 15px;
+    border-radius: 12px;
     text-decoration: none !important;
-    font-size: 13px;
     transition: all 0.2s ease;
+    text-align: left;
+}
+
+.tier-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
 }
 
 .btn-support-tier strong {
@@ -1924,33 +1928,35 @@ header,
     color: #1e293b;
 }
 
-.btn-support-tier small {
+.btn-support-tier strong small {
+    font-size: 11px;
+    color: #94a3b8; /* Subtle USD text */
+    font-weight: 500;
+}
+
+.btn-support-tier p {
+    margin: 0;
+    font-size: 11px;
     color: #64748b;
-    font-weight: normal;
 }
 
 .btn-support-tier:hover {
     background-color: #ed8936;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(237, 137, 54, 0.2);
+}
+
+.btn-support-tier:hover strong,
+.btn-support-tier:hover strong small,
+.btn-support-tier:hover p {
     color: #ffffff !important;
-    transform: scale(1.02);
 }
 
-.btn-support-tier:hover strong, 
-.btn-support-tier:hover small {
-    color: #ffffff;
-}
-
-/* "Choose own" style - more subtle */
 .btn-support-tier.choose-own {
+    justify-content: center;
     border: 1px dashed #cbd5e1;
     background: transparent;
     color: #64748b !important;
     font-size: 11px;
     font-weight: 600;
-}
-
-.btn-support-tier.choose-own:hover {
-    border-color: #94a3b8;
-    background: #f1f5f9;
-    color: #1e293b !important;
 }
