@@ -1903,34 +1903,54 @@ header,
     z-index: 1; /* Keeping it grounded */
 }
 
-/* Support Card Button Styling */
-.btn-support {
-    display: inline-block;
-    background-color: #0070ba !important; /* PayPal Blue */
-    color: #ffffff !important;
-    padding: 10px 24px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 14px;
+/* Tiered Support Buttons */
+.btn-support-tier {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: #ffffff;
+    border: 2px solid #ed8936;
+    color: #ed8936 !important;
+    padding: 8px 15px;
+    border-radius: 10px;
     text-decoration: none !important;
-    transition: all 0.3s ease;
-    border: none;
+    font-size: 13px;
+    transition: all 0.2s ease;
 }
 
-.btn-support:hover {
-    background-color: #003087 !important; /* Deeper PayPal Blue */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 112, 186, 0.3);
+.btn-support-tier strong {
+    font-size: 15px;
+    color: #1e293b;
+}
+
+.btn-support-tier small {
+    color: #64748b;
+    font-weight: normal;
+}
+
+.btn-support-tier:hover {
+    background-color: #ed8936;
     color: #ffffff !important;
+    transform: scale(1.02);
 }
 
-/* Specific styling for the Support Card itself */
-.support-card {
-    border-radius: 16px;
-    overflow: hidden;
-    transition: transform 0.3s ease;
+.btn-support-tier:hover strong, 
+.btn-support-tier:hover small {
+    color: #ffffff;
 }
 
-.support-card:hover {
-    transform: translateY(-4px);
+/* "Choose own" style - more subtle */
+.btn-support-tier.choose-own {
+    border: 1px dashed #cbd5e1;
+    background: transparent;
+    color: #64748b !important;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.btn-support-tier.choose-own:hover {
+    border-color: #94a3b8;
+    background: #f1f5f9;
+    color: #1e293b !important;
 }

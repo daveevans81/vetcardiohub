@@ -76,16 +76,24 @@
 
 <section class="sidebar-card support-card" style="margin-top: 24px; background: #fffaf0; border: 1px solid #fbd38d; text-align: center;">
     <div class="sidebar-badge" style="background: #ed8936;">Support the Hub</div>
-    <div style="padding: 15px 0;">
-        <i class="fa-solid fa-heart-pulse" style="font-size: 2rem; color: #ed8936; margin-bottom: 10px;"></i>
-        <h3 style="font-size: 1.1rem; color: #1e293b;">Support Our Mission</h3>
-        <p style="font-size: 12px; color: #64748b; line-height: 1.4; margin-bottom: 15px; padding: 0 10px;">
-            Help us keep VetCardioHub ad-free and open-access for the veterinary community. All contributions go into running the site.
+    <div style="padding: 15px 10px;">
+        <i class="fa-solid fa-heart-pulse" style="font-size: 1.8rem; color: #ed8936; margin-bottom: 10px;"></i>
+        <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 5px;">Support Our Mission</h3>
+        <p style="font-size: 11px; color: #64748b; line-height: 1.4; margin-bottom: 15px;">
+            Help keep this clinical resource open-access for everyone.
         </p>
         
-        <a href="https://paypal.me/vetcardiohub/5" target="_blank" class="btn-support">
-            <i class="fa-brands fa-paypal"></i> Support with PayPal
-        </a>
+        <div class="support-tiers" style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="https://paypal.me/vetcardiohub/2" target="_blank" class="btn-support-tier">
+                <span>☕</span> <strong>£2</strong> <small>Buy a Coffee</small>
+            </a>
+            <a href="https://paypal.me/vetcardiohub/5" target="_blank" class="btn-support-tier">
+                <span>📚</span> <strong>£5</strong> <small>Support a Module</small>
+            </a>
+            <a href="https://paypal.me/vetcardiohub" target="_blank" class="btn-support-tier choose-own">
+                Choose your own amount
+            </a>
+        </div>
     </div>
   </section>
 
