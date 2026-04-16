@@ -1950,3 +1950,51 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
         min-width: calc(50% - 20px); /* Two items per row on mobile */
     }
 }
+
+/* Hero Text Layout Adjustments */
+.hero-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* The New Integrated Trust Flexbox */
+.hero-trust-flex {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two items per row */
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Subtle divider */
+}
+
+.hero-trust-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hero-trust-item i {
+    font-size: 1.2rem;
+    color: #2563eb; /* Professional Blue */
+    width: 25px;
+    text-align: center;
+}
+
+.hero-trust-item span {
+    font-size: 0.9rem;
+    color: #334155; /* Dark slate for high visibility */
+    line-height: 1.2;
+}
+
+.hero-trust-item strong {
+    color: #1e293b;
+    font-weight: 800;
+}
+
+/* Mobile Tweak: Stack them on very small screens */
+@media (max-width: 480px) {
+    .hero-trust-flex {
+        grid-template-columns: 1fr;
+    }
+}
