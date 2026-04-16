@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0T3D8RJXS3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-0T3D8RJXS3');
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="VetCardioHub Summary of Monitoring Patients in CHF">
+    
+    <title>VetCardioHub - Patient Monitoring Summary</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<!-- Standard favicon -->
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="MyWebSite" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #f4f7f6; /* Soft clinical grey/white */
+            --accent-color: #008080; /* Teal/Professional Green */
+            --text-color: #333;
+            --button-bg: #ffffff;
+        }
+
+
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .profile-img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        .link-button {
+            display: block;
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .link-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: var(--accent-color);
+        }
+
+        /* Special style for the most important link */
+        .featured {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: 700;
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="owner-resource-hub">
+    <section class="hub-header">
+        <img src="/images/dave-about.jpg" alt="Dr Dave" class="profile-img">
+        <h1>Pet Owner Resource Hub</h1>
+        <p>Expert guidance to help you manage your pet's heart health with confidence. Download these tools to use at home and share with your vet.</p>
+    </section>
+
+    <section class="resource-category">
+        <h2><i class="fa-solid fa-map-location-dot"></i> Step 1: Your Action Plan</h2>
+        <div class="link-grid">
+            <a class="link-button featured" href="action-plan.html">Dog Murmur Action Plan (PDF)</a>
+            <a class="link-button featured" href="cat-action-plan.html">Cat Murmur Action Plan (PDF)</a>
+        </div>
+    </section>
+
+    <section class="resource-category">
+        <h2><i class="fa-solid fa-gauge-high"></i> Step 2: Daily Monitoring Tools</h2>
+        <div class="link-grid">
+            <a class="link-button" href="/downloads/SRR_Sheet.pdf" download>
+                <i class="fa-solid fa-file-pdf"></i> SRR Recording Chart
+            </a>
+            <a class="link-button" href="/downloads/Monitoring_Checklist.pdf" download>
+                <i class="fa-solid fa-clipboard-check"></i> Daily Monitoring Checklist
+            </a>
+            <a class="link-button" href="/downloads/Cardiology_Appointment.pdf" download>
+                <i class="fa-solid fa-calendar-check"></i> Appointment Prep Checklist
+            </a>
+        </div>
+    </section>
+
+    <section class="resource-category">
+        <h2><i class="fa-solid fa-chart-line"></i> Activity & Weight Logs</h2>
+        <div class="link-grid">
+            <a class="link-button" href="/downloads/Daily_Activity_Log_Template(Dog).csv" download>Dog Activity Log (CSV)</a>
+            <a class="link-button" href="/downloads/Daily_Activity_Log_Template(Cat).csv" download>Cat Activity Log (CSV)</a>
+        </div>
+    </section>
+
+    <section class="resource-category">
+        <h2><i class="fa-solid fa-circle-info"></i> More Support</h2>
+        <div class="link-grid">
+            <a href="/videos.html" class="link-button"><i class="fa-solid fa-play"></i> Full Video Library</a>
+            <a href="https://www.youtube.com/@VetCardioHub" target="_blank" class="link-button youtube-style">
+                <i class="fa-brands fa-youtube"></i> YouTube Channel
+            </a>
+            <a href="/support.html" class="link-button support-style">
+                <i class="fa-solid fa-heart"></i> Support the Hub
+            </a>
+        </div>
+    </section>
+</main>
+<div id="site-footer"></div>
+
+<script src="/js/load-partials.js"></script>
+</body>
+</html>
