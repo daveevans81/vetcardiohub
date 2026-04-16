@@ -2159,3 +2159,76 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
     font-weight: 700;
     color: #008080;
 }
+
+/* --- Blog Mini Cards --- */
+.blog-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.blog-mini-card {
+    display: flex;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none !important;
+    transition: all 0.3s ease;
+}
+
+.blog-mini-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border-color: #008080;
+}
+
+.blog-mini-img {
+    width: 100px;
+    flex-shrink: 0;
+}
+
+.blog-mini-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.blog-mini-content {
+    padding: 15px;
+}
+
+.blog-mini-content h3 {
+    margin: 5px 0;
+    font-size: 1rem;
+    color: #1e293b;
+    line-height: 1.3;
+}
+
+.blog-mini-content p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.blog-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #008080;
+    background: #f0fdfa;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+@media (max-width: 480px) {
+    .blog-mini-card {
+        flex-direction: column;
+    }
+    .blog-mini-img {
+        width: 100%;
+        height: 120px;
+    }
+}
