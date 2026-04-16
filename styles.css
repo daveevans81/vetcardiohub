@@ -1743,3 +1743,149 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
     color: #94a3b8;
     font-weight: 600;
 }
+
+/* --- Pathway Selector Styles --- */
+.pathway-selector {
+    display: flex;
+    gap: 20px;
+    padding: 60px 20px;
+    background: #f1f5f9;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.path-card {
+    flex: 1;
+    max-width: 400px;
+    background: white;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.path-card:hover {
+    transform: translateY(-5px);
+}
+
+.path-pro { border-bottom: 4px solid #2563eb; }
+.path-owner { border-bottom: 4px solid #ed8936; }
+
+.path-card i {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.path-pro i { color: #2563eb; }
+.path-owner i { color: #ed8936; }
+
+/* --- Homepage Support Section Styles --- */
+.home-support-cta {
+    background: #fffaf0;
+    padding: 80px 20px;
+    text-align: center;
+    border-top: 1px solid #fbd38d;
+    border-bottom: 1px solid #fbd38d;
+}
+
+.home-support-container {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.support-main-icon {
+    font-size: 3rem;
+    color: #ed8936;
+    margin-bottom: 20px;
+}
+
+.support-description {
+    color: #64748b;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+.support-tier-grid {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Tier Button Base */
+.btn-support-tier {
+    min-width: 220px;
+    background: white;
+    padding: 15px 20px;
+    border: 2px solid #fbd38d;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none !important;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.tier-emoji { font-size: 1.5rem; }
+
+.tier-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.tier-info strong {
+    font-size: 16px;
+    color: #1e293b;
+}
+
+.tier-info strong small {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.tier-info span {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* Hover & Active States */
+.active-tier {
+    border-color: #ed8936;
+    box-shadow: 0 4px 15px rgba(237, 137, 54, 0.15);
+}
+
+.btn-support-tier:hover {
+    background: #ed8936;
+    border-color: #ed8936;
+    transform: translateY(-3px);
+}
+
+.btn-support-tier:hover strong,
+.btn-support-tier:hover small,
+.btn-support-tier:hover span {
+    color: #ffffff !important;
+}
+
+.support-footer-link {
+    margin-top: 30px;
+    font-size: 14px;
+}
+
+.support-footer-link a {
+    color: #ed8936;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.support-footer-link a:hover {
+    text-decoration: underline;
+}
+
+/* Custom Style for Choose Own Amount */
+.btn-support-tier.choose-own {
+    border-style: dashed;
+    border-color: #cbd5e1;
+}
