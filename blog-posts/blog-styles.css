@@ -1902,3 +1902,35 @@ header,
     position: relative;
     z-index: 1; /* Keeping it grounded */
 }
+
+/* Support Card Button Styling */
+.btn-support {
+    display: inline-block;
+    background-color: #0070ba !important; /* PayPal Blue */
+    color: #ffffff !important;
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none !important;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-support:hover {
+    background-color: #003087 !important; /* Deeper PayPal Blue */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 112, 186, 0.3);
+    color: #ffffff !important;
+}
+
+/* Specific styling for the Support Card itself */
+.support-card {
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.support-card:hover {
+    transform: translateY(-4px);
+}
