@@ -80,7 +80,7 @@
         <i class="fa-solid fa-heart-pulse" style="font-size: 1.8rem; color: #ed8936; margin-bottom: 10px;"></i>
         <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 5px;">Support Our Mission</h3>
         <p style="font-size: 11px; color: #64748b; line-height: 1.4; margin-bottom: 15px;">
-            Your support keeps these clinical resources open-access and ad-free for vets and owners worldwide.
+            Your support keeps these clinical resources open-access and ad-free for vets and pet owners worldwide.
         </p>
         
         <div class="support-tiers" style="display: flex; flex-direction: column; gap: 8px;">
