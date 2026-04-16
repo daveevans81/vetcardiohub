@@ -1,5 +1,26 @@
 window.posts = [
   {
+    slug: "post22.html",
+    title: "Echocardiography Basics 3: Complications with the Left Atrium to Aorta Ratio (LA:Ao)",
+    subtitle: "The flaws and controversies that can trip you up...",
+    date: "April 16, 2026",
+    reviewed: "April 16, 2026",
+    author: "Dave Evans",
+    authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
+    authorLink: "../about.html#daveevans",
+    category: "Echocardiography",
+    level: "Beginner", 
+    series: "Foundations of Echo",
+    seriesOrder: 3,
+    technique: "Right-Sided SAX",
+    readTime: "12 min read",
+    group: "diagnosis",
+    audience: "vet",
+    featured: false,
+    image: "/images/LAAo-pulmvein-an.jpg",
+    snippet: "While the LA:Ao is the first step on most echo journeys, it has a lot of flaws and controversies. What are they, and how can we mitigate them?"
+  },  
+  {
     slug: "post21.html",
     title: "Echocardiography Basics 2: The Left Atrium to Aorta Ratio (LA:Ao)",
     subtitle: "Getting started with Echo: Measuring your first important ratio",

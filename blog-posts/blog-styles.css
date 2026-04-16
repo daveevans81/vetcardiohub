@@ -1880,3 +1880,25 @@ header h1 {
     }
     .date-block .published { text-align: left; }
 }
+
+/* 1. Ensure the Header is always on top of everything */
+header, 
+#site-header,
+.nav-container {
+    position: relative; /* Or fixed/sticky depending on your header setup */
+    z-index: 9999 !important; /* The 'VIP' level */
+}
+
+/* 2. Ensure the dropdown specifically is elevated */
+.nav-dropdown, 
+.dropdown-menu,
+.vets-menu {
+    z-index: 10000 !important;
+}
+
+/* 3. Give the sidebar a lower level */
+#featured-posts,
+.sidebar-card {
+    position: relative;
+    z-index: 1; /* Keeping it grounded */
+}
