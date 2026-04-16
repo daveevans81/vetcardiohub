@@ -1823,7 +1823,7 @@ h4 {
 
 
 header {
-    background-color: #f8fafc; /* Lighter, more modern than the old teal */
+    background-color: #f9f9f9 ; /* Lighter, more modern than the old teal #f8fafc */
     border-left: 5px solid #a8dadc;
     max-width: 800px;
     margin: 20px auto 40px;
