@@ -462,7 +462,7 @@
 
         <div class="card" style="margin-top:16px">
 <p>LAD measurement:</p>
-<img src="LAmeasure.jpg" alt="LAD measurement">
+<img src="/images/LAmeasure.jpg" alt="LAD measurement">
 <p class="reference">Reference: Marchesotti et al Left atrial anteroposterior diameter in dogs: reference interval, allometric scaling, and agreement with the left atrial-to-aortic root ratio. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6895628/">Journal of Veterinary Medicine and Science</a> 2019</p>
 
 
@@ -472,75 +472,50 @@
         <div class="card" style="margin-top:16px">
 <div class="stage-card">
 <h3>ACVIM Stages Guide</p>
-<a href="blog-posts/post7.html"><img src="images/acvim_stages.png" alt="ACVIM Stages" class="stage-image"></a>
+<a href="/blog-posts/post7.html"><img src="/images/acvim_stages.png" alt="ACVIM Stages" class="stage-image"></a>
 
 <p class="reference" style="color: white;">Reference: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6524084/" style="color: white;">Keene et al (2019) ACVIM consensus guidelines for the diagnosis and treatment of myxomatous mitral valve disease in dogs. J Vet Intern Med. 33(3):1127-1140.J</a></p>
 </div>
 
  <div class="card">
-          <h3>Formulas Used:</h3>
-<h3 style="color: #1e293b; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
-        <i class="fa-solid fa-square-root-variable"></i> Allometric Scaling Formulas
-    </h3>
-    <div class="table-container">
-        <table class="clinical-table">
-            <thead>
-                <tr>
-                    <th>Parameter</th>
-                    <th>Normalized Formula</th>
-                    <th>Normal Limit</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>LVIDd (n)</strong></td>
-                    <td>$$\frac{LVIDd (cm)}{Weight (kg)^{0.294}}$$</td>
-                    <td><span class="important">&lt; 1.7</span></td>
-                </tr>
-                <tr>
-                    <td><strong>LA Short Axis (n)</strong></td>
-                    <td>$$\frac{LA (cm)}{Weight (kg)^{0.355}}$$</td>
-                    <td><span class="important">&lt; 1.17</span></td>
-                </tr>
-                <tr>
-                    <td><strong>LAD Long Axis (n)</strong></td>
-                    <td>$$\frac{LAD (cm)}{Weight (kg)^{0.309}}$$</td>
-                    <td><span class="important">&lt; 1.6</span></td>
-                </tr>
-            </tbody>
-        </table>
+<section class="sidebar-formulas" style="padding: 10px;">
+    <h4 class="sidebar-subheading">Normalized Reference</h4>
+    
+    <div class="formula-card">
+        <div class="formula-header">
+            <strong>LVIDd (n)</strong>
+            <span class="ref-badge">&lt; 1.7</span>
+        </div>
+        <div class="formula-math">
+            $$\frac{LVIDd}{Wt^{0.294}}$$
+        </div>
     </div>
-    <p style="font-size: 0.85rem; color: #64748b; font-style: italic; margin-top: 10px;">
-        *Normalized values based on allometric scaling (Cornell method).
-    </p>
 
+    <div class="formula-card">
+        <div class="formula-header">
+            <strong>LA Sax (n)</strong>
+            <span class="ref-badge">&lt; 1.17</span>
+        </div>
+        <div class="formula-math">
+            $$\frac{LA}{Wt^{0.355}}$$
+        </div>
+    </div>
 
-<p>LVIDdn:</p>
-<p>LVIDdn = 
-<span style="display: inline-block; vertical-align: middle; text-align: center;">
-    <span style="display: block; border-bottom: 1px solid black; padding: 0 5px;">LVIDd (cm)</span>
-    <span style="display: block; padding: 0 5px;">Weight (kg)<sup>0.294</sup></span>
-</span></p>
-<p><p>When normalised in this way, the value should be &lt; 1.7</p>
-<p>LA short axis (normalised):</p>
-<p>LA (short axis) normalised = 
-<span style="display: inline-block; vertical-align: middle; text-align: center;">
-    <span style="display: block; border-bottom: 1px solid black; padding: 0 5px;">LA (cm)</span>
-    <span style="display: block; padding: 0 5px;">Weight (kg)<sup>0.355</sup></span>
-</span></p>
-<p>When normalised in this way, the value should be &lt; 1.17 </p>
-<p>LAD normalised:</p>
-<p>LAD (long axis) normalised = 
-<span style="display: inline-block; vertical-align: middle; text-align: center;">
-    <span style="display: block; border-bottom: 1px solid black; padding: 0 5px;">LAD (cm)</span>
-    <span style="display: block; padding: 0 5px;">Weight (kg)<sup>0.309</sup></span>
-</span></p>
-<p>When normalised in this way, the value should be &lt; 1.6 </p>
+    <div class="formula-card">
+        <div class="formula-header">
+            <strong>LAD Lax (n)</strong>
+            <span class="ref-badge">&lt; 1.6</span>
+        </div>
+        <div class="formula-math">
+            $$\frac{LAD}{Wt^{0.309}}$$
+        </div>
+    </div>
+</section>
 
 
 
         </div>
-
+<div class="card">
           <h3>References</h3>
 <p>Cornell Allometric Scaling:</p>
 <p class="reference">Cornell et al. Allometric scaling of M-mode cardiac measurements in normal adult dogs. J Vet Intern Med. 2004</p>
