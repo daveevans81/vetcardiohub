@@ -2373,33 +2373,3 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
     border-radius: 3px;
     white-space: nowrap; /* Keep the < and the number together */
 }
-
-/* 1. The Global Fix for wobbling on mobile: Prevent the body from ever sliding sideways */
-html, body {
-    max-width: 100vw;
-    overflow-x: hidden;
-    position: relative;
-    /* This stops the 'rubber band' effect on some mobile browsers */
-    overscroll-behavior-x: none; 
-}
-
-/* 2. The Container Fix: Ensure all boxes use Border-Box sizing */
-* {
-    box-sizing: border-box;
-}
-
-/* 3. The Standalone Fix: Force everything to stay within the bounds */
-@media all and (display-mode: standalone) {
-    main {
-        overflow-x: hidden !important;
-        width: 100vw !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* If your table is causing the leak, force it to scroll internally only */
-    .table-container, .formula-sidebar-wrap {
-        max-width: 100% !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-    }
-}
