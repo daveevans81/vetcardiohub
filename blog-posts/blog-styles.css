@@ -2048,3 +2048,31 @@ header,
     }
     .nav-central-hub { order: 3; }
 }
+
+#article-navigation {
+    display: block; /* Ensures children (wrappers) stack vertically */
+    width: 100%;
+}
+
+.nav-visual-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 120px 1fr; /* This keeps the 3-column layout per row */
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px; /* Space between course row and blog row */
+}
+
+/* Ensure course cards look distinct but maintain your original styling */
+.course-card-nav {
+    background: #f0f9ff !important;
+    border: 2px solid #bae6fd !important;
+}
+
+@media (max-width: 768px) {
+    .nav-visual-wrapper {
+        grid-template-columns: 1fr; /* Stacks everything on mobile */
+    }
+    .nav-central-hub {
+        order: 3; /* Keeps 'All Articles' below the cards on mobile */
+    }
+}
