@@ -1974,3 +1974,77 @@ header,
 .nav-card.next .nav-card-label {
     color: #2563eb; /* Blue for 'Next' to encourage clicking */
 }
+
+/* Container Spacing */
+#article-navigation {
+    margin-top: 50px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 40px;
+}
+
+/* Course Header */
+.course-nav-header {
+    text-align: center;
+    font-weight: 800;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+/* Divider between Course and Blog Nav */
+.nav-divider {
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+    line-height: 0.1em;
+    margin: 40px 0 30px;
+}
+.nav-divider span {
+    background: #fff;
+    padding: 0 15px;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Course Nav Card Styling */
+.course-card-nav {
+    background: #f0f7ff !important;
+    border: 2px solid #bfdbfe !important;
+}
+.course-card-nav .nav-card-label {
+    color: #2563eb !important;
+}
+
+/* Blog Nav Card Styling (Make it smaller and subtle) */
+.blog-card-nav {
+    padding: 12px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+.blog-card-nav .nav-card-title {
+    font-size: 0.85rem !important;
+    color: #64748b !important;
+}
+
+/* Shared wrapper adjustments */
+.nav-visual-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 120px 1fr;
+    gap: 15px;
+    align-items: center;
+}
+
+.mod-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+@media (max-width: 600px) {
+    .nav-visual-wrapper {
+        grid-template-columns: 1fr;
+    }
+    .nav-central-hub { order: 3; }
+}
