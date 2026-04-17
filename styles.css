@@ -2329,52 +2329,47 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
 }
 
 /* Sidebar Formula Container */
-.sidebar-formulas {
-    background: #f8fafc;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+.formula-sidebar-wrap {
+    width: 100%;
+    overflow: hidden; /* Prevent any ghost overflow */
+    margin: 10px 0;
 }
 
-.formula-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 8px;
+.compact-clinical-table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+    font-size: 11px; /* Smaller base font */
+    line-height: 1.2;
 }
 
-.formula-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.formula-header strong {
-    font-size: 12px;
-    color: #1e293b;
-}
-
-/* The Reference Limit Badge */
-.ref-badge {
-    font-size: 10px;
-    font-weight: 800;
-    color: #dc2626;
-    background: #fef2f2;
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
-/* Shrinking the MathJax output for sidebar */
-.formula-math {
-    font-size: 0.85rem !important; /* Forces the math to be smaller */
-    text-align: center;
+.compact-clinical-table th {
+    text-align: left;
+    padding: 6px 4px;
+    background: #f1f5f9;
     color: #475569;
-    padding: 5px 0;
+    font-size: 10px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-/* Helper to make MathJax more compact in narrow spaces */
-.mjx-chtml {
-    margin: 0 !important;
-    padding: 0 !important;
+.compact-clinical-table td {
+    padding: 8px 4px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+/* Specifically shrinking the MathJax output even further */
+.compact-clinical-table .MathJax {
+    font-size: 0.8rem !important;
+}
+
+/* The small red limit badge */
+.ref-limit {
+    color: #dc2626;
+    font-weight: 800;
+    background: #fef2f2;
+    padding: 2px 4px;
+    border-radius: 3px;
+    white-space: nowrap; /* Keep the < and the number together */
 }
