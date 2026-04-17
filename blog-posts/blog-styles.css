@@ -291,6 +291,66 @@ h4 {
 
 
 
+.nav-link-center {
+
+  font-size: 0.8rem;
+
+  font-weight: 700;
+
+  color: #64748b;
+
+  text-decoration: none;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.05em;
+
+  white-space: nowrap;
+
+}
+
+
+
+.share-btn {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+
+  padding: 6px 12px;
+
+  border-radius: 8px;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  color: #475569;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+}
+
+
+
+.share-btn:hover {
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  border-color: #bfdbfe;
+
+}
+
 
 
 
