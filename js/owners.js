@@ -6,10 +6,15 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!hubContainer) return;
 
     // The logic: filter by featured AND by owner audience
+// Define the slugs you've already hard-coded on the page
+    const permanentSlugs = ["post19.html", "post18.html"];
+
     const featuredPosts = posts
         .filter(p => p.featured) 
-        .filter(p => p.audience === "owner" || p.audience === "both") 
-        .slice(0, 4); 
+        .filter(p => p.audience === "owner" || p.audience === "both")
+        // This line checks if the post slug is NOT in your permanent list
+        .filter(p => !permanentSlugs.includes(p.slug)) 
+        .slice(0, 4);
 
     if (featuredPosts.length > 0) {
         hubContainer.innerHTML = featuredPosts.map(p => `
