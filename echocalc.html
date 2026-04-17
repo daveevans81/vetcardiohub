@@ -123,14 +123,16 @@ link rel="manifest" href="/manifest.json">
 }
 
 .close-nudge {
-    background: none;
+    position: relative;
+    z-index: 10005; /* Ensures it sits above the banner background */
+    padding: 10px;  /* Larger hit area for thumbs */
+    margin-right: 5px;
+    background: transparent;
     border: none;
     color: #94a3b8;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 0 10px 0 0;
+    font-size: 24px;
     line-height: 1;
+    cursor: pointer;
 }
 
 .close-nudge:hover {
