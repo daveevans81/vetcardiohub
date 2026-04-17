@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const featuredPosts = posts
         .filter(p => p.featured) 
         .filter(p => p.audience === "owner" || p.audience === "both") 
-        .slice(0, 3); 
+        .slice(0, 4); 
 
     if (featuredPosts.length > 0) {
         hubContainer.innerHTML = featuredPosts.map(p => `

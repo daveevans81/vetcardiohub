@@ -2227,9 +2227,10 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
 
 .blog-feature-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* This ensures they wrap into a 2x2 grid on medium screens 
+       and a 4-column row on very wide screens */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
     gap: 20px;
-    margin-top: 15px;
 }
 
 /* Ensure the mini-cards stay uniform in height */
