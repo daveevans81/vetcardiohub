@@ -100,12 +100,7 @@ input {
 /* 5. GLOBAL FIXES (CRITICAL) */
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-html, body {
-    width: 100%;
-    overflow-x: hidden; /* Stop horizontal wobble */
-    overflow-y: auto;   /* ENSURE VERTICAL SCROLLING IS ALLOWED */
-    margin: 0; padding: 0;
-}
+
 
 main { user-select: none; -webkit-user-select: none; }
 input { user-select: auto; -webkit-user-select: auto; }
@@ -177,6 +172,66 @@ input { user-select: auto; -webkit-user-select: auto; }
         margin-left: 15px;
         z-index: 1001;
     }
+
+
+/* 1. RESTORE BANNER OVERFLOW */
+html {
+    overflow-x: initial; /* Allow the banner to 'breathe' at the root level */
+}
+
+body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    /* We move the overflow protection to the main content only */
+}
+
+/* Ensure the banner allows the image to break out of the box */
+.banner {
+    position: relative;
+    overflow: visible !important; /* This is the key to your aesthetic overflow */
+    z-index: 1;
+}
+
+/* Ensure the image doesn't block clicks even if it overlaps */
+.banner-image {
+    pointer-events: none; /* Clicks pass THROUGH the image to the buttons below */
+    z-index: -1; /* Pushes it behind the navigation text */
+}
+
+/* 2. THE MOBILE WOBBLE FIX (Targeted) */
+/* Instead of locking the whole 'html', we only lock the containers that jitter */
+main, footer, #install-nudge-static {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+
+
+/* 4. STANDALONE APP OVERRIDES */
+@media all and (display-mode: standalone) {
+    .banner, footer, #install-nudge-static {
+        display: none !important; /* Strip the website clutter in App mode */
+    }
+
+    .header-container {
+        display: flex !important;
+        align-items: center;
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        padding-top: env(safe-area-inset-top, 0px) !important;
+    }
+
+
+
+    main {
+        width: 100vw !important;
+        margin: 0 !important;
+        padding: 15px !important;
+        box-sizing: border-box !important;
+    }
+}
+
 
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
