@@ -239,14 +239,29 @@ input {
         margin: 0 !important;
         padding: 15px !important;
     }
-    /* Ensure it's hidden by default on the web */
-.app-branding {
-    display: none;
+/* 1. THE DESKTOP "KILL SWITCH" */
+/* This targets everything larger than a tablet and explicitly hides the app-only bits */
+@media (min-width: 1025px) {
+    #app-only-branding,
+    #install-nudge-static,
+    .app-branding {
+        display: none !important;
+    }
 }
 
+/* 2. THE MOBILE WEB "KILL SWITCH" */
+/* Hide the branding if we are on mobile but STILL in the browser (not the app) */
+@media (max-width: 1024px) {
+    #app-only-branding {
+        display: none !important;
+    }
+}
+
+/* 3. THE APP MODE "SHOW SWITCH" */
+/* ONLY show the branding and HIDE the nudge when actually launched from the home screen */
 @media all and (display-mode: standalone) {
     #app-only-branding {
-        display: block !important; /* !important ensures it overrides the default display:none */
+        display: block !important;
         font-size: 11px;
         font-weight: 800;
         text-transform: uppercase;
@@ -255,6 +270,10 @@ input {
         letter-spacing: 1.5px;
         text-align: center;
         width: 100%;
+    }
+    
+    #install-nudge-static {
+        display: none !important;
     }
 }
 
