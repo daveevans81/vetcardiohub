@@ -533,45 +533,21 @@ input {
     #install-nudge-static {
         display: none !important;
     }
-
-
-
-
-
-
+    header.hero.card {
+        display: none !important;
+    }
 
     /* 2. Style the Header Container for App Mode */
-
-
-
     .header-container {
-
-
-
         position: sticky;
-
-
-
         top: 0;
-
-
-
-        z-index: 1000;
-
-
-
+       z-index: 1000;
         background: #ffffff;
-
-
-
         border-bottom: 1px solid #e2e8f0;
 
 
 
         /* Padding for the iPhone Notch */
-
-
-
         padding-top: env(safe-area-inset-top, 10px) !important;
 
 
@@ -706,12 +682,7 @@ input {
 
 /* 1. THE DESKTOP "KILL SWITCH" */
 
-
-
 /* This targets everything larger than a tablet and explicitly hides the app-only bits */
-
-
-
 @media (min-width: 1025px) {
     #app-only-branding,
     #install-nudge-static,
