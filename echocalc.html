@@ -95,48 +95,68 @@
     width: 100%;
 }
 
-.install-banner {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
+.install-footer-box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 40px 0; /* Space from the calculator and the footer */
+}
+
+.nudge-icon {
+    font-size: 24px;
+    color: #2563eb;
+    background: #eff6ff;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.nudge-text {
+    flex-grow: 1;
+}
+
+.nudge-text h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    color: #1e293b;
+}
+
+.nudge-text p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+.btn-nudge-static {
     background: #1e293b;
     color: white;
-    padding: 12px 20px;
-    border-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    z-index: 10001;
-}
-
-.nudge-content { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 500; }
-.btn-nudge { 
-    background: #2563eb; 
-    color: white; 
-    border: none; 
-    padding: 6px 12px; 
-    border-radius: 6px; 
-    font-size: 11px; 
-    font-weight: 700;
-}
-
-.close-nudge {
-    position: relative;
-    z-index: 10005; /* Ensures it sits above the banner background */
-    padding: 10px;  /* Larger hit area for thumbs */
-    margin-right: 5px;
-    background: transparent;
     border: none;
-    color: #94a3b8;
-    font-size: 24px;
-    line-height: 1;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
     cursor: pointer;
+    transition: background 0.2s;
 }
 
-.close-nudge:hover {
-    color: #ffffff;
+.btn-nudge-static:hover {
+    background: #334155;
+}
+
+/* Hide if already in standalone 'App' mode */
+@media all and (display-mode: standalone) {
+    #install-nudge-static {
+        display: none;
+    }
 }
 
 /* Ensure the banner doesn't cover important calculator buttons */
@@ -617,6 +637,18 @@ input {
 
 
 <div class="small">This guide and calculator is designed for assistance in interpretation of echo results, but can't replace expert clinical judgement.</div>
+
+<section id="install-nudge-static" class="install-footer-box">
+    <div class="nudge-icon">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+    </div>
+    <div class="nudge-text">
+        <h4>Save as a Clinical App</h4>
+        <p>Add this calculator to your home screen for instant access during consults.</p>
+    </div>
+    <button onclick="showInstructions()" class="btn-nudge-static">How-To</button>
+</section>
+
 </div>
 
 </div>
