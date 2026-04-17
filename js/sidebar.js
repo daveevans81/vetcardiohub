@@ -21,7 +21,7 @@
       displayPosts = posts
         .filter(p => p.series === currentPost.series)
         .sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
-      listTitle = currentPost.series;
+      listTitle = `${currentPost.series} Course`;
       sidebarBadge = "Course Modules";
     } else {
       displayPosts = posts.filter(p => p.featured).slice(0, 5);
