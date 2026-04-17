@@ -157,6 +157,27 @@ input { user-select: auto; -webkit-user-select: auto; }
 @media screen and (max-width: 768px) {
     input, select, textarea { font-size: 16px !important; }
 }
+
+.menu-toggle {
+    display: none; /* Hidden on desktop by default */
+    background: #1e293b !important; /* Give it a dark background */
+    color: white !important; /* Force the ☰ to be white */
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 24px;
+    cursor: pointer;
+    border: none;
+    -webkit-appearance: none;
+}
+
+@media all and (display-mode: standalone) {
+
+    .menu-toggle {
+        display: block !important; /* Show it in the app */
+        margin-left: 15px;
+        z-index: 1001;
+    }
+
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
