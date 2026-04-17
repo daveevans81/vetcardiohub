@@ -16,6 +16,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="VetCardioHub Echo Calculator">
+link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
     
     <title>VetCardioHub Echo Calculator</title>
     <link rel="stylesheet" href="styles.css">
@@ -84,6 +90,33 @@
     border-bottom: 1px solid rgba(255,255,255,0.2);
     padding-bottom: 10px;
     width: 100%;
+}
+
+.install-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: #1e293b;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 10001;
+}
+
+.nudge-content { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 500; }
+.btn-nudge { 
+    background: #2563eb; 
+    color: white; 
+    border: none; 
+    padding: 6px 12px; 
+    border-radius: 6px; 
+    font-size: 11px; 
+    font-weight: 700;
 }
 
     </style>
@@ -456,9 +489,15 @@
       <aside>
 <div class="card"> <a href="/echo.html"><h3 style="text-align:center">Full Echocardiography Courses and Guides</h3><img src="/images/Ultrasound-fan.jpg" alt="Fan of ultrasound beam" style="width:250px"></a></div>
 
-       
-
-
+   <div class="card" style="margin-top:16px">    
+<div id="install-nudge" class="install-banner" style="display:none;">
+    <div class="nudge-content">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+        <span>Save to Home Screen for instant clinical use</span>
+    </div>
+    <button onclick="showInstructions()" class="btn-nudge">How-To</button>
+</div>
+</div>
 
         <div class="card" style="margin-top:16px">
 <p>LAD measurement:</p>
@@ -472,7 +511,7 @@
 <a href="/blog-posts/post7.html"><img src="/images/acvim_stages.png" alt="ACVIM Stages" class="stage-image"></a>
 
 <p class="reference" style="color: white;">Reference: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6524084/" style="color: white;">Keene et al (2019) ACVIM consensus guidelines for the diagnosis and treatment of myxomatous mitral valve disease in dogs. J Vet Intern Med. 33(3):1127-1140.J</a></p>
-</div>
+</div></div>
 
  <div class="card" style="padding: 0px">
 <section class="formula-sidebar-wrap" style="margin: 0px">
@@ -536,5 +575,6 @@
 <div id="site-footer"></div>
 
 <script src="/js/load-partials.js"></script>
+<script src="/js/echocalc.js"></script>
 </body>
 </html>
