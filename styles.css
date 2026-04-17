@@ -2223,6 +2223,37 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
     border-radius: 4px;
 }
 
+
+
+.blog-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+/* Ensure the mini-cards stay uniform in height */
+.blog-mini-card {
+    display: flex;
+    flex-direction: column; /* Stacks image on top of text for a 'card' look */
+    height: 100%;
+}
+
+.blog-mini-img {
+    width: 100%;
+    height: 160px; /* Fixed height for consistent grid look */
+}
+
+.blog-mini-content {
+    flex-grow: 1; /* Pushes content to fill the card */
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-mini-content p {
+    flex-grow: 1;
+}
+
 @media (max-width: 480px) {
     .blog-mini-card {
         flex-direction: column;
