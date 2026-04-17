@@ -96,4 +96,37 @@
             }
         }
     });
+// --- AUTO-INJECT LIGHTBOX LOGIC ---
+
+// 1. Create and Inject the Modal HTML
+const modalHTML = `
+    <div id="image-modal" style="display:none; position:fixed; z-index:99999; padding-top:50px; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.9); cursor:zoom-out;" onclick="this.style.display='none'">
+        <span style="position:absolute; top:20px; right:35px; color:#f1f1f1; font-size:40px; font-weight:bold; cursor:pointer;">&times;</span>
+        <img id="modal-img" style="margin:auto; display:block; max-width:90%; max-height:85vh; border-radius:8px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
+        <div id="modal-caption" style="margin:auto; display:block; width:80%; max-width:700px; text-align:center; color:#ccc; padding:15px 0; font-size:14px; font-family:sans-serif;"></div>
+    </div>
+`;
+
+// Append modal to body
+document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+// 2. Find all images in the blog container and make them clickable
+const blogImages = document.querySelectorAll(".blog-container img");
+const modal = document.getElementById("image-modal");
+const modalImg = document.getElementById("modal-img");
+const captionText = document.getElementById("modal-caption");
+
+blogImages.forEach(img => {
+    // Add visual cue that image is clickable
+    img.style.cursor = "zoom-in";
+    
+    img.onclick = function(e) {
+        // Prevent clicking through to links if the image is wrapped in one
+        e.preventDefault(); 
+        
+        modal.style.display = "block";
+        modalImg.src = this.src;
+        captionText.innerHTML = this.alt || "VetCardioHub Clinical Image";
+    };
+});
 })();

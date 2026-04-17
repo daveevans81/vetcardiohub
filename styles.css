@@ -2317,3 +2317,13 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
 .btn-course:hover {
     background: #e2e8f0;
 }
+
+/* Ensure the modal images scale nicely and doesn't 'snap' */
+#modal-img {
+    animation: zoom 0.3s;
+}
+
+@keyframes zoom {
+    from {transform:scale(0.95); opacity:0} 
+    to {transform:scale(1); opacity:1}
+}
