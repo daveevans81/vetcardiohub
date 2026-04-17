@@ -122,6 +122,8 @@ window.posts = [
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
+    series: "Cat Heart Foundations", // The name of the course
+    seriesOrder: 4,                 // Step 4
     category: "Monitoring",
     readTime: "6 min read",
     group: "management",
@@ -139,6 +141,8 @@ window.posts = [
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
+    series: "Dog Heart Foundations", // The name of the course
+    seriesOrder: 3,                 // Step 3
     category: "Diagnosis",
     readTime: "6 min read",
     group: "foundations",
@@ -190,6 +194,8 @@ window.posts = [
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
+    series: "Cat Heart Foundations", // The name of the course
+    seriesOrder: 1,                 // Step 1
     category: "Murmurs",
     readTime: "7 min read",
     group: "foundations",
@@ -224,6 +230,8 @@ window.posts = [
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
+    series: "Cat Heart Foundations", // The name of the course
+    seriesOrder: 2,                 // Step 2
     category: "Diagnosis",
     readTime: "10 min read",
     group: "foundations",
@@ -258,6 +266,8 @@ window.posts = [
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
+    series: "Dog Heart Foundations", // The name of the course
+    seriesOrder: 5,                 // Step 5
     category: "Medication",
     readTime: "6 min read",
     group: "management",
@@ -275,6 +285,8 @@ window.posts = [
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
+    series: "Dog Heart Foundations", // The name of the course
+    seriesOrder: 4,                 // Step 4
     category: "Diagnosis",
     readTime: "8 min read",
     group: "foundations",
@@ -292,6 +304,8 @@ window.posts = [
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
+    series: "Dog Heart Foundations", // The name of the course
+    seriesOrder: 2,                 // Step 2
     category: "Diagnosis",
     readTime: "6 min read",
     group: "foundations",
@@ -343,6 +357,8 @@ window.posts = [
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
+    series: "Cat Heart Foundations", // The name of the course
+    seriesOrder: 3,                 // Step 3
     category: "Diagnosis",
     readTime: "8 min read",
     group: "foundations",
@@ -377,6 +393,8 @@ window.posts = [
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
+    series: "Dog Heart Foundations", // The name of the course
+    seriesOrder: 1,                 // Step 1
     category: "Murmurs",
     readTime: "10 min read",
     group: "foundations",
