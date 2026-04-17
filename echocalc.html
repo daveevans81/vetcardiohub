@@ -122,6 +122,49 @@ link rel="manifest" href="/manifest.json">
     font-weight: 700;
 }
 
+.close-nudge {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 10px 0 0;
+    line-height: 1;
+}
+
+.close-nudge:hover {
+    color: #ffffff;
+}
+
+/* Ensure the banner doesn't cover important calculator buttons */
+.install-banner {
+    z-index: 10001;
+    transition: opacity 0.3s ease;
+}
+
+/* Prevents iOS from zooming in on input fields */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Smooths the scrolling if your calculator has a long list of formulas below it */
+.echo-calc-container {
+    -webkit-overflow-scrolling: touch;
+}
+* { -webkit-tap-highlight-color: transparent; }
+
+main {
+    user-select: none;
+    -webkit-user-select: none;
+}
+input {
+    user-select: auto; /* Allow selection only in the boxes they need to type in */
+    -webkit-user-select: auto;
+}
+
     </style>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -483,7 +526,14 @@ link rel="manifest" href="/manifest.json">
 
         </section>
 
-
+<div id="install-nudge" class="install-banner" style="display:none;">
+    <div class="nudge-content">
+        <button onclick="dismissNudge()" class="close-nudge" aria-label="Dismiss">&times;</button>
+        <i class="fa-solid fa-mobile-screen-button"></i>
+        <span>Save to Home Screen for clinical use</span>
+    </div>
+    <button onclick="showInstructions()" class="btn-nudge">How-To</button>
+</div>
 
 
       </main>
@@ -493,14 +543,7 @@ link rel="manifest" href="/manifest.json">
 <div class="card"> <a href="/echo.html"><h3 style="text-align:center">Full Echocardiography Courses and Guides</h3><img src="/images/Ultrasound-fan.jpg" alt="Fan of ultrasound beam" style="width:250px"></a></div>
 
    <div class="card" style="margin-top:16px">    
-<div id="install-nudge" class="install-banner" style="display:none;">
-    <div class="nudge-content">
-        <i class="fa-solid fa-mobile-screen-button"></i>
-        <span>Save to Home Screen for instant clinical use</span>
-    </div>
-    <button onclick="showInstructions()" class="btn-nudge">How-To</button>
-</div>
-</div>
+
 
         <div class="card" style="margin-top:16px">
 <p>LAD measurement:</p>
