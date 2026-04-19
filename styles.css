@@ -2492,3 +2492,16 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
     font-weight: bold;
     color: #64748b;
 }
+
+.series-badge {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    font-weight: 600;
+}
+
+.dashboard-divider {
+    border: 0;
+    border-top: 1px solid #e2e8f0;
+    margin: 30px 0;
+}
