@@ -1,4 +1,27 @@
 window.posts = [
+
+
+  {
+    slug: "post23.html",
+    title: "Echocardiography Basics 4: Why the Long-Axis Left Atrium (LAD) is Often Better",
+    subtitle: "Lots of reasons to learn this over LA:Ao...",
+    date: "April 19, 2026",
+    reviewed: "April 19, 2026",
+    author: "Dave Evans",
+    authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
+    authorLink: "../about.html#daveevans",
+    category: "Echocardiography",
+    level: "Beginner", 
+    series: "Foundations of Echo",
+    seriesOrder: 4,
+    technique: "Right-Sided SAX",
+    readTime: "9 min read",
+    group: "diagnosis",
+    audience: "vet",
+    featured: false,
+    image: "/images/LADmeasure.jpg",
+    snippet: "The LAD measurement has lots of benefits and improvements compared to using the LA:Ao. Lets have a look at how its done, and how we can account for different sized dogs."
+  },    
   {
     slug: "post22.html",
     title: "Echocardiography Basics 3: Complications with the Left Atrium to Aorta Ratio (LA:Ao)",
