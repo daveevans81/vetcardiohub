@@ -241,7 +241,7 @@ window.posts = [
     group: "foundations",
     audience: "both",
     featured: false,
-    image: "/images/blog11piechart.jpg",
+    image: "/images/blog11piechart.jpeg",
     snippet: "Over 60% of UK vet practices are now corporate-owned. What does this shift mean for your pet's care and your wallet?"
   },
   {
