@@ -5,68 +5,64 @@
   const searchInput = document.getElementById("blog-search");
   const filterButtons = document.querySelectorAll(".filter-btn");
 
-  // --- 1. Calculate Category Counts ---
-  const counts = posts.reduce((acc, post) => {
-    acc[post.category] = (acc[post.category] || 0) + 1;
-    acc["all"] = (acc["all"] || 0) + 1;
-    return acc;
-  }, { all: 0 });
+  if (typeof posts === 'undefined') return;
 
-  // Update button text with counts (e.g., "Diagnosis 4")
-  filterButtons.forEach(btn => {
-    const cat = btn.getAttribute("data-category");
-    const count = counts[cat] || 0;
-    btn.innerHTML = `${cat.charAt(0).toUpperCase() + cat.slice(1)} <span class="count">${count}</span>`;
-  });
-
-  // --- 2. Main Render Function ---
+  // --- 1. Render Function ---
   function renderPosts(postsToDisplay) {
     if (!feedContainer) return;
 
-    // A. RENDER THE COURSE DASHBOARD (Top Section)
-    // We always pull from the full 'posts' array so courses stay visible
-    const coursePosts = posts.filter(p => p.category.toLowerCase() === 'courses');
-    
+    // A. FIND UNIQUE SERIES (DASHBOARD LOGIC)
+    // We look for all unique 'series' names and find the lesson 1 for each
+    const seriesLessons = posts.reduce((acc, post) => {
+      if (post.series) {
+        // If we haven't found this series yet, or this is Lesson 1, store it
+        if (!acc[post.series] || post.seriesOrder === 1) {
+          acc[post.series] = post;
+        }
+      }
+      return acc;
+    }, {});
+
+    const uniqueSeries = Object.values(seriesLessons);
+    console.log("Unique Series found:", uniqueSeries.length);
+
     if (dashboardContainer) {
-      if (coursePosts.length > 0) {
+      if (uniqueSeries.length > 0) {
         dashboardContainer.innerHTML = `
             <div class="course-dashboard">
-                <h4 class="filter-section-title">Active Courses</h4>
+                <h4 class="filter-section-title">Clinical Series & Courses</h4>
                 <div class="course-grid">
-                    ${coursePosts.map(course => `
+                    ${uniqueSeries.map(course => `
                         <a href="blog-posts/${course.slug}" class="course-launch-card">
-                            <span class="course-tag">FOUNDATION</span>
-                            <span class="course-name">${course.title}</span>
-                            <span class="course-action">Start Lesson 1 →</span>
+                            <span class="course-tag">SERIES</span>
+                            <span class="course-name">${course.series}</span>
+                            <span class="course-action">Start from Lesson 1 →</span>
                         </a>
                     `).join('')}
                 </div>
+                <hr class="dashboard-divider">
             </div>
         `;
       } else {
-        dashboardContainer.innerHTML = ''; // Hide if no courses exist
+        dashboardContainer.innerHTML = ''; 
       }
     }
 
-    // B. HANDLE NO SEARCH RESULTS (For the main list)
+    // B. RENDER MAIN FEED
     if (postsToDisplay.length === 0) {
-      feedContainer.innerHTML = `<p class="no-results">No articles found matching your search.</p>`;
+      feedContainer.innerHTML = `<p class="no-results">No articles found.</p>`;
       return;
     }
 
-    // C. RENDER THE BLOG FEED (Bottom Section)
     const defaultImage = "/images/thumbnails/default-placeholder.jpg";
 
     feedContainer.innerHTML = postsToDisplay.map(post => {
-      // Logic: If it's a course, we've already shown it in the dashboard, 
-      // so we skip it in the chronological list to avoid clutter.
-      if (post.category.toLowerCase() === 'courses') return '';
+      const thumbnailToUse = post.image || defaultImage;
+      const audience = post.audience || 'vet';
 
-      const thumbnailToUse = post.image ? post.image : defaultImage;
-
-      let audienceHtml = post.audience === 'both' 
+      let audienceHtml = audience === 'both' 
         ? '<span class="badge audience-tag owner">OWNER</span><span class="badge audience-tag vet">VET</span>'
-        : `<span class="badge audience-tag ${post.audience}">${post.audience.toUpperCase()}</span>`;
+        : `<span class="badge audience-tag ${audience}">${audience.toUpperCase()}</span>`;
 
       return `
         <li class="${post.featured ? 'featured-item-highlight' : ''}">
@@ -76,62 +72,41 @@
                 ${post.featured ? '<span class="badge featured-badge">★ Featured</span>' : ''}
                 ${audienceHtml}
                 <span class="badge date-badge">${post.date}</span>
-                <span class="badge read-badge">
-                    <i class="fa-regular fa-clock"></i> ${post.readTime || '5 min read'}
-                </span>
+                ${post.series ? `<span class="badge series-badge">${post.series} #${post.seriesOrder}</span>` : ''}
               </div>
-              
               <a href="blog-posts/${post.slug}" class="post-title">${post.title}</a>
               <p class="snippet">${post.snippet}</p>
-              
-              <div class="topic-footer">
-                <span class="category-label">Category:</span>
-                <span class="category-tag">${post.category}</span>
-              </div>
             </div>
-            
-            ${thumbnailToUse ? `
-              <div class="post-thumbnail">
+            <div class="post-thumbnail">
                 <img src="${thumbnailToUse}" alt="${post.title}" loading="lazy">
-              </div>
-            ` : ''}
+            </div>
           </div>
         </li>
       `;
     }).join("");
   }
 
-  // --- 3. Initial Render ---
+  // --- 2. Initial Render & Event Listeners ---
   renderPosts(posts);
 
-  // --- 4. Live Search Logic ---
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       const term = e.target.value.toLowerCase();
       const filtered = posts.filter(p => 
         p.title.toLowerCase().includes(term) || 
-        p.snippet.toLowerCase().includes(term) ||
-        p.category.toLowerCase().includes(term)
+        p.snippet.toLowerCase().includes(term)
       );
       renderPosts(filtered);
     });
   }
 
-  // --- 5. Category Filtering Logic ---
   filterButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       const category = btn.getAttribute("data-category");
-      
-      // Update UI
       filterButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
-      if (category === "all") {
-        renderPosts(posts);
-      } else {
-        const filtered = posts.filter(p => p.category === category);
-        renderPosts(filtered);
-      }
+      const filtered = category === "all" ? posts : posts.filter(p => p.category === category);
+      renderPosts(filtered);
     });
   });
 })();
