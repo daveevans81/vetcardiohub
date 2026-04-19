@@ -205,7 +205,7 @@ window.posts = [
     group: "management",
     audience: "owner",
     featured: true,
-    image: "",
+    image: "/images/tracker_cat.jpg",
     snippet: "How do you really monitor your pet’s heart disease at home? We look at whether tracking collars and smart monitors are worth the investment."
   },
   {
