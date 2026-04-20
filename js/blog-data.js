@@ -1,6 +1,24 @@
 window.posts = [
 
-
+  {
+    slug: "post24.html",
+    title: "Diuretic Therapy in Heart Failure",
+    subtitle: "Why we use furosemide (lasix) and when...",
+    date: "April 20, 2026",
+    reviewed: "April 20, 2026",
+    author: "Dave Evans",
+    authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
+    authorLink: "../about.html#daveevans",
+    series: "Dog Heart Foundations", // The name of the course
+    seriesOrder: 6,                 // Step 6
+    category: "Medication",
+    readTime: "9 min read",
+    group: "management",
+    audience: "both",
+    featured: false,
+    image: "/images/medications.jpeg",
+    snippet: "<strong>Diuretic therapy</strong> is the primary tool used by vets to manage congestive heart failure, yet its application requires a sophisticated understanding of renal physiology, cardiac remodelling, and the precise timing of intervention."
+  },  
   {
     slug: "post23.html",
     title: "Echocardiography Basics 4: Why the Long-Axis Left Atrium (LAD) is Often Better",
