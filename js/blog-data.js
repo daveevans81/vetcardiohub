@@ -395,7 +395,7 @@ window.posts = [
     title: "Sleeping Respiratory Rate (SRR)",
     subtitle: "What is it? Why measure it? When is it important?",
     date: "March 3, 2025",
-    reviewed: "March 3, 2025",
+    reviewed: "April 20, 2026",
     author: "Dave Evans",
     authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
     authorLink: "../about.html#daveevans",
@@ -404,7 +404,7 @@ window.posts = [
     group: "management",
     audience: "owner",
     featured: false,
-    image: "/images/srrgraph.jpg",
+    image: "/images/kittenasleep.jpg",
     snippet: "Monitoring breathing rate during sleep provides early clues to heart problems. Find out how to perform this vital check at home."
   },
   {
