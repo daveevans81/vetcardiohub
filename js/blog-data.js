@@ -15,7 +15,7 @@ window.posts = [
     group: "management",
     audience: "both",
     featured: false,
-    image: "/images/frenchieoxygen",
+    image: "/images/frenchieoxygen.jpg",
     snippet: "In <strong>congestive heart failure (CHF)</strong>, few interventions feel as immediately life-saving as oxygen. When a dog is struggling to breathe, giving oxygen is instinctive, and often correct. But here’s the problem: <em>Once that crisis has passed, more oxygen is not always better, and may not help at all.</em>"
   },  
   {
