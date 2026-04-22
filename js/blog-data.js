@@ -1,5 +1,23 @@
 window.posts = [
-
+  {
+    slug: "post25.html",
+    title: "Oxygen Therapy in Canine Heart Disease:",
+    subtitle: "The Science of the Diffusion Barrier and the Transition to Home Care",
+    date: "April 22, 2026",
+    reviewed: "April 22, 2026",
+    author: "Dave Evans",
+    authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
+    authorLink: "../about.html#daveevans",
+    series: "Dog Heart Foundations", // The name of the course
+    seriesOrder: 7,                 // Step 6
+    category: "Medication",
+    readTime: "9 min read",
+    group: "management",
+    audience: "both",
+    featured: false,
+    image: "/images/frenchieoxygen",
+    snippet: "In <strong>congestive heart failure (CHF)</strong>, few interventions feel as immediately life-saving as oxygen. When a dog is struggling to breathe, giving oxygen is instinctive, and often correct. But here’s the problem: <em>Once that crisis has passed, more oxygen is not always better, and may not help at all.</em>"
+  },  
   {
     slug: "post24.html",
     title: "Diuretic Therapy in Heart Failure",
