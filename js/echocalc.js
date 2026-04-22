@@ -1,3 +1,4 @@
+// Function to show instructions (existing)
 function showInstructions() {
     const isiOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     if (isiOS) {
@@ -7,12 +8,9 @@ function showInstructions() {
     }
 }
 
-
-
 // 1. Populate the dropdown on load
 document.addEventListener('DOMContentLoaded', function() {
     const selector = document.getElementById('breed-selector');
-    // Check if the data file loaded and the selector exists
     if (selector && typeof breedSpecificReferenceRanges!== 'undefined') {
         const breedNames = Object.keys(breedSpecificReferenceRanges).sort();
         breedNames.forEach(breed => {
@@ -24,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// 2. Build the comparison table
 function updateBreedTable() {
     const selector = document.getElementById('breed-selector');
     const container = document.getElementById('breed-data-container');
@@ -36,17 +35,9 @@ function updateBreedTable() {
 
     const data = breedSpecificReferenceRanges[breedName];
     
-    // This helper safely gets current Alpine data for the comparison column
-    const getPatientVal = (modelName) => {
-        const el = document.querySelector(`[x-model="${modelName}"]`);
-        return el && el.value? el.value : '—';
-    };
-
-    // For calculated getters like LVIDdN
-    const getCalculatedVal = (xTextName) => {
-        const el = document.querySelector(``);
-        return el? el.innerText : '—';
-    };
+    // Safety check: Get data from the nearest Alpine component
+    const alpineEl = document.querySelector('[x-data]');
+    const patientData = alpineEl? alpineEl.__x.$data : {};
 
     let html = '';
 
@@ -60,28 +51,25 @@ function updateBreedTable() {
                 <thead style="background-color: #f8f9fa;">
                     <tr>
                         <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Metric</th>
-                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Patient</th>
-                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed RI (Limit)</th>
+                        <th style="padding: 10px; border: 10px solid #dee2e6; text-align: left;">Patient</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed Normal</th>
                     </tr>
                 </thead>
                 <tbody>`;
 
-    // Configuration for which keys in your data file match which Alpine variables
-    const metrics =;
+    // Map your Alpine variables to the breed data keys
+    const metricsToCompare =;
 
-    metrics.forEach(m => {
+    metricsToCompare.forEach(m => {
         if (data[m.key]) {
-            // Using double pipe |
-
-| for the fallback
-            let breedLimit = data[m.key].max |
+            let breedVal = data[m.key].max |
 
 | data[m.key].median |
 | data[m.key];
             html += `<tr>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.label}</td>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.patient}</td>
-                        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>${breedLimit}</strong></td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>${breedVal}</strong></td>
                      </tr>`;
         }
     });
@@ -90,12 +78,12 @@ function updateBreedTable() {
 
     if (data.clinical_note) {
         html += `<div style="background-color: #f1f5f9; padding: 12px; border-radius: 4px; font-style: italic; margin-top: 10px; border-left: 4px solid #64748b;">
-                    <strong>Clinical Note:</strong> ${data.clinical_note}
+                    <strong>Note:</strong> ${data.clinical_note}
                  </div>`;
     }
 
     if (data.pmid) {
-        html += `<p style="margin-top:10px;"><a href="https://pubmed.ncbi.nlm.nih.gov/${data.pmid}" target="_blank" style="color: #2563eb; font-size: 0.85rem; text-decoration: underline;">🔗 View Primary Research (PMID: ${data.pmid})</a></p>`;
+        html += `<p style="margin-top:10px;"><a href="https://pubmed.ncbi.nlm.nih.gov/${data.pmid}" target="_blank" style="color: #2563eb; font-size: 0.85rem; text-decoration: underline;">🔗 View Research (PMID: ${data.pmid})</a></p>`;
     }
 
     container.innerHTML = html;
