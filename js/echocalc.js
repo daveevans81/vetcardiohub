@@ -34,33 +34,16 @@ function updateBreedTable() {
 
     const data = breedSpecificReferenceRanges[breedName];
     
-    // Access the values entered in your Alpine calculator
-    // We use document.querySelector to grab the current text or value
-    const pLVIDd = document.querySelector('[x-model="lvidd"]')?.value |
-
-| '—';
-    const pLVIDs = document.querySelector('[x-model="lvids"]')?.value |
-
-| '—';
-    const pLA = document.querySelector('[x-model="la"]')?.value |
-
-| '—';
-    const pAo = document.querySelector('[x-model="ao"]')?.value |
-
-| '—';
-    
-    // For calculated values, we can grab the text inside your result spans
-    // Ensure these selectors match your HTML classes/IDs
-    const pLVIDdN = document.querySelector('[x-text="lviddn"]')?.innerText |
-
-| '—';
-    const pLAAo = (pLA && pAo && pAo > 0)? (pLA / pAo).toFixed(2) : '—';
+    // Access current Alpine.js values directly from the proxy object
+    // Note: We use __x.$data to access the scope if calling from outside, 
+    // but standard DOM selection is safer for mixed setups:
+    const alpineData = document.querySelector('[x-data]').__x.$data;
 
     let html = '';
 
     if (data.is_deviant) {
         html += `<div style="background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; color: #856404; font-weight: bold;">
-                    ⚠️ CLINICAL ALERT: ${breedName} is a "deviant" breed. Standard multi-breed formulas (Cornell) may lead to misdiagnosis.
+                    ⚠️ CLINICAL ALERT: ${breedName} is a "deviant" breed. Standard multi-breed formulas (Cornell) often result in mis-staging.
                  </div>`;
     }
 
@@ -69,27 +52,24 @@ function updateBreedTable() {
                     <tr>
                         <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Metric</th>
                         <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Patient</th>
-                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed Normal (Upper RI)</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed RI (Limit)</th>
                     </tr>
                 </thead>
                 <tbody>`;
 
-    // Mapping key results for comparison
-    const comparisonMetrics =;
+    const metrics =;
 
-    comparisonMetrics.forEach(m => {
+    metrics.forEach(m => {
         if (data[m.key]) {
-            // Fix: using double pipe |
-
-| for fallback
-            let breedVal = data[m.key].max |
+            let breedLimit = data[m.key].max |
 
 | data[m.key].median |
-| data[m.key];
+| data[m.key].min |
+| '—';
             html += `<tr>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.label}</td>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.patient}</td>
-                        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>${breedVal}</strong></td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>${breedLimit}</strong></td>
                      </tr>`;
         }
     });
@@ -97,13 +77,13 @@ function updateBreedTable() {
     html += `</tbody></table>`;
 
     if (data.clinical_note) {
-        html += `<div style="background-color: #e9ecef; padding: 12px; border-radius: 4px; font-style: italic; margin-top: 10px;">
+        html += `<div style="background-color: #f1f5f9; padding: 12px; border-radius: 4px; font-style: italic; margin-top: 10px; border-left: 4px solid #64748b;">
                     <strong>Note:</strong> ${data.clinical_note}
                  </div>`;
     }
 
     if (data.pmid) {
-        html += `<p style="margin-top:10px;"><a href="https://pubmed.ncbi.nlm.nih.gov/${data.pmid}" target="_blank" style="color: #0056b3; font-size: 0.85rem;">🔗 View Research (PMID: ${data.pmid})</a></p>`;
+        html += `<p style="margin-top:10px;"><a href="https://pubmed.ncbi.nlm.nih.gov/${data.pmid}" target="_blank" style="color: #2563eb; font-size: 0.85rem; text-decoration: underline;">🔗 View Primary Research (PMID: ${data.pmid})</a></p>`;
     }
 
     container.innerHTML = html;
