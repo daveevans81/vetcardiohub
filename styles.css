@@ -2505,3 +2505,18 @@ footer { margin-top: 26px; padding: 18px; text-align:center; color:#6b7280; font
     border-top: 1px solid #e2e8f0;
     margin: 30px 0;
 }
+
+
+/* Expandable sections */
+details {
+  margin: 10px 0;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+details[open] summary {
+  color: #0077cc;
+}
