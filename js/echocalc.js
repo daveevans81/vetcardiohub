@@ -11,7 +11,8 @@ function showInstructions() {
 
 document.addEventListener('DOMContentLoaded', function() {
     const selector = document.getElementById('breed-selector');
-    if (selector && typeof breedSpecificReferenceRanges!== 'undefined') {
+    // Check if the data object exists from your external file
+    if (selector && typeof breedSpecificReferenceRanges !== 'undefined') {
         const breedNames = Object.keys(breedSpecificReferenceRanges).sort();
         breedNames.forEach(breed => {
             let option = document.createElement('option');
@@ -34,22 +35,11 @@ function updateBreedTable() {
 
     const data = breedSpecificReferenceRanges[breedName];
     
-    // Access the current patient values from your Alpine.js inputs
-    const pLVIDd = document.querySelector('[x-model="lvidd"]')?.value |
-
-| '—';
-    const pLVIDs = document.querySelector('[x-model="lvids"]')?.value |
-
-| '—';
-    const pLVIDdN = document.querySelector('[x-text="lviddn"]')?.innerText |
-
-| '—';
-    const pLAAo = document.querySelector('[x-text="laAo"]')?.innerText |
-
-| '—';
-    const pIVS = document.querySelector('[x-model="ivsd"]')?.value |
-
-| '—';
+    // Corrected selection logic using || for defaults
+    const pLVIDd = document.querySelector('[x-model="lvidd"]')?.value || '—';
+    const pLVIDs = document.querySelector('[x-model="lvids"]')?.value || '—';
+    const pLVIDdN = document.querySelector('[x-text="lviddn"]')?.innerText || '—';
+    const pLAAo = document.querySelector('[x-text="laAo"]')?.innerText || '—';
 
     let html = '';
 
@@ -69,16 +59,18 @@ function updateBreedTable() {
                 </thead>
                 <tbody>`;
 
-    // Mapping your data keys to labels and patient values
-    const metricsToCompare =;
+    // Corrected the metrics array mapping
+    const metricsToCompare = [
+        { key: 'lvidd_mm', label: 'LVIDd (mm)', patient: pLVIDd },
+        { key: 'lvids_mm', label: 'LVIDs (mm)', patient: pLVIDs },
+        { key: 'lvidd_n', label: 'LVIDdN', patient: pLVIDdN },
+        { key: 'la_ao', label: 'LA:Ao Ratio', patient: pLAAo }
+    ];
 
     metricsToCompare.forEach(m => {
         if (data[m.key]) {
-            let breedLimit = data[m.key].max |
-
-| data[m.key].median |
-| data[m.key].mean |
-| '—';
+            // Checks for max, then median, then mean, then default
+            let breedLimit = data[m.key].max || data[m.key].median || data[m.key].mean || '—';
             html += `<tr>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.label}</td>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.patient}</td>
