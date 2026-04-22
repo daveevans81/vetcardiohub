@@ -731,6 +731,53 @@ input {
         display: none !important;
     }
 }
+
+
+/* Table styling for breed specific clinical data */
+.breed-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.breed-table th,.breed-table td {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    text-align: left;
+}
+
+.breed-table th {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+/* Alert styling for Deviant Breeds */
+.deviant-alert {
+    background-color: #fff3cd;
+    border-left: 5px solid #ffc107;
+    padding: 15px;
+    margin-bottom: 15px;
+    color: #856404;
+    font-weight: bold;
+}
+
+.clinical-note {
+    background-color: #e9ecef;
+    padding: 12px;
+    border-radius: 4px;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.pubmed-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #0056b3;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
     </style>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -1093,7 +1140,24 @@ input {
 
         </section>
 
+    <section class="card" style="margin-top:18px" id="breed-normals-card">
 
+    <h3>Is your patient a breed with recorded echo normals?</h3>
+    <p>Select a breed to view published reference intervals and clinical caveats.</p>
+    
+    <div class="input-group">
+        <select id="breed-selector" onchange="updateBreedTable()">
+            <option value="">-- Select a Breed --</option>
+        </select>
+    </div>
+
+    <div id="breed-data-container" style="margin-top: 20px;">
+        </div>
+
+
+
+
+</section>
 
 
       </main>
@@ -1193,6 +1257,8 @@ input {
 </div>
 <div id="site-footer"></div>
 
+
+<script src="/js/echo-breeds.js"></script>
 <script src="/js/load-partials.js"></script>
 <script src="/js/echocalc.js"></script>
 </body>
