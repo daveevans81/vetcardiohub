@@ -7,10 +7,12 @@ function showInstructions() {
     }
 };
 
-// This function runs on page load to fill the dropdown
+
+
 // 1. Populate the dropdown on load
 document.addEventListener('DOMContentLoaded', function() {
     const selector = document.getElementById('breed-selector');
+    // Check if the data file loaded and the selector exists
     if (selector && typeof breedSpecificReferenceRanges!== 'undefined') {
         const breedNames = Object.keys(breedSpecificReferenceRanges).sort();
         breedNames.forEach(breed => {
@@ -34,15 +36,22 @@ function updateBreedTable() {
 
     const data = breedSpecificReferenceRanges[breedName];
     
-    // Access current Alpine.js values directly from the proxy object
-    // Note: We use __x.$data to access the scope if calling from outside, 
-    // but standard DOM selection is safer for mixed setups:
-    const alpineData = document.querySelector('[x-data]').__x.$data;
+    // This helper safely gets current Alpine data for the comparison column
+    const getPatientVal = (modelName) => {
+        const el = document.querySelector(`[x-model="${modelName}"]`);
+        return el && el.value? el.value : '—';
+    };
+
+    // For calculated getters like LVIDdN
+    const getCalculatedVal = (xTextName) => {
+        const el = document.querySelector(``);
+        return el? el.innerText : '—';
+    };
 
     let html = '';
 
     if (data.is_deviant) {
-        html += `<div style="background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; color: #856404; font-weight: bold;">
+        html += `<div style="background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; color: #856404; font-weight: bold; border-radius: 4px;">
                     ⚠️ CLINICAL ALERT: ${breedName} is a "deviant" breed. Standard multi-breed formulas (Cornell) often result in mis-staging.
                  </div>`;
     }
@@ -57,15 +66,18 @@ function updateBreedTable() {
                 </thead>
                 <tbody>`;
 
+    // Configuration for which keys in your data file match which Alpine variables
     const metrics =;
 
     metrics.forEach(m => {
         if (data[m.key]) {
+            // Using double pipe |
+
+| for the fallback
             let breedLimit = data[m.key].max |
 
 | data[m.key].median |
-| data[m.key].min |
-| '—';
+| data[m.key];
             html += `<tr>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.label}</td>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.patient}</td>
@@ -78,7 +90,7 @@ function updateBreedTable() {
 
     if (data.clinical_note) {
         html += `<div style="background-color: #f1f5f9; padding: 12px; border-radius: 4px; font-style: italic; margin-top: 10px; border-left: 4px solid #64748b;">
-                    <strong>Note:</strong> ${data.clinical_note}
+                    <strong>Clinical Note:</strong> ${data.clinical_note}
                  </div>`;
     }
 
