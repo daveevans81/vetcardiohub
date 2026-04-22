@@ -797,6 +797,7 @@ input {
         ao: '',
         lad: '',
         lvpwd: '',
+        ivs: '',
         lvedv: '',
         lvesv: '',
         
@@ -1142,13 +1143,13 @@ input {
 
     <section class="card" style="margin-top:18px" id="breed-normals-card">
 
-    <h3>Is your patient a breed with recorded echo normals?</h3>
-    <p>Select a breed to view published reference intervals and clinical caveats.</p>
+<h3>Is your patient a breed with recorded echo normals?</h3>
+    <p>Select a breed to compare patient results with published breed-specific intervals.</p>
     
     <div class="input-group">
-        <select id="breed-selector" onchange="updateBreedTable()">
+        <select id="breed-selector" x-model="selectedBreed" @change="updateBreedTable()">
             <option value="">-- Select a Breed --</option>
-        </select>
+            </select>
     </div>
 
     <div id="breed-data-container" style="margin-top: 20px;">

@@ -25,76 +25,69 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateBreedTable() {
     const selector = document.getElementById('breed-selector');
     const container = document.getElementById('breed-data-container');
-    const selectedBreed = selector.value;
+    const breed = selector.value;
 
-    if (!selectedBreed) {
+    if (!breed) {
         container.innerHTML = '';
         return;
     }
 
-    const data = breedSpecificReferenceRanges;
+    const data = breedSpecificReferenceRanges[breed];
+    // This part accesses your Alpine.js data to get entered values
+    const patientLVIDd = document.querySelector('[x-model="lvidd"]')?.value |
+
+| '—';
+    const patientLVIDs = document.querySelector('[x-model="lvids"]')?.value |
+
+| '—';
+    const patientLA = document.querySelector('[x-model="la"]')?.value |
+
+| '—';
+    const patientAo = document.querySelector('[x-model="ao"]')?.value |
+
+| '—';
+
     let html = '';
 
-    // 1. Add Deviant Alert if applicable
     if (data.is_deviant) {
-        html += `<div class="deviant-alert">⚠️ CLINICAL ALERT: ${selectedBreed} is a known "deviant" breed. Standard multi-breed formulas (Cornell) often result in mis-staging.</div>`;
+        html += `<div class="deviant-alert">⚠️ CLINICAL ALERT: ${breed} is a "deviant" breed. Standard PIs (Cornell) may lead to misdiagnosis.</div>`;
     }
 
-    // 2. Build the Normals Table
     html += `<table class="breed-table">
                 <thead>
                     <tr>
                         <th>Metric</th>
-                        <th>Reference Range (Upper Limit)</th>
+                        <th>Patient Value</th>
+                        <th>Breed Normal (Upper RI)</th>
                     </tr>
                 </thead>
                 <tbody>`;
 
-    // Mapping key names to user-friendly labels
-    const labels = {
-        'lvidd_mm': 'LVIDd (mm)',
-        'lvids_mm': 'LVIDs (mm)',
-        'lvidd_cm': 'LVIDd (cm)',
-        'lvids_cm': 'LVIDs (cm)',
-        'ivsd_mm': 'IVSd (mm)',
-        'ivsd_cm': 'IVSd (cm)',
-        'lvfwd_mm': 'LVFWd (mm)',
-        'lvfwd_cm': 'LVFWd (cm)',
-        'la_ao': 'LA:Ao Ratio',
-        'la_ao_sax': 'LA:Ao (Short Axis)',
-        'lvidd_n': 'LVIDdN (Normalized)',
-        'edvi_smod': 'EDVI (SMOD ml/m²)',
-        'esvi_smod': 'ESVI (SMOD ml/m²)',
-        'ef_smod': 'Ejection Fraction (%)',
-        'ao_vmax': 'Aortic Velocity (m/s)',
-        'vhs_limit': 'VHS Upper Limit',
-        'nt_probnp': 'NT-proBNP (pmol/l)'
-    };
+    const metrics =;
 
-    for (let key in labels) {
-        if (data[key]) {
-            let val = data[key].max |
+    metrics.forEach(m => {
+        if (data[m.breedKey]) {
+            const breedVal = data[m.breedKey].max |
 
-| data[key].median |
-| data[key].limit_upper |
-| data[key].mean |
-| data[key];
-            // If the data is an object with a range string
-            if (data[key].range) val = `${data[key].range} (Median: ${data[key].median})`;
-            
-            html += `<tr><td>${labels[key]}</td><td><strong>${val}</strong></td></tr>`;
+| data[m.breedKey].median |
+| data[m.breedKey];
+            const displayVal = typeof breedVal === 'object'? breedVal.max : breedVal;
+            html += `<tr>
+                        <td>${m.label}</td>
+                        <td>${m.patient}</td>
+                        <td><strong>${displayVal}</strong></td>
+                     </tr>`;
         }
-    }
+    });
 
     html += `</tbody></table>`;
 
-    // 3. Add Clinical Note and Reference
     if (data.clinical_note) {
-        html += `<div class="clinical-note"><strong>Clinical Note:</strong> ${data.clinical_note}</div>`;
+        html += `<div class="clinical-note"><strong>Clinical Takeaway:</strong> ${data.clinical_note}</div>`;
     }
 
     if (data.pmid) {
-        html += `<a href="https://pubmed.ncbi.nlm.nih.gov/${data.pmid}" target="_blank" class="pubmed-link">🔗 View Primary Research (PMID: ${data.pmid})</a>`;
+        html += `<a href="https://pubmed.ncbi.nlm.nih.gov/${data.pmid}" target="_blank" class="pubmed-link">🔗 View Research (PMID: ${data.pmid})</a>`;
     }
 
     container.innerHTML = html;
