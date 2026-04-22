@@ -54,7 +54,10 @@ const breedSpecificReferenceRanges = {
     "lvidd_mm": { "min": 33.0, "max": 52.0 },
     "lvids_mm": { "min": 20.0, "max": 37.0 },
     "ivsd_mm": { "min": 8.0, "max": 12.0 },
-    "lvfwd_mm": { "min": 7.0, "max": 11.0 }
+    "lvfwd_mm": { "min": 7.0, "max": 11.0 },
+    "la_ao": { "max": 1.6 },
+    "clinical_note": "Sighthound phenotype; naturally larger dimensions than general populations.",
+    "reference": "Cerbu et al. (2023)"
   },
   "American Staffordshire Terrier": {
     "is_deviant": true,

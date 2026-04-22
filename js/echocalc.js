@@ -8,74 +8,88 @@ function showInstructions() {
 };
 
 // This function runs on page load to fill the dropdown
+// 1. Populate the dropdown on load
 document.addEventListener('DOMContentLoaded', function() {
     const selector = document.getElementById('breed-selector');
-    
-    // Sort breeds alphabetically and populate
-    const breedNames = Object.keys(breedSpecificReferenceRanges).sort();
-    
-    breedNames.forEach(breed => {
-        let option = document.createElement('option');
-        option.value = breed;
-        option.text = breed;
-        selector.appendChild(option);
-    });
+    if (selector && typeof breedSpecificReferenceRanges!== 'undefined') {
+        const breedNames = Object.keys(breedSpecificReferenceRanges).sort();
+        breedNames.forEach(breed => {
+            let option = document.createElement('option');
+            option.value = breed;
+            option.text = breed;
+            selector.appendChild(option);
+        });
+    }
 });
 
 function updateBreedTable() {
     const selector = document.getElementById('breed-selector');
     const container = document.getElementById('breed-data-container');
-    const breed = selector.value;
+    const breedName = selector.value;
 
-    if (!breed) {
+    if (!breedName) {
         container.innerHTML = '';
         return;
     }
 
-    const data = breedSpecificReferenceRanges[breed];
-    // This part accesses your Alpine.js data to get entered values
-    const patientLVIDd = document.querySelector('[x-model="lvidd"]')?.value |
+    const data = breedSpecificReferenceRanges[breedName];
+    
+    // Access the values entered in your Alpine calculator
+    // We use document.querySelector to grab the current text or value
+    const pLVIDd = document.querySelector('[x-model="lvidd"]')?.value |
 
 | '—';
-    const patientLVIDs = document.querySelector('[x-model="lvids"]')?.value |
+    const pLVIDs = document.querySelector('[x-model="lvids"]')?.value |
 
 | '—';
-    const patientLA = document.querySelector('[x-model="la"]')?.value |
+    const pLA = document.querySelector('[x-model="la"]')?.value |
 
 | '—';
-    const patientAo = document.querySelector('[x-model="ao"]')?.value |
+    const pAo = document.querySelector('[x-model="ao"]')?.value |
 
 | '—';
+    
+    // For calculated values, we can grab the text inside your result spans
+    // Ensure these selectors match your HTML classes/IDs
+    const pLVIDdN = document.querySelector('[x-text="lviddn"]')?.innerText |
+
+| '—';
+    const pLAAo = (pLA && pAo && pAo > 0)? (pLA / pAo).toFixed(2) : '—';
 
     let html = '';
 
     if (data.is_deviant) {
-        html += `<div class="deviant-alert">⚠️ CLINICAL ALERT: ${breed} is a "deviant" breed. Standard PIs (Cornell) may lead to misdiagnosis.</div>`;
+        html += `<div style="background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; color: #856404; font-weight: bold;">
+                    ⚠️ CLINICAL ALERT: ${breedName} is a "deviant" breed. Standard multi-breed formulas (Cornell) may lead to misdiagnosis.
+                 </div>`;
     }
 
-    html += `<table class="breed-table">
-                <thead>
+    html += `<table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; border: 1px solid #dee2e6;">
+                <thead style="background-color: #f8f9fa;">
                     <tr>
-                        <th>Metric</th>
-                        <th>Patient Value</th>
-                        <th>Breed Normal (Upper RI)</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Metric</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Patient</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed Normal (Upper RI)</th>
                     </tr>
                 </thead>
                 <tbody>`;
 
-    const metrics =;
+    // Mapping key results for comparison
+    const comparisonMetrics =;
 
-    metrics.forEach(m => {
-        if (data[m.breedKey]) {
-            const breedVal = data[m.breedKey].max |
+    comparisonMetrics.forEach(m => {
+        if (data[m.key]) {
+            // Fix: using double pipe |
 
-| data[m.breedKey].median |
-| data[m.breedKey];
-            const displayVal = typeof breedVal === 'object'? breedVal.max : breedVal;
+| for fallback
+            let breedVal = data[m.key].max |
+
+| data[m.key].median |
+| data[m.key];
             html += `<tr>
-                        <td>${m.label}</td>
-                        <td>${m.patient}</td>
-                        <td><strong>${displayVal}</strong></td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;">${m.label}</td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;">${m.patient}</td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>${breedVal}</strong></td>
                      </tr>`;
         }
     });
@@ -83,11 +97,13 @@ function updateBreedTable() {
     html += `</tbody></table>`;
 
     if (data.clinical_note) {
-        html += `<div class="clinical-note"><strong>Clinical Takeaway:</strong> ${data.clinical_note}</div>`;
+        html += `<div style="background-color: #e9ecef; padding: 12px; border-radius: 4px; font-style: italic; margin-top: 10px;">
+                    <strong>Note:</strong> ${data.clinical_note}
+                 </div>`;
     }
 
     if (data.pmid) {
-        html += `<a href="https://pubmed.ncbi.nlm.nih.gov/${data.pmid}" target="_blank" class="pubmed-link">🔗 View Research (PMID: ${data.pmid})</a>`;
+        html += `<p style="margin-top:10px;"><a href="https://pubmed.ncbi.nlm.nih.gov/${data.pmid}" target="_blank" style="color: #0056b3; font-size: 0.85rem;">🔗 View Research (PMID: ${data.pmid})</a></p>`;
     }
 
     container.innerHTML = html;
