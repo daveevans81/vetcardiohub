@@ -8,7 +8,7 @@ function showInstructions() {
     }
 }
 
-// 1. Populate the dropdown on load
+
 document.addEventListener('DOMContentLoaded', function() {
     const selector = document.getElementById('breed-selector');
     if (selector && typeof breedSpecificReferenceRanges!== 'undefined') {
@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// 2. Build the comparison table
 function updateBreedTable() {
     const selector = document.getElementById('breed-selector');
     const container = document.getElementById('breed-data-container');
@@ -35,9 +34,22 @@ function updateBreedTable() {
 
     const data = breedSpecificReferenceRanges[breedName];
     
-    // Safety check: Get data from the nearest Alpine component
-    const alpineEl = document.querySelector('[x-data]');
-    const patientData = alpineEl? alpineEl.__x.$data : {};
+    // Access the current patient values from your Alpine.js inputs
+    const pLVIDd = document.querySelector('[x-model="lvidd"]')?.value |
+
+| '—';
+    const pLVIDs = document.querySelector('[x-model="lvids"]')?.value |
+
+| '—';
+    const pLVIDdN = document.querySelector('[x-text="lviddn"]')?.innerText |
+
+| '—';
+    const pLAAo = document.querySelector('[x-text="laAo"]')?.innerText |
+
+| '—';
+    const pIVS = document.querySelector('[x-model="ivsd"]')?.value |
+
+| '—';
 
     let html = '';
 
@@ -51,25 +63,26 @@ function updateBreedTable() {
                 <thead style="background-color: #f8f9fa;">
                     <tr>
                         <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Metric</th>
-                        <th style="padding: 10px; border: 10px solid #dee2e6; text-align: left;">Patient</th>
-                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed Normal</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Patient</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed Normal (Limit)</th>
                     </tr>
                 </thead>
                 <tbody>`;
 
-    // Map your Alpine variables to the breed data keys
+    // Mapping your data keys to labels and patient values
     const metricsToCompare =;
 
     metricsToCompare.forEach(m => {
         if (data[m.key]) {
-            let breedVal = data[m.key].max |
+            let breedLimit = data[m.key].max |
 
 | data[m.key].median |
-| data[m.key];
+| data[m.key].mean |
+| '—';
             html += `<tr>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.label}</td>
                         <td style="padding: 10px; border: 1px solid #dee2e6;">${m.patient}</td>
-                        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>${breedVal}</strong></td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>${breedLimit}</strong></td>
                      </tr>`;
         }
     });
