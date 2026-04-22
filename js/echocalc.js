@@ -5,7 +5,7 @@ function showInstructions() {
     } else {
         alert("To save: Tap the three dots (⋮) and select 'Install app' or 'Add to Home Screen'.");
     }
-};
+}
 
 
 
