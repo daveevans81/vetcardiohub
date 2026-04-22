@@ -69,7 +69,7 @@ const breedSpecificReferenceRanges = {
     "lvfwd_mm": { "min": 6.2, "max": 12.1 }
   },
 "Beagle": {
-    "is_deviant": flase,
+    "is_deviant": false,
     "pmid": "37760386",
     "lvidd_mm": { "min": 25.2, "max": 30.0 },
     "lvids_mm": { "min": 12.9, "max": 19.1 },
