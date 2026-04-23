@@ -63,6 +63,7 @@ function updateBreedTable() {
         label = label.replace(/\bMM\b/g, '(mm)');
         label = label.replace(/\bLA AO\b/g, 'LA:Ao');
         label = label.replace(/\bSMOD KG\b/g, '(smod)/kg');
+        label = label.replace(/\bSMOD M2\b/g, '(smod)/m²');
         label = label.replace(/\bVMAX\b/g, '(Vmax)');
         label = label.replace(/\bPCT\b/g, '%');
         label = label.replace(/\bLVIDD N\b/g, 'LVIDdn');
