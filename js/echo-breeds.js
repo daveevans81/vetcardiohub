@@ -16,7 +16,7 @@ const breedSpecificReferenceRanges = {
     	"esvi_smod_m2": { "median": 26.10, "min": 12.09, "max": 45.05 },
     	"edvi_smod_kg": { "median": 1.8, "min": 0.5 , "max": 3.1 },
     	"esvi_smod_kg": { "median": 0.7, "min": 0.3 , "max": 1.6 },
-    	"ef_smod": { "median": 59.55, "min": 38.64, "max": 78.11 },
+    	"ef": { "median": 59.55, "min": 38.64, "max": 78.11 },
     	"ao_vmax": { "median": 0.66, "max": 2.2 }
         }
     },
@@ -26,7 +26,7 @@ const breedSpecificReferenceRanges = {
       "clinical_note": "Earlier M-mode study with slightly different limits.",
       "metrics": {
         "lvidd_mm": { "min": 35.0, "max": 52.0 },
-        "fs_pct": { "min": 28, "max": 45 }
+        "fs": { "min": 28, "max": 45 }
       }
     }
   ]
@@ -47,7 +47,7 @@ const breedSpecificReferenceRanges = {
     "lvidd_cm": { "median": 3.75, "min": 3.02, "max": 4.44 },
     "lvids_cm": { "median": 2.84, "min": 2.10, "max": 3.63 },
     "ivsd_cm": { "median": 1.00, "min": 0.72, "max": 1.28 },
-    "la_ao_sax": { "median": 1.27, "min": 0.95, "max": 1.62 }
+    "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62 }
   },
 "Newfoundland": {
     "is_deviant": true,
@@ -113,7 +113,7 @@ const breedSpecificReferenceRanges = {
     "clinical_focus": "DCM occult stage",
     "LVIDd_mm": { "mean": 41.6, "sd": 3.4 },
     "LVIDs_mm": { "mean": 28.6, "sd": 2.5 },
-    "EF_SMOD_percent": { "limit_lower": 40.0 },
+    "EF": { "limit_lower": 40.0 },
     "VPC_24h_limit": 300,
     "clinical_note": "SMOD is the gold standard for detecting early eccentric remodelling in this breed. >300 VPCs/24h is diagnostic of occult DCM.",
     "reference": "Wess et al. (2010/2022)"
@@ -131,7 +131,7 @@ const breedSpecificReferenceRanges = {
     "is_deviant": true,
     "pmid": "35813010",
     "clinical_note": "Standard 1.7 LVIDdN threshold is too high for dogs <5kg. Use 1.6 limit and 0.332 exponent for more accurate MMVD staging.",
-    "lviddn_threshold_b2": 1.6,
+    "lviddn": 1.6,
     "exponent": 0.332,
     "ivsd_cm": { "median": 0.59 },
     "lvidd_cm": { "median": 1.78 }
@@ -149,7 +149,7 @@ const breedSpecificReferenceRanges = {
     "pmid": "35859155",
     "clinical_note": "Thoracic conformation affects windows. Measurements are influenced by intrathoracic pressure fluctuations from BOAS.",
     "la_ao": { "median": 1.30, "min": 0.97, "max": 1.63 },
-    "lvidd_cm": { "median": 2.66, "min": 2.11, "max": 3.21 },
+    "lvidd_mm": { "median": 26.6, "min": 21.1, "max": 32.1 },
     "edvi_smod": { "median": 43.27, "min": 27.57, "max": 57.69 }
   },
 
