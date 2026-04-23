@@ -8,10 +8,8 @@ function showInstructions() {
     }
 }
 
-
 document.addEventListener('DOMContentLoaded', function() {
     const selector = document.getElementById('breed-selector');
-    // Check if the data object exists from your external file
     if (selector && typeof breedSpecificReferenceRanges !== 'undefined') {
         const breedNames = Object.keys(breedSpecificReferenceRanges).sort();
         breedNames.forEach(breed => {
@@ -33,12 +31,12 @@ function updateBreedTable() {
     const breedData = breedSpecificReferenceRanges[breedName];
     const excludedTags = ['is_deviant', 'pmid', 'clinical_note', 'reference', 'sources'];
 
-    // 1. Capture ALL live values from the Alpine.js model
-    // Using a helper to get text or value from the DOM
+    // Helper to get text or value from the DOM
     const getVal = (selector, isText = false) => {
         const el = document.querySelector(selector);
         if (!el) return '—';
-        const val = isText ? el.innerText : el.value;
+        let val = isText ? el.innerText : el.value;
+        if (typeof val === 'string') val = val.replace('%', '').trim();
         return (val === '0' || val === '0.0' || val === '' || val === 0) ? '—' : val;
     };
 
@@ -60,19 +58,8 @@ function updateBreedTable() {
         "esvi_smod_kg": getVal('[x-text="lvesvbw"]', true)
     };
 
-    let html = '';
-
-    if (breedData.is_deviant) {
-        html += `<div style="background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; color: #856404; font-weight: bold; border-radius: 4px;">
-                    ⚠️ CLINICAL ALERT: ${breedName} is a "deviant" breed.
-                 </div>`;
-    }
-
-
-const formatLabel = (key) => {
+    const formatLabel = (key) => {
         let label = key.toUpperCase().replace(/_/g, ' ');
-        
-        // Custom formatting replacements
         label = label.replace(/\bMM\b/g, '(mm)');
         label = label.replace(/\bLA AO\b/g, 'LA:Ao');
         label = label.replace(/\bSMOD KG\b/g, '(smod)/kg');
@@ -80,13 +67,12 @@ const formatLabel = (key) => {
         label = label.replace(/\bPCT\b/g, '%');
         label = label.replace(/\bLVIDD N\b/g, 'LVIDdn');
         label = label.replace(/\bLVIDS N\b/g, 'LVIDsn');
-
         return label;
     };
 
     const renderSourceBlock = (dataObj, title = null) => {
         let blockHtml = '';
-        if (title) blockHtml += `<h4 style="margin: 20px 0 10px 0; color: #1e40af; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${title}</h4>`;
+        if (title) blockHtml += `<h4 style="margin: 25px 0 10px 0; color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">${title}</h4>`;
 
         const metricsSource = dataObj.metrics || dataObj;
 
@@ -103,10 +89,8 @@ const formatLabel = (key) => {
         Object.keys(metricsSource).forEach(key => {
             if (!excludedTags.includes(key)) {
                 const val = metricsSource[key];
-                let label = key.replace(/_/g, ' ').toUpperCase();
-                const label = formatLabel(key);
+                const label = formatLabel(key); // Variable redeclaration error fixed here
                 
-                // Determine the Range String
                 let rangeString = '—';
                 if (typeof val === 'object' && val !== null) {
                     if (val.min !== undefined && val.max !== undefined) rangeString = `${val.min}–${val.max}`;
@@ -116,15 +100,12 @@ const formatLabel = (key) => {
                     rangeString = val || '—';
                 }
 
-                // Check for Patient Value match
                 const pVal = patientValues[key] || '—';
-                
-                // Highlighting Logic: if patient > breed max, make it bold/red
                 const isAbnormal = (pVal !== '—' && val.max && parseFloat(pVal) > parseFloat(val.max));
 
                 blockHtml += `<tr>
-                                <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 500;">${label}</td>
-                                <td style="padding: 10px; border: 1px solid #dee2e6; ${isAbnormal ? 'color: #ef4444; font-weight: bold;' : ''}">${pVal}</td>
+                                <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 500; background-color: #f9fafb;">${label}</td>
+                                <td style="padding: 10px; border: 1px solid #dee2e6; ${isAbnormal ? 'background-color: #fef2f2; color: #ef4444; font-weight: bold;' : ''}">${pVal}</td>
                                 <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">${rangeString}</td>
                              </tr>`;
             }
@@ -137,6 +118,15 @@ const formatLabel = (key) => {
         return blockHtml;
     };
 
+    let html = '';
+
+    // Deviant Breed Alert
+    if (breedData.is_deviant) {
+        html += `<div style="background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; color: #856404; font-weight: bold; border-radius: 4px;">
+                    ⚠️ CLINICAL ALERT: ${breedName} is a "deviant" breed.
+                 </div>`;
+    }
+
     if (breedData.sources && Array.isArray(breedData.sources)) {
         breedData.sources.forEach((source, index) => {
             html += renderSourceBlock(source, source.reference || `Source ${index + 1}`);
@@ -145,10 +135,9 @@ const formatLabel = (key) => {
         html += renderSourceBlock(breedData);
     }
 
-
-    
-    html += `<div style="background-color: #f9f9f9; padding: 12px; border-radius: 4px;  margin-top: 10px; border-left: 4px solid #999999;"><strong>Caveat:</strong> In practice, breed normals serve as starting values; each animal’s weight and context must be considered. Clinicians should integrate multiple indices (e.g. body-size normalized LVID, EF, LA/Ao, etc.) when assessing an individual
-</div>`;
+    html += `<div style="background-color: #f9f9f9; padding: 12px; border-radius: 4px; margin-top: 20px; border-left: 4px solid #999999; font-size: 0.85rem;">
+                <strong>Caveat:</strong> In practice, breed normals serve as starting values; each animal’s weight and context must be considered. Clinicians should integrate multiple indices (e.g. body-size normalized LVID, EF, LA/Ao, etc.) when assessing an individual.
+             </div>`;
 
     container.innerHTML = html;
 }
