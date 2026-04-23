@@ -2,19 +2,35 @@ const breedSpecificReferenceRanges = {
   // --- CANINE: "DEVIANT" OR HIGH-PRIORITY BREEDS ---
   "Golden Retriever": {
     "is_deviant": true,
-    "pmid": "39938895",
-    "clinical_note": "Naturally larger ventricular volumes and higher aortic velocities. Classed as a deviant breed compared to multi-breed nonsighthound PIs.",
-    "lvidd_mm": { "median": 42.45, "min": 34.6, "max": 50.8 },
-    "lvids_mm": { "median": 28.75, "min": 20.2, "max": 36.3 },
-    "la_ao": { "median": 1.35, "min": 1.03, "max": 1.63 },
-    "lvidd_n": { "median": 1.56, "min": 1.28, "max": 1.82 },
-    "edvi_smod_m2": { "median": 66.81, "min": 45.14, "max": 97.04 },
-    "esvi_smod_m2": { "median": 26.10, "min": 12.09, "max": 45.05 },
-    "edvi_smod_kg": { "median": 1.8, "min": 0.5 , "max": 3.1 },
-    "esvi_smod_kg": { "median": 0.7, "min": 0.3 , "max": 1.6 },
-    "ef_smod": { "median": 59.55, "min": 38.64, "max": 78.11 },
-    "ao_vmax": { "median": 0.66, "max": 2.2 }
-  },
+    "sources": [
+    {
+    	"pmid": "39938895",
+    	"clinical_note": "Naturally larger ventricular volumes and higher aortic velocities. Classed as a deviant breed compared to multi-breed nonsighthound PIs.",
+        "reference": "Bagardi et al. (2025)",
+        "metrics": {
+    	"lvidd_mm": { "median": 42.45, "min": 34.6, "max": 50.8 },
+    	"lvids_mm": { "median": 28.75, "min": 20.2, "max": 36.3 },
+    	"la_ao": { "median": 1.35, "min": 1.03, "max": 1.63 },
+    	"lvidd_n": { "median": 1.56, "min": 1.28, "max": 1.82 },
+    	"edvi_smod_m2": { "median": 66.81, "min": 45.14, "max": 97.04 },
+    	"esvi_smod_m2": { "median": 26.10, "min": 12.09, "max": 45.05 },
+    	"edvi_smod_kg": { "median": 1.8, "min": 0.5 , "max": 3.1 },
+    	"esvi_smod_kg": { "median": 0.7, "min": 0.3 , "max": 1.6 },
+    	"ef_smod": { "median": 59.55, "min": 38.64, "max": 78.11 },
+    	"ao_vmax": { "median": 0.66, "max": 2.2 }
+        }
+    },
+    {
+      "reference": "Stepien et al. 2000",
+      "pmid": "10647155",
+      "clinical_note": "Earlier M-mode study with slightly different limits.",
+      "metrics": {
+        "lvidd_mm": { "min": 35.0, "max": 52.0 },
+        "fs_pct": { "min": 28, "max": 45 }
+      }
+    }
+  ]
+},
   "Boxer": {
     "is_deviant": true,
     "pmid": "24266948",
