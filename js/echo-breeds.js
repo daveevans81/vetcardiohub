@@ -31,14 +31,33 @@ const breedSpecificReferenceRanges = {
     }
   ]
 },
+
   "Boxer": {
+    "DataCheck": "half",
     "is_deviant": true,
-    "pmid": "24266948",
-    "clinical_note": "Aortic velocities up to 2.4 m/s are physiological. ESVI limit for systolic dysfunction is 50 ml/m2, significantly higher than the standard 30 limit.",
-    "lvidd_mm": { "min": 29.0, "max": 48.0 },
-    "lvids_mm": { "min": 16.7, "max": 33.0 },
-    "esvi_smod": { "max": 50.0 },
-    "ao_vmax": { "max": 2.4 }
+    "sources": [
+    {
+       "pmid": "",
+        "clinical_note": "Aortic velocities up to 2.4 m/s are physiological. ESVI limit for systolic dysfunction is 50 ml/m2, significantly higher than the standard 30 limit.",
+        "metrics": {
+        "lvidd_mm": { "min": 29.0, "max": 48.0 },
+   	"lvids_mm": { "min": 16.7, "max": 33.0 },
+    	"esvi_smod": { "max": 50.0 },
+   	"ao_vmax": { "max": 2.4 }
+        }
+    },
+    {
+        "pmid": "37760386",
+        "clinical_note": "",
+        "reference": "Cerbu et al. (2023)",
+        "metrics": {
+    		"lvidd_mm": { "min": 29.0, "max": 48.0 },
+   		 "lvids_mm": { "min": 16.7, "max": 33.0 },
+   		 "ivsd_mm": { "min": 8.3, "max": 16.1 },
+   		 "lvfwd_mm": { "min": 9.0, "max": 15.5 }
+      }
+    }
+  ]
   },
   "Whippet": {
     "is_deviant": true,
@@ -76,30 +95,46 @@ const breedSpecificReferenceRanges = {
     "reference": "Cerbu et al. (2023)"
   },
   "American Staffordshire Terrier": {
+    "DataCheck": true,
     "is_deviant": true,
-    "pmid": "33559132",
+    "pmid": "33563862",
     "clinical_note": "Naturally higher LVIDdN (mean 1.62 vs standard 1.53). Heart is more rounded than deep-chested breeds.",
-    "lvidd_n": { "mean": 1.62 },
-    "la_ao": { "mean": 1.37 },
-    "ao_vmax": { "mean": 1.77 },
+    "reference": "Vezzosi et al. (2021)",
+    "lvidd_n": { "mean": 1.62, "min": 1.27, "max": 1.87 },
+    "la_ao": { "mean": 1.37, "min": 1.0, "max": 1.75 },
+    "ao_vmax": { "mean": 1.77, "min": 1.17, "max": 2.45 },
     "lvidd_mm": { "min": 34.4, "max": 51.2 },
     "lvids_mm": { "min": 17.6, "max": 36.9 },
     "ivsd_mm": { "min": 5.9, "max": 14.3},
-    "lvfwd_mm": { "min": 6.2, "max": 12.1 }
+    "lvfwd_mm": { "min": 6.2, "max": 12.1 },
+    "edvi_smod_m2": { "min": 37.1, "max": 86.7 },
+    "esvi_smod_m2": { "min": 9.5, "max": 35.3 },
+    "EF": { "min": 40.5, "max": 82.5 },
+    "FS": { "min": 20.1, "max": 56.4 },
   },
 "Beagle": {
+    "DataCheck": true,
     "is_deviant": false,
     "pmid": "37760386",
+    "reference": "Cerbu et al. (2023)",
     "lvidd_mm": { "min": 25.2, "max": 30.0 },
     "lvids_mm": { "min": 12.9, "max": 19.1 },
     "ivsd_mm": { "min": 7.7, "max": 10.5 },
     "lvfwd_mm": { "min": 7.8, "max": 9.2 }
   },
  "Great Dane": {
+    "DataCheck": true,
     "is_deviant": false,
     "pmid": "22882627",
+    "reference": "Stephenson et al. (2012)",
     "clinical_note": "ESVI is more reliable for identifying preclinical DCM than FS in this breed.",
-    "esvi_smod": { "note": "Breed-specific RI often lower than general giant breed expectations" }
+    "lvidd_mm": { "min": 42.7, "max": 58.7 },
+    "lvids_mm": { "min": 28.8, "max": 41.9 },
+    "EF": {  "min": 42.1, "max": 63.9 },
+    "FS": {  "min": 20, "max": 37 },
+    "la_ao": { "min": 0.91, "max": 1.41 },
+    "esvi_smod_m2": { "min": 21.9, "max": 47.0 },
+    "lvidd_n": { "min": 1.3, "max": 1.64 }
   },
   "Dogue de Bordeaux": {
     "is_deviant": true,
@@ -119,11 +154,14 @@ const breedSpecificReferenceRanges = {
     "reference": "Wess et al. (2010/2022)"
   },
   "Border Collie": {
+    "DataCheck": true,
+    "reference": "Cerbu et al. (2023)",
     "is_deviant": false,
     "pmid": "37760386",
     "lvidd_mm": { "min": 24.3, "max": 41.4 },
     "lvids_mm": { "min": 17.9, "max": 31.6 },
-    "ivsd_mm": { "min": 7.0, "max": 12.7 }
+    "ivsd_mm": { "min": 7.0, "max": 12.7 },
+    "lvfwd_mm": { "min": 4.9, "max": 15.17 }
   },
 
   // --- CANINE: SMALL & TOY BREEDS ---
