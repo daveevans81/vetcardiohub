@@ -35,17 +35,15 @@ function updateBreedTable() {
 
     const data = breedSpecificReferenceRanges[breedName];
     
-    // Corrected selection logic using || for defaults
-    const pLVIDd = document.querySelector('[x-model="lvidd"]')?.value || '—';
-    const pLVIDs = document.querySelector('[x-model="lvids"]')?.value || '—';
-    const pLVIDdN = document.querySelector('[x-text="lviddn"]')?.innerText || '—';
-    const pLAAo = document.querySelector('[x-text="laAo"]')?.innerText || '—';
+    // Define the tags we want to skip
+    const excludedTags = ['is_deviant', 'pmid', 'clinical_note', 'reference'];
 
     let html = '';
 
+    // 1. Handle Clinical Alert for Deviant Breeds
     if (data.is_deviant) {
         html += `<div style="background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; color: #856404; font-weight: bold; border-radius: 4px;">
-                    ⚠️ CLINICAL ALERT: ${breedName} is a "deviant" breed. Standard multi-breed formulas (Cornell) often result in mis-staging.
+                    ⚠️ CLINICAL ALERT: ${breedName} is a "deviant" breed.
                  </div>`;
     }
 
@@ -53,37 +51,49 @@ function updateBreedTable() {
                 <thead style="background-color: #f8f9fa;">
                     <tr>
                         <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Metric</th>
-                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Patient</th>
-                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed Normal (Limit)</th>
+                        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Reference Range / Limit</th>
                     </tr>
                 </thead>
                 <tbody>`;
 
-    // Corrected the metrics array mapping
-    const metricsToCompare = [
-        { key: 'lvidd_mm', label: 'LVIDd (mm)', patient: pLVIDd },
-        { key: 'lvids_mm', label: 'LVIDs (mm)', patient: pLVIDs },
-        { key: 'lvidd_n', label: 'LVIDdN', patient: pLVIDdN },
-        { key: 'la_ao', label: 'LA:Ao Ratio', patient: pLAAo }
-    ];
+    // 2. Loop through every key in the data object dynamically
+    Object.keys(data).forEach(key => {
+        // Skip the metadata tags
+        if (!excludedTags.includes(key)) {
+            const val = data[key];
+            
+            // Format the Label (e.g., "lvidd_mm" -> "LVIDD MM")
+            let label = key.replace(/_/g, ' ').toUpperCase();
 
-    metricsToCompare.forEach(m => {
-        if (data[m.key]) {
-            // Checks for max, then median, then mean, then default
-            let breedLimit = data[m.key].max || data[m.key].median || data[m.key].mean || '—';
+            // Format the Value string (Median/Min/Max)
+            let rangeString = '';
+            if (typeof val === 'object') {
+                if (val.min !== undefined && val.max !== undefined) {
+                    rangeString = `${val.min} – ${val.max}`;
+                } else if (val.max !== undefined) {
+                    rangeString = `Up to ${val.max}`;
+                } else if (val.median !== undefined) {
+                    rangeString = `Median: ${val.median}`;
+                } else {
+                    rangeString = JSON.stringify(val); // Fallback
+                }
+            } else {
+                rangeString = val; // If it's just a number/string
+            }
+
             html += `<tr>
-                        <td style="padding: 10px; border: 1px solid #dee2e6;">${m.label}</td>
-                        <td style="padding: 10px; border: 1px solid #dee2e6;">${m.patient}</td>
-                        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>${breedLimit}</strong></td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 500;">${label}</td>
+                        <td style="padding: 10px; border: 1px solid #dee2e6;">${rangeString}</td>
                      </tr>`;
         }
     });
 
     html += `</tbody></table>`;
 
+    // 3. Add Clinical Note and PubMed link at the bottom
     if (data.clinical_note) {
-        html += `<div style="background-color: #f1f5f9; padding: 12px; border-radius: 4px; font-style: italic; margin-top: 10px; border-left: 4px solid #64748b;">
-                    <strong>Note:</strong> ${data.clinical_note}
+        html += `<div style="background-color: #f1f5f9; padding: 12px; border-radius: 4px; font-style: italic; margin-top: 15px; border-left: 4px solid #64748b;">
+                    <strong>Clinical Note:</strong> ${data.clinical_note}
                  </div>`;
     }
 
