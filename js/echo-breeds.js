@@ -2,6 +2,7 @@ const breedSpecificReferenceRanges = {
   // --- CANINE: "DEVIANT" OR HIGH-PRIORITY BREEDS ---
   "Golden Retriever": {
     "is_deviant": true,
+"DataCheck": true,
     "sources": [
     {
     	"pmid": "39938895",
@@ -19,15 +20,6 @@ const breedSpecificReferenceRanges = {
     	"ef": { "median": 59.55, "min": 38.64, "max": 78.11 },
     	"ao_vmax": { "median": 0.66, "max": 2.2 }
         }
-    },
-    {
-      "reference": "Stepien et al. 2000",
-      "pmid": "10647155",
-      "clinical_note": "Earlier M-mode study with slightly different limits.",
-      "metrics": {
-        "lvidd_mm": { "min": 35.0, "max": 52.0 },
-        "fs": { "min": 28, "max": 45 }
-      }
     }
   ]
 },
@@ -56,6 +48,8 @@ const breedSpecificReferenceRanges = {
    		"lvids_mm": { "min": 19.9, "max": 34.7 },
     		"esvi_smod": { "max": 50.0 },
    		"ao_vmax": { "min": 1.26, "max": 2.34 },
+    		"edvi_smod_m2": { "median": 71, "min": 49, "max": 93 },
+    		"esvi_smod_m2": { "median": 36, "min": 22, "max": 50 },
         	"edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
         	"esvi_smod_kg": {  "min": 0.47 , "max": 2.19 },
         	"EF_PCT": { "min": 35, "max": 63 },
@@ -65,7 +59,7 @@ const breedSpecificReferenceRanges = {
   ]
   },
   "Whippet": {
-        "DataCheck": true,
+    "DataCheck": true,
     "is_deviant": true,
     "pmid": "36975003",
     "reference": "Stepien et al. (2023)",
@@ -138,6 +132,16 @@ const breedSpecificReferenceRanges = {
     "lvids_mm": { "min": 12.9, "max": 19.1 },
     "ivsd_mm": { "min": 7.7, "max": 10.5 },
     "lvfwd_mm": { "min": 7.8, "max": 9.2 }
+  }, 
+"German Shepherd": {
+    "DataCheck": true,
+    "is_deviant": false,
+    "pmid": "16645347",
+    "reference": "Muzzi et al. (2006)",
+    "lvidd_mm": { "min": 31.7, "max": 51.7 },
+    "lvids_mm": { "min": 20.8, "max": 41.2 },
+    "FS": {  "min": 15.6, "max": 41.6 },
+
   },
  "Great Dane": {
     "DataCheck": true,
