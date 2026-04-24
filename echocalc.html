@@ -44,6 +44,78 @@
     </style>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MedicalWebPage",
+  "name": "Veterinary Echocardiography Calculator (Cornell & EPIC Criteria)",
+  "description": "An interactive clinical tool for veterinarians to calculate allometric scaling (LVIDdn, LAsaxn), BSA-indexed volumes (EDVI, ESVI), and ACVIM/EPIC staging for dogs.",
+  "url": "https://yourdomain.com/echocalc.html",
+  "medicalAudience": {
+    "@type": "MedicalAudience",
+    "audienceType": "Veterinary Professionals"
+  },
+  "specialty": {
+    "@type": "MedicalSpecialty",
+    "name": "Cardiology"
+  },
+  "mainEntity": {
+    "@type": "MedicalDevice",
+    "name": "EchoCalc Diagnostic Tool",
+    "description": "Calculates normalized cardiac dimensions based on Cornell and EPIC trial parameters.",
+    "purpose": "Diagnostic interpretation of canine echocardiography"
+  },
+  "citation": [
+    "Cornell et al. (2004) Allometric scaling of M-mode cardiac measurements in normal adult dogs.",
+    "Boswood et al. (2016) The EPIC Study - Pimobendan in Dogs with Preclinical MMVD.",
+    "Keene et al. (2019) ACVIM consensus guidelines for myxomatous mitral valve disease."
+  ],
+  "lastReviewed": "2026-04-24",
+  "isAccessibleForFree": "true"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How is LVIDdn calculated in the Echo Calculator?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "LVIDdn (normalized Left Ventricular Internal Diameter in diastole) is calculated using the Cornell allometric scaling formula: LVIDd (cm) / Weight (kg)^0.294. A value > 1.7 is typically considered indicative of left ventricular enlargement."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the EPIC trial criteria for Stage B2 MMVD?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The EPIC trial defines Stage B2 as a patient with a murmur grade > 3/6 and echocardiographic evidence of cardiomegaly, specifically an LA:Ao ratio > 1.6 and an LVIDdn > 1.7."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use breed-specific normals or Cornell scaling?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Standard Cornell scaling is appropriate for most breeds. However, for 'deviant' breeds like Sighthounds or Boxers, published breed-specific reference intervals should be used to avoid mis-staging heart disease."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use LA:Ao or LAD?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The LA:Ao ratio measurement has been the gold standard metric for assessing left atrial size, but has been shown to be challenging to measure reliably especially in inexperienced hands. Moving towards the LAD (left atrial diameter in long axis) is now recommended, and can be scaled to body weight using the allometric scaling formula LAD (cm) / Weight (kg)^0.309. A value > 1.6 is typically considered indicative of left atrial enlargement."
+      }
+    }
+  ]
+}
+</script>
+
 </head>
 
 <body>
