@@ -56,7 +56,9 @@ function updateBreedTable() {
         "lad_mm":   getVal('[x-model="lad"]'),
         "edvi_smod_kg": getVal('[x-text="lvedvbw"]', true),
         "esvi_smod_kg": getVal('[x-text="lvesvbw"]', true)
-    };
+        "edvi_smod_m2": getVal('[x-text="edvim2"]', true),
+        "esvi_smod_m2": getVal('[x-text="esvim2"]', true)
+};
 
     const formatLabel = (key) => {
         let label = key.toUpperCase().replace(/_/g, ' ');

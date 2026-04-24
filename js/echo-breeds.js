@@ -36,19 +36,9 @@ const breedSpecificReferenceRanges = {
     "DataCheck": "half",
     "is_deviant": true,
     "sources": [
-    {
-       "pmid": "",
-        "clinical_note": "Aortic velocities up to 2.4 m/s are physiological. ESVI limit for systolic dysfunction is 50 ml/m2, significantly higher than the standard 30 limit.",
-        "metrics": {
-        "lvidd_mm": { "min": 29.0, "max": 48.0 },
-   	"lvids_mm": { "min": 16.7, "max": 33.0 },
-    	"esvi_smod": { "max": 50.0 },
-   	"ao_vmax": { "max": 2.4 }
-        }
-    },
+
     {
         "pmid": "37760386",
-        "clinical_note": "",
         "reference": "Cerbu et al. (2023)",
         "metrics": {
     		"lvidd_mm": { "min": 29.0, "max": 48.0 },
@@ -56,18 +46,44 @@ const breedSpecificReferenceRanges = {
    		 "ivsd_mm": { "min": 8.3, "max": 16.1 },
    		 "lvfwd_mm": { "min": 9.0, "max": 15.5 }
       }
+    },
+{
+        "pmid": "24428317",
+        "reference": "Smets et al. (2014)",
+        "clinical_note": "Aortic velocities up to 2.4 m/s are physiological. ESVI limit for systolic dysfunction is 50 ml/m2, significantly higher than the standard 30 limit.",
+        "metrics": {
+        "lvidd_mm": { "min": 32.8, "max": 46.4 },
+   	"lvids_mm": { "min": 19.9, "max": 34.7 },
+    	"esvi_smod": { "max": 50.0 },
+   	"ao_vmax": { "min": 1.26, "max": 2.34 },
+        "edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
+        "esvi_smod_kg": {  "min": 0.47 , "max": 2.19 },
+        "EF_PCT": { "min": 35, "max": 63 },
+        "FS_PCT": { "min": 18.5, "max": 44.1 },
     }
   ]
   },
   "Whippet": {
+        "DataCheck": true,
     "is_deviant": true,
-    "pmid": "17491146",
+    "pmid": "36975003",
+    "reference": "Stepien et al. (2023)",
     "clinical_note": "Athletic Heart phenotype. Conditioned agility/racing dogs show eccentric hypertrophy; standard multi-breed PIs will over-diagnose DCM.",
-    "lvidd_cm": { "median": 3.75, "min": 3.02, "max": 4.44 },
-    "lvids_cm": { "median": 2.84, "min": 2.10, "max": 3.63 },
-    "ivsd_cm": { "median": 1.00, "min": 0.72, "max": 1.28 },
-    "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62 }
+    "lvidd_mm": { "median": 37.5, "min": 30.2, "max": 44.4 },
+    "lvids_mm": { "median": 28.4, "min": 21.0, "max": 36.3 },
+    "ivsd_mm": { "median": 10.0, "min": 7.2, "max": 12.8 },
+    "lvfwd_mm": { "min": 6.1, "max": 11.3 },
+    "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62,
+    "LAD_mm": {  "min": 28.1, "max": 41.4 },
+    "ao_vmax": { "max": 1.99 },
+
+    "edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
+    "esvi_smod_kg": {  "min": 0.47 , "max": 2.19 },
+    "lvidd_n": {  "min": 1.28, "max": 1.77 }
+    
+}
   },
+
 "Newfoundland": {
     "is_deviant": true,
     "pmid": "33009675",
@@ -109,8 +125,8 @@ const breedSpecificReferenceRanges = {
     "lvfwd_mm": { "min": 6.2, "max": 12.1 },
     "edvi_smod_m2": { "min": 37.1, "max": 86.7 },
     "esvi_smod_m2": { "min": 9.5, "max": 35.3 },
-    "EF": { "min": 40.5, "max": 82.5 },
-    "FS": { "min": 20.1, "max": 56.4 },
+    "EF_PCT": { "min": 40.5, "max": 82.5 },
+    "FS_PCT": { "min": 20.1, "max": 56.4 }
   },
 "Beagle": {
     "DataCheck": true,
@@ -137,21 +153,31 @@ const breedSpecificReferenceRanges = {
     "lvidd_n": { "min": 1.3, "max": 1.64 }
   },
   "Dogue de Bordeaux": {
-    "is_deviant": true,
-    "pmid": "21414006",
+
     "clinical_note": "Naturally thicker myocardial walls; measurements frequently exceed multi-breed nonsighthound prediction intervals.",
+
+    "DataCheck": true,
+    "reference": "Cerbu et al. (2023)",
+    "is_deviant": true,
+    "pmid": "37760386",
+
     "ivsd_mm": { "min": 10.1, "max": 13.1 },
     "lvfwd_mm": { "min": 10.8, "max": 13.2 }
   },
+
   "Doberman Pinscher": {
     "is_deviant": false,
     "clinical_focus": "DCM occult stage",
-    "LVIDd_mm": { "mean": 41.6, "sd": 3.4 },
+    "LVIDd_mm": { "mean": 41.6, "sd": 3.4, "min": 34.8, "max": 48.4},
     "LVIDs_mm": { "mean": 28.6, "sd": 2.5 },
     "EF": { "limit_lower": 40.0 },
     "VPC_24h_limit": 300,
     "clinical_note": "SMOD is the gold standard for detecting early eccentric remodelling in this breed. >300 VPCs/24h is diagnostic of occult DCM.",
-    "reference": "Wess et al. (2010/2022)"
+    "reference": "Wess et al. (2010/2022)",
+    "ivsd_mm": { "min": 8., "max": 13.5 },
+    "lvidd_mm": { "min": 27.0, "max": 45.3 },
+    "lvfwd_mm": { "min": 6.8, "max": 11.3 },
+    "lvids_mm": { "min": 14.5, "max": 36.8 }
   },
   "Border Collie": {
     "DataCheck": true,
@@ -162,6 +188,16 @@ const breedSpecificReferenceRanges = {
     "lvids_mm": { "min": 17.9, "max": 31.6 },
     "ivsd_mm": { "min": 7.0, "max": 12.7 },
     "lvfwd_mm": { "min": 4.9, "max": 15.17 }
+  },
+  "Labrador Retriever": {
+    "DataCheck": true,
+    "reference": "Cerbu et al. (2023)",
+    "is_deviant": false,
+    "pmid": "37760386",
+    "ivsd_mm": { "min": 5.6, "max": 13.5 },
+    "lvidd_mm": { "min": 27.0, "max": 45.3 },
+    "lvfwd_mm": { "min": 6.8, "max": 11.3 },
+    "lvids_mm": { "min": 14.5, "max": 36.8 }
   },
 
   // --- CANINE: SMALL & TOY BREEDS ---

@@ -845,7 +845,20 @@ input {
         get ladao() {
             if(!this.la || !this.lad || !this.ao) return 0;
             return ((this.lad ) / this.ao).toFixed(3);
-        }
+        },
+	get bsa() {
+ 	   if (!this.weight) return 0;
+ 	   // BSA = 0.101 * BW^(2/3)
+ 	   return (0.101 * Math.pow(this.weight, 2/3)).toFixed(3);
+	},
+	get edvim2() {
+ 	   if (!this.lvedv || !this.bsa) return 0;
+  	  return (this.lvedv / this.bsa).toFixed(2);
+	},
+	get esvim2() {
+  	  if (!this.lvesv || !this.bsa) return 0;
+ 	   return (this.lvesv / this.bsa).toFixed(2);
+	}
      }" x-effect="updateBreedTable()">
 <main>
 <div id="app-only-branding" class="app-branding">VetCardioHub EchoCalc</div>
@@ -1055,6 +1068,21 @@ input {
                 <span style="font-size: 0.8em; color: #666;"> (ref 0.3 - 1.35) </span>
             </span>
         </div>
+<div class="result-row">
+    <span><strong>LVEDV / m²</strong></span>
+    <span>
+        <span x-text="edvim2"></span>
+        <span style="font-size: 0.8em; color: #666;"> ml/m² (ref <100)</span>
+    </span>
+</div>
+<div class="result-row">
+    <span><strong>LVESV / m²</strong></span>
+    <span>
+        <span x-text="esvim2"></span>
+        <span x-show="esvim2 >= 30" class="abnormal">(Enlarged)</span>
+        <span style="font-size: 0.8em; color: #666;"> ml/m² (ref <30)</span>
+    </span>
+</div>
         <div class="result-row">
             <span><strong>LA:Ao Ratio</strong></span>
             <span>
