@@ -59,7 +59,7 @@ const breedSpecificReferenceRanges = {
         "edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
         "esvi_smod_kg": {  "min": 0.47 , "max": 2.19 },
         "EF_PCT": { "min": 35, "max": 63 },
-        "FS_PCT": { "min": 18.5, "max": 44.1 },
+        "FS_PCT": { "min": 18.5, "max": 44.1 }
     }
   ]
   },
