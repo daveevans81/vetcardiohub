@@ -90,6 +90,7 @@ const breedSpecificReferenceRanges = {
     "clinical_note": "Significant deviant in nonsighthound populations. AoVmax limit for screening is 2.0 m/s.",
     "ao_vmax": { "max": 2.0 }
   },
+
   "Cavalier King Charles Spaniel": {
     "is_deviant": true,
     "pmid": "31794915",

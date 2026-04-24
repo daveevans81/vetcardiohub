@@ -2520,3 +2520,263 @@ summary {
 details[open] summary {
   color: #0077cc;
 }
+
+/* ECHO calculator styles */
+        .reference { color: #050505; font-size: 8px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input { 
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; 
+            box-sizing: border-box; /* Ensures padding doesn't break width */
+        }
+        .results-box { 
+            margin-top: 20px; padding: 20px; background: #eef2ff; 
+            border-radius: 6px; border: 1px solid #c7d2fe; 
+        }
+        .result-row { 
+            display: flex; justify-content: space-between; margin-bottom: 10px; 
+            padding-bottom: 10px; border-bottom: 1px solid #dcdcdc; 
+        }
+        .result-row:last-child { border-bottom: none; margin-bottom: 0; }
+        .abnormal { color: #d9534f; font-weight: bold; }
+        .normal { color: #5cb85c; font-weight: bold; }
+  /* Feedback for suspicious entries */
+.input-warning { border: 2px solid #f59e0b !important; background-color: #fffbeb !important; }
+.input-error { border: 2px solid #ef4444 !important; background-color: #fef2f2 !important; }
+.warning-text { color: #d97706; font-size: 0.75rem; font-weight: bold; margin-top: 4px; }
+
+/* ACVIM stages */
+.stage-card {
+    background: linear-gradient(135deg, #2B66AE 0%, #183A63 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.stage-image {
+    max-width: 100%;
+    height: auto;
+    margin-top: 15px;
+    filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.3)); /* Adds depth to your transparent PNG */
+}
+.stage-card h3 {
+    color: #fff;
+    margin-top: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+    width: 100%;
+}
+.install-footer-box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 40px 0; /* Space from the calculator and the footer */
+}
+.nudge-icon {
+    font-size: 24px;
+    color: #2563eb;
+    background: #eff6ff;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+.nudge-text {
+    flex-grow: 1;
+}
+.nudge-text h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    color: #1e293b;
+}
+.nudge-text p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.4;
+}
+.btn-nudge-static {
+    background: #1e293b;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-nudge-static:hover {
+    background: #334155;
+}
+/* Hide if already in standalone 'App' mode */
+@media all and (display-mode: standalone) {
+    #install-nudge-static {
+        display: none;
+    }
+}
+/* Ensure the banner doesn't cover important calculator buttons */
+.install-banner {
+    z-index: 10001;
+    transition: opacity 0.3s ease;
+}
+/* Prevents iOS from zooming in on input fields */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+/* Smooths the scrolling if your calculator has a long list of formulas below it */
+.echo-calc-container {
+    -webkit-overflow-scrolling: touch;
+}
+* { -webkit-tap-highlight-color: transparent; }
+main {
+    user-select: none;
+    -webkit-user-select: none;
+}
+input {
+    user-select: auto; /* Allow selection only in the boxes they need to type in */
+    -webkit-user-select: auto;
+}
+@media all and (display-mode: standalone) {
+
+    /* 1. Hide the bulky 'website' elements */
+    .banner, 
+    footer, 
+    #install-nudge-static {
+        display: none !important;
+    }
+    header.hero.card {
+        display: none !important;
+    }
+
+    /* 2. Style the Header Container for App Mode */
+    .header-container {
+        position: sticky;
+        top: 0;
+       z-index: 1000;
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        /* Padding for the iPhone Notch */
+        padding-top: env(safe-area-inset-top, 10px) !important;
+    }
+    /* 3. Ensure the hamburger is visible and easy to tap */
+    .menu-toggle {
+        display: block !important;
+        padding: 15px;
+        font-size: 24px;
+        background: transparent;
+        border: none;
+        color: #1e293b;
+    }
+    /* 4. Desktop Nav Links (The non-hamburger ones) usually need to be hidden */
+    /* Only show the 'is-open' state that Alpine.js toggles */
+    .nav-links-container:not(.is-open) {
+        display: none !important;
+    }
+    .nav-links-container.is-open {
+        display: block !important;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border-bottom: 2px solid #2563eb;
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+    }
+    /* 5. Clean up the Main area */
+    main {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 15px !important;
+    }
+}
+/* 1. THE DESKTOP "KILL SWITCH" */
+
+/* This targets everything larger than a tablet and explicitly hides the app-only bits */
+@media (min-width: 1025px) {
+    #app-only-branding,
+    #install-nudge-static,
+    .app-branding {
+        display: none !important;
+    }
+}
+
+/* 2. THE MOBILE WEB "KILL SWITCH" */
+/* Hide the branding if we are on mobile but STILL in the browser (not the app) */
+@media (max-width: 1024px) {
+    #app-only-branding {
+        display: none !important;
+    }
+}
+
+/* 3. THE APP MODE "SHOW SWITCH" */
+/* ONLY show the branding and HIDE the nudge when actually launched from the home screen */
+@media all and (display-mode: standalone) {
+    #app-only-branding {
+        display: block !important;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 20px;
+        letter-spacing: 1.5px;
+        text-align: center;
+        width: 100%;
+    }
+
+    #install-nudge-static {
+        display: none !important;
+    }
+}
+/* Table styling for breed specific clinical data */
+.breed-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+.breed-table th,.breed-table td {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    text-align: left;
+}
+.breed-table th {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+/* Alert styling for Deviant Breeds */
+.deviant-alert {
+    background-color: #fff3cd;
+    border-left: 5px solid #ffc107;
+    padding: 15px;
+    margin-bottom: 15px;
+    color: #856404;
+    font-weight: bold;
+}
+.clinical-note {
+    background-color: #e9ecef;
+    padding: 12px;
+    border-radius: 4px;
+    font-style: italic;
+    margin-top: 10px;
+}
+.pubmed-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #0056b3;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
