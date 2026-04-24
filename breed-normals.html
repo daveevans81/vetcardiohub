@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0T3D8RJXS3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-0T3D8RJXS3');
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<!-- Standard favicon -->
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="MyWebSite" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EchoBreeds">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breed-Specific Echocardiographic Reference Ranges | VetCardioHub</title>
+    <meta name="description" content="Searchable database of breed-specific echocardiographic normal values and reference intervals for dogs.">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/css/styles.css"> 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MedicalWebPage",
+  "name": "Canine Breed-Specific Echocardiographic Reference Ranges",
+  "description": "A clinical database of normal echocardiographic values for specific dog breeds.",
+  "medicalAudience": "Veterinary Professionals",
+  "specialty": "Cardiology",
+  "lastReviewed": "2026-04-24",
+  "mainEntity": {
+    "@type": "MedicalGuideline",
+    "guidelineSubject": "Echocardiographic Reference Intervals"
+  }
+}
+</script>
+</head>
+
+<body>
+    <div id="site-header"></div>
+
+    <div class="container">
+        <header class="hero card">
+            <h1>Breed-Specific Echo Normals</h1>
+            <p class="lead">Search published reference intervals for specific canine breeds to improve diagnostic accuracy.</p>
+        </header>
+
+        <section class="card shadow-sm">
+            <div class="input-group">
+                <label for="breed-selector" style="font-weight: bold; display: block; margin-bottom: 8px;">Select a Breed to View Normals:</label>
+                <select id="breed-selector" class="form-select" onchange="updateBreedOnlyTable()">
+                    <option value="">-- Select a Breed --</option>
+                </select>
+            </div>
+
+            <div id="breed-data-container" style="margin-top: 25px;">
+                <div class="placeholder-text" style="text-align: center; color: #64748b; padding: 40px;">
+                    <i class="fa-solid fa-dog" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.2;"></i>
+                    <p>Select a breed above to view published echocardiographic limits, clinical notes, and research sources.</p>
+                </div>
+            </div>
+        </section>
+
+        <article class="card" style="margin-top: 20px;">
+            <h2>Why Use Breed-Specific Reference Intervals?</h2>
+            <p>Standard allometric scaling (Cornell method) is reliable for many dogs, but "deviant" breeds—such as <strong>Greyhounds, Boxers, and Cavalier King Charles Spaniels</strong>—often have physiological heart sizes that fall outside standard multi-breed ranges.</p>
+            <p>Using breed-specific data helps avoid mis-staging patients with preclinical heart disease (Stage B1 vs B2).</p>
+        </article>
+    </div>
+
+   
+<div id="site-footer"></div>
+
+
+<script src="/js/echo-breeds.js"></script>
+<script src="/js/load-partials.js"></script>
+
+
+
+    <script src="/js/echo-breeds.js"></script> <script>
+        // Simplified script for a "Breed Only" view
+        document.addEventListener('DOMContentLoaded', function() {
+            const selector = document.getElementById('breed-selector');
+            if (selector && typeof breedSpecificReferenceRanges !== 'undefined') {
+                const breedNames = Object.keys(breedSpecificReferenceRanges).sort();
+                breedNames.forEach(breed => {
+                    let option = document.createElement('option');
+                    option.value = breed;
+                    option.text = breed;
+                    selector.appendChild(option);
+                });
+            }
+        });
+
+        function updateBreedOnlyTable() {
+            const selector = document.getElementById('breed-selector');
+            const container = document.getElementById('breed-data-container');
+            const breedName = selector.value;
+
+            if (!breedName) return;
+
+            const breedData = breedSpecificReferenceRanges[breedName];
+            const excludedTags = ['is_deviant', 'pmid', 'clinical_note', 'reference', 'sources'];
+
+            const formatLabel = (key) => {
+                let label = key.toUpperCase().replace(/_/g, ' ');
+                label = label.replace(/\bMM\b/g, '(mm)').replace(/\bLA AO\b/g, 'LA:Ao').replace(/\bSMOD KG\b/g, '(smod)/kg').replace(/\bSMOD M2\b/g, '(smod)/m²').replace(/\bVMAX\b/g, '(Vmax)').replace(/\bPCT\b/g, '%').replace(/\bLVIDD N\b/g, 'LVIDdn').replace(/\bLVIDS N\b/g, 'LVIDsn');
+                return label;
+            };
+
+            const renderBlock = (dataObj, title = null) => {
+                let html = title ? `<h3 style="color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px;">${title}</h3>` : '';
+                const metrics = dataObj.metrics || dataObj;
+
+                html += `<table style="width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid #dee2e6;">
+                            <thead style="background-color: #f8f9fa;">
+                                <tr>
+                                    <th style="padding: 12px; border: 1px solid #dee2e6; text-align: left;">Metric</th>
+                                    <th style="padding: 12px; border: 1px solid #dee2e6; text-align: left;">Normal Range / Limit</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                Object.keys(metrics).forEach(key => {
+                    if (!excludedTags.includes(key)) {
+                        const val = metrics[key];
+                        const label = formatLabel(key);
+                        let range = '—';
+                        if (typeof val === 'object' && val !== null) {
+                            if (val.min !== undefined && val.max !== undefined) range = `${val.min} – ${val.max}`;
+                            else if (val.max !== undefined) range = `< ${val.max}`;
+                            else if (val.median !== undefined) range = `Median: ${val.median}`;
+                        } else { range = val; }
+
+                        html += `<tr>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: 500; background-color: #f9fafb;">${label}</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">${range}</td>
+                                 </tr>`;
+                    }
+                });
+                html += `</tbody></table>`;
+
+                if (dataObj.clinical_note) html += `<div class="note-box" style="background: #f1f5f9; padding: 15px; border-left: 4px solid #64748b; margin: 15px 0;"><strong>Clinical Interpretation:</strong> ${dataObj.clinical_note}</div>`;
+                if (dataObj.pmid) html += `<p><a href="https://pubmed.ncbi.nlm.nih.gov/${dataObj.pmid}" target="_blank" style="color: #2563eb; text-decoration: underline;">🔗 View Research Source (PMID: ${dataObj.pmid})</a></p>`;
+                
+                return html;
+            };
+
+            let finalHtml = breedData.is_deviant ? `<div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 5px solid #ffc107; font-weight: bold; margin-bottom: 20px;">⚠️ DEVIANT BREED: Standard multi-breed formulas are not recommended for ${breedName}.</div>` : '';
+
+            if (breedData.sources) {
+                breedData.sources.forEach(s => finalHtml += renderBlock(s, s.reference));
+            } else {
+                finalHtml += renderBlock(breedData);
+            }
+
+            container.innerHTML = finalHtml;
+        }
+    </script>
+</body>
+</html>
