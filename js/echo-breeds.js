@@ -33,7 +33,7 @@ const breedSpecificReferenceRanges = {
 },
 
   "Boxer": {
-    "DataCheck": "half",
+    "DataCheck": true,
     "is_deviant": true,
     "sources": [
 
@@ -52,14 +52,15 @@ const breedSpecificReferenceRanges = {
         "reference": "Smets et al. (2014)",
         "clinical_note": "Aortic velocities up to 2.4 m/s are physiological. ESVI limit for systolic dysfunction is 50 ml/m2, significantly higher than the standard 30 limit.",
         "metrics": {
-        "lvidd_mm": { "min": 32.8, "max": 46.4 },
-   	"lvids_mm": { "min": 19.9, "max": 34.7 },
-    	"esvi_smod": { "max": 50.0 },
-   	"ao_vmax": { "min": 1.26, "max": 2.34 },
-        "edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
-        "esvi_smod_kg": {  "min": 0.47 , "max": 2.19 },
-        "EF_PCT": { "min": 35, "max": 63 },
-        "FS_PCT": { "min": 18.5, "max": 44.1 }
+        	"lvidd_mm": { "min": 32.8, "max": 46.4 },
+   		"lvids_mm": { "min": 19.9, "max": 34.7 },
+    		"esvi_smod": { "max": 50.0 },
+   		"ao_vmax": { "min": 1.26, "max": 2.34 },
+        	"edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
+        	"esvi_smod_kg": {  "min": 0.47 , "max": 2.19 },
+        	"EF_PCT": { "min": 35, "max": 63 },
+        	"FS_PCT": { "min": 18.5, "max": 44.1 }
+       }
     }
   ]
   },
@@ -76,7 +77,6 @@ const breedSpecificReferenceRanges = {
     "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62,
     "LAD_mm": {  "min": 28.1, "max": 41.4 },
     "ao_vmax": { "max": 1.99 },
-
     "edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
     "esvi_smod_kg": {  "min": 0.47 , "max": 2.19 },
     "lvidd_n": {  "min": 1.28, "max": 1.77 }
@@ -98,7 +98,7 @@ const breedSpecificReferenceRanges = {
     "vhs_limit": 11.9
   },
 
-  // --- DOG BREEDS: CERBU (2023) M-MODE DATASET ---
+  //  DOG BREEDS: CERBU (2023) M-MODE DATASET 
 "Afghan Hound": {
     "is_deviant": true,
     "pmid": "37760386",
