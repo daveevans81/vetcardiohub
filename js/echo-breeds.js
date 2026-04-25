@@ -2,7 +2,6 @@ const breedSpecificReferenceRanges = {
   // --- CANINE: "DEVIANT" OR HIGH-PRIORITY BREEDS ---
   "Golden Retriever": {
     "is_deviant": true,
-"DataCheck": true,
     "sources": [
     {
     	"pmid": "39938895",
@@ -25,10 +24,8 @@ const breedSpecificReferenceRanges = {
 },
 
   "Boxer": {
-    "DataCheck": true,
     "is_deviant": true,
     "sources": [
-
     {
         "pmid": "37760386",
         "reference": "Cerbu et al. (2023)",
@@ -59,38 +56,54 @@ const breedSpecificReferenceRanges = {
   ]
   },
   "Whippet": {
-    "DataCheck": true,
     "is_deviant": true,
-    "pmid": "36975003",
-    "reference": "Stepien et al. (2023)",
-    "clinical_note": "Athletic Heart phenotype. Conditioned agility/racing dogs show eccentric hypertrophy; standard multi-breed PIs will over-diagnose DCM.",
-    "lvidd_mm": { "median": 37.5, "min": 30.2, "max": 44.4 },
-    "lvids_mm": { "median": 28.4, "min": 21.0, "max": 36.3 },
-    "ivsd_mm": { "median": 10.0, "min": 7.2, "max": 12.8 },
-    "lvfwd_mm": { "min": 6.1, "max": 11.3 },
-    "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62,
-    "LAD_mm": {  "min": 28.1, "max": 41.4 },
-    "ao_vmax": { "max": 1.99 },
-    "edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
-    "esvi_smod_kg": {  "min": 0.47 , "max": 2.19 },
-    "lvidd_n": {  "min": 1.28, "max": 1.77 }
-    
-}
-  },
-
-"Newfoundland": {
-    "is_deviant": true,
-    "pmid": "33009675",
-    "clinical_note": "Significant deviant in nonsighthound populations. AoVmax limit for screening is 2.0 m/s.",
-    "ao_vmax": { "max": 2.0 }
+   "sources": [
+    {
+    	"pmid": "36975003",
+    	"reference": "Stepien et al. (2023)",
+    	"clinical_note": "Athletic Heart phenotype. Conditioned agility/racing dogs show eccentric hypertrophy; standard multi-breed PIs will over-diagnose DCM.",
+        "metrics": {
+   	   "lvidd_mm": { "median": 37.5, "min": 30.2, "max": 44.4 },
+  	   "lvids_mm": { "median": 28.4, "min": 21.0, "max": 36.3 },
+  	   "ivsd_mm": { "median": 10.0, "min": 7.2, "max": 12.8 },
+ 	   "lvfwd_mm": { "min": 6.1, "max": 11.3 },
+ 	   "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62,
+ 	   "LAD_mm": {  "min": 28.1, "max": 41.4 },
+ 	   "ao_vmax": { "max": 1.99 },
+  	   "edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
+  	   "esvi_smod_kg": {  "min": 0.47 , "max": 2.19 },
+  	   "lvidd_n": {  "min": 1.28, "max": 1.77 }
+          }
+    },
+{
+    	"pmid": 17508509,
+    	"reference": Bavegems et al. (2007)",
+        "metrics": {
+           "lvidd_mm": { "median": 37.3, "min": 29.7, "max": 44.8 },
+  	   "lvids_mm": { "median": 26.9, "min": 19.8, "max": 34.1 },
+  	   "ivsd_mm": { "median": 9.4, "min": 7.0, "max": 11.8 },
+ 	   "lvfwd_mm": { "min": 6.6, "max": 10.9 },
+ 	   "la_ao": { "median": 1.4, "min": 1.1, "max": 1.7,
+ 	   "LAD_mm": {  "min": 26.5, "max": 37.6 },
+  	   "esvi_smod_m2": { "min": 21.1, "max": 76.6 },
+    	   "EF_PCT": { "min": 45.1, "max": 77.5 },
+    	   "FS_PCT": { "min": 17.4, "max": 38.1 },
+   	   "ao_vmax": { "mean": 1.39, "min": 0.9, "max": 1.89 }
+           }  
+       }
+    }
+  ]
   },
 
   "Cavalier King Charles Spaniel": {
     "is_deviant": true,
-    "pmid": "31794915",
+    "reference": "Cerbu et al. (2023)",
+    "pmid": "37760386",
     "clinical_note": "Flatter mitral annulus. Up to 10% of healthy CKCS exceed the standard Stage B2 LVIDdN limit of 1.7. VHS up to 11.9 can be normal.",
-    "la_ao": { "median": 1.03, "sd": 0.09 },
-    "vhs_limit": 11.9
+    "lvidd_mm": { "min": 21.4, "max": 41.1 },
+    "lvids_mm": { "min": 10.9, "max": 24.6 },
+    "ivsd_mm": { "min": 4.8, "max": 8.8 },
+    "lvfwd_mm": { "min": 4.9, "max": 8.5 }
   },
 
   //  DOG BREEDS: CERBU (2023) M-MODE DATASET 
@@ -101,12 +114,10 @@ const breedSpecificReferenceRanges = {
     "lvids_mm": { "min": 20.0, "max": 37.0 },
     "ivsd_mm": { "min": 8.0, "max": 12.0 },
     "lvfwd_mm": { "min": 7.0, "max": 11.0 },
-    "la_ao": { "max": 1.6 },
     "clinical_note": "Sighthound phenotype; naturally larger dimensions than general populations.",
     "reference": "Cerbu et al. (2023)"
   },
   "American Staffordshire Terrier": {
-    "DataCheck": true,
     "is_deviant": true,
     "pmid": "33563862",
     "clinical_note": "Naturally higher LVIDdN (mean 1.62 vs standard 1.53). Heart is more rounded than deep-chested breeds.",
@@ -124,7 +135,6 @@ const breedSpecificReferenceRanges = {
     "FS_PCT": { "min": 20.1, "max": 56.4 }
   },
 "Beagle": {
-    "DataCheck": true,
     "is_deviant": false,
     "pmid": "37760386",
     "reference": "Cerbu et al. (2023)",
@@ -134,13 +144,45 @@ const breedSpecificReferenceRanges = {
     "lvfwd_mm": { "min": 7.8, "max": 9.2 }
   }, 
 "German Shepherd": {
-    "DataCheck": true,
     "is_deviant": false,
+   "sources": [
+    {
     "pmid": "16645347",
     "reference": "Muzzi et al. (2006)",
-    "lvidd_mm": { "min": 31.7, "max": 51.7 },
-    "lvids_mm": { "min": 20.8, "max": 41.2 },
-    "FS": {  "min": 15.6, "max": 41.6 },
+        "metrics": {
+  	  "lvidd_mm": { "min": 31.7, "max": 51.7 },
+   	  "lvids_mm": { "min": 20.8, "max": 41.2 },
+     	  "FS": {  "min": 15.6, "max": 41.6 },
+  	  "ivsd_mm": { "min": 7.8, "max": 11.4 },
+  	  "lvfwd_mm": { "min": 6.6, "max": 11 }
+          }
+    },
+{
+    	"pmid": "17009513",
+    	"reference": "Kayar et al. (2006)",
+        "clinical_note": "Dogs split into ages and sexes, overall min and max confidence intervals for whole group quoted here.",
+        "metrics": {
+           "lvidd_mm": { "min": 40.4, "max": 60.6 },
+  	   "lvids_mm": {  "min": 27.1, "max": 42.2 },
+  	   "ivsd_mm": {  "min": 6.6, "max": 12.8 },
+ 	   "lvfwd_mm": { "min": 6.8, "max": 12.1 }
+          }
+    },
+{
+    	"pmid": "35775866",
+    	"reference": "de Lima et al. (2006)",
+        "clinical_note": "Brazilian Police Dog population",
+        "metrics": {
+           "lvidd_mm": { "min": 32.1, "max": 50.1 },
+  	   "lvids_mm": {  "min": 16.8, "max": 36.0 },
+  	   "ivsd_mm": {  "min": 7.3, "max": 14.1 },
+ 	   "lvfwd_mm": { "min": 7.3, "max": 11.3 }
+          }
+           }  
+       }
+    }
+  ]
+  
 
   },
  "Great Dane": {
@@ -158,14 +200,11 @@ const breedSpecificReferenceRanges = {
     "lvidd_n": { "min": 1.3, "max": 1.64 }
   },
   "Dogue de Bordeaux": {
-
     "clinical_note": "Naturally thicker myocardial walls; measurements frequently exceed multi-breed nonsighthound prediction intervals.",
-
     "DataCheck": true,
     "reference": "Cerbu et al. (2023)",
     "is_deviant": true,
     "pmid": "37760386",
-
     "ivsd_mm": { "min": 10.1, "max": 13.1 },
     "lvfwd_mm": { "min": 10.8, "max": 13.2 }
   },
@@ -184,16 +223,42 @@ const breedSpecificReferenceRanges = {
     "lvfwd_mm": { "min": 6.8, "max": 11.3 },
     "lvids_mm": { "min": 14.5, "max": 36.8 }
   },
+
   "Border Collie": {
     "DataCheck": true,
-    "reference": "Cerbu et al. (2023)",
-    "is_deviant": false,
-    "pmid": "37760386",
-    "lvidd_mm": { "min": 24.3, "max": 41.4 },
-    "lvids_mm": { "min": 17.9, "max": 31.6 },
-    "ivsd_mm": { "min": 7.0, "max": 12.7 },
-    "lvfwd_mm": { "min": 4.9, "max": 15.17 }
+    "is_deviant": true,
+    "sources": [
+
+     {
+        "pmid": "37760386", 
+        "reference": "Cerbu et al. (2023)",
+    	"clinical_note": "Athletic Heart phenotype in working dogs.",
+        "metrics": {
+
+   	   "lvidd_mm": { "min": 24.3, "max": 41.4 },
+  	   "lvids_mm": { "min": 17.9, "max": 31.6 },
+ 	   "ivsd_mm": { "min": 7.0, "max": 12.7 },
+ 	   "lvfwd_mm": { "min": 4.9, "max": 15.17 }
+          }
+    },
+{
+    	"pmid": 23643817,
+    	"reference": Jacobson et al. (2013)",
+        "clinical_note": "Higher than average LVIDd and low FS compared to general population.",
+        "metrics": {
+           "lvidd_mm": { "min": 35.03, "max": 38.32 },
+  	   "lvids_mm": {  "min": 25.06, "max": 28.17 },
+  	   "ivsd_mm": {  "min": 8.96, "max": 10.41 },
+ 	   "lvfwd_mm": { "min": 8.46, "max": 9.49},
+ 	   "la_ao": {  "min": 1.12, "max": 1.29,
+    	   "FS_PCT": { "min": 25.28, "max": 29.73 },
+   	   "ao_vmax": {  "min": 1.31, "max": 1.55 }
+           }  
+       }
+    }
+  ]
   },
+
   "Labrador Retriever": {
     "DataCheck": true,
     "reference": "Cerbu et al. (2023)",
@@ -208,20 +273,44 @@ const breedSpecificReferenceRanges = {
   // --- CANINE: SMALL & TOY BREEDS ---
   "Toy Breeds (<5kg)": {
     "is_deviant": true,
-    "pmid": "35813010",
+    "reference": "Isayama et al. (2022)",
+    "pmid": "35812853",
     "clinical_note": "Standard 1.7 LVIDdN threshold is too high for dogs <5kg. Use 1.6 limit and 0.332 exponent for more accurate MMVD staging.",
-    "lviddn": 1.6,
+    "lviddn":  { "max": 1.6 },
     "exponent": 0.332,
     "ivsd_cm": { "median": 0.59 },
     "lvidd_cm": { "median": 1.78 }
   },
   "Dachshund": {
     "is_deviant": false,
-    "pmid": "27074212",
-    "clinical_note": "Narrower PIs than multi-breed standards. Thicker septum and smaller LVIDd than generic dogs of similar weight.",
-    "la_ao": { "mean": 1.40, "sd": 0.13 },
-    "ivsd_mm": { "min": 4.6, "max": 7.8 },
-    "lvidd_mm": { "min": 21.6, "max": 34.5 }
+    "DataCheck": true,
+    "sources": [
+
+     {
+        "pmid": "30605275", 
+        "reference": Garncarz et al. (2018)",
+        "metrics": {
+   	   "lvidd_mm": { "min": 17.6, "max": 34.7 },
+  	   "lvids_mm": { "min": 7.2, "max": 22.1 },
+ 	   "ivsd_mm": { "min": 4.5, "max": 10.9 },
+ 	   "lvfwd_mm": { "min": 3.9, "max": 11.4 }
+          }
+    },
+{
+    	"pmid": "27027836",
+    	"reference": Lim et al. (2016)",
+        "clinical_note": "Narrower PIs than multi-breed standards. Thicker septum and smaller LVIDd than generic dogs of similar weight. ",
+        "metrics": {
+   	   "lvidd_mm": { "min": 20.8, "max": 34.5 },
+  	   "lvids_mm": { "min": 10.4, "max": 22.2 },
+ 	   "ivsd_mm": { "min": 4.8, "max": 7.9 },
+ 	   "lvfwd_mm": { "min": 4.9, "max": 8.4 },
+ 	   "la_ao": {  "min": 1.14, "max": 1.66,
+    	   "FS_PCT": { "min": 31.2, "max": 51.6 }
+           }  
+       }
+    }
+  ]
   },
   "Pug": {
     "is_deviant": true,
