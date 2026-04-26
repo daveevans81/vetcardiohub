@@ -125,6 +125,7 @@
 
 
 <div x-data="{ 
+        /* 1. STATE VARIABLES */
         weight: '', 
         lvidd: '', 
         lvids: '', 
@@ -134,9 +135,11 @@
         lvpwd: '',
         ivsd: '',
         selectedBreed: '',
+        selectedModel: 'cornell_canine', // <--- ADDED VARIABLE HERE
         lvedv: '',
         lvesv: '',
         
+        /* 2. GETTERS (Calculated Properties) */
         get lviddn() {
             if(!this.weight || !this.lvidd) return 0;
             return ((this.lvidd / 10) / Math.pow(this.weight, 0.294)).toFixed(2);
@@ -181,20 +184,50 @@
             if(!this.la || !this.lad || !this.ao) return 0;
             return ((this.lad ) / this.ao).toFixed(3);
         },
-	get bsa() {
- 	   if (!this.weight) return 0;
- 	   // BSA = 0.101 * BW^(2/3)
- 	   return (0.101 * Math.pow(this.weight, 2/3)).toFixed(3);
-	},
-	get edvim2() {
- 	   if (!this.lvedv || !this.bsa) return 0;
-  	  return (this.lvedv / this.bsa).toFixed(2);
-	},
-	get esvim2() {
-  	  if (!this.lvesv || !this.bsa) return 0;
- 	   return (this.lvesv / this.bsa).toFixed(2);
-	}
-     }" x-effect="updateBreedTable()">
+        get bsa() {
+            if (!this.weight) return 0;
+            return (0.101 * Math.pow(this.weight, 2/3)).toFixed(3);
+        },
+        get edvim2() {
+            if (!this.lvedv || !this.bsa) return 0;
+            return (this.lvedv / this.bsa).toFixed(2);
+        },
+        get esvim2() {
+            if (!this.lvesv || !this.bsa) return 0;
+            return (this.lvesv / this.bsa).toFixed(2);
+        },
+
+        /* 3. METHODS (Functions) */
+        getPredictedRange(paramKey) { // <--- ADDED FUNCTION HERE
+            if (!this.weight || !this.selectedModel) return null;
+            
+            const model = allometricModels[this.selectedModel].params[paramKey];
+            if (!model) return null;
+
+            let mean, lower, upper;
+
+            if (model.type === 'log') {
+                const logBW = Math.log10(this.weight);
+                const logMean = model.a + (model.b * logBW);
+                mean = Math.pow(10, logMean);
+                lower = Math.pow(10, logMean - (2 * model.se));
+                upper = Math.pow(10, logMean + (2 * model.se));
+            } else {
+                mean = model.a * Math.pow(this.weight, model.b);
+                upper = (model.limit * Math.pow(this.weight, model.b)) * 10; 
+                return { upper: upper.toFixed(1), isLimitOnly: true };
+            }
+
+            return {
+                mean: (mean * 10).toFixed(1),
+                lower: (lower * 10).toFixed(1),
+                upper: (upper * 10).toFixed(1)
+            };
+        }
+     }" 
+     x-effect="updateBreedTable()">
+
+
 <main>
 <div id="app-only-branding" class="app-branding">VetCardioHub EchoCalc</div>
     <div class="content">
@@ -528,6 +561,31 @@
 
 </section>
 
+
+<section class="card" style="margin-top:18px" id="allometric-card">
+
+<div class="input-group">
+    <label>Allometric Reference Model</label>
+    <select x-model="selectedModel" style="width: 100%; padding: 8px; border-radius: 4px;">
+        <template x-for="(model, key) in allometricModels" :key="key">
+            <option :value="key" x-text="model.label"></option>
+        </template>
+    </select>
+</div>
+
+<div class="result-row">
+    <span><strong>LVIDd</strong> (Measured vs Predicted)</span>
+    <span>
+        <span x-text="lvidd || '0'"></span> mm 
+        <template x-if="getPredictedRange('lvidd')">
+            <span style="font-size: 0.8em; color: #666;">
+                (Ref: <span x-text="getPredictedRange('lvidd').lower"></span> - 
+                <span x-text="getPredictedRange('lvidd').upper"></span> mm)
+            </span>
+        </template>
+    </span>
+</div>
+</section>
 
       </main>
 

@@ -41,7 +41,7 @@ const breedSpecificReferenceRanges = {
   "Border Collie": {
     "is_deviant": true,
     "pmid": "23643817",
-    "reference": "Jacobson et al. (2013)", // Fixed Quote
+    "reference": "Jacobson et al. (2013)", 
     "clinical_note": "Higher than average LVIDd and low FS compared to general population.",   
     "lvidd_mm": { "min": 35.03, "max": 38.32 },
     "lvids_mm": { "min": 25.06, "max": 28.17 },
@@ -160,7 +160,7 @@ const breedSpecificReferenceRanges = {
           "EF_PCT": { "min": 66.9, "max": 77.3 }
         }
       }
-    ] // Fixed Brackets
+    ] 
   },
 
   "German Shepherd": {
@@ -253,7 +253,7 @@ const breedSpecificReferenceRanges = {
   "Pug": {
     "is_deviant": true,
     "pmid": "35854376",
-    "reference": "Wiegel et al. (2022)", // Fixed Quote
+    "reference": "Wiegel et al. (2022)", 
     "clinical_note": "Thoracic conformation affects windows. Measurements are influenced by intrathoracic pressure fluctuations from BOAS.",
     "la_ao": { "median": 1.30, "min": 0.97, "max": 1.63 },
     "lvidd_mm": { "median": 26.6, "min": 21.1, "max": 32.1 },
@@ -281,7 +281,7 @@ const breedSpecificReferenceRanges = {
           "lvids_mm": { "median": 28.4, "min": 21.0, "max": 36.3 },
           "ivsd_mm": { "median": 10.0, "min": 7.2, "max": 12.8 },
           "lvfwd_mm": { "min": 6.1, "max": 11.3 },
-          "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62 }, // Fixed Nesting
+          "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62 },
           "LAD_mm": { "min": 28.1, "max": 41.4 },
           "ao_vmax": { "max": 1.99 },
           "edvi_smod_kg": { "min": 2.42 , "max": 4.38 },
@@ -291,7 +291,7 @@ const breedSpecificReferenceRanges = {
       },
       {
         "pmid": "17508509", // Standardized to String
-        "reference": "Bavegems et al. (2007)", // Fixed Quote
+        "reference": "Bavegems et al. (2007)", 
         "metrics": {
           "lvidd_mm": { "median": 37.3, "min": 29.7, "max": 44.8 },
           "lvids_mm": { "median": 26.9, "min": 19.8, "max": 34.1 },
@@ -352,4 +352,35 @@ const breedSpecificReferenceRanges = {
     "nt_probnp": { "median": 31, "max": 75 },
     "tr_prevalence": "37.5%"
   }
+};
+
+const allometricModels = {
+    "cornell_canine": {
+        label: "Cornell Standard (Canine)",
+        species: "dog",
+        params: {
+            lvidd: { a: 1.53, b: 0.294, limit: 1.7, type: "power" }, // Linear Power: Y = a * BW^b
+            lvids: { a: 0.82, b: 0.315, limit: 1.26, type: "power" },
+            la:    { a: 0.88, b: 0.355, limit: 1.17, type: "power" },
+            lad:   { a: 1.10, b: 0.309, limit: 1.6, type: "power" }
+        }
+    },
+    "esser_non_sighthound": {
+        label: "Esser (Non-Sighthound)",
+        species: "dog",
+        params: {
+            lvidd: { a: 1.48, b: 0.31, limit: 1.75, type: "power" },
+            // ... add other Esser parameters
+        }
+    },
+    "feline_kitten_visser": {
+        label: "Kitten (Visser 2022)",
+        species: "cat",
+        params: {
+            // Note: These use the Log10 coefficients from your previous table
+            la:  { a: -0.099, b: 0.275, se: 0.0422, type: "log" }, 
+            lad: { a: -0.077, b: 0.289, se: 0.0461, type: "log" },
+            ao:  { a: -0.235, b: 0.292, se: 0.037, type: "log" }
+        }
+    }
 };
