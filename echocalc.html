@@ -608,21 +608,22 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
                         <th style="text-align: center; padding: 8px;">95% Range (mm)</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <template x-for="(data, paramName) in allometricModels[selectedModel]?.params" :key="paramName">
-                        <tr :class="calculateRef(paramName) && this[paramName] > 0 && (parseFloat(this[paramName]) > parseFloat(calculateRef(paramName).max) || parseFloat(this[paramName]) < parseFloat(calculateRef(paramName).min)) ? 'row-highlight-error' : ''">
-                            <td style="font-weight: bold; text-transform: uppercase; padding: 8px;" x-text="paramName"></td>
-                            
-                            <td style="text-align: center; font-weight: bold;" x-text="this[paramName] || '—'"></td>
-                            
-                            <td style="text-align: center;" x-text="calculateRef(paramName)?.mean"></td>
-                            
-                            <td style="text-align: center; color: #2563eb; font-weight: bold;">
-                                <span x-text="calculateRef(paramName) ? calculateRef(paramName).min + '–' + calculateRef(paramName).max : '—'"></span>
-                            </td>
-                        </tr>
-                    </template>
-                </tbody>
+ <tbody>
+    <template x-for="(data, paramName) in allometricModels[selectedModel]?.params" :key="paramName">
+        <tr :class="calculateRef(paramName) && $data[paramName] > 0 && (parseFloat($data[paramName]) > parseFloat(calculateRef(paramName).max) || parseFloat($data[paramName]) < parseFloat(calculateRef(paramName).min)) ? 'row-highlight-error' : ''">
+            
+            <td style="font-weight: bold; text-transform: uppercase; padding: 10px;" x-text="paramName"></td>
+            
+            <td style="text-align: center; font-weight: bold;" x-text="$data[paramName] || '—'"></td>
+            
+            <td style="text-align: center;" x-text="calculateRef(paramName)?.mean || '—'"></td>
+            
+            <td style="text-align: center; color: #2563eb; font-weight: bold;">
+                <span x-text="calculateRef(paramName) ? calculateRef(paramName).min + '–' + calculateRef(paramName).max : '—'"></span>
+            </td>
+        </tr>
+    </template>
+</tbody>
             </table>
         </div>
     </div>
