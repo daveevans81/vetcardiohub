@@ -376,10 +376,15 @@ const allometricModels = {
         species: "Dog",
         reference: "Esser et al. (2020)",
         params: {
-            lvidd: { a: 1.484, b: 0.306, see: 0.046, type: "log" },
-            lvids: { a: 0.840, b: 0.327, see: 0.071, type: "log" },
-            ivsd:  { a: 0.425, b: 0.264, see: 0.080, type: "log" },
-            lvpwd: { a: 0.437, b: 0.252, see: 0.069, type: "log" }
+            lvidd: { a: 1.38, b: 0.322, normMin: 1.17, normMax: 1.63, type: "norm" },
+            lvids: { a: 0.87, b: 0.346, normMin: 0.70, normMax: 1.09, type: "norm" },
+            ivsd:  { a: 0.36, b: 0.289, normMin: 0.27, normMax: 0.49, type: "norm" },
+            ivss:  { a: 0.51, b: 0.276, normMin: 0.38, normMax: 0.68, type: "norm" },
+            lvpwd: { a: 0.40, b: 0.261, normMin: 0.30, normMax: 0.53, type: "norm" },
+            lvpws: { a: 0.60, b: 0.247, normMin: 0.46, normMax: 0.78, type: "norm" },
+            ao:    { a: 0.78, b: 0.292, normMin: 0.63, normMax: 0.96, type: "norm" },
+            la:    { a: 0.76, b: 0.355, normMin: 0.59, normMax: 0.97, type: "norm" },
+            lad:   { a: 1.10, b: 0.309, normMin: 0.89, normMax: 1.6, type: "norm" }
         }
     },
     "wesselowski_sighthound": {
