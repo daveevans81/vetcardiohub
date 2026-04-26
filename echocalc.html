@@ -125,116 +125,113 @@
 
 
 <div x-data="{ 
-        /* 1. STATE VARIABLES */
-        weight: '', 
-        lvidd: '', 
-        lvids: '', 
-        la: '', 
-        ao: '',
-        lad: '',
-        lvpwd: '',
-        ivsd: '',
-        selectedBreed: '',
-        selectedModel: 'cornell_canine', 
-        lvedv: '',
-        lvesv: '',
-        
-        /* 2. GETTERS (Calculated Properties) */
-        get lviddn() {
-            if(!this.weight || !this.lvidd) return 0;
-            return ((this.lvidd / 10) / Math.pow(this.weight, 0.294)).toFixed(2);
-        },
-        get lvidsn() {
-            if(!this.weight || !this.lvids) return 0;
-            return ((this.lvids / 10) / Math.pow(this.weight, 0.315)).toFixed(2);
-        },
-        get lvedvbw() {
-            if(!this.weight || !this.lvedv) return 0;
-           return ((this.lvedv) / (this.weight)).toFixed(2);
-        },
-        get lvesvbw() {
-            if(!this.weight || !this.lvesv) return 0;
-            return ((this.lvesv) / (this.weight)).toFixed(2);
-        },
-        get fs() {
-            if(!this.lvidd || !this.lvids) return 0;
-            return (((this.lvidd - this.lvids) / this.lvidd) * 100).toFixed(1);
-        },
-        get ef() {
-            if(!this.lvedv || !this.lvesv) return 0;
-            return (((this.lvedv - this.lvesv) / this.lvedv) * 100).toFixed(1);
-        },
-        get laAo() {
-            if(!this.la || !this.ao) return 0;
-            return (this.la / this.ao).toFixed(2);
-        },
-        get lan() {
-            if(!this.weight || !this.la) return 0;
-            return ((this.la / 10) / Math.pow(this.weight, 0.355)).toFixed(2);
-        },
-        get ladn() {
-            if(!this.weight || !this.lad) return 0;
-            return ((this.lad / 10) / Math.pow(this.weight, 0.309)).toFixed(2);
-        },
-        get RWT() {
-            if(!this. lvpwd || !this.lvidd) return 0;
-            return ((2 * this.lvpwd) / this.lvidd).toFixed(2);
-        },
-        get ladao() {
-            if(!this.la || !this.lad || !this.ao) return 0;
-            return ((this.lad ) / this.ao).toFixed(3);
-        },
-        get bsa() {
-            if (!this.weight) return 0;
-            return (0.101 * Math.pow(this.weight, 2/3)).toFixed(3);
-        },
-        get edvim2() {
-            if (!this.lvedv || !this.bsa) return 0;
-            return (this.lvedv / this.bsa).toFixed(2);
-        },
-        get esvim2() {
-            if (!this.lvesv || !this.bsa) return 0;
-            return (this.lvesv / this.bsa).toFixed(2);
-        },
+    /* 1. STATE VARIABLES */
+    weight: '', 
+    lvidd: '', 
+    lvids: '', 
+    la: '', 
+    ao: '',
+    lad: '',
+    lvpwd: '',
+    ivsd: '',
+    selectedBreed: '',
+    selectedModel: 'cornell_canine', 
+    lvedv: '',
+    lvesv: '',
+    
+    /* 2. GETTERS */
+    get lviddn() {
+        if(!this.weight || !this.lvidd) return 0;
+        return ((this.lvidd / 10) / Math.pow(this.weight, 0.294)).toFixed(2);
+    },
+    get lvidsn() {
+        if(!this.weight || !this.lvids) return 0;
+        return ((this.lvids / 10) / Math.pow(this.weight, 0.315)).toFixed(2);
+    },
+    get lvedvbw() {
+        if(!this.weight || !this.lvedv) return 0;
+        return (this.lvedv / this.weight).toFixed(2);
+    },
+    get lvesvbw() {
+        if(!this.weight || !this.lvesv) return 0;
+        return (this.lvesv / this.weight).toFixed(2);
+    },
+    get fs() {
+        if(!this.lvidd || !this.lvids) return 0;
+        return (((this.lvidd - this.lvids) / this.lvidd) * 100).toFixed(1);
+    },
+    get ef() {
+        if(!this.lvedv || !this.lvesv) return 0;
+        return (((this.lvedv - this.lvesv) / this.lvedv) * 100).toFixed(1);
+    },
+    get laAo() {
+        if(!this.la || !this.ao) return 0;
+        return (this.la / this.ao).toFixed(2);
+    },
+    get lan() {
+        if(!this.weight || !this.la) return 0;
+        return ((this.la / 10) / Math.pow(this.weight, 0.355)).toFixed(2);
+    },
+    get ladn() {
+        if(!this.weight || !this.lad) return 0;
+        return ((this.lad / 10) / Math.pow(this.weight, 0.309)).toFixed(2);
+    },
+    get RWT() {
+        if(!this.lvpwd || !this.lvidd) return 0;
+        return ((2 * this.lvpwd) / this.lvidd).toFixed(2);
+    },
+    get ladao() {
+        if(!this.la || !this.lad || !this.ao) return 0;
+        return (this.lad / this.ao).toFixed(3);
+    },
+    get bsa() {
+        if (!this.weight) return 0;
+        return (0.101 * Math.pow(this.weight, 2/3)).toFixed(3);
+    },
+    get edvim2() {
+        if (!this.lvedv || !this.bsa) return 0;
+        return (this.lvedv / this.bsa).toFixed(2);
+    },
+    get esvim2() {
+        if (!this.lvesv || !this.bsa) return 0;
+        return (this.lvesv / this.bsa).toFixed(2);
+    },
 
-        /* 3. METHODS (Functions) */
-calculateRef(paramKey) {
-    if (!this.weight || this.weight <= 0) return null;
-    if (typeof allometricModels === 'undefined') return null;
+    /* 3. METHODS */
+    calculateRef(paramKey) {
+        if (!this.weight || this.weight <= 0) return null;
+        if (typeof allometricModels === 'undefined') return null;
 
-    const model = allometricModels[this.selectedModel]?.params[paramKey];
-    if (!model) return null;
+        const model = allometricModels[this.selectedModel]?.params?.[paramKey];
+        if (!model) return null;
 
-    let lower, upper, mean;
+        let lower, upper, mean;
 
-    if (model.type === "log_direct") {
-        // Pure Log coefficients (Kittens/Visser)
-        const logMean = model.a + (model.b * Math.log10(this.weight));
-        mean = Math.pow(10, logMean);
-        lower = Math.pow(10, logMean - (1.96 * model.see));
-        upper = Math.pow(10, logMean + (1.96 * model.see));
-    } else if (model.type === "log") {
-        // Dog linear coefficients
-        const logMean = Math.log10(model.a) + (model.b * Math.log10(this.weight));
-        mean = Math.pow(10, logMean);
-        lower = Math.pow(10, logMean - (1.96 * model.see));
-        upper = Math.pow(10, logMean + (1.96 * model.see));
-    } else {
-        // Cornell Power math
-        const bwPower = Math.pow(this.weight, model.b);
-        mean = model.a * bwPower;
-        lower = model.normMin * bwPower;
-        upper = model.normMax * bwPower;
+        if (model.type === 'log_direct') {
+            const logMean = model.a + (model.b * Math.log10(this.weight));
+            mean = Math.pow(10, logMean);
+            lower = Math.pow(10, logMean - (1.96 * model.see));
+            upper = Math.pow(10, logMean + (1.96 * model.see));
+        } else if (model.type === 'log') {
+            const logMean = Math.log10(model.a) + (model.b * Math.log10(this.weight));
+            mean = Math.pow(10, logMean);
+            lower = Math.pow(10, logMean - (1.96 * model.see));
+            upper = Math.pow(10, logMean + (1.96 * model.see));
+        } else {
+            const bwPower = Math.pow(this.weight, model.b);
+            mean = model.a * bwPower;
+            lower = model.normMin * bwPower;
+            upper = model.normMax * bwPower;
+        }
+
+        return {
+            min: (lower * 10).toFixed(1),
+            max: (upper * 10).toFixed(1),
+            mean: (mean * 10).toFixed(1)
+        };
     }
-
-    return {
-        min: (lower * 10).toFixed(1),
-        max: (upper * 10).toFixed(1),
-        mean: (mean * 10).toFixed(1)
-    };
-}
-     }" 
-     x-effect="updateBreedTable()">
+}" 
+x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function') updateBreedTable();">
 
 
 <main>
@@ -571,7 +568,7 @@ calculateRef(paramKey) {
 </section>
 
 
-<section class="card" style="margin-top:18px" x-show="weight > 0">
+<section class="card" style="margin-top:18px" >
     <div class="reference-section">
         <h3 style="font-size: 1.1em; color: #1e40af;">
             <i class="fa-solid fa-chart-line"></i> Dynamic Allometric Reference
