@@ -41,15 +41,14 @@ const breedSpecificReferenceRanges = {
 
   "Border Collie": {
     "is_deviant": true,
-
     	"pmid": "23643817",
-    	"reference": Jacobson et al. (2013)",
+    	"reference": "Jacobson et al. (2013)",
         "clinical_note": "Higher than average LVIDd and low FS compared to general population.",   
            "lvidd_mm": { "min": 35.03, "max": 38.32 },
   	   "lvids_mm": {  "min": 25.06, "max": 28.17 },
   	   "ivsd_mm": {  "min": 8.96, "max": 10.41 },
  	   "lvfwd_mm": { "min": 8.46, "max": 9.49},
- 	   "la_ao": {  "min": 1.12, "max": 1.29,
+ 	   "la_ao": {  "min": 1.12, "max": 1.29 },
     	   "FS_PCT": { "min": 25.28, "max": 29.73 },
    	   "ao_vmax": {  "min": 1.31, "max": 1.55 }
   },
@@ -102,12 +101,10 @@ const breedSpecificReferenceRanges = {
 
   "Dachshund": {
     "is_deviant": false,
-    "DataCheck": true,
     "sources": [
-
      {
         "pmid": "30605275", 
-        "reference": Garncarz et al. (2018)",
+        "reference": "Garncarz et al. (2018)",
         "metrics": {
    	   "lvidd_mm": { "min": 17.6, "max": 34.7 },
   	   "lvids_mm": { "min": 7.2, "max": 22.1 },
@@ -124,7 +121,7 @@ const breedSpecificReferenceRanges = {
   	   "lvids_mm": { "min": 10.4, "max": 22.2 },
  	   "ivsd_mm": { "min": 4.8, "max": 7.9 },
  	   "lvfwd_mm": { "min": 4.9, "max": 8.4 },
- 	   "la_ao": {  "min": 1.14, "max": 1.66,
+ 	   "la_ao": {  "min": 1.14, "max": 1.66 },
     	   "FS_PCT": { "min": 31.2, "max": 51.6 }
            }  
        }
@@ -164,7 +161,7 @@ const breedSpecificReferenceRanges = {
  	   "la_ao": {  "min": 1.0, "max": 1.39 },
     	   "FS_PCT": { "min": 29.1, "max": 34.4 },
     	   "EF_PCT": { "min": 66.9, "max": 77.3 }
-          }
+          
            }  
        }
     }
@@ -205,7 +202,7 @@ const breedSpecificReferenceRanges = {
   	   "lvids_mm": {  "min": 16.8, "max": 36.0 },
   	   "ivsd_mm": {  "min": 7.3, "max": 14.1 },
  	   "lvfwd_mm": { "min": 7.3, "max": 11.3 }
-          }
+          
            }  
        }
     }
@@ -266,7 +263,7 @@ const breedSpecificReferenceRanges = {
   "Pug": {
     "is_deviant": true,
     "pmid": "35854376",
-    "reference": Wiegel et al. (2022)",
+    "reference": "Wiegel et al. (2022)",
     "clinical_note": "Thoracic conformation affects windows. Measurements are influenced by intrathoracic pressure fluctuations from BOAS.",
     "la_ao": { "median": 1.30, "min": 0.97, "max": 1.63 },
     "lvidd_mm": { "median": 26.6, "min": 21.1, "max": 32.1 },
@@ -294,7 +291,7 @@ const breedSpecificReferenceRanges = {
   	   "lvids_mm": { "median": 28.4, "min": 21.0, "max": 36.3 },
   	   "ivsd_mm": { "median": 10.0, "min": 7.2, "max": 12.8 },
  	   "lvfwd_mm": { "min": 6.1, "max": 11.3 },
- 	   "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62,
+ 	   "la_ao": { "median": 1.27, "min": 0.95, "max": 1.62 },
  	   "LAD_mm": {  "min": 28.1, "max": 41.4 },
  	   "ao_vmax": { "max": 1.99 },
   	   "edvi_smod_kg": {  "min": 2.42 , "max": 4.38 },
@@ -303,8 +300,8 @@ const breedSpecificReferenceRanges = {
           }
     },
 {
-    	"pmid": 17508509,
-    	"reference": Bavegems et al. (2007)",
+    	"pmid": "17508509",
+    	"reference": "Bavegems et al. (2007)",
         "metrics": {
            "lvidd_mm": { "median": 37.3, "min": 29.7, "max": 44.8 },
   	   "lvids_mm": { "median": 26.9, "min": 19.8, "max": 34.1 },
@@ -370,5 +367,34 @@ const breedSpecificReferenceRanges = {
     "tr_prevalence": "37.5%"
   }
 };
-
+const allometricModels = {
+    "cornell_canine": {
+        label: "Cornell Standard (Canine)",
+        species: "dog",
+        params: {
+            lvidd: { a: 1.53, b: 0.294, limit: 1.7, type: "power" }, // Linear Power: Y = a * BW^b
+            lvids: { a: 0.82, b: 0.315, limit: 1.26, type: "power" },
+            la:    { a: 0.88, b: 0.355, limit: 1.17, type: "power" },
+            lad:   { a: 1.10, b: 0.309, limit: 1.6, type: "power" }
+        }
+    },
+    "esser_non_sighthound": {
+        label: "Esser (Non-Sighthound)",
+        species: "dog",
+        params: {
+            lvidd: { a: 1.48, b: 0.31, limit: 1.75, type: "power" },
+            // ... add other Esser parameters
+        }
+    },
+    "feline_kitten_visser": {
+        label: "Kitten (Visser 2022)",
+        species: "cat",
+        params: {
+            // Note: These use the Log10 coefficients from your previous table
+            la:  { a: -0.099, b: 0.275, se: 0.0422, type: "log" }, 
+            lad: { a: -0.077, b: 0.289, se: 0.0461, type: "log" },
+            ao:  { a: -0.235, b: 0.292, se: 0.037, type: "log" }
+        }
+    }
+};
 
