@@ -355,32 +355,35 @@ const breedSpecificReferenceRanges = {
 };
 
 const allometricModels = {
-    "cornell_canine": {
-        label: "Cornell Standard (Canine)",
-        species: "dog",
+    "cornell_standard": {
+        label: "Cornell (Standard Canine)",
+        description: "The traditional baseline for all breeds (Cornell 2004).",
         params: {
-            lvidd: { a: 1.53, b: 0.294, limit: 1.7, type: "power" }, // Linear Power: Y = a * BW^b
-            lvids: { a: 0.82, b: 0.315, limit: 1.26, type: "power" },
-            la:    { a: 0.88, b: 0.355, limit: 1.17, type: "power" },
-            lad:   { a: 1.10, b: 0.309, limit: 1.6, type: "power" }
+            lvidd: { a: 1.53, b: 0.294, normMin: 1.27, normMax: 1.7, type: "norm" },
+            lvids: { a: 0.82, b: 0.315, normMin: 0.71, normMax: 1.26, type: "norm" },
+            ivsd:  { a: 0.43, b: 0.219, normMin: 0.33, normMax: 0.53, type: "norm" },
+            lvpwd: { a: 0.42, b: 0.252, normMin: 0.32, normMax: 0.55, type: "norm" }
         }
     },
     "esser_non_sighthound": {
         label: "Esser (Non-Sighthound)",
-        species: "dog",
+        description: "Updated 2020 multi-breed data excluding sighthounds.",
         params: {
-            lvidd: { a: 1.48, b: 0.31, limit: 1.75, type: "power" },
-            // ... add other Esser parameters
+            // Calculated using Log10 SEE for 95% Confidence Intervals
+            lvidd: { a: 1.484, b: 0.306, see: 0.046, type: "log" },
+            lvids: { a: 0.840, b: 0.327, see: 0.071, type: "log" },
+            ivsd:  { a: 0.425, b: 0.264, see: 0.080, type: "log" },
+            lvpwd: { a: 0.437, b: 0.252, see: 0.069, type: "log" }
         }
     },
-    "feline_kitten_visser": {
-        label: "Kitten (Visser 2022)",
-        species: "cat",
+    "wesselowski_sighthound": {
+        label: "Wesselowski (Whippet/Sighthound)",
+        description: "Sighthound-specific scaling (2015); accounts for 'Athletic Heart'.",
         params: {
-            // Note: These use the Log10 coefficients from your previous table
-            la:  { a: -0.099, b: 0.275, se: 0.0422, type: "log" }, 
-            lad: { a: -0.077, b: 0.289, se: 0.0461, type: "log" },
-            ao:  { a: -0.235, b: 0.292, se: 0.037, type: "log" }
+            lvidd: { a: 1.85, b: 0.25, see: 0.044, type: "log" },
+            lvids: { a: 1.05, b: 0.25, see: 0.061, type: "log" },
+            ivsd:  { a: 0.50, b: 0.25, see: 0.070, type: "log" },
+            lvpwd: { a: 0.48, b: 0.25, see: 0.065, type: "log" }
         }
     }
 };

@@ -198,32 +198,34 @@
         },
 
         /* 3. METHODS (Functions) */
-        getPredictedRange(paramKey) { // <--- ADDED FUNCTION HERE
-            if (!this.weight || !this.selectedModel) return null;
-            
-            const model = allometricModels[this.selectedModel].params[paramKey];
-            if (!model) return null;
+calculateRef(paramKey) {
+    if (!this.weight || this.weight <= 0) return null;
+    
+    const model = allometricModels[this.selectedModel].params[paramKey];
+    if (!model) return null;
 
-            let mean, lower, upper;
+    let lower, upper, mean;
 
-            if (model.type === 'log') {
-                const logBW = Math.log10(this.weight);
-                const logMean = model.a + (model.b * logBW);
-                mean = Math.pow(10, logMean);
-                lower = Math.pow(10, logMean - (2 * model.se));
-                upper = Math.pow(10, logMean + (2 * model.se));
-            } else {
-                mean = model.a * Math.pow(this.weight, model.b);
-                upper = (model.limit * Math.pow(this.weight, model.b)) * 10; 
-                return { upper: upper.toFixed(1), isLimitOnly: true };
-            }
+    if (model.type === "log") {
+        // Log-transformed logic for Esser/Sighthound
+        const logMean = Math.log10(model.a) + (model.b * Math.log10(this.weight));
+        mean = Math.pow(10, logMean);
+        lower = Math.pow(10, logMean - (1.96 * model.see));
+        upper = Math.pow(10, logMean + (1.96 * model.see));
+    } else {
+        // Normalized Limit logic for Cornell
+        const bwPower = Math.pow(this.weight, model.b);
+        mean = model.a * bwPower;
+        lower = model.normMin * bwPower;
+        upper = model.normMax * bwPower;
+    }
 
-            return {
-                mean: (mean * 10).toFixed(1),
-                lower: (lower * 10).toFixed(1),
-                upper: (upper * 10).toFixed(1)
-            };
-        }
+    return {
+        min: (lower * 10).toFixed(1), // cm to mm
+        max: (upper * 10).toFixed(1),
+        mean: (mean * 10).toFixed(1)
+    };
+}
      }" 
      x-effect="updateBreedTable()">
 
@@ -564,26 +566,31 @@
 
 <section class="card" style="margin-top:18px" id="allometric-card">
 
-<div class="input-group">
-    <label>Allometric Reference Model</label>
-    <select x-model="selectedModel" style="width: 100%; padding: 8px; border-radius: 4px;">
-        <template x-for="(model, key) in allometricModels" :key="key">
-            <option :value="key" x-text="model.label"></option>
-        </template>
-    </select>
-</div>
-
-<div class="result-row">
-    <span><strong>LVIDd</strong> (Measured vs Predicted)</span>
-    <span>
-        <span x-text="lvidd || '0'"></span> mm 
-        <template x-if="getPredictedRange('lvidd')">
-            <span style="font-size: 0.8em; color: #666;">
-                (Ref: <span x-text="getPredictedRange('lvidd').lower"></span> - 
-                <span x-text="getPredictedRange('lvidd').upper"></span> mm)
-            </span>
-        </template>
-    </span>
+<div class="reference-section" x-show="weight > 0" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
+    <h3 style="font-size: 1.1em; color: #1e40af;">Predicted Reference Intervals (95% CI)</h3>
+    <p style="font-size: 0.85em; color: #666;">Based on <strong x-text="allometricModels[selectedModel].label"></strong> for a <span x-text="weight"></span>kg patient.</p>
+    
+    <table class="compact-clinical-table" style="width: 100%; margin-top: 10px;">
+        <thead>
+            <tr style="background: #f8fafc;">
+                <th>Variable</th>
+                <th>Predicted Mean</th>
+                <th>95% CI Range (mm)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="param in ['lvidd', 'lvids', 'ivsd', 'lvpwd']">
+                <tr :class="eval(param) > 0 && (eval(param) > calculateRef(param).max || eval(param) < calculateRef(param).min) ? 'row-highlight-error' : ''">
+                    <td style="font-weight: bold;" x-text="param.toUpperCase()"></td>
+                    <td x-text="calculateRef(param) ? calculateRef(param).mean + ' mm' : '-'"></td>
+                    <td style="color: #2563eb; font-weight: 500;">
+                        <span x-text="calculateRef(param) ? calculateRef(param).min + ' - ' + calculateRef(param).max : 'Enter Weight'"></span>
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+    <p style="font-size: 0.75em; color: #94a3b8; margin-top: 8px;">*Row highlights red if your measurement falls outside the predicted 95% CI.</p>
 </div>
 </section>
 
