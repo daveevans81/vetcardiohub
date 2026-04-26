@@ -358,6 +358,7 @@ const allometricModels = {
     "cornell_standard": {
         label: "Cornell (Standard Canine)",
         species: "Dog",
+        reference: "Cornell et al. (2004)",
         params: {
             lvidd: { a: 1.53, b: 0.294, normMin: 1.27, normMax: 1.7, type: "norm" },
             lvids: { a: 0.82, b: 0.315, normMin: 0.71, normMax: 1.26, type: "norm" },
@@ -368,6 +369,7 @@ const allometricModels = {
     "esser_non_sighthound": {
         label: "Esser (Non-Sighthound)",
         species: "Dog",
+        reference: "Esser et al. (2020)",
         params: {
             lvidd: { a: 1.484, b: 0.306, see: 0.046, type: "log" },
             lvids: { a: 0.840, b: 0.327, see: 0.071, type: "log" },
@@ -375,11 +377,20 @@ const allometricModels = {
             lvpwd: { a: 0.437, b: 0.252, see: 0.069, type: "log" }
         }
     },
-    "visser_kitten": {
-        label: "Visser (Kitten/Growth)",
-        species: "Cat",
+    "wesselowski_sighthound": {
+        label: "Wesselowski (Sighthound/Whippet)",
+        species: "Dog",
+        reference: "Wesselowski et al. (2015)",
         params: {
-            // Using the a, b, and SE coefficients from the Visser table
+            lvidd: { a: 1.85, b: 0.25, see: 0.044, type: "log" },
+            lvids: { a: 1.05, b: 0.25, see: 0.061, type: "log" }
+        }
+    },
+    "visser_kitten": {
+        label: "Visser (Kitten Growth)",
+        species: "Cat",
+        reference: "Visser et al. (2022)",
+        params: {
             la:   { a: -0.099, b: 0.275, see: 0.0422, type: "log_direct" },
             lad:  { a: -0.077, b: 0.289, see: 0.0461, type: "log_direct" },
             ao:   { a: -0.235, b: 0.292, see: 0.037, type: "log_direct" },

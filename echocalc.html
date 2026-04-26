@@ -197,38 +197,46 @@
     },
 
     /* 3. METHODS */
-    calculateRef(paramKey) {
-        if (!this.weight || this.weight <= 0) return null;
-        if (typeof allometricModels === 'undefined') return null;
+calculateRef(paramKey) {
+    if (!this.weight || this.weight <= 0) return null;
+    
+    // Safety check for global data
+    const models = typeof allometricModels !== 'undefined' ? allometricModels : null;
+    if (!models) return null;
 
-        const model = allometricModels[this.selectedModel]?.params?.[paramKey];
-        if (!model) return null;
+    const model = models[this.selectedModel]?.params?.[paramKey];
+    if (!model) return null;
 
-        let lower, upper, mean;
+    let lower, upper, mean;
 
-        if (model.type === 'log_direct') {
-            const logMean = model.a + (model.b * Math.log10(this.weight));
-            mean = Math.pow(10, logMean);
-            lower = Math.pow(10, logMean - (1.96 * model.see));
-            upper = Math.pow(10, logMean + (1.96 * model.see));
-        } else if (model.type === 'log') {
-            const logMean = Math.log10(model.a) + (model.b * Math.log10(this.weight));
-            mean = Math.pow(10, logMean);
-            lower = Math.pow(10, logMean - (1.96 * model.see));
-            upper = Math.pow(10, logMean + (1.96 * model.see));
-        } else {
-            const bwPower = Math.pow(this.weight, model.b);
-            mean = model.a * bwPower;
-            lower = model.normMin * bwPower;
-            upper = model.normMax * bwPower;
-        }
-
-        return {
-            min: (lower * 10).toFixed(1),
-            max: (upper * 10).toFixed(1),
-            mean: (mean * 10).toFixed(1)
-        };
+    // KITTEN LOGIC (Visser)
+    if (model.type === "log_direct") {
+        const logMean = model.a + (model.b * Math.log10(this.weight));
+        mean = Math.pow(10, logMean);
+        lower = Math.pow(10, logMean - (1.96 * model.see));
+        upper = Math.pow(10, logMean + (1.96 * model.see));
+    } 
+    // DOG LINEAR LOGIC (Esser/Sighthound)
+    else if (model.type === "log") {
+        const logMean = Math.log10(model.a) + (model.b * Math.log10(this.weight));
+        mean = Math.pow(10, logMean);
+        lower = Math.pow(10, logMean - (1.96 * model.see));
+        upper = Math.pow(10, logMean + (1.96 * model.see));
+    } 
+    // CORNELL POWER LOGIC
+    else {
+        const bwPower = Math.pow(this.weight, model.b);
+        mean = model.a * bwPower;
+        lower = model.normMin * bwPower;
+        upper = model.normMax * bwPower;
     }
+
+    return {
+        min: (lower * 10).toFixed(1), // Scale to mm
+        max: (upper * 10).toFixed(1),
+        mean: (mean * 10).toFixed(1)
+    };
+}
 }" 
 x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function') updateBreedTable();">
 
@@ -567,45 +575,64 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
 </section>
 
 
-<section class="card" style="margin-top:18px" >
-    <div class="reference-section">
-        <h3 style="font-size: 1.1em; color: #1e40af;">
-            <i class="fa-solid fa-chart-line"></i> Dynamic Allometric Reference
+<section class="card" style="margin-top:25px; border: 2px solid #e2e8f0;">
+    <div class="reference-section" x-data="{ localModels: typeof allometricModels !== 'undefined' ? allometricModels : {} }">
+        <h3 style="color: #1e40af; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-calculator"></i> Allometric Prediction Tool
         </h3>
 
-        <div class="input-group" style="margin-bottom: 15px;">
-            <label>Select Dataset / Paper:</label>
-            <select x-model="selectedModel" style="width: 100%; padding: 8px;">
-                <template x-for="(model, key) in allometricModels" :key="key">
-                    <option :value="key" x-text="model.label + ' (' + model.species + ')'"></option>
-                </template>
-            </select>
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="input-group">
+                <label>Confirm Patient Weight (kg):</label>
+                <input type="number" step="0.1" x-model="weight" placeholder="Enter Weight" style="border: 2px solid #2563eb;">
+            </div>
+            <div class="input-group">
+                <label>Select Allometric Dataset:</label>
+                <select x-model="selectedModel" style="width: 100%; padding: 8px;">
+                    <template x-for="(model, key) in localModels" :key="key">
+                        <option :value="key" x-text="model.label"></option>
+                    </template>
+                </select>
+            </div>
         </div>
 
-        <table class="compact-clinical-table" style="width: 100%;">
-            <thead>
-                <tr style="background: #f8fafc;">
-                    <th>Parameter</th>
-                    <th>Predicted Mean</th>
-                    <th>95% Reference Range</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template x-for="(data, paramName) in allometricModels[selectedModel].params" :key="paramName">
-                    <tr :class="this[paramName] > 0 && calculateRef(paramName) && (parseFloat(this[paramName]) > parseFloat(calculateRef(paramName).max) || parseFloat(this[paramName]) < parseFloat(calculateRef(paramName).min)) ? 'row-highlight-error' : ''">
-                        <td style="font-weight: bold; text-transform: uppercase;" x-text="paramName"></td>
-                        <td x-text="calculateRef(paramName).mean + ' mm'"></td>
-                        <td style="color: #2563eb; font-weight: 500;">
-                            <span x-text="calculateRef(paramName).min + ' - ' + calculateRef(paramName).max + ' mm'"></span>
-                        </td>
+        <div x-show="!weight || weight <= 0" style="text-align: center; padding: 40px; color: #64748b; background: #fff; border: 2px dashed #cbd5e1; border-radius: 8px;">
+            <i class="fa-solid fa-weight-hanging" style="font-size: 2rem; margin-bottom: 10px;"></i>
+            <p><strong>Awaiting Weight Entry...</strong><br>Enter the patient's weight above to see predicted 95% reference intervals for this specific dataset.</p>
+        </div>
+
+        <div x-show="weight > 0">
+            <p style="font-size: 0.9rem; margin-bottom: 10px;">
+                Reference for <strong x-text="weight"></strong>kg: 
+                <span style="color: #64748b;" x-text="localModels[selectedModel]?.reference"></span>
+            </p>
+            
+            <table class="compact-clinical-table" style="width: 100%;">
+                <thead style="background: #f1f5f9;">
+                    <tr>
+                        <th>Metric</th>
+                        <th>Patient (mm)</th>
+                        <th>Mean</th>
+                        <th>95% CI Range</th>
                     </tr>
-                </template>
-            </tbody>
-        </table>
-        
-        <p style="font-size: 0.75em; color: #94a3b8; margin-top: 10px;">
-            *Automatically showing variables available for the <strong x-text="allometricModels[selectedModel].label"></strong> study.
-        </p>
+                </thead>
+                <tbody>
+                    <template x-for="(data, paramName) in localModels[selectedModel]?.params" :key="paramName">
+                        <tr :class="calculateRef(paramName) && this[paramName] > 0 && (parseFloat(this[paramName]) > parseFloat(calculateRef(paramName).max) || parseFloat(this[paramName]) < parseFloat(calculateRef(paramName).min)) ? 'row-highlight-error' : ''">
+                            <td style="font-weight: bold; text-transform: uppercase;" x-text="paramName"></td>
+                            
+                            <td style="font-weight: bold;" x-text="this[paramName] || '—'"></td>
+                            
+                            <td x-text="calculateRef(paramName)?.mean"></td>
+                            
+                            <td style="color: #2563eb; font-weight: bold;">
+                                <span x-text="calculateRef(paramName) ? calculateRef(paramName).min + '–' + calculateRef(paramName).max : '—'"></span>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
     </div>
 </section>
 
