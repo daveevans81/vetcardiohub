@@ -135,7 +135,7 @@
         lvpwd: '',
         ivsd: '',
         selectedBreed: '',
-        selectedModel: 'cornell_canine', // <--- ADDED VARIABLE HERE
+        selectedModel: 'cornell_canine', 
         lvedv: '',
         lvesv: '',
         
@@ -200,20 +200,27 @@
         /* 3. METHODS (Functions) */
 calculateRef(paramKey) {
     if (!this.weight || this.weight <= 0) return null;
-    
-    const model = allometricModels[this.selectedModel].params[paramKey];
+    if (typeof allometricModels === 'undefined') return null;
+
+    const model = allometricModels[this.selectedModel]?.params[paramKey];
     if (!model) return null;
 
     let lower, upper, mean;
 
-    if (model.type === "log") {
-        // Log-transformed logic for Esser/Sighthound
+    if (model.type === "log_direct") {
+        // Pure Log coefficients (Kittens/Visser)
+        const logMean = model.a + (model.b * Math.log10(this.weight));
+        mean = Math.pow(10, logMean);
+        lower = Math.pow(10, logMean - (1.96 * model.see));
+        upper = Math.pow(10, logMean + (1.96 * model.see));
+    } else if (model.type === "log") {
+        // Dog linear coefficients
         const logMean = Math.log10(model.a) + (model.b * Math.log10(this.weight));
         mean = Math.pow(10, logMean);
         lower = Math.pow(10, logMean - (1.96 * model.see));
         upper = Math.pow(10, logMean + (1.96 * model.see));
     } else {
-        // Normalized Limit logic for Cornell
+        // Cornell Power math
         const bwPower = Math.pow(this.weight, model.b);
         mean = model.a * bwPower;
         lower = model.normMin * bwPower;
@@ -221,7 +228,7 @@ calculateRef(paramKey) {
     }
 
     return {
-        min: (lower * 10).toFixed(1), // cm to mm
+        min: (lower * 10).toFixed(1),
         max: (upper * 10).toFixed(1),
         mean: (mean * 10).toFixed(1)
     };
@@ -564,34 +571,46 @@ calculateRef(paramKey) {
 </section>
 
 
-<section class="card" style="margin-top:18px" id="allometric-card">
+<section class="card" style="margin-top:18px" x-show="weight > 0">
+    <div class="reference-section">
+        <h3 style="font-size: 1.1em; color: #1e40af;">
+            <i class="fa-solid fa-chart-line"></i> Dynamic Allometric Reference
+        </h3>
 
-<div class="reference-section" x-show="weight > 0" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
-    <h3 style="font-size: 1.1em; color: #1e40af;">Predicted Reference Intervals (95% CI)</h3>
-    <p style="font-size: 0.85em; color: #666;">Based on <strong x-text="allometricModels[selectedModel].label"></strong> for a <span x-text="weight"></span>kg patient.</p>
-    
-    <table class="compact-clinical-table" style="width: 100%; margin-top: 10px;">
-        <thead>
-            <tr style="background: #f8fafc;">
-                <th>Variable</th>
-                <th>Predicted Mean</th>
-                <th>95% CI Range (mm)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <template x-for="param in ['lvidd', 'lvids', 'ivsd', 'lvpwd']">
-                <tr :class="eval(param) > 0 && (eval(param) > calculateRef(param).max || eval(param) < calculateRef(param).min) ? 'row-highlight-error' : ''">
-                    <td style="font-weight: bold;" x-text="param.toUpperCase()"></td>
-                    <td x-text="calculateRef(param) ? calculateRef(param).mean + ' mm' : '-'"></td>
-                    <td style="color: #2563eb; font-weight: 500;">
-                        <span x-text="calculateRef(param) ? calculateRef(param).min + ' - ' + calculateRef(param).max : 'Enter Weight'"></span>
-                    </td>
+        <div class="input-group" style="margin-bottom: 15px;">
+            <label>Select Dataset / Paper:</label>
+            <select x-model="selectedModel" style="width: 100%; padding: 8px;">
+                <template x-for="(model, key) in allometricModels" :key="key">
+                    <option :value="key" x-text="model.label + ' (' + model.species + ')'"></option>
+                </template>
+            </select>
+        </div>
+
+        <table class="compact-clinical-table" style="width: 100%;">
+            <thead>
+                <tr style="background: #f8fafc;">
+                    <th>Parameter</th>
+                    <th>Predicted Mean</th>
+                    <th>95% Reference Range</th>
                 </tr>
-            </template>
-        </tbody>
-    </table>
-    <p style="font-size: 0.75em; color: #94a3b8; margin-top: 8px;">*Row highlights red if your measurement falls outside the predicted 95% CI.</p>
-</div>
+            </thead>
+            <tbody>
+                <template x-for="(data, paramName) in allometricModels[selectedModel].params" :key="paramName">
+                    <tr :class="this[paramName] > 0 && calculateRef(paramName) && (parseFloat(this[paramName]) > parseFloat(calculateRef(paramName).max) || parseFloat(this[paramName]) < parseFloat(calculateRef(paramName).min)) ? 'row-highlight-error' : ''">
+                        <td style="font-weight: bold; text-transform: uppercase;" x-text="paramName"></td>
+                        <td x-text="calculateRef(paramName).mean + ' mm'"></td>
+                        <td style="color: #2563eb; font-weight: 500;">
+                            <span x-text="calculateRef(paramName).min + ' - ' + calculateRef(paramName).max + ' mm'"></span>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+        
+        <p style="font-size: 0.75em; color: #94a3b8; margin-top: 10px;">
+            *Automatically showing variables available for the <strong x-text="allometricModels[selectedModel].label"></strong> study.
+        </p>
+    </div>
 </section>
 
       </main>

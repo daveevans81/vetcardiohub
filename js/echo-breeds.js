@@ -357,7 +357,7 @@ const breedSpecificReferenceRanges = {
 const allometricModels = {
     "cornell_standard": {
         label: "Cornell (Standard Canine)",
-        description: "The traditional baseline for all breeds (Cornell 2004).",
+        species: "Dog",
         params: {
             lvidd: { a: 1.53, b: 0.294, normMin: 1.27, normMax: 1.7, type: "norm" },
             lvids: { a: 0.82, b: 0.315, normMin: 0.71, normMax: 1.26, type: "norm" },
@@ -367,23 +367,23 @@ const allometricModels = {
     },
     "esser_non_sighthound": {
         label: "Esser (Non-Sighthound)",
-        description: "Updated 2020 multi-breed data excluding sighthounds.",
+        species: "Dog",
         params: {
-            // Calculated using Log10 SEE for 95% Confidence Intervals
             lvidd: { a: 1.484, b: 0.306, see: 0.046, type: "log" },
             lvids: { a: 0.840, b: 0.327, see: 0.071, type: "log" },
             ivsd:  { a: 0.425, b: 0.264, see: 0.080, type: "log" },
             lvpwd: { a: 0.437, b: 0.252, see: 0.069, type: "log" }
         }
     },
-    "wesselowski_sighthound": {
-        label: "Wesselowski (Whippet/Sighthound)",
-        description: "Sighthound-specific scaling (2015); accounts for 'Athletic Heart'.",
+    "visser_kitten": {
+        label: "Visser (Kitten/Growth)",
+        species: "Cat",
         params: {
-            lvidd: { a: 1.85, b: 0.25, see: 0.044, type: "log" },
-            lvids: { a: 1.05, b: 0.25, see: 0.061, type: "log" },
-            ivsd:  { a: 0.50, b: 0.25, see: 0.070, type: "log" },
-            lvpwd: { a: 0.48, b: 0.25, see: 0.065, type: "log" }
+            // Using the a, b, and SE coefficients from the Visser table
+            la:   { a: -0.099, b: 0.275, see: 0.0422, type: "log_direct" },
+            lad:  { a: -0.077, b: 0.289, see: 0.0461, type: "log_direct" },
+            ao:   { a: -0.235, b: 0.292, see: 0.037, type: "log_direct" },
+            lvidd: { a: 0.018, b: 0.259, see: 0.0473, type: "log_direct" }
         }
     }
 };
