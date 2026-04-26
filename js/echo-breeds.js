@@ -362,10 +362,13 @@ const allometricModels = {
         params: {
             lvidd: { a: 1.53, b: 0.294, normMin: 1.27, normMax: 1.85, type: "norm" },
             lvids: { a: 0.95, b: 0.315, normMin: 0.71, normMax: 1.26, type: "norm" },
-            ivsd:  { a: 0.48, b: 0.219, normMin: 0.33, normMax: 0.53, type: "norm" },
-            lvpwd: { a: 0.43, b: 0.252, normMin: 0.32, normMax: 0.55, type: "norm" },
-            ao:    { a: 0.84, b: 0.292, normMin: 0.68, normMax: 1.04, type: "norm" },
-            la:    { a: 0.82, b: 0.355, normMin: 0.64, normMax: 1.05, type: "norm" }
+            ivsd:  { a: 0.41, b: 0.241, normMin: 0.29, normMax: 0.59, type: "norm" },
+            ivss:  { a: 0.58, b: 0.240, normMin: 0.43, normMax: 0.79, type: "norm" },
+            lvpwd: { a: 0.42, b: 0.232, normMin: 0.29, normMax: 0.60, type: "norm" },
+            lvpws: { a: 0.64, b: 0.222, normMin: 0.48, normMax: 0.87, type: "norm" },
+            ao:    { a: 0.78, b: 0.292, normMin: 0.63, normMax: 0.96, type: "norm" },
+            la:    { a: 0.76, b: 0.355, normMin: 0.59, normMax: 0.97, type: "norm" },
+            lad:   { a: 1.10, b: 0.309, normMin: 0.89, normMax: 1.6, type: "norm" }
         }
     },
     "esser_non_sighthound": {
