@@ -2788,3 +2788,9 @@ input {
 .faq-item p {
 	margin-top: 10px; font-size: 0.95rem; line-height: 1.5;
 }
+.row-highlight-error {
+    background-color: #fef2f2 !important; /* Soft red */
+}
+.row-highlight-error td {
+    color: #b91c1c; /* Dark red text */
+}
