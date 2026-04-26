@@ -609,20 +609,23 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
                     </tr>
                 </thead>
  <tbody>
-    <template x-for="(data, paramName) in allometricModels[selectedModel]?.params" :key="paramName">
-        <tr :class="calculateRef(paramName) && $data[paramName] > 0 && (parseFloat($data[paramName]) > parseFloat(calculateRef(paramName).max) || parseFloat($data[paramName]) < parseFloat(calculateRef(paramName).min)) ? 'row-highlight-error' : ''">
-            
-            <td style="font-weight: bold; text-transform: uppercase; padding: 10px;" x-text="paramName"></td>
-            
-            <td style="text-align: center; font-weight: bold;" x-text="$data[paramName] || '—'"></td>
-            
-            <td style="text-align: center;" x-text="calculateRef(paramName)?.mean || '—'"></td>
-            
-            <td style="text-align: center; color: #2563eb; font-weight: bold;">
-                <span x-text="calculateRef(paramName) ? calculateRef(paramName).min + '–' + calculateRef(paramName).max : '—'"></span>
-            </td>
-        </tr>
-    </template>
+<template x-for="(data, paramName) in allometricModels[selectedModel]?.params" :key="paramName">
+    <tr :class="calculateRef(paramName) && $data[paramName] > 0 && (parseFloat($data[paramName]) > parseFloat(calculateRef(paramName).max) || parseFloat($data[paramName]) < parseFloat(calculateRef(paramName).min)) ? 'row-highlight-error' : ''">
+        
+        <td style="font-weight: bold; text-transform: uppercase; padding: 10px;" x-text="paramName"></td>
+        
+        <td style="text-align: center; font-weight: bold;" 
+            :class="$data[paramName] > 0 ? 'text-primary' : 'text-muted'"
+            x-text="$data[paramName] || '—'">
+        </td>
+        
+        <td style="text-align: center;" x-text="calculateRef(paramName)?.mean || '—'"></td>
+        
+        <td style="text-align: center; color: #2563eb; font-weight: bold;">
+            <span x-text="calculateRef(paramName) ? calculateRef(paramName).min + ' – ' + calculateRef(paramName).max : '—'"></span>
+        </td>
+    </tr>
+</template>
 </tbody>
             </table>
         </div>
