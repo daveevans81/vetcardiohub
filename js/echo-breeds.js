@@ -360,10 +360,12 @@ const allometricModels = {
         species: "Dog",
         reference: "Cornell et al. (2004)",
         params: {
-            lvidd: { a: 1.53, b: 0.294, normMin: 1.27, normMax: 1.7, type: "norm" },
-            lvids: { a: 0.82, b: 0.315, normMin: 0.71, normMax: 1.26, type: "norm" },
-            ivsd:  { a: 0.43, b: 0.219, normMin: 0.33, normMax: 0.53, type: "norm" },
-            lvpwd: { a: 0.42, b: 0.252, normMin: 0.32, normMax: 0.55, type: "norm" }
+            lvidd: { a: 1.53, b: 0.294, normMin: 1.27, normMax: 1.85, type: "norm" },
+            lvids: { a: 0.95, b: 0.315, normMin: 0.71, normMax: 1.26, type: "norm" },
+            ivsd:  { a: 0.48, b: 0.219, normMin: 0.33, normMax: 0.53, type: "norm" },
+            lvpwd: { a: 0.43, b: 0.252, normMin: 0.32, normMax: 0.55, type: "norm" },
+            ao:    { a: 0.84, b: 0.292, normMin: 0.68, normMax: 1.04, type: "norm" },
+            la:    { a: 0.82, b: 0.355, normMin: 0.64, normMax: 1.05, type: "norm" }
         }
     },
     "esser_non_sighthound": {
