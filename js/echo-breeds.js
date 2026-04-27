@@ -399,7 +399,7 @@ const breedSpecificReferenceRanges = {
 
 const allometricModels = {
     "cornell_standard": {
-        label: "Cornell (Standard Canine)",
+        label: "Standard Canine (Cornell)",
         species: "Dog",
         reference: "Cornell et al. (2004)", 
         isCm: true,
@@ -418,7 +418,7 @@ const allometricModels = {
         }
     },
     "esser_non_sighthound": {
-        label: "Esser (Non-Sighthound)",
+        label: "Non-Sighthound (Esser)",
         species: "Dog",
         reference: "Esser et al. (2020)",
         pmid: "33009675",
@@ -437,7 +437,7 @@ const allometricModels = {
         }
     },
     "stepien_sighthound": {
-        label: "Stepien (Sighthound/Whippet)",
+        label: "Sighthound/Whippet (Stepien)",
 	species: "Dog",
  	reference: "Stepien et al. (2023)",
         breed: "Whippet",
@@ -453,6 +453,25 @@ const allometricModels = {
         lad:   { a: 1.20, b: 0.391, normMin: 0.91, normMax: 1.58, type: "norm" }
     }
     },
+"isayama_toy_breed_2022": {
+    label: "Toy Breed (Isayama)",
+    species: "Dog",
+    pmid: "35812853",
+    reference: "Isayama et al. (2022)",
+    isCm: true, // Constants are in cm
+    clinicalNote: "Specific to toy breeds (e.g., Chihuahua, Yorkie, Toy Poodle). These breeds often have smaller heart dimensions relative to BW compared to standard models. Study was specific to dogs <5kg.",
+    params: {
+        // b = Exponent, a = 50th %, normMin = 2.5th %, normMax = 97.5th %
+        lvidd: { a: 1.26, b: 0.332, normMin: 1.02, normMax: 1.57, type: "norm" },
+        lvids: { a: 0.78, b: 0.263, normMin: 0.54, normMax: 1.15, type: "norm" },
+        ivsd:  { a: 0.34, b: 0.486, normMin: 0.15, normMax: 0.77, type: "norm" },
+        ivss:  { a: 0.62, b: 0.238, normMin: 0.46, normMax: 0.83, type: "norm" },
+        lvpwd: { a: 0.43, b: 0.275, normMin: 0.33, normMax: 0.57, type: "norm" },
+        lvpws: { a: 0.57, b: 0.310, normMin: 0.43, normMax: 0.75, type: "norm" },
+        ao:    { a: 0.91, b: 0.183, normMin: 0.70, normMax: 1.18, type: "norm" },
+        la:    { a: 0.92, b: 0.345, normMin: 0.65, normMax: 1.30, type: "norm" }
+    }
+},
 "karsten_adult_cat": {
     label: "Karsten (Adult Cat)",
     species: "Cat",
