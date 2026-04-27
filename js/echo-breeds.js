@@ -47,10 +47,54 @@ const breedSpecificReferenceRanges = {
     "lvids_mm": { "min": 25.06, "max": 28.17 },
     "ivsd_mm": { "min": 8.96, "max": 10.41 },
     "lvfwd_mm": { "min": 8.46, "max": 9.49},
-    "la_ao": { "min": 1.12, "max": 1.29 }, // Fixed Nesting
+    "la_ao": { "min": 1.12, "max": 1.29 }, 
     "FS_PCT": { "min": 25.28, "max": 29.73 },
     "ao_vmax": { "min": 1.31, "max": 1.55 }
   },
+  "Borzoi": {
+    "is_deviant": false,
+    "sources": [
+      {
+        "pmid": "38154250", 
+        "reference": "Wesselowski et al. (2024) Male dogs",
+        "metrics": {
+          "lvidd_mm": { "min": 38.7, "max": 51.2 },
+          "lvids_mm": { "min": 26.5, "max": 38.3 },
+          "ivsd_mm": { "min": 8.3, "max": 13.3 },
+          "lvfwd_mm": { "min": 8.8, "max": 14.9 },
+          "ao_vmax": { "min": 0.85, "max": 2.07 },
+          "edvi_smod_kg": { "min": 1.16 , "max": 3.33 },
+          "esvi_smod_kg": { "min": 0.3 , "max": 1.55 },
+          "EF_PCT": { "min": 47.95, "max": 83.95 },
+          "FS_PCT": { "min": 20.85, "max": 35.95 },
+          "TAPSE_mm": {  "min": 9.8, "max": 22.4 },
+	  "la_ao": { "min": 1.1, "max": 1.44 },
+	  "lad": { "min": 36.2, "max": 52.1 }
+        }
+      },
+      {
+        "pmid": "38154250",
+        "reference": "Wesselowski et al. (2024) Female dogs",
+        "clinical_note": "Echocardiographic screening for DCM in Borzoi should be considered",
+        "metrics": {
+          "lvidd_mm": { "min": 37.0, "max": 50.6 },
+          "lvids_mm": { "min": 24.6, "max": 37.5 },
+          "ivsd_mm": { "min": 7.1, "max": 12.4 },
+          "lvfwd_mm": { "min": 7.1, "max": 13.3 },
+          "ao_vmax": { "min": 0.9, "max": 2.09 },
+          "edvi_smod_kg": { "min": 1.1 , "max": 3.42 },
+          "esvi_smod_kg": { "min": 0.36 , "max": 1.60 },
+          "EF_PCT": { "min": 50.02, "max": 76.8 },
+          "FS_PCT": { "min": 21.12, "max": 36.61 },
+          "TAPSE_mm": {  "min": 9.7, "max": 18.7 },
+	  "la_ao": { "min": 1.06, "max": 1.51 },
+	  "lad": { "min": 34.4, "max": 48.5}
+        }
+      }
+    ]
+  },
+
+
 
   "Boxer": {
     "is_deviant": true,
@@ -98,7 +142,6 @@ const breedSpecificReferenceRanges = {
 
   "Dachshund": {
     "is_deviant": false,
-    "DataCheck": true,
     "sources": [
       {
         "pmid": "30605275", 
@@ -388,13 +431,19 @@ const allometricModels = {
         }
     },
     "wesselowski_sighthound": {
-        label: "Wesselowski (Sighthound/Whippet)",
-        species: "Dog",
-        reference: "Wesselowski et al. (2015)",
+        label: "Stepien (Sighthound/Whippet)",
+	species: "Dog",
+ 	reference: "Stepien et al. (2023)",
+        breed: "Whippet",
+        PMID: "36975003",
         params: {
-            lvidd: { a: 1.85, b: 0.25, see: 0.044, type: "log" },
-            lvids: { a: 1.05, b: 0.25, see: 0.061, type: "log" }
-        }
+        // b = scaling exponent, normMin/Max calculated from SE of Y estimate
+        lvidd: { a: 1.51, b: 0.332, normMin: 1.13, normMax: 2.01, type: "norm" },
+        lvids: { a: 0.89, b: 0.433, normMin: 0.60, normMax: 1.33, type: "norm" },
+        ivsd:  { a: 0.55, b: 0.222, normMin: 0.35, normMax: 0.86, type: "norm" },
+        lvpwd: { a: 0.35, b: 0.335, normMin: 0.21, normMax: 0.57, type: "norm" },
+        lad:   { a: 1.20, b: 0.391, normMin: 0.91, normMax: 1.58, type: "norm" }
+    }
     },
     "visser_kitten": {
         label: "Visser (Kitten Growth)",
