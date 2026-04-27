@@ -472,6 +472,25 @@ const allometricModels = {
         la:    { a: 0.92, b: 0.345, normMin: 0.65, normMax: 1.30, type: "norm" }
     }
 },
+"sisson_puppy_1991": {
+    label: "Puppy (Sisson)",
+    species: "Dog",
+    pmid: "1767977",
+    reference: "Sisson and Schaeffer (1991)",
+    isCm: false, // Constants are already in mm
+    clinicalNote: "Applicable to growing puppies (1wk–1yr). **CARE - OLDER PAPER BASED ON SMALL SAMPLE SIZE OF ENGLISH POINTERS.** Puppy measurements should always be interpreted with great care, and very few studies have reported on allometric scaling as yet. Note: Reference ranges calculated using Natural Log SEE (base e) from Table 2 in paper.",
+    params: {
+        // a = antilog(ln a) in mm, b = exponent, normMin/Max = a * e^(+/- 1.96 * SEE)
+        lvidd: { a: 11.63, b: 0.409, normMin: 9.94, normMax: 13.60, type: "norm" },
+        lvids: { a: 6.76,  b: 0.445, normMin: 5.32, normMax: 8.60, type: "norm" },
+        ivsd:  { a: 2.36,  b: 0.367, normMin: 1.74, normMax: 3.19, type: "norm" }, 
+        ivss:  { a: 4.13,  b: 0.319, normMin: 3.43, normMax: 4.97, type: "norm" },
+        lvpwd: { a: 2.47,  b: 0.348, normMin: 1.92, normMax: 3.18, type: "norm" }, 
+        lvpws: { a: 4.50,  b: 0.313, normMin: 3.66, normMax: 5.53, type: "norm" },
+        ao:    { a: 7.28,  b: 0.401, normMin: 6.27, normMax: 8.45, type: "norm" },
+        la:    { a: 7.22,  b: 0.380, normMin: 6.02, normMax: 8.65, type: "norm" }
+    }
+},
 "karsten_adult_cat": {
     label: "Karsten (Adult Cat)",
     species: "Cat",
