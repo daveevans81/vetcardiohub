@@ -454,6 +454,8 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
     <span><strong>LVEDV / m²</strong></span>
     <span>
         <span x-text="edvim2"></span>
+<span x-show="edvim2 < 100 " class="normal">(Normal)</span>
+        <span x-show="edvim2 >= 100" class="abnormal">(Enlarged)</span>
         <span style="font-size: 0.8em; color: #666;"> ml/m² (ref <100)</span>
     </span>
 </div>
