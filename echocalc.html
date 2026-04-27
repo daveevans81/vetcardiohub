@@ -646,6 +646,16 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
         </a>
     </template>
 </div>
+
+<div x-show="allometricModels[selectedModel]?.clinicalNote" 
+     x-transition
+     style="margin-top: 15px; background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #166534;">
+    <p style="margin: 0;">
+        <i class="fa-solid fa-lightbulb" style="margin-right: 5px;"></i>
+        <strong>Dataset Note:</strong> 
+        <span x-text="allometricModels[selectedModel].clinicalNote"></span>
+    </p>
+</div>
         </div>
     </div>
 </section>
