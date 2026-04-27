@@ -438,6 +438,7 @@ const allometricModels = {
  	reference: "Stepien et al. (2023)",
         breed: "Whippet",
         pmid: "36975003",
+        clinicalNote: "Specific to North American Whippets. Higher ranges account for 'Athletic Heart' phenotype in conditioned dogs.",
         params: {
         // b = scaling exponent, normMin/Max calculated from SE of Y estimate
         lvidd: { a: 1.51, b: 0.332, normMin: 1.13, normMax: 2.01, type: "norm" },
@@ -452,11 +453,18 @@ const allometricModels = {
         species: "Cat",
         reference: "Visser et al. (2022)",
         pmid: "32812464",
-        params: {
-            la:   { a: -0.099, b: 0.275, see: 0.0422, type: "log_direct" },
-            lad:  { a: -0.077, b: 0.289, see: 0.0461, type: "log_direct" },
-            ao:   { a: -0.235, b: 0.292, see: 0.037, type: "log_direct" },
-            lvidd: { a: 0.018, b: 0.259, see: 0.0473, type: "log_direct" }
-        }
+        clinicalNote: "Applicable to growing kittens (6–16 weeks). Calibrated for pediatric feline heart development.",
+params: {
+        // Data from Source 1: a is the log-intercept, b is the exponent
+        lad:   { a: -0.077, b: 0.289, see: 0.0461, type: "log_direct" }, // Left atrial diam (Lx)
+        rad:   { a: -0.016, b: 0.316, see: 0.0498, type: "log_direct" }, // Right atrial diam (Lx)
+        la:    { a: -0.099, b: 0.275, see: 0.0422, type: "log_direct" }, // Left atrium (Sx)
+        ao:    { a: -0.235, b: 0.292, see: 0.0370, type: "log_direct" }, // Aorta
+        lvidd: { a: 0.046,  b: 0.278, see: 0.0509, type: "log_direct" }, // LVIDd (M-mode, Sx)
+        lvids: { a: -0.296, b: 0.376, see: 0.0989, type: "log_direct" }, // LVIDs (M-mode, Sx)
+        ivsd:  { a: -0.510, b: 0.274, see: 0.0672, type: "log_direct" }, // IVSd (M-mode, Sx)
+        lvpwd: { a: -0.507, b: 0.213, see: 0.0758, type: "log_direct" },  // LVFWd (M-mode, Sx)
+        rvidd: { a: -0.328, b: 0.255, see: 0.109, type: "log_direct" }, // RVIDd ( Sx)
+    }
     }
 };
