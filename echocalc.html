@@ -203,6 +203,9 @@ calculateRef(paramKey) {
         // Safety check: Is the data file loaded?
         if (typeof allometricModels === 'undefined') return null;
 
+        const modelData = allometricModels[this.selectedModel];
+if (!modelData) return null;
+
         const model = allometricModels[this.selectedModel]?.params?.[paramKey];
         if (!model) return null;
 
