@@ -199,7 +199,8 @@
     /* 3. METHODS */
 calculateRef(paramKey) {
         if (!this.weight || this.weight <= 0) return null;
-        
+        if (!this.weight || this.weight <= 0) return { min: '—', max: '—', mean: '—' };
+
         // Safety check: Is the data file loaded?
         if (typeof allometricModels === 'undefined') return null;
 
@@ -208,6 +209,8 @@ if (!modelData) return null;
 
         const model = allometricModels[this.selectedModel]?.params?.[paramKey];
         if (!model) return null;
+// If the selected model doesn't have this specific parameter (e.g. some lack IVSs)
+    if (!model) return { min: '—', max: '—', mean: '—' };
 
         // Smart unit handling
         const scaleFactor = modelData.isCm ? 10 : 1;
@@ -500,6 +503,70 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
                 <span style="font-size: 0.8em; color: #666;"> (ref &lt;2.1) </span>
             </span>
         </div>
+<p style="font-weight: bold; color: #1e40af; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+    Weight-Based Allometric Results (Model: <span x-text="allometricModels[selectedModel].label"></span>)
+</p>
+
+<div class="result-row" x-show="lvidd">
+    <span><strong>LVIDd</strong></span>
+    <span>
+        <span x-text="lvidd"></span> mm
+        <span x-show="parseFloat(lvidd) > calculateRef('lvidd').max" class="abnormal">(Enlarged)</span>
+        <span x-show="parseFloat(lvidd) < calculateRef('lvidd').min" class="abnormal">(Small)</span>
+        <span x-show="parseFloat(lvidd) >= calculateRef('lvidd').min && parseFloat(lvidd) <= calculateRef('lvidd').max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + calculateRef('lvidd').min + '-' + calculateRef('lvidd').max + ')'"></span>
+    </span>
+</div>
+
+<div class="result-row" x-show="lvids">
+    <span><strong>LVIDs</strong></span>
+    <span>
+        <span x-text="lvids"></span> mm
+        <span x-show="parseFloat(lvids) > calculateRef('lvids').max" class="abnormal">(Enlarged)</span>
+        <span x-show="parseFloat(lvids) <= calculateRef('lvids').max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref <' + calculateRef('lvids').max + ')'"></span>
+    </span>
+</div>
+
+<div class="result-row" x-show="ivsd">
+    <span><strong>IVSd</strong></span>
+    <span>
+        <span x-text="ivsd"></span> mm
+        <span x-show="parseFloat(ivsd) > calculateRef('ivsd').max" class="abnormal">(Thickened)</span>
+        <span x-show="parseFloat(ivsd) <= calculateRef('ivsd').max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref <' + calculateRef('ivsd').max + ')'"></span>
+    </span>
+</div>
+
+<div class="result-row" x-show="lvpwd">
+    <span><strong>LVFWd</strong></span>
+    <span>
+        <span x-text="lvpwd"></span> mm
+        <span x-show="parseFloat(lvpwd) > calculateRef('lvpwd').max" class="abnormal">(Thickened)</span>
+        <span x-show="parseFloat(lvpwd) <= calculateRef('lvpwd').max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref <' + calculateRef('lvpwd').max + ')'"></span>
+    </span>
+</div>
+
+<div class="result-row" x-show="la">
+    <span><strong>LA</strong></span>
+    <span>
+        <span x-text="la"></span> mm
+        <span x-show="parseFloat(la) > calculateRef('la').max" class="abnormal">(Enlarged)</span>
+        <span x-show="parseFloat(la) <= calculateRef('la').max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref <' + calculateRef('la').max + ')'"></span>
+    </span>
+</div>
+
+<div class="result-row" x-show="ao">
+    <span><strong>Ao</strong></span>
+    <span>
+        <span x-text="ao"></span> mm
+        <span x-show="parseFloat(ao) > calculateRef('ao').max" class="abnormal">(Dilated)</span>
+        <span x-show="parseFloat(ao) <= calculateRef('ao').max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref <' + calculateRef('ao').max + ')'"></span>
+    </span>
+</div>
     </div>
 </div>
 
