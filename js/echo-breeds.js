@@ -438,7 +438,7 @@ const allometricModels = {
  	reference: "Stepien et al. (2023)",
         breed: "Whippet",
         pmid: "36975003",
-        clinicalNote: "Specific to North American Whippets. Higher ranges account for 'Athletic Heart' phenotype in conditioned dogs.",
+        clinicalNote: "Specific to North American Whippets. Higher ranges account for 'Athletic Heart' phenotype in conditioned dogs. Apply to other sighthounds with care.",
         params: {
         // b = scaling exponent, normMin/Max calculated from SE of Y estimate
         lvidd: { a: 1.51, b: 0.332, normMin: 1.13, normMax: 2.01, type: "norm" },
@@ -453,7 +453,7 @@ const allometricModels = {
         species: "Cat",
         reference: "Visser et al. (2022)",
         pmid: "32812464",
-        clinicalNote: "Applicable to growing kittens (6–16 weeks). Calibrated for pediatric feline heart development.",
+        clinicalNote: "Applicable to growing kittens (6–16 weeks). Calibrated for pediatric feline heart development. Discrepancy Note: Values here are 95% intervals, the paper published a table that seemingly uses 90% intervals and mislabelled.",
 params: {
         // Data from Source 1: a is the log-intercept, b is the exponent
         lad:   { a: -0.077, b: 0.289, see: 0.0461, type: "log_direct" }, // Left atrial diam (Lx)
