@@ -631,6 +631,21 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
 </template>
 </tbody>
             </table>
+
+<div class="reference-link-box" style="margin-top: 15px; padding: 10px; background: #f1f5f9; border-radius: 6px;">
+    <p style="font-size: 0.85rem; color: #475569; margin: 0;">
+        <i class="fa-solid fa-book-open"></i> 
+        <strong>Source:</strong> <span x-text="allometricModels[selectedModel]?.reference"></span>
+    </p>
+    
+    <template x-if="allometricModels[selectedModel]?.pmid">
+        <a :href="'https://pubmed.ncbi.nlm.nih.gov/' + allometricModels[selectedModel].pmid" 
+           target="_blank" 
+           style="font-size: 0.8rem; color: #2563eb; text-decoration: underline; display: inline-block; margin-top: 5px;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> View on PubMed (PMID: <span x-text="allometricModels[selectedModel].pmid"></span>)
+        </a>
+    </template>
+</div>
         </div>
     </div>
 </section>
