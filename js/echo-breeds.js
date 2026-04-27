@@ -340,7 +340,7 @@ const breedSpecificReferenceRanges = {
           "lvids_mm": { "median": 26.9, "min": 19.8, "max": 34.1 },
           "ivsd_mm": { "median": 9.4, "min": 7.0, "max": 11.8 },
           "lvfwd_mm": { "min": 6.6, "max": 10.9 },
-          "la_ao": { "median": 1.4, "min": 1.1, "max": 1.7 }, // Fixed Nesting
+          "la_ao": { "median": 1.4, "min": 1.1, "max": 1.7 }, 
           "LAD_mm": { "min": 26.5, "max": 37.6 },
           "esvi_smod_m2": { "min": 21.1, "max": 76.6 },
           "EF_PCT": { "min": 45.1, "max": 77.5 },
@@ -402,6 +402,7 @@ const allometricModels = {
         label: "Cornell (Standard Canine)",
         species: "Dog",
         reference: "Cornell et al. (2004)", 
+        isCm: true,
         clinicalNote: "Original allometric dataset. Included sighthound breeds so this skews dataset somewhat as they are outliers typically.",
         pmid: "15188817",
         params: {
@@ -421,6 +422,7 @@ const allometricModels = {
         species: "Dog",
         reference: "Esser et al. (2020)",
         pmid: "33009675",
+        isCm: true,
         clinicalNote: "Revision of Cornell allometric dataset. Deliberately excluded sighthound breeds so this doesn't skew the dataset.",
         params: {
             lvidd: { a: 1.38, b: 0.322, normMin: 1.17, normMax: 1.63, type: "norm" },
@@ -440,6 +442,7 @@ const allometricModels = {
  	reference: "Stepien et al. (2023)",
         breed: "Whippet",
         pmid: "36975003",
+        isCm: true,
         clinicalNote: "Specific to North American Whippets. Higher ranges account for 'Athletic Heart' phenotype in conditioned dogs. Apply to other sighthounds with care.",
         params: {
         // b = scaling exponent, normMin/Max calculated from SE of Y estimate
@@ -454,6 +457,7 @@ const allometricModels = {
     label: "Karsten (Adult Cat)",
     species: "Cat",
     pmid: "28993567",
+    isCm: false,
     reference: "Karsten et al. (2017)",
     clinicalNote: "Applicable to adult cats. Measurements are 2D-derived. Ventricular data (LVDd, IVSd, LVPWd) uses Short-axis 2D measurements; Max LAD uses Long-axis 2D.",
     params: {
@@ -468,6 +472,7 @@ const allometricModels = {
         species: "Cat",
         reference: "Visser et al. (2022)",
         pmid: "32812464",
+        isCm: true,
         clinicalNote: "Applicable to growing kittens (6–16 weeks). Calibrated for pediatric feline heart development. Discrepancy Note: Values here are 95% intervals, the paper published a table that seemingly uses 90% intervals and mislabelled.",
 params: {
         // Data from Source 1: a is the log-intercept, b is the exponent
