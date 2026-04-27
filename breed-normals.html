@@ -87,6 +87,67 @@
             </div>
         </section>
 
+<section class="card shadow-sm" style="margin-top: 30px;" x-data="allometricApp()">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #1e40af;"><i class="fa-solid fa-calculator"></i> Weight-Based Allometric Predictor</h2>
+        <span style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">Evidence-Based</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+        <div class="input-group">
+            <label style="font-weight: bold; display: block; margin-bottom: 8px;">Body Weight (kg):</label>
+            <input type="number" x-model="weight" placeholder="e.g. 25" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+        </div>
+
+        <div class="input-group">
+            <label style="font-weight: bold; display: block; margin-bottom: 8px;">Select Reference Model:</label>
+            <select x-model="selectedModel" class="form-select" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <template x-for="(model, key) in allometricModels" :key="key">
+                    <option :value="key" x-text="model.label"></option>
+                </template>
+            </select>
+        </div>
+    </div>
+
+    <div x-show="weight > 0" x-transition>
+        <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
+            <thead style="background-color: #f8f9fa;">
+                <tr>
+                    <th style="padding: 12px; border: 1px solid #dee2e6; text-align: left;">Echocardiographic Metric</th>
+                    <th style="padding: 12px; border: 1px solid #dee2e6; text-align: center;">Predicted Mean (mm)</th>
+                    <th style="padding: 12px; border: 1px solid #dee2e6; text-align: center;">95% Reference Interval (mm)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="(params, paramKey) in allometricModels[selectedModel].params" :key="paramKey">
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: 500; text-transform: uppercase;" x-text="paramKey"></td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6; text-align: center; color: #64748b;" x-text="calculateRef(paramKey).mean"></td>
+                        <td style="padding: 12px; border: 1px solid #dee2e6; text-align: center; font-weight: bold; background-color: #f0f9ff;" x-text="calculateRef(paramKey).min + ' – ' + calculateRef(paramKey).max"></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+
+        <div style="margin-top: 20px;">
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 6px;">
+                <p style="margin: 0; font-size: 0.9rem;">
+                    <strong>Source:</strong> <span x-text="allometricModels[selectedModel].reference"></span> 
+                    <a :href="'https://pubmed.ncbi.nlm.nih.gov/' + allometricModels[selectedModel].pmid" target="_blank" style="margin-left: 10px; color: #2563eb;">View PMID: <span x-text="allometricModels[selectedModel].pmid"></span></a>
+                </p>
+                <div x-show="allometricModels[selectedModel].clinicalNote" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px; font-style: italic; font-size: 0.85rem; color: #475569;">
+                    <i class="fa-solid fa-circle-info"></i> <span x-text="allometricModels[selectedModel].clinicalNote"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="!weight || weight <= 0" style="text-align: center; padding: 40px; color: #94a3b8; background: #f8fafc; border: 2px dashed #e2e8f0; border-radius: 8px;">
+        <i class="fa-solid fa-weight-hanging" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.3;"></i>
+        <p>Enter the patient's weight to generate research-backed allometric reference intervals.</p>
+    </div>
+</section>
+
         <article class="card" style="margin-top: 20px;">
             <h2>Why Use Breed-Specific Reference Intervals?</h2>
             <p>Standard allometric scaling (Cornell method) is reliable for many dogs, but "deviant" breeds - in particular sighthounds like <strong>Greyhounds and Whippets</strong> - often have physiological heart sizes that fall outside standard multi-breed ranges.</p>
@@ -184,5 +245,54 @@
             container.innerHTML = finalHtml;
         }
     </script>
+
+<script>
+function allometricApp() {
+    return {
+        weight: '',
+        selectedModel: 'cornell_standard',
+        
+calculateRef(paramKey) {
+        if (!this.weight || this.weight <= 0) return null;
+        
+        // Safety check: Is the data file loaded?
+        if (typeof allometricModels === 'undefined') return null;
+
+        const modelData = allometricModels[this.selectedModel];
+if (!modelData) return null;
+
+        const model = allometricModels[this.selectedModel]?.params?.[paramKey];
+        if (!model) return null;
+
+        // Smart unit handling
+        const scaleFactor = modelData.isCm ? 10 : 1;
+
+        let lower, upper, mean;
+
+        if (model.type === 'log_direct' || model.type === 'log') {
+            const logMean = (model.type === 'log_direct') 
+                ? model.a + (model.b * Math.log10(this.weight))
+                : Math.log10(model.a) + (model.b * Math.log10(this.weight));
+            
+            mean = Math.pow(10, logMean);
+            lower = Math.pow(10, logMean - (1.96 * model.see));
+            upper = Math.pow(10, logMean + (1.96 * model.see));
+        } else {
+            const bwPower = Math.pow(this.weight, model.b);
+            mean = model.a * bwPower;
+            lower = model.normMin * bwPower;
+            upper = model.normMax * bwPower;
+        }
+
+        return {
+        	min: (lower * scaleFactor).toFixed(1),
+        	max: (upper * scaleFactor).toFixed(1),
+        	mean: (mean * scaleFactor).toFixed(1)
+        };
+        }
+    }
+}
+</script>
+
 </body>
 </html>
