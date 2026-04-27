@@ -450,6 +450,19 @@ const allometricModels = {
         lad:   { a: 1.20, b: 0.391, normMin: 0.91, normMax: 1.58, type: "norm" }
     }
     },
+"karsten_adult_cat": {
+    label: "Karsten (Adult Cat)",
+    species: "Cat",
+    pmid: "28993567",
+    reference: "Karsten et al. (2017)",
+    clinicalNote: "Applicable to adult cats. Measurements are 2D-derived. Ventricular data (LVDd, IVSd, LVPWd) uses Short-axis 2D measurements; Max LAD uses Long-axis 2D.",
+    params: {
+        lvidd: { a: 9.96, b: 0.247, normMin: 7.74, normMax: 12.82, type: "norm" },
+        ivsd:  { a: 3.73, b: 0.177, normMin: 2.77, normMax: 5.01,  type: "norm" },
+        lvpwd: { a: 3.21, b: 0.212, normMin: 2.59, normMax: 3.97,  type: "norm" },
+        lad:   { a: 11.23, b: 0.177, normMin: 9.24, normMax: 13.65, type: "norm" }
+    }
+},
     "visser_kitten": {
         label: "Visser (Kitten Growth)",
         species: "Cat",
