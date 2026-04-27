@@ -206,6 +206,9 @@ calculateRef(paramKey) {
         const model = allometricModels[this.selectedModel]?.params?.[paramKey];
         if (!model) return null;
 
+        // Smart unit handling
+        const scaleFactor = modelData.isCm ? 10 : 1;
+
         let lower, upper, mean;
 
         if (model.type === 'log_direct' || model.type === 'log') {
@@ -224,9 +227,9 @@ calculateRef(paramKey) {
         }
 
         return {
-            min: (lower * 10).toFixed(1),
-            max: (upper * 10).toFixed(1),
-            mean: (mean * 10).toFixed(1)
+        	min: (lower * scaleFactor).toFixed(1),
+        	max: (upper * scaleFactor).toFixed(1),
+        	mean: (mean * scaleFactor).toFixed(1)
         };
     }
 }" 
