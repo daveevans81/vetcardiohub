@@ -401,7 +401,8 @@ const allometricModels = {
     "cornell_standard": {
         label: "Cornell (Standard Canine)",
         species: "Dog",
-        reference: "Cornell et al. (2004)",
+        reference: "Cornell et al. (2004)", 
+        pmid: "15188817",
         params: {
             lvidd: { a: 1.53, b: 0.294, normMin: 1.27, normMax: 1.85, type: "norm" },
             lvids: { a: 0.95, b: 0.315, normMin: 0.71, normMax: 1.26, type: "norm" },
@@ -418,6 +419,7 @@ const allometricModels = {
         label: "Esser (Non-Sighthound)",
         species: "Dog",
         reference: "Esser et al. (2020)",
+        pmid: "33009675",
         params: {
             lvidd: { a: 1.38, b: 0.322, normMin: 1.17, normMax: 1.63, type: "norm" },
             lvids: { a: 0.87, b: 0.346, normMin: 0.70, normMax: 1.09, type: "norm" },
@@ -430,12 +432,12 @@ const allometricModels = {
             lad:   { a: 1.10, b: 0.309, normMin: 0.89, normMax: 1.6, type: "norm" }
         }
     },
-    "wesselowski_sighthound": {
+    "stepien_sighthound": {
         label: "Stepien (Sighthound/Whippet)",
 	species: "Dog",
  	reference: "Stepien et al. (2023)",
         breed: "Whippet",
-        PMID: "36975003",
+        pmid: "36975003",
         params: {
         // b = scaling exponent, normMin/Max calculated from SE of Y estimate
         lvidd: { a: 1.51, b: 0.332, normMin: 1.13, normMax: 2.01, type: "norm" },
@@ -449,6 +451,7 @@ const allometricModels = {
         label: "Visser (Kitten Growth)",
         species: "Cat",
         reference: "Visser et al. (2022)",
+        pmid: "32812464",
         params: {
             la:   { a: -0.099, b: 0.275, see: 0.0422, type: "log_direct" },
             lad:  { a: -0.077, b: 0.289, see: 0.0461, type: "log_direct" },
