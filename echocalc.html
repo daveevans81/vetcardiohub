@@ -380,7 +380,7 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
 
     <div class="results-box" x-transition>
         
-        <div class="result-row">
+        <div class="result-row" x-show="lviddn">
             <span><strong>LVIDDN</strong> (Cornell)</span>
             <span>
                 <span x-text="lviddn"></span>
@@ -392,7 +392,7 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
             </span>
         </div>
 
-        <div class="result-row">
+        <div class="result-row" x-show="lvidsn">
             <span><strong>LVIDSN</strong> (Cornell)</span>
             <span>
                 <span x-text="lvidsn"></span>
@@ -403,7 +403,7 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
             </span>
         </div>
 
-        <div class="result-row">
+        <div class="result-row"> x-show="fs"
             <span><strong>Fractional Shortening</strong></span>
             <span><span x-text="fs"></span>&percnt;</span>
                 <span x-show="fs >= 25" class="normal">(Normal)</span>
@@ -411,7 +411,7 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
                 <span style="font-size: 0.8em; color: #666;"> (ref &gt;25) </span>
         </div>
 
-        <div class="result-row">
+        <div class="result-row" x-show="RWT">
             <span><strong>Relative Wall Thickness</strong></span>
             <span><span x-text="RWT"></span>
                 <span x-show="RWT >= 0.43" class="abnormal">(Thick Walls)</span>
@@ -421,15 +421,15 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
 </span>
         </div>
 
-        <div class="result-row">
+        <div class="result-row" x-show="ef">
             <span><strong>Ejection Fraction</strong></span>
             <span><span x-text="ef"></span>&percnt;</span>
                 <span x-show="ef >= 50" class="normal">(Normal)</span>
-                <span x-show="fs < 50 && fs > 0" class="abnormal">(Abnormal)</span>
+                <span x-show="ef < 50 && ef > 0" class="abnormal">(Abnormal)</span>
                 <span style="font-size: 0.8em; color: #666;"> (ref &gt;50) </span>
         </div>
 
-        <div class="result-row">
+        <div class="result-row" x-show="lvedvbw">
             <span><strong>LVEDV / BW</strong></span>
             <span>
                 <span x-text="lvedvbw"></span>
@@ -440,7 +440,7 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
             </span>
         </div>
 
-        <div class="result-row">
+        <div class="result-row" x-show="lvesvbw">
             <span><strong>LVESV / BW</strong></span>
             <span>
                 <span x-text="lvesvbw"></span>
@@ -450,14 +450,14 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
                 <span style="font-size: 0.8em; color: #666;"> (ref 0.3 - 1.35) </span>
             </span>
         </div>
-<div class="result-row">
+<div class="result-row" x-show="edvim2">
     <span><strong>LVEDV / m²</strong></span>
     <span>
         <span x-text="edvim2"></span>
         <span style="font-size: 0.8em; color: #666;"> ml/m² (ref <100)</span>
     </span>
 </div>
-<div class="result-row">
+<div class="result-row" x-show="esvim2">
     <span><strong>LVESV / m²</strong></span>
     <span>
         <span x-text="esvim2"></span>
@@ -465,7 +465,7 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
         <span style="font-size: 0.8em; color: #666;"> ml/m² (ref <30)</span>
     </span>
 </div>
-        <div class="result-row">
+        <div class="result-row" x-show="laAo">
             <span><strong>LA:Ao Ratio</strong></span>
             <span>
                 <span x-text="laAo"></span>
@@ -475,7 +475,7 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
             </span>
         </div>
  
-        <div class="result-row">
+        <div class="result-row" x-show="lan">
             <span><strong>LA (short axis) Normalised</strong></span>
             <span>
                 <span x-text="lan"></span>
@@ -485,7 +485,7 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
             </span>
         </div>
 
-        <div class="result-row">
+        <div class="result-row" x-show="ladn">
             <span><strong>LADN</strong></span>
             <span>
                 <span x-text="ladn"></span>
@@ -494,7 +494,7 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
                 <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.6) </span>
             </span>
         </div>
-             <div class="result-row">
+             <div class="result-row" x-show="ladao">
             <span><strong>LAD : Ao(short axis)</strong></span>
             <span>
                 <span x-text="ladao"></span>
