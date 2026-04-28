@@ -247,6 +247,7 @@ exportToClipboard() {
         if (!allometricModels[this.selectedModel]) return;
         const modelLabel = allometricModels[this.selectedModel].label;
         const results = this.allometricResults;
+        const species = (model.species || 'VETERINARY').toUpperCase();
 
         // Helper function for status tags
         const getTag = (val, min, max, high = '[ENLARGED]', low = '[SMALL]') => {
@@ -257,7 +258,7 @@ exportToClipboard() {
             return '';
         };
 
-        let text = `ECHOCARDIOGRAPHY REPORT\n`;
+        let text = `${species} ECHOCARDIOGRAPHY REPORT\n`;
         text += `Weight: ${this.weight}kg | Model: ${modelLabel}\n`;
         text += `--------------------------------------------------\n\n`;
 
@@ -302,15 +303,41 @@ exportToClipboard() {
         if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${getTag(this.ladn, null, 1.60)}\n`;
         if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${getTag(this.ladao, null, 2.10)}\n`;
 
-        // SECTION: EPIC CHECK
+// SECTION: SPECIES-SPECIFIC CLINICAL CHECKS
+    
+    // --- CANINE: EPIC CHECK ---
+    if (species === 'DOG' || species === 'CANINE') {
         if (this.lviddn > 0 && this.laAo > 0) {
-            text += `\nEPIC TRIAL CHECK (Stage B2 Criteria):\n`;
+            text += `\nCANINE CLINICAL ASSESSMENT (EPIC B2):\n`;
             const meetsLA = this.laAo >= 1.65;
             const meetsLV = this.lviddn >= 1.7;
             text += `LV Size: ${meetsLV ? 'ENLARGED' : 'NORMAL'}\n`;
             text += `LA Size: ${meetsLA ? 'ENLARGED' : 'NORMAL'}\n`;
-            text += `RESULT: ${ (meetsLA && meetsLV) ? 'MEETS CRITERIA FOR STAGE B2' : 'DOES NOT MEET CRITERIA'}\n`;
+            text += `EPIC RESULT: ${ (meetsLA && meetsLV) ? 'MEETS CRITERIA FOR STAGE B2' : 'DOES NOT MEET CRITERIA'}\n`;
         }
+    }
+
+    // --- FELINE: HCM & ATE RISK CHECK ---
+    if (species === 'CAT' || species === 'FELINE') {
+        text += `\nFELINE CLINICAL ASSESSMENT:\n`;
+        
+        // HCM Check (IVSd or LVFWd >= 6mm)
+        const ivs = parseFloat(this.ivsd) || 0;
+        const lvp = parseFloat(this.lvpwd) || 0;
+        if (ivs >= 6 || lvp >= 6) {
+            text += `HCM CHECK: Wall thickening detected (>= 6mm). Potential HCM phenotype.\n`;
+        } else if (ivs > 0 || lvp > 0) {
+            text += `HCM CHECK: Wall thickness < 6mm. Within standard limits.\n`;
+        }
+
+        // ATE Risk Check (LAD >= 20mm)
+        const ladVal = parseFloat(this.lad) || 0;
+        if (ladVal >= 20) {
+            text += `ATE RISK: Severe LA enlargement (LAD >= 20mm). High risk for ATE / Smoke.\n`;
+        } else if (ladVal > 0) {
+            text += `ATE RISK: LAD < 20mm. Lower risk for immediate thrombus formation.\n`;
+        }
+    }
 
         text += `\n--------------------------------------------------\n`;
         text += `Generated via VetCardioHub.com`;

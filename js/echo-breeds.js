@@ -400,7 +400,7 @@ const breedSpecificReferenceRanges = {
 const allometricModels = {
     "cornell_standard": {
         label: "Standard Canine (Cornell)",
-        species: "Dog",
+        species: "canine",
         reference: "Cornell et al. (2004)", 
         isCm: true,
         clinicalNote: "Original allometric dataset. Included sighthound breeds so this skews dataset somewhat as they are outliers typically. LAD included from Marchesotti et al. (2019)",
@@ -419,7 +419,7 @@ const allometricModels = {
     },
     "esser_non_sighthound": {
         label: "Non-Sighthound (Esser)",
-        species: "Dog",
+        species: "canine",
         reference: "Esser et al. (2020)",
         pmid: "33009675",
         isCm: true,
@@ -438,7 +438,7 @@ const allometricModels = {
     },
     "stepien_sighthound": {
         label: "Sighthound/Whippet (Stepien)",
-	species: "Dog",
+	species: "canine",
  	reference: "Stepien et al. (2023)",
         breed: "Whippet",
         pmid: "36975003",
@@ -455,7 +455,7 @@ const allometricModels = {
     },
 "isayama_toy_breed_2022": {
     label: "Toy Breed (Isayama)",
-    species: "Dog",
+    species: "canine",
     pmid: "35812853",
     reference: "Isayama et al. (2022)",
     isCm: true, // Constants are in cm
@@ -474,7 +474,7 @@ const allometricModels = {
 },
 "sisson_puppy_1991": {
     label: "Puppy (Sisson)",
-    species: "Dog",
+    species: "canine",
     pmid: "1767977",
     reference: "Sisson and Schaeffer (1991)",
     isCm: false, // Constants are already in mm
@@ -493,7 +493,7 @@ const allometricModels = {
 },
 "karsten_adult_cat": {
     label: "Karsten (Adult Cat)",
-    species: "Cat",
+    species: "feline",
     pmid: "28993567",
     isCm: false,
     reference: "Karsten et al. (2017)",
@@ -507,7 +507,7 @@ const allometricModels = {
 },
     "visser_kitten": {
         label: "Visser (Kitten Growth)",
-        species: "Cat",
+        species: "feline",
         reference: "Visser et al. (2022)",
         pmid: "32812464",
         isCm: true,
