@@ -280,14 +280,23 @@ exportToClipboard() {
             { key: 'lvidd', label: 'LVIDd' }, { key: 'lvids', label: 'LVIDs' },
             { key: 'ivsd', label: 'IVSd' }, { key: 'lvpwd', label: 'LVFWd' }
         ];
-        lvParams.forEach(p => {
-            const val = this[p.key];
-            if (val && results[p.key]) {
-                const ref = results[p.key];
-                const tag = getTag(val, ref.min, ref.max, (p.key.includes('ivs') || p.key.includes('pwd') ? '[THICKENED]' : '[ENLARGED]'), (p.key.includes('ivs') || p.key.includes('pwd') ? '[THIN]' : '[SMALL]'));
-                text += `${p.label}: ${val}mm (Ref: ${ref.min}-${ref.max}mm)${tag}\n`;
+lvParams.forEach(p => {
+        const val = this[p.key];
+        const res = results[p.key];
+        if (val) {
+            let line = `${p.l}: ${val}mm`;
+            // Only add ref range if the model actually provides one
+            if (res && res.available) {
+                const tag = getTag(val, res, 
+                    (p.key.includes('ivs') || p.key.includes('pwd') ? '[THICKENED]' : '[ENLARGED]'), 
+                    (p.key.includes('ivs') || p.key.includes('pwd') ? '[THIN]' : '[SMALL]'));
+                line += ` (Ref: ${res.min}-${res.max}mm)${tag}`;
+            } else {
+                line += ` (No ref)`;
             }
-        });
+            text += line + `\n`;
+        }
+    });
 
 //Dog Only
 if (this.isDog) {
@@ -309,13 +318,24 @@ if (this.isDog) {
         // SECTION: LEFT ATRIUM
         text += `\nLEFT ATRIUM:\n`;
         const laParams = [{ key: 'la', label: 'LA' }, { key: 'ao', label: 'Ao' }, { key: 'lad', label: 'LAD' }];
-        laParams.forEach(p => {
-            const val = this[p.key];
-            if (val && results[p.key]) {
-                const ref = results[p.key];
-                text += `${p.label}: ${val}mm (Ref: ${ref.min}-${ref.max}mm)${getTag(val, ref.min, ref.max)}\n`;
+laParams.forEach(p => {
+        const val = this[p.key];
+        const res = results[p.key];
+        if (val) {
+            let line = `${p.l}: ${val}mm`;
+            // Only add ref range if the model actually provides one
+            if (res && res.available) {
+                const tag = getTag(val, res, 
+                    (p.key.includes('ivs') || p.key.includes('pwd') ? '[THICKENED]' : '[ENLARGED]'), 
+                    (p.key.includes('ivs') || p.key.includes('pwd') ? '[THIN]' : '[SMALL]'));
+                line += ` (Ref: ${res.min}-${res.max}mm)${tag}`;
+            } else {
+                line += ` (No ref)`;
             }
-        });
+            text += line + `\n`;
+        }
+    }); 
+
         if (this.laAo > 0)   text += `LA:Ao Ratio: ${this.laAo} (Ref: <1.65)${getTag(this.laAo, null, 1.65)}\n`;
 if (this.isDog) {
         if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${getTag(this.lan, null, 1.17)}\n`;
