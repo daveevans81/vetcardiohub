@@ -392,7 +392,7 @@ if (this.isDog) {
         if (val) {
             let line = `${p.label}: ${val}mm`; 
             if (res && res.available) {
-                line += ` (Ref: ${res.min}-${res.max}mm)${getTag(val, res)}`;
+                line += ` (Ref: ${res.min}-${res.max}mm)${this.getTag(val, res)}`;
             } else {
                 line += ` (No ref)`;
             }
