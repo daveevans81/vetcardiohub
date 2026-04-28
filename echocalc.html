@@ -844,22 +844,33 @@ Left Atrium:
 <div x-show="isCat">
         <h2 style="color: #16325F;"><i class="fa-solid fa-cat"></i> Feline Risk Assessment</h2>
         <p style="font-size: 0.85rem; color: #64748b;">(ISCAID / HCM Screening Guidelines)</p>
+<div style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+    <p style="margin-bottom: 8px;">
+        <strong>ATE / Thrombus Risk:</strong> 
+        
+        <template x-if="parseFloat(lad) >= 20">
+            <span class="abnormal" style="color: #dc2626; font-weight: bold;">[HIGH RISK]</span>
+        </template>
+        
+        <template x-if="parseFloat(lad) >= 17 && parseFloat(lad) < 20">
+            <span style="color: #ea580c; font-weight: bold;">[MODERATE RISK]</span>
+        </template>
+        
+        <template x-if="parseFloat(lad) > 0 && parseFloat(lad) < 17">
+            <span class="normal" style="color: #16a34a; font-weight: bold;">[LOWER RISK]</span>
+        </template>
+        
+        <span x-show="lad" x-text="' (LAD: ' + lad + 'mm)'" style="color: #64748b; font-size: 0.9rem;"></span>
+    </p>
 
-        <div style="margin-top: 15px;">
-            <p>HCM Phenotype (Wall &ge; 6mm): 
-                <span :class="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'abnormal' : 'normal'" 
-                      x-text="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'DETECTED' : 'Not Detected'"></span>
-            </p>
+    <div x-show="parseFloat(lad) >= 20" class="alert-box-red" style="background-color: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> <strong>Severe LA Enlargement:</strong> High risk of ATE. Recommend Clopidogrel and screening for "smoke" or thrombus.
+    </div>
 
-            <p>ATE / Thrombus Risk (LAD &ge; 20mm): 
-                <span :class="parseFloat(lad) >= 20 ? 'abnormal' : 'normal'" 
-                      x-text="parseFloat(lad) >= 20 ? 'HIGH RISK' : 'Lower Risk'"></span>
-            </p>
-
-            <div x-show="parseFloat(lad) >= 20" class="alert-box-red" style="background-color: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; padding: 10px; border-radius: 6px;">
-                <strong>⚠️ Severe LA Enlargement:</strong> High risk of ATE. Recommend Clopidogrel and screening for "smoke" or thrombus.
-            </div>
-        </div>
+    <div x-show="parseFloat(lad) >= 17 && parseFloat(lad) < 20" style="background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; padding: 12px; border-radius: 6px;">
+        <i class="fa-solid fa-circle-info"></i> <strong>Moderate LA Enlargement:</strong> Risk of thrombus formation present. Clinical monitoring and consideration of antiplatelet therapy indicated.
+    </div>
+</div>
     </div>
    
 
