@@ -246,7 +246,7 @@
 exportToClipboard() {
         if (!allometricModels[this.selectedModel]) return;
         const modelLabel = allometricModels[this.selectedModel].label;
-        const results = this.getResults();
+        const results = this.allometricResults();
 
         // Helper function for status tags
         const getTag = (val, min, max, high = '[ENLARGED]', low = '[SMALL]') => {
