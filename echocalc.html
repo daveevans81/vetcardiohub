@@ -376,7 +376,7 @@
         if (this.esvim2 > 0)  text += `LVESV/m²: ${this.esvim2} (Ref: <30)${this.getTag(this.esvim2, null, 30)}\n`;
 }
 
-        }
+        
 
         text += `\nLEFT ATRIUM:\n`;
         const laParams = [{ key: 'la', label: 'LA' }, { key: 'ao', label: 'Ao' }, { key: 'lad', label: 'LAD' }];
@@ -397,9 +397,9 @@
         if (this.laAo > 0) text += `LA:Ao Ratio: ${this.laAo} (Ref: <1.65)${this.getTag(this.laAo, null, 1.65)}\n`;
 
 if (this.isDog) {
-        if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${getTag(this.lan, null, 1.17)}\n`;
-        if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${getTag(this.ladn, null, 1.60)}\n`;
-        if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${getTag(this.ladao, null, 2.10)}\n`;
+        if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${this.getTag(this.lan, null, 1.17)}\n`;
+        if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${this.getTag(this.ladn, null, 1.60)}\n`;
+        if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${this.getTag(this.ladao, null, 2.10)}\n`;
         
         if (this.lviddn > 0 && this.laAo > 0) {
             text += `\nCANINE CLINICAL ASSESSMENT (EPIC B2):\n`;
