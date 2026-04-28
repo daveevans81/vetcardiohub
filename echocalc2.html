@@ -115,63 +115,79 @@
 <script src="/js/echo-breeds.js"></script>
 
 <style type="text/css">
+/* --- SCREEN STYLES (App looks normal) --- */
+.pdf-header, .pdf-comments-header {
+    display: none; /* Hide these in the app */
+}
+
+
+
+
 @media print {
-    /* 1. Hide everything that isn't part of the medical record */
-    #site-header, #site-footer, .hero, .input-group, 
-    .export-actions, #breed-selector, .placeholder-text,
-    button, nav, aside, .app-branding, .small, 
-    .install-footer-box, #allometric-card, .Lead {
+    .pdf-comments {
+        display: block !important; /* Only visible in PDF */
+    }
+}
+
+/* Optional: Styling for the 'Add Comments' button in the app */
+.btn-text {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.9rem;
+    color: #2563eb;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+@media print {
+    /* 1. Hide the Sidebar, Header, Footer and UI Buttons */
+    #site-header, #site-footer, aside, .hero, .export-actions, 
+    #install-nudge-static, .app-branding, button, .small, nav {
         display: none !important;
     }
 
-    /* 2. Reset layout for PDF */
+    /* 2. Hide specific ENTRY elements inside the calculator */
+    /* This targets the 'LV Measurements' titles and input wrappers */
+    .calculator-card > h2, 
+    .calculator-card > div:not(.results-box),
+    .calculator-card > p,
+    .warning-text,
+    #breed-normals-card > h3,
+    #breed-normals-card > p,
+    #breed-selector {
+        display: none !important;
+    }
+
+    /* 3. Reset Layout */
     body, html {
         background: white !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100%;
     }
 
-    /* Ensure the main containers don't restrict height or width */
-    main, .container, .content {
+    main, .container, .content, .calculator-card {
         display: block !important;
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
+        border: none !important;
         box-shadow: none !important;
     }
 
-    /* 3. Show and Format the Report Sections */
+    /* 4. Ensure Report Sections are Visible */
     .results-box, .epic-check, #breed-data-container {
         display: block !important;
         visibility: visible !important;
-        width: 100% !important;
-        border: none !important;
-        margin-bottom: 30px !important;
-        page-break-inside: avoid; /* Keeps a table from splitting over two pages */
+        opacity: 1 !important;
+        page-break-inside: avoid;
+        margin-bottom: 20px !important;
     }
 
-    /* 4. Fix colors (Browsers often ignore colors in print unless forced) */
-    .abnormal, [style*="color: #dc2626"], [style*="color: #b91c1c"] { 
-        color: #dc2626 !important; 
-        font-weight: bold !important; 
-    }
-    .normal, [style*="color: #16a34a"] { 
-        color: #16a34a !important; 
-    }
-    h1, h2, h3, [style*="color: #1e40af"], [style*="color: #16325F"] { 
-        color: #16325F !important; 
-    }
-
-    /* 5. Custom Branding for the PDF */
-    .results-box::before {
-        content: "VETCARDIOHUB CLINICAL REPORT";
-        display: block;
-        font-size: 10px;
-        letter-spacing: 2px;
-        color: #94a3b8;
-        margin-bottom: 5px;
-    }
+    /* 5. Force professional colors */
+    .abnormal { color: #dc2626 !important; font-weight: bold !important; }
+    .normal { color: #16a34a !important; font-weight: bold !important; }
+    h2, h3 { color: #16325F !important; border-bottom: 1px solid #eee; }
 }
 </style>
 </head>
@@ -197,6 +213,9 @@
     lvedv: '',
     lvesv: '',
     copySuccess: false,
+    reportStyle: 'pretty', 
+    showComments: false,
+    clinicalComments: '',
     
     /* 2. GETTERS */
     get lviddn() {
@@ -443,6 +462,14 @@ if (this.isDog) {
             text += `ATE RISK: Moderate LA enlargement. Risk of thrombus formation present.\n`;
         }
     }
+
+// --- SECTION 4: CLINICAL OBSERVATIONS ---
+if (this.clinicalComments && this.clinicalComments.trim() !== '') {
+    text += `\nCLINICAL OBSERVATIONS & PLAN:\n`;
+    text += `${this.clinicalComments.trim()}\n`;
+}
+
+
         text += `\n--------------------------------------------------\n`;
         text += `Generated via VetCardioHub.com`;
 
@@ -454,8 +481,10 @@ if (this.isDog) {
 }"
 x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
-
+    <div class="grid">
+      <!-- Main column -->
 <main>
+
 <div id="app-only-branding" class="app-branding">VetCardioHub EchoCalc</div>
     <div class="content">
       <div class="container">
@@ -466,13 +495,12 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
     <div class="grid">
       <!-- Main column -->
-      <main>
+
         <section class="card">
          
 
           <div style="margin-top:10px" >
-<div class="calculator-card" 
-     >
+<div class="calculator-card" >
 
     
     <p style="color: #666; font-size: 0.9em;">Enter measurements in <strong>mm</strong> and weight in <strong>kg</strong>.</p>
@@ -599,7 +627,9 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     </template>
     </div>
 
-    <div class="results-box" x-transition>
+<div class="results-box"  x-transition>
+    
+
 
 
 <p style="font-weight: bold; color: #1e40af; border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-bottom: 5px; font-size: 1.2rem;">
@@ -860,12 +890,32 @@ Left Atrium:
 </div>
 
     </div>
+
+
+<div x-show="clinicalComments" class="pdf-comments" style="margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+        <h3 style="color: #16325F; font-size: 1rem; margin-bottom: 5px;">Clinical Observations & Plan:</h3>
+        <p x-text="clinicalComments" style="font-style: italic; white-space: pre-wrap; color: #1e293b;"></p>
+    </div>
 </div>
 
 
+<div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+  
+        <button @click="showComments = !showComments" class="btn-text" style="color: #1e40af; font-weight: bold; cursor: pointer; border: none; background: none;">
+            <i class="fa-solid" :class="showComments ? 'fa-minus' : 'fa-plus'"></i> 
+            <span x-text="showComments ? 'Hide Clinical Comments' : 'Add Clinical Comments'"></span>
+        </button>
+
+    </div>
+
+    <div x-show="showComments" x-collapse style="margin-bottom: 15px;">
+        <textarea x-model="clinicalComments" 
+                  placeholder="e.g. Mild MR noted. Normal systolic function. Recheck in 6 months." 
+                  style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit;"></textarea>
+    </div>
+</div>
 
 
-          </div>
 <div class="export-actions" style="margin-top: 20px; display: flex; align-items: center; gap: 15px;">
     <div style="position: relative;">
         <button @click="exportToClipboard()" class="btn-secondary">
@@ -885,6 +935,14 @@ Left Atrium:
         <i class="fa-solid fa-file-pdf"></i> Save PDF
     </button>
 </div>
+</div>
+
+
+
+
+        
+
+
         </section>
 
 
