@@ -2821,3 +2821,11 @@ input {
         border-bottom: 2px solid #1e40af;
     }
 }
+.alert-box-red {
+    background-color: #fef2f2;
+    border: 1px solid #ef4444;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    color: #b91c1c;
+}

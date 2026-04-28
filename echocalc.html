@@ -799,7 +799,7 @@ Left Atrium:
 
           <article class="epic-check" style="margin-top:12px">
 <div x-show="isDog">
-<h2>EPIC CHECK:</h2>
+<h2 style="color: #16325F;"><i class="fa-solid fa-shield-dog"></i> Canine EPIC Check</h2>
 <p>(Applicable to <strong>Degenerative Mitral Valve Disease</strong> cases only)</p>
 <p><span>Left Atrial Enlargement (LA:Ao > 1.65) - </span>
 <span x-show="laAo >= 1.9" class="abnormal">Very Enlarged</span>
@@ -844,6 +844,12 @@ Left Atrium:
         <h2 style="color: #16325F;"><i class="fa-solid fa-cat"></i> Feline Risk Assessment</h2>
         <p style="font-size: 0.85rem; color: #64748b;">(ISCAID / HCM Screening Guidelines)</p>
 <div style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+
+<p>HCM Phenotype (Wall &ge; 6mm): 
+                <span :class="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'abnormal' : 'normal'" 
+                      x-text="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'DETECTED' : 'Not Detected'"></span>
+            </p>
+
     <p style="margin-bottom: 8px;">
         <strong>ATE / Thrombus Risk:</strong> 
         
