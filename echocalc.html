@@ -116,62 +116,53 @@
 
 <style type="text/css">
 @media print {
-    /* 1. Hide everything that isn't part of the medical record */
-    #site-header, #site-footer, .hero, .input-group, 
-    .export-actions, #breed-selector, .placeholder-text,
-    button, nav, aside, .app-branding, .small, 
-    .install-footer-box, #allometric-card, .Lead {
+    /* 1. Hide the Sidebar, Header, Footer and UI Buttons */
+    #site-header, #site-footer, aside, .hero, .export-actions, 
+    #install-nudge-static, .app-branding, button, .small, nav {
         display: none !important;
     }
 
-    /* 2. Reset layout for PDF */
+    /* 2. Hide specific ENTRY elements inside the calculator */
+    /* This targets the 'LV Measurements' titles and input wrappers */
+    .calculator-card > h2, 
+    .calculator-card > div:not(.results-box),
+    .calculator-card > p,
+    .warning-text,
+    #breed-normals-card > h3,
+    #breed-normals-card > p,
+    #breed-selector {
+        display: none !important;
+    }
+
+    /* 3. Reset Layout */
     body, html {
         background: white !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100%;
     }
 
-    /* Ensure the main containers don't restrict height or width */
-    main, .container, .content {
+    main, .container, .content, .calculator-card {
         display: block !important;
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
+        border: none !important;
         box-shadow: none !important;
     }
 
-    /* 3. Show and Format the Report Sections */
+    /* 4. Ensure Report Sections are Visible */
     .results-box, .epic-check, #breed-data-container {
         display: block !important;
         visibility: visible !important;
-        width: 100% !important;
-        border: none !important;
-        margin-bottom: 30px !important;
-        page-break-inside: avoid; /* Keeps a table from splitting over two pages */
+        opacity: 1 !important;
+        page-break-inside: avoid;
+        margin-bottom: 20px !important;
     }
 
-    /* 4. Fix colors (Browsers often ignore colors in print unless forced) */
-    .abnormal, [style*="color: #dc2626"], [style*="color: #b91c1c"] { 
-        color: #dc2626 !important; 
-        font-weight: bold !important; 
-    }
-    .normal, [style*="color: #16a34a"] { 
-        color: #16a34a !important; 
-    }
-    h1, h2, h3, [style*="color: #1e40af"], [style*="color: #16325F"] { 
-        color: #16325F !important; 
-    }
-
-    /* 5. Custom Branding for the PDF */
-    .results-box::before {
-        content: "VETCARDIOHUB CLINICAL REPORT";
-        display: block;
-        font-size: 10px;
-        letter-spacing: 2px;
-        color: #94a3b8;
-        margin-bottom: 5px;
-    }
+    /* 5. Force professional colors */
+    .abnormal { color: #dc2626 !important; font-weight: bold !important; }
+    .normal { color: #16a34a !important; font-weight: bold !important; }
+    h2, h3 { color: #16325F !important; border-bottom: 1px solid #eee; }
 }
 </style>
 </head>
