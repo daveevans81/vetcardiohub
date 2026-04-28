@@ -450,11 +450,11 @@ if (this.clinicalComments && this.clinicalComments.trim() !== '') {
     },
 
     exportToClipboard() {
-        navigator.clipboard.writeText(this.generateReportText()).then(() => {
-            this.copySuccess = true;
-            setTimeout(() => this.copySuccess = false, 2500);
-        });
-    }
+navigator.clipboard.writeText(this.generateReportText()).then(() => {
+this.copySuccess = true;
+setTimeout(() => { this.copySuccess = false; }, 2500);
+});
+}
 }" 
 x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
