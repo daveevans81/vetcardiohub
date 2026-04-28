@@ -312,7 +312,7 @@ exportToClipboard() {
     if (this.laAo > 0)   text += `LA:Ao Ratio: ${this.laAo} (Ref: <1.65)${getStatus(this.laAo, null, 1.65)}\n`;
     if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${getStatus(this.lan, null, 1.17)}\n`;
     if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${getStatus(this.ladn, null, 1.60)}\n`;
-    if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${getStatus(this.ladao, null, 2.10)}\n`;
+    if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${getStatus(this.ladao, null, 2.10)}\n`; 
 
     // SECTION: EPIC CHECK
     if (this.lviddn > 0 && this.laAo > 0) {
@@ -328,8 +328,8 @@ exportToClipboard() {
 
     navigator.clipboard.writeText(text).then(() => {
         this.copySuccess = true;
-        setTimeout(() => this.copySuccess = false, 2500); // Hide after 2.5s
-     });
+        setTimeout(() => this.copySuccess = false, 2500);
+    });
    }
 }"
 x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
