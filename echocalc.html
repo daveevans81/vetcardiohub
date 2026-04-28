@@ -318,28 +318,26 @@ exportToClipboard() {
         }
     }
 
-    // --- FELINE: HCM & ATE RISK CHECK ---
+// --- FELINE ASSESSMENT ---
     if (species === 'CAT' || species === 'FELINE') {
         text += `\nFELINE CLINICAL ASSESSMENT:\n`;
         
-        // HCM Check (IVSd or LVFWd >= 6mm)
-        const ivs = parseFloat(this.ivsd) || 0;
-        const lvp = parseFloat(this.lvpwd) || 0;
-        if (ivs >= 6 || lvp >= 6) {
-            text += `HCM CHECK: Wall thickening detected (>= 6mm). Potential HCM phenotype.\n`;
-        } else if (ivs > 0 || lvp > 0) {
-            text += `HCM CHECK: Wall thickness < 6mm. Within standard limits.\n`;
+        // HCM Phenotype Check
+        const maxWall = Math.max(parseFloat(this.ivsd) || 0, parseFloat(this.lvpwd) || 0);
+        if (maxWall >= 6) {
+            text += `HCM CHECK: Wall thickening (>= 6mm). Phenotype consistent with HCM.\n`;
+        } else if (maxWall >= 5 && maxWall < 6) {
+            text += `HCM CHECK: Equivocal wall thickness (5-6mm). Monitor closely.\n`;
         }
 
-        // ATE Risk Check (LAD >= 20mm)
+        // ATE Risk Check
         const ladVal = parseFloat(this.lad) || 0;
         if (ladVal >= 20) {
-            text += `ATE RISK: Severe LA enlargement (LAD >= 20mm). High risk for ATE / Smoke.\n`;
-        } else if (ladVal > 0) {
-            text += `ATE RISK: LAD < 20mm. Lower risk for immediate thrombus formation.\n`;
+            text += `ATE RISK: Severe LA enlargement (LAD >= 20mm). High risk for ATE.\n`;
+        } else if (ladVal >= 16.5) {
+            text += `ATE RISK: Moderate LA enlargement. Risk of thrombus formation present.\n`;
         }
     }
-
         text += `\n--------------------------------------------------\n`;
         text += `Generated via VetCardioHub.com`;
 
