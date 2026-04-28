@@ -197,6 +197,36 @@
     },
 
     /* 3. METHODS */
+exportToClipboard() {
+    const model = allometricModels[this.selectedModel].label;
+    const results = this.allometricResults; // Using the getter we built
+    
+    let text = `ECHOCARDIOGRAPHY REPORT SUMMARY\n`;
+    text += `Weight: ${this.weight}kg | Model: ${model}\n`;
+    text += `------------------------------------\n`;
+    
+    const params = [
+        { key: 'lvidd', label: 'LVIDd' },
+        { key: 'lvids', label: 'LVIDs' },
+        { key: 'ivsd',  label: 'IVSd' },
+        { key: 'lvpwd', label: 'LVFWd' },
+        { key: 'la',    label: 'LA' },
+        { key: 'ao',    label: 'Ao' }
+    ];
+
+    params.forEach(p => {
+        const val = this[p.key];
+        if (val) {
+            const ref = results[p.key];
+            const status = parseFloat(val) > ref.max ? ' [ABNORMAL]' : '';
+            text += `${p.label}: ${val} mm (Ref: ${ref.min}-${ref.max} mm)${status}\n`;
+        }
+    });
+
+    navigator.clipboard.writeText(text).then(() => {
+        alert("Report copied to clipboard!");
+    });
+},
 calculateRef(paramKey) {
         if (!this.weight || this.weight <= 0) return null;
         if (!this.weight || this.weight <= 0) return { min: '—', max: '—', mean: '—' };
@@ -584,13 +614,22 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
 
 
           </div>
+<div class="export-actions" style="margin-top: 20px; display: flex; gap: 10px;">
+    <button @click="exportToClipboard()" class="btn-secondary">
+        <i class="fa-solid fa-copy"></i> Copy Text
+    </button>
+    <button @click="window.print()" class="btn-primary">
+        <i class="fa-solid fa-file-pdf"></i> Save as PDF
+    </button>
+</div>
         </section>
+
 
         <section class="card" style="margin-top:18px">
          
 
 
-          <article style="margin-top:12px">
+          <article class="epic-check" style="margin-top:12px">
 <h2>EPIC CHECK:</h2>
 <p>(Applicable to <strong>Degenerative Mitral Valve Disease</strong> cases only)</p>
 <p><span>Left Atrial Enlargement (LA:Ao > 1.65) - </span>
