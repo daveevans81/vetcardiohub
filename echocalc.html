@@ -206,6 +206,12 @@
         });
         return results;
     },
+    get isDog() { 
+    return allometricModels[this.selectedModel]?.species.toLowerCase() === 'canine'; 
+},
+     get isCat() { 
+    return allometricModels[this.selectedModel]?.species.toLowerCase() === 'feline'; 
+}
 
     /* 4. METHODS */
     calculateRef(paramKey) {
@@ -511,7 +517,64 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     <strong>BSA:</strong> <span x-text="bsa || '—'"></span> m² | 
     <strong>Model:</strong> <span x-text="allometricModels[selectedModel].label"></span>
 </p>
+
+<p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">
+
+
+Left Ventricle:
+
+
+</p>
+     <div class="result-row" x-show="lvidd">
+    <span><strong>LVIDd</strong></span>
+    <span>
+        <span x-text="lvidd"></span> mm
+        <span x-show="parseFloat(lvidd) > allometricResults.lvidd.max" class="abnormal">(Enlarged)</span>
+        <span x-show="parseFloat(lvidd) < allometricResults.lvidd.min" class="abnormal">(Small)</span>
+        <span x-show="parseFloat(lvidd) >= allometricResults.lvidd.min && parseFloat(lvidd) <= allometricResults.lvidd.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvidd.min + '-' + allometricResults.lvidd.max + ')'"></span>
+    </span>
+</div>
+
+<div class="result-row" x-show="lvids">
+    <span><strong>LVIDs</strong></span>
+    <span>
+        <span x-text="lvids"></span> mm
+<template x-if="allometricResults.lvids.available">
+        <span x-show="parseFloat(lvids) > allometricResults.lvids.max" class="abnormal">(Enlarged)</span>
+        <span x-show="parseFloat(lvids) <= allometricResults.lvids.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvids.min + '-' + allometricResults.lvids.max + ')'"></span>
+</template>
         
+        <template x-if="!allometricResults.lvids.available">
+            <span style="font-size: 0.8em; color: #999;">(No ref)</span>
+        </template>
+    </span>
+</div>
+
+<div class="result-row" x-show="ivsd">
+    <span><strong>IVSd</strong></span>
+    <span>
+        <span x-text="ivsd"></span> mm
+        <span x-show="parseFloat(ivsd) > allometricResults.ivsd.max" class="abnormal">(Thickened)</span>
+        <span x-show="parseFloat(ivsd) <= allometricResults.ivsd.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ivsd.min + '-' + allometricResults.ivsd.max + ')'"></span>
+    </span>
+</div>
+
+<div class="result-row" x-show="lvpwd">
+    <span><strong>LVFWd</strong></span>
+    <span>
+        <span x-text="lvpwd"></span> mm
+        <span x-show="parseFloat(lvpwd) > allometricResults.lvpwd.max" class="abnormal">(Thickened)</span>
+        <span x-show="parseFloat(lvpwd) <= allometricResults.lvpwd.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvpwd.min + '-' + allometricResults.lvpwd.max + ')'"></span>
+    </span>
+</div>
+
+
+
+<div x-show="isDog" x-transition>
         <div class="result-row" x-show="lviddn">
             <span><strong>LVIDDN</strong> (Cornell)</span>
             <span>
@@ -534,7 +597,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
                 <span style="font-size: 0.8em; color: #666;"> (ref 0.71 - 1.26) </span>
             </span>
         </div>
-
+</div>
         <div class="result-row" x-show="fs">
             <span><strong>Fractional Shortening</strong></span>
             <span><span x-text="fs"></span>&percnt;</span>
@@ -543,7 +606,15 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
                 <span style="font-size: 0.8em; color: #666;"> (ref &gt;25) </span>
             </span>
         </div>
-
+        <div class="result-row" x-show="ef">
+            <span><strong>Ejection Fraction</strong></span>
+            <span><span x-text="ef"></span>&percnt;</span>
+                <span x-show="ef >= 50" class="normal">(Normal)</span>
+                <span x-show="ef < 50 && ef > 0" class="abnormal">(Abnormal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &gt;50) </span>
+           </span>
+        </div>
+<div x-show="isDog" x-transition>
         <div class="result-row" x-show="RWT">
             <span><strong>Relative Wall Thickness</strong></span>
             <span><span x-text="RWT"></span>
@@ -551,17 +622,8 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
                 <span x-show="RWT < 0.43 && RWT > 0.31" class="normal">(Normal Walls)</span>
                 <span x-show="RWT <= 0.31 && RWT > 0" class="abnormal">(Thin Walls)</span>
                 <span style="font-size: 0.8em; color: #666;"> (ref 0.32-0.42) </span>
-</span>
+            </span>
         </div>
-
-        <div class="result-row" x-show="ef">
-            <span><strong>Ejection Fraction</strong></span>
-            <span><span x-text="ef"></span>&percnt;</span>
-                <span x-show="ef >= 50" class="normal">(Normal)</span>
-                <span x-show="ef < 50 && ef > 0" class="abnormal">(Abnormal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &gt;50) </span>
-        </div>
-
         <div class="result-row" x-show="lvedvbw">
             <span><strong>LVEDV / BW</strong></span>
             <span>
@@ -600,93 +662,15 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
         <span style="font-size: 0.8em; color: #666;"> ml/m² (ref <30)</span>
     </span>
 </div>
-        <div class="result-row" x-show="laAo">
-            <span><strong>LA:Ao Ratio</strong></span>
-            <span>
-                <span x-text="laAo"></span>
-                <span x-show="laAo >= 1.65" class="abnormal">(Enlarged)</span>
-                <span x-show="laAo < 1.65 && laAo > 0" class="normal">(Normal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.65) </span>
-            </span>
-        </div>
- 
-        <div class="result-row" x-show="lan">
-            <span><strong>LA (short axis) Normalised</strong></span>
-            <span>
-                <span x-text="lan"></span>
-                <span x-show="lan >= 1.17" class="abnormal">(Enlarged)</span>
-                <span x-show="lan < 1.17 && laAo > 0" class="normal">(Normal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.17) </span>
-            </span>
-        </div>
-
-        <div class="result-row" x-show="ladn">
-            <span><strong>LADN</strong></span>
-            <span>
-                <span x-text="ladn"></span>
-                <span x-show="ladn >= 1.6" class="abnormal">(Enlarged)</span>
-                <span x-show="ladn < 1.6 && ladn > 0" class="normal">(Normal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.6) </span>
-            </span>
-        </div>
-             <div class="result-row" x-show="ladao">
-            <span><strong>LAD : Ao(short axis)</strong></span>
-            <span>
-                <span x-text="ladao"></span>
-                <span x-show="ladao >= 2.1" class="abnormal">(Enlarged)</span>
-                <span x-show="ladao < 2.1 && ladao > 0" class="normal">(Normal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &lt;2.1) </span>
-            </span>
-        </div>
-
-
-<div class="result-row" x-show="lvidd">
-    <span><strong>LVIDd</strong></span>
-    <span>
-        <span x-text="lvidd"></span> mm
-        <span x-show="parseFloat(lvidd) > allometricResults.lvidd.max" class="abnormal">(Enlarged)</span>
-        <span x-show="parseFloat(lvidd) < allometricResults.lvidd.min" class="abnormal">(Small)</span>
-        <span x-show="parseFloat(lvidd) >= allometricResults.lvidd.min && parseFloat(lvidd) <= allometricResults.lvidd.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvidd.min + '-' + allometricResults.lvidd.max + ')'"></span>
-    </span>
 </div>
 
-<div class="result-row" x-show="lvids">
-    <span><strong>LVIDs</strong></span>
-    <span>
-        <span x-text="lvids"></span> mm
-<template x-if="allometricResults.lvids.available">
-        <span x-show="parseFloat(lvids) > allometricResults.lvids.max" class="abnormal">(Enlarged)</span>
-        <span x-show="parseFloat(lvids) <= allometricResults.lvids.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvids.min + '-' + allometricResults.lvids.max + ')'"></span>
-</template>
-        
-        <template x-if="!allometricResults.lvids.available">
-            <span style="font-size: 0.8em; color: #999;">(No allometric ref for this model)</span>
-        </template>
-    </span>
-</div>
+<p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">
 
-<div class="result-row" x-show="ivsd">
-    <span><strong>IVSd</strong></span>
-    <span>
-        <span x-text="ivsd"></span> mm
-        <span x-show="parseFloat(ivsd) > allometricResults.ivsd.max" class="abnormal">(Thickened)</span>
-        <span x-show="parseFloat(ivsd) <= allometricResults.ivsd.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ivsd.min + '-' + allometricResults.ivsd.max + ')'"></span>
-    </span>
-</div>
 
-<div class="result-row" x-show="lvpwd">
-    <span><strong>LVFWd</strong></span>
-    <span>
-        <span x-text="lvpwd"></span> mm
-        <span x-show="parseFloat(lvpwd) > allometricResults.lvpwd.max" class="abnormal">(Thickened)</span>
-        <span x-show="parseFloat(lvpwd) <= allometricResults.lvpwd.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvpwd.min + '-' + allometricResults.lvpwd.max + ')'"></span>
-    </span>
-</div>
+Left Atrium:
 
+
+</p>
 <div class="result-row" x-show="la">
     <span><strong>LA</strong></span>
     <span>
@@ -698,7 +682,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 </template>
         
         <template x-if="!allometricResults.la.available">
-            <span style="font-size: 0.8em; color: #999;">(No allometric ref for this model)</span>
+            <span style="font-size: 0.8em; color: #999;">(No ref)</span>
         </template>
     </span>
 </div>
@@ -714,7 +698,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 </template>
         
         <template x-if="!allometricResults.ao.available">
-            <span style="font-size: 0.8em; color: #999;">(No allometric ref for this model)</span>
+            <span style="font-size: 0.8em; color: #999;">(No ref)</span>
         </template>
     </span>
 </div>
@@ -723,11 +707,64 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     <span><strong>LAD</strong> (Long Axis)</span>
     <span>
         <span x-text="lad"></span> mm
+        <span x-text="ao"></span> mm
+<template x-if="allometricResults.lad.available">
         <span x-show="parseFloat(lad) > allometricResults.lad.max" class="abnormal">(Enlarged)</span>
         <span x-show="parseFloat(lad) <= allometricResults.lad.max" class="normal">(Normal)</span>
         <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lad.min + '-' + allometricResults.lad.max + ')'"></span>
+</template>
+        
+        <template x-if="!allometricResults.lad.available">
+            <span style="font-size: 0.8em; color: #999;">(No ref)</span>
+        </template>
     </span>
 </div>
+
+        <div class="result-row" x-show="laAo">
+            <span><strong>LA:Ao Ratio</strong></span>
+            <span>
+                <span x-text="laAo"></span>
+                <span x-show="laAo >= 1.65" class="abnormal">(Enlarged)</span>
+                <span x-show="laAo < 1.65 && laAo > 0" class="normal">(Normal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.65) </span>
+            </span>
+        </div>
+ 
+
+
+<div x-show="isDog" x-transition>
+        <div class="result-row" x-show="lan">
+            <span><strong>LA (short axis) Normalised</strong></span>
+            <span>
+                <span x-text="lan"></span>
+                <span x-show="lan >= 1.17" class="abnormal">(Enlarged)</span>
+                <span x-show="lan < 1.17 && laAo > 0" class="normal">(Normal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.17) </span>
+            </span>
+        </div>
+</div>
+             <div class="result-row" x-show="ladao">
+            <span><strong>LAD : Ao(short axis)</strong></span>
+            <span>
+                <span x-text="ladao"></span>
+                <span x-show="ladao >= 2.1" class="abnormal">(Enlarged)</span>
+                <span x-show="ladao < 2.1 && ladao > 0" class="normal">(Normal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &lt;2.1) </span>
+            </span>
+        </div>
+
+<div x-show="isDog" x-transition>
+        <div class="result-row" x-show="ladn">
+            <span><strong>LADN</strong></span>
+            <span>
+                <span x-text="ladn"></span>
+                <span x-show="ladn >= 1.6" class="abnormal">(Enlarged)</span>
+                <span x-show="ladn < 1.6 && ladn > 0" class="normal">(Normal)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.6) </span>
+            </span>
+        </div>
+</div>
+
     </div>
 </div>
 
@@ -762,6 +799,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
 
           <article class="epic-check" style="margin-top:12px">
+<div x-show="isDog">
 <h2>EPIC CHECK:</h2>
 <p>(Applicable to <strong>Degenerative Mitral Valve Disease</strong> cases only)</p>
 <p><span>Left Atrial Enlargement (LA:Ao > 1.65) - </span>
@@ -800,6 +838,32 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 <div x-show="lviddn >= 1.7" style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 12px; margin-top: 15px; font-size: 0.85rem; color: #0369a1;">
     <strong>💡 Clinical Nuance:</strong> The EPIC trial uses a threshold of <strong>>1.70</strong> for LVIDdn to define cardiomegaly. This is more sensitive than the statistical 95% limit (1.85) to ensure at-risk patients aren't missed. 5% of dogs will have normal hearts > 1.7 and especially athletic/sighthound breeds.
 </div>
+</div>
+
+
+<div x-show="isCat">
+        <h2 style="color: #16325F;"><i class="fa-solid fa-cat"></i> Feline Risk Assessment</h2>
+        <p style="font-size: 0.85rem; color: #64748b;">(ISCAID / HCM Screening Guidelines)</p>
+
+        <div style="margin-top: 15px;">
+            <p>HCM Phenotype (Wall &ge; 6mm): 
+                <span :class="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'abnormal' : 'normal'" 
+                      x-text="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'DETECTED' : 'Not Detected'"></span>
+            </p>
+
+            <p>ATE / Thrombus Risk (LAD &ge; 20mm): 
+                <span :class="parseFloat(lad) >= 20 ? 'abnormal' : 'normal'" 
+                      x-text="parseFloat(lad) >= 20 ? 'HIGH RISK' : 'Lower Risk'"></span>
+            </p>
+
+            <div x-show="parseFloat(lad) >= 20" class="alert-box-red" style="background-color: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; padding: 10px; border-radius: 6px;">
+                <strong>⚠️ Severe LA Enlargement:</strong> High risk of ATE. Recommend Clopidogrel and screening for "smoke" or thrombus.
+            </div>
+        </div>
+    </div>
+   
+
+
           </article>
 
         </section>
