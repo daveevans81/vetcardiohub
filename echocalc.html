@@ -196,55 +196,28 @@
         return (this.lvesv / this.bsa).toFixed(2);
     },
 
-    /* 3. METHODS */
-exportToClipboard() {
-    const model = allometricModels[this.selectedModel].label;
-    const results = this.allometricResults; // Using the getter we built
-    
-    let text = `ECHOCARDIOGRAPHY REPORT SUMMARY\n`;
-    text += `Weight: ${this.weight}kg | Model: ${model}\n`;
-    text += `------------------------------------\n`;
-    
-    const params = [
-        { key: 'lvidd', label: 'LVIDd' },
-        { key: 'lvids', label: 'LVIDs' },
-        { key: 'ivsd',  label: 'IVSd' },
-        { key: 'lvpwd', label: 'LVFWd' },
-        { key: 'la',    label: 'LA' },
-        { key: 'ao',    label: 'Ao' }
-    ];
+/* 3. ALLOMETRIC GETTER (Crucial for the Results Table) */
+    get allometricResults() {
+        const results = {};
+        const params = ['lvidd', 'lvids', 'ivsd', 'lvpwd', 'la', 'ao'];
+        params.forEach(p => {
+            results[p] = this.calculateRef(p) || { min: 0, max: 0, mean: 0 };
+        });
+        return results;
+    },
 
-    params.forEach(p => {
-        const val = this[p.key];
-        if (val) {
-            const ref = results[p.key];
-            const status = parseFloat(val) > ref.max ? ' [ABNORMAL]' : '';
-            text += `${p.label}: ${val} mm (Ref: ${ref.min}-${ref.max} mm)${status}\n`;
+    /* 4. METHODS */
+    calculateRef(paramKey) {
+        if (!this.weight || this.weight <= 0 || typeof allometricModels === 'undefined') {
+            return { min: 0, max: 0, mean: 0 };
         }
-    });
-
-    navigator.clipboard.writeText(text).then(() => {
-        alert("Report copied to clipboard!");
-    });
-},
-calculateRef(paramKey) {
-        if (!this.weight || this.weight <= 0) return null;
-        if (!this.weight || this.weight <= 0) return { min: '—', max: '—', mean: '—' };
-
-        // Safety check: Is the data file loaded?
-        if (typeof allometricModels === 'undefined') return null;
 
         const modelData = allometricModels[this.selectedModel];
-if (!modelData) return null;
+        const model = modelData?.params?.[paramKey];
+        if (!model) return { min: 0, max: 0, mean: 0 };
 
-        const model = allometricModels[this.selectedModel]?.params?.[paramKey];
-        if (!model) return null;
-// If the selected model doesn't have this specific parameter (e.g. some lack IVSs)
-    if (!model) return { min: '—', max: '—', mean: '—' };
-
-        // Smart unit handling
         const scaleFactor = modelData.isCm ? 10 : 1;
-
+        const multiplier = modelData.multiplier || 1.96;
         let lower, upper, mean;
 
         if (model.type === 'log_direct' || model.type === 'log') {
@@ -253,23 +226,48 @@ if (!modelData) return null;
                 : Math.log10(model.a) + (model.b * Math.log10(this.weight));
             
             mean = Math.pow(10, logMean);
-            lower = Math.pow(10, logMean - (1.96 * model.see));
-            upper = Math.pow(10, logMean + (1.96 * model.see));
+            lower = Math.pow(10, logMean - (multiplier * model.see));
+            upper = Math.pow(10, logMean + (multiplier * model.see));
         } else {
             const bwPower = Math.pow(this.weight, model.b);
             mean = model.a * bwPower;
-            lower = model.normMin * bwPower;
-            upper = model.normMax * bwPower;
+            lower = (model.normMin || model.a) * bwPower; // Fallback to 'a' if min not defined
+            upper = (model.normMax || model.a) * bwPower;
         }
 
         return {
-        	min: (lower * scaleFactor).toFixed(1),
-        	max: (upper * scaleFactor).toFixed(1),
-        	mean: (mean * scaleFactor).toFixed(1)
+            min: parseFloat((lower * scaleFactor).toFixed(1)),
+            max: parseFloat((upper * scaleFactor).toFixed(1)),
+            mean: parseFloat((mean * scaleFactor).toFixed(1))
         };
+    },
+
+    exportToClipboard() {
+        const modelLabel = allometricModels[this.selectedModel].label;
+        const results = this.allometricResults;
+        let text = `ECHOCARDIOGRAPHY REPORT SUMMARY\n`;
+        text += `Weight: ${this.weight}kg | Model: ${modelLabel}\n`;
+        text += `------------------------------------\n`;
+        
+        const params = [
+            { key: 'lvidd', label: 'LVIDd' }, { key: 'lvids', label: 'LVIDs' },
+            { key: 'ivsd', label: 'IVSd' }, { key: 'lvpwd', label: 'LVFWd' },
+            { key: 'la', label: 'LA' }, { key: 'ao', label: 'Ao' }
+        ];
+
+        params.forEach(p => {
+            const val = this[p.key];
+            if (val) {
+                const ref = results[p.key];
+                const status = parseFloat(val) > ref.max ? ' [ABNORMAL]' : '';
+                text += `${p.label}: ${val} mm (Ref: ${ref.min}-${ref.max} mm)${status}\n`;
+            }
+        });
+
+        navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
     }
-}" 
-x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function') updateBreedTable();">
+}"
+x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
 
 <main>
@@ -551,10 +549,10 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
     <span><strong>LVIDd</strong></span>
     <span>
         <span x-text="lvidd"></span> mm
-        <span x-show="parseFloat(lvidd) > calculateRef('lvidd').max" class="abnormal">(Enlarged)</span>
-        <span x-show="parseFloat(lvidd) < calculateRef('lvidd').min" class="abnormal">(Small)</span>
-        <span x-show="parseFloat(lvidd) >= calculateRef('lvidd').min && parseFloat(lvidd) <= calculateRef('lvidd').max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + calculateRef('lvidd').min + '-' + calculateRef('lvidd').max + ')'"></span>
+        <span x-show="parseFloat(lvidd) > allometricResults.lvidd.max" class="abnormal">(Enlarged)</span>
+        <span x-show="parseFloat(lvidd) < allometricResults.lvidd.min" class="abnormal">(Small)</span>
+        <span x-show="parseFloat(lvidd) >= allometricResults.lvidd.min && parseFloat(lvidd) <= allometricResults.lvidd.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvidd.min + '-' + allometricResults.lvidd.max + ')'"></span>
     </span>
 </div>
 
@@ -562,9 +560,9 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
     <span><strong>LVIDs</strong></span>
     <span>
         <span x-text="lvids"></span> mm
-        <span x-show="parseFloat(lvids) > calculateRef('lvids').max" class="abnormal">(Enlarged)</span>
-        <span x-show="parseFloat(lvids) <= calculateRef('lvids').max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + calculateRef('lvids').min + '-' + calculateRef('lvids').max + ')'"></span>
+        <span x-show="parseFloat(lvids) > allometricResults.lvids.max" class="abnormal">(Enlarged)</span>
+        <span x-show="parseFloat(lvids) <= allometricResults.lvids.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvids.min + '-' + allometricResults.lvids.max + ')'"></span>
     </span>
 </div>
 
@@ -572,9 +570,9 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
     <span><strong>IVSd</strong></span>
     <span>
         <span x-text="ivsd"></span> mm
-        <span x-show="parseFloat(ivsd) > calculateRef('ivsd').max" class="abnormal">(Thickened)</span>
-        <span x-show="parseFloat(ivsd) <= calculateRef('ivsd').max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + calculateRef('ivsd').min + '-' + calculateRef('ivsd').max + ')'"></span>
+        <span x-show="parseFloat(ivsd) > allometricResults.ivsd.max" class="abnormal">(Thickened)</span>
+        <span x-show="parseFloat(ivsd) <= allometricResults.ivsd.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ivsd.min + '-' + allometricResults.ivsd.max + ')'"></span>
     </span>
 </div>
 
@@ -582,9 +580,9 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
     <span><strong>LVFWd</strong></span>
     <span>
         <span x-text="lvpwd"></span> mm
-        <span x-show="parseFloat(lvpwd) > calculateRef('lvpwd').max" class="abnormal">(Thickened)</span>
-        <span x-show="parseFloat(lvpwd) <= calculateRef('lvpwd').max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + calculateRef('lvpwd').min + '-' + calculateRef('lvpwd').max + ')'"></span>
+        <span x-show="parseFloat(lvpwd) > allometricResults.lvpwd.max" class="abnormal">(Thickened)</span>
+        <span x-show="parseFloat(lvpwd) <= allometricResults.lvpwd.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvpwd.min + '-' + allometricResults.lvpwd.max + ')'"></span>
     </span>
 </div>
 
@@ -592,9 +590,9 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
     <span><strong>LA</strong></span>
     <span>
         <span x-text="la"></span> mm
-        <span x-show="parseFloat(la) > calculateRef('la').max" class="abnormal">(Enlarged)</span>
-        <span x-show="parseFloat(la) <= calculateRef('la').max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + calculateRef('la').min + '-' + calculateRef('la').max + ')'"></span>
+        <span x-show="parseFloat(la) > allometricResults.la.max" class="abnormal">(Enlarged)</span>
+        <span x-show="parseFloat(la) <= allometricResults.la.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.la.min + '-' + allometricResults.la.max + ')'"></span>
     </span>
 </div>
 
@@ -602,9 +600,9 @@ x-effect="weight; lvidd; selectedBreed; if(typeof updateBreedTable === 'function
     <span><strong>Ao</strong></span>
     <span>
         <span x-text="ao"></span> mm
-        <span x-show="parseFloat(ao) > calculateRef('ao').max" class="abnormal">(Dilated)</span>
-        <span x-show="parseFloat(ao) <= calculateRef('ao').max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + calculateRef('ao').min + '-' + calculateRef('ao').max + ')'"></span>
+        <span x-show="parseFloat(ao) > allometricResults.ao.max" class="abnormal">(Dilated)</span>
+        <span x-show="parseFloat(ao) <= allometricResults.ao.max" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ao.min + '-' + allometricResults.ao.max + ')'"></span>
     </span>
 </div>
     </div>
