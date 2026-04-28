@@ -2794,33 +2794,8 @@ input {
 .row-highlight-error td {
     color: #b91c1c; /* Dark red text */
 }
-@media print {
-    /* Hide everything except the results card */
-    body * { visibility: hidden; }
-    #site-header, #site-footer, .hero, .input-group, .export-actions, .clinical-note { display: none; }
-    
-    /* Show and style the results */
-    .epic-check, .results-section, .results-section * { visibility: visible; }
-    .results-section {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        border: none !important;
-        box-shadow: none !important;
-    }
-    
-    /* Add a professional header for the PDF only */
-    .results-section::before {
-        content: "VetCardioHub - Echocardiography Report";
-        display: block;
-        font-size: 20px;
-        font-weight: bold;
-        color: #1e40af;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #1e40af;
-    }
-}
+
+
 .alert-box-red {
     background-color: #fef2f2;
     border: 1px solid #ef4444;

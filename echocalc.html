@@ -114,7 +114,64 @@
 
 <script src="/js/echo-breeds.js"></script>
 
+<styles>
+@media print {
+    /* 1. Hide the UI 'Noise' */
+    #site-header, 
+    #site-footer, 
+    .hero, 
+    .input-group, 
+    .export-actions, 
+    #breed-selector, 
+    .placeholder-text,
+    button,
+    nav {
+        display: none !important;
+    }
 
+    /* 2. Reset Body & Container for Printing */
+    body {
+        background: white !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container, .content, main {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    /* 3. Style the Report Card */
+    .card, .results-box, .epic-check, .assessment-box {
+        border: none !important;
+        box-shadow: none !important;
+        visibility: visible !important;
+        display: block !important;
+        page-break-inside: avoid; /* Prevents splitting a table across two pages */
+        margin-bottom: 20px;
+    }
+
+    /* 4. Professional PDF Header */
+    /* We attach this to the first visible results block */
+    .results-box::before {
+        content: "VetCardioHub - Echocardiography Report";
+        display: block;
+        font-size: 22px;
+        font-weight: bold;
+        color: #16325F;
+        margin-bottom: 10px;
+        border-bottom: 2px solid #16325F;
+        padding-bottom: 10px;
+    }
+
+    /* 5. Clean up colors for ink saving */
+    .abnormal { color: #dc2626 !important; font-weight: bold; }
+    .normal { color: #16a34a !important; }
+    h1, h2, h3 { color: #16325F !important; }
+}
+</styles>
 </head>
 
 <body>
