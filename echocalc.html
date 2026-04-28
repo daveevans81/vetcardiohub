@@ -433,6 +433,14 @@ if (this.isDog) {
             text += `ATE RISK: Moderate LA enlargement. Risk of thrombus formation present.\n`;
         }
     }
+
+// --- SECTION 4: CLINICAL OBSERVATIONS ---
+if (this.clinicalComments && this.clinicalComments.trim() !== '') {
+    text += `\nCLINICAL OBSERVATIONS & PLAN:\n`;
+    text += `${this.clinicalComments.trim()}\n`;
+}
+
+
         text += `\n--------------------------------------------------\n`;
         text += `Generated via VetCardioHub.com`;
 
