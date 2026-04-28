@@ -392,7 +392,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
         <input type="number" step="0.1" x-model="weight" placeholder="e.g. 10.5">
     </div>
      <div class="input-group" style="margin-bottom: 20px; flex: 1;">
-    <label style="font-weight: bold; font-size: 0.9em;">Change Allometric Reference Model:</label>
+    <label style="font-weight: bold; font-size: 0.9em;">Species/Breed Reference Model:</label>
     <select x-model="selectedModel" class="form-select">
         <template x-for="(model, key) in allometricModels" :key="key">
             <option :value="key" x-text="model.label"></option>
@@ -675,10 +675,10 @@ Left Atrium:
     <span><strong>LA</strong></span>
     <span>
         <span x-text="la"></span> mm
-<template x-if="allometricResults.la.available">
+<template x-if="allometricResults.la.available"><span>
         <span x-show="parseFloat(la) > allometricResults.la.max" class="abnormal">(Enlarged)</span>
         <span x-show="parseFloat(la) <= allometricResults.la.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.la.min + '-' + allometricResults.la.max + ')'"></span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.la.min + '-' + allometricResults.la.max + ')'"></span></span>
 </template>
         
         <template x-if="!allometricResults.la.available">
@@ -691,10 +691,10 @@ Left Atrium:
     <span><strong>Ao</strong></span>
     <span>
         <span x-text="ao"></span> mm
-<template x-if="allometricResults.ao.available">
+<template x-if="allometricResults.ao.available"><span>
         <span x-show="parseFloat(ao) > allometricResults.ao.max" class="abnormal">(Dilated)</span>
         <span x-show="parseFloat(ao) <= allometricResults.ao.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ao.min + '-' + allometricResults.ao.max + ')'"></span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ao.min + '-' + allometricResults.ao.max + ')'"></span></span>
 </template>
         
         <template x-if="!allometricResults.ao.available">
@@ -707,11 +707,10 @@ Left Atrium:
     <span><strong>LAD</strong> (Long Axis)</span>
     <span>
         <span x-text="lad"></span> mm
-        <span x-text="ao"></span> mm
-<template x-if="allometricResults.lad.available">
+<template x-if="allometricResults.lad.available"><span>
         <span x-show="parseFloat(lad) > allometricResults.lad.max" class="abnormal">(Enlarged)</span>
         <span x-show="parseFloat(lad) <= allometricResults.lad.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lad.min + '-' + allometricResults.lad.max + ')'"></span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lad.min + '-' + allometricResults.lad.max + ')'"></span></span>
 </template>
         
         <template x-if="!allometricResults.lad.available">
