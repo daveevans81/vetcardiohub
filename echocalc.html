@@ -245,6 +245,7 @@
 
 exportToClipboard() {
         if (!allometricModels[this.selectedModel]) return;
+        const model = allometricModels[this.selectedModel];
         const modelLabel = allometricModels[this.selectedModel].label;
         const results = this.allometricResults;
         const species = (model.species || 'VETERINARY').toUpperCase();
