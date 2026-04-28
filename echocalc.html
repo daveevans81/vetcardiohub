@@ -120,7 +120,7 @@
     #site-header, #site-footer, .hero, .input-group, .measurements,
     .export-actions, #breed-selector, .placeholder-text,
     button, nav, aside, .app-branding, .small, 
-    .install-footer-box, #allometric-card, .Lead {
+    .install-footer-box, #allometric-card, .Lead, button, .share-nodes {
         display: none !important;
     }
 
@@ -312,6 +312,135 @@ if (!model) {
             available: true
         };
     },
+shareReport() {
+    // 1. Generate the report text (Reuse your existing logic here)
+    const model = allometricModels[this.selectedModel];
+    const results = this.allometricResults;
+    const species = (model.species || 'VETERINARY').toUpperCase();
+    
+    let text = `${species} ECHOCARDIOGRAPHY REPORT\n`;
+    text += `Weight: ${this.weight}kg | Model: ${model.label}\n`;
+    text += `--------------------------------------------------\n\n`;
+
+// --- SECTION 1: LEFT VENTRICLE ---
+    text += `LEFT VENTRICLE:\n`;
+    const lvParams = [
+        { key: 'lvidd', label: 'LVIDd' }, { key: 'lvids', label: 'LVIDs' },
+        { key: 'ivsd', label: 'IVSd' }, { key: 'lvpwd', label: 'LVFWd' }
+    ];
+    
+    lvParams.forEach(p => {
+        const val = this[p.key];
+        const res = results[p.key];
+        if (val) {
+            let line = `${p.label}: ${val}mm`; 
+            if (res && res.available) {
+                const tag = getTag(val, res, null, 
+                    (p.key.includes('ivs') || p.key.includes('pwd') ? '[THICKENED]' : '[ENLARGED]'), 
+                    (p.key.includes('ivs') || p.key.includes('pwd') ? '[THIN]' : '[SMALL]'));
+                line += ` (Ref: ${res.min}-${res.max}mm)${tag}`;
+            } else {
+                line += ` (No ref)`;
+            }
+            text += line + `\n`;
+        }
+    });
+
+        if (this.fs > 0)     text += `Fractional Shortening: ${this.fs}% (Ref: >25%)${getTag(this.fs, 25, 999, '', '[ABNORMAL]')}\n`;
+        if (this.ef > 0)     text += `Ejection Fraction: ${this.ef}% (Ref: >50%)${getTag(this.ef, 50, 999, '', '[ABNORMAL]')}\n`;
+//Dog Only
+if (this.isDog) {
+        if (this.RWT > 0)    text += `Relative Wall Thickness: ${this.RWT} (Ref: 0.32-0.42)${getTag(this.RWT, 0.32, 0.42, '[THICK WALLS]', '[THIN WALLS]')}\n`;
+        if (this.lviddn > 0) text += `LVIDdn: ${this.lviddn} (Ref: 1.27-1.70)${getTag(this.lviddn, 1.27, 1.70)}\n`;
+        if (this.lvidsn > 0) text += `LVIDsn: ${this.lvidsn} (Ref: 0.71-1.26)${getTag(this.lvidsn, 0.71, 1.26)}\n`;
+        if (this.lvedv > 0)   text += `LVEDV (Total): ${this.lvedv}ml\n`;
+        if (this.lvesv > 0)   text += `LVESV (Total): ${this.lvesv}ml\n`;
+        if (this.lvedvbw > 0) text += `LVEDV/BW: ${this.lvedvbw} (Ref: 1.25-3.00)${getTag(this.lvedvbw, 1.25, 3.00)}\n`;
+        if (this.lvesvbw > 0) text += `LVESV/BW: ${this.lvesvbw} (Ref: 0.30-1.35)${getTag(this.lvesvbw, 0.30, 1.35)}\n`;
+        if (this.edvim2 > 0)  text += `LVEDV/m²: ${this.edvim2} (Ref: <100)${getTag(this.edvim2, null, 100)}\n`;
+        if (this.esvim2 > 0)  text += `LVESV/m²: ${this.esvim2} (Ref: <30)${getTag(this.esvim2, null, 30)}\n`;
+}
+
+
+
+
+// --- SECTION 2: LEFT ATRIUM ---
+    text += `\nLEFT ATRIUM:\n`;
+    const laParams = [{ key: 'la', label: 'LA' }, { key: 'ao', label: 'Ao' }, { key: 'lad', label: 'LAD' }];
+    
+    laParams.forEach(p => {
+        const val = this[p.key];
+        const res = results[p.key];
+        if (val) {
+            let line = `${p.label}: ${val}mm`; 
+            if (res && res.available) {
+                line += ` (Ref: ${res.min}-${res.max}mm)${getTag(val, res)}`;
+            } else {
+                line += ` (No ref)`;
+            }
+            text += line + `\n`;
+        }
+    });
+
+        if (this.laAo > 0)   text += `LA:Ao Ratio: ${this.laAo} (Ref: <1.65)${getTag(this.laAo, null, 1.65)}\n`;
+if (this.isDog) {
+        if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${getTag(this.lan, null, 1.17)}\n`;
+        if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${getTag(this.ladn, null, 1.60)}\n`;
+        if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${getTag(this.ladao, null, 2.10)}\n`;
+
+
+        if (this.lviddn > 0 && this.laAo > 0) {
+            text += `\nCANINE CLINICAL ASSESSMENT (EPIC B2):\n`;
+            const meetsLA = this.laAo >= 1.65;
+            const meetsLV = this.lviddn >= 1.7;
+            text += `LV Size: ${meetsLV ? 'ENLARGED' : 'NORMAL'}\n`;
+            text += `LA Size: ${meetsLA ? 'ENLARGED' : 'NORMAL'}\n`;
+            text += `EPIC RESULT: ${ (meetsLA && meetsLV) ? 'MEETS CRITERIA FOR STAGE B2' : 'DOES NOT MEET CRITERIA'}\n`;
+        }
+    }
+
+// --- FELINE ASSESSMENT ---
+    if (species === 'CAT' || species === 'FELINE') {
+        text += `\nFELINE CLINICAL ASSESSMENT:\n`;
+        
+        // HCM Phenotype Check
+        const maxWall = Math.max(parseFloat(this.ivsd) || 0, parseFloat(this.lvpwd) || 0);
+        if (maxWall >= 6) {
+            text += `HCM CHECK: Wall thickening (>= 6mm). Phenotype consistent with HCM.\n`;
+        } else if (maxWall >= 5 && maxWall < 6) {
+            text += `HCM CHECK: Equivocal wall thickness (5-6mm). Monitor closely.\n`;
+        }
+
+        // ATE Risk Check
+        const ladVal = parseFloat(this.lad) || 0;
+        if (ladVal >= 20) {
+            text += `ATE RISK: Severe LA enlargement (LAD >= 20mm). High risk for ATE.\n`;
+        } else if (ladVal >= 16.5) {
+            text += `ATE RISK: Moderate LA enlargement. Risk of thrombus formation present.\n`;
+        }
+    }
+
+if (this.clinicalComments && this.clinicalComments.trim() !== '') {
+    text += `\nCLINICAL OBSERVATIONS & PLAN:\n`;
+    text += `${this.clinicalComments.trim()}\n`;
+}
+
+
+        text += `\n--------------------------------------------------\n`;
+        text += `Generated via VetCardioHub.com`;
+// 2. Trigger Native Share
+    if (navigator.share) {
+        navigator.share({
+            title: `${species} Echo Report`,
+            text: text
+        }).catch((error) => console.log('Error sharing:', error));
+    } else {
+        // Fallback for desktop browsers that don't support sharing
+        this.exportToClipboard();
+        alert("Sharing not supported on this browser. Report copied to clipboard instead!");
+    }
+},
+
 
 exportToClipboard() {
         if (!allometricModels[this.selectedModel]) return;
@@ -907,6 +1036,11 @@ Left Atrium:
     <button @click="window.print()" class="btn-primary">
         <i class="fa-solid fa-file-pdf"></i> Save PDF
     </button>
+    <template x-if="navigator.share">
+        <button @click="shareReport()" style="background: #0d9488; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-share-nodes"></i> Share
+        </button>
+    </template>
 </div>
 
 
