@@ -179,6 +179,71 @@
         display: none !important;
     }
 }
+
+@media print {
+    /* 1. THE 'KILL' LIST - Remove UI elements from the PDF */
+    #site-header, #site-footer, aside, .hero, .export-actions, 
+    #install-nudge-static, .app-branding, button, .small, nav,
+    .calculator-card > h2, 
+    .calculator-card > div:not(.results-box),
+    .calculator-card > p,
+    .warning-text,
+    #breed-normals-card,
+    #allometric-card,
+    textarea {
+        display: none !important;
+    }
+
+    /* 2. PAGE SETUP */
+    body, html {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Ensure the report uses the full width of the PDF */
+    main, .container, .content, .calculator-card, .results-box {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* 3. DYNAMIC STYLE: PRETTY vs PLAIN */
+    
+    /* Hide the PDF Header in the App, show it in PDF */
+    .pdf-header { 
+        display: block !important; 
+        visibility: visible !important;
+    }
+
+    /* If user chose 'Plain', we hide that fancy header even in print */
+    .style-plain .pdf-header {
+        display: none !important;
+    }
+
+    /* Make the 'Pretty' version look like professional stationery */
+    .style-pretty h2, .style-pretty .pdf-comments h3 {
+        background: #f1f5f9 !important;
+        padding: 8px 12px !important;
+        border-radius: 4px;
+        color: #16325F !important;
+        -webkit-print-color-adjust: exact; /* Forces background colors to print */
+    }
+
+    /* 4. CONTENT WRAPPING */
+    .results-box, .epic-check, .pdf-comments {
+        page-break-inside: avoid; /* Don't split tables across pages */
+        margin-bottom: 25px !important;
+    }
+
+    /* 5. COLOR FORCING */
+    .abnormal { color: #dc2626 !important; font-weight: bold !important; }
+    .normal { color: #16a34a !important; font-weight: bold !important; }
+}
 </style>
 </head>
 
