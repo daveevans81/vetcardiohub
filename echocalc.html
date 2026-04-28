@@ -115,54 +115,50 @@
 <script src="/js/echo-breeds.js"></script>
 
 <style type="text/css">
+/* --- SCREEN STYLES (App looks normal) --- */
+.pdf-header, .pdf-comments-header {
+    display: none; /* Hide these in the app */
+}
+
+.screen-only {
+    display: flex;
+}
+
+/* --- PRINT STYLES (The PDF Transformation) --- */
 @media print {
-    /* 1. Hide the Sidebar, Header, Footer and UI Buttons */
-    #site-header, #site-footer, aside, .hero, .export-actions, 
-    #install-nudge-static, .app-branding, button, .small, nav {
+    /* Hide the UI noise */
+    #site-header, #site-footer, aside, .hero, .input-group, 
+    .export-options, .screen-only, button, .app-branding, textarea {
         display: none !important;
     }
 
-    /* 2. Hide specific ENTRY elements inside the calculator */
-    /* This targets the 'LV Measurements' titles and input wrappers */
-    .calculator-card > h2, 
-    .calculator-card > div:not(.results-box),
-    .calculator-card > p,
-    .warning-text,
-    #breed-normals-card > h3,
-    #breed-normals-card > p,
-    #breed-selector {
-        display: none !important;
-    }
-
-    /* 3. Reset Layout */
-    body, html {
-        background: white !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    main, .container, .content, .calculator-card {
+    /* Show the hidden PDF elements */
+    .pdf-header {
         display: block !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
     }
 
-    /* 4. Ensure Report Sections are Visible */
-    .results-box, .epic-check, #breed-data-container {
+    /* Style the 'Pretty' version only if the user selected it */
+    .style-pretty {
+        padding: 0 !important;
+    }
+
+    .style-pretty h2, .style-pretty .pdf-comments h3 {
+        background: #f1f5f9 !important; /* Subtle background for headers */
+        padding: 5px 10px !important;
+        border-radius: 4px;
+        -webkit-print-color-adjust: exact;
+    }
+
+    /* The Clinical Comments are mirrored into a div for better printing */
+    .pdf-comments {
         display: block !important;
         visibility: visible !important;
-        opacity: 1 !important;
-        page-break-inside: avoid;
-        margin-bottom: 20px !important;
     }
 
-    /* 5. Force professional colors */
-    .abnormal { color: #dc2626 !important; font-weight: bold !important; }
-    .normal { color: #16a34a !important; font-weight: bold !important; }
-    h2, h3 { color: #16325F !important; border-bottom: 1px solid #eee; }
+    /* If user chose 'Plain', hide the fancy PDF header */
+    .style-plain .pdf-header {
+        display: none !important;
+    }
 }
 </style>
 </head>
@@ -188,6 +184,9 @@
     lvedv: '',
     lvesv: '',
     copySuccess: false,
+    reportStyle: 'pretty', 
+    showComments: false,
+    clinicalComments: '',
     
     /* 2. GETTERS */
     get lviddn() {
@@ -590,7 +589,20 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     </template>
     </div>
 
-    <div class="results-box" x-transition>
+<div class="results-box" :class="'style-' + reportStyle" x-transition>
+    
+    <div class="pdf-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #16325F; padding-bottom: 10px; margin-bottom: 20px;">
+            <div>
+                <div style="background: #16325F; color: white; padding: 5px 10px; border-radius: 4px; display: inline-block; font-weight: bold; margin-bottom: 5px;">VCH</div>
+                <h1 style="margin: 0; font-size: 1.4rem; color: #16325F;">Cardiac Imaging Report</h1>
+            </div>
+            <div style="text-align: right; font-size: 0.8rem; color: #64748b;">
+                <p>Date: <span x-text="new Date().toLocaleDateString()"></span></p>
+                <p x-text="allometricModels[selectedModel].reference"></p>
+            </div>
+        </div>
+    </div>
 
 
 <p style="font-weight: bold; color: #1e40af; border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-bottom: 5px; font-size: 1.2rem;">
@@ -857,6 +869,37 @@ Left Atrium:
 
 
           </div>
+
+
+<div x-show="clinicalComments" class="pdf-comments" style="margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+        <h3 style="color: #16325F; font-size: 1rem; margin-bottom: 5px;">Clinical Observations & Plan:</h3>
+        <p x-text="clinicalComments" style="font-style: italic; white-space: pre-wrap; color: #1e293b;"></p>
+    </div>
+</div>
+
+
+<div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <button @click="showComments = !showComments" class="btn-text" style="color: #1e40af; font-weight: bold; cursor: pointer; border: none; background: none;">
+            <i class="fa-solid" :class="showComments ? 'fa-minus' : 'fa-plus'"></i> 
+            <span x-text="showComments ? 'Hide Clinical Comments' : 'Add Clinical Comments'"></span>
+        </button>
+
+        <div class="screen-only" style="font-size: 0.85rem; color: #64748b; display: flex; gap: 10px;">
+            <span>PDF Style:</span>
+            <label><input type="radio" value="pretty" x-model="reportStyle"> Pro</label>
+            <label><input type="radio" value="plain" x-model="reportStyle"> Plain</label>
+        </div>
+    </div>
+
+    <div x-show="showComments" x-collapse style="margin-bottom: 15px;">
+        <textarea x-model="clinicalComments" 
+                  placeholder="e.g. Mild MR noted. Normal systolic function. Recheck in 6 months." 
+                  style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit;"></textarea>
+    </div>
+</div>
+
+
 <div class="export-actions" style="margin-top: 20px; display: flex; align-items: center; gap: 15px;">
     <div style="position: relative;">
         <button @click="exportToClipboard()" class="btn-secondary">
