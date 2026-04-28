@@ -500,6 +500,12 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     </div>
 
     <div class="results-box" x-transition>
+
+<p style="font-weight: bold; color: #1e40af; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+    <span x-text="allometricModels[selectedModel].species"></span> Echocardiography Report </p>
+<p style="font-weight: bold; color: #1e40af; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Weight: <span x-text="weight"></span>kg BSA: <span x-text="bsa"></span>m² (Model: <span x-text="allometricModels[selectedModel].label"></span>)
+</p>
         
         <div class="result-row" x-show="lviddn">
             <span><strong>LVIDDN</strong> (Cornell)</span>
@@ -626,9 +632,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
                 <span style="font-size: 0.8em; color: #666;"> (ref &lt;2.1) </span>
             </span>
         </div>
-<p style="font-weight: bold; color: #1e40af; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
-    Weight-Based Allometric Results (Model: <span x-text="allometricModels[selectedModel].label"></span>)
-</p>
+
 
 <div class="result-row" x-show="lvidd">
     <span><strong>LVIDd</strong></span>
