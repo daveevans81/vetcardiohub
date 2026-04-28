@@ -331,10 +331,12 @@
     generateReportText() {
         if (typeof allometricModels === 'undefined') return 'Error: Reference models missing.';
         const model = allometricModels[this.selectedModel];
+       const modelLabel = allometricModels[this.selectedModel].label;
         const results = this.allometricResults;
+        const species = (model.species || 'VETERINARY').toUpperCase();
         
-        let text = `${(model?.species || 'VETERINARY').toUpperCase()} ECHOCARDIOGRAPHY REPORT\n`;
-        text += `Weight: ${this.weight}kg | BSA: ${this.bsa}m² | Model: ${model?.label || 'Standard'}\n`;
+        let text = `${species} ECHOCARDIOGRAPHY REPORT\n`;
+        text += `Weight: ${this.weight}kg | BSA: ${this.bsa}m² | Model: ${modelLabel} \n`;
         text += `--------------------------------------------------\n\n`;
 
         text += `LEFT VENTRICLE:\n`;
