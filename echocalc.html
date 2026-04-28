@@ -289,7 +289,8 @@ const model = allometricModels[this.selectedModel];
     navigator.clipboard.writeText(text).then(() => {
         this.copySuccess = true;
         setTimeout(() => this.copySuccess = false, 2500); // Hide after 2.5s
-});
+     });
+   }
 }"
 x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
