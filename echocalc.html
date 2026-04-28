@@ -332,6 +332,7 @@ if (!model) {
 // 2. CREATE THE MASTER REPORT GENERATOR
     generateReportText() {
         const model = allometricModels[this.selectedModel];
+        const modelLabel = model?.label || 'Standard';
         const results = this.allometricResults;
         const species = (model.species || 'VETERINARY').toUpperCase();
         
@@ -352,7 +353,7 @@ if (!model) {
         if (val) {
             let line = `${p.label}: ${val}mm`; 
             if (res && res.available) {
-                const tag = getTag(val, res, null, 
+                const tag = this.getTag(val, res, null, 
                     (p.key.includes('ivs') || p.key.includes('pwd') ? '[THICKENED]' : '[ENLARGED]'), 
                     (p.key.includes('ivs') || p.key.includes('pwd') ? '[THIN]' : '[SMALL]'));
                 line += ` (Ref: ${res.min}-${res.max}mm)${tag}`;
@@ -363,19 +364,19 @@ if (!model) {
         }
     });
 
-        if (this.fs > 0)     text += `Fractional Shortening: ${this.fs}% (Ref: >25%)${getTag(this.fs, 25, 999, '', '[ABNORMAL]')}\n`;
-        if (this.ef > 0)     text += `Ejection Fraction: ${this.ef}% (Ref: >50%)${getTag(this.ef, 50, 999, '', '[ABNORMAL]')}\n`;
+        if (this.fs > 0)     text += `Fractional Shortening: ${this.fs}% (Ref: >25%)${this.getTag(this.fs, 25, 999, '', '[ABNORMAL]')}\n`;
+        if (this.ef > 0)     text += `Ejection Fraction: ${this.ef}% (Ref: >50%)${this.getTag(this.ef, 50, 999, '', '[ABNORMAL]')}\n`;
 //Dog Only
 if (this.isDog) {
-        if (this.RWT > 0)    text += `Relative Wall Thickness: ${this.RWT} (Ref: 0.32-0.42)${getTag(this.RWT, 0.32, 0.42, '[THICK WALLS]', '[THIN WALLS]')}\n`;
-        if (this.lviddn > 0) text += `LVIDdn: ${this.lviddn} (Ref: 1.27-1.70)${getTag(this.lviddn, 1.27, 1.70)}\n`;
-        if (this.lvidsn > 0) text += `LVIDsn: ${this.lvidsn} (Ref: 0.71-1.26)${getTag(this.lvidsn, 0.71, 1.26)}\n`;
+        if (this.RWT > 0)    text += `Relative Wall Thickness: ${this.RWT} (Ref: 0.32-0.42)${this.getTag(this.RWT, 0.32, 0.42, '[THICK WALLS]', '[THIN WALLS]')}\n`;
+        if (this.lviddn > 0) text += `LVIDdn: ${this.lviddn} (Ref: 1.27-1.70)${this.getTag(this.lviddn, 1.27, 1.70)}\n`;
+        if (this.lvidsn > 0) text += `LVIDsn: ${this.lvidsn} (Ref: 0.71-1.26)${this.getTag(this.lvidsn, 0.71, 1.26)}\n`;
         if (this.lvedv > 0)   text += `LVEDV (Total): ${this.lvedv}ml\n`;
         if (this.lvesv > 0)   text += `LVESV (Total): ${this.lvesv}ml\n`;
-        if (this.lvedvbw > 0) text += `LVEDV/BW: ${this.lvedvbw} (Ref: 1.25-3.00)${getTag(this.lvedvbw, 1.25, 3.00)}\n`;
-        if (this.lvesvbw > 0) text += `LVESV/BW: ${this.lvesvbw} (Ref: 0.30-1.35)${getTag(this.lvesvbw, 0.30, 1.35)}\n`;
-        if (this.edvim2 > 0)  text += `LVEDV/m²: ${this.edvim2} (Ref: <100)${getTag(this.edvim2, null, 100)}\n`;
-        if (this.esvim2 > 0)  text += `LVESV/m²: ${this.esvim2} (Ref: <30)${getTag(this.esvim2, null, 30)}\n`;
+        if (this.lvedvbw > 0) text += `LVEDV/BW: ${this.lvedvbw} (Ref: 1.25-3.00)${this.getTag(this.lvedvbw, 1.25, 3.00)}\n`;
+        if (this.lvesvbw > 0) text += `LVESV/BW: ${this.lvesvbw} (Ref: 0.30-1.35)${this.getTag(this.lvesvbw, 0.30, 1.35)}\n`;
+        if (this.edvim2 > 0)  text += `LVEDV/m²: ${this.edvim2} (Ref: <100)${this.getTag(this.edvim2, null, 100)}\n`;
+        if (this.esvim2 > 0)  text += `LVESV/m²: ${this.esvim2} (Ref: <30)${this.getTag(this.esvim2, null, 30)}\n`;
 }
 
 
@@ -399,11 +400,11 @@ if (this.isDog) {
         }
     });
 
-        if (this.laAo > 0)   text += `LA:Ao Ratio: ${this.laAo} (Ref: <1.65)${getTag(this.laAo, null, 1.65)}\n`;
+        if (this.laAo > 0)   text += `LA:Ao Ratio: ${this.laAo} (Ref: <1.65)${this.getTag(this.laAo, null, 1.65)}\n`;
 if (this.isDog) {
-        if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${getTag(this.lan, null, 1.17)}\n`;
-        if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${getTag(this.ladn, null, 1.60)}\n`;
-        if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${getTag(this.ladao, null, 2.10)}\n`;
+        if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${this.getTag(this.lan, null, 1.17)}\n`;
+        if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${this.getTag(this.ladn, null, 1.60)}\n`;
+        if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${this.getTag(this.ladao, null, 2.10)}\n`;
 
 
         if (this.lviddn > 0 && this.laAo > 0) {
