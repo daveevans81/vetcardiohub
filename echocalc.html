@@ -518,7 +518,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     <strong>Model:</strong> <span x-text="allometricModels[selectedModel].label"></span>
 </p>
 
-<p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">
+<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px;">
 
 
 Left Ventricle:
@@ -540,10 +540,10 @@ Left Ventricle:
     <span><strong>LVIDs</strong></span>
     <span>
         <span x-text="lvids"></span> mm
-<template x-if="allometricResults.lvids.available">
+<template x-if="allometricResults.lvids.available"><span>
         <span x-show="parseFloat(lvids) > allometricResults.lvids.max" class="abnormal">(Enlarged)</span>
         <span x-show="parseFloat(lvids) <= allometricResults.lvids.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvids.min + '-' + allometricResults.lvids.max + ')'"></span>
+        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvids.min + '-' + allometricResults.lvids.max + ')'"></span></span>
 </template>
         
         <template x-if="!allometricResults.lvids.available">
@@ -664,7 +664,7 @@ Left Ventricle:
 </div>
 </div>
 
-<p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">
+<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
 
 
 Left Atrium:
