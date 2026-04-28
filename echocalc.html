@@ -275,8 +275,6 @@ exportToClipboard() {
                 text += `${p.label}: ${val}mm (Ref: ${ref.min}-${ref.max}mm)${tag}\n`;
             }
         });
-
-        text += `\nLV INDICES & VOLUMES:\n`;
         if (this.lviddn > 0) text += `LVIDdn: ${this.lviddn} (Ref: 1.27-1.70)${getTag(this.lviddn, 1.27, 1.70)}\n`;
         if (this.lvidsn > 0) text += `LVIDsn: ${this.lvidsn} (Ref: 0.71-1.26)${getTag(this.lvidsn, 0.71, 1.26)}\n`;
         if (this.fs > 0)     text += `Fractional Shortening: ${this.fs}% (Ref: >25%)${getTag(this.fs, 25, 999, '', '[ABNORMAL]')}\n`;
