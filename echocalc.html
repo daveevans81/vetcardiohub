@@ -120,9 +120,6 @@
     display: none; /* Hide these in the app */
 }
 
-.screen-only {
-    display: flex;
-}
 
 
 
@@ -143,106 +140,54 @@
     cursor: pointer;
 }
 
-/* --- PRINT STYLES (The PDF Transformation) --- */
 @media print {
-    /* Hide the UI noise */
-    #site-header, #site-footer, aside, .hero, .input-group, 
-    .export-options, .screen-only, button, .app-branding, textarea {
-        display: none !important;
-    }
-
-    /* Show the hidden PDF elements */
-    .pdf-header {
-        display: block !important;
-    }
-
-    /* Style the 'Pretty' version only if the user selected it */
-    .style-pretty {
-        padding: 0 !important;
-    }
-
-    .style-pretty h2, .style-pretty .pdf-comments h3 {
-        background: #f1f5f9 !important; /* Subtle background for headers */
-        padding: 5px 10px !important;
-        border-radius: 4px;
-        -webkit-print-color-adjust: exact;
-    }
-
-    /* The Clinical Comments are mirrored into a div for better printing */
-    .pdf-comments {
-        display: block !important;
-        visibility: visible !important;
-    }
-
-    /* If user chose 'Plain', hide the fancy PDF header */
-    .style-plain .pdf-header {
-        display: none !important;
-    }
-}
-
-@media print {
-    /* 1. THE 'KILL' LIST - Remove UI elements from the PDF */
+    /* 1. Hide the Sidebar, Header, Footer and UI Buttons */
     #site-header, #site-footer, aside, .hero, .export-actions, 
-    #install-nudge-static, .app-branding, button, .small, nav,
+    #install-nudge-static, .app-branding, button, .small, nav {
+        display: none !important;
+    }
+
+    /* 2. Hide specific ENTRY elements inside the calculator */
+    /* This targets the 'LV Measurements' titles and input wrappers */
     .calculator-card > h2, 
     .calculator-card > div:not(.results-box),
     .calculator-card > p,
     .warning-text,
-    #breed-normals-card,
-    #allometric-card,
-    textarea {
+    #breed-normals-card > h3,
+    #breed-normals-card > p,
+    #breed-selector {
         display: none !important;
     }
 
-    /* 2. PAGE SETUP */
+    /* 3. Reset Layout */
     body, html {
         background: white !important;
         margin: 0 !important;
         padding: 0 !important;
     }
-    
-    /* Ensure the report uses the full width of the PDF */
-    main, .container, .content, .calculator-card, .results-box {
+
+    main, .container, .content, .calculator-card {
         display: block !important;
         width: 100% !important;
-        max-width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         border: none !important;
         box-shadow: none !important;
     }
 
-    /* 3. DYNAMIC STYLE: PRETTY vs PLAIN */
-    
-    /* Hide the PDF Header in the App, show it in PDF */
-    .pdf-header { 
-        display: block !important; 
+    /* 4. Ensure Report Sections are Visible */
+    .results-box, .epic-check, #breed-data-container {
+        display: block !important;
         visibility: visible !important;
+        opacity: 1 !important;
+        page-break-inside: avoid;
+        margin-bottom: 20px !important;
     }
 
-    /* If user chose 'Plain', we hide that fancy header even in print */
-    .style-plain .pdf-header {
-        display: none !important;
-    }
-
-    /* Make the 'Pretty' version look like professional stationery */
-    .style-pretty h2, .style-pretty .pdf-comments h3 {
-        background: #f1f5f9 !important;
-        padding: 8px 12px !important;
-        border-radius: 4px;
-        color: #16325F !important;
-        -webkit-print-color-adjust: exact; /* Forces background colors to print */
-    }
-
-    /* 4. CONTENT WRAPPING */
-    .results-box, .epic-check, .pdf-comments {
-        page-break-inside: avoid; /* Don't split tables across pages */
-        margin-bottom: 25px !important;
-    }
-
-    /* 5. COLOR FORCING */
+    /* 5. Force professional colors */
     .abnormal { color: #dc2626 !important; font-weight: bold !important; }
     .normal { color: #16a34a !important; font-weight: bold !important; }
+    h2, h3 { color: #16325F !important; border-bottom: 1px solid #eee; }
 }
 </style>
 </head>
@@ -965,17 +910,12 @@ Left Atrium:
 
 
 <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+  
         <button @click="showComments = !showComments" class="btn-text" style="color: #1e40af; font-weight: bold; cursor: pointer; border: none; background: none;">
             <i class="fa-solid" :class="showComments ? 'fa-minus' : 'fa-plus'"></i> 
             <span x-text="showComments ? 'Hide Clinical Comments' : 'Add Clinical Comments'"></span>
         </button>
 
-        <div class="screen-only" style="font-size: 0.85rem; color: #64748b; display: flex; gap: 10px;">
-            <span>PDF Style:</span>
-            <label><input type="radio" value="pretty" x-model="reportStyle"> Pro</label>
-            <label><input type="radio" value="plain" x-model="reportStyle"> Plain</label>
-        </div>
     </div>
 
     <div x-show="showComments" x-collapse style="margin-bottom: 15px;">
