@@ -243,48 +243,88 @@
         };
     },
 
-    exportToClipboard() {
-const model = allometricModels[this.selectedModel];
-    const results = this.allometricResults;
+exportToClipboard() {
+    if (!allometricModels[this.selectedModel]) return;
     
-    let text = `ECHOCARDIOGRAPHY REPORT - VETCARDIOHUB\n`;
-    text += `Weight: ${this.weight}kg | Allometric Model: ${model.label}\n`;
+    const modelLabel = allometricModels[this.selectedModel].label;
+    const results = this.getResults(); // Helper method to get current ref ranges
+    
+    // Helper function to return status label based on range
+    const getStatus = (val, min, max, highLabel = '[ENLARGED]', lowLabel = '[SMALL]') => {
+        const num = parseFloat(val);
+        if (num > max) return ` ${highLabel}`;
+        if (min !== null && num < min) return ` ${lowLabel}`;
+        return '';
+    };
+
+    let text = `ECHOCARDIOGRAPHY REPORT\n`;
+    text += `Weight: ${this.weight}kg | Allometric Model: ${modelLabel}\n`;
     text += `--------------------------------------------------\n\n`;
     
-    // Section: Allometric Comparison
-    text += `WEIGHT-BASED PREDICTIONS (95% PI):\n`;
-    const params = [
+    // SECTION: LEFT VENTRICLE ALLOMETRY
+    text += `LEFT VENTRICLE:\n`;
+    const lvParams = [
         { key: 'lvidd', label: 'LVIDd' }, { key: 'lvids', label: 'LVIDs' },
-        { key: 'ivsd', label: 'IVSd' }, { key: 'lvpwd', label: 'LVFWd' },
-        { key: 'la', label: 'LA' }, { key: 'ao', label: 'Ao' }, { key: 'lad', label: 'LAD' }
+        { key: 'ivsd', label: 'IVSd' }, { key: 'lvpwd', label: 'LVFWd' }
     ];
 
-    params.forEach(p => {
+    lvParams.forEach(p => {
         const val = this[p.key];
-        if (val) {
+        if (val && results[p.key]) {
             const ref = results[p.key];
-            const status = parseFloat(val) > ref.max ? ' [ABNORMAL]' : '';
+            const status = getStatus(val, ref.min, ref.max, 
+                (p.key === 'ivsd' || p.key === 'lvpwd' ? '[THICKENED]' : '[ENLARGED]'), 
+                (p.key === 'ivsd' || p.key === 'lvpwd' ? '[THIN]' : '[SMALL]'));
             text += `${p.label}: ${val}mm (Ref: ${ref.min}-${ref.max}mm)${status}\n`;
         }
     });
 
-    // Section: Indices & Ratios
-    text += `\nNORMALIZED INDICES & RATIOS:\n`;
-    if (this.lviddn > 0) text += `LVIDdn: ${this.lviddn} (Ref: 1.27-1.70)\n`;
-    if (this.lvidsn > 0) text += `LVIDsn: ${this.lvidsn} (Ref: 0.71-1.26)\n`;
-    if (this.laAo > 0)   text += `LA:Ao Ratio: ${this.laAo} (Ref: <1.65)\n`;
-    if (this.fs > 0)     text += `Fractional Shortening: ${this.fs}%\n`;
-    if (this.ef > 0)     text += `Ejection Fraction: ${this.ef}%\n`;
+    // SECTION: LV INDICES & VOLUMES
+    if (this.lviddn > 0) text += `LVIDdn: ${this.lviddn} (Ref: 1.27-1.70)${getStatus(this.lviddn, 1.27, 1.70)}\n`;
+    if (this.lvidsn > 0) text += `LVIDsn: ${this.lvidsn} (Ref: 0.71-1.26)${getStatus(this.lvidsn, 0.71, 1.26)}\n`;
+    if (this.fs > 0)     text += `Fractional Shortening: ${this.fs}% (Ref: >25%)${getStatus(this.fs, 25, 999, '', '[ABNORMAL]')}\n`;
+    if (this.ef > 0)     text += `Ejection Fraction: ${this.ef}% (Ref: >50%)${getStatus(this.ef, 50, 999, '', '[ABNORMAL]')}\n`;
+    if (this.RWT > 0)    text += `Relative Wall Thickness: ${this.RWT} (Ref: 0.32-0.42)${getStatus(this.RWT, 0.32, 0.42, '[THICK WALLS]', '[THIN WALLS]')}\n`;
+    
+    if (this.lvedv > 0)   text += `LVEDV (Total): ${this.lvedv}ml\n`;
+    if (this.lvesv > 0)   text += `LVESV (Total): ${this.lvesv}ml\n`; // Restored missing ESV
+    
+    if (this.lvedvbw > 0) text += `LVEDV/BW: ${this.lvedvbw} (Ref: 1.25-3.00)${getStatus(this.lvedvbw, 1.25, 3.00)}\n`;
+    if (this.lvesvbw > 0) text += `LVESV/BW: ${this.lvesvbw} (Ref: 0.30-1.35)${getStatus(this.lvesvbw, 0.30, 1.35)}\n`;
+    if (this.edvim2 > 0)  text += `LVEDV/m²: ${this.edvim2} (Ref: <100)${getStatus(this.edvim2, null, 100)}\n`;
+    if (this.esvim2 > 0)  text += `LVESV/m²: ${this.esvim2} (Ref: <30)${getStatus(this.esvim2, null, 30)}\n`;
 
-    // Section: EPIC Check
+    // SECTION: LEFT ATRIUM
+    text += `\nLEFT ATRIUM:\n`;
+    const laParams = [
+        { key: 'la', label: 'LA' }, { key: 'ao', label: 'Ao' }, { key: 'lad', label: 'LAD' }
+    ];
+
+    laParams.forEach(p => {
+        const val = this[p.key];
+        if (val && results[p.key]) {
+            const ref = results[p.key];
+            const status = getStatus(val, ref.min, ref.max);
+            text += `${p.label}: ${val}mm (Ref: ${ref.min}-${ref.max}mm)${status}\n`;
+        }
+    });
+
+    if (this.laAo > 0)   text += `LA:Ao Ratio: ${this.laAo} (Ref: <1.65)${getStatus(this.laAo, null, 1.65)}\n`;
+    if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${getStatus(this.lan, null, 1.17)}\n`;
+    if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${getStatus(this.ladn, null, 1.60)}\n`;
+    if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${getStatus(this.ladao, null, 2.10)}\n`;
+
+    // SECTION: EPIC CHECK
     if (this.lviddn > 0 && this.laAo > 0) {
         text += `\nEPIC TRIAL CHECK (Stage B2 Criteria):\n`;
-        const meetsCriteria = this.lviddn >= 1.7 && this.laAo >= 1.65;
-        text += meetsCriteria ? `RESULT: Meets Echo Criteria for Stage B2\n` : `RESULT: Does Not Meet Criteria\n`;
+        const meetsLA = this.laAo >= 1.65;
+        const meetsLV = this.lviddn >= 1.7;
+        text += `LV Size: ${meetsLV ? 'ENLARGED' : 'NORMAL'}\n`;
+        text += `LA Size: ${meetsLA ? 'ENLARGED' : 'NORMAL'}\n`;
+        text += `RESULT: ${ (meetsLA && meetsLV) ? 'MEETS CRITERIA FOR STAGE B2' : 'DOES NOT MEET CRITERIA'}\n`;
     }
 
-    text += `\n--------------------------------------------------\n`;
-    text += `Generated via VetCardioHub.com`;
+    text += `\nGenerated via VetCardioHub.com\n--------------------------------------------------`;
 
     navigator.clipboard.writeText(text).then(() => {
         this.copySuccess = true;
