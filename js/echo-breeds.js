@@ -403,7 +403,7 @@ const allometricModels = {
         species: "Dog",
         reference: "Cornell et al. (2004)", 
         isCm: true,
-        clinicalNote: "Original allometric dataset. Included sighthound breeds so this skews dataset somewhat as they are outliers typically.",
+        clinicalNote: "Original allometric dataset. Included sighthound breeds so this skews dataset somewhat as they are outliers typically. LAD included from Marchesotti et al. (2019)",
         pmid: "15188817",
         params: {
             lvidd: { a: 1.53, b: 0.294, normMin: 1.27, normMax: 1.85, type: "norm" },
@@ -423,7 +423,7 @@ const allometricModels = {
         reference: "Esser et al. (2020)",
         pmid: "33009675",
         isCm: true,
-        clinicalNote: "Revision of Cornell allometric dataset. Deliberately excluded sighthound breeds so this doesn't skew the dataset.",
+        clinicalNote: "Revision of Cornell allometric dataset. Deliberately excluded sighthound breeds so this doesn't skew the dataset. LAD included from Marchesotti et al. (2019)",
         params: {
             lvidd: { a: 1.38, b: 0.322, normMin: 1.17, normMax: 1.63, type: "norm" },
             lvids: { a: 0.87, b: 0.346, normMin: 0.70, normMax: 1.09, type: "norm" },
