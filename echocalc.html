@@ -259,35 +259,48 @@ exportToClipboard() {
         const results = this.allometricResults;
         const species = (model.species || 'VETERINARY').toUpperCase();
 
-        // Helper function for status tags
-        const getTag = (val, min, max, high = '[ENLARGED]', low = '[SMALL]') => {
-            const n = parseFloat(val);
-//  If there's no max value (unavailable), don't return a tag
-    if (!n || isNaN(n) || !max || max === 0) return '';
-            if (!n || isNaN(n)) return '';
-            if (n > max) return ` ${high}`;
-            if (min !== null && n < min) return ` ${low}`;
-            return '';
-        };
+   
+ // Helper: Handles both result objects {min, max} AND static numbers
+    const getTag = (val, minOrObj, max, high = '[ENLARGED]', low = '[SMALL]') => {
+        const n = parseFloat(val);
+        if (!n || isNaN(n)) return '';
+        
+        // Determine if we were passed an object (allometry) or static numbers (indices)
+        let minVal, maxVal;
+        if (typeof minOrObj === 'object' && minOrObj !== null) {
+            if (!minOrObj.available) return '';
+            minVal = minOrObj.min;
+            maxVal = minOrObj.max;
+        } else {
+            minVal = minOrObj;
+            maxVal = max;
+        }
+
+        if (maxVal && n > maxVal) return ` ${high}`;
+        if (minVal !== null && n < minVal) return ` ${low}`;
+        return '';
+    };
+
+
 
         let text = `${species} ECHOCARDIOGRAPHY REPORT\n`;
         text += `Weight: ${this.weight}kg | Model: ${modelLabel}\n`;
         text += `--------------------------------------------------\n\n`;
 
-        // SECTION: LEFT VENTRICLE
-        text += `LEFT VENTRICLE:\n`;
-        const lvParams = [
-            { key: 'lvidd', label: 'LVIDd' }, { key: 'lvids', label: 'LVIDs' },
-            { key: 'ivsd', label: 'IVSd' }, { key: 'lvpwd', label: 'LVFWd' }
-        ];
-lvParams.forEach(p => {
+// --- SECTION 1: LEFT VENTRICLE ---
+    text += `LEFT VENTRICLE:\n`;
+    const lvParams = [
+        { key: 'lvidd', label: 'LVIDd' }, { key: 'lvids', label: 'LVIDs' },
+        { key: 'ivsd', label: 'IVSd' }, { key: 'lvpwd', label: 'LVFWd' }
+    ];
+    
+    lvParams.forEach(p => {
         const val = this[p.key];
         const res = results[p.key];
         if (val) {
-            let line = `${p.l}: ${val}mm`;
-            // Only add ref range if the model actually provides one
+            let line = `${p.label}: ${val}mm`; 
             if (res && res.available) {
-                const tag = getTag(val, res, 
+                const tag = getTag(val, res, null, 
                     (p.key.includes('ivs') || p.key.includes('pwd') ? '[THICKENED]' : '[ENLARGED]'), 
                     (p.key.includes('ivs') || p.key.includes('pwd') ? '[THIN]' : '[SMALL]'));
                 line += ` (Ref: ${res.min}-${res.max}mm)${tag}`;
@@ -298,6 +311,8 @@ lvParams.forEach(p => {
         }
     });
 
+        if (this.fs > 0)     text += `Fractional Shortening: ${this.fs}% (Ref: >25%)${getTag(this.fs, 25, 999, '', '[ABNORMAL]')}\n`;
+        if (this.ef > 0)     text += `Ejection Fraction: ${this.ef}% (Ref: >50%)${getTag(this.ef, 50, 999, '', '[ABNORMAL]')}\n`;
 //Dog Only
 if (this.isDog) {
         if (this.RWT > 0)    text += `Relative Wall Thickness: ${this.RWT} (Ref: 0.32-0.42)${getTag(this.RWT, 0.32, 0.42, '[THICK WALLS]', '[THIN WALLS]')}\n`;
@@ -310,31 +325,27 @@ if (this.isDog) {
         if (this.edvim2 > 0)  text += `LVEDV/m²: ${this.edvim2} (Ref: <100)${getTag(this.edvim2, null, 100)}\n`;
         if (this.esvim2 > 0)  text += `LVESV/m²: ${this.esvim2} (Ref: <30)${getTag(this.esvim2, null, 30)}\n`;
 }
-        if (this.fs > 0)     text += `Fractional Shortening: ${this.fs}% (Ref: >25%)${getTag(this.fs, 25, 999, '', '[ABNORMAL]')}\n`;
-        if (this.ef > 0)     text += `Ejection Fraction: ${this.ef}% (Ref: >50%)${getTag(this.ef, 50, 999, '', '[ABNORMAL]')}\n`;
 
 
 
-        // SECTION: LEFT ATRIUM
-        text += `\nLEFT ATRIUM:\n`;
-        const laParams = [{ key: 'la', label: 'LA' }, { key: 'ao', label: 'Ao' }, { key: 'lad', label: 'LAD' }];
-laParams.forEach(p => {
+
+// --- SECTION 2: LEFT ATRIUM ---
+    text += `\nLEFT ATRIUM:\n`;
+    const laParams = [{ key: 'la', label: 'LA' }, { key: 'ao', label: 'Ao' }, { key: 'lad', label: 'LAD' }];
+    
+    laParams.forEach(p => {
         const val = this[p.key];
         const res = results[p.key];
         if (val) {
-            let line = `${p.l}: ${val}mm`;
-            // Only add ref range if the model actually provides one
+            let line = `${p.label}: ${val}mm`; 
             if (res && res.available) {
-                const tag = getTag(val, res, 
-                    (p.key.includes('ivs') || p.key.includes('pwd') ? '[THICKENED]' : '[ENLARGED]'), 
-                    (p.key.includes('ivs') || p.key.includes('pwd') ? '[THIN]' : '[SMALL]'));
-                line += ` (Ref: ${res.min}-${res.max}mm)${tag}`;
+                line += ` (Ref: ${res.min}-${res.max}mm)${getTag(val, res)}`;
             } else {
                 line += ` (No ref)`;
             }
             text += line + `\n`;
         }
-    }); 
+    });
 
         if (this.laAo > 0)   text += `LA:Ao Ratio: ${this.laAo} (Ref: <1.65)${getTag(this.laAo, null, 1.65)}\n`;
 if (this.isDog) {
