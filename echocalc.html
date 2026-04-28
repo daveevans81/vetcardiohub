@@ -117,7 +117,7 @@
 <style type="text/css">
 @media print {
     /* 1. Hide everything that isn't part of the medical record */
-    #site-header, #site-footer, .hero, .input-group, 
+    #site-header, #site-footer, .hero, .input-group, .measurements,
     .export-actions, #breed-selector, .placeholder-text,
     button, nav, aside, .app-branding, .small, 
     .install-footer-box, #allometric-card, .Lead {
@@ -197,6 +197,8 @@
     lvedv: '',
     lvesv: '',
     copySuccess: false,
+showComments: false,
+clinicalComments: '',
     
     /* 2. GETTERS */
     get lviddn() {
@@ -471,8 +473,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
          
 
           <div style="margin-top:10px" >
-<div class="calculator-card" 
-     >
+<div class="calculator-card"><div class="measurements">
 
     
     <p style="color: #666; font-size: 0.9em;">Enter measurements in <strong>mm</strong> and weight in <strong>kg</strong>.</p>
@@ -598,6 +599,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
         <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
     </template>
     </div>
+</div>
 
     <div class="results-box" x-transition>
 
@@ -859,13 +861,27 @@ Left Atrium:
         </div>
 </div>
 
-    </div>
+
+<div x-show="clinicalComments" class="report-comments" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+    <h3 style="color: #1e40af; font-size: 1.1rem; margin-bottom: 5px;">Clinical Observations & Plan:</h3>
+    <p x-text="clinicalComments" style="font-style: italic; white-space: pre-wrap; color: #334155; line-height: 1.4;"></p>
 </div>
 
 
+    </div>
+</div>
+<div style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+    <button @click="showComments = !showComments" class="btn-text" style="font-size: 0.85rem; margin-bottom: 10px;">
+        <i class="fa-solid" :class="showComments ? 'fa-minus' : 'fa-plus'"></i> 
+        <span x-text="showComments ? ' Hide Observations' : ' Add Clinical Observations/Plan'"></span>
+    </button>
 
-
-          </div>
+    <div x-show="showComments" x-transition style="margin-bottom: 15px;">
+        <textarea x-model="clinicalComments" 
+                  placeholder="e.g. Mild MR. No evidence of CHF. Recheck 6 months." 
+                  style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem;"></textarea>
+    </div>
+</div>
 <div class="export-actions" style="margin-top: 20px; display: flex; align-items: center; gap: 15px;">
     <div style="position: relative;">
         <button @click="exportToClipboard()" class="btn-secondary">
@@ -885,6 +901,10 @@ Left Atrium:
         <i class="fa-solid fa-file-pdf"></i> Save PDF
     </button>
 </div>
+
+
+          </div>
+
         </section>
 
 
