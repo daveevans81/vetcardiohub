@@ -439,15 +439,27 @@ if (this.clinicalComments && this.clinicalComments.trim() !== '') {
         return text;
     },
 
-    shareReport() {
-        const reportText = this.generateReportText();
-        if (navigator.share) {
-            navigator.share({ title: 'Echo Report', text: reportText });
-        } else {
-            this.exportToClipboard();
-            alert('Copied to clipboard.');
-        }
-    },
+shareReport() {
+    const reportText = this.generateReportText();
+    
+    // 1. Check for the real window.navigator.share
+    if (window.navigator && window.navigator.share) {
+        // 2. Use .call() to ensure the 'this' context is the real navigator
+        window.navigator.share.call(window.navigator, { 
+            title: 'Echo Report', 
+            text: reportText 
+        }).catch((error) => {
+            // 3. Handle cases where the user cancels the share
+            if (error.name !== 'AbortError') {
+                console.error('Share failed:', error);
+            }
+        });
+    } else {
+        // Fallback for browsers that don't support sharing (like Chrome on Windows)
+        this.exportToClipboard();
+        alert('Copied to clipboard.');
+    }
+},
 
     exportToClipboard() {
 navigator.clipboard.writeText(this.generateReportText()).then(() => {
