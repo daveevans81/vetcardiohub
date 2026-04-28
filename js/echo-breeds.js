@@ -492,7 +492,7 @@ const allometricModels = {
     }
 },
 "karsten_adult_cat": {
-    label: "Karsten (Adult Cat)",
+    label: "Adult Cat (Karsten)",
     species: "feline",
     pmid: "28993567",
     isCm: false,
@@ -506,7 +506,7 @@ const allometricModels = {
     }
 },
     "visser_kitten": {
-        label: "Visser (Kitten Growth)",
+        label: "Kitten Growth (Visser)",
         species: "feline",
         reference: "Visser et al. (2022)",
         pmid: "32812464",
