@@ -2804,3 +2804,68 @@ input {
     margin-top: 15px;
     color: #b91c1c;
 }
+
+
+/* Export Action Bar Styling */
+.export-actions {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    flex-wrap: wrap; /* Wraps nicely on small mobile screens */
+}
+
+/* Base button style for all 3 report share buttons */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    width: 100%; /* Allows flex-grow to work */
+    white-space: nowrap;
+}
+
+/* Secondary Look (Copy & Share) */
+.btn-secondary {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+    background-color: #e2e8f0;
+    color: #1e293b;
+}
+
+/* Primary Look (PDF) */
+.btn-primary {
+    background-color: #1e40af;
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: #1e3a8a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 10px -1px rgba(30, 64, 175, 0.3);
+}
+
+/* Tiny Toast for Copy Success */
+.toast-popup {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #065f46;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    z-index: 20;
+}

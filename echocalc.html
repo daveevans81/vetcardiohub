@@ -896,12 +896,17 @@ Left Atrium:
                   style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem;"></textarea>
     </div>
 </div>
-<div class="export-actions" style="margin-top: 20px; display: flex; align-items: center; gap: 15px;">
-    <div style="position: relative;">
-        <button @click="exportToClipboard()" class="btn-secondary">
-            <i class="fa-solid fa-copy"></i> Copy Report Text
-        </button>
-        
+
+<div class="export-container" style="margin-top: 30px; border-top: 2px solid #f1f5f9; padding-top: 20px;">
+    <p style="font-size: 0.8rem; color: #64748b; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
+        Report Export Options
+    </p>
+    
+    <div class="export-actions">
+        <div style="position: relative; flex: 1;">
+            <button @click="exportToClipboard()" class="action-btn btn-secondary">
+                <i class="fa-solid fa-copy"></i> Copy Text
+            </button>
         <div x-show="copySuccess" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 transform -translate-y-2"
@@ -909,17 +914,21 @@ Left Atrium:
              style="position: absolute; top: -40px; left: 0; background: #065f46; color: white; padding: 5px 12px; border-radius: 4px; font-size: 0.8rem; white-space: nowrap; z-index: 10;">
             <i class="fa-solid fa-check"></i> Report Copied to Clipboard!
         </div>
-    </div>
-    
-    <button @click="window.print()" class="btn-primary">
-        <i class="fa-solid fa-file-pdf"></i> Save PDF
-    </button>
-    
-        <button @click="shareReport()" style="background: #0d9488; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-share-nodes"></i> Share
+        </div>
+
+            <button @click="shareReport()" class="action-btn btn-secondary" style="flex: 1;">
+                <i class="fa-solid fa-share-nodes"></i> Share
+            </button>
+  
+
+        <button @click="window.print()" class="action-btn btn-primary" style="flex: 1.2;">
+            <i class="fa-solid fa-file-pdf"></i> Save PDF Report
         </button>
-    
+    </div>
 </div>
+
+
+
 
 
           </div>
