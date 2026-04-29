@@ -171,6 +171,23 @@
         letter-spacing: 2px;
         color: #94a3b8;
         margin-bottom: 5px;
+/* 6. Add a safety buffer to the results container */
+    .results-box {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        box-sizing: border-box; /* Ensures padding doesn't increase total width */
+    }
+
+    /* 7. Optional: Global page margin safety */
+    @page {
+        margin: 1cm; /* Standard medical report margin */
+    }
+
+    /* 8. Ensure the rows don't stretch beyond the padded container */
+    .result-row {
+        width: 100%;
+        max-width: 100%;
+    }
     }
 }
 </style>
