@@ -116,24 +116,36 @@
 
 <style type="text/css">
 @media print {
-    /* 1. Hide everything that isn't part of the medical record */
+    /* 1. Global Reset - Ensures padding doesn't push width over 100% */
+    * {
+        box-sizing: border-box !important;
+        -webkit-print-color-adjust: exact !important; /* Forces colors/backgrounds */
+        print-color-adjust: exact !important;
+    }
+
+    /* 2. Hide UI Elements */
     #site-header, #site-footer, .hero, .input-group, .measurements,
     .export-actions, #breed-selector, .placeholder-text,
     button, nav, aside, .app-branding, .small, 
-    .install-footer-box, #allometric-card, .Lead {
+    .install-footer-box, #allometric-card, .Lead, .btn-text {
         display: none !important;
     }
 
-    /* 2. Reset layout for PDF */
+    /* 3. Page & Layout Setup */
+    @page {
+        size: auto;
+        margin: 1.5cm !important; /* The physical paper margin */
+    }
+
     body, html {
         background: white !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100%;
+        width: 100% !important;
     }
 
-    /* Ensure the main containers don't restrict height or width */
-    main, .container, .content {
+    /* Containers must be 100% width so they don't fight the @page margin */
+    main, .container, .content, .calculator-card {
         display: block !important;
         width: 100% !important;
         margin: 0 !important;
@@ -141,18 +153,45 @@
         box-shadow: none !important;
     }
 
-    /* 3. Show and Format the Report Sections */
+    /* 4. The Report Sections (The Safety Gutter) */
     .results-box, .epic-check, #breed-data-container {
         display: block !important;
         visibility: visible !important;
         width: 100% !important;
+        padding: 0 15px !important; /* Internal safety gutter to prevent clipping */
         border: none !important;
         margin-bottom: 30px !important;
-        page-break-inside: avoid; /* Keeps a table from splitting over two pages */
+        page-break-inside: avoid;
     }
 
-    /* 4. Fix colors (Browsers often ignore colors in print unless forced) */
-    .abnormal, [style*="color: #dc2626"], [style*="color: #b91c1c"] { 
+    /* 5. Custom Branding Header */
+    .results-box::before {
+        content: "VETCARDIOHUB CLINICAL REPORT";
+        display: block;
+        font-size: 10px;
+        letter-spacing: 2px;
+        color: #94a3b8;
+        margin-bottom: 10px;
+    } /* FIXED: This closing brace was missing! */
+
+    /* 6. The Result Row Alignment */
+    .result-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        border-bottom: 1px solid #eee !important;
+        padding: 8px 0 !important;
+    }
+
+    /* This targets the right-hand side cluster */
+    .result-row > span:last-child {
+        text-align: right !important;
+        padding-left: 20px !important; /* Prevents values from crowding the label */
+        flex-shrink: 0; /* Prevents the number from being squashed */
+    }
+
+    /* 7. Clinical Colors */
+    .abnormal, [style*="color: #dc2626"] { 
         color: #dc2626 !important; 
         font-weight: bold !important; 
     }
@@ -161,50 +200,6 @@
     }
     h1, h2, h3, [style*="color: #1e40af"], [style*="color: #16325F"] { 
         color: #16325F !important; 
-    }
-
-    /* 5. Custom Branding for the PDF */
-    .results-box::before {
-        content: "VETCARDIOHUB CLINICAL REPORT";
-        display: block;
-        font-size: 10px;
-        letter-spacing: 2px;
-        color: #94a3b8;
-        margin-bottom: 5px;
- /* 1. Global Box Reset for Print */
-    * {
-        box-sizing: border-box !important;
-    }
-
-    /* 2. Force the main container to stay inside the lines */
-    .results-box {
-        width: 96% !important; /* Shaving off 4% creates a guaranteed gutter */
-        margin-left: auto !important;
-        margin-right: auto !important;
-        padding: 0 !important; /* Reset padding here to rely on the width reduction */
-        overflow: hidden; /* Prevents any "stray" characters from pushing the boundary */
-    }
-
-    /* 3. The Result Row Safety */
-    .result-row {
-        display: flex !important;
-        justify-content: space-between !important;
-        width: 100% !important;
-        /* Add a small internal buffer to the right-hand span */
-        padding-right: 15px !important; 
-    }
-
-    /* 4. The Right-Hand Value Cluster */
-    /* This ensures the values don't lean against the literal edge of the 96% width */
-    .result-row > span:last-child {
-        text-align: right !important;
-        white-space: nowrap !important; /* Prevents wrapping which can also cause clipping */
-    }
-
-    /* 5. Force the browser to respect margins */
-    @page {
-        size: auto;
-        margin: 1.5cm !important; /* Standard medical margin */
     }
 }
 </style>
