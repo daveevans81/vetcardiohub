@@ -171,25 +171,40 @@
         letter-spacing: 2px;
         color: #94a3b8;
         margin-bottom: 5px;
-/* 6. Add a safety buffer to the results container */
+ /* 1. Global Box Reset for Print */
+    * {
+        box-sizing: border-box !important;
+    }
+
+    /* 2. Force the main container to stay inside the lines */
     .results-box {
-        padding-left: 20px !important;
-        padding-right: 20px !important;
-        margin-left: 20px !important;
-        margin-right: 20px !important;
-        box-sizing: border-box; /* Ensures padding doesn't increase total width */
+        width: 96% !important; /* Shaving off 4% creates a guaranteed gutter */
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding: 0 !important; /* Reset padding here to rely on the width reduction */
+        overflow: hidden; /* Prevents any "stray" characters from pushing the boundary */
     }
 
-    /* 7. Optional: Global page margin safety */
-    @page {
-        margin: 1cm; /* Standard medical report margin */
-    }
-
-    /* 8. Ensure the rows don't stretch beyond the padded container */
+    /* 3. The Result Row Safety */
     .result-row {
-        width: 100%;
-        max-width: 100%;
+        display: flex !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        /* Add a small internal buffer to the right-hand span */
+        padding-right: 15px !important; 
     }
+
+    /* 4. The Right-Hand Value Cluster */
+    /* This ensures the values don't lean against the literal edge of the 96% width */
+    .result-row > span:last-child {
+        text-align: right !important;
+        white-space: nowrap !important; /* Prevents wrapping which can also cause clipping */
+    }
+
+    /* 5. Force the browser to respect margins */
+    @page {
+        size: auto;
+        margin: 1.5cm !important; /* Standard medical margin */
     }
 }
 </style>
