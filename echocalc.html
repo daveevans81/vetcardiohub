@@ -683,7 +683,7 @@ Left Ventricle:
 </div>
 
         <div class="result-row" x-show="fs">
-            <span><strong>Fractional Shortening</strong></span>
+            <span><strong>FS</strong></span>
             <span x-text="`${fs}%` "></span>
                 <span x-show="fs >= 25" class="normal">(Normal)</span>
                 <span x-show="fs < 25 && fs > 0" class="abnormal">(Abnormal)</span>
@@ -691,7 +691,7 @@ Left Ventricle:
             </span>
         </div>
         <div class="result-row" x-show="ef">
-            <span><strong>Ejection Fraction</strong></span>
+            <span><strong>EF</strong></span>
             <span x-text="`${ef}%` "></span>
                 <span x-show="ef >= 50" class="normal">(Normal)</span>
                 <span x-show="ef < 50 && ef > 0" class="abnormal">(Abnormal)</span>
