@@ -1708,7 +1708,7 @@ header,
 #site-header,
 .nav-container {
     position: relative; /* Or fixed/sticky depending on your header setup */
-    z-index: 9999 !important; /* The 'VIP' level */
+    z-index: 10 !important; /* The 'VIP' level */
 }
 
 /* 2. Ensure the dropdown specifically is elevated */
