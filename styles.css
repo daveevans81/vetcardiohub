@@ -264,6 +264,7 @@ max-width: 1200px;
 .nav .dropdown {
     /* DEFAULT: Keep items horizontal */
     display: inline-block; 
+        z-index: 10001;
 }
 
 .menu-toggle {
