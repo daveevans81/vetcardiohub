@@ -1915,7 +1915,7 @@ header,
 
     /* 2. Ensure the dropdown panel itself is at the absolute top */
     .nav-links-container {
-        z-index: 10000 !important;
+        z-index: 9999 !important;
     }
 
     /* 3. The "Gremlin" Fix: Explicitly push the blog header down on mobile */
