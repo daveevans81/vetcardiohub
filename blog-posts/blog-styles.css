@@ -1703,22 +1703,13 @@ header h1 {
     .date-block .published { text-align: left; }
 }
 
-/* 1. Ensure the Header is always on top of everything */
+
+
 header, 
-#site-header {
-    position: relative;
-    z-index: 1 ;
-}
-
-
-
-
-
-/* 3. Give the sidebar a lower level */
-#featured-posts,
-.sidebar-card {
-    position: relative;
-    z-index: 1; /* Keeping it grounded */
+.sidebar, 
+#featured-posts {
+    position: relative !important;
+    z-index: 10 !important; /* Low level so Nav can slide over it */
 }
 
 .btn-support-tier {

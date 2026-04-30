@@ -344,6 +344,20 @@ max-width: 1200px;
     transform: translateX(-50%);
     }
 }
+/* 1. The Navigation Bar (Super VIP) */
+#site-header, 
+.header-container, 
+.nav-container {
+    position: relative !important;
+    z-index: 2000 !important; /* Higher than everything else */
+}
+
+/* 2. The Actual Dropdowns & Mobile Panel */
+.dropdown-content, 
+.nav-links-container, 
+.vets-menu {
+    z-index: 9999 !important; /* Highest possible within the Nav */
+}
 
 /* MEDIA FIXES FOR SMALL SCREENS */
 @media (max-width: 768px) {
