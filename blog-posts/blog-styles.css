@@ -1705,10 +1705,14 @@ header h1 {
 
 /* 1. Ensure the Header is always on top of everything */
 header, 
-#site-header,
-.nav-container {
-    position: relative; /* Or fixed/sticky depending on your header setup */
+#site-header {
+    position: relative;
     z-index: 10 ;
+}
+
+.nav-container {
+    position: relative;
+    z-index: 101 ;
 }
 
 /* 2. Ensure the dropdown specifically is elevated */
