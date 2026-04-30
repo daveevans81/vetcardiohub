@@ -249,7 +249,7 @@ main a {
      margin-top: -15px; /* Adjust this negative value to control the overlap amount */
     padding-top: 5px;
     padding-bottom: 0px;
-    z-index: 5; /* Give it a low z-index */
+    z-index: 15; /* Give it a low z-index */
 }
 
 .nav-links-container {
