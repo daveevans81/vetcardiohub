@@ -164,7 +164,7 @@ main a {
     background-color: #0a9396;
     min-width: 160px; /* Made slightly wider for text */
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    z-index: 10;
+    z-index: 15;
 }
 
 /* Links inside the dropdown */
@@ -249,7 +249,7 @@ main a {
      margin-top: -15px; /* Adjust this negative value to control the overlap amount */
     padding-top: 5px;
     padding-bottom: 0px;
-    z-index: 15; /* Give it a low z-index */
+    z-index: 8; /* Give it a low z-index */
 }
 
 .nav-links-container {
