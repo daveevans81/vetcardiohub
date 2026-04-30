@@ -372,6 +372,15 @@ max-width: 1200px;
     }
 }
 
+/* Update the 'Ensure the dropdown specifically is elevated' block */
+.nav-dropdown, 
+.dropdown-menu,
+.vets-menu,
+.dropdown-content,   /* <--- Added this */
+.nav-links-container { /* <--- Added this for mobile */
+    z-index: 9999 !important;
+}
+
 
 /* VIDEO PAGE */
 
