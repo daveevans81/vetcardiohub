@@ -1707,20 +1707,12 @@ header h1 {
 header, 
 #site-header {
     position: relative;
-    z-index: 10 ;
+    z-index: 1 ;
 }
 
-.nav-container {
-    position: relative;
-    z-index: 101 ;
-}
 
-/* 2. Ensure the dropdown specifically is elevated */
-.nav-dropdown, 
-.dropdown-menu,
-.vets-menu {
-    z-index: 10000 !important;
-}
+
+
 
 /* 3. Give the sidebar a lower level */
 #featured-posts,

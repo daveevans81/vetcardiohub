@@ -376,11 +376,15 @@ max-width: 1200px;
 .nav-dropdown, 
 .dropdown-menu,
 .vets-menu,
-.dropdown-content,   /* <--- Added this */
-.nav-links-container { /* <--- Added this for mobile */
+.dropdown-content,   
+.nav-links-container { 
     z-index: 9999 !important;
 }
 
+.nav-container {
+    position: relative;
+    z-index: 1001 ;
+}
 
 /* VIDEO PAGE */
 
