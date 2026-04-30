@@ -58,7 +58,7 @@ main a {
 
 .header-logo-section {
     position: absolute; 
-    z-index: 20001;      /* Ensure it floats above the background image/gradient */
+    z-index: 100;      /* Ensure it floats above the background image/gradient */
     top: 8px;         /* Vertical distance from the top edge */
     left: 15px;        /* Horizontal distance from the left edge */
     display: flex;
@@ -71,7 +71,7 @@ main a {
     height: 100%;
     width: auto;
     position: center;  Keep relative positioning for stacking context 
-    z-index: 20000;
+    z-index: 20;
 /*     position: absolute;     */
 /*     top: 0;                 */
 /*     left: 50%; Start at 50% */
@@ -164,7 +164,7 @@ main a {
     background-color: #0a9396;
     min-width: 160px; /* Made slightly wider for text */
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    z-index: 15;
+    z-index: 10;
 }
 
 /* Links inside the dropdown */
@@ -249,7 +249,7 @@ main a {
      margin-top: -15px; /* Adjust this negative value to control the overlap amount */
     padding-top: 5px;
     padding-bottom: 0px;
-    z-index: 8; /* Give it a low z-index */
+    z-index: 5; /* Give it a low z-index */
 }
 
 .nav-links-container {
@@ -264,7 +264,6 @@ max-width: 1200px;
 .nav .dropdown {
     /* DEFAULT: Keep items horizontal */
     display: inline-block; 
-        z-index: 1001;
 }
 
 .menu-toggle {
@@ -307,7 +306,7 @@ max-width: 1200px;
         left: 0;
         background-color: #f4f4f9;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        z-index: 1002;
+        z-index: 5;
         width: 100%;
         min-height: auto;
     }
@@ -344,20 +343,6 @@ max-width: 1200px;
     transform: translateX(-50%);
     }
 }
-/* 1. The Navigation Bar (Super VIP) */
-#site-header, 
-.header-container, 
-.nav-container {
-    position: relative !important;
-    z-index: 1000 !important; /* Higher than everything else */
-}
-
-/* 2. The Actual Dropdowns & Mobile Panel */
-.dropdown-content, 
-.nav-links-container, 
-.vets-menu {
-    z-index: 1003 !important; /* Highest possible within the Nav */
-}
 
 /* MEDIA FIXES FOR SMALL SCREENS */
 @media (max-width: 768px) {
@@ -386,19 +371,6 @@ max-width: 1200px;
     }
 }
 
-/* Update the 'Ensure the dropdown specifically is elevated' block */
-.nav-dropdown, 
-.dropdown-menu,
-.vets-menu,
-.dropdown-content,   
-.nav-links-container { 
-    z-index: 1002 !important;
-}
-
-.nav-container {
-    position: relative;
-    z-index: 1001 ;
-}
 
 /* VIDEO PAGE */
 
