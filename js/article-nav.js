@@ -117,6 +117,9 @@ const modalImg = document.getElementById("modal-img");
 const captionText = document.getElementById("modal-caption");
 
 blogImages.forEach(img => {
+        if (this.closest('a')) {
+            return; // Exit the function and let the link work normally
+        }
     // Add visual cue that image is clickable
     img.style.cursor = "zoom-in";
     
