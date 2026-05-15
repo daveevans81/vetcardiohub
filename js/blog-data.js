@@ -1,5 +1,22 @@
 window.posts = [
   {
+    slug: "post26.html",
+    title: "Bridging the Gap: A New Era in Canine Mitral Valve Repair with TEER",
+    subtitle: "The revolutionary new technique to repair the mitral valve and cure Degenerative Mitral Valve Disease in Dogs",
+    date: "May 15, 2026",
+    reviewed: "May 15, 2026",
+    author: "Dave Evans",
+    authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
+    authorLink: "../about.html#daveevans",
+    category: "Interventions",
+    readTime: "10 min read",
+    group: "management",
+    audience: "vet",
+    featured: false,
+    image: "/images/TEER.jpg",
+    snippet: "This minimally invasive, beating-heart procedure offers a mechanical solution for degenerative mitral valve disease patients who are not candidates for bypass repair but don't want to accept the limitations of medical therapy for heart failure."
+  },  
+  {
     slug: "post25.html",
     title: "Oxygen Therapy in Canine Heart Disease:",
     subtitle: "The Science of the Diffusion Barrier and the Transition to Home Care",
