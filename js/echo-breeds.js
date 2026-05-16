@@ -526,3 +526,37 @@ params: {
     }
     }
 };
+
+const mineModels = {
+    mine_1: {
+        label: "MINE 1 (Vezzosi 2021 - 4 Parameter)",
+        variables: ['laAo', 'lviddn', 'fs', 'eVel'],
+        ranges: {
+            laAo: [ { max: 1.7, pts: 1 }, { max: 1.9, pts: 2 }, { max: 2.5, pts: 3 }, { max: Infinity, pts: 4 } ],
+            lviddn: [ { max: 1.7, pts: 1 }, { max: 2.0, pts: 2 }, { max: 2.3, pts: 3 }, { max: Infinity, pts: 4 } ],
+            fs: [ { max: 45, pts: 1 }, { max: 50, pts: 2 }, { max: Infinity, pts: 3 } ],
+            eVel: [ { max: 1.2, pts: 1 }, { max: 1.5, pts: 2 }, { max: Infinity, pts: 3 } ]
+        },
+        tiers: [
+            { min: 4, max: 5, label: "Mild Severity", mst: "2344 days", class: "mild" },
+            { min: 6, max: 7, label: "Moderate Severity", mst: "1882 days", class: "moderate" },
+            { min: 8, max: 12, label: "Severe Severity", mst: "623 days", class: "severe" },
+            { min: 13, max: 14, label: "Late Stage Severity", mst: "157 days", class: "late" }
+        ]
+    },
+    mine_2: {
+        label: "MINE 2 (Vezzosi 2025 - 3 Parameter Simplified)",
+        variables: ['laAo', 'lviddn', 'eVel'],
+        ranges: {
+            laAo: [ { max: 1.7, pts: 1 }, { max: 1.9, pts: 2 }, { max: 2.5, pts: 3 }, { max: Infinity, pts: 4 } ],
+            lviddn: [ { max: 1.7, pts: 1 }, { max: 2.0, pts: 2 }, { max: 2.3, pts: 3 }, { max: Infinity, pts: 4 } ],
+            eVel: [ { max: 1.2, pts: 1 }, { max: 1.5, pts: 2 }, { max: Infinity, pts: 3 } ]
+        },
+        tiers: [
+            { min: 3, max: 4, label: "Mild Risk / Lower Progression", mst: "2604 days", class: "mild" },
+            { min: 5, max: 6, label: "Moderate Risk / Intermediate Progression", mst: "1216 days", class: "moderate" },
+            { min: 7, max: 10, label: "Severe Risk (Advanced B2 Status)", mst: "718 days", class: "severe" },
+            { min: 11, max: 12, label: "Late Stage C / D", mst: "152 days (estimated)", class: "late" }
+        ]
+    }
+};
