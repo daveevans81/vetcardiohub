@@ -310,21 +310,65 @@ get calculatedMineScore() {
     
     let totalPoints = 0;
     let missingFields = [];
+    let breakdown = [];
 
     model.variables.forEach(v => {
+        // Map keys to clean clinical display names
+        const displayName = v === 'laAo' ? 'LA:Ao Ratio' : 
+                            v === 'lviddn' ? 'LVIDdn' : 
+                            v === 'fs' ? 'Fractional Shortening' : 
+                            v === 'eVel' ? 'E-wave Peak Velocity' : v.toUpperCase();
+
         const val = parseFloat(this[v]);
+        
+        // If data is missing or un-entered yet
         if (!val || isNaN(val) || val <= 0) {
-            missingFields.push(v.toUpperCase());
+            missingFields.push(displayName);
+            breakdown.push({
+                name: displayName,
+                val: '—',
+                threshold: 'Awaiting entry',
+                pts: 0
+            });
             return;
         }
         
-        // Find matching score bracket from the data file
-        const match = model.ranges[v].find(r => val <= r.max);
-        if (match) totalPoints += match.pts;
+        // Find matching score tier
+        const ranges = model.ranges[v];
+        const matchRule = ranges.find(r => val <= r.max);
+        const ptsAwarded = matchRule ? matchRule.pts : 0;
+        totalPoints += ptsAwarded;
+
+        // Calculate text representation of the triggered cutoff bracket
+        const matchIndex = ranges.indexOf(matchRule);
+        let thresholdText = '';
+        if (matchIndex === 0) {
+            thresholdText = `≤ ${matchRule.max}`;
+        } else if (matchRule.max === Infinity) {
+            thresholdText = `> ${ranges[matchIndex - 1].max}`;
+        } else {
+            thresholdText = `${ranges[matchIndex - 1].max} – ${matchRule.max}`;
+        }
+
+        // Format values with correct clinical units for the audit trail
+        const unitSuffix = v === 'fs' ? '%' : v === 'eVel' ? ' m/s' : '';
+
+        breakdown.push({
+            name: displayName,
+            val: `${val}${unitSuffix}`,
+            threshold: thresholdText,
+            pts: ptsAwarded
+        });
     });
 
     if (missingFields.length > 0) {
-        return { score: null, tier: null, mst: null, status: 'Awaiting: ' + missingFields.join(', ') };
+        return { 
+            score: null, 
+            tier: null, 
+            mst: null, 
+            status: 'Awaiting inputs for complete assessment', 
+            breakdown: breakdown 
+        };
     }
 
     const activeTier = model.tiers.find(t => totalPoints >= t.min && totalPoints <= t.max);
@@ -333,7 +377,8 @@ get calculatedMineScore() {
         tier: activeTier ? activeTier.label : 'Unclassified',
         mst: activeTier ? activeTier.mst : 'N/A',
         class: activeTier ? activeTier.class : 'normal',
-        status: 'Complete'
+        status: 'Complete',
+        breakdown: breakdown
     };
 },
 
@@ -1189,6 +1234,39 @@ Left Atrium:
             *Survival estimates represent median time to cardiac death or congestive heart failure entry as validated by Vezzosi et al.
         </p>
     </div>
+
+<div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+    <h3 style="font-size: 0.85rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-chart-line"></i> Parameter Points Breakdown
+    </h3>
+    
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+        <thead>
+            <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Echo Variable</th>
+                <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Patient Entry</th>
+                <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Triggered Interval</th>
+                <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: right;">Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="item in calculatedMineScore?.breakdown" :key="item.name">
+                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#fdfdfd'" onmouseout="this.style.backgroundColor='transparent'">
+                    <td style="padding: 10px; font-weight: 600; color: #334155;" x-text="item.name"></td>
+                    
+                    <td style="padding: 10px; text-align: center; font-weight: bold; color: #1e40af;" x-text="item.val"></td>
+                    
+                    <td style="padding: 10px; text-align: center; color: #64748b; font-style: italic;" x-text="item.threshold"></td>
+                    
+                    <td style="padding: 10px; text-align: right; font-weight: bold; color: #1e293b;" 
+                        x-text="item.val === '—' ? '0' : `+${item.pts}`"></td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>
+
+
 </section>
 
     <section class="card" style="margin-top:18px" id="breed-normals-card">
