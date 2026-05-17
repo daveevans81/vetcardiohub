@@ -8,7 +8,6 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="VetCardioHub Echo Calculator">
 <link rel="manifest" href="/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,7 +15,8 @@
 
 <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
     
-    <title>VetCardioHub Echo Calculator</title>
+<title>Veterinary Echocardiography Calculator & Advanced Diagnostics | VetCardioHub</title>
+<meta name="description" content="Free veterinary echo calculator featuring allometric reference sizing, advanced canine MINE prognostic scoring, Qp:Qs ratio, diastolic function grading, and feline hypertrophic cardiomyopathy screening.">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
@@ -38,9 +38,9 @@
 {
   "@context": "https://schema.org",
   "@type": "MedicalWebPage",
-  "name": "Veterinary Echocardiography Calculator (Cornell & EPIC Criteria)",
-  "description": "An interactive clinical tool for veterinarians to calculate allometric scaling (LVIDdn, LAsaxn), BSA-indexed volumes (EDVI, ESVI), and ACVIM/EPIC staging for dogs.",
-  "url": "https://yourdomain.com/echocalc.html",
+  "name": "Advanced Veterinary Echocardiography Calculator | VetCardioHub",
+  "description": "Interactive veterinary echo calculator featuring allometric reference scaling, Canine MINE prognostic scoring, Qp:Qs flow ratios, automated diastolic function classification matrices, and feline HCM screening.",
+  "url": "https://vetcardiohub.com/echocalc.html",
   "medicalAudience": {
     "@type": "MedicalAudience",
     "audienceType": "Veterinary Professionals"
@@ -51,16 +51,18 @@
   },
   "mainEntity": {
     "@type": "MedicalDevice",
-    "name": "EchoCalc Diagnostic Tool",
-    "description": "Calculates normalized cardiac dimensions based on Cornell and EPIC trial parameters.",
-    "purpose": "Diagnostic interpretation of canine echocardiography"
+    "name": "VetCardioHub Advanced Echo Calc Suite",
+    "description": "Calculates normalized dimensions, advanced volumetric indices, Mitral INsufficiency Echocardiographic (MINE) risk score, shunt ratios (Qp:Qs), and diastolic performance grading.",
+    "purpose": "Comprehensive structural, hemodynamic, and prognostic interpretation of canine and feline echocardiography"
   },
   "citation": [
     "Cornell et al. (2004) Allometric scaling of M-mode cardiac measurements in normal adult dogs.",
     "Boswood et al. (2016) The EPIC Study - Pimobendan in Dogs with Preclinical MMVD.",
-    "Keene et al. (2019) ACVIM consensus guidelines for myxomatous mitral valve disease."
+    "Keene et al. (2019) ACVIM consensus guidelines for myxomatous mitral valve disease.",
+    "Vezzosi et al. (2021 & 2025) Mitral INsufficiency Echocardiographic (MINE) scoring system for prognostic stratification.",
+    "Schober et al. (2010) Echocardiographic assessment of left ventricular diastolic function in dogs."
   ],
-  "lastReviewed": "2026-04-24",
+  "lastReviewed": "2026-05-17",
   "isAccessibleForFree": "true"
 }
 </script>
@@ -100,7 +102,23 @@
         "@type": "Answer",
         "text": "The LA:Ao ratio measurement has been the gold standard metric for assessing left atrial size, but has been shown to be challenging to measure reliably especially in inexperienced hands. Moving towards the LAD (left atrial diameter in long axis) is now recommended, and can be scaled to body weight using the allometric scaling formula LAD (cm) / Weight (kg)^0.309. A value > 1.6 is typically considered indicative of left atrial enlargement."
       }
-    }
+    },
+{
+  "@type": "Question",
+  "name": "What parameters are required to calculate the Canine MINE score?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "The 4-parameter MINE 1 scoring system requires the LA:Ao ratio, LVIDdn, Fractional Shortening (FS), and E-wave peak velocity. The simplified 3-parameter MINE 2 system utilizes LA:Ao, LVIDdn, and E-wave velocity to classify myxomatous mitral valve disease (MMVD) severity and estimate median survival time (MST)."
+  }
+},
+{
+  "@type": "Question",
+  "name": "How is the Qp:Qs ratio calculated on a veterinary echocardiogram?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "The Qp:Qs shunt ratio evaluates pulmonary to systemic blood flow. Systemic stroke volume (Qs) is calculated using the LVOT diameter and LVOT VTI, while pulmonary stroke volume (Qp) uses the RVOT diameter and RVOT VTI via the formula: Stroke Volume = VTI × π × (Diameter / 20)^2. A ratio of 1.0 is normal, while values > 1.5 indicate a hemodynamically significant left-to-right shunt."
+  }
+}
   ]
 }
 </script>
@@ -2132,7 +2150,22 @@ Right Heart:
             </p>
         </details>
     </div>
-
+    <div class="faq-item">
+        <details>
+            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What parameters are required to calculate the Canine MINE score?</summary>
+            <p>
+                The 4-parameter MINE 1 scoring system requires the LA:Ao ratio, LVIDdn, Fractional Shortening (FS), and E-wave peak velocity. The simplified 3-parameter MINE 2 system utilizes LA:Ao, LVIDdn, and E-wave velocity to classify myxomatous mitral valve disease (MMVD) severity and estimate median survival time (MST). Enter those values in our calculator to get the score calculated instantly and displayed in a printable report.
+            </p>
+        </details>
+    </div>
+    <div class="faq-item">
+        <details>
+            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How is the Qp:Qs ratio calculated on a veterinary echocardiogram?</summary>
+            <p>
+                The Qp:Qs shunt ratio evaluates pulmonary to systemic blood flow. Systemic stroke volume (Qs) is calculated using the LVOT diameter and LVOT VTI, while pulmonary stroke volume (Qp) uses the RVOT diameter and RVOT VTI via the formula: Stroke Volume = VTI × π × (Diameter / 20)^2. A ratio of 1.0 is normal, while values > 1.5 indicate a hemodynamically significant left-to-right shunt. Enter those values in our calculator to get the ratio calculated instantly and displayed in a printable report.
+            </p>
+        </details>
+    </div>
 </div>
         </div>
       </aside>
