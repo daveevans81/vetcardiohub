@@ -222,6 +222,12 @@
     showComments: false,
     clinicalComments: '',
     eVel: '',
+    aVel: '',
+    ivrt: '',
+    lvotd: '',
+    rvotd: '',
+    lvotvti: '',
+    rvotvti: '',
     selectedMineModel: 'mine_1',
     showVolumes: false,
     showDoppler: false,
@@ -786,7 +792,21 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     </template>
 
             </div>
+<div class="input-group">
+                <label style="font-weight: 600; font-size: 0.85rem;">IVRT (ms)</label>
+                <input type="number" step="1" x-model="ivrt" placeholder="e.g. 55" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+            'input-warning': ivrt > 0 && ivrt < 15, 
+            'input-error': ivrt > 150 
+        }">
+    <template x-if="ivrt > 0 && ivrt < 15">
+        <div class="warning-text">⚠️ Value too low for ms.</div>
+    </template>
+    
+    <template x-if="ivrt > 150">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for ms.</div>
+    </template>
 
+            </div>
             </div>
     </div>
 </div>
