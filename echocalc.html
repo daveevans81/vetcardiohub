@@ -228,11 +228,11 @@
     rvotd: '',
     lvotvti: '',
     rvotvti: '',
-    rvotvmax: '',
-    lvotvmax: '',
     ePrime: '',
     mdt: '',   // Mitral Deceleration Time (ms)
     trMax: '', // Tricuspid Regurgitation Max Velocity (m/s)
+    aovmax: '',  // Aortic Valve / SAS Max Velocity (m/s)
+    pavmax: '', // Pulmonary Artery / PS Max Velocity (m/s)
     selectedMineModel: 'mine_1',
     showVolumes: false,
     showDoppler: false,
@@ -345,6 +345,49 @@
     return parseFloat(fraction.toFixed(1));
     },
 
+
+
+    get aoGradient() {
+    const v = parseFloat(this.aovmax);
+    return v > 0 ? parseFloat((4 * (v ** 2)).toFixed(1)) : 0;
+    },
+
+    get aoStenosisGrade() {
+    const v = parseFloat(this.aovmax);
+    if (!v || v < 1.8) return { label: 'Normal', class: 'normal' };
+    if (v >= 1.8 && v <= 2.5) return { label: 'Mild Elevation', class: 'abnormal' };
+    if (v >= 2.5 && v <= 3.5) return { label: 'Mild Stenosis', class: 'abnormal' };
+    if (v > 3.5 && v <= 4.5) return { label: 'Moderate Stenosis', class: 'abnormal' };
+    return { label: 'Severe Stenosis', class: 'abnormal' }; // > 4.5 m/s (> 81 mmHg)
+    },
+
+get paGradient() {
+    const v = parseFloat(this.pavmax);
+    return v > 0 ? parseFloat((4 * (v ** 2)).toFixed(1)) : 0;
+},
+
+get paStenosisGrade() {
+    const v = parseFloat(this.pavmax);
+    if (!v || v < 1.6) return { label: 'Normal', class: 'normal' }; // Pulmonic is slightly lower
+    if (v >= 1.6 && v <= 2.5) return { label: 'Mild Elevation', class: 'abnormal' };
+    if (v >= 2.5 && v <= 3.5) return { label: 'Mild Stenosis', class: 'abnormal' };
+    if (v > 3.5 && v <= 4.5) return { label: 'Moderate Stenosis', class: 'abnormal' };
+    return { label: 'Severe Stenosis', class: 'abnormal' }; // > 4.5 m/s (> 81 mmHg)
+},
+
+get felineLvotoAssessment() {
+    if (!this.isCat || !this.lvotvmax) return null;
+    const v = parseFloat(this.lvotvmax);
+    
+    if (v > 1.9) {
+        return {
+            label: "Elevated Velocity (Probable LVOTO)",
+            class: "abnormal",
+            note: "Velocity > 1.9 m/s. Closely evaluate CW Doppler envelope for a late-systolic peaking, scimitar-shaped (dagger) curve indicative of dynamic obstruction (e.g., SAM)."
+        };
+    }
+    return { label: "Normal Outflow Velocity", class: "normal", note: "" };
+},
 
     /* Diastolic Scorer */
 /* Diastolic Scorer */
@@ -661,6 +704,12 @@ if (this.ear > 0) {
 }
 if (this.eivrt > 0) {
     text += `E:IVRT Ratio: ${this.eivrt} (Ref: <2.5)${this.eivrt >= 2.5 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+}
+
+// --- OUTFLOW TRACT & STENOSIS EVALUATION ---
+if (this.aovmax || this.pavmax) {
+    if (this.aovmax)   text += `Ao Vmax: ${this.aovmax} m/s | PG: ${this.aoGradient} mmHg | ${this.aoStenosisGrade.label.toUpperCase()}\n`;
+    if (this.pavmax)  text += `PA Vmax: ${this.pavmax} m/s | PG: ${this.paGradient} mmHg | ${this.paStenosisGrade.label.toUpperCase()}\n`;
 }
 
 
@@ -981,16 +1030,16 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
       <div style="display: flex; gap: 15px;">
 
             <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">LVOT VMax (m/s)</label>
-                <input type="number" step="0.01" x-model="lvotvmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': lvotvmax > 0 && lvotvmax < 0.2, 
-            'input-error': lvotvmax > 5
+                <label style="font-weight: 600; font-size: 0.85rem;">Ao VMax (m/s)</label>
+                <input type="number" step="0.01" x-model="aovmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+            'input-warning': aovmax > 0 && aovmax < 0.2, 
+            'input-error': aovmax > 10
         }">
-    <template x-if="lvotvmax > 0 && lvotvmax < 0.2">
+    <template x-if="aovmax > 0 && aovmax < 0.2">
         <div class="warning-text">⚠️ Value too low for m/s.</div>
     </template>
     
-    <template x-if="lvotvmax > 5">
+    <template x-if="aovmax > 10">
         <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
     </template>
             </div>
@@ -1012,16 +1061,16 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
             </div>
 
             <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">RVOT VMax (m/s)</label>
-                <input type="number" step="0.01" x-model="rvotvmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': rvotvmax > 0 && rvotvmax < 0.2, 
-            'input-error': rvotvmax > 5
+                <label style="font-weight: 600; font-size: 0.85rem;">PA VMax (m/s)</label>
+                <input type="number" step="0.01" x-model="pavmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+            'input-warning': pavmax > 0 && pavmax < 0.2, 
+            'input-error': pavmax > 10
         }">
-    <template x-if="rvotvmax > 0 && rvotvmax < 0.2">
+    <template x-if="pavmax > 0 && pavmax < 0.2">
         <div class="warning-text">⚠️ Value too low for m/s.</div>
     </template>
     
-    <template x-if="rvotvmax > 5">
+    <template x-if="pavmax > 10">
         <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
     </template>
             </div>
@@ -1495,26 +1544,22 @@ Spectral Doppler and Flow:
         <span style="font-size: 0.8em; color: #666;" x-text="` (E: ${eVel}m/s / IVRT: ${ivrt}ms; ref <2.5)`"></span>
             </span>
         </div>
-        <div class="result-row" x-show="lvotvmax">
-            <span><strong>LVOT Vmax</strong></span>
-            <span>
-                <span x-text="lvotvmax"></span>
-                <span x-show="lvotvmax > 1.0" class="abnormal">(High)</span>
-                <span x-show="lvotvmax <= 1.0 && lvotvmax >= 0.6" class="normal">(Normal)</span>
-                <span x-show="lvotvmax < 0.6 && lvotvmax > 0" class="abnormal">(Low)</span>
-                <span style="font-size: 0.8em; color: #666;">m/s (ref 0.6 - 1.0) </span>
-            </span>
-        </div>
-        <div class="result-row" x-show="rvotvmax">
-            <span><strong>RVOT Vmax</strong></span>
-            <span>
-                <span x-text="rvotvmax"></span>
-                <span x-show="rvotvmax > 1.0" class="abnormal">(High)</span>
-                <span x-show="rvotvmax <= 1.0 && rvotvmax >= 0.6" class="normal">(Normal)</span>
-                <span x-show="rvotvmax < 0.6 && rvotvmax > 0" class="abnormal">(Low)</span>
-                <span style="font-size: 0.8em; color: #666;">m/s (ref 0.6 - 1.0) </span>
-            </span>
-        </div>
+    <div class="result-row" x-show="aovmax">
+    <span><strong>Aortic VMax</strong></span>
+    <span>
+        <span x-text="aovmax"></span> m/s 
+        <span style="font-weight: bold;" :class="aoStenosisGrade.class" x-text="`[${aoStenosisGrade.label}]` "></span>
+        <span style="font-size: 0.85em; color: #475569; font-weight: 600;" x-text="` (${aoGradient} mmHg)`"></span>
+    </span>
+    </div>
+    <div class="result-row" x-show="pavmax">
+    <span><strong>Pulmonic VMax</strong></span>
+    <span>
+        <span x-text="pavmax"></span> m/s 
+        <span style="font-weight: bold;" :class="paStenosisGrade.class" x-text="`[${paStenosisGrade.label}]` "></span>
+        <span style="font-size: 0.85em; color: #475569; font-weight: 600;" x-text="` (${paGradient} mmHg)`"></span>
+    </span>
+    </div>
 
 
 <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
@@ -1722,6 +1767,16 @@ Right Heart:
     <div x-show="parseFloat(lad) >= 17 && parseFloat(lad) < 20" style="background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; padding: 12px; border-radius: 6px;">
         <i class="fa-solid fa-circle-info"></i> <strong>Moderate LA Enlargement:</strong> Risk of thrombus formation present. Clinical monitoring and consideration of antiplatelet therapy indicated.
     </div>
+
+<template x-if="isCat && felineLvotoAssessment && lvotvmax > 1.9">
+    <div style="margin-top: 8px; background-color: #fff5f5; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
+        <span style="font-weight: bold; display: block; margin-bottom: 4px;" 
+              :class="felineLvotoAssessment.class" 
+              x-text="felineLvotoAssessment.label"></span>
+        <p style="font-size: 0.82rem; color: #991b1b; margin: 0; line-height: 1.4;" 
+           x-text="felineLvotoAssessment.note"></p>
+    </div>
+</template>
 </div>
     </div>
    
