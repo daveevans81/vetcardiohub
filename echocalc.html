@@ -347,6 +347,7 @@
 
 
     /* Diastolic Scorer */
+/* Diastolic Scorer */
 get diastolicClassification() {
     if (!this.isDog) return null;
     
@@ -354,28 +355,30 @@ get diastolicClassification() {
     let totalEvaluated = 0;
 
     // Package actual calculated values for immediate evaluation
-const inputs = {
-    ear: parseFloat(this.ear),
-    eivrt: parseFloat(this.eivrt),
-    eePrime: parseFloat(this.eePrime),
-    lveio: parseFloat(this.lveio),
-    laAo: parseFloat(this.laAo),
-    ivrt: parseFloat(this.ivrt), 
-    mdt: parseFloat(this.mdt),
-    trMax: parseFloat(this.trMax)
-};
+    const inputs = {
+        ear: parseFloat(this.ear),
+        eivrt: parseFloat(this.eivrt),
+        eePrime: parseFloat(this.eePrime),
+        lveio: parseFloat(this.lveio),
+        laAo: parseFloat(this.laAo),
+        ivrt: parseFloat(this.ivrt), 
+        mdt: parseFloat(this.mdt),
+        trMax: parseFloat(this.trMax)
+    };
 
-    // Run the point allocation algorithm
-    Object.keys(inputs).forEach(key => {
-        const val = inputs[key];
-        if (val && val > 0 && diastolicRules[key]) {
-            const match = diastolicRules[key].find(r => val >= r.min && val <= r.max);
-            if (match) {
-                votes[match.grade] = (votes[match.grade] || 0) + match.weight;
-                totalEvaluated++;
+    // Safe global check
+    if (typeof diastolicRules !== 'undefined') {
+        for (const key in inputs) {
+            const val = inputs[key];
+            if (val && val > 0 && diastolicRules[key]) {
+                const match = diastolicRules[key].find(r => val >= r.min && val <= r.max);
+                if (match) {
+                    votes[match.grade] = (votes[match.grade] || 0) + match.weight;
+                    totalEvaluated++;
+                }
             }
         }
-    });
+    }
 
     // If less than 2 tracking metrics are entered, safely declare insufficient data
     if (totalEvaluated < 2) {
@@ -391,7 +394,7 @@ const inputs = {
 
     // Calculate a confidence rating percentage based on point concentration
     const totalPoints = votes['Grade I'] + votes['Grade II'] + votes['Grade III'];
-    const confidencePct = Math.round((maxPoints / totalPoints) * 100);
+    const confidencePct = totalPoints > 0 ? Math.round((maxPoints / totalPoints) * 100) : 0;
     
     let confidenceLabel = 'Moderate';
     if (confidencePct > 75 && totalEvaluated >= 4) confidenceLabel = 'High (Robust Alignment)';
@@ -410,7 +413,7 @@ const inputs = {
         class: finalGrade === 'Grade I' ? 'normal' : 'abnormal',
         evaluatedCount: totalEvaluated
     };
-}
+},
 
     /* 3. ALLOMETRIC GETTERS */
     get allometricResults() {
@@ -839,7 +842,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
         <i class="fa-solid" :class="showVolumes ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
     </button>
     <div x-show="showVolumes" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9; display: flex; gap: 15px;">
-<div style="display: flex; gap: 15px;">
+      <div style="display: flex; gap: 15px;">
         <div class="input-group" style="flex: 1;">
             <label>LVEDV modified Simpsons (ml)</label>
             <input type="number" step="0.01" x-model="lvedv" placeholder="e.g. 65">
@@ -848,7 +851,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
             <label>LVESV modified Simpsons (ml)</label>
             <input type="number" step="0.01" x-model="lvesv" placeholder="e.g. 35">
         </div>
-</div>
+       </div>
 
     </div>
 </div>
