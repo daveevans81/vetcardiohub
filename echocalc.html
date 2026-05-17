@@ -387,8 +387,8 @@ get paStenosisGrade() {
     return { label: 'Severe Stenosis', class: 'abnormal' }; // > 4.5 m/s (> 81 mmHg)
 },
 get felineLvotoAssessment() {
-    if (!this.isCat || !this.lvotvmax) return null;
-    const v = parseFloat(this.lvotvmax);
+    if (!this.isCat || !this.aovmax) return null;
+    const v = parseFloat(this.aovmax);
     
     if (v > 1.9) {
         return {
@@ -461,9 +461,9 @@ get diastolicClassification() {
     };
 
     return {
-        grade: finalGrade,
+        grade: finalGrade || 'Undetermined',
         label: descriptions[finalGrade] || 'Complex Pattern',
-        confidence: confidenceLabel,
+        confidence: confidenceLabel || 'Low',
         class: finalGrade === 'Grade I' ? 'normal' : 'abnormal',
         evaluatedCount: totalEvaluated
     };
@@ -1779,7 +1779,7 @@ Right Heart:
         <i class="fa-solid fa-circle-info"></i> <strong>Moderate LA Enlargement:</strong> Risk of thrombus formation present. Clinical monitoring and consideration of antiplatelet therapy indicated.
     </div>
 
-<template x-if="isCat && felineLvotoAssessment && lvotvmax > 1.9">
+<template x-if="isCat && felineLvotoAssessment && aovmax > 1.9">
     <div style="margin-top: 8px; background-color: #fff5f5; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
         <span style="font-weight: bold; display: block; margin-bottom: 4px;" 
               :class="felineLvotoAssessment.class" 
