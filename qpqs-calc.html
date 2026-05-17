@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/js/global-head.js" defer></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <title>Veterinary Qp:Qs Shunt Ratio Calculator | VetCardioHub</title>
+    <meta name="description" content="Free interactive veterinary tool to calculate pulmonary-to-systemic flow ratio (Qp:Qs) and VTI ratios. Accurately assess hemodynamic shunt severity for PDA, VSD, and ASD in dogs and cats.">
+    <meta name="keywords" content="Qp Qs calculator dog, pulmonary systemic flow ratio veterinary, cardiac shunt calculation, PDA echo ratio cat, VetCardioHub">
+    
+    <meta property="og:title" content="Veterinary Qp:Qs Shunt Ratio Calculator | VetCardioHub">
+    <meta property="og:description" content="Quantify left-to-right congenital heart shunts. Computes VTI ratios and stroke volumes using automated diameter-to-radius conversions.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vetcardiohub.com/qp-qs-calculator.html">
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MedicalWebPage",
+      "name": "Veterinary Qp:Qs Shunt Ratio Calculator",
+      "description": "An interactive clinical decision support application to calculate the ratio of pulmonary to systemic blood flow (Qp:Qs) and VTI ratios in canine and feline patients with congenital anomalies.",
+      "url": "https://vetcardiohub.com/qp-qs-calculator.html",
+      "medicalAudience": {
+        "@type": "MedicalAudience",
+        "audienceType": "Veterinary Professionals"
+      },
+      "specialty": {
+        "@type": "MedicalSpecialty",
+        "name": "Cardiology"
+      },
+      "mainEntity": {
+        "@type": "MedicalDevice",
+        "name": "Qp:Qs Algorithmic Computation Module",
+        "description": "Calculates pulmonary (Qp) and systemic (Qs) stroke volumes and ratios using sub-valvular and continuous wave velocities.",
+        "purpose": "Hemodynamic quantification of cardiovascular shunts"
+      },
+      "citation": [
+        "Boon J.A. (2011) Veterinary Echocardiography - Congenital Shunt Flow Analysis.",
+        "Serres et al. (2009) Quantification of echocardiographic left-to-right shunt in dogs with patent ductus arteriosus."
+      ],
+      "lastReviewed": "2026-05-17",
+      "isAccessibleForFree": "true"
+    }
+    </script>
+</head>
+<body>
+<div id="site-header"></div>
+
+<div class="content">
+<div class="container" x-data="qpqsCalculator()">
+    
+    <header class="hero card">
+        <h1><i class="fa-solid fa-arrows-left-right-to-line"></i> Qp:Qs Shunt Quantification</h1>
+        <p>Pulmonary-to-Systemic Flow Ratio & Hemodynamic Volume Assessment</p>
+    </header>
+
+    <main class="card">
+        <div class="card-title">
+            <i class="fa-solid fa-sliders" style="color: #0ea5e9;"></i>
+            <span>Velocity Time Integrals & Diameters</span>
+        </div>
+
+        <div class="grid-inputs">
+            <div class="input-group">
+                <label>LVOT Diameter (mm)</label>
+                <input type="number" step="0.1" x-model="lvotd" placeholder="e.g. 14.5">
+            </div>
+            <div class="input-group">
+                <label>LVOT VTI (cm)</label>
+                <input type="number" step="0.1" x-model="lvotvti" placeholder="e.g. 18.2">
+            </div>
+            <div class="input-group">
+                <label>RVOT Diameter (mm)</label>
+                <input type="number" step="0.1" x-model="rvotd" placeholder="e.g. 15.1">
+            </div>
+            <div class="input-group">
+                <label>RVOT VTI (cm)</label>
+                <input type="number" step="0.1" x-model="rvotvti" placeholder="e.g. 16.5">
+            </div>
+        </div>
+
+
+<p>Need More Echo Calculations? <a href="\echocalc.html" class="btn">Access the Fully Integrated VetCardioHub EchoCalc here</a></p>
+
+
+        <div x-show="qpqs === 0" style="background: #f8fafc; border: 1px dashed var(--border); padding: 20px; border-radius: 6px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-info"></i> Enter complete outflow velocities and dimensions above to map systemic stroke volumes and calculate active shunt values.
+        </div>
+
+        <div x-show="qpqs > 0" x-transition>
+            <div class="results-panel">
+                <div class="score-badge">
+                    <span style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase;">Qp : Qs Ratio</span>
+                    <span class="score-num" x-text="qpqs"></span>
+                </div>
+                <div>
+                    <h4 style="margin:0; font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Hemodynamic Shunt Classification</h4>
+                    
+                    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;">
+                        <span x-show="qpqs === 1.0" class="normal">Physiologic Normal Balance</span>
+                        <span x-show="qpqs > 1.0 && qpqs < 1.5" class="normal">Small Left-to-Right Shunt (Insignificant)</span>
+                        <span x-show="qpqs >= 1.5 && qpqs <= 2.0" class="abnormal">Moderate Left-to-Right Shunt (Significant)</span>
+                        <span x-show="qpqs > 2.0" class="abnormal">Large Left-to-Right Shunt (Severe Overload)</span>
+                        <span x-show="qpqs < 1.0" class="abnormal">Reversed Right-to-Left Shunt (Eisenmenger Physiology Risk)</span>
+                    </div>
+                    
+                    <h4 style="margin:0; font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Velocity-Time Integral Balance</h4>
+                    <p style="margin:0; font-size: 1.1rem; font-weight: bold; color: #1e293b;">
+                        <i class="fa-solid fa-chart-simple" style="color: #0ea5e9;"></i> LVOT:RVOT VTI Ratio: <span x-text="vtir"></span>
+                    </p>
+                </div>
+            </div>
+
+            <table class="breakdown-table">
+                <thead>
+                    <tr>
+                        <th>Cardiac Measurement Element</th>
+                        <th style="text-align: right;">Calculated Output Volume</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="font-weight: 600;">Systemic Flow Stroke Volume (Qs)</td>
+                        <td style="text-align: right; font-weight: bold; color: #1e40af;" x-text="`${qs} ml` "></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600;">Pulmonary Flow Stroke Volume (Qp)</td>
+                        <td style="text-align: right; font-weight: bold; color: #0284c7;" x-text="`${qp} ml` "></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <section class="card info-block">
+        <div class="card-title" style="border:none; margin:0; padding:0;">
+            <i class="fa-solid fa-book-medical" style="color: #16325F;"></i>
+            <h2>Clinical Pathophysiology & Calculation Methods</h2>
+        </div>
+        <p style="margin-top: 10px;">
+            The <strong>$Q_p:Q_s$ Ratio</strong> balances total blood flow moving through the pulmonary systemic pathway against matching outputs driving the peripheral systemic circulation. In normal anatomical pathways, this values remains exactly balanced at <strong>1.0</strong>.
+        </p>
+        <p style="margin-top: 10px;">
+            This metric serves as a quantitative gold standard when tracing congenital anomalies including <strong>Patent Ductus Arteriosus (PDA)</strong>, <strong>Ventricular Septal Defects (VSD)</strong>, and <strong>Atrial Septal Defects (ASD)</strong>. Left-to-right vascular communications volume-overload the downstream structures, and a ratio exceeding <strong>1.5</strong> commonly represents a strong indication for definitive device occlusion or surgical correction to counteract irreversible remodelling changes.
+        </p>
+    </section>
+
+    <section>
+        <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center;">
+            Need full patient workspace metrics? Access the master <a href="https://vetcardiohub.com/echocalc.html">VetCardioHub Complete Advanced Echo Suite</a> for allometric models, complete canine MINE scoring, and dynamic diastolic dysfunction verification tracking engines.
+        </p>
+    </section>
+</div>
+</div>
+
+<div id="site-footer"></div>
+
+<script src="/js/load-partials.js"></script>
+
+<script>
+function qpqsCalculator() {
+    return {
+        lvotvti: '',
+        lvotd: '',
+        rvotvti: '',
+        rvotd: '',
+
+        // Fully bound modular diagnostic getters
+        get vtir() {
+            if (!this.lvotvti || !this.rvotvti || parseFloat(this.rvotvti) === 0) return 0;
+            return (this.lvotvti / this.rvotvti).toFixed(2);
+        },
+        get qp() {
+            if (!this.rvotvti || !this.rvotd || parseFloat(this.rvotvti) === 0) return 0;
+            return parseFloat((this.rvotvti * Math.PI * ((this.rvotd / 20) ** 2)).toFixed(2));
+        },
+        get qs() {
+            if (!this.lvotvti || !this.lvotd || parseFloat(this.lvotvti) === 0) return 0;
+            return parseFloat((this.lvotvti * Math.PI * ((this.lvotd / 20) ** 2)).toFixed(2));
+        },
+        get qpqs() {
+            if (!this.qp || !this.qs || parseFloat(this.qs) === 0) return 0;
+            return parseFloat((this.qp / this.qs).toFixed(2));
+        }
+    }
+}
+</script>
+</body>
+</html>
