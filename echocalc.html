@@ -785,7 +785,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     <div x-show="showDoppler" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
         <div style="display: flex; gap: 15px;">
             <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">E-wave Peak Velocity (m/s)</label>
+                <label style="font-weight: 600; font-size: 0.85rem;">E-wave Peak Vel (m/s)</label>
                 <input type="number" step="0.01" x-model="eVel" placeholder="e.g. 0.85" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
             'input-warning': eVel > 0 && eVel < 0.2, 
             'input-error': eVel > 5
@@ -800,7 +800,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
             </div>
             <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">A-wave Peak Velocity (m/s)</label>
+                <label style="font-weight: 600; font-size: 0.85rem;">A-wave Peak Vel (m/s)</label>
                 <input type="number" step="0.01" x-model="aVel" placeholder="e.g. 0.55" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
             'input-warning': aVel > 0 && aVel < 0.2, 
             'input-error': aVel > 5 
@@ -836,7 +836,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
             <div class="input-group" style="flex: 1;">
                 <label style="font-weight: 600; font-size: 0.85rem;">LVOT VMax (m/s)</label>
-                <input type="number" step="0.01" x-model="lvotvmax" placeholder="e.g. 0.85" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+                <input type="number" step="0.01" x-model="lvotvmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
             'input-warning': lvotvmax > 0 && lvotvmax < 0.2, 
             'input-error': lvotvmax > 5
         }">
@@ -851,7 +851,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
             <div class="input-group" style="flex: 1;">
                 <label style="font-weight: 600; font-size: 0.85rem;">LVOT VTI (<strong>cm</strong>)</label>
-                <input type="number" step="0.01" x-model="lvotvti" placeholder="e.g. 0.85" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+                <input type="number" step="0.01" x-model="lvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
             'input-warning': lvotvti > 0 && lvotvti < 4, 
             'input-error': lvotvti > 50
         }">
@@ -867,7 +867,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
             <div class="input-group" style="flex: 1;">
                 <label style="font-weight: 600; font-size: 0.85rem;">RVOT VMax (m/s)</label>
-                <input type="number" step="0.01" x-model="rvotvmax" placeholder="e.g. 0.85" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+                <input type="number" step="0.01" x-model="rvotvmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
             'input-warning': rvotvmax > 0 && rvotvmax < 0.2, 
             'input-error': rvotvmax > 5
         }">
@@ -883,7 +883,7 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
             <div class="input-group" style="flex: 1;">
                 <label style="font-weight: 600; font-size: 0.85rem;">RVOT VTI (<strong>cm</strong>)</label>
-                <input type="number" step="0.01" x-model="rvotvti" placeholder="e.g. 0.85" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+                <input type="number" step="0.01" x-model="rvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
             'input-warning': rvotvti > 0 && rvotvti < 4, 
             'input-error': rvotvti > 50
         }">
@@ -897,7 +897,41 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
             </div>
 
+        </div>
+      <div style="display: flex; gap: 15px;">
 
+            <div class="input-group" style="flex: 1;">
+                <label style="font-weight: 600; font-size: 0.85rem;">LVOT diameter (mm)</label>
+                <input type="number" step="0.01" x-model="lvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+            'input-warning': lvotd > 0 && lvotd < 5, 
+            'input-error': lvotd > 30
+        }">
+    <template x-if="lvotd > 0 && lvotd < 5">
+        <div class="warning-text">⚠️ Value too low for mm.</div>
+    </template>
+    
+    <template x-if="lvotd > 30">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+    </template>
+            </div>
+
+
+            <div class="input-group" style="flex: 1;">
+                <label style="font-weight: 600; font-size: 0.85rem;">RVOT diameter (mm)</label>
+                <input type="number" step="0.01" x-model="rvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+            'input-warning': rvotd > 0 && rvotd < 5, 
+            'input-error': rvotd > 30
+        }">
+    <template x-if="rvotd > 0 && rvotd < 5">
+        <div class="warning-text">⚠️ Value too low for mm.</div>
+    </template>
+    
+    <template x-if="rvotd > 30">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+    </template>
+            </div>
+
+     </div>
 
     </div>
 </div>
