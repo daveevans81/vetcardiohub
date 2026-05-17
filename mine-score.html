@@ -62,14 +62,6 @@
     <script src="/js/echo-breeds.js"></script>
 
     <style>
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -109,15 +101,7 @@
             color: var(--text-main);
         }
 
-        .input-group input, .input-group select {
-            padding: 8px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            background-color: #f8fafc;
-            color: var(--text-main);
-            width: 100%;
-        }
+
 
         .input-group input:focus, .input-group select:focus {
             outline: 2px solid var(--primary-light);
@@ -202,7 +186,7 @@
 <div class="content">
 <div class="container" x-data="mineCalculator()">
     
-    <header>
+    <header class="hero card">
         <h1><i class="fa-solid fa-calculator"></i> Canine MINE Prognostic Suite</h1>
         <p>Mitral INsufficiency Echocardiographic Scoring System (Vezzosi 2021 & 2025)</p>
     </header>
