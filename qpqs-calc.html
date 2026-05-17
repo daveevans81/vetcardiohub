@@ -97,53 +97,47 @@
 <p>Need More Echo Calculations? <a href="\echocalc.html" class="btn">Access the Fully Integrated VetCardioHub EchoCalc here</a></p>
 
 
-        <div x-show="qpqs === 0" style="background: #f8fafc; border: 1px dashed var(--border); padding: 20px; border-radius: 6px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-            <i class="fa-solid fa-circle-info"></i> Enter complete outflow velocities and dimensions above to map systemic stroke volumes and calculate active shunt values.
+<div x-show="qpqs === 0" style="background: #f8fafc; border: 1px dashed var(--border); padding: 20px; border-radius: 6px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+    <i class="fa-solid fa-circle-info"></i> Enter complete outflow velocities and dimensions above to calculate active shunt values.
+</div>
+
+<div x-show="qpqs > 0" x-transition style="margin-top: 20px;">
+    
+    <div class="results-box" style="border: 1px solid var(--border); padding: 10px 15px; border-radius: 6px; background: #fff;">
+        
+        <div class="result-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 10px 0;">
+            <span><strong>Q<sub>p</sub>:Q<sub>s</sub> Ratio</strong></span>
+            <span style="font-size: 1.4rem; font-weight: 900; color: var(--primary-light);" x-text="qpqs"></span>
         </div>
 
-        <div x-show="qpqs > 0" x-transition>
-            <div class="results-panel">
-                <div class="score-badge">
-                    <span style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase;">Qp : Qs Ratio</span>
-                    <span class="score-num" x-text="qpqs"></span>
-                </div>
-                <div>
-                    <h4 style="margin:0; font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Hemodynamic Shunt Classification</h4>
-                    
-                    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;">
-                        <span x-show="qpqs === 1.0" class="normal">Physiologic Normal Balance</span>
-                        <span x-show="qpqs > 1.0 && qpqs < 1.5" class="normal">Small Left-to-Right Shunt (Insignificant)</span>
-                        <span x-show="qpqs >= 1.5 && qpqs <= 2.0" class="abnormal">Moderate Left-to-Right Shunt (Significant)</span>
-                        <span x-show="qpqs > 2.0" class="abnormal">Large Left-to-Right Shunt (Severe Overload)</span>
-                        <span x-show="qpqs < 1.0" class="abnormal">Reversed Right-to-Left Shunt (Eisenmenger Physiology Risk)</span>
-                    </div>
-                    
-                    <h4 style="margin:0; font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Velocity-Time Integral Balance</h4>
-                    <p style="margin:0; font-size: 1.1rem; font-weight: bold; color: #1e293b;">
-                        <i class="fa-solid fa-chart-simple" style="color: #0ea5e9;"></i> LVOT:RVOT VTI Ratio: <span x-text="vtir"></span>
-                    </p>
-                </div>
-            </div>
-
-            <table class="breakdown-table">
-                <thead>
-                    <tr>
-                        <th>Cardiac Measurement Element</th>
-                        <th style="text-align: right;">Calculated Output Volume</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="font-weight: 600;">Systemic Flow Stroke Volume (Qs)</td>
-                        <td style="text-align: right; font-weight: bold; color: #1e40af;" x-text="`${qs} ml` "></td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: 600;">Pulmonary Flow Stroke Volume (Qp)</td>
-                        <td style="text-align: right; font-weight: bold; color: #0284c7;" x-text="`${qp} ml` "></td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="result-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 10px 0;">
+            <span><strong>Shunt Status</strong></span>
+            <span style="font-weight: bold;">
+                <span x-show="qpqs === 1.0" class="normal">Physiologic Normal Balance</span>
+                <span x-show="qpqs > 1.0 && qpqs < 1.5" class="normal">Small Left-to-Right Shunt (Insignificant)</span>
+                <span x-show="qpqs >= 1.5 && qpqs <= 2.0" class="abnormal">Moderate Left-to-Right Shunt (Significant)</span>
+                <span x-show="qpqs > 2.0" class="abnormal">Large Left-to-Right Shunt (Severe Overload)</span>
+                <span x-show="qpqs < 1.0" class="abnormal">Reversed Shunt (Eisenmenger Risk)</span>
+            </span>
         </div>
+
+        <div class="result-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 10px 0;">
+            <span><strong>LVOT:RVOT VTI Ratio</strong></span>
+            <span style="font-weight: 600; color: var(--text-main);" x-text="vtir"></span>
+        </div>
+
+        <div class="result-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 10px 0;">
+            <span><strong>Systemic Stroke Volume (Q<sub>s</sub>)</strong></span>
+            <span style="font-weight: bold; color: #1e40af;" x-text="`${qs} ml` "></span>
+        </div>
+
+        <div class="result-row" style="display: flex; justify-content: space-between; padding: 10px 0;">
+            <span><strong>Pulmonary Stroke Volume (Q<sub>p</sub>)</strong></span>
+            <span style="font-weight: bold; color: #0284c7;" x-text="`${qp} ml` "></span>
+        </div>
+
+    </div>
+</div>
     </main>
 
     <section class="card info-block">
