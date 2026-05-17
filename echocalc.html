@@ -228,8 +228,11 @@
     rvotd: '',
     lvotvti: '',
     rvotvti: '',
-    sv: '',
-    mr: '',
+    rvotvmax: '',
+    lvotvmax: '',
+    ePrime: '',
+    mdt: '',   // Mitral Deceleration Time (ms)
+    trMax: '', // Tricuspid Regurgitation Max Velocity (m/s)
     selectedMineModel: 'mine_1',
     showVolumes: false,
     showDoppler: false,
@@ -296,6 +299,14 @@
         if (!this.lvesv || !this.bsa || parseFloat(this.bsa) === 0) return 0;
         return (this.lvesv / this.bsa).toFixed(2);
     },
+    get ear() {
+        if (!this.eVel || !this.aVel || parseFloat(this.aVel) === 0) return 0;
+        return (this.eVel / this.aVel).toFixed(2);
+    },
+    get eivrt() {
+      if (!this.eVel || !this.ivrt || parseFloat(this.ivrt) === 0) return 0;
+      return parseFloat(((parseFloat(this.eVel) * 1000) / parseFloat(this.ivrt)).toFixed(2));
+    },
     get vtir() {
         if (!this.lvotvti || !this.rvotvti || parseFloat(this.rvotvti) === 0) return 0;
         return (this.lvotvti / this.rvotvti).toFixed(2);
@@ -312,6 +323,94 @@
         if (!this.qp || !this.qs|| parseFloat(this.qs) === 0) return 0;
     return parseFloat((this.qp / this.qs).toFixed(2));
     },
+    get lveio() {
+    if (!this.eVel || !this.lvotvti || parseFloat(this.lvotvti) === 0) return 0;
+    return parseFloat((parseFloat(this.eVel) / parseFloat(this.lvotvti)).toFixed(2));
+    },
+    get eePrime() {
+    if (!this.eVel || !this.ePrime || parseFloat(this.ePrime) === 0) return 0;
+    // Converts ePrime from cm/s to m/s to match E wave scale
+    return parseFloat((parseFloat(this.eVel) / (parseFloat(this.ePrime) / 100)).toFixed(2));
+    },
+    get mrVol() {
+    // Requires both total stroke volume and systemic stroke volume (Qs)
+    if (!this.sv || !this.qs) return 0;
+    const vol = this.sv - this.qs;
+    // Guard against negative numbers caused by slight measurement errors
+    return vol > 0 ? parseFloat(vol.toFixed(2)) : 0;
+    },
+    get mrFraction() {
+    if (!this.sv || !this.mrVol) return 0;
+    const fraction = (this.mrVol / this.sv) * 100;
+    return parseFloat(fraction.toFixed(1));
+    },
+
+
+    /* Diastolic Scorer */
+get diastolicClassification() {
+    if (!this.isDog) return null;
+    
+    let votes = { 'Grade I': 0, 'Grade II': 0, 'Grade III': 0 };
+    let totalEvaluated = 0;
+
+    // Package actual calculated values for immediate evaluation
+const inputs = {
+    ear: parseFloat(this.ear),
+    eivrt: parseFloat(this.eivrt),
+    eePrime: parseFloat(this.eePrime),
+    lveio: parseFloat(this.lveio),
+    laAo: parseFloat(this.laAo),
+    ivrt: parseFloat(this.ivrt), 
+    mdt: parseFloat(this.mdt),
+    trMax: parseFloat(this.trMax)
+};
+
+    // Run the point allocation algorithm
+    Object.keys(inputs).forEach(key => {
+        const val = inputs[key];
+        if (val && val > 0 && diastolicRules[key]) {
+            const match = diastolicRules[key].find(r => val >= r.min && val <= r.max);
+            if (match) {
+                votes[match.grade] = (votes[match.grade] || 0) + match.weight;
+                totalEvaluated++;
+            }
+        }
+    });
+
+    // If less than 2 tracking metrics are entered, safely declare insufficient data
+    if (totalEvaluated < 2) {
+        return { grade: 'Awaiting Metrics', confidence: 'Low', class: 'normal', details: 'Enter at least 2 spectral Doppler or LA indices.' };
+    }
+
+    // Determine the highest point earner
+    let finalGrade = 'Undetermined';
+    let maxPoints = 0;
+    Object.keys(votes).forEach(g => {
+        if (votes[g] > maxPoints) { maxPoints = votes[g]; finalGrade = g; }
+    });
+
+    // Calculate a confidence rating percentage based on point concentration
+    const totalPoints = votes['Grade I'] + votes['Grade II'] + votes['Grade III'];
+    const confidencePct = Math.round((maxPoints / totalPoints) * 100);
+    
+    let confidenceLabel = 'Moderate';
+    if (confidencePct > 75 && totalEvaluated >= 4) confidenceLabel = 'High (Robust Alignment)';
+    if (confidencePct < 55) confidenceLabel = 'Equivocal (Mixed Inflow Profile)';
+
+    const descriptions = {
+        'Grade I': 'Impaired Relaxation Pattern (Normal Pressures)',
+        'Grade II': 'Pseudonormal Pattern (Elevated Filling Pressures suspected)',
+        'Grade III': 'Restrictive Filling Profile (High Risk of acute CHF)'
+    };
+
+    return {
+        grade: finalGrade,
+        label: descriptions[finalGrade] || 'Complex Pattern',
+        confidence: confidenceLabel,
+        class: finalGrade === 'Grade I' ? 'normal' : 'abnormal',
+        evaluatedCount: totalEvaluated
+    };
+}
 
     /* 3. ALLOMETRIC GETTERS */
     get allometricResults() {
@@ -508,6 +607,15 @@ get calculatedMineScore() {
             if (this.lvesvbw > 0) text += `LVESV/BW: ${this.lvesvbw} (Ref: 0.30-1.35)${this.getTag(this.lvesvbw, 0.30, 1.35)}\n`;
         if (this.edvim2 > 0)  text += `LVEDV/m²: ${this.edvim2} (Ref: <100)${this.getTag(this.edvim2, null, 100)}\n`;
         if (this.esvim2 > 0)  text += `LVESV/m²: ${this.esvim2} (Ref: <30)${this.getTag(this.esvim2, null, 30)}\n`;
+
+// --- QUANTITATIVE VALVULAR ASSESSMENT ---
+if (this.mrFraction > 0) {
+    text += `\nQUANTITATIVE VALVULAR ASSESSMENT:\n`;
+    text += `Total LV Stroke Volume (Simpsons): ${this.sv}ml\n`;
+    text += `Systemic Stroke Volume (Qs): ${this.qs}ml\n`;
+    text += `Mitral Regurgitant Volume: ${this.mrVol}ml\n`;
+    text += `Mitral Regurgitant Fraction: ${this.mrFraction}%\n`;
+}
 }
 
         
@@ -535,7 +643,25 @@ if (this.isDog) {
         if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${this.getTag(this.ladn, null, 1.60)}\n`;
         if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${this.getTag(this.ladao, null, 2.10)}\n`;
         
-        if (this.lviddn > 0 && this.laAo > 0) {
+
+    }
+
+        text += `\nSPECTRAL DOPPLER:\n`;
+if (this.eVel > 0) {
+    text += `E Vel: ${this.eVel} m/s (Ref: 0.6-1.0)\n`;
+}
+if (this.aVel > 0) {
+    text += `A Vel: ${this.aVel} m/s (Ref: 0.3-0.8)\n`;
+}
+if (this.ear > 0) {
+    text += `E:A Ratio: ${this.ear} (Ref: 1.0-2.0)${this.ear >= 2.0 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+}
+if (this.eivrt > 0) {
+    text += `E:IVRT Ratio: ${this.eivrt} (Ref: <2.5)${this.eivrt >= 2.5 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+}
+
+
+        if (this.isDog && this.lviddn > 0 && this.laAo > 0) {
             text += `\nCANINE CLINICAL ASSESSMENT (EPIC B2):\n`;
             const meetsLA = this.laAo >= 1.65;
             const meetsLV = this.lviddn >= 1.7;
@@ -543,7 +669,7 @@ if (this.isDog) {
             text += `LA Size: ${meetsLA ? 'ENLARGED' : 'NORMAL'}\n`;
             text += `EPIC RESULT: ${ (meetsLA && meetsLV) ? 'MEETS CRITERIA FOR STAGE B2' : 'DOES NOT MEET CRITERIA'}\n`;
         }
-    }
+
 
 // ---  CANINE MINE PROGNOSTIC SCORING ---
 if (this.isDog && this.calculatedMineScore && this.calculatedMineScore.score !== null) {
@@ -831,6 +957,16 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
             </div>
          </div>
 
+      <div style="display: flex; gap: 15px;">
+<div class="input-group">
+        <label style="font-weight: 600; font-size: 0.85rem;">Mitral DT (ms)</label>
+        <input type="number" step="1" x-model="mdt" placeholder="e.g. 80">
+    </div>
+    <div class="input-group">
+        <label style="font-weight: 600; font-size: 0.85rem;">Mitral E' (cm/s)</label>
+        <input type="number" step="0.1" x-model="ePrime" placeholder="e.g. 6.5">
+    </div>
+</div>
 
       <div style="display: flex; gap: 15px;">
 
@@ -1127,8 +1263,43 @@ Left Ventricle:
         <span style="font-size: 0.8em; color: #666;"> ml/m² (ref <30)</span>
     </span>
 </div>
+
+
+<div class="result-row" x-show="sv">
+    <span><strong>LV Stroke Vol</strong></span>
+    <span>
+        <span x-text="sv"></span>
+        <span style="font-size: 0.8em; color: #666;"> ml</span>
+    </span>
+</div>
+<div class="result-row" x-show="qs">
+    <span><strong>Systemic Stroke Vol</strong></span>
+    <span>
+        <span x-text="qs"></span>
+        <span style="font-size: 0.8em; color: #666;"> ml</span>
+    </span>
+</div>
+<div class="result-row" x-show="mrVol">
+    <span><strong>Mitral Regurgitant Vol</strong></span>
+    <span>
+        <span x-text="mrVol"></span>
+        <span style="font-size: 0.8em; color: #666;"> ml</span>
+    </span>
+</div>
+<div class="result-row" x-show="mrFraction > 0" x-transition>
+    <span><strong>MR Fraction</strong></span>
+    <span>
+        <span x-text="`${mrFraction}%` "></span>
+        <span x-show="mrFraction >= 50" class="abnormal">(Severe Regurgitation)</span>
+        <span x-show="mrFraction >= 30 && mrFraction < 50" class="abnormal">(Moderate)</span>
+        <span x-show="mrFraction < 30" class="normal">(Mild)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="` (Vol: ${mrVol}ml / SV: ${sv}ml)`"></span>
+    </span>
 </div>
 
+
+
+</div>
 
 <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
 
@@ -1229,6 +1400,79 @@ Left Atrium:
             </span>
         </div>
 </div>
+
+
+<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
+Spectral Doppler and Flow:
+</p>
+        <div class="result-row" x-show="eVel">
+            <span><strong>E vel</strong></span>
+            <span>
+                <span x-text="eVel"></span>
+                <span x-show="eVel > 1.0" class="abnormal">(High)</span>
+                <span x-show="eVel <= 1.0 && eVel >= 0.6" class="normal">(Normal)</span>
+                <span x-show="eVel < 0.6 && eVel > 0" class="abnormal">(Low)</span>
+                <span style="font-size: 0.8em; color: #666;">m/s (ref 0.6 - 1.0) </span>
+            </span>
+        </div>
+        <div class="result-row" x-show="aVel">
+            <span><strong>A vel</strong></span>
+            <span>
+                <span x-text="aVel"></span>
+                <span x-show="aVel > 0.8" class="abnormal">(High)</span>
+                <span x-show="aVel <= 0.8 && aVel >= 0.3" class="normal">(Normal)</span>
+                span x-show="aVel < 0.3 && aVel > 0" class="abnormal">(Low)</span>
+                <span style="font-size: 0.8em; color: #666;">m/s (ref 0.3 - 0.8) </span>
+            </span>
+        </div>
+        <div class="result-row" x-show="ear">
+            <span><strong>E : A Ratio</strong></span>
+            <span>
+                <span x-text="ear"></span>
+                <span x-show="ear > 1.6" class="abnormal">(High)</span>
+                <span x-show="ear <= 1.6 && ear >= 0.95" class="normal">(Normal)</span>
+                span x-show="ear < 0.95 && ear > 0" class="abnormal">(Low)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 0.95 - 1.6) </span>
+            </span>
+        </div>
+        <div class="result-row" x-show="ear">
+            <span><strong>E:IVRT Ratio</strong></span>
+            <span>
+                <span x-text="ear"></span>
+        <span x-text="eivrt"></span>
+        <span x-show="eivrt >= 2.5" class="abnormal">[HIGH FILLING PRESSURE]</span>
+        <span x-show="eivrt < 2.5" class="normal">(Normal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="` (E: ${eVel}m/s / IVRT: ${ivrt}ms; ref <2.5)`"></span>
+            </span>
+        </div>
+
+    eVel: '',
+    aVel: '',
+    ivrt: '',
+    lvotd: '',
+    rvotd: '',
+    lvotvti: '',
+    rvotvti: '',
+    rvotvmax: '',
+    lvotvmax: '',
+get ear() {
+    get eivrt() {
+    get vtir() {
+
+    get qp() {
+
+    get qs() {
+
+    get qpqs() {
+
+    get mrVol() {
+
+    get mrFraction() {
+
+
+<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
+Right Heart:
+</p>
 
 
 <div x-show="clinicalComments" class="report-comments" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">

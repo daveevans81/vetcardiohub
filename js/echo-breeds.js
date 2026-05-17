@@ -560,3 +560,47 @@ const mineModels = {
         ]
     }
 };
+
+const diastolicRules = {
+    ear: [
+        { min: 0, max: 0.99, grade: 'Grade I', weight: 3 },
+        { min: 1.0, max: 1.5, grade: 'Grade II', weight: 1 }, // Weak sign alone due to normal overlap
+        { min: 2.0, max: Infinity, grade: 'Grade III', weight: 3 }
+    ],
+    eivrt: [
+        { min: 0, max: 1.49, grade: 'Grade I', weight: 2 },
+        { min: 1.5, max: 2.49, grade: 'Grade II', weight: 2 },
+        { min: 2.5, max: Infinity, grade: 'Grade III', weight: 4 } // High weight prognostic indicator
+    ],
+    eePrime: [ // Assuming ePrime input is captured in cm/s, E in m/s (E / (ePrime/100))
+        { min: 0, max: 7.9, grade: 'Normal/Grade I', weight: 2 },
+        { min: 8.0, max: 12.0, grade: 'Grade II', weight: 3 },
+        { min: 12.01, max: Infinity, grade: 'Grade III', weight: 4 }
+    ],
+    lveio: [ // E-wave velocity / LVOT VTI
+        { min: 0, max: 7.99, grade: 'Grade I', weight: 2 },
+        { min: 8.0, max: 11.84, grade: 'Grade II', weight: 3 },
+        { min: 11.85, max: Infinity, grade: 'Grade III', weight: 4 }
+    ],
+    laAo: [
+        { min: 0, max: 1.64, grade: 'Grade I', weight: 1 },
+        { min: 1.65, max: 1.99, grade: 'Grade II', weight: 2 },
+        { min: 2.0, max: Infinity, grade: 'Grade III', weight: 3 }
+    ],
+
+ivrt: [
+    { min: 80.01, max: Infinity, grade: 'Grade I', weight: 2 },
+    { min: 50.0, max: 80.0, grade: 'Grade II', weight: 1 }, // Votes for II if other signs of high pressure exist
+    { min: 0, max: 49.99, grade: 'Grade III', weight: 3 }
+],
+mdt: [
+    { min: 100.01, max: Infinity, grade: 'Grade I', weight: 2 },
+    { min: 60.0, max: 100.0, grade: 'Grade II', weight: 1 },
+    { min: 0, max: 59.99, grade: 'Grade III', weight: 3 }
+],
+trMax: [
+    { min: 0, max: 2.79, grade: 'Grade I', weight: 1 },
+    { min: 2.8, max: 3.4, grade: 'Grade II', weight: 3 }, // Strong surrogate for high LAP
+    { min: 3.41, max: Infinity, grade: 'Grade III', weight: 4 }
+]
+};
