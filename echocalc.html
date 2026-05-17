@@ -362,14 +362,10 @@
     const fraction = (this.mrVol / this.sv) * 100;
     return parseFloat(fraction.toFixed(1));
     },
-
-
-
     get aoGradient() {
     const v = parseFloat(this.aovmax);
     return v > 0 ? parseFloat((4 * (v ** 2)).toFixed(1)) : 0;
     },
-
     get aoStenosisGrade() {
     const v = parseFloat(this.aovmax);
     if (!v || v < 1.8) return { label: 'Normal', class: 'normal' };
@@ -378,12 +374,10 @@
     if (v > 3.5 && v <= 4.5) return { label: 'Moderate Stenosis', class: 'abnormal' };
     return { label: 'Severe Stenosis', class: 'abnormal' }; // > 4.5 m/s (> 81 mmHg)
     },
-
 get paGradient() {
     const v = parseFloat(this.pavmax);
     return v > 0 ? parseFloat((4 * (v ** 2)).toFixed(1)) : 0;
 },
-
 get paStenosisGrade() {
     const v = parseFloat(this.pavmax);
     if (!v || v < 1.6) return { label: 'Normal', class: 'normal' }; // Pulmonic is slightly lower
@@ -392,19 +386,18 @@ get paStenosisGrade() {
     if (v > 3.5 && v <= 4.5) return { label: 'Moderate Stenosis', class: 'abnormal' };
     return { label: 'Severe Stenosis', class: 'abnormal' }; // > 4.5 m/s (> 81 mmHg)
 },
-
 get felineLvotoAssessment() {
     if (!this.isCat || !this.lvotvmax) return null;
     const v = parseFloat(this.lvotvmax);
     
     if (v > 1.9) {
         return {
-            label: "Elevated Velocity (Probable LVOTO)",
-            class: "abnormal",
-            note: "Velocity > 1.9 m/s. Closely evaluate CW Doppler envelope for a late-systolic peaking, scimitar-shaped (dagger) curve indicative of dynamic obstruction (e.g., SAM)."
+            label: 'Elevated Velocity (Probable LVOTO)',
+            class: 'abnormal',
+            note: 'Velocity > 1.9 m/s. Closely evaluate CW Doppler envelope for a late-systolic peaking, scimitar-shaped (dagger) curve indicative of dynamic obstruction (e.g., SAM).'
         };
     }
-    return { label: "Normal Outflow Velocity", class: "normal", note: "" };
+    return { label: 'Normal Outflow Velocity', class: 'normal', note: '' };
 },
 
     /* Diastolic Scorer */
