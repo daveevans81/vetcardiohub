@@ -683,6 +683,13 @@ text += `\n (Applicable to Degenerative Mitral Valve Disease Cases Only)\n`;
     text += `Median Survival Time (MST): ${this.calculatedMineScore.mst}\n`;
 }
 
+// --- DIASTOLIC FUNCTION REPORT LINE ---
+if (this.diastolicClassification && this.diastolicClassification.evaluatedCount >= 2) {
+    text += `\nDIASTOLIC FUNCTIONAL PROFILE:\n`;
+    text += `Classification: ${this.diastolicClassification.grade} (${this.diastolicClassification.label})\n`;
+    text += `Analysis Confidence: ${this.diastolicClassification.confidence}\n`;
+}
+
         if (this.isCat) {
         text += `\nFELINE CLINICAL ASSESSMENT:\n`;
         
@@ -1425,8 +1432,29 @@ Spectral Doppler and Flow:
                 <span style="font-size: 0.8em; color: #666;">m/s (ref 0.3 - 0.8) </span>
             </span>
         </div>
+        <div class="result-row" x-show="ivrt">
+            <span><strong>IVRT</strong></span>
+            <span>
+                <span x-text="ivrt"></span>
+                <span x-show="ivrt > 80" class="abnormal">(prolonged)</span>
+                <span x-show="ivrt <= 80 && ivrt >= 50" class="normal">(Normal)</span>
+                span x-show="ivrt < 50 && ivrt > 0" class="abnormal">(short)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 50 - 80) </span>
+            </span>
+        </div>
+        <div class="result-row" x-show="mdt">
+            <span><strong>E wave DT</strong></span>
+            <span>
+                <span x-text="mdt"></span>
+                <span x-show="mdt > 100" class="abnormal">(prolonged)</span>
+                <span x-show="mdt <= 100 && mdt >= 60" class="normal">(Normal)</span>
+                span x-show="mdt < 60 && mdt > 0" class="abnormal">(short)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 60 - 100) </span>
+            </span>
+        </div>
+
         <div class="result-row" x-show="ear">
-            <span><strong>E : A Ratio</strong></span>
+            <span><strong>E:A Ratio</strong></span>
             <span>
                 <span x-text="ear"></span>
                 <span x-show="ear > 1.6" class="abnormal">(High)</span>
@@ -1435,39 +1463,94 @@ Spectral Doppler and Flow:
                 <span style="font-size: 0.8em; color: #666;"> (ref 0.95 - 1.6) </span>
             </span>
         </div>
-        <div class="result-row" x-show="ear">
+        <div class="result-row" x-show="eivrt">
             <span><strong>E:IVRT Ratio</strong></span>
             <span>
-                <span x-text="ear"></span>
+                <span x-text="eivrt"></span>
         <span x-text="eivrt"></span>
         <span x-show="eivrt >= 2.5" class="abnormal">[HIGH FILLING PRESSURE]</span>
         <span x-show="eivrt < 2.5" class="normal">(Normal)</span>
         <span style="font-size: 0.8em; color: #666;" x-text="` (E: ${eVel}m/s / IVRT: ${ivrt}ms; ref <2.5)`"></span>
             </span>
         </div>
+        <div class="result-row" x-show="lvotvmax">
+            <span><strong>LVOT Vmax</strong></span>
+            <span>
+                <span x-text="lvotvmax"></span>
+                <span x-show="lvotvmax > 1.0" class="abnormal">(High)</span>
+                <span x-show="lvotvmax <= 1.0 && lvotvmax >= 0.6" class="normal">(Normal)</span>
+                <span x-show="lvotvmax < 0.6 && lvotvmax > 0" class="abnormal">(Low)</span>
+                <span style="font-size: 0.8em; color: #666;">m/s (ref 0.6 - 1.0) </span>
+            </span>
+        </div>
+        <div class="result-row" x-show="rvotvmax">
+            <span><strong>RVOT Vmax</strong></span>
+            <span>
+                <span x-text="rvotvmax"></span>
+                <span x-show="rvotvmax > 1.0" class="abnormal">(High)</span>
+                <span x-show="rvotvmax <= 1.0 && rvotvmax >= 0.6" class="normal">(Normal)</span>
+                <span x-show="rvotvmax < 0.6 && rvotvmax > 0" class="abnormal">(Low)</span>
+                <span style="font-size: 0.8em; color: #666;">m/s (ref 0.6 - 1.0) </span>
+            </span>
+        </div>
 
-    eVel: '',
-    aVel: '',
-    ivrt: '',
-    lvotd: '',
-    rvotd: '',
-    lvotvti: '',
-    rvotvti: '',
-    rvotvmax: '',
-    lvotvmax: '',
-get ear() {
-    get eivrt() {
-    get vtir() {
 
-    get qp() {
+<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
+Shunt Ratios (Qp:Qs):
+</p>
 
-    get qs() {
+        <div class="result-row" x-show="lvotd">
+            <span><strong>LVOT diameter</strong></span>
+            <span>
+                <span x-text="lvotd"></span>
+                <span style="font-size: 0.8em; color: #666;"> mm</span>
+            </span>
+        </div>
+        <div class="result-row" x-show="rvotd">
+            <span><strong>RVOT diameter</strong></span>
+            <span>
+                <span x-text="rvotd"></span>
+                <span style="font-size: 0.8em; color: #666;"> mm</span>
+            </span>
+        </div>
+        <div class="result-row" x-show="lvotvti">
+            <span><strong>LVOT VTI</strong></span>
+            <span>
+                <span x-text="lvotvti"></span>
+                <span style="font-size: 0.8em; color: #666;"> cm</span>
+            </span>
+        </div>
+       <div class="result-row" x-show="rvotvti">
+            <span><strong>RVOT VTI</strong></span>
+            <span>
+                <span x-text="rvotvti"></span>
+                <span style="font-size: 0.8em; color: #666;"> cm</span>
+            </span>
+        </div>
 
-    get qpqs() {
+        <div class="result-row" x-show="vtir">
+            <span><strong>VTI Ratio P:S</strong></span>
+            <span>
+                <span x-text="vtir"></span>
+                <span x-show="vtir > 1.1" class="abnormal">(High)</span>
+                <span x-show="vtir <= 1.1 && vtir >= 0.9" class="normal">(Normal)</span>
+                span x-show="vtir < 0.9 && vtir > 0" class="abnormal">(Low)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 0.9 - 1.1) </span>
+            </span>
+        </div>
 
-    get mrVol() {
+        <div class="result-row" x-show="qpqs">
+            <span><strong>VTI Ratio P:S</strong></span>
+            <span>
+                <span x-text="qpqs"></span>
+                <span x-show="qpqs > 1.1" class="abnormal">(High)</span>
+                <span x-show="qpqs <= 1.1 && qpqs >= 0.9" class="normal">(Normal)</span>
+                span x-show="qpqs < 0.9 && qpqs > 0" class="abnormal">(Low)</span>
+                <span style="font-size: 0.8em; color: #666;"> (ref 0.9 - 1.1) </span>
+            </span>
+        </div>
+  
 
-    get mrFraction() {
 
 
 <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
@@ -1625,6 +1708,52 @@ Right Heart:
           </article>
 
         </section>
+
+
+
+<section class="card standard-card" 
+         x-show="isDog && diastolicClassification && diastolicClassification.evaluatedCount >= 2" 
+         x-transition 
+         style="margin-top: 18px; border-left: 4px solid #1e40af; background: #fff;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px;">
+        <h2 style="color: #16325F; margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-heart-pulse" style="color: #0ea5e9;"></i> Diastolic Functional Profile
+        </h2>
+        <span style="font-size: 0.75rem; background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-weight: 600;" 
+              x-text="`${diastolicClassification.evaluatedCount} Metrics Evaluated` "></span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        
+        <div style="text-align: center; border-right: 2px solid #e2e8f0; padding-right: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Classification</span>
+            <div style="font-size: 1.6rem; font-weight: 900; margin-top: 5px; line-height: 1.1;" 
+                 :class="diastolicClassification.class === 'normal' ? 'normal' : 'abnormal'"
+                 x-text="diastolicClassification.grade"></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+            <h4 style="margin: 0 0 4px 0; font-size: 0.8rem; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">Physiologic State</h4>
+            <p style="margin: 0 0 12px 0; font-size: 1.05rem; font-weight: bold; color: #1e293b;" x-text="diastolicClassification.label"></p>
+
+            <h4 style="margin: 0 0 4px 0; font-size: 0.8rem; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">Algorithmic Confidence</h4>
+            <p style="margin: 0; font-size: 0.95rem; font-weight: 600; color: #334155;">
+                <i class="fa-solid fa-shield-halved" :style="diastolicClassification.class === 'normal' ? 'color: #16a34a;' : 'color: #ea580c;'"></i> 
+                <span x-text="diastolicClassification.confidence"></span>
+            </p>
+        </div>
+    </div>
+
+    <div style="margin-top: 12px; background-color: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+        <p style="font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.4;">
+            <i class="fa-solid fa-circle-exclamation" style="color: #94a3b8;"></i> 
+            <strong>Interpretation Support:</strong> Point-based matrix models reconcile conflicting filling velocity signals. Differentiating Grade I from Grade II Pseudonormal profiles utilizes combined calculations ($E:\text{IVRT}$, $E:E'$, and left atrial structural markers).
+        </p>
+    </div>
+</section>
+
+
 
 <section class="card" style="margin-top: 18px;" x-show="isDog" x-transition>
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
