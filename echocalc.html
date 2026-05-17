@@ -469,6 +469,13 @@ get diastolicClassification() {
     };
 },
 
+hasSectionData(fieldsArray) {
+    return fieldsArray.some(field => {
+        const val = parseFloat(this[field]);
+        return val && !isNaN(val) && val > 0;
+    });
+},
+
     /* 3. ALLOMETRIC GETTERS */
     get allometricResults() {
         const results = {};
@@ -1490,10 +1497,10 @@ Left Atrium:
         </div>
 </div>
 
-
+<div x-show="hasSectionData(['eVel', 'aVel', 'ivrt', 'mdt', 'ePrime'])">
 <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
 Spectral Doppler and Flow:
-</p>
+</p></div>
         <div class="result-row" x-show="eVel">
             <span><strong>E vel</strong></span>
             <span>
