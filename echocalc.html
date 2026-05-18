@@ -1187,22 +1187,29 @@
             <!-- SECTION: ADVANCED MINE RISK STRATIFICATION -->
  <section class="card" style="margin-top: 18px; max-width: 100%; overflow: hidden; box-sizing: border-box;" x-show="isDog" x-transition>
     
-    <!-- FIX 1: Cleaned up the header layout panel to drop down into clean vertical rows on small screen profiles -->
-    <div style="display: flex; flex-direction: column; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; width: 100%;">
-            <h2 style="color: #16325F; margin: 0; font-size: 1.25rem; line-height: 1.3; max-width: 100%;">
-                <i class="fa-solid fa-square-poll-vertical"></i> Advanced MINE Risk Stratification
+ 
+<div style="display: block; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px; width: 100%;">
+        
+        <!-- Title and Dropdown Layout Area -->
+        <div style="margin-bottom: 8px;">
+            <h2 style="color: #16325F; margin: 0 0 10px 0; font-size: 1.25rem; line-height: 1.3; display: block; word-break: break-word;">
+                <i class="fa-solid fa-square-poll-vertical" style="color: #1e40af; margin-right: 4px;"></i> Advanced MINE Risk Stratification
             </h2>
             
-            <select x-model="selectedMineModel" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background-color: #f8fafc; font-weight: 600; color: #1e3a8a; min-width: 130px;">
-                <template x-if="typeof mineModels !== 'undefined'">
-                    <template x-for="(model, key) in mineModels" :key="key">
-                        <option :value="key" x-text="model.label"></option>
+            <!-- Select dropdown sits safely underneath on mobile or aligns naturally without pushing grid walls -->
+            <div style="margin-top: 8px; margin-bottom: 8px;">
+                <select x-model="selectedMineModel" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background-color: #f8fafc; font-weight: 600; color: #1e3a8a; width: auto; max-width: 100%; display: inline-block;">
+                    <template x-if="typeof mineModels !== 'undefined'">
+                        <template x-for="(model, key) in mineModels" :key="key">
+                            <option :value="key" x-text="model.label"></option>
+                        </template>
                     </template>
-                </template>
-            </select>
+                </select>
+            </div>
         </div>
-        <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.4;">
+        
+        <!-- Disclaimer Subtext Line -->
+        <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.4; display: block;">
             <em>Applicable to <strong>Degenerative Mitral Valve Disease</strong> Cases Only</em>
         </p>
     </div>
