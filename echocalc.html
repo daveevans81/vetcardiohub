@@ -878,6 +878,17 @@
                     <span style="font-size: 0.8em; color: #666;" x-text="` (E: ${eVel}m/s / IVRT: ${ivrt}ms; ref <2.5)`"></span>
                   </span>
                 </div>
+                
+                <div class="result-row" x-show="lveio">
+                  <span><strong>LVEIO</strong></span>
+                  <span>
+                    <span x-text="lveio"></span>
+                    <span x-show="lveio >= 11.85" class="abnormal">(HIGH LAP)</span>
+                    <span x-show="lveio < 8" class="normal">(Normal)</span>
+                    <span x-show="lveio < 11.85 && lveio >= 8" class="abnormal">(Eqivocal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (E: ${eVel}m/s / AoVTI: ${lvotvti}ms; ref <11.85)`"></span>
+                  </span>
+                </div>
 
                 <div class="result-row" x-show="ePrime">
                   <span><strong>E'</strong></span>
@@ -1179,7 +1190,7 @@
                 <h2 style="color: #16325F; margin: 0; font-size: 1.3rem;">
                   <i class="fa-solid fa-square-poll-vertical"></i> Advanced MINE Risk Stratification
                 </h2>
-                <p><em>Applicable to <strong>Degenerative Mitral Valve Disease</strong> Cases Only</em></p>
+
                 <select x-model="selectedMineModel" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background-color: #f8fafc; font-weight: 600; color: #1e3a8a;">
                   <template x-if="typeof mineModels !== 'undefined'">
                     <template x-for="(model, key) in mineModels" :key="key">
