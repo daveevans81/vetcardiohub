@@ -401,14 +401,9 @@ get felineLvotoAssessment() {
 },
 
     /* Diastolic Scorer */
-/* Diastolic Scorer */
 get diastolicClassification() {
     if (!this.isDog) return null;
     
-    let votes = { 'Grade I': 0, 'Grade II': 0, 'Grade III': 0 };
-    let totalEvaluated = 0;
-
-    // Package actual calculated values for immediate evaluation
     const inputs = {
         ear: parseFloat(this.ear),
         eivrt: parseFloat(this.eivrt),
@@ -420,52 +415,121 @@ get diastolicClassification() {
         trMax: parseFloat(this.trMax)
     };
 
-    // Safe global check
-    if (typeof diastolicRules !== 'undefined') {
-        for (const key in inputs) {
-            const val = inputs[key];
-            if (val && val > 0 && diastolicRules[key]) {
-                const match = diastolicRules[key].find(r => val >= r.min && val <= r.max);
-                if (match) {
-                    votes[match.grade] = (votes[match.grade] || 0) + match.weight;
-                    totalEvaluated++;
-                }
+    let evaluatedCount = 0;
+    let rawBreakdown = [];
+    
+    // Disease severity tracking trackers
+    let grade1Points = 0;
+    let grade2Points = 0;
+    let grade3Points = 0;
+
+    const metaMapping = {
+        ear: { name: 'E:A Ratio', unit: '' },
+        eivrt: { name: 'E:IVRT Ratio', unit: '' },
+        eePrime: { name: 'E:E\' Ratio', unit: '' },
+        lveio: { name: 'LVEIO (E:LVOT VTI)', unit: '' },
+        laAo: { name: 'LA:Ao Ratio', unit: '' },
+        ivrt: { name: 'Raw IVRT', unit: ' ms' },
+        mdt: { name: 'Mitral Deceleration Time (MDT)', unit: ' ms' },
+        trMax: { name: 'TR Max Velocity', unit: ' m/s' }
+    };
+
+    // Step 1: Accumulate Pathological Points
+    Object.keys(inputs).forEach(key => {
+        const val = inputs[key];
+        const rules = diastolicRules[key];
+        
+        if (val && !isNaN(val) && val > 0 && rules) {
+            const match = rules.find(r => val >= r.min && val <= r.max);
+            if (match) {
+                evaluatedCount++;
+                
+                if (match.grade === 'Grade I') grade1Points += match.points;
+                if (match.grade === 'Grade II') grade2Points += match.points;
+                if (match.grade === 'Grade III') grade3Points += match.points;
+
+                const threshIdx = rules.indexOf(match);
+                let thresholdText = threshIdx === 0 ? `≤ ${match.max}` : match.max === Infinity ? `> ${rules[threshIdx-1].max}` : `${rules[threshIdx-1].max} – ${match.max}`;
+
+                rawBreakdown.push({
+                    key: key,
+                    name: metaMapping[key].name,
+                    val: `${val}${metaMapping[key].unit}`,
+                    threshold: thresholdText,
+                    category: match.category,
+                    grade: match.grade,
+                    points: match.points
+                });
             }
+        }
+    });
+
+    if (evaluatedCount < 2) {
+        return { grade: 'Awaiting Metrics', stepIndex: -1, label: 'Enter at least 2 parameters.', class: 'normal', evaluatedCount: evaluatedCount, breakdown: [] };
+    }
+
+    // Step 2: Determine Final Staging via Cluster Weights
+    let finalGrade = 'Normal';
+    let stepIndex = 0;
+    let label = 'Normal Diastologic Performance';
+    let className = 'normal';
+
+    const highLAPPoints = grade2Points + grade3Points;
+
+    if (highLAPPoints === 0 && grade1Points === 0) {
+        // Patient is perfectly normal - zero accumulated pathology points
+        finalGrade = 'Normal';
+        stepIndex = 0;
+        label = 'Normal Diastologic Performance';
+        className = 'normal';
+    } else if (highLAPPoints === 0 && grade1Points > 0) {
+        // Relaxation is delayed, but filling pressures (LAP) remain entirely normal
+        finalGrade = 'Grade I';
+        stepIndex = 1;
+        label = 'Impaired Relaxation Pattern (Normal LAP)';
+        className = 'normal'; 
+    } else {
+        // High LAP pressure markers are active. Balance Grade II vs Grade III
+        if (grade3Points >= grade2Points || grade3Points >= 5) {
+            finalGrade = 'Grade III';
+            stepIndex = 3;
+            label = 'Restrictive Filling Profile (High Risk Acute CHF)';
+            className = 'abnormal';
+        } else {
+            finalGrade = 'Grade II';
+            stepIndex = 2;
+            label = 'Pseudonormal Pattern (Elevated LAP Suspected)';
+            className = 'abnormal';
         }
     }
 
-    // If less than 2 tracking metrics are entered, safely declare insufficient data
-    if (totalEvaluated < 2) {
-        return { grade: 'Awaiting Metrics', confidence: 'Low', class: 'normal', details: 'Enter at least 2 spectral Doppler or LA indices.' };
-    }
-
-    // Determine the highest point earner
-    let finalGrade = 'Undetermined';
-    let maxPoints = 0;
-    Object.keys(votes).forEach(g => {
-        if (votes[g] > maxPoints) { maxPoints = votes[g]; finalGrade = g; }
+    // Step 3: Identify Discordant Values (Conflict Checker Matrix)
+    const finalizedBreakdown = rawBreakdown.map(item => {
+        let conflicts = false;
+        
+        if (finalGrade === 'Normal' && item.points > 0) conflicts = true;
+        if (finalGrade === 'Grade I' && item.grade !== 'Grade I' && item.points > 0) conflicts = true;
+        if ((finalGrade === 'Grade II' || finalGrade === 'Grade III') && item.grade === 'Grade I') conflicts = true;
+        
+        // Flag row if a high-pressure marker shows a "Normal" state while final status is elevated
+        if ((finalGrade === 'Grade II' || finalGrade === 'Grade III') && item.grade === 'Normal') {
+            // Note: ear, ivrt, and mdt naturally pseudo-normalize back to baseline limits.
+            // Their normal status isn't a conflict; it is an intrinsic part of the Grade II profile.
+            if (item.key !== 'ear' && item.key !== 'ivrt' && item.key !== 'mdt') {
+                conflicts = true;
+            }
+        }
+        return { ...item, conflicts: conflicts };
     });
 
-    // Calculate a confidence rating percentage based on point concentration
-    const totalPoints = votes['Grade I'] + votes['Grade II'] + votes['Grade III'];
-    const confidencePct = totalPoints > 0 ? Math.round((maxPoints / totalPoints) * 100) : 0;
-    
-    let confidenceLabel = 'Moderate';
-    if (confidencePct > 75 && totalEvaluated >= 4) confidenceLabel = 'High (Robust Alignment)';
-    if (confidencePct < 55) confidenceLabel = 'Equivocal (Mixed Inflow Profile)';
-
-    const descriptions = {
-        'Grade I': 'Impaired Relaxation Pattern (Normal Pressures)',
-        'Grade II': 'Pseudonormal Pattern (Elevated Filling Pressures suspected)',
-        'Grade III': 'Restrictive Filling Profile (High Risk of acute CHF)'
-    };
-
     return {
-        grade: finalGrade || 'Undetermined',
-        label: descriptions[finalGrade] || 'Complex Pattern',
-        confidence: confidenceLabel || 'Low',
-        class: finalGrade === 'Grade I' ? 'normal' : 'abnormal',
-        evaluatedCount: totalEvaluated
+        grade: finalGrade,
+        stepIndex: stepIndex,
+        label: label,
+        class: className,
+        evaluatedCount: evaluatedCount,
+        breakdown: finalizedBreakdown,
+        pointsSummary: { I: grade1Points, II: grade2Points, III: grade3Points }
     };
 },
 
@@ -1541,7 +1605,6 @@ Spectral Doppler and Flow:
                 <span style="font-size: 0.8em; color: #666;"> (ref 60 - 100) </span>
             </span>
         </div>
-
         <div class="result-row" x-show="ear">
             <span><strong>E:A Ratio</strong></span>
             <span>
@@ -1559,6 +1622,25 @@ Spectral Doppler and Flow:
         <span x-show="eivrt >= 2.5" class="abnormal">(HIGH LAP)</span>
         <span x-show="eivrt < 2.5" class="normal">(Normal)</span>
         <span style="font-size: 0.8em; color: #666;" x-text="` (E: ${eVel}m/s / IVRT: ${ivrt}ms; ref <2.5)`"></span>
+            </span>
+        </div>
+        <div class="result-row" x-show="ePrime">
+            <span><strong>E'</strong></span>
+            <span>
+                <span x-text="ePrime"></span>
+        <span x-show="ePrime >= 6.5" class="normal">(Normal)</span>
+                <span x-show="ePrime < 12 && ePrime > 0" class="abnormal">(Low)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="` (ref >6.5)`"></span>
+            </span>
+        </div>
+        <div class="result-row" x-show="eePrime">
+            <span><strong>E:E' ratio</strong></span>
+            <span>
+                <span x-text="eePrime"></span>
+        <span x-show="eePrime >= 12" class="abnormal">(HIGH LAP)</span>
+        <span x-show="eePrime < 8" class="normal">(Normal)</span>
+                <span x-show="eePrime < 12 && eePrime >= 8" class="abnormal">(Equivocal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="` (ref <12)`"></span>
             </span>
         </div>
     <div class="result-row" x-show="aovmax">
@@ -1636,11 +1718,20 @@ Shunt Ratios (Qp:Qs):
   
 
 
-<div x-show="hasSectionData(['trVel', 'rvotd', 'rvotvti'])">
+<div x-show="hasSectionData(['trMax', 'rvotd', 'rvotvti'])">
 <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
 Right Heart:
 </p></div>
-
+       <div class="result-row" x-show="trMax">
+            <span><strong>TR Vel</strong></span>
+            <span>
+                <span x-text="trMax"></span>
+        <span x-show="trMax >= 3.2" class="abnormal">(HIGH)</span>
+        <span x-show="trMax < 2.7" class="normal">(Normal)</span>
+                <span x-show="trMax < 3.2 && trMax >= 2.7" class="abnormal">(Equivocal)</span>
+        <span style="font-size: 0.8em; color: #666;" x-text="` (ref <2.7)`"></span>
+            </span>
+        </div>
 
 <div x-show="clinicalComments" class="report-comments" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
     <h3 style="color: #1e40af; font-size: 1.1rem; margin-bottom: 5px;">Clinical Observations & Plan:</h3>
@@ -1805,45 +1896,113 @@ Right Heart:
         </section>
 
 
-
 <section class="card standard-card" 
          x-show="isDog && diastolicClassification && diastolicClassification.evaluatedCount >= 2" 
          x-transition 
-         style="margin-top: 18px; border-left: 4px solid #1e40af; background: #fff;">
+         style="margin-top: 18px; border-left: 4px solid #0ea5e9; background: #ffffff;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 12px;">
         <h2 style="color: #16325F; margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
             <i class="fa-solid fa-heart-pulse" style="color: #0ea5e9;"></i> Diastolic Functional Profile
         </h2>
-        <span style="font-size: 0.75rem; background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-weight: 600;" 
-              x-text="`${diastolicClassification.evaluatedCount} Metrics Evaluated` "></span>
+        <div style="font-weight: 700; font-size: 1.1rem; padding: 4px 10px; border-radius: 6px;"
+             :class="diastolicClassification?.class === 'normal' ? 'normal' : 'abnormal'"
+             x-text="diastolicClassification?.grade">
+        </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <div style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa; padding: 15px; margin-bottom: 20px;">
+        <h3 style="font-size: 0.8rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-chart-gantt"></i> Hemodynamic Progression Waveform Map
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; text-align: center;">
+            
+            <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;"
+                 :style="diastolicClassification?.stepIndex === 0 ? 'opacity: 1; border-color: #16a34a; background: #f0fdf4; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+                <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #16a34a; display: flex; align-items: center; justify-content: center;">1</span>
+                <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Physiologic</p>
+                <span style="font-size: 0.7rem; font-weight: 600; color: #16a34a; background: #e8f5e9; padding: 1px 5px; border-radius: 3px;">E > A Inflow</span>
+            </div>
+
+            <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;"
+                 :style="diastolicClassification?.stepIndex === 1 ? 'opacity: 1; border-color: #ea580c; background: #fff7ed; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+                <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #ea580c; display: flex; align-items: center; justify-content: center;">2</span>
+                <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade I</p>
+                <span style="font-size: 0.7rem; font-weight: 600; color: #c2410c; background: #ffedd5; padding: 1px 5px; border-radius: 3px;">E &lt; A Reversal</span>
+            </div>
+
+            <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;"
+                 :style="diastolicClassification?.stepIndex === 2 ? 'opacity: 1; border-color: #dc2626; background: #fef2f2; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+                <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #dc2626; display: flex; align-items: center; justify-content: center;">3</span>
+                <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade II</p>
+                <span style="font-size: 0.7rem; font-weight: 600; color: #b91c1c; background: #fee2e2; padding: 1px 5px; border-radius: 3px;">Pseudo E > A</span>
+            </div>
+
+            <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;"
+                 :style="diastolicClassification?.stepIndex === 3 ? 'opacity: 1; border-color: #7f1d1d; background: #fff5f5; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+                <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #7f1d1d; display: flex; align-items: center; justify-content: center;">4</span>
+                <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade III</p>
+                <span style="font-size: 0.7rem; font-weight: 600; color: #7f1d1d; background: #ffeeee; padding: 1px 5px; border-radius: 3px;">E &gt;&gt; A Spike</span>
+            </div>
+
+        </div>
+    </div>
+    
+    <div style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
+        <h3 style="font-size: 0.8rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-scale-balanced"></i> Pathological Points Attribution Audit
+        </h3>
         
-        <div style="text-align: center; border-right: 2px solid #e2e8f0; padding-right: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Classification</span>
-            <div style="font-size: 1.6rem; font-weight: 900; margin-top: 5px; line-height: 1.1;" 
-                 :class="diastolicClassification.class === 'normal' ? 'normal' : 'abnormal'"
-                 x-text="diastolicClassification.grade"></div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; justify-content: center;">
-            <h4 style="margin: 0 0 4px 0; font-size: 0.8rem; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">Physiologic State</h4>
-            <p style="margin: 0 0 12px 0; font-size: 1.05rem; font-weight: bold; color: #1e293b;" x-text="diastolicClassification.label"></p>
-
-            <h4 style="margin: 0 0 4px 0; font-size: 0.8rem; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">Algorithmic Confidence</h4>
-            <p style="margin: 0; font-size: 0.95rem; font-weight: 600; color: #334155;">
-                <i class="fa-solid fa-shield-halved" :style="diastolicClassification.class === 'normal' ? 'color: #16a34a;' : 'color: #ea580c;'"></i> 
-                <span x-text="diastolicClassification.confidence"></span>
-            </p>
-        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+            <thead>
+                <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                    <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Echo Metric</th>
+                    <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Entry</th>
+                    <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Physiologic Interpretation</th>
+                    <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: right;">Score Weight</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="item in diastolicClassification?.breakdown" :key="item.key">
+                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" 
+                        :style="item.conflicts ? 'background-color: #fffbeb;' : ''">
+                        
+                        <td style="padding: 10px; font-weight: 600; color: #334155;">
+                            <span x-text="item.name"></span>
+                            <span x-text="item.category" style="display: block; font-size: 0.72rem; color: #64748b; font-weight: 500; font-style: italic; margin-top: 1px;"></span>
+                        </td>
+                        
+                        <td style="padding: 10px; text-align: center; font-weight: bold; color: #1e40af; font-size: 0.9rem;" x-text="item.val"></td>
+                        
+                        <td style="padding: 10px;">
+                            <div style="display: flex; flex-direction: column;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="color: #1e293b; font-weight: 700;" x-text="item.grade"></span>
+                                    <template x-if="item.conflicts">
+                                        <span style="font-size: 0.68rem; color: #b45309; background: #fef3c7; padding: 1px 4px; border-radius: 3px; font-weight: bold; display: inline-flex; align-items: center; gap: 2px;">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> Discordant
+                                        </span>
+                                    </template>
+                                </div>
+                                <span style="font-size: 0.75rem; color: #64748b;" x-text="`Range: ${item.threshold}`"></span>
+                            </div>
+                        </td>
+                        
+                        <td style="padding: 10px; text-align: right; font-weight: 900; color: #1e293b; font-size: 0.95rem;" 
+                            :class="item.points > 0 ? (diastolicClassification?.class === 'normal' ? 'normal' : 'abnormal') : ''"
+                            x-text="item.points === 0 ? '0' : `+${item.points}`">
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
     </div>
 
-    <div style="margin-top: 12px; background-color: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
-        <p style="font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.4;">
-            <i class="fa-solid fa-circle-exclamation" style="color: #94a3b8;"></i> 
-            <strong>Interpretation Support:</strong> Point-based matrix models reconcile conflicting filling velocity signals. Differentiating Grade I from Grade II Pseudonormal profiles utilizes combined calculations ($E:\text{IVRT}$, $E:E'$, and left atrial structural markers).
+    <div style="margin-top: 15px; background-color: #f8fafc; padding: 10px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+        <p style="font-size: 0.82rem; color: #334155; margin: 0; line-height: 1.4;">
+            <i class="fa-solid fa-circle-nodes" style="color: #0ea5e9; margin-right: 2px;"></i> 
+            <strong>Hemodynamic Profile Analysis:</strong> <span x-text="diastolicClassification?.label"></span>
         </p>
     </div>
 </section>

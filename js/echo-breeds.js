@@ -563,44 +563,43 @@ const mineModels = {
 
 const diastolicRules = {
     ear: [
-        { min: 0, max: 0.99, grade: 'Grade I', weight: 3 },
-        { min: 1.0, max: 1.5, grade: 'Grade II', weight: 1 }, // Weak sign alone due to normal overlap
-        { min: 2.0, max: Infinity, grade: 'Grade III', weight: 3 }
+        { min: 0, max: 0.99, category: 'Impaired Relaxation', grade: 'Grade I', points: 3 },
+        { min: 1.0, max: 1.99, category: 'Normal / Pseudonormal Overlap', grade: 'Normal', points: 0 },
+        { min: 2.0, max: Infinity, category: 'Restrictive Filling', grade: 'Grade III', points: 4 }
     ],
     eivrt: [
-        { min: 0, max: 1.49, grade: 'Grade I', weight: 2 },
-        { min: 1.5, max: 2.49, grade: 'Grade II', weight: 2 },
-        { min: 2.5, max: Infinity, grade: 'Grade III', weight: 4 } // High weight prognostic indicator
+        { min: 0, max: 1.49, category: 'Normal Flow Timing', grade: 'Normal', points: 0 },
+        { min: 1.5, max: 2.49, category: 'Elevated Filling Pressure', grade: 'Grade II', points: 2 },
+        { min: 2.5, max: Infinity, category: 'Severe Left Atrial Pressure', grade: 'Grade III', points: 4 }
     ],
-    eePrime: [ // Assuming ePrime input is captured in cm/s, E in m/s (E / (ePrime/100))
-        { min: 0, max: 7.9, grade: 'Normal/Grade I', weight: 2 },
-        { min: 8.0, max: 12.0, grade: 'Grade II', weight: 3 },
-        { min: 12.01, max: Infinity, grade: 'Grade III', weight: 4 }
+    eePrime: [
+        { min: 0, max: 7.99, category: 'Normal Basal Velocity', grade: 'Normal', points: 0 },
+        { min: 8.0, max: 12.0, category: 'Elevated Filling Pressure', grade: 'Grade II', points: 3 },
+        { min: 12.01, max: Infinity, category: 'Severe Left Atrial Pressure', grade: 'Grade III', points: 4 }
     ],
-    lveio: [ // E-wave velocity / LVOT VTI
-        { min: 0, max: 7.99, grade: 'Grade I', weight: 2 },
-        { min: 8.0, max: 11.84, grade: 'Grade II', weight: 3 },
-        { min: 11.85, max: Infinity, grade: 'Grade III', weight: 4 }
+    lveio: [
+        { min: 0, max: 7.99, category: 'Normal Outflow Ratio', grade: 'Normal', points: 0 },
+        { min: 8.0, max: 11.84, category: 'Elevated Filling Pressure', grade: 'Grade II', points: 3 },
+        { min: 11.85, max: Infinity, category: 'Severe Left Atrial Pressure', grade: 'Grade III', points: 4 }
     ],
     laAo: [
-        { min: 0, max: 1.64, grade: 'Grade I', weight: 1 },
-        { min: 1.65, max: 1.99, grade: 'Grade II', weight: 2 },
-        { min: 2.0, max: Infinity, grade: 'Grade III', weight: 3 }
+        { min: 0, max: 1.59, category: 'Normal Atrial Size', grade: 'Normal', points: 0 },
+        { min: 1.6, max: 1.99, category: 'Mild-Moderate Atrial Enlargement', grade: 'Grade II', points: 2 },
+        { min: 2.0, max: Infinity, category: 'Severe Atrial Enlargement', grade: 'Grade III', points: 3 }
     ],
-
-ivrt: [
-    { min: 80.01, max: Infinity, grade: 'Grade I', weight: 2 },
-    { min: 50.0, max: 80.0, grade: 'Grade II', weight: 1 }, // Votes for II if other signs of high pressure exist
-    { min: 0, max: 49.99, grade: 'Grade III', weight: 3 }
-],
-mdt: [
-    { min: 100.01, max: Infinity, grade: 'Grade I', weight: 2 },
-    { min: 60.0, max: 100.0, grade: 'Grade II', weight: 1 },
-    { min: 0, max: 59.99, grade: 'Grade III', weight: 3 }
-],
-trMax: [
-    { min: 0, max: 2.79, grade: 'Grade I', weight: 1 },
-    { min: 2.8, max: 3.4, grade: 'Grade II', weight: 3 }, // Strong surrogate for high LAP
-    { min: 3.41, max: Infinity, grade: 'Grade III', weight: 4 }
-]
+    ivrt: [
+        { min: 80.01, max: Infinity, category: 'Prolonged Relaxation', grade: 'Grade I', points: 2 },
+        { min: 50.0, max: 80.0, category: 'Normal / Pseudonormal Overlap', grade: 'Normal', points: 0 },
+        { min: 0, max: 49.99, category: 'Severe Restrictive Blunting', grade: 'Grade III', points: 3 }
+    ],
+    mdt: [
+        { min: 100.01, max: Infinity, category: 'Prolonged Deceleration', grade: 'Grade I', points: 2 },
+        { min: 60.0, max: 100.0, category: 'Normal / Pseudonormal Overlap', grade: 'Normal', points: 0 },
+        { min: 0, max: 59.99, category: 'Severe Restrictive Acceleration', grade: 'Grade III', points: 3 }
+    ],
+    trMax: [
+        { min: 0, max: 2.79, category: 'Normal Pulmonary Velocity', grade: 'Normal', points: 0 },
+        { min: 2.8, max: 3.4, category: 'Pulmonary Hypertension / High LAP', grade: 'Grade II', points: 3 },
+        { min: 3.41, max: Infinity, category: 'Severe Pulmonary Hypertension', grade: 'Grade III', points: 4 }
+    ]
 };
