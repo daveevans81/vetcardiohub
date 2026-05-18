@@ -2535,7 +2535,7 @@ details[open] summary {
         }
         .result-row { 
             display: flex; justify-content: space-between; margin-bottom: 10px; 
-            padding-bottom: 10px; border-bottom: 1px solid #dcdcdc; 
+            padding-bottom: 10px; border-bottom: 1px solid #dcdcdc; font-size: 0.9em;
         }
         .result-row:last-child { border-bottom: none; margin-bottom: 0; }
         .abnormal { color: #d9534f; font-weight: bold; }
