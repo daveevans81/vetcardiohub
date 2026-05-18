@@ -568,11 +568,26 @@ if (this.eVel > 0) {
 if (this.aVel > 0) {
     text += `A Vel: ${this.aVel} m/s (Ref: 0.3-0.8)\n`;
 }
+if (this.ivrt > 0) {
+    text += `IVRT: ${this.ivrt} ms (Ref: 50-80)\n`;
+}
+if (this.mdt > 0) {
+    text += `E wave DT: ${this.mdt} m/s (Ref: 60-100)\n`;
+}
 if (this.ear > 0) {
-    text += `E:A Ratio: ${this.ear} (Ref: 1.0-2.0)${this.ear >= 2.0 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+    text += `E:A Ratio: ${this.ear} (Ref: 0.95-1.6)${this.ear >= 1.6 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
 }
 if (this.eivrt > 0) {
     text += `E:IVRT Ratio: ${this.eivrt} (Ref: <2.5)${this.eivrt >= 2.5 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+}
+if (this.ePrime > 0) {
+    text += `Eprime: ${this.ePrime} (Ref: 0.95-1.6)${this.ear >= 1.6 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+}
+if (this.eePrime > 0) {
+    text += `E:Eprime Ratio: ${this.eePrime} (Ref: 0.95-1.6)${this.ear >= 12 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+}
+if (this.lveio > 0) {
+    text += `LVEIO: ${this.lveio} (Ref: <11.85)${this.ear >= 11.85 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
 }
 
 // --- OUTFLOW TRACT & STENOSIS EVALUATION ---
@@ -580,6 +595,39 @@ if (this.aovmax || this.pavmax) {
     if (this.aovmax)   text += `Ao Vmax: ${this.aovmax} m/s | PG: ${this.aoGradient} mmHg | ${this.aoStenosisGrade.label.toUpperCase()}\n`;
     if (this.pavmax)  text += `PA Vmax: ${this.pavmax} m/s | PG: ${this.paGradient} mmHg | ${this.paStenosisGrade.label.toUpperCase()}\n`;
 }
+
+
+// --- SHUNT RATIOS ---
+if (this.lvotd > 0 || this.rvotd > 0 || this.lvotvti || this.rvotvti) {
+        text += `\nShunt Ratios (Qp:Qs):\n`;
+}
+if (this.lvotd > 0) {
+    text += `LVOT diameter: ${this.lvotd} \n`;
+}
+if (this.rvotd > 0) {
+    text += `RVOT diameter: ${this.lvotd} \n`;
+}
+if (this.lvotvti > 0) {
+    text += `LVOT VTI: ${this.lvotd} \n`;
+}
+if (this.rvotvti > 0) {
+    text += `RVOT VTI: ${this.lvotd} \n`;
+}
+if (this.vtir > 0) {
+    text += `VTI Ratio P:S: ${this.vtir} (Ref: 0.9-1.1)${this.vtir >= 1.1 ? ' [High]' :  ''}\n`;
+}
+if (this.qpqs > 0) {
+    text += `Qp:Qs Ratio: ${this.qpqs} (Ref: 0.9-1.1)${this.qpqs >= 1.1 ? ' [High]' :  ''}\n`;
+}
+
+// --- RIGHT HEART
+if (this.trMax > 0 || this.rvotd > 0 || this.lvotvti || this.rvotvti) {
+        text += `\nRight Heart:\n`;
+}
+if (this.trMax > 0) {
+    text += `TR Vel: ${this.trMax} (Ref: <2.7)${this.trMax > 2.7 ? ' [High]' :  ''}\n`;
+}
+
 
 
         if (this.isDog && this.lviddn > 0 && this.laAo > 0) {
