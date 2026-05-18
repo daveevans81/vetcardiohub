@@ -1247,29 +1247,33 @@
             <i class="fa-solid fa-chart-line"></i> MINE Scoring Points Breakdown
         </h3>
         
-        <!-- This outer container forces the internal table layout logic to stay contained -->
-        <div style="width: 100% !important; max-width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; border: 1px solid #e2e8f0; border-radius: 6px; display: block; box-sizing: border-box;">
-            <table style="width: 100%; min-width: 440px; border-collapse: collapse; font-size: 0.85rem; text-align: left; table-layout: fixed; background: #ffffff;">
-                <thead>
-                    <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
-                        <th style="padding: 8px 10px; color: #475569; font-weight: 700; width: 40%;">Echo Variable</th>
-                        <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center; width: 20%;">Patient</th>
-                        <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center; width: 25%;">Interval</th>
-                        <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: right; width: 15%;">Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template x-for="item in calculatedMineScore?.breakdown" :key="item.name">
-                        <tr style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 10px; font-weight: 600; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="item.name"></td>
-                            <td style="padding: 10px; text-align: center; font-weight: bold; color: #1e40af;" x-text="item.val"></td>
-                            <td style="padding: 10px; text-align: center; color: #64748b; font-style: italic; font-size: 0.8rem;" x-text="item.threshold"></td>
-                            <td style="padding: 10px; text-align: right; font-weight: bold; color: #1e293b;" x-text="item.val === '—' ? '0' : `+${item.pts}`"></td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
-        </div>
+      
+        <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid #e2e8f0; border-radius: 6px; display: block; box-sizing: border-box;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left; background: #ffffff;">
+        <thead>
+            <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+               
+                <th style="padding: 6px 8px; color: #475569; font-weight: 700;">Variable</th>
+                <th style="padding: 6px 8px; color: #475569; font-weight: 700; text-align: center; white-space: nowrap;">Patient</th>
+                <th style="padding: 6px 8px; color: #475569; font-weight: 700; text-align: center; white-space: nowrap;">Interval</th>
+                <th style="padding: 6px 8px; color: #475569; font-weight: 700; text-align: right; white-space: nowrap;">Pts</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="item in calculatedMineScore?.breakdown" :key="item.name">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <!-- Variable names compress naturally; word breaks protect against blowout strings -->
+                    <td style="padding: 8px; font-weight: 600; color: #334155; word-break: break-word;" x-text="item.name"></td>
+                    
+                    <!-- White-space nowrap forces patient numbers and units to stay on 1 clean line -->
+                    <td style="padding: 8px; text-align: center; font-weight: bold; color: #1e40af; white-space: nowrap;" x-text="item.val"></td>
+                    <td style="padding: 8px; text-align: center; color: #64748b; font-style: italic; font-size: 0.78rem; white-space: nowrap;" x-text="item.threshold"></td>
+                    <td style="padding: 8px; text-align: right; font-weight: bold; color: #1e293b; white-space: nowrap;" x-text="item.val === '—' ? '0' : `+${item.pts}`"></td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>
     </div>
 </section>
             <!-- SECTION: BREED NORMALS REFERENCE -->
