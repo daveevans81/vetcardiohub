@@ -1497,7 +1497,7 @@ Left Atrium:
         </div>
 </div>
 
-<div x-show="hasSectionData(['eVel', 'aVel', 'ivrt', 'mdt', 'ePrime'])">
+<div x-show="hasSectionData(['eVel', 'aVel', 'ivrt', 'mdt', 'ePrime', 'aovmax', 'pavmax'])">
 <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
 Spectral Doppler and Flow:
 </p></div>
@@ -1517,7 +1517,7 @@ Spectral Doppler and Flow:
                 <span x-text="aVel"></span>
                 <span x-show="aVel > 0.8" class="abnormal">(High)</span>
                 <span x-show="aVel <= 0.8 && aVel >= 0.3" class="normal">(Normal)</span>
-                span x-show="aVel < 0.3 && aVel > 0" class="abnormal">(Low)</span>
+                <span x-show="aVel < 0.3 && aVel > 0" class="abnormal">(Low)</span>
                 <span style="font-size: 0.8em; color: #666;">m/s (ref 0.3 - 0.8) </span>
             </span>
         </div>
@@ -1527,7 +1527,7 @@ Spectral Doppler and Flow:
                 <span x-text="ivrt"></span>
                 <span x-show="ivrt > 80" class="abnormal">(prolonged)</span>
                 <span x-show="ivrt <= 80 && ivrt >= 50" class="normal">(Normal)</span>
-                span x-show="ivrt < 50 && ivrt > 0" class="abnormal">(short)</span>
+                <span x-show="ivrt < 50 && ivrt > 0" class="abnormal">(short)</span>
                 <span style="font-size: 0.8em; color: #666;"> (ref 50 - 80) </span>
             </span>
         </div>
@@ -1537,7 +1537,7 @@ Spectral Doppler and Flow:
                 <span x-text="mdt"></span>
                 <span x-show="mdt > 100" class="abnormal">(prolonged)</span>
                 <span x-show="mdt <= 100 && mdt >= 60" class="normal">(Normal)</span>
-                span x-show="mdt < 60 && mdt > 0" class="abnormal">(short)</span>
+                <span x-show="mdt < 60 && mdt > 0" class="abnormal">(short)</span>
                 <span style="font-size: 0.8em; color: #666;"> (ref 60 - 100) </span>
             </span>
         </div>
@@ -1548,7 +1548,7 @@ Spectral Doppler and Flow:
                 <span x-text="ear"></span>
                 <span x-show="ear > 1.6" class="abnormal">(High)</span>
                 <span x-show="ear <= 1.6 && ear >= 0.95" class="normal">(Normal)</span>
-                span x-show="ear < 0.95 && ear > 0" class="abnormal">(Low)</span>
+                <span x-show="ear < 0.95 && ear > 0" class="abnormal">(Low)</span>
                 <span style="font-size: 0.8em; color: #666;"> (ref 0.95 - 1.6) </span>
             </span>
         </div>
@@ -1556,8 +1556,7 @@ Spectral Doppler and Flow:
             <span><strong>E:IVRT Ratio</strong></span>
             <span>
                 <span x-text="eivrt"></span>
-        <span x-text="eivrt"></span>
-        <span x-show="eivrt >= 2.5" class="abnormal">[HIGH FILLING PRESSURE]</span>
+        <span x-show="eivrt >= 2.5" class="abnormal">(HIGH LAP)</span>
         <span x-show="eivrt < 2.5" class="normal">(Normal)</span>
         <span style="font-size: 0.8em; color: #666;" x-text="` (E: ${eVel}m/s / IVRT: ${ivrt}ms; ref <2.5)`"></span>
             </span>
@@ -1579,10 +1578,10 @@ Spectral Doppler and Flow:
     </span>
     </div>
 
-
+<div x-show="hasSectionData(['lvotd', 'rvotd', 'lvotvti', 'rvotvti'])">
 <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
 Shunt Ratios (Qp:Qs):
-</p>
+</p></div>
 
         <div class="result-row" x-show="lvotd">
             <span><strong>LVOT diameter</strong></span>
@@ -1619,7 +1618,7 @@ Shunt Ratios (Qp:Qs):
                 <span x-text="vtir"></span>
                 <span x-show="vtir > 1.1" class="abnormal">(High)</span>
                 <span x-show="vtir <= 1.1 && vtir >= 0.9" class="normal">(Normal)</span>
-                span x-show="vtir < 0.9 && vtir > 0" class="abnormal">(Low)</span>
+                <span x-show="vtir < 0.9 && vtir > 0" class="abnormal">(Low)</span>
                 <span style="font-size: 0.8em; color: #666;"> (ref 0.9 - 1.1) </span>
             </span>
         </div>
@@ -1630,17 +1629,17 @@ Shunt Ratios (Qp:Qs):
                 <span x-text="qpqs"></span>
                 <span x-show="qpqs > 1.1" class="abnormal">(High)</span>
                 <span x-show="qpqs <= 1.1 && qpqs >= 0.9" class="normal">(Normal)</span>
-                span x-show="qpqs < 0.9 && qpqs > 0" class="abnormal">(Low)</span>
+                <span x-show="qpqs < 0.9 && qpqs > 0" class="abnormal">(Low)</span>
                 <span style="font-size: 0.8em; color: #666;"> (ref 0.9 - 1.1) </span>
             </span>
         </div>
   
 
 
-
+<div x-show="hasSectionData(['trVel', 'rvotd', 'rvotvti'])">
 <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
 Right Heart:
-</p>
+</p></div>
 
 
 <div x-show="clinicalComments" class="report-comments" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
@@ -1651,6 +1650,7 @@ Right Heart:
 
     </div>
 </div>
+
 <div style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
     <button @click="showComments = !showComments" class="btn-text" style="font-size: 0.85rem; margin-bottom: 10px;">
         <i class="fa-solid" :class="showComments ? 'fa-minus' : 'fa-plus'"></i> 
