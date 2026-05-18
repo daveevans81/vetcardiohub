@@ -1,1720 +1,1249 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<script src="/js/global-head.js" defer></script>
+<div x-data="advancedEchoSuite()" x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <div id="app-only-branding" class="app-branding">VetCardioHub EchoCalc</div>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="/manifest.json">
-
-
-
-    
-<title>Veterinary Echocardiography Calculator & Advanced Diagnostics | VetCardioHub</title>
-<meta name="description" content="Free veterinary echo calculator featuring allometric reference sizing, advanced canine MINE prognostic scoring, Qp:Qs ratio, diastolic function grading, and feline hypertrophic cardiomyopathy screening.">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
-<!-- Standard favicon -->
-<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="shortcut icon" href="/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="MyWebSite" />
-<link rel="manifest" href="/site.webmanifest" />
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="VetCardioHub EchoCalc">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="VetCardioHub EchoCalc">
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "MedicalWebPage",
-  "name": "Advanced Veterinary Echocardiography Calculator | VetCardioHub",
-  "description": "Interactive veterinary echo calculator featuring allometric reference scaling, Canine MINE prognostic scoring, Qp:Qs flow ratios, automated diastolic function classification matrices, and feline HCM screening.",
-  "url": "https://vetcardiohub.com/echocalc.html",
-  "medicalAudience": {
-    "@type": "MedicalAudience",
-    "audienceType": "Veterinary Professionals"
-  },
-  "specialty": {
-    "@type": "MedicalSpecialty",
-    "name": "Cardiology"
-  },
-  "mainEntity": {
-    "@type": "MedicalDevice",
-    "name": "VetCardioHub Advanced Echo Calc Suite",
-    "description": "Calculates normalized dimensions, advanced volumetric indices, Mitral INsufficiency Echocardiographic (MINE) risk score, shunt ratios (Qp:Qs), and diastolic performance grading.",
-    "purpose": "Comprehensive structural, hemodynamic, and prognostic interpretation of canine and feline echocardiography"
-  },
-  "citation": [
-    "Cornell et al. (2004) Allometric scaling of M-mode cardiac measurements in normal adult dogs.",
-    "Boswood et al. (2016) The EPIC Study - Pimobendan in Dogs with Preclinical MMVD.",
-    "Keene et al. (2019) ACVIM consensus guidelines for myxomatous mitral valve disease.",
-    "Vezzosi et al. (2021 & 2025) Mitral INsufficiency Echocardiographic (MINE) scoring system for prognostic stratification.",
-    "Schober et al. (2010) Echocardiographic assessment of left ventricular diastolic function in dogs."
-  ],
-  "lastReviewed": "2026-05-17",
-  "isAccessibleForFree": "true"
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "How is LVIDdn calculated in the Echo Calculator?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "LVIDdn (normalized Left Ventricular Internal Diameter in diastole) is calculated using the Cornell allometric scaling formula: LVIDd (cm) / Weight (kg)^0.294. A value > 1.7 is typically considered indicative of left ventricular enlargement."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What are the EPIC trial criteria for Stage B2 MMVD?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The EPIC trial defines Stage B2 as a patient with a murmur grade > 3/6 and echocardiographic evidence of cardiomegaly, specifically an LA:Ao ratio > 1.6 and an LVIDdn > 1.7."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Should I use breed-specific normals or Cornell scaling?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Standard Cornell scaling is appropriate for most breeds. However, for 'deviant' breeds like Sighthounds or Boxers, published breed-specific reference intervals should be used to avoid mis-staging heart disease."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Should I use LA:Ao or LAD?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The LA:Ao ratio measurement has been the gold standard metric for assessing left atrial size, but has been shown to be challenging to measure reliably especially in inexperienced hands. Moving towards the LAD (left atrial diameter in long axis) is now recommended, and can be scaled to body weight using the allometric scaling formula LAD (cm) / Weight (kg)^0.309. A value > 1.6 is typically considered indicative of left atrial enlargement."
-      }
-    },
-{
-  "@type": "Question",
-  "name": "What parameters are required to calculate the Canine MINE score?",
-  "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "The 4-parameter MINE 1 scoring system requires the LA:Ao ratio, LVIDdn, Fractional Shortening (FS), and E-wave peak velocity. The simplified 3-parameter MINE 2 system utilizes LA:Ao, LVIDdn, and E-wave velocity to classify myxomatous mitral valve disease (MMVD) severity and estimate median survival time (MST)."
-  }
-},
-{
-  "@type": "Question",
-  "name": "How is the Qp:Qs ratio calculated on a veterinary echocardiogram?",
-  "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "The Qp:Qs shunt ratio evaluates pulmonary to systemic blood flow. Systemic stroke volume (Qs) is calculated using the LVOT diameter and LVOT VTI, while pulmonary stroke volume (Qp) uses the RVOT diameter and RVOT VTI via the formula: Stroke Volume = VTI × π × (Diameter / 20)^2. A ratio of 1.0 is normal, while values > 1.5 indicate a hemodynamically significant left-to-right shunt."
-  }
-}
-  ]
-}
-</script>
-
-<script src="/js/echo-breeds.js" defer></script>
-<script src="/js/echocalc.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-<style type="text/css">
-@media print {
-    /* 1. Global Reset - Ensures padding doesn't push width over 100% */
-    * {
-        box-sizing: border-box !important;
-        -webkit-print-color-adjust: exact !important; /* Forces colors/backgrounds */
-        print-color-adjust: exact !important;
-    }
-
-    /* 2. Hide UI Elements */
-    #site-header, #site-footer, .hero, .input-group, .measurements,
-    .export-actions, #breed-selector, .placeholder-text,
-    button, nav, aside, .app-branding, .small, 
-    .install-footer-box, #allometric-card, .Lead, .btn-text {
-        display: none !important;
-    }
-
-    /* 3. Page & Layout Setup */
-    @page {
-        size: auto;
-        margin: 1.5cm !important; /* The physical paper margin */
-    }
-
-    body, html {
-        background: white !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100% !important;
-    }
-
-    /* Containers must be 100% width so they don't fight the @page margin */
-    main, .container, .content, .calculator-card {
-        display: block !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-    }
-
-    /* 4. The Report Sections (The Safety Gutter) */
-    .results-box, .epic-check, #breed-data-container {
-        display: block !important;
-        visibility: visible !important;
-        width: 100% !important;
-        padding: 0 15px !important; /* Internal safety gutter to prevent clipping */
-        border: none !important;
-        margin-bottom: 30px !important;
-        page-break-inside: avoid;
-    }
-
-    /* 5. Custom Branding Header */
-    .results-box::before {
-        content: "VETCARDIOHUB CLINICAL REPORT";
-        display: block;
-        font-size: 10px;
-        letter-spacing: 2px;
-        color: #94a3b8;
-        margin-bottom: 10px;
-    } /* FIXED: This closing brace was missing! */
-
-    /* 6. The Result Row Alignment */
-    .result-row {
-        display: flex !important;
-        justify-content: space-between !important;
-        width: 100% !important;
-        border-bottom: 1px solid #eee !important;
-        padding: 8px 0 !important;
-    }
-
-    /* This targets the right-hand side cluster */
-    .result-row > span:last-child {
-        text-align: right !important;
-        padding-left: 20px !important; /* Prevents values from crowding the label */
-        flex-shrink: 0; /* Prevents the number from being squashed */
-    }
-
-    /* 7. Clinical Colors */
-    .abnormal, [style*="color: #dc2626"] { 
-        color: #dc2626 !important; 
-        font-weight: bold !important; 
-    }
-    .normal, [style*="color: #16a34a"] { 
-        color: #16a34a !important; 
-    }
-    h1, h2, h3, [style*="color: #1e40af"], [style*="color: #16325F"] { 
-        color: #16325F !important; 
-    }
-}
-</style>
-</head>
-
-<body>
-
-
-<div id="site-header"></div>
-
-
-<div x-data="advancedEchoSuite()"
-x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
-
-
-
-<div id="app-only-branding" class="app-branding">VetCardioHub EchoCalc</div>
     <div class="content">
       <div class="container">
-       <header class="hero card">
-      <h1>Echo Calculator</h1>
-      <p class="lead">Enter your echo measurements here to calculate normalised values and see reference ranges.</p>
-    </header>
 
-    <div class="grid">
-      <!-- Main column -->
-      <main>
-        <section class="card">
-         
+        <header class="hero card">
+          <h1>Echo Calculator</h1>
+          <p class="lead">Enter your echo measurements here to calculate normalised values and see reference ranges.</p>
+        </header>
 
-          <div style="margin-top:10px" >
-<div class="calculator-card"><div class="measurements">
+        <!-- 2. TWO-COLUMN RESPONSIVE VIEWPORT GRID -->
+        <div class="grid">
 
-    
-    <p style="color: #666; font-size: 0.9em;">Enter measurements in <strong>mm</strong> and weight in <strong>kg</strong>.</p>
-<button @click="weight = ''; lvidd = ''; lvids = ''; la = ''; ao = ''; lad = ''; lvpwd = ''; lvedv = ''; lvesv = ''" 
+          <!-- ========================================================= -->
+          <!--                    MAIN CALCULATION COLUMN                -->
+          <!-- ========================================================= -->
+          <main>
+            <section class="card">
+              <div style="margin-top:10px">
+                <div class="calculator-card">
+                  <div class="measurements">
+
+                    <p style="color: #666; font-size: 0.9em;">Enter measurements in <strong>mm</strong> and weight in <strong>kg</strong>.</p>
+                      <button @click="weight = ''; lvidd = ''; lvids = ''; la = ''; ao = ''; lad = ''; lvpwd = ''; lvedv = ''; lvesv = ''; ivsd: ''; clinicalComments: '';
+    eVel: '';
+    aVel: '';
+    ivrt: '';
+    lvotd: '';
+    rvotd: '';
+    lvotvti: '';
+    rvotvti: '';
+    ePrime: '';
+    mdt: '';   
+    trMax: ''; 
+    aovmax: '';  
+    pavmax: ''" 
         style="background: #fca5a5; padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; margin-bottom: 10px;">
-    Clear All Measurements
-</button>
-<div style="display: flex; gap: 15px;">
-    <div class="input-group" style="flex: 1;">
-        <label>Body Weight (kg)</label>
-        <input type="number" step="0.1" x-model="weight" placeholder="e.g. 10.5">
-    </div>
-     <div class="input-group" style="margin-bottom: 20px; flex: 1;">
-    <label style="font-weight: bold; font-size: 0.9em;">Species/Breed Reference Model:</label>
-    <select x-model="selectedModel" class="form-select">
-        <template x-for="(model, key) in allometricModels" :key="key">
-            <option :value="key" x-text="model.label"></option>
-        </template>
-    </select>
-</div></div>
-<h2>LV Measurements:</h2>
-    <div style="display: flex; gap: 15px;">
-        <div class="input-group" style="flex: 1;">
-            <label>LVIDd (mm)</label>
-            <input type="number" step="0.01" x-model="lvidd" 
-        placeholder="e.g. 32"
-        :class="{ 
-            'input-warning': lvidd > 0 && lvidd < 8, 
-            'input-error': lvidd > 100 
-        }">
-    
-    <template x-if="lvidd > 0 && lvidd < 8">
-        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
-    </template>
-    
-    <template x-if="lvidd > 100">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
-    </template>
-
-        </div>
-        <div class="input-group" style="flex: 1;">
-            <label>LVIDs (mm)</label>
-            <input type="number" step="0.01" x-model="lvids" placeholder="e.g. 21" :class="{ 
-            'input-warning': lvids > 0 && lvids < 8, 
-            'input-error': lvids > 100 
-        }">
-    
-    <template x-if="lvids > 0 && lvids < 6">
-        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
-    </template>
-    
-    <template x-if="lvids > 100">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
-    </template>
-        </div>
-        <div class="input-group" style="flex: 1;">
-            <label>IVSd (mm)</label>
-            <input type="number" step="0.01" x-model="ivsd" placeholder="e.g. 8">
-        </div>
-        <div class="input-group" style="flex: 1;">
-            <label>LVPWd (mm)</label>
-            <input type="number" step="0.01" x-model="lvpwd" placeholder="e.g. 8">
-        </div>
-    </div>
-
-<div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
-    <button @click="showVolumes = !showVolumes" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
-        <span><i class="fa-solid fa-cube"></i> Advanced Volumetric Indices</span>
-        <i class="fa-solid" :class="showVolumes ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-    </button>
-    <div x-show="showVolumes" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9; display: flex; gap: 15px;">
-      <div style="display: flex; gap: 15px;">
-        <div class="input-group" style="flex: 1;">
-            <label>LVEDV modified Simpsons (ml)</label>
-            <input type="number" step="0.01" x-model="lvedv" placeholder="e.g. 65">
-        </div>
-        <div class="input-group" style="flex: 1;">
-            <label>LVESV modified Simpsons (ml)</label>
-            <input type="number" step="0.01" x-model="lvesv" placeholder="e.g. 35">
-        </div>
-       </div>
-
-    </div>
-</div>
-
-
-
-
-<h2>LA Measurements:</h2>
-    <div style="display: flex; gap: 15px;">
-        <div class="input-group" style="flex: 1;">
-            <label>LA short-axis (mm)</label>
-            <input type="number" step="0.01" x-model="la" placeholder="e.g. 20" :class="{ 
-            'input-warning': la > 0 && la < 6, 
-            'input-error': la > 100 
-        }">
-    
-    <template x-if="la > 0 && la < 6">
-        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
-    </template>
-    
-    <template x-if="la > 100">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
-    </template>
-        </div>
-        <div class="input-group" style="flex: 1;">
-            <label>Ao Diameter (mm)</label>
-            <input type="number" step="0.01" x-model="ao" placeholder="e.g. 15" :class="{ 
-            'input-warning': ao > 0 && ao < 4, 
-            'input-error': ao > 100 
-        }">
-    
-    <template x-if="ao > 0 && ao < 4">
-        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
-    </template>
-    
-    <template x-if="ao > 100">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
-    </template>
-        </div>
-    </div>
-
-   <div class="input-group">
-        <label>LA Long Axis (LAD) (mm)</label>
-        <input type="number" step="0.1" x-model="lad" placeholder="e.g. 20" :class="{ 
-            'input-warning': lad > 0 && lad < 8, 
-            'input-error': lad > 100 
-        }">
-    
-    <template x-if="lad > 0 && lad < 8">
-        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
-    </template>
-    
-    <template x-if="lad > 100">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
-    </template>
-    </div>
-
-
-
-
-
-<div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
-    <button @click="showDoppler = !showDoppler" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
-        <span><i class="fa-solid fa-wave-square"></i> Spectral Doppler</span>
-        <i class="fa-solid" :class="showDoppler ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-    </button>
-    <div x-show="showDoppler" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
-        <div style="display: flex; gap: 15px;">
-            <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">E-wave Peak Vel (m/s)</label>
-                <input type="number" step="0.01" x-model="eVel" placeholder="e.g. 0.85" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': eVel > 0 && eVel < 0.2, 
-            'input-error': eVel > 5
-        }">
-    <template x-if="eVel > 0 && eVel < 0.2">
-        <div class="warning-text">⚠️ Value too low.</div>
-    </template>
-    
-    <template x-if="eVel > 5">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
-    </template>
-
-            </div>
-            <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">A-wave Peak Vel (m/s)</label>
-                <input type="number" step="0.01" x-model="aVel" placeholder="e.g. 0.55" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': aVel > 0 && aVel < 0.2, 
-            'input-error': aVel > 5 
-        }">
-    <template x-if="aVel > 0 && aVel < 0.2">
-        <div class="warning-text">⚠️ Value too low.</div>
-    </template>
-    
-    <template x-if="aVel > 5">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
-    </template>
-
-            </div>
-<div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">IVRT (ms)</label>
-                <input type="number" step="1" x-model="ivrt" placeholder="e.g. 55" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': ivrt > 0 && ivrt < 15, 
-            'input-error': ivrt > 150 
-        }">
-    <template x-if="ivrt > 0 && ivrt < 15">
-        <div class="warning-text">⚠️ Value too low for ms.</div>
-    </template>
-    
-    <template x-if="ivrt > 150">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for ms.</div>
-    </template>
-
-            </div>
-         </div>
-
-      <div style="display: flex; gap: 15px;">
-        <div class="input-group"  style="flex: 1;">
-          <label style="font-weight: 600; font-size: 0.85rem;">Mitral DT (ms)</label>
-          <input type="number" step="1" x-model="mdt" placeholder="e.g. 80" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;">
-       </div>
-       <div class="input-group"  style="flex: 1;">
-        <label style="font-weight: 600; font-size: 0.85rem;">Mitral E' (cm/s)</label>
-        <input type="number" step="0.1" x-model="ePrime" placeholder="e.g. 6.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;">
-       </div>
-            <div class="input-group"  style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">Ao VMax (m/s)</label>
-                <input type="number" step="0.01" x-model="aovmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': aovmax > 0 && aovmax < 0.2, 
-            'input-error': aovmax > 10
-        }">
-    <template x-if="aovmax > 0 && aovmax < 0.2">
-        <div class="warning-text">⚠️ Value too low for m/s.</div>
-    </template>
-    
-    <template x-if="aovmax > 10">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
-    </template>
-            </div>
-
-  
-
-          <div class="input-group"  style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">PA VMax (m/s)</label>
-                <input type="number" step="0.01" x-model="pavmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': pavmax > 0 && pavmax < 0.2, 
-            'input-error': pavmax > 10
-        }">
-    <template x-if="pavmax > 0 && pavmax < 0.2">
-            <div class="warning-text">⚠️ Value too low for m/s.</div>
-    </template>
-    
-    <template x-if="pavmax > 10">
-            <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
-    </template>
-          </div>
-      </div>
-    </div>
-</div>
-
-<div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
-    <button @click="showShunt = !showShunt" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
-        <span><i class="fa-solid fa-scale-balanced"></i> Shunt and VTI Ratios</span>
-        <i class="fa-solid" :class="showShunt ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-    </button>
-    <div x-show="showShunt" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
-        <div style="display: flex; gap: 15px;">
-            <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">LVOT diam (mm)</label>
-                <input type="number" step="0.01" x-model="lvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': lvotd > 0 && lvotd < 5, 
-            'input-error': lvotd > 30
-        }">
-    <template x-if="lvotd > 0 && lvotd < 5">
-        <div class="warning-text">⚠️ Value too low for mm.</div>
-    </template>
-    
-    <template x-if="lvotd > 30">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
-    </template>
-            </div>
-
-          <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">LVOT VTI (<strong>cm</strong>)</label>
-                <input type="number" step="0.01" x-model="lvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': lvotvti > 0 && lvotvti < 4, 
-            'input-error': lvotvti > 50
-        }">
-    <template x-if="lvotvti > 0 && lvotvti < 4">
-        <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
-    </template>
-    
-    <template x-if="lvotvti > 50">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for cm. Or consistent with severe aortic stenosis.</div>
-    </template>
-
-            </div>
-
-<div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">RVOT diam (mm)</label>
-                <input type="number" step="0.01" x-model="rvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': rvotd > 0 && rvotd < 5, 
-            'input-error': rvotd > 30
-        }">
-    <template x-if="rvotd > 0 && rvotd < 5">
-        <div class="warning-text">⚠️ Value too low for mm.</div>
-    </template>
-    
-    <template x-if="rvotd > 30">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
-    </template>
-            </div>
-
-          <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">RVOT VTI (<strong>cm</strong>)</label>
-                <input type="number" step="0.01" x-model="rvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': rvotvti > 0 && rvotvti < 4, 
-            'input-error': rvotvti > 50
-        }">
-    <template x-if="rvotvti > 0 && rvotvti < 4">
-        <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
-    </template>
-    
-    <template x-if="rvotvti > 50">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for cm. Or consistent with severe pulmonic stenosis.</div>
-    </template>
-
-            </div>
-
-
-        </div>
-    </div>
-</div>
-
-<div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
-    <button @click="showRightHeart = !showRightHeart" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
-        <span><i class="fa-solid fa-heart-pulse"></i> Right Heart & Pulmonary System</span>
-        <i class="fa-solid" :class="showRightHeart ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-    </button>
-    <div x-show="showRightHeart" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
-      <div style="display: flex; gap: 15px;">
-
-
-            <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">TR Peak Vel (m/s)</label>
-                <input type="number" step="0.01" x-model="trMax" placeholder="e.g. 2.6" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': trMax > 0 && trMax < 0.9, 
-            'input-error': trMax > 8 
-        }">
-    <template x-if="trMax > 0 && trMax < 0.9">
-        <div class="warning-text">⚠️ Value too low.</div>
-    </template>
-    
-    <template x-if="trMax > 8">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
-    </template>
-
-            </div>
-
-      </div>
-    </div>
-</div>
-
-
-</div>
-
-
-
-
-    <div class="results-box" x-transition>
-
-
-<p style="font-weight: bold; color: #1e40af; border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-bottom: 5px; font-size: 1.2rem;">
-    <span style="text-transform: capitalize;" x-text="allometricModels[selectedModel].species"></span> Echocardiography Report
-</p>
-
-<p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">
-    <strong>Weight:</strong> <span x-text="weight || '—'"></span> kg | 
-    <strong>BSA:</strong> <span x-text="bsa || '—'"></span> m² | 
-    <strong>Model:</strong> <span x-text="allometricModels[selectedModel].label"></span>
-</p>
-
-<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px;">
-
-
-Left Ventricle:
-
-
-</p>
-     <div class="result-row" x-show="lvidd">
-    <span><strong>LVIDd</strong></span>
-    <span>
-        <span x-text="lvidd"></span> mm
-        <span x-show="parseFloat(lvidd) > allometricResults.lvidd.max" class="abnormal">(Enlarged)</span>
-        <span x-show="parseFloat(lvidd) < allometricResults.lvidd.min" class="abnormal">(Small)</span>
-        <span x-show="parseFloat(lvidd) >= allometricResults.lvidd.min && parseFloat(lvidd) <= allometricResults.lvidd.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvidd.min + '-' + allometricResults.lvidd.max + ')'"></span>
-    </span>
-</div>
-
-<div class="result-row" x-show="lvids">
-    <span><strong>LVIDs</strong></span>
-    <span>
-        <span x-text="lvids"></span> mm
-<template x-if="allometricResults.lvids.available"><span>
-        <span x-show="parseFloat(lvids) > allometricResults.lvids.max" class="abnormal">(Enlarged)</span>
-        <span x-show="parseFloat(lvids) <= allometricResults.lvids.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvids.min + '-' + allometricResults.lvids.max + ')'"></span></span>
-</template>
-        
-        <template x-if="!allometricResults.lvids.available">
-            <span style="font-size: 0.8em; color: #999;">(No ref)</span>
-        </template>
-    </span>
-</div>
-
-<div class="result-row" x-show="ivsd">
-    <span><strong>IVSd</strong></span>
-    <span>
-        <span x-text="ivsd"></span> mm
-        <span x-show="parseFloat(ivsd) > allometricResults.ivsd.max" class="abnormal">(Thickened)</span>
-        <span x-show="parseFloat(ivsd) <= allometricResults.ivsd.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ivsd.min + '-' + allometricResults.ivsd.max + ')'"></span>
-    </span>
-</div>
-
-<div class="result-row" x-show="lvpwd">
-    <span><strong>LVFWd</strong></span>
-    <span>
-        <span x-text="lvpwd"></span> mm
-        <span x-show="parseFloat(lvpwd) > allometricResults.lvpwd.max" class="abnormal">(Thickened)</span>
-        <span x-show="parseFloat(lvpwd) <= allometricResults.lvpwd.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvpwd.min + '-' + allometricResults.lvpwd.max + ')'"></span>
-    </span>
-</div>
-
-        <div class="result-row" x-show="fs">
-            <span><strong>Fractional Shortening</strong></span>
-            <span>
-                 <span x-text="`${fs}%`"></span>
-                <span x-show="fs >= 25" class="normal">(Normal)</span>
-                <span x-show="fs < 25 && fs > 0" class="abnormal">(Abnormal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &gt;25) </span>
-            </span>
-        </div>
-        <div class="result-row" x-show="ef">
-            <span><strong>Ejection Fraction</strong></span>
-           <span>
-            <span x-text="`${ef}%`"></span>
-                <span x-show="ef >= 50" class="normal">(Normal)</span>
-                <span x-show="ef < 50 && ef > 0" class="abnormal">(Abnormal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &gt;50) </span>
-           </span>
-        </div>
-        <div class="result-row" x-show="lvedv">
-            <span><strong>LVEDV</strong></span>
-            <span>
-                <span x-text="lvedv"></span>ml
-            </span>
-        </div>
-
-        <div class="result-row" x-show="lvesv">
-            <span><strong>LVESV</strong></span>
-            <span>
-                <span x-text="lvesv"></span>ml
-
-            </span>
-        </div>
-
-<div x-show="isDog" x-transition>
-        <div class="result-row" x-show="lviddn">
-            <span><strong>LVIDDN</strong> (Cornell)</span>
-            <span>
-                <span x-text="lviddn"></span>
-                <span x-show="lviddn >= 1.85" class="abnormal">(Enlarged)</span>
-                <span x-show="lviddn >= 1.7 && lviddn < 1.85" class="abnormal">(Borderline Enlarged)</span>
-                <span x-show="lviddn < 1.7 && lviddn >= 1.27" class="normal">(Normal)</span>
-                <span x-show="lviddn < 1.27 && lviddn > 0" class="abnormal">(Underfilled)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 1.27 - 1.7) </span>
-            </span>
-        </div>
-
-        <div class="result-row" x-show="lvidsn">
-            <span><strong>LVIDSN</strong> (Cornell)</span>
-            <span>
-                <span x-text="lvidsn"></span>
-                <span x-show="lvidsn >= 1.26" class="abnormal">(Enlarged)</span>
-                <span x-show="lvidsn < 1.26 && lvidsn >= 0.71" class="normal">(Normal)</span>
-                <span x-show="lvidsn < 0.71 && lvidsn > 0" class="abnormal">(Underfilled)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 0.71 - 1.26) </span>
-            </span>
-        </div>
-
-
-
-        <div class="result-row" x-show="RWT">
-            <span><strong>Relative Wall Thickness</strong></span>
-            <span><span x-text="RWT"></span>
-                <span x-show="RWT >= 0.43" class="abnormal">(Thick Walls)</span>
-                <span x-show="RWT < 0.43 && RWT > 0.31" class="normal">(Normal Walls)</span>
-                <span x-show="RWT <= 0.31 && RWT > 0" class="abnormal">(Thin Walls)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 0.32-0.42) </span>
-            </span>
-        </div>
-        <div class="result-row" x-show="lvedvbw">
-            <span><strong>LVEDV / BW</strong></span>
-            <span>
-                <span x-text="lvedvbw"></span>
-                <span x-show="lvedvbw >= 3" class="abnormal">(Enlarged)</span>
-                <span x-show="lvedvbw < 3 && lvedvbw >= 1.25" class="normal">(Normal)</span>
-                <span x-show="lvedvbw < 1.25 && lvedvbw > 0" class="abnormal">(Underfilled)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 1.25 - 3.00) </span>
-            </span>
-        </div>
-
-        <div class="result-row" x-show="lvesvbw">
-            <span><strong>LVESV / BW</strong></span>
-            <span>
-                <span x-text="lvesvbw"></span>
-                <span x-show="lvesvbw >= 1.35" class="abnormal">(Enlarged)</span>
-                <span x-show="lvesvbw < 1.35 && lvesvbw >= 0.3" class="normal">(Normal)</span>
-                <span x-show="lvesvbw < 0.3 && lvesvbw > 0" class="abnormal">(Underfilled)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 0.3 - 1.35) </span>
-            </span>
-        </div>
-<div class="result-row" x-show="edvim2">
-    <span><strong>LVEDV / m²</strong></span>
-    <span>
-        <span x-text="edvim2"></span>
-<span x-show="edvim2 < 100 " class="normal">(Normal)</span>
-        <span x-show="edvim2 >= 100" class="abnormal">(Enlarged)</span>
-        <span style="font-size: 0.8em; color: #666;"> ml/m² (ref <100)</span>
-    </span>
-</div>
-<div class="result-row" x-show="esvim2">
-    <span><strong>LVESV / m²</strong></span>
-    <span>
-        <span x-text="esvim2"></span>
-        <span x-show="esvim2 >= 30" class="abnormal">(Enlarged)</span>
-        <span style="font-size: 0.8em; color: #666;"> ml/m² (ref <30)</span>
-    </span>
-</div>
-
-
-<div class="result-row" x-show="sv">
-    <span><strong>LV Stroke Vol</strong></span>
-    <span>
-        <span x-text="sv"></span>
-        <span style="font-size: 0.8em; color: #666;"> ml</span>
-    </span>
-</div>
-<div class="result-row" x-show="qs">
-    <span><strong>Systemic Stroke Vol</strong></span>
-    <span>
-        <span x-text="qs"></span>
-        <span style="font-size: 0.8em; color: #666;"> ml</span>
-    </span>
-</div>
-<div class="result-row" x-show="mrVol">
-    <span><strong>Mitral Regurgitant Vol</strong></span>
-    <span>
-        <span x-text="mrVol"></span>
-        <span style="font-size: 0.8em; color: #666;"> ml</span>
-    </span>
-</div>
-<div class="result-row" x-show="mrFraction > 0" x-transition>
-    <span><strong>MR Fraction</strong></span>
-    <span>
-        <span x-text="`${mrFraction}%` "></span>
-        <span x-show="mrFraction >= 50" class="abnormal">(Severe Regurgitation)</span>
-        <span x-show="mrFraction >= 30 && mrFraction < 50" class="abnormal">(Moderate)</span>
-        <span x-show="mrFraction < 30" class="normal">(Mild)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="` (Vol: ${mrVol}ml / SV: ${sv}ml)`"></span>
-    </span>
-</div>
-
-
-
-</div>
-
-<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
-
-
-Left Atrium:
-
-
-</p>
-<div class="result-row" x-show="la">
-    <span><strong>LA</strong></span>
-    <span>
-        <span x-text="la"></span> mm
-<template x-if="allometricResults.la.available"><span>
-        <span x-show="parseFloat(la) > allometricResults.la.max" class="abnormal">(Enlarged)</span>
-        <span x-show="parseFloat(la) <= allometricResults.la.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.la.min + '-' + allometricResults.la.max + ')'"></span></span>
-</template>
-        
-        <template x-if="!allometricResults.la.available">
-            <span style="font-size: 0.8em; color: #999;">(No ref)</span>
-        </template>
-    </span>
-</div>
-
-<div class="result-row" x-show="ao">
-    <span><strong>Ao</strong></span>
-    <span>
-        <span x-text="ao"></span> mm
-<template x-if="allometricResults.ao.available"><span>
-        <span x-show="parseFloat(ao) > allometricResults.ao.max" class="abnormal">(Dilated)</span>
-        <span x-show="parseFloat(ao) <= allometricResults.ao.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ao.min + '-' + allometricResults.ao.max + ')'"></span></span>
-</template>
-        
-        <template x-if="!allometricResults.ao.available">
-            <span style="font-size: 0.8em; color: #999;">(No ref)</span>
-        </template>
-    </span>
-</div>
-
-<div class="result-row" x-show="lad">
-    <span><strong>LAD</strong> (Long Axis)</span>
-    <span>
-        <span x-text="lad"></span> mm
-<template x-if="allometricResults.lad.available"><span>
-        <span x-show="parseFloat(lad) > allometricResults.lad.max" class="abnormal">(Enlarged)</span>
-        <span x-show="parseFloat(lad) <= allometricResults.lad.max" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lad.min + '-' + allometricResults.lad.max + ')'"></span></span>
-</template>
-        
-        <template x-if="!allometricResults.lad.available">
-            <span style="font-size: 0.8em; color: #999;">(No ref)</span>
-        </template>
-    </span>
-</div>
-
-        <div class="result-row" x-show="laAo">
-            <span><strong>LA:Ao Ratio</strong></span>
-            <span>
-                <span x-text="laAo"></span>
-                <span x-show="laAo >= 1.65" class="abnormal">(Enlarged)</span>
-                <span x-show="laAo < 1.65 && laAo > 0" class="normal">(Normal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.65) </span>
-            </span>
-        </div>
- 
-
-
-<div x-show="isDog" x-transition>
-        <div class="result-row" x-show="lan">
-            <span><strong>LA (short axis) Normalised</strong></span>
-            <span>
-                <span x-text="lan"></span>
-                <span x-show="lan >= 1.17" class="abnormal">(Enlarged)</span>
-                <span x-show="lan < 1.17 && laAo > 0" class="normal">(Normal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.17) </span>
-            </span>
-        </div>
-
-             <div class="result-row" x-show="ladao">
-            <span><strong>LAD : Ao(short axis)</strong></span>
-            <span>
-                <span x-text="ladao"></span>
-                <span x-show="ladao >= 2.1" class="abnormal">(Enlarged)</span>
-                <span x-show="ladao < 2.1 && ladao > 0" class="normal">(Normal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &lt;2.1) </span>
-            </span>
-        </div>
-
-
-        <div class="result-row" x-show="ladn">
-            <span><strong>LADN</strong></span>
-            <span>
-                <span x-text="ladn"></span>
-                <span x-show="ladn >= 1.6" class="abnormal">(Enlarged)</span>
-                <span x-show="ladn < 1.6 && ladn > 0" class="normal">(Normal)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.6) </span>
-            </span>
-        </div>
-</div>
-
-<div x-show="hasSectionData(['eVel', 'aVel', 'ivrt', 'mdt', 'ePrime', 'aovmax', 'pavmax'])">
-<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
-Spectral Doppler and Flow:
-</p></div>
-        <div class="result-row" x-show="eVel">
-            <span><strong>E vel</strong></span>
-            <span>
-                <span x-text="eVel"></span>
-                <span x-show="eVel > 1.0" class="abnormal">(High)</span>
-                <span x-show="eVel <= 1.0 && eVel >= 0.6" class="normal">(Normal)</span>
-                <span x-show="eVel < 0.6 && eVel > 0" class="abnormal">(Low)</span>
-                <span style="font-size: 0.8em; color: #666;">m/s (ref 0.6 - 1.0) </span>
-            </span>
-        </div>
-        <div class="result-row" x-show="aVel">
-            <span><strong>A vel</strong></span>
-            <span>
-                <span x-text="aVel"></span>
-                <span x-show="aVel > 0.8" class="abnormal">(High)</span>
-                <span x-show="aVel <= 0.8 && aVel >= 0.3" class="normal">(Normal)</span>
-                <span x-show="aVel < 0.3 && aVel > 0" class="abnormal">(Low)</span>
-                <span style="font-size: 0.8em; color: #666;">m/s (ref 0.3 - 0.8) </span>
-            </span>
-        </div>
-        <div class="result-row" x-show="ivrt">
-            <span><strong>IVRT</strong></span>
-            <span>
-                <span x-text="ivrt"></span>
-                <span x-show="ivrt > 80" class="abnormal">(prolonged)</span>
-                <span x-show="ivrt <= 80 && ivrt >= 50" class="normal">(Normal)</span>
-                <span x-show="ivrt < 50 && ivrt > 0" class="abnormal">(short)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 50 - 80) </span>
-            </span>
-        </div>
-        <div class="result-row" x-show="mdt">
-            <span><strong>E wave DT</strong></span>
-            <span>
-                <span x-text="mdt"></span>
-                <span x-show="mdt > 100" class="abnormal">(prolonged)</span>
-                <span x-show="mdt <= 100 && mdt >= 60" class="normal">(Normal)</span>
-                <span x-show="mdt < 60 && mdt > 0" class="abnormal">(short)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 60 - 100) </span>
-            </span>
-        </div>
-        <div class="result-row" x-show="ear">
-            <span><strong>E:A Ratio</strong></span>
-            <span>
-                <span x-text="ear"></span>
-                <span x-show="ear > 1.6" class="abnormal">(High)</span>
-                <span x-show="ear <= 1.6 && ear >= 0.95" class="normal">(Normal)</span>
-                <span x-show="ear < 0.95 && ear > 0" class="abnormal">(Low)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 0.95 - 1.6) </span>
-            </span>
-        </div>
-        <div class="result-row" x-show="eivrt">
-            <span><strong>E:IVRT Ratio</strong></span>
-            <span>
-                <span x-text="eivrt"></span>
-        <span x-show="eivrt >= 2.5" class="abnormal">(HIGH LAP)</span>
-        <span x-show="eivrt < 2.5" class="normal">(Normal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="` (E: ${eVel}m/s / IVRT: ${ivrt}ms; ref <2.5)`"></span>
-            </span>
-        </div>
-        <div class="result-row" x-show="ePrime">
-            <span><strong>E'</strong></span>
-            <span>
-                <span x-text="ePrime"></span>
-        <span x-show="ePrime >= 6.5" class="normal">(Normal)</span>
-                <span x-show="ePrime < 12 && ePrime > 0" class="abnormal">(Low)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="` (ref >6.5)`"></span>
-            </span>
-        </div>
-        <div class="result-row" x-show="eePrime">
-            <span><strong>E:E' ratio</strong></span>
-            <span>
-                <span x-text="eePrime"></span>
-        <span x-show="eePrime >= 12" class="abnormal">(HIGH LAP)</span>
-        <span x-show="eePrime < 8" class="normal">(Normal)</span>
-                <span x-show="eePrime < 12 && eePrime >= 8" class="abnormal">(Equivocal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="` (ref <12)`"></span>
-            </span>
-        </div>
-    <div class="result-row" x-show="aovmax">
-    <span><strong>Aortic VMax</strong></span>
-    <span>
-        <span x-text="aovmax"></span> m/s 
-        <span style="font-weight: bold;" :class="aoStenosisGrade.class" x-text="`[${aoStenosisGrade.label}]` "></span>
-        <span style="font-size: 0.85em; color: #475569; font-weight: 600;" x-text="` (${aoGradient} mmHg)`"></span>
-    </span>
-    </div>
-    <div class="result-row" x-show="pavmax">
-    <span><strong>Pulmonic VMax</strong></span>
-    <span>
-        <span x-text="pavmax"></span> m/s 
-        <span style="font-weight: bold;" :class="paStenosisGrade.class" x-text="`[${paStenosisGrade.label}]` "></span>
-        <span style="font-size: 0.85em; color: #475569; font-weight: 600;" x-text="` (${paGradient} mmHg)`"></span>
-    </span>
-    </div>
-
-<div x-show="hasSectionData(['lvotd', 'rvotd', 'lvotvti', 'rvotvti'])">
-<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
-Shunt Ratios (Qp:Qs):
-</p></div>
-
-        <div class="result-row" x-show="lvotd">
-            <span><strong>LVOT diameter</strong></span>
-            <span>
-                <span x-text="lvotd"></span>
-                <span style="font-size: 0.8em; color: #666;"> mm</span>
-            </span>
-        </div>
-        <div class="result-row" x-show="rvotd">
-            <span><strong>RVOT diameter</strong></span>
-            <span>
-                <span x-text="rvotd"></span>
-                <span style="font-size: 0.8em; color: #666;"> mm</span>
-            </span>
-        </div>
-        <div class="result-row" x-show="lvotvti">
-            <span><strong>LVOT VTI</strong></span>
-            <span>
-                <span x-text="lvotvti"></span>
-                <span style="font-size: 0.8em; color: #666;"> cm</span>
-            </span>
-        </div>
-       <div class="result-row" x-show="rvotvti">
-            <span><strong>RVOT VTI</strong></span>
-            <span>
-                <span x-text="rvotvti"></span>
-                <span style="font-size: 0.8em; color: #666;"> cm</span>
-            </span>
-        </div>
-
-        <div class="result-row" x-show="vtir">
-            <span><strong>VTI Ratio P:S</strong></span>
-            <span>
-                <span x-text="vtir"></span>
-                <span x-show="vtir > 1.1" class="abnormal">(High)</span>
-                <span x-show="vtir <= 1.1 && vtir >= 0.9" class="normal">(Normal)</span>
-                <span x-show="vtir < 0.9 && vtir > 0" class="abnormal">(Low)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 0.9 - 1.1) </span>
-            </span>
-        </div>
-
-        <div class="result-row" x-show="qpqs">
-            <span><strong>Qp:Qs Ratio</strong></span>
-            <span>
-                <span x-text="qpqs"></span>
-                <span x-show="qpqs > 1.1" class="abnormal">(High)</span>
-                <span x-show="qpqs <= 1.1 && qpqs >= 0.9" class="normal">(Normal)</span>
-                <span x-show="qpqs < 0.9 && qpqs > 0" class="abnormal">(Low)</span>
-                <span style="font-size: 0.8em; color: #666;"> (ref 0.9 - 1.1) </span>
-            </span>
-        </div>
-  
-
-
-<div x-show="hasSectionData(['trMax', 'rvotd', 'rvotvti'])">
-<p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">
-Right Heart:
-</p></div>
-       <div class="result-row" x-show="trMax">
-            <span><strong>TR Vel</strong></span>
-            <span>
-                <span x-text="trMax"></span>
-        <span x-show="trMax >= 3.2" class="abnormal">(HIGH)</span>
-        <span x-show="trMax < 2.7" class="normal">(Normal)</span>
-                <span x-show="trMax < 3.2 && trMax >= 2.7" class="abnormal">(Equivocal)</span>
-        <span style="font-size: 0.8em; color: #666;" x-text="` (ref <2.7)`"></span>
-            </span>
-        </div>
-
-<div x-show="clinicalComments" class="report-comments" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-    <h3 style="color: #1e40af; font-size: 1.1rem; margin-bottom: 5px;">Clinical Observations & Plan:</h3>
-    <p x-text="clinicalComments" style="font-style: italic; white-space: pre-wrap; color: #334155; line-height: 1.4;"></p>
-</div>
-
-
-    </div>
-</div>
-
-<div style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-    <button @click="showComments = !showComments" class="btn-text" style="font-size: 0.85rem; margin-bottom: 10px;">
-        <i class="fa-solid" :class="showComments ? 'fa-minus' : 'fa-plus'"></i> 
-        <span x-text="showComments ? ' Hide Observations' : ' Add Clinical Observations/Plan'"></span>
-    </button>
-
-    <div x-show="showComments" x-transition style="margin-bottom: 15px;">
-        <textarea x-model="clinicalComments" 
-                  placeholder="e.g. Mild MR. No evidence of CHF. Recheck 6 months." 
-                  style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem;"></textarea>
-    </div>
-</div>
-
-<div class="export-container" style="margin-top: 30px; border-top: 2px solid #f1f5f9; padding-top: 20px;">
-    <p style="font-size: 0.8rem; color: #64748b; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
-        Report Export Options
-    </p>
-    
-    <div class="export-actions">
-        <div style="position: relative; flex: 1;">
-            <button @click="exportToClipboard()" class="action-btn btn-primary">
-                <i class="fa-solid fa-copy"></i> Copy Text
-            </button>
-        <div x-show="copySuccess" 
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 transform -translate-y-2"
-             x-transition:leave="transition ease-in duration-300"
-             style="position: absolute; top: -40px; left: 0; background: #065f46; color: white; padding: 5px 12px; border-radius: 4px; font-size: 0.8rem; white-space: nowrap; z-index: 10;">
-            <i class="fa-solid fa-check"></i> Report Copied to Clipboard!
-        </div>
-        </div>
-
-            <button @click="shareReport()" class="action-btn btn-primary" style="flex: 1;">
-                <i class="fa-solid fa-share-nodes"></i> Share
-            </button>
-  
-
-        <button @click="window.print()" class="action-btn btn-primary" style="flex: 1.2;">
-            <i class="fa-solid fa-file-pdf"></i> Save PDF Report
-        </button>
-    </div>
-</div>
-
-
-
-
-
-          </div>
-
-        </section>
-
-
-        <section class="card" style="margin-top:18px">
-         
-
-
-          <article class="epic-check" style="margin-top:12px">
-<div x-show="isDog">
-<h2 style="color: #16325F;"><i class="fa-solid fa-shield-dog"></i> Canine EPIC Check</h2>
-<p>(Applicable to <strong>Degenerative Mitral Valve Disease</strong> cases only)</p>
-<p><span>Left Atrial Enlargement (LA:Ao > 1.65) - </span>
-<span x-show="laAo >= 1.9" class="abnormal">Very Enlarged</span>
-<span x-show="laAo >= 1.65 && laAo <1.85" class="abnormal">Slightly Enlarged - Check LAD</span>
-<span x-show="laAo < 1.65 && laAo >0" class="normal">Normal</span>
-<span x-show="laAo == 0 || laAo == ''" style="color: #666;">Awaiting measurements...</span></p>
-
-<p>
-                    <span>LV Enlargement (LVIDDN > 1.7) - </span>
-                    <span x-show="lviddn >= 1.85" class="abnormal">Very Enlarged</span>
-<span x-show="lviddn >= 1.7 && lviddn <1.85" class="abnormal">Slightly Enlarged - Check Breed Normal</span>
-                    <span x-show="lviddn < 1.7 && lviddn > 0" class="normal">Normal</span>
-<span x-show="lviddn == 0 || lviddn == ''" style="color: #666;">Awaiting measurements...</span>
-                </p>
-
-<p>
-                    <span>EPIC - </span>
-<span x-show="lviddn >= 1.7 && laAo >= 1.65" class="abnormal">
-    Meets Echo Criteria for Stage B2
-</span>
-
-<span x-show="(lviddn > 0 && laAo > 0) && (lviddn < 1.7 || laAo < 1.65)" class="normal">
-    Does Not Meet Criteria
-</span>
-
-<span x-show="lviddn == 0 || laAo == 0" style="color: #666;">
-    Awaiting measurements...
-</span>
-                </p>
-<div x-show="lviddn >= 1.7 && laAo >= 1.6" 
-     style="background-color: #fef2f2; border: 2px solid #ef4444; padding: 15px; border-radius: 8px; margin-top: 20px;">
-    <h3 style="color: #b91c1c; margin-top: 0;">⚠️ Stage B2 Potential</h3>
-    <p style="margin: 0;">This patient meets the <strong>EPIC Trial</strong> echo criteria for Stage B2. In the presence of a grade &ge;3/6 murmur, pimobendan may be indicated.</p>
-</div>
-<div x-show="lviddn >= 1.7" style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 12px; margin-top: 15px; font-size: 0.85rem; color: #0369a1;">
-    <strong>💡 Clinical Nuance:</strong> The EPIC trial uses a threshold of <strong>>1.70</strong> for LVIDdn to define cardiomegaly. This is more sensitive than the statistical 95% limit (1.85) to ensure at-risk patients aren't missed. 5% of dogs will have normal hearts > 1.7 and especially athletic/sighthound breeds.
-</div>
-</div>
-
-
-<div x-show="isCat">
-        <h2 style="color: #16325F;"><i class="fa-solid fa-cat"></i> Feline Risk Assessment</h2>
-        <p style="font-size: 0.85rem; color: #64748b;">(ISCAID / HCM Screening Guidelines)</p>
-<div style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-
-<p>HCM Phenotype (Wall &ge; 6mm): 
-                <span :class="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'abnormal' : 'normal'" 
-                      x-text="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'DETECTED' : 'Not Detected'"></span>
-            </p>
-
-    <p style="margin-bottom: 8px;">
-        <strong>ATE / Thrombus Risk:</strong> 
-        
-        <template x-if="parseFloat(lad) >= 20">
-            <span class="abnormal" style="color: #dc2626; font-weight: bold;">[HIGH RISK]</span>
-        </template>
-        
-        <template x-if="parseFloat(lad) >= 17 && parseFloat(lad) < 20">
-            <span style="color: #ea580c; font-weight: bold;">[MODERATE RISK]</span>
-        </template>
-        
-        <template x-if="parseFloat(lad) > 0 && parseFloat(lad) < 17">
-            <span class="normal" style="color: #16a34a; font-weight: bold;">[LOWER RISK]</span>
-        </template>
-        
-        <span x-show="lad" x-text="' (LAD: ' + lad + 'mm)'" style="color: #64748b; font-size: 0.9rem;"></span>
-    </p>
-
-    <div x-show="parseFloat(lad) >= 20" class="alert-box-red" style="background-color: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
-        <i class="fa-solid fa-triangle-exclamation"></i> <strong>Severe LA Enlargement:</strong> High risk of ATE. Recommend Clopidogrel and screening for "smoke" or thrombus.
-    </div>
-
-    <div x-show="parseFloat(lad) >= 17 && parseFloat(lad) < 20" style="background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; padding: 12px; border-radius: 6px;">
-        <i class="fa-solid fa-circle-info"></i> <strong>Moderate LA Enlargement:</strong> Risk of thrombus formation present. Clinical monitoring and consideration of antiplatelet therapy indicated.
-    </div>
-
-<template x-if="isCat && felineLvotoAssessment && aovmax > 1.9">
-    <div style="margin-top: 8px; background-color: #fff5f5; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
-        <span style="font-weight: bold; display: block; margin-bottom: 4px;" 
-              :class="felineLvotoAssessment.class" 
-              x-text="felineLvotoAssessment.label"></span>
-        <p style="font-size: 0.82rem; color: #991b1b; margin: 0; line-height: 1.4;" 
-           x-text="felineLvotoAssessment.note"></p>
-    </div>
-</template>
-</div>
-    </div>
-   
-
-
-          </article>
-
-        </section>
-
-
-<section class="card standard-card" 
-         x-show="isDog && diastolicClassification && diastolicClassification.evaluatedCount >= 2" 
-         x-transition 
-         style="margin-top: 18px; border-left: 4px solid #0ea5e9; background: #ffffff;">
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 12px;">
-        <h2 style="color: #16325F; margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-heart-pulse" style="color: #0ea5e9;"></i> Diastolic Functional Profile
-        </h2>
-        <div style="font-weight: 700; font-size: 1.1rem; padding: 4px 10px; border-radius: 6px;"
-             :class="diastolicClassification?.class === 'normal' ? 'normal' : 'abnormal'"
-             x-text="diastolicClassification?.grade">
-        </div>
-    </div>
-
-    <div style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa; padding: 15px; margin-bottom: 20px;">
-        <h3 style="font-size: 0.8rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
-            <i class="fa-solid fa-chart-gantt"></i> Hemodynamic Progression Waveform Map
-        </h3>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; text-align: center;">
-            
-            <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;"
-                 :style="diastolicClassification?.stepIndex === 0 ? 'opacity: 1; border-color: #16a34a; background: #f0fdf4; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
-                <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #16a34a; display: flex; align-items: center; justify-content: center;">1</span>
-                <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Physiologic</p>
-                <span style="font-size: 0.7rem; font-weight: 600; color: #16a34a; background: #e8f5e9; padding: 1px 5px; border-radius: 3px;">E > A Inflow</span>
-            </div>
-
-            <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;"
-                 :style="diastolicClassification?.stepIndex === 1 ? 'opacity: 1; border-color: #ea580c; background: #fff7ed; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
-                <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #ea580c; display: flex; align-items: center; justify-content: center;">2</span>
-                <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade I</p>
-                <span style="font-size: 0.7rem; font-weight: 600; color: #c2410c; background: #ffedd5; padding: 1px 5px; border-radius: 3px;">E &lt; A Reversal</span>
-            </div>
-
-            <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;"
-                 :style="diastolicClassification?.stepIndex === 2 ? 'opacity: 1; border-color: #dc2626; background: #fef2f2; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
-                <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #dc2626; display: flex; align-items: center; justify-content: center;">3</span>
-                <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade II</p>
-                <span style="font-size: 0.7rem; font-weight: 600; color: #b91c1c; background: #fee2e2; padding: 1px 5px; border-radius: 3px;">Pseudo E > A</span>
-            </div>
-
-            <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;"
-                 :style="diastolicClassification?.stepIndex === 3 ? 'opacity: 1; border-color: #7f1d1d; background: #fff5f5; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
-                <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #7f1d1d; display: flex; align-items: center; justify-content: center;">4</span>
-                <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade III</p>
-                <span style="font-size: 0.7rem; font-weight: 600; color: #7f1d1d; background: #ffeeee; padding: 1px 5px; border-radius: 3px;">E &gt;&gt; A Spike</span>
-            </div>
-
-        </div>
-    </div>
-    
-    <div style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
-        <h3 style="font-size: 0.8rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-            <i class="fa-solid fa-scale-balanced"></i> Pathological Points Attribution Audit
-        </h3>
-        
-        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
-            <thead>
-                <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
-                    <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Echo Metric</th>
-                    <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Entry</th>
-                    <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Physiologic Interpretation</th>
-                    <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: right;">Score Weight</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template x-for="item in diastolicClassification?.breakdown" :key="item.key">
-                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" 
-                        :style="item.conflicts ? 'background-color: #fffbeb;' : ''">
-                        
-                        <td style="padding: 10px; font-weight: 600; color: #334155;">
-                            <span x-text="item.name"></span>
-                            <span x-text="item.category" style="display: block; font-size: 0.72rem; color: #64748b; font-weight: 500; font-style: italic; margin-top: 1px;"></span>
-                        </td>
-                        
-                        <td style="padding: 10px; text-align: center; font-weight: bold; color: #1e40af; font-size: 0.9rem;" x-text="item.val"></td>
-                        
-                        <td style="padding: 10px;">
-                            <div style="display: flex; flex-direction: column;">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span style="color: #1e293b; font-weight: 700;" x-text="item.grade"></span>
-                                    <template x-if="item.conflicts">
-                                        <span style="font-size: 0.68rem; color: #b45309; background: #fef3c7; padding: 1px 4px; border-radius: 3px; font-weight: bold; display: inline-flex; align-items: center; gap: 2px;">
-                                            <i class="fa-solid fa-triangle-exclamation"></i> Discordant
-                                        </span>
-                                    </template>
-                                </div>
-                                <span style="font-size: 0.75rem; color: #64748b;" x-text="`Range: ${item.threshold}`"></span>
-                            </div>
-                        </td>
-                        
-                        <td style="padding: 10px; text-align: right; font-weight: 900; color: #1e293b; font-size: 0.95rem;" 
-                            :class="item.points > 0 ? (diastolicClassification?.class === 'normal' ? 'normal' : 'abnormal') : ''"
-                            x-text="item.points === 0 ? '0' : `+${item.points}`">
-                        </td>
-                    </tr>
-                </template>
-            </tbody>
-        </table>
-    </div>
-
-    <div style="margin-top: 15px; background-color: #f8fafc; padding: 10px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-        <p style="font-size: 0.82rem; color: #334155; margin: 0; line-height: 1.4;">
-            <i class="fa-solid fa-circle-nodes" style="color: #0ea5e9; margin-right: 2px;"></i> 
-            <strong>Hemodynamic Profile Analysis:</strong> <span x-text="diastolicClassification?.label"></span>
-        </p>
-    </div>
-</section>
-
-
-
-<section class="card" style="margin-top: 18px;" x-show="isDog" x-transition>
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
-        <h2 style="color: #16325F; margin: 0; font-size: 1.3rem;">
-            <i class="fa-solid fa-square-poll-vertical"></i> Advanced MINE Risk Stratification
-        </h2><p><em>Applicable to <strong>Degenerative Mitral Valve Disease</strong> Cases Only</em></p>
-        
-        <select x-model="selectedMineModel" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background-color: #f8fafc; font-weight: 600; color: #1e3a8a;">
-            <template x-if="typeof mineModels !== 'undefined'">
-                <template x-for="(model, key) in mineModels" :key="key">
-                    <option :value="key" x-text="model.label"></option>
-                </template>
-            </template>
-        </select>
-    </div>
-
-    <div x-show="calculatedMineScore && calculatedMineScore.score === null" style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 6px; text-align: center; color: #64748b; font-size: 0.9rem;">
-        <p style="margin: 0;"><i class="fa-solid fa-circle-info"></i> <span x-text="calculatedMineScore.status"></span></p>
-    </div>
-
-    <div x-show="calculatedMineScore && calculatedMineScore.score !== null">
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            
-            <div style="text-align: center; border-right: 2px solid #e2e8f0; padding-right: 15px; display: flex; flex-direction: column; justify-content: center;">
-                <span style="font-size: 0.8rem; font-weight: bold; color: #64748b; text-transform: uppercase;">MINE Score</span>
-                <span style="font-size: 2.5rem; font-weight: 900; color: #1e40af;" x-text="calculatedMineScore.score"></span>
-            </div>
-
-            <div>
-                <h4 style="margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; color: #64748b;">Prognostic Risk Category</h4>
-                <div style="font-size: 1.25rem; font-weight: bold; margin-bottom: 12px;" 
-                     :class="calculatedMineScore.class === 'normal' ? 'normal' : 'abnormal'"
-                     x-text="calculatedMineScore.tier"></div>
-
-                <h4 style="margin: 0 0 3px 0; font-size: 0.85rem; text-transform: uppercase; color: #64748b;">Median Survival Time (MST)</h4>
-                <p style="margin: 0; font-size: 1.05rem; font-weight: bold; color: #1e293b;">
-                    <i class="fa-solid fa-hourglass-half" style="color: #0284c7;"></i> <span x-text="calculatedMineScore.mst"></span>
-                </p>
-            </div>
-        </div>
-
-        <p style="font-size: 0.8rem; color: #64748b; font-style: italic; margin-top: 10px; margin-bottom: 0;">
-            *Survival estimates represent median time to cardiac death or congestive heart failure entry as validated by Vezzosi et al.
-        </p>
-    </div>
-
-<div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-    <h3 style="font-size: 0.85rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-        <i class="fa-solid fa-chart-line"></i> MINE Scoring Points Breakdown
-    </h3>
-    
-    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
-        <thead>
-            <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
-                <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Echo Variable</th>
-                <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Patient Entry</th>
-                <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Triggered Interval</th>
-                <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: right;">Points</th>
-            </tr>
-        </thead>
-        <tbody>
-            <template x-for="item in calculatedMineScore?.breakdown" :key="item.name">
-                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#fdfdfd'" onmouseout="this.style.backgroundColor='transparent'">
-                    <td style="padding: 10px; font-weight: 600; color: #334155;" x-text="item.name"></td>
-                    
-                    <td style="padding: 10px; text-align: center; font-weight: bold; color: #1e40af;" x-text="item.val"></td>
-                    
-                    <td style="padding: 10px; text-align: center; color: #64748b; font-style: italic;" x-text="item.threshold"></td>
-                    
-                    <td style="padding: 10px; text-align: right; font-weight: bold; color: #1e293b;" 
-                        x-text="item.val === '—' ? '0' : `+${item.pts}`"></td>
-                </tr>
-            </template>
-        </tbody>
-    </table>
-</div>
-
-
-</section>
-
-    <section class="card" style="margin-top:18px" id="breed-normals-card">
-
-<h3>Is your patient a breed with recorded echo normals?</h3>
-    <p>Select a breed to compare patient results with published breed-specific intervals.</p>
-    
-    <div class="input-group">
-        <select id="breed-selector" x-model="selectedBreed" @change="updateBreedTable()">
-            <option value="">-- Select a Breed --</option>
-            </select>
-    </div>
-
-    <div id="breed-data-container" style="margin-top: 20px;">
-        </div>
-
-
-
-
-</section>
-
-
-<section class="card" style="margin-top:25px; border: 2px solid #e2e8f0;" id="allometric-card">
-    <div class="reference-section">
-        <h3 style="color: #1e40af; display: flex; align-items: center; gap: 10px;">
-            <i class="fa-solid fa-calculator"></i> Allometric Prediction Tool
-        </h3>
-
-        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="input-group">
-                <label style="font-weight: bold; color: #1e40af;">Patient Weight (kg):</label>
-                <input type="number" step="0.1" x-model="weight" placeholder="Enter Weight" style="border: 2px solid #2563eb; width: 100%; padding: 8px; border-radius: 4px;">
-            </div>
-            <div class="input-group">
-                <label style="font-weight: bold; color: #1e40af;">Dataset Selection:</label>
-                <select x-model="selectedModel" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
-                    <template x-if="typeof allometricModels !== 'undefined'">
-                        <template x-for="(model, key) in allometricModels" :key="key">
-                            <option :value="key" x-text="model.label + ' (' + model.species + ')'"></option>
+                      Clear All Measurements
+                    </button>
+
+                    <div style="display: flex; gap: 15px;">
+                      <div class="input-group" style="flex: 1;">
+                        <label>Body Weight (kg)</label>
+                        <input type="number" step="0.1" x-model="weight" placeholder="e.g. 10.5">
+                      </div>
+                      <div class="input-group" style="margin-bottom: 20px; flex: 1;">
+                        <label style="font-weight: bold; font-size: 0.9em;">Species/Breed Reference Model:</label>
+                        <select x-model="selectedModel" class="form-select">
+                          <template x-for="(model, key) in allometricModels" :key="key">
+                            <option :value="key" x-text="model.label"></option>
+                          </template>
+                        </select>
+                      </div>
+                    </div>
+
+                    <h2>LV Measurements:</h2>
+                    <div style="display: flex; gap: 15px;">
+                      <div class="input-group" style="flex: 1;">
+                        <label>LVIDd (mm)</label>
+                        <input type="number" step="0.01" x-model="lvidd" placeholder="e.g. 32" :class="{ 'input-warning': lvidd > 0 && lvidd < 8, 'input-error': lvidd > 100 }">
+                        <template x-if="lvidd > 0 && lvidd < 8">
+                          <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
                         </template>
+                        <template x-if="lvidd > 100">
+                          <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+                        </template>
+                      </div>
+                      <div class="input-group" style="flex: 1;">
+                        <label>LVIDs (mm)</label>
+                        <input type="number" step="0.01" x-model="lvids" placeholder="e.g. 21" :class="{ 'input-warning': lvids > 0 && lvids < 8, 'input-error': lvids > 100 }">
+                        <template x-if="lvids > 0 && lvids < 6">
+                          <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+                        </template>
+                        <template x-if="lvids > 100">
+                          <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+                        </template>
+                      </div>
+                      <div class="input-group" style="flex: 1;">
+                        <label>IVSd (mm)</label>
+                        <input type="number" step="0.01" x-model="ivsd" placeholder="e.g. 8">
+                      </div>
+                      <div class="input-group" style="flex: 1;">
+                        <label>LVPWd (mm)</label>
+                        <input type="number" step="0.01" x-model="lvpwd" placeholder="e.g. 8">
+                      </div>
+                    </div>
+
+                    <!-- ACCORDION: VOLUMETRICS -->
+                    <div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
+                      <button @click="showVolumes = !showVolumes" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
+                        <span><i class="fa-solid fa-cube"></i> Advanced Volumetric Indices</span>
+                        <i class="fa-solid" :class="showVolumes ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                      </button>
+                      <div x-show="showVolumes" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
+                        <div style="display: flex; gap: 15px;">
+                          <div class="input-group" style="flex: 1;">
+                            <label>LVEDV modified Simpsons (ml)</label>
+                            <input type="number" step="0.01" x-model="lvedv" placeholder="e.g. 65">
+                          </div>
+                          <div class="input-group" style="flex: 1;">
+                            <label>LVESV modified Simpsons (ml)</label>
+                            <input type="number" step="0.01" x-model="lvesv" placeholder="e.g. 35">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h2>LA Measurements:</h2>
+                    <div style="display: flex; gap: 15px;">
+                      <div class="input-group" style="flex: 1;">
+                        <label>LA short-axis (mm)</label>
+                        <input type="number" step="0.01" x-model="la" placeholder="e.g. 20" :class="{ 'input-warning': la > 0 && la < 6, 'input-error': la > 100 }">
+                        <template x-if="la > 0 && la < 6">
+                          <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+                        </template>
+                        <template x-if="la > 100">
+                          <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+                        </template>
+                      </div>
+                      <div class="input-group" style="flex: 1;">
+                        <label>Ao Diameter (mm)</label>
+                        <input type="number" step="0.01" x-model="ao" placeholder="e.g. 15" :class="{ 'input-warning': ao > 0 && ao < 4, 'input-error': ao > 100 }">
+                        <template x-if="ao > 0 && ao < 4">
+                          <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+                        </template>
+                        <template x-if="ao > 100">
+                          <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+                        </template>
+                      </div>
+                    </div>
+
+                    <div class="input-group">
+                      <label>LA Long Axis (LAD) (mm)</label>
+                      <input type="number" step="0.1" x-model="lad" placeholder="e.g. 20" :class="{ 'input-warning': lad > 0 && lad < 8, 'input-error': lad > 100 }">
+                      <template x-if="lad > 0 && lad < 8">
+                        <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+                      </template>
+                      <template x-if="lad > 100">
+                        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+                      </template>
+                    </div>
+
+                    <!-- ACCORDION: SPECTRAL DOPPLER -->
+                    <div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
+                      <button @click="showDoppler = !showDoppler" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
+                        <span><i class="fa-solid fa-wave-square"></i> Spectral Doppler</span>
+                        <i class="fa-solid" :class="showDoppler ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                      </button>
+                      <div x-show="showDoppler" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">E-wave Peak Vel (m/s)</label>
+                            <input type="number" step="0.01" x-model="eVel" placeholder="e.g. 0.85" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': eVel > 0 && eVel < 0.2, 'input-error': eVel > 5 }">
+                            <template x-if="eVel > 0 && eVel < 0.2">
+                              <div class="warning-text">⚠️ Value too low.</div>
+                            </template>
+                            <template x-if="eVel > 5">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
+                            </template>
+                          </div>
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">A-wave Peak Vel (m/s)</label>
+                            <input type="number" step="0.01" x-model="aVel" placeholder="e.g. 0.55" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': aVel > 0 && aVel < 0.2, 'input-error': aVel > 5 }">
+                            <template x-if="aVel > 0 && aVel < 0.2">
+                              <div class="warning-text">⚠️ Value too low.</div>
+                            </template>
+                            <template x-if="aVel > 5">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
+                            </template>
+                          </div>
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">IVRT (ms)</label>
+                            <input type="number" step="1" x-model="ivrt" placeholder="e.g. 55" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': ivrt > 0 && ivrt < 15, 'input-error': ivrt > 150 }">
+                            <template x-if="ivrt > 0 && ivrt < 15">
+                              <div class="warning-text">⚠️ Value too low for ms.</div>
+                            </template>
+                            <template x-if="ivrt > 150">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for ms.</div>
+                            </template>
+                          </div>
+                        </div>
+
+                        <div style="display: flex; gap: 15px;">
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">Mitral DT (ms)</label>
+                            <input type="number" step="1" x-model="mdt" placeholder="e.g. 80" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                          </div>
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">Mitral E' (cm/s)</label>
+                            <input type="number" step="0.1" x-model="ePrime" placeholder="e.g. 6.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                          </div>
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">Ao VMax (m/s)</label>
+                            <input type="number" step="0.01" x-model="aovmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': aovmax > 0 && aovmax < 0.2, 'input-error': aovmax > 10 }">
+                            <template x-if="aovmax > 0 && aovmax < 0.2">
+                              <div class="warning-text">⚠️ Value too low for m/s.</div>
+                            </template>
+                            <template x-if="aovmax > 10">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
+                            </template>
+                          </div>
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">PA VMax (m/s)</label>
+                            <input type="number" step="0.01" x-model="pavmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': pavmax > 0 && pavmax < 0.2, 'input-error': pavmax > 10 }">
+                            <template x-if="pavmax > 0 && pavmax < 0.2">
+                              <div class="warning-text">⚠️ Value too low for m/s.</div>
+                            </template>
+                            <template x-if="pavmax > 10">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- ACCORDION: SHUNTS -->
+                    <div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
+                      <button @click="showShunt = !showShunt" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
+                        <span><i class="fa-solid fa-scale-balanced"></i> Shunt and VTI Ratios</span>
+                        <i class="fa-solid" :class="showShunt ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                      </button>
+                      <div x-show="showShunt" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
+                        <div style="display: flex; gap: 15px;">
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">LVOT diam (mm)</label>
+                            <input type="number" step="0.01" x-model="lvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': lvotd > 0 && lvotd < 5, 'input-error': lvotd > 30 }">
+                            <template x-if="lvotd > 0 && lvotd < 5">
+                              <div class="warning-text">⚠️ Value too low for mm.</div>
+                            </template>
+                            <template x-if="lvotd > 30">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+                            </template>
+                          </div>
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">LVOT VTI (<strong>cm</strong>)</label>
+                            <input type="number" step="0.01" x-model="lvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': lvotvti > 0 && lvotvti < 4, 'input-error': lvotvti > 50 }">
+                            <template x-if="lvotvti > 0 && lvotvti < 4">
+                              <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
+                            </template>
+                            <template x-if="lvotvti > 50">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for cm. Or consistent with severe aortic stenosis.</div>
+                            </template>
+                          </div>
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">RVOT diam (mm)</label>
+                            <input type="number" step="0.01" x-model="rvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvotd > 0 && rvotd < 5, 'input-error': rvotd > 30 }">
+                            <template x-if="rvotd > 0 && rvotd < 5">
+                              <div class="warning-text">⚠️ Value too low for mm.</div>
+                            </template>
+                            <template x-if="rvotd > 30">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+                            </template>
+                          </div>
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">RVOT VTI (<strong>cm</strong>)</label>
+                            <input type="number" step="0.01" x-model="rvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvotvti > 0 && rvotvti < 4, 'input-error': rvotvti > 50 }">
+                            <template x-if="rvotvti > 0 && rvotvti < 4">
+                              <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
+                            </template>
+                            <template x-if="rvotvti > 50">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for cm. Or consistent with severe pulmonic stenosis.</div>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- ACCORDION: RIGHT HEART -->
+                    <div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
+                      <button @click="showRightHeart = !showRightHeart" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
+                        <span><i class="fa-solid fa-heart-pulse"></i> Right Heart & Pulmonary System</span>
+                        <i class="fa-solid" :class="showRightHeart ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                      </button>
+                      <div x-show="showRightHeart" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
+                        <div style="display: flex; gap: 15px;">
+                          <div class="input-group" style="flex: 1;">
+                            <label style="font-weight: 600; font-size: 0.85rem;">TR Peak Vel (m/s)</label>
+                            <input type="number" step="0.01" x-model="trMax" placeholder="e.g. 2.6" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': trMax > 0 && trMax < 0.9, 'input-error': trMax > 8 }">
+                            <template x-if="trMax > 0 && trMax < 0.9">
+                              <div class="warning-text">⚠️ Value too low.</div>
+                            </template>
+                            <template x-if="trMax > 8">
+                              <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div> <!-- .measurements -->
+                </div> <!-- .calculator-card -->
+              </div>
+
+              <!-- ========================================================= -->
+              <!--                      RESULTS DISPLAY                      -->
+              <!-- ========================================================= -->
+              <div class="results-box" x-transition>
+                <p style="font-weight: bold; color: #1e40af; border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-bottom: 5px; font-size: 1.2rem;">
+                  <span style="text-transform: capitalize;" x-text="allometricModels[selectedModel].species"></span> Echocardiography Report
+                </p>
+
+                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">
+                  <strong>Weight:</strong> <span x-text="weight || '—'"></span> kg |
+                  <strong>BSA:</strong> <span x-text="bsa || '—'"></span> m² |
+                  <strong>Model:</strong> <span x-text="allometricModels[selectedModel].label"></span>
+                </p>
+
+                <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px;">Left Ventricle:</p>
+
+                <div class="result-row" x-show="lvidd">
+                  <span><strong>LVIDd</strong></span>
+                  <span>
+                    <span x-text="lvidd"></span> mm
+                    <span x-show="parseFloat(lvidd) > allometricResults.lvidd.max" class="abnormal">(Enlarged)</span>
+                    <span x-show="parseFloat(lvidd) < allometricResults.lvidd.min" class="abnormal">(Small)</span>
+                    <span x-show="parseFloat(lvidd) >= allometricResults.lvidd.min && parseFloat(lvidd) <= allometricResults.lvidd.max" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvidd.min + '-' + allometricResults.lvidd.max + ')'"></span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="lvids">
+                  <span><strong>LVIDs</strong></span>
+                  <span>
+                    <span x-text="lvids"></span> mm
+                    <template x-if="allometricResults.lvids.available">
+                      <span>
+                        <span x-show="parseFloat(lvids) > allometricResults.lvids.max" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(lvids) <= allometricResults.lvids.max" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvids.min + '-' + allometricResults.lvids.max + ')'"></span>
+                      </span>
                     </template>
+                    <template x-if="!allometricResults.lvids.available">
+                      <span style="font-size: 0.8em; color: #999;">(No ref)</span>
+                    </template>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="ivsd">
+                  <span><strong>IVSd</strong></span>
+                  <span>
+                    <span x-text="ivsd"></span> mm
+                    <span x-show="parseFloat(ivsd) > allometricResults.ivsd.max" class="abnormal">(Thickened)</span>
+                    <span x-show="parseFloat(ivsd) <= allometricResults.ivsd.max" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ivsd.min + '-' + allometricResults.ivsd.max + ')'"></span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="lvpwd">
+                  <span><strong>LVFWd</strong></span>
+                  <span>
+                    <span x-text="lvpwd"></span> mm
+                    <span x-show="parseFloat(lvpwd) > allometricResults.lvpwd.max" class="abnormal">(Thickened)</span>
+                    <span x-show="parseFloat(lvpwd) <= allometricResults.lvpwd.max" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lvpwd.min + '-' + allometricResults.lvpwd.max + ')'"></span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="fs">
+                  <span><strong>Fractional Shortening</strong></span>
+                  <span>
+                    <span x-text="`${fs}%`"></span>
+                    <span x-show="fs >= 25" class="normal">(Normal)</span>
+                    <span x-show="fs < 25 && fs > 0" class="abnormal">(Abnormal)</span>
+                    <span style="font-size: 0.8em; color: #666;"> (ref &gt;25) </span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="ef">
+                  <span><strong>Ejection Fraction</strong></span>
+                  <span>
+                    <span x-text="`${ef}%`"></span>
+                    <span x-show="ef >= 50" class="normal">(Normal)</span>
+                    <span x-show="ef < 50 && ef > 0" class="abnormal">(Abnormal)</span>
+                    <span style="font-size: 0.8em; color: #666;"> (ref &gt;50) </span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="lvedv">
+                  <span><strong>LVEDV</strong></span>
+                  <span><span x-text="lvedv"></span>ml</span>
+                </div>
+
+                <div class="result-row" x-show="lvesv">
+                  <span><strong>LVESV</strong></span>
+                  <span><span x-text="lvesv"></span>ml</span>
+                </div>
+
+                <div x-show="isDog" x-transition>
+                  <div class="result-row" x-show="lviddn">
+                    <span><strong>LVIDDN</strong> (Cornell)</span>
+                    <span>
+                      <span x-text="lviddn"></span>
+                      <span x-show="lviddn >= 1.85" class="abnormal">(Enlarged)</span>
+                      <span x-show="lviddn >= 1.7 && lviddn < 1.85" class="abnormal">(Borderline Enlarged)</span>
+                      <span x-show="lviddn < 1.7 && lviddn >= 1.27" class="normal">(Normal)</span>
+                      <span x-show="lviddn < 1.27 && lviddn > 0" class="abnormal">(Underfilled)</span>
+                      <span style="font-size: 0.8em; color: #666;"> (ref 1.27 - 1.7) </span>
+                    </span>
+                  </div>
+
+                  <div class="result-row" x-show="lvidsn">
+                    <span><strong>LVIDSN</strong> (Cornell)</span>
+                    <span>
+                      <span x-text="lvidsn"></span>
+                      <span x-show="lvidsn >= 1.26" class="abnormal">(Enlarged)</span>
+                      <span x-show="lvidsn < 1.26 && lvidsn >= 0.71" class="normal">(Normal)</span>
+                      <span x-show="lvidsn < 0.71 && lvidsn > 0" class="abnormal">(Underfilled)</span>
+                      <span style="font-size: 0.8em; color: #666;"> (ref 0.71 - 1.26) </span>
+                    </span>
+                  </div>
+
+                  <div class="result-row" x-show="RWT">
+                    <span><strong>Relative Wall Thickness</strong></span>
+                    <span>
+                      <span x-text="RWT"></span>
+                      <span x-show="RWT >= 0.43" class="abnormal">(Thick Walls)</span>
+                      <span x-show="RWT < 0.43 && RWT > 0.31" class="normal">(Normal Walls)</span>
+                      <span x-show="RWT <= 0.31 && RWT > 0" class="abnormal">(Thin Walls)</span>
+                      <span style="font-size: 0.8em; color: #666;"> (ref 0.32-0.42) </span>
+                    </span>
+                  </div>
+
+                  <div class="result-row" x-show="lvedvbw">
+                    <span><strong>LVEDV / BW</strong></span>
+                    <span>
+                      <span x-text="lvedvbw"></span>
+                      <span x-show="lvedvbw >= 3" class="abnormal">(Enlarged)</span>
+                      <span x-show="lvedvbw < 3 && lvedvbw >= 1.25" class="normal">(Normal)</span>
+                      <span x-show="lvedvbw < 1.25 && lvedvbw > 0" class="abnormal">(Underfilled)</span>
+                      <span style="font-size: 0.8em; color: #666;"> (ref 1.25 - 3.00) </span>
+                    </span>
+                  </div>
+
+                  <div class="result-row" x-show="lvesvbw">
+                    <span><strong>LVESV / BW</strong></span>
+                    <span>
+                      <span x-text="lvesvbw"></span>
+                      <span x-show="lvesvbw >= 1.35" class="abnormal">(Enlarged)</span>
+                      <span x-show="lvesvbw < 1.35 && lvesvbw >= 0.3" class="normal">(Normal)</span>
+                      <span x-show="lvesvbw < 0.3 && lvesvbw > 0" class="abnormal">(Underfilled)</span>
+                      <span style="font-size: 0.8em; color: #666;"> (ref 0.3 - 1.35) </span>
+                    </span>
+                  </div>
+
+                  <div class="result-row" x-show="edvim2">
+                    <span><strong>LVEDV / m²</strong></span>
+                    <span>
+                      <span x-text="edvim2"></span>
+                      <span x-show="edvim2 < 100 " class="normal">(Normal)</span>
+                      <span x-show="edvim2 >= 100" class="abnormal">(Enlarged)</span>
+                      <span style="font-size: 0.8em; color: #666;"> ml/m² (ref &lt;100)</span>
+                    </span>
+                  </div>
+
+                  <div class="result-row" x-show="esvim2">
+                    <span><strong>LVESV / m²</strong></span>
+                    <span>
+                      <span x-text="esvim2"></span>
+                      <span x-show="esvim2 >= 30" class="abnormal">(Enlarged)</span>
+                      <span style="font-size: 0.8em; color: #666;"> ml/m² (ref &lt;30)</span>
+                    </span>
+                  </div>
+
+                  <div class="result-row" x-show="sv">
+                    <span><strong>LV Stroke Vol</strong></span>
+                    <span><span x-text="sv"></span><span style="font-size: 0.8em; color: #666;"> ml</span></span>
+                  </div>
+
+                  <div class="result-row" x-show="qs">
+                    <span><strong>Systemic Stroke Vol</strong></span>
+                    <span><span x-text="qs"></span><span style="font-size: 0.8em; color: #666;"> ml</span></span>
+                  </div>
+
+                  <div class="result-row" x-show="mrVol">
+                    <span><strong>Mitral Regurgitant Vol</strong></span>
+                    <span><span x-text="mrVol"></span><span style="font-size: 0.8em; color: #666;"> ml</span></span>
+                  </div>
+
+                  <div class="result-row" x-show="mrFraction > 0" x-transition>
+                    <span><strong>MR Fraction</strong></span>
+                    <span>
+                      <span x-text="`${mrFraction}%` "></span>
+                      <span x-show="mrFraction >= 50" class="abnormal">(Severe Regurgitation)</span>
+                      <span x-show="mrFraction >= 30 && mrFraction < 50" class="abnormal">(Moderate)</span>
+                      <span x-show="mrFraction < 30" class="normal">(Mild)</span>
+                      <span style="font-size: 0.8em; color: #666;" x-text="` (Vol: ${mrVol}ml / SV: ${sv}ml)`"></span>
+                    </span>
+                  </div>
+                </div>
+
+                <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">Left Atrium:</p>
+
+                <div class="result-row" x-show="la">
+                  <span><strong>LA</strong></span>
+                  <span>
+                    <span x-text="la"></span> mm
+                    <template x-if="allometricResults.la.available">
+                      <span>
+                        <span x-show="parseFloat(la) > allometricResults.la.max" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(la) <= allometricResults.la.max" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.la.min + '-' + allometricResults.la.max + ')'"></span>
+                      </span>
+                    </template>
+                    <template x-if="!allometricResults.la.available">
+                      <span style="font-size: 0.8em; color: #999;">(No ref)</span>
+                    </template>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="ao">
+                  <span><strong>Ao</strong></span>
+                  <span>
+                    <span x-text="ao"></span> mm
+                    <template x-if="allometricResults.ao.available">
+                      <span>
+                        <span x-show="parseFloat(ao) > allometricResults.ao.max" class="abnormal">(Dilated)</span>
+                        <span x-show="parseFloat(ao) <= allometricResults.ao.max" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.ao.min + '-' + allometricResults.ao.max + ')'"></span>
+                      </span>
+                    </template>
+                    <template x-if="!allometricResults.ao.available">
+                      <span style="font-size: 0.8em; color: #999;">(No ref)</span>
+                    </template>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="lad">
+                  <span><strong>LAD</strong> (Long Axis)</span>
+                  <span>
+                    <span x-text="lad"></span> mm
+                    <template x-if="allometricResults.lad.available">
+                      <span>
+                        <span x-show="parseFloat(lad) > allometricResults.lad.max" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(lad) <= allometricResults.lad.max" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="' (ref ' + allometricResults.lad.min + '-' + allometricResults.lad.max + ')'"></span>
+                      </span>
+                    </template>
+                    <template x-if="!allometricResults.lad.available">
+                      <span style="font-size: 0.8em; color: #999;">(No ref)</span>
+                    </template>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="laAo">
+                  <span><strong>LA:Ao Ratio</strong></span>
+                  <span>
+                    <span x-text="laAo"></span>
+                    <span x-show="laAo >= 1.65" class="abnormal">(Enlarged)</span>
+                    <span x-show="laAo < 1.65 && laAo > 0" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.65) </span>
+                  </span>
+                </div>
+
+                <div x-show="isDog" x-transition>
+                  <div class="result-row" x-show="lan">
+                    <span><strong>LA (short axis) Normalised</strong></span>
+                    <span>
+                      <span x-text="lan"></span>
+                      <span x-show="lan >= 1.17" class="abnormal">(Enlarged)</span>
+                      <span x-show="lan < 1.17 && laAo > 0" class="normal">(Normal)</span>
+                      <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.17) </span>
+                    </span>
+                  </div>
+
+                  <div class="result-row" x-show="ladao">
+                    <span><strong>LAD : Ao(short axis)</strong></span>
+                    <span>
+                      <span x-text="ladao"></span>
+                      <span x-show="ladao >= 2.1" class="abnormal">(Enlarged)</span>
+                      <span x-show="ladao < 2.1 && ladao > 0" class="normal">(Normal)</span>
+                      <span style="font-size: 0.8em; color: #666;"> (ref &lt;2.1) </span>
+                    </span>
+                  </div>
+
+                  <div class="result-row" x-show="ladn">
+                    <span><strong>LADN</strong></span>
+                    <span>
+                      <span x-text="ladn"></span>
+                      <span x-show="ladn >= 1.6" class="abnormal">(Enlarged)</span>
+                      <span x-show="ladn < 1.6 && ladn > 0" class="normal">(Normal)</span>
+                      <span style="font-size: 0.8em; color: #666;"> (ref &lt;1.6) </span>
+                    </span>
+                  </div>
+                </div>
+
+                <div x-show="hasSectionData(['eVel', 'aVel', 'ivrt', 'mdt', 'ePrime', 'aovmax', 'pavmax'])">
+                  <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">Spectral Doppler and Flow:</p>
+                </div>
+
+                <div class="result-row" x-show="eVel">
+                  <span><strong>E vel</strong></span>
+                  <span>
+                    <span x-text="eVel"></span>
+                    <span x-show="eVel > 1.0" class="abnormal">(High)</span>
+                    <span x-show="eVel <= 1.0 && eVel >= 0.6" class="normal">(Normal)</span>
+                    <span x-show="eVel < 0.6 && eVel > 0" class="abnormal">(Low)</span>
+                    <span style="font-size: 0.8em; color: #666;">m/s (ref 0.6 - 1.0) </span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="aVel">
+                  <span><strong>A vel</strong></span>
+                  <span>
+                    <span x-text="aVel"></span>
+                    <span x-show="aVel > 0.8" class="abnormal">(High)</span>
+                    <span x-show="aVel <= 0.8 && aVel >= 0.3" class="normal">(Normal)</span>
+                    <span x-show="aVel < 0.3 && aVel > 0" class="abnormal">(Low)</span>
+                    <span style="font-size: 0.8em; color: #666;">m/s (ref 0.3 - 0.8) </span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="ivrt">
+                  <span><strong>IVRT</strong></span>
+                  <span>
+                    <span x-text="ivrt"></span>
+                    <span x-show="ivrt > 80" class="abnormal">(prolonged)</span>
+                    <span x-show="ivrt <= 80 && ivrt >= 50" class="normal">(Normal)</span>
+                    <span x-show="ivrt < 50 && ivrt > 0" class="abnormal">(short)</span>
+                    <span style="font-size: 0.8em; color: #666;"> (ref 50 - 80) </span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="mdt">
+                  <span><strong>E wave DT</strong></span>
+                  <span>
+                    <span x-text="mdt"></span>
+                    <span x-show="mdt > 100" class="abnormal">(prolonged)</span>
+                    <span x-show="mdt <= 100 && mdt >= 60" class="normal">(Normal)</span>
+                    <span x-show="mdt < 60 && mdt > 0" class="abnormal">(short)</span>
+                    <span style="font-size: 0.8em; color: #666;"> (ref 60 - 100) </span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="ear">
+                  <span><strong>E:A Ratio</strong></span>
+                  <span>
+                    <span x-text="ear"></span>
+                    <span x-show="ear > 1.6" class="abnormal">(High)</span>
+                    <span x-show="ear <= 1.6 && ear >= 0.95" class="normal">(Normal)</span>
+                    <span x-show="ear < 0.95 && ear > 0" class="abnormal">(Low)</span>
+                    <span style="font-size: 0.8em; color: #666;"> (ref 0.95 - 1.6) </span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="eivrt">
+                  <span><strong>E:IVRT Ratio</strong></span>
+                  <span>
+                    <span x-text="eivrt"></span>
+                    <span x-show="eivrt >= 2.5" class="abnormal">(HIGH LAP)</span>
+                    <span x-show="eivrt < 2.5" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (E: ${eVel}m/s / IVRT: ${ivrt}ms; ref <2.5)`"></span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="ePrime">
+                  <span><strong>E'</strong></span>
+                  <span>
+                    <span x-text="ePrime"></span>
+                    <span x-show="ePrime >= 6.5" class="normal">(Normal)</span>
+                    <span x-show="ePrime < 12 && ePrime > 0" class="abnormal">(Low)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref >6.5)`"></span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="eePrime">
+                  <span><strong>E:E' ratio</strong></span>
+                  <span>
+                    <span x-text="eePrime"></span>
+                    <span x-show="eePrime >= 12" class="abnormal">(HIGH LAP)</span>
+                    <span x-show="eePrime < 8" class="normal">(Normal)</span>
+                    <span x-show="eePrime < 12 && eePrime >= 8" class="abnormal">(Equivocal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref <12)`"></span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="aovmax">
+                  <span><strong>Aortic VMax</strong></span>
+                  <span>
+                    <span x-text="aovmax"></span> m/s
+                    <span style="font-weight: bold;" :class="aoStenosisGrade.class" x-text="`[${aoStenosisGrade.label}]` "></span>
+                    <span style="font-size: 0.85em; color: #475569; font-weight: 600;" x-text="` (${aoGradient} mmHg)`"></span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="pavmax">
+                  <span><strong>Pulmonic VMax</strong></span>
+                  <span>
+                    <span x-text="pavmax"></span> m/s
+                    <span style="font-weight: bold;" :class="paStenosisGrade.class" x-text="`[${paStenosisGrade.label}]` "></span>
+                    <span style="font-size: 0.85em; color: #475569; font-weight: 600;" x-text="` (${paGradient} mmHg)`"></span>
+                  </span>
+                </div>
+
+                <div x-show="hasSectionData(['lvotd', 'rvotd', 'lvotvti', 'rvotvti'])">
+                  <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">Shunt Ratios (Qp:Qs):</p>
+                </div>
+
+                <div class="result-row" x-show="lvotd">
+                  <span><strong>LVOT diameter</strong></span>
+                  <span><span x-text="lvotd"></span><span style="font-size: 0.8em; color: #666;"> mm</span></span>
+                </div>
+
+                <div class="result-row" x-show="rvotd">
+                  <span><strong>RVOT diameter</strong></span>
+                  <span><span x-text="rvotd"></span><span style="font-size: 0.8em; color: #666;"> mm</span></span>
+                </div>
+
+                <div class="result-row" x-show="lvotvti">
+                  <span><strong>LVOT VTI</strong></span>
+                  <span><span x-text="lvotvti"></span><span style="font-size: 0.8em; color: #666;"> cm</span></span>
+                </div>
+
+                <div class="result-row" x-show="rvotvti">
+                  <span><strong>RVOT VTI</strong></span>
+                  <span><span x-text="rvotvti"></span><span style="font-size: 0.8em; color: #666;"> cm</span></span>
+                </div>
+
+                <div class="result-row" x-show="vtir">
+                  <span><strong>VTI Ratio P:S</strong></span>
+                  <span>
+                    <span x-text="vtir"></span>
+                    <span x-show="vtir > 1.1" class="abnormal">(High)</span>
+                    <span x-show="vtir <= 1.1 && vtir >= 0.9" class="normal">(Normal)</span>
+                    <span x-show="vtir < 0.9 && vtir > 0" class="abnormal">(Low)</span>
+                    <span style="font-size: 0.8em; color: #666;"> (ref 0.9 - 1.1) </span>
+                  </span>
+                </div>
+
+                <div class="result-row" x-show="qpqs">
+                  <span><strong>Qp:Qs Ratio</strong></span>
+                  <span>
+                    <span x-text="qpqs"></span>
+                    <span x-show="qpqs > 1.1" class="abnormal">(High)</span>
+                    <span x-show="qpqs <= 1.1 && qpqs >= 0.9" class="normal">(Normal)</span>
+                    <span x-show="qpqs < 0.9 && qpqs > 0" class="abnormal">(Low)</span>
+                    <span style="font-size: 0.8em; color: #666;"> (ref 0.9 - 1.1) </span>
+                  </span>
+                </div>
+
+                <div x-show="hasSectionData(['trMax', 'rvotd', 'rvotvti'])">
+                  <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">Right Heart:</p>
+                </div>
+
+                <div class="result-row" x-show="trMax">
+                  <span><strong>TR Vel</strong></span>
+                  <span>
+                    <span x-text="trMax"></span>
+                    <span x-show="trMax >= 3.2" class="abnormal">(HIGH)</span>
+                    <span x-show="trMax < 2.7" class="normal">(Normal)</span>
+                    <span x-show="trMax < 3.2 && trMax >= 2.7" class="abnormal">(Equivocal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref <2.7)`"></span>
+                  </span>
+                </div>
+
+                <div x-show="clinicalComments" class="report-comments" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                  <h3 style="color: #1e40af; font-size: 1.1rem; margin-bottom: 5px;">Clinical Observations & Plan:</h3>
+                  <p x-text="clinicalComments" style="font-style: italic; white-space: pre-wrap; color: #334155; line-height: 1.4;"></p>
+                </div>
+              </div> <!-- .results-box -->
+
+              <div style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                <button @click="showComments = !showComments" class="btn-text" style="font-size: 0.85rem; margin-bottom: 10px;">
+                  <i class="fa-solid" :class="showComments ? 'fa-minus' : 'fa-plus'"></i>
+                  <span x-text="showComments ? ' Hide Observations' : ' Add Clinical Observations/Plan'"></span>
+                </button>
+                <div x-show="showComments" x-transition style="margin-bottom: 15px;">
+                  <textarea x-model="clinicalComments" placeholder="e.g. Mild MR. No evidence of CHF. Recheck 6 months." style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem;"></textarea>
+                </div>
+              </div>
+
+              <!-- REPORT EXPORTS -->
+              <div class="export-container" style="margin-top: 30px; border-top: 2px solid #f1f5f9; padding-top: 20px;">
+                <p style="font-size: 0.8rem; color: #64748b; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Report Export Options</p>
+                <div class="export-actions">
+                  <div style="position: relative; flex: 1;">
+                    <button @click="exportToClipboard()" class="action-btn btn-primary">
+                      <i class="fa-solid fa-copy"></i> Copy Text
+                    </button>
+                    <div x-show="copySuccess" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:leave="transition ease-in duration-300" style="position: absolute; top: -40px; left: 0; background: #065f46; color: white; padding: 5px 12px; border-radius: 4px; font-size: 0.8rem; white-space: nowrap; z-index: 10;">
+                      <i class="fa-solid fa-check"></i> Report Copied to Clipboard!
+                    </div>
+                  </div>
+                  <button @click="shareReport()" class="action-btn btn-primary" style="flex: 1;">
+                    <i class="fa-solid fa-share-nodes"></i> Share
+                  </button>
+                  <button @click="window.print()" class="action-btn btn-primary" style="flex: 1.2;">
+                    <i class="fa-solid fa-file-pdf"></i> Save PDF Report
+                  </button>
+                </div>
+              </div>
+
+            </section>
+
+            <!-- SECTION: CANINE EPIC / FELINE ASSESSMENT -->
+            <section class="card" style="margin-top:18px">
+              <article class="epic-check" style="margin-top:12px">
+                <div x-show="isDog">
+                  <h2 style="color: #16325F;"><i class="fa-solid fa-shield-dog"></i> Canine EPIC Check</h2>
+                  <p>(Applicable to <strong>Degenerative Mitral Valve Disease</strong> cases only)</p>
+                  <p>Left Atrial Enlargement (LA:Ao > 1.65) -
+                    <span x-show="laAo >= 1.9" class="abnormal">Very Enlarged</span>
+                    <span x-show="laAo >= 1.65 && laAo <1.85" class="abnormal">Slightly Enlarged - Check LAD</span>
+                    <span x-show="laAo < 1.65 && laAo >0" class="normal">Normal</span>
+                    <span x-show="laAo == 0 || laAo == ''" style="color: #666;">Awaiting measurements...</span>
+                  </p>
+                  <p>LV Enlargement (LVIDDN > 1.7) -
+                    <span x-show="lviddn >= 1.85" class="abnormal">Very Enlarged</span>
+                    <span x-show="lviddn >= 1.7 && lviddn <1.85" class="abnormal">Slightly Enlarged - Check Breed Normal</span>
+                    <span x-show="lviddn < 1.7 && lviddn > 0" class="normal">Normal</span>
+                    <span x-show="lviddn == 0 || lviddn == ''" style="color: #666;">Awaiting measurements...</span>
+                  </p>
+                  <p>EPIC -
+                    <span x-show="lviddn >= 1.7 && laAo >= 1.65" class="abnormal">Meets Echo Criteria for Stage B2</span>
+                    <span x-show="(lviddn > 0 && laAo > 0) && (lviddn < 1.7 || laAo < 1.65)" class="normal">Does Not Meet Criteria</span>
+                    <span x-show="lviddn == 0 || laAo == 0" style="color: #666;">Awaiting measurements...</span>
+                  </p>
+                  <div x-show="lviddn >= 1.7 && laAo >= 1.6" style="background-color: #fef2f2; border: 2px solid #ef4444; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                    <h3 style="color: #b91c1c; margin-top: 0;">⚠️ Stage B2 Potential</h3>
+                    <p style="margin: 0;">This patient meets the <strong>EPIC Trial</strong> echo criteria for Stage B2. In the presence of a grade &ge;3/6 murmur, pimobendan may be indicated.</p>
+                  </div>
+                  <div x-show="lviddn >= 1.7" style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 12px; margin-top: 15px; font-size: 0.85rem; color: #0369a1;">
+                    <strong>💡 Clinical Nuance:</strong> The EPIC trial uses a threshold of <strong>>1.70</strong> for LVIDdn to define cardiomegaly. This is more sensitive than the statistical 95% limit (1.85) to ensure at-risk patients aren't missed. 5% of dogs will have normal hearts > 1.7 and especially athletic/sighthound breeds.
+                  </div>
+                </div>
+
+                <div x-show="isCat">
+                  <h2 style="color: #16325F;"><i class="fa-solid fa-cat"></i> Feline Risk Assessment</h2>
+                  <p style="font-size: 0.85rem; color: #64748b;">(ISCAID / HCM Screening Guidelines)</p>
+                  <div style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                    <p>HCM Phenotype (Wall &ge; 6mm):
+                      <span :class="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'abnormal' : 'normal'" x-text="(parseFloat(ivsd) >= 6 || parseFloat(lvpwd) >= 6) ? 'DETECTED' : 'Not Detected'"></span>
+                    </p>
+                    <p style="margin-bottom: 8px;">
+                      <strong>ATE / Thrombus Risk:</strong>
+                      <template x-if="parseFloat(lad) >= 20">
+                        <span class="abnormal" style="color: #dc2626; font-weight: bold;">[HIGH RISK]</span>
+                      </template>
+                      <template x-if="parseFloat(lad) >= 17 && parseFloat(lad) < 20">
+                        <span style="color: #ea580c; font-weight: bold;">[MODERATE RISK]</span>
+                      </template>
+                      <template x-if="parseFloat(lad) > 0 && parseFloat(lad) < 17">
+                        <span class="normal" style="color: #16a34a; font-weight: bold;">[LOWER RISK]</span>
+                      </template>
+                      <span x-show="lad" x-text="' (LAD: ' + lad + 'mm)'" style="color: #64748b; font-size: 0.9rem;"></span>
+                    </p>
+                    <div x-show="parseFloat(lad) >= 20" class="alert-box-red" style="background-color: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                      <i class="fa-solid fa-triangle-exclamation"></i> <strong>Severe LA Enlargement:</strong> High risk of ATE. Recommend Clopidogrel and screening for "smoke" or thrombus.
+                    </div>
+                    <div x-show="parseFloat(lad) >= 17 && parseFloat(lad) < 20" style="background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; padding: 12px; border-radius: 6px;">
+                      <i class="fa-solid fa-circle-info"></i> <strong>Moderate LA Enlargement:</strong> Risk of thrombus formation present. Clinical monitoring and consideration of antiplatelet therapy indicated.
+                    </div>
+                    <template x-if="isCat && felineLvotoAssessment && aovmax > 1.9">
+                      <div style="margin-top: 8px; background-color: #fff5f5; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
+                        <span style="font-weight: bold; display: block; margin-bottom: 4px;" :class="felineLvotoAssessment.class" x-text="felineLvotoAssessment.label"></span>
+                        <p style="font-size: 0.82rem; color: #991b1b; margin: 0; line-height: 1.4;" x-text="felineLvotoAssessment.note"></p>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </article>
+            </section>
+
+            <!-- SECTION: DIASTOLIC STEP WAVEFORM MATRIX -->
+            <section class="card standard-card" x-show="isDog && diastolicClassification && diastolicClassification.evaluatedCount >= 2" x-transition style="margin-top: 18px; border-left: 4px solid #0ea5e9; background: #ffffff;">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 12px;">
+                <h2 style="color: #16325F; margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-heart-pulse" style="color: #0ea5e9;"></i> Diastolic Functional Profile
+                </h2>
+                <div style="font-weight: 700; font-size: 1.1rem; padding: 4px 10px; border-radius: 6px;" :class="diastolicClassification?.class === 'normal' ? 'normal' : 'abnormal'" x-text="diastolicClassification?.grade"></div>
+              </div>
+
+              <div style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa; padding: 15px; margin-bottom: 20px;">
+                <h3 style="font-size: 0.8rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fa-solid fa-chart-gantt"></i> Hemodynamic Progression Waveform Map
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; text-align: center;">
+                  <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;" :style="diastolicClassification?.stepIndex === 0 ? 'opacity: 1; border-color: #16a34a; background: #f0fdf4; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+                    <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #16a34a; display: flex; align-items: center; justify-content: center;">1</span>
+                    <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Physiologic</p>
+                    <span style="font-size: 0.7rem; font-weight: 600; color: #16a34a; background: #e8f5e9; padding: 1px 5px; border-radius: 3px;">E > A Inflow</span>
+                  </div>
+                  <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;" :style="diastolicClassification?.stepIndex === 1 ? 'opacity: 1; border-color: #ea580c; background: #fff7ed; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+                    <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #ea580c; display: flex; align-items: center; justify-content: center;">2</span>
+                    <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade I</p>
+                    <span style="font-size: 0.7rem; font-weight: 600; color: #c2410c; background: #ffedd5; padding: 1px 5px; border-radius: 3px;">E &lt; A Reversal</span>
+                  </div>
+                  <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;" :style="diastolicClassification?.stepIndex === 2 ? 'opacity: 1; border-color: #dc2626; background: #fef2f2; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+                    <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #dc2626; display: flex; align-items: center; justify-content: center;">3</span>
+                    <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade II</p>
+                    <span style="font-size: 0.7rem; font-weight: 600; color: #b91c1c; background: #fee2e2; padding: 1px 5px; border-radius: 3px;">Pseudo E > A</span>
+                  </div>
+                  <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;" :style="diastolicClassification?.stepIndex === 3 ? 'opacity: 1; border-color: #7f1d1d; background: #fff5f5; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+                    <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #7f1d1d; display: flex; align-items: center; justify-content: center;">4</span>
+                    <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade III</p>
+                    <span style="font-size: 0.7rem; font-weight: 600; color: #7f1d1d; background: #ffeeee; padding: 1px 5px; border-radius: 3px;">E &gt;&gt; A Spike</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                <h3 style="font-size: 0.8rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fa-solid fa-scale-balanced"></i> Pathological Points Attribution Audit
+                </h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                  <thead>
+                    <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                      <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Echo Metric</th>
+                      <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Entry</th>
+                      <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Physiologic Interpretation</th>
+                      <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: right;">Score Weight</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="item in diastolicClassification?.breakdown" :key="item.key">
+                      <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" :style="item.conflicts ? 'background-color: #fffbeb;' : ''">
+                        <td style="padding: 10px; font-weight: 600; color: #334155;">
+                          <span x-text="item.name"></span>
+                          <span x-text="item.category" style="display: block; font-size: 0.72rem; color: #64748b; font-weight: 500; font-style: italic; margin-top: 1px;"></span>
+                        </td>
+                        <td style="padding: 10px; text-align: center; font-weight: bold; color: #1e40af; font-size: 0.9rem;" x-text="item.val"></td>
+                        <td style="padding: 10px;">
+                          <div style="display: flex; flex-direction: column;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                              <span style="color: #1e293b; font-weight: 700;" x-text="item.grade"></span>
+                              <template x-if="item.conflicts">
+                                <span style="font-size: 0.68rem; color: #b45309; background: #fef3c7; padding: 1px 4px; border-radius: 3px; font-weight: bold; display: inline-flex; align-items: center; gap: 2px;">
+                                  <i class="fa-solid fa-triangle-exclamation"></i> Discordant
+                                </span>
+                              </template>
+                            </div>
+                            <span style="font-size: 0.75rem; color: #64748b;" x-text="`Range: ${item.threshold}`"></span>
+                          </div>
+                        </td>
+                        <td style="padding: 10px; text-align: right; font-weight: 900; color: #1e293b; font-size: 0.95rem;" :class="item.points > 0 ? (diastolicClassification?.class === 'normal' ? 'normal' : 'abnormal') : ''" x-text="item.points === 0 ? '0' : `+${item.points}`"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+
+              <div style="margin-top: 15px; background-color: #f8fafc; padding: 10px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <p style="font-size: 0.82rem; color: #334155; margin: 0; line-height: 1.4;">
+                  <i class="fa-solid fa-circle-nodes" style="color: #0ea5e9; margin-right: 2px;"></i>
+                  <strong>Hemodynamic Profile Analysis:</strong> <span x-text="diastolicClassification?.label"></span>
+                </p>
+              </div>
+            </section>
+
+            <!-- SECTION: ADVANCED MINE RISK STRATIFICATION -->
+            <section class="card" style="margin-top: 18px;" x-show="isDog" x-transition>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                <h2 style="color: #16325F; margin: 0; font-size: 1.3rem;">
+                  <i class="fa-solid fa-square-poll-vertical"></i> Advanced MINE Risk Stratification
+                </h2>
+                <p><em>Applicable to <strong>Degenerative Mitral Valve Disease</strong> Cases Only</em></p>
+                <select x-model="selectedMineModel" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background-color: #f8fafc; font-weight: 600; color: #1e3a8a;">
+                  <template x-if="typeof mineModels !== 'undefined'">
+                    <template x-for="(model, key) in mineModels" :key="key">
+                      <option :value="key" x-text="model.label"></option>
+                    </template>
+                  </template>
                 </select>
-            </div>
-        </div>
+              </div>
 
-        <div x-show="!weight || weight <= 0" style="text-align: center; padding: 30px; color: #64748b; background: #fff; border: 2px dashed #cbd5e1; border-radius: 8px;">
-            <p><i class="fa-solid fa-weight-hanging"></i> <strong>Awaiting Weight Entry</strong><br>Reference ranges will appear once a weight is entered.</p>
-        </div>
+              <div x-show="calculatedMineScore && calculatedMineScore.score === null" style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 6px; text-align: center; color: #64748b; font-size: 0.9rem;">
+                <p style="margin: 0;"><i class="fa-solid fa-circle-info"></i> <span x-text="calculatedMineScore.status"></span></p>
+              </div>
 
-        <div x-show="weight > 0 && typeof allometricModels !== 'undefined'">
-            <p style="font-size: 0.9rem; margin-bottom: 12px; font-style: italic;">
-                Current Weight: <strong x-text="weight"></strong> kg | Reference: <span x-text="allometricModels[selectedModel]?.reference"></span>
-            </p>
-            
-            <table class="compact-clinical-table" style="width: 100%; border-collapse: collapse;">
-                <thead style="background: #f1f5f9;">
-                    <tr>
+              <div x-show="calculatedMineScore && calculatedMineScore.score !== null">
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                  <div style="text-align: center; border-right: 2px solid #e2e8f0; padding-right: 15px; display: flex; flex-direction: column; justify-content: center;">
+                    <span style="font-size: 0.8rem; font-weight: bold; color: #64748b; text-transform: uppercase;">MINE Score</span>
+                    <span style="font-size: 2.5rem; font-weight: 900; color: #1e40af;" x-text="calculatedMineScore.score"></span>
+                  </div>
+                  <div>
+                    <h4 style="margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; color: #64748b;">Prognostic Risk Category</h4>
+                    <div style="font-size: 1.25rem; font-weight: bold; margin-bottom: 12px;" :class="calculatedMineScore.class === 'normal' ? 'normal' : 'abnormal'" x-text="calculatedMineScore.tier"></div>
+                    <h4 style="margin: 0 0 3px 0; font-size: 0.85rem; text-transform: uppercase; color: #64748b;">Median Survival Time (MST)</h4>
+                    <p style="margin: 0; font-size: 1.05rem; font-weight: bold; color: #1e293b;">
+                      <i class="fa-solid fa-hourglass-half" style="color: #0284c7;"></i> <span x-text="calculatedMineScore.mst"></span>
+                    </p>
+                  </div>
+                </div>
+                <p style="font-size: 0.8rem; color: #64748b; font-style: italic; margin-top: 10px; margin-bottom: 0;">
+                  *Survival estimates represent median time to cardiac death or congestive heart failure entry as validated by Vezzosi et al.
+                </p>
+              </div>
+
+              <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                <h3 style="font-size: 0.85rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fa-solid fa-chart-line"></i> MINE Scoring Points Breakdown
+                </h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                  <thead>
+                    <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                      <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Echo Variable</th>
+                      <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Patient Entry</th>
+                      <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Triggered Interval</th>
+                      <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: right;">Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="item in calculatedMineScore?.breakdown" :key="item.name">
+                      <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#fdfdfd'" onmouseout="this.style.backgroundColor='transparent'">
+                        <td style="padding: 10px; font-weight: 600; color: #334155;" x-text="item.name"></td>
+                        <td style="padding: 10px; text-align: center; font-weight: bold; color: #1e40af;" x-text="item.val"></td>
+                        <td style="padding: 10px; text-align: center; color: #64748b; font-style: italic;" x-text="item.threshold"></td>
+                        <td style="padding: 10px; text-align: right; font-weight: bold; color: #1e293b;" x-text="item.val === '—' ? '0' : `+${item.pts}`"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <!-- SECTION: BREED NORMALS REFERENCE -->
+            <section class="card" style="margin-top:18px" id="breed-normals-card">
+              <h3>Is your patient a breed with recorded echo normals?</h3>
+              <p>Select a breed to compare patient results with published breed-specific intervals.</p>
+              <div class="input-group">
+                <select id="breed-selector" x-model="selectedBreed" @change="updateBreedTable()">
+                  <option value="">-- Select a Breed --</option>
+                </select>
+              </div>
+              <div id="breed-data-container" style="margin-top: 20px;"></div>
+            </section>
+
+            <!-- SECTION: ALLOMETRIC CALCULATOR ENGINE -->
+            <section class="card" style="margin-top:25px; border: 2px solid #e2e8f0;" id="allometric-card">
+              <div class="reference-section">
+                <h3 style="color: #1e40af; display: flex; align-items: center; gap: 10px;">
+                  <i class="fa-solid fa-calculator"></i> Allometric Prediction Tool
+                </h3>
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                  <div class="input-group">
+                    <label style="font-weight: bold; color: #1e40af;">Patient Weight (kg):</label>
+                    <input type="number" step="0.1" x-model="weight" placeholder="Enter Weight" style="border: 2px solid #2563eb; width: 100%; padding: 8px; border-radius: 4px;">
+                  </div>
+                  <div class="input-group">
+                    <label style="font-weight: bold; color: #1e40af;">Dataset Selection:</label>
+                    <select x-model="selectedModel" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                      <template x-if="typeof allometricModels !== 'undefined'">
+                        <template x-for="(model, key) in allometricModels" :key="key">
+                          <option :value="key" x-text="model.label + ' (' + model.species + ')'"></option>
+                        </template>
+                      </template>
+                    </select>
+                  </div>
+                </div>
+
+                <div x-show="!weight || weight <= 0" style="text-align: center; padding: 30px; color: #64748b; background: #fff; border: 2px dashed #cbd5e1; border-radius: 8px;">
+                  <p><i class="fa-solid fa-weight-hanging"></i> <strong>Awaiting Weight Entry</strong><br>Reference ranges will appear once a weight is entered.</p>
+                </div>
+
+                <div x-show="weight > 0 && typeof allometricModels !== 'undefined'">
+                  <p style="font-size: 0.9rem; margin-bottom: 12px; font-style: italic;">
+                    Current Weight: <strong x-text="weight"></strong> kg | Reference: <span x-text="allometricModels[selectedModel]?.reference"></span>
+                  </p>
+                  <table class="compact-clinical-table" style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: #f1f5f9;">
+                      <tr>
                         <th style="text-align: left; padding: 8px;">Metric</th>
                         <th style="text-align: center; padding: 8px;">Patient</th>
                         <th style="text-align: center; padding: 8px;">Mean</th>
                         <th style="text-align: center; padding: 8px;">95% Range (mm)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="(data, paramName) in allometricModels[selectedModel]?.params" :key="paramName">
+                        <tr :class="calculateRef(paramName) && $data[paramName] > 0 && (parseFloat($data[paramName]) > parseFloat(calculateRef(paramName).max) || parseFloat($data[paramName]) < parseFloat(calculateRef(paramName).min)) ? 'row-highlight-error' : ''">
+                          <td style="font-weight: bold; text-transform: uppercase; padding: 10px;" x-text="paramName"></td>
+                          <td style="text-align: center; font-weight: bold;" :class="$data[paramName] > 0 ? 'text-primary' : 'text-muted'" x-text="$data[paramName] || '—'"></td>
+                          <td style="text-align: center;" x-text="calculateRef(paramName)?.mean || '—'"></td>
+                          <td style="text-align: center; color: #2563eb; font-weight: bold;">
+                            <span x-text="calculateRef(paramName) ? calculateRef(paramName).min + ' – ' + calculateRef(paramName).max : '—'"></span>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+
+                  <div class="reference-link-box" style="margin-top: 15px; padding: 10px; background: #f1f5f9; border-radius: 6px;">
+                    <p style="font-size: 0.85rem; color: #475569; margin: 0;">
+                      <i class="fa-solid fa-book-open"></i> <strong>Source:</strong> <span x-text="allometricModels[selectedModel]?.reference"></span>
+                    </p>
+                    <template x-if="allometricModels[selectedModel]?.pmid">
+                      <a :href="'https://pubmed.ncbi.nlm.nih.gov/' + allometricModels[selectedModel].pmid" target="_blank" style="font-size: 0.8rem; color: #2563eb; text-decoration: underline; display: inline-block; margin-top: 5px;">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> View on PubMed (PMID: <span x-text="allometricModels[selectedModel].pmid"></span>)
+                      </a>
+                    </template>
+                  </div>
+
+                  <div x-show="allometricModels[selectedModel]?.clinicalNote" x-transition style="margin-top: 15px; background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #166534;">
+                    <p style="margin: 0;">
+                      <i class="fa-solid fa-lightbulb" style="margin-right: 5px;"></i> <strong>Dataset Note:</strong> <span x-text="allometricModels[selectedModel].clinicalNote"></span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </main>
+
+          <!-- ========================================================= -->
+          <!--                    RIGHT ASIDE SIDEBAR                    -->
+          <!-- ========================================================= -->
+          <aside>
+            <div class="card">
+              <a href="/echo.html">
+                <h3 style="text-align:center">Full Echocardiography Courses and Guides</h3>
+                <img src="/images/Ultrasound-fan.jpg" alt="Fan of ultrasound beam" style="width:250px">
+              </a>
+            </div>
+
+            <div class="card" style="margin-top:16px">
+              <p>LAD measurement:</p>
+              <img src="/images/LAmeasure.jpg" alt="LAD measurement">
+              <p class="reference">Reference: Marchesotti et al Left atrial anteroposterior diameter in dogs: reference interval, allometric scaling, and agreement with the left atrial-to-aortic root ratio. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6895628/">Journal of Veterinary Medicine and Science</a> 2019</p>
+            </div>
+
+            <div class="card" style="margin-top:16px">
+              <div class="stage-card">
+                <h3>ACVIM Stages Guide</h3>
+                <a href="/blog-posts/post7.html"><img src="/images/acvim_stages.png" alt="ACVIM Stages" class="stage-image"></a>
+                <p class="reference" style="color: white;">Reference: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6524084/" style="color: white;">Keene et al (2019) ACVIM consensus guidelines for the diagnosis and treatment of myxomatous mitral valve disease in dogs. J Vet Intern Med. 33(3):1127-1140.J</a></p>
+              </div>
+            </div>
+
+            <div class="card" style="padding: 0px">
+              <section class="formula-sidebar-wrap" style="margin: 0px">
+                <h3 style="color: #1e293b; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+                  <i class="fa-solid fa-square-root-variable"></i> Allometric Scaling Formulas
+                </h3>
+                <table class="compact-clinical-table">
+                  <thead>
+                    <tr>
+                      <th>Parameter</th>
+                      <th>Formula (Normalised)</th>
+                      <th>Limit</th>
                     </tr>
-                </thead>
- <tbody>
-<template x-for="(data, paramName) in allometricModels[selectedModel]?.params" :key="paramName">
-    <tr :class="calculateRef(paramName) && $data[paramName] > 0 && (parseFloat($data[paramName]) > parseFloat(calculateRef(paramName).max) || parseFloat($data[paramName]) < parseFloat(calculateRef(paramName).min)) ? 'row-highlight-error' : ''">
-        
-        <td style="font-weight: bold; text-transform: uppercase; padding: 10px;" x-text="paramName"></td>
-        
-        <td style="text-align: center; font-weight: bold;" 
-            :class="$data[paramName] > 0 ? 'text-primary' : 'text-muted'"
-            x-text="$data[paramName] || '—'">
-        </td>
-        
-        <td style="text-align: center;" x-text="calculateRef(paramName)?.mean || '—'"></td>
-        
-        <td style="text-align: center; color: #2563eb; font-weight: bold;">
-            <span x-text="calculateRef(paramName) ? calculateRef(paramName).min + ' – ' + calculateRef(paramName).max : '—'"></span>
-        </td>
-    </tr>
-</template>
-</tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>LVIDdn</strong></td>
+                      <td>$$\frac{LVIDd}{Wt^{0.294}}$$</td>
+                      <td><span class="ref-limit">&lt;1.7</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>LAsaxn</strong></td>
+                      <td>$$\frac{LA}{Wt^{0.355}}$$</td>
+                      <td><span class="ref-limit">&lt;1.17</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>LADn</strong></td>
+                      <td>$$\frac{LAD}{Wt^{0.309}}$$</td>
+                      <td><span class="ref-limit">&lt;1.6</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style="font-size: 0.85rem; color: #64748b; font-style: italic; margin-top: 10px;">
+                  *Normalized values based on allometric scaling (Cornell method).<br>
+                  *All measurements <strong>must</strong> be in cm
+                </p>
+              </section>
+            </div>
 
-<div class="reference-link-box" style="margin-top: 15px; padding: 10px; background: #f1f5f9; border-radius: 6px;">
-    <p style="font-size: 0.85rem; color: #475569; margin: 0;">
-        <i class="fa-solid fa-book-open"></i> 
-        <strong>Source:</strong> <span x-text="allometricModels[selectedModel]?.reference"></span>
-    </p>
-    
-    <template x-if="allometricModels[selectedModel]?.pmid">
-        <a :href="'https://pubmed.ncbi.nlm.nih.gov/' + allometricModels[selectedModel].pmid" 
-           target="_blank" 
-           style="font-size: 0.8rem; color: #2563eb; text-decoration: underline; display: inline-block; margin-top: 5px;">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i> View on PubMed (PMID: <span x-text="allometricModels[selectedModel].pmid"></span>)
-        </a>
-    </template>
-</div>
+            <div class="card">
+              <h3>References</h3>
+              <p>Cornell Allometric Scaling:</p>
+              <p class="reference">Cornell et al. Allometric scaling of M-mode cardiac measurements in normal adult dogs. J Vet Intern Med. 2004</p>
+              <p>The EPIC Trial:</p>
+              <p class="reference">Boswood A et al. Effect of Pimobendan in Dogs with Preclinical Myxomatous Mitral Valve Disease and Cardiomegaly: The EPIC Study-A Randomized Clinical Trial. J Vet Intern Med. 2016 Nov;30(6):1765-1779</p>
+            </div>
 
-<div x-show="allometricModels[selectedModel]?.clinicalNote" 
-     x-transition
-     style="margin-top: 15px; background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #166534;">
-    <p style="margin: 0;">
-        <i class="fa-solid fa-lightbulb" style="margin-right: 5px;"></i>
-        <strong>Dataset Note:</strong> 
-        <span x-text="allometricModels[selectedModel].clinicalNote"></span>
-    </p>
-</div>
-        </div>
-    </div>
-</section>
+            <div class="card">
+              <h2>Echocardiography FAQ & Clinical Guidance</h2>
+              <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Should I use LA:Ao or LAD to assess left atrial size?</summary>
+                  <p>The LA:Ao ratio has traditionally been the standard, but it can be challenging to measure reliably. Recent recommendations favor the <strong>Left Atrial Diameter (LAD)</strong> in the long axis. This can be normalized using the allometric scaling formula: <strong>LAD (cm) / Weight (kg)<sup>0.309</sup></strong>. A value > 1.6 is typically considered indicative of left atrial enlargement.</p>
+                </details>
+              </div>
+              <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How is LVIDdn calculated in the Echo Calculator?</summary>
+                  <p>LVIDdn (normalized Left Ventricular Internal Diameter in diastole) uses the Cornell allometric scaling formula: <strong>LVIDd (cm) / Weight (kg)<sup>0.294</sup></strong>. This allows for the comparison of heart size across different body weights.</p>
+                </details>
+              </div>
+              <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What are the EPIC trial criteria for Stage B2 MMVD?</summary>
+                  <p>The EPIC trial defines Stage B2 as a patient with a murmur grade ≥ 3/6 and echocardiographic evidence of cardiomegaly, specifically an LA:Ao ratio ≥ 1.6 and an LVIDdn ≥ 1.7.</p>
+                </details>
+              </div>
+              <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Should I use breed-specific normals or Cornell scaling?</summary>
+                  <p>Standard Cornell scaling is appropriate for most breeds. However, for 'deviant' breeds like Sighthounds or Boxers, published breed-specific reference intervals should be used to avoid mis-staging heart disease.</p>
+                </details>
+              </div>
+              <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What parameters are required to calculate the Canine MINE score?</summary>
+                  <p>The 4-parameter MINE 1 scoring system requires the LA:Ao ratio, LVIDdn, Fractional Shortening (FS), and E-wave peak velocity. The simplified 3-parameter MINE 2 system utilizes LA:Ao, LVIDdn, and E-wave velocity to classify myxomatous mitral valve disease (MMVD) severity and estimate median survival time (MST). Enter those values in our calculator to get the score calculated instantly and displayed in a printable report.</p>
+                </details>
+              </div>
+              <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How is the Qp:Qs ratio calculated on a veterinary echocardiogram?</summary>
+                  <p>The Qp:Qs shunt ratio evaluates pulmonary to systemic blood flow. Systemic stroke volume (Qs) is calculated using the LVOT diameter and LVOT VTI, while pulmonary stroke volume (Qp) uses the RVOT diameter and RVOT VTI via the formula: Stroke Volume = VTI × π × (Diameter / 20)^2. A ratio of 1.0 is normal, while values > 1.5 indicate a hemodynamically significant left-to-right shunt. Enter those values in our calculator to get the ratio calculated instantly and displayed in a printable report.</p>
+                </details>
+              </div>
+            </div>
+          </aside>
 
-      </main>
+        </div> <!-- .grid (Closes layout row safely) -->
 
-      <!-- Right column -->
-      <aside>
-<div class="card"> <a href="/echo.html"><h3 style="text-align:center">Full Echocardiography Courses and Guides</h3><img src="/images/Ultrasound-fan.jpg" alt="Fan of ultrasound beam" style="width:250px"></a></div>
+        <div class="small">This guide and calculator is designed for assistance in interpretation of echo results, but can't replace expert clinical judgement.</div>
 
-   <div class="card" style="margin-top:16px">    
+        <section class="card disclaimer-box" style="margin-top: 40px; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
+          <h3 style="color: #64748b; font-size: 1rem; display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+            <i class="fa-solid fa-scale-balanced"></i> Clinical Disclaimer & Terms of Use
+          </h3>
+          <div style="font-size: 0.85rem; color: #475569; line-height: 1.6;">
+            <p style="margin-bottom: 10px;"><strong>For Professional Use Only:</strong> This calculator is a clinical decision support tool intended for use by qualified veterinary professionals. It is designed to assist in the interpretation of echocardiographic data but **must not** replace independent clinical judgment, physical examination findings, or expert consultation.</p>
+            <p style="margin-bottom: 10px;"><strong>Accuracy & Liability:</strong> Compiling complex, multi-source published datasets and allometric models is an intricate process. While every effort is made to ensure accuracy, <strong>VetCardioHub</strong> and its developers hold no liability for errors, omissions, or the clinical outcomes of any patient managed using this tool. All calculations are performed at the user's own risk.</p>
+            <p><strong>Help Us Improve:</strong> Found a bug? Noticed a missing model or an error in a reference range? Please <a href="mailto:info@vetcardiohub.com" style="color: #1e40af; text-decoration: underline;">contact the Hub</a>. Your feedback is essential for maintaining the accuracy of this community resource.</p>
+          </div>
+        </section>
 
+        <section id="install-nudge-static" class="install-footer-box">
+          <div class="nudge-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+          <div class="nudge-text">
+            <h4>Save as a Clinical App</h4>
+            <p>Add this calculator to your home screen for instant access during consults.</p>
+          </div>
+          <button onclick="showInstructions()" class="btn-nudge-static">How-To</button>
+        </section>
 
-        <div class="card" style="margin-top:16px">
-<p>LAD measurement:</p>
-<img src="/images/LAmeasure.jpg" alt="LAD measurement">
-<p class="reference">Reference: Marchesotti et al Left atrial anteroposterior diameter in dogs: reference interval, allometric scaling, and agreement with the left atrial-to-aortic root ratio. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6895628/">Journal of Veterinary Medicine and Science</a> 2019</p>
-        </div>
+      </div> <!-- .container -->
+    </div> <!-- .content -->
 
-        <div class="card" style="margin-top:16px">
-<div class="stage-card">
-<h3>ACVIM Stages Guide</p>
-<a href="/blog-posts/post7.html"><img src="/images/acvim_stages.png" alt="ACVIM Stages" class="stage-image"></a>
+  </div> <!-- x-data (Closes Alpine component scope perfectly) -->
 
-<p class="reference" style="color: white;">Reference: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6524084/" style="color: white;">Keene et al (2019) ACVIM consensus guidelines for the diagnosis and treatment of myxomatous mitral valve disease in dogs. J Vet Intern Med. 33(3):1127-1140.J</a></p>
-</div></div>
+  <div id="site-footer"></div>
 
- <div class="card" style="padding: 0px">
-<section class="formula-sidebar-wrap" style="margin: 0px">
-<h3 style="color: #1e293b; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
-        <i class="fa-solid fa-square-root-variable"></i> Allometric Scaling Formulas
-    </h3>
-
-    <table class="compact-clinical-table">
-        <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Formula (Normalised)</th>
-                <th>Limit</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>LVIDdn</strong></td>
-                <td>$$\frac{LVIDd}{Wt^{0.294}}$$</td>
-                <td><span class="ref-limit">&lt;1.7</span></td>
-            </tr>
-            <tr>
-                <td><strong>LAsaxn</strong></td>
-                <td>$$\frac{LA}{Wt^{0.355}}$$</td>
-                <td><span class="ref-limit">&lt;1.17</span></td>
-            </tr>
-            <tr>
-                <td><strong>LADn</strong></td>
-                <td>$$\frac{LAD}{Wt^{0.309}}$$</td>
-                <td><span class="ref-limit">&lt;1.6</span></td>
-            </tr>
-        </tbody>
-    </table>
-
-<p style="font-size: 0.85rem; color: #64748b; font-style: italic; margin-top: 10px;">
-        *Normalized values based on allometric scaling (Cornell method).<br>
-        *All measurements <strong>must</strong> be in cm
-    </p>
-</section>
-</div>
-
-        
-<div class="card">
-          <h3>References</h3>
-<p>Cornell Allometric Scaling:</p>
-<p class="reference">Cornell et al. Allometric scaling of M-mode cardiac measurements in normal adult dogs. J Vet Intern Med. 2004</p>
-
-<p>The EPIC Trial:</p>
-<p class="reference">Boswood A et al. Effect of Pimobendan in Dogs with Preclinical Myxomatous Mitral Valve Disease and Cardiomegaly: The EPIC Study-A Randomized Clinical Trial. J Vet Intern Med. 2016 Nov;30(6):1765-1779</p>
-
-        </div>
-
-<div class="card">
-<h2>Echocardiography FAQ & Clinical Guidance</h2>
-    
-    <div class="faq-item">
-        <details>
-            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Should I use LA:Ao or LAD to assess left atrial size?</summary>
-            <p>
-                The LA:Ao ratio has traditionally been the standard, but it can be challenging to measure reliably. Recent recommendations favor the <strong>Left Atrial Diameter (LAD)</strong> in the long axis. This can be normalized using the allometric scaling formula: <strong>LAD (cm) / Weight (kg)<sup>0.309</sup></strong>. A value > 1.6 is typically considered indicative of left atrial enlargement.
-            </p>
-        </details>
-    </div>
-
-    <div class="faq-item">
-        <details>
-            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How is LVIDdn calculated in the Echo Calculator?</summary>
-            <p>
-                LVIDdn (normalized Left Ventricular Internal Diameter in diastole) uses the Cornell allometric scaling formula: <strong>LVIDd (cm) / Weight (kg)<sup>0.294</sup></strong>. This allows for the comparison of heart size across different body weights.
-            </p>
-        </details>
-    </div>
-
-    <div class="faq-item">
-        <details>
-            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What are the EPIC trial criteria for Stage B2 MMVD?</summary>
-            <p>
-                The EPIC trial defines Stage B2 as a patient with a murmur grade ≥ 3/6 and echocardiographic evidence of cardiomegaly, specifically an LA:Ao ratio ≥ 1.6 and an LVIDdn ≥ 1.7.
-            </p>
-        </details>
-    </div>
-    <div class="faq-item">
-        <details>
-            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Should I use breed-specific normals or Cornell scaling?</summary>
-            <p>
-                Standard Cornell scaling is appropriate for most breeds. However, for 'deviant' breeds like Sighthounds or Boxers, published breed-specific reference intervals should be used to avoid mis-staging heart disease.
-            </p>
-        </details>
-    </div>
-    <div class="faq-item">
-        <details>
-            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What parameters are required to calculate the Canine MINE score?</summary>
-            <p>
-                The 4-parameter MINE 1 scoring system requires the LA:Ao ratio, LVIDdn, Fractional Shortening (FS), and E-wave peak velocity. The simplified 3-parameter MINE 2 system utilizes LA:Ao, LVIDdn, and E-wave velocity to classify myxomatous mitral valve disease (MMVD) severity and estimate median survival time (MST). Enter those values in our calculator to get the score calculated instantly and displayed in a printable report.
-            </p>
-        </details>
-    </div>
-    <div class="faq-item">
-        <details>
-            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How is the Qp:Qs ratio calculated on a veterinary echocardiogram?</summary>
-            <p>
-                The Qp:Qs shunt ratio evaluates pulmonary to systemic blood flow. Systemic stroke volume (Qs) is calculated using the LVOT diameter and LVOT VTI, while pulmonary stroke volume (Qp) uses the RVOT diameter and RVOT VTI via the formula: Stroke Volume = VTI × π × (Diameter / 20)^2. A ratio of 1.0 is normal, while values > 1.5 indicate a hemodynamically significant left-to-right shunt. Enter those values in our calculator to get the ratio calculated instantly and displayed in a printable report.
-            </p>
-        </details>
-    </div>
-</div>
-        </div>
-      </aside>
-    </div>
-    </div>
-
-
-<div class="small">This guide and calculator is designed for assistance in interpretation of echo results, but can't replace expert clinical judgement.</div>
-
-<section class="card disclaimer-box" style="margin-top: 40px; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
-    <h3 style="color: #64748b; font-size: 1rem; display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-        <i class="fa-solid fa-scale-balanced"></i> Clinical Disclaimer & Terms of Use
-    </h3>
-    <div style="font-size: 0.85rem; color: #475569; line-height: 1.6;">
-        <p style="margin-bottom: 10px;">
-            <strong>For Professional Use Only:</strong> This calculator is a clinical decision support tool intended for use by qualified veterinary professionals. It is designed to assist in the interpretation of echocardiographic data but **must not** replace independent clinical judgment, physical examination findings, or expert consultation.
-        </p>
-        <p style="margin-bottom: 10px;">
-            <strong>Accuracy & Liability:</strong> Compiling complex, multi-source published datasets and allometric models is an intricate process. While every effort is made to ensure accuracy, <strong>VetCardioHub</strong> and its developers hold no liability for errors, omissions, or the clinical outcomes of any patient managed using this tool. All calculations are performed at the user's own risk.
-        </p>
-        <p>
-            <strong>Help Us Improve:</strong> Found a bug? Noticed a missing model or an error in a reference range? Please <a href="mailto:info@vetcardiohub.com" style="color: #1e40af; text-decoration: underline;">contact the Hub</a>. Your feedback is essential for maintaining the accuracy of this community resource.
-        </p>
-    </div>
-</section>
-
-<section id="install-nudge-static" class="install-footer-box">
-    <div class="nudge-icon">
-        <i class="fa-solid fa-mobile-screen-button"></i>
-    </div>
-    <div class="nudge-text">
-        <h4>Save as a Clinical App</h4>
-        <p>Add this calculator to your home screen for instant access during consults.</p>
-    </div>
-    <button onclick="showInstructions()" class="btn-nudge-static">How-To</button>
-</section>
-
-</div>
-
-</div>
-
-<div id="site-footer"></div>
-
-
-
-<script src="/js/load-partials.js"></script>
-
+  <script src="/js/load-partials.js"></script>
 </body>
-</html>
