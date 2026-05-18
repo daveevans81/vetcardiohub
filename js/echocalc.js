@@ -1,5 +1,5 @@
-document.addEventListener('alpine:init', () => {
-    Alpine.data('echoCalculator', () => ({ 
+function advancedEchoSuite() {
+    return {
     /* 1. STATE VARIABLES */
     weight: '', 
     lvidd: '', 
@@ -662,8 +662,7 @@ setTimeout(() => { this.copySuccess = false; }, 2500);
 });
 }
 }
-}));
-});
+
 
 // Function to show instructions (existing)
 function showInstructions() {
