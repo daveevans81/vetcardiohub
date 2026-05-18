@@ -1,3 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="/js/global-head.js" defer></script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+
+
+
+    
+<title>Veterinary Echocardiography Calculator & Advanced Diagnostics | VetCardioHub</title>
+<meta name="description" content="Free veterinary echo calculator featuring allometric reference sizing, advanced canine MINE prognostic scoring, Qp:Qs ratio, diastolic function grading, and feline hypertrophic cardiomyopathy screening.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<!-- Standard favicon -->
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="MyWebSite" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="VetCardioHub EchoCalc">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="VetCardioHub EchoCalc">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MedicalWebPage",
+  "name": "Advanced Veterinary Echocardiography Calculator | VetCardioHub",
+  "description": "Interactive veterinary echo calculator featuring allometric reference scaling, Canine MINE prognostic scoring, Qp:Qs flow ratios, automated diastolic function classification matrices, and feline HCM screening.",
+  "url": "https://vetcardiohub.com/echocalc.html",
+  "medicalAudience": {
+    "@type": "MedicalAudience",
+    "audienceType": "Veterinary Professionals"
+  },
+  "specialty": {
+    "@type": "MedicalSpecialty",
+    "name": "Cardiology"
+  },
+  "mainEntity": {
+    "@type": "MedicalDevice",
+    "name": "VetCardioHub Advanced Echo Calc Suite",
+    "description": "Calculates normalized dimensions, advanced volumetric indices, Mitral INsufficiency Echocardiographic (MINE) risk score, shunt ratios (Qp:Qs), and diastolic performance grading.",
+    "purpose": "Comprehensive structural, hemodynamic, and prognostic interpretation of canine and feline echocardiography"
+  },
+  "citation": [
+    "Cornell et al. (2004) Allometric scaling of M-mode cardiac measurements in normal adult dogs.",
+    "Boswood et al. (2016) The EPIC Study - Pimobendan in Dogs with Preclinical MMVD.",
+    "Keene et al. (2019) ACVIM consensus guidelines for myxomatous mitral valve disease.",
+    "Vezzosi et al. (2021 & 2025) Mitral INsufficiency Echocardiographic (MINE) scoring system for prognostic stratification.",
+    "Schober et al. (2010) Echocardiographic assessment of left ventricular diastolic function in dogs."
+  ],
+  "lastReviewed": "2026-05-17",
+  "isAccessibleForFree": "true"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How is LVIDdn calculated in the Echo Calculator?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "LVIDdn (normalized Left Ventricular Internal Diameter in diastole) is calculated using the Cornell allometric scaling formula: LVIDd (cm) / Weight (kg)^0.294. A value > 1.7 is typically considered indicative of left ventricular enlargement."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the EPIC trial criteria for Stage B2 MMVD?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The EPIC trial defines Stage B2 as a patient with a murmur grade > 3/6 and echocardiographic evidence of cardiomegaly, specifically an LA:Ao ratio > 1.6 and an LVIDdn > 1.7."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use breed-specific normals or Cornell scaling?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Standard Cornell scaling is appropriate for most breeds. However, for 'deviant' breeds like Sighthounds or Boxers, published breed-specific reference intervals should be used to avoid mis-staging heart disease."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use LA:Ao or LAD?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The LA:Ao ratio measurement has been the gold standard metric for assessing left atrial size, but has been shown to be challenging to measure reliably especially in inexperienced hands. Moving towards the LAD (left atrial diameter in long axis) is now recommended, and can be scaled to body weight using the allometric scaling formula LAD (cm) / Weight (kg)^0.309. A value > 1.6 is typically considered indicative of left atrial enlargement."
+      }
+    },
+{
+  "@type": "Question",
+  "name": "What parameters are required to calculate the Canine MINE score?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "The 4-parameter MINE 1 scoring system requires the LA:Ao ratio, LVIDdn, Fractional Shortening (FS), and E-wave peak velocity. The simplified 3-parameter MINE 2 system utilizes LA:Ao, LVIDdn, and E-wave velocity to classify myxomatous mitral valve disease (MMVD) severity and estimate median survival time (MST)."
+  }
+},
+{
+  "@type": "Question",
+  "name": "How is the Qp:Qs ratio calculated on a veterinary echocardiogram?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "The Qp:Qs shunt ratio evaluates pulmonary to systemic blood flow. Systemic stroke volume (Qs) is calculated using the LVOT diameter and LVOT VTI, while pulmonary stroke volume (Qp) uses the RVOT diameter and RVOT VTI via the formula: Stroke Volume = VTI × π × (Diameter / 20)^2. A ratio of 1.0 is normal, while values > 1.5 indicate a hemodynamically significant left-to-right shunt."
+  }
+}
+  ]
+}
+</script>
+
+<script src="/js/echo-breeds.js" defer></script>
+<script src="/js/echocalc.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<style type="text/css">
+@media print {
+    /* 1. Global Reset - Ensures padding doesn't push width over 100% */
+    * {
+        box-sizing: border-box !important;
+        -webkit-print-color-adjust: exact !important; /* Forces colors/backgrounds */
+        print-color-adjust: exact !important;
+    }
+
+    /* 2. Hide UI Elements */
+    #site-header, #site-footer, .hero, .input-group, .measurements,
+    .export-actions, #breed-selector, .placeholder-text,
+    button, nav, aside, .app-branding, .small, 
+    .install-footer-box, #allometric-card, .Lead, .btn-text {
+        display: none !important;
+    }
+
+    /* 3. Page & Layout Setup */
+    @page {
+        size: auto;
+        margin: 1.5cm !important; /* The physical paper margin */
+    }
+
+    body, html {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Containers must be 100% width so they don't fight the @page margin */
+    main, .container, .content, .calculator-card {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    /* 4. The Report Sections (The Safety Gutter) */
+    .results-box, .epic-check, #breed-data-container {
+        display: block !important;
+        visibility: visible !important;
+        width: 100% !important;
+        padding: 0 15px !important; /* Internal safety gutter to prevent clipping */
+        border: none !important;
+        margin-bottom: 30px !important;
+        page-break-inside: avoid;
+    }
+
+    /* 5. Custom Branding Header */
+    .results-box::before {
+        content: "VETCARDIOHUB CLINICAL REPORT";
+        display: block;
+        font-size: 10px;
+        letter-spacing: 2px;
+        color: #94a3b8;
+        margin-bottom: 10px;
+    } /* FIXED: This closing brace was missing! */
+
+    /* 6. The Result Row Alignment */
+    .result-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        border-bottom: 1px solid #eee !important;
+        padding: 8px 0 !important;
+    }
+
+    /* This targets the right-hand side cluster */
+    .result-row > span:last-child {
+        text-align: right !important;
+        padding-left: 20px !important; /* Prevents values from crowding the label */
+        flex-shrink: 0; /* Prevents the number from being squashed */
+    }
+
+    /* 7. Clinical Colors */
+    .abnormal, [style*="color: #dc2626"] { 
+        color: #dc2626 !important; 
+        font-weight: bold !important; 
+    }
+    .normal, [style*="color: #16a34a"] { 
+        color: #16a34a !important; 
+    }
+    h1, h2, h3, [style*="color: #1e40af"], [style*="color: #16325F"] { 
+        color: #16325F !important; 
+    }
+}
+</style>
+</head>
+
+<body>
+
+
+<div id="site-header"></div>
+
 <div x-data="advancedEchoSuite()" x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
 
     <div id="app-only-branding" class="app-branding">VetCardioHub EchoCalc</div>
@@ -1247,3 +1472,4 @@
 
   <script src="/js/load-partials.js"></script>
 </body>
+</html>
