@@ -299,6 +299,11 @@ get diastolicClassification() {
         return { ...item, conflicts: conflicts };
     });
 
+     const conflictCount = finalizedBreakdown.filter(i => i.conflicts).length;
+    let confidenceLabel = 'Robust Alignment';
+    if (conflictCount > 0) confidenceLabel = 'Mixed Profile (Minor Discrepancy)';
+    if (conflictCount >= evaluatedCount / 2) confidenceLabel = 'Equivocal (High Contradiction)';
+
     return {
         grade: finalGrade,
         stepIndex: stepIndex,
@@ -306,7 +311,8 @@ get diastolicClassification() {
         class: className,
         evaluatedCount: evaluatedCount,
         breakdown: finalizedBreakdown,
-        pointsSummary: { I: grade1Points, II: grade2Points, III: grade3Points }
+        pointsSummary: { I: grade1Points, II: grade2Points, III: grade3Points },
+        confidence: confidenceLabel
     };
 },
 
