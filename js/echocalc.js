@@ -32,6 +32,7 @@ function advancedEchoSuite() {
     showVolumes: false,
     showDoppler: false,
     showRightHeart: false,
+    showShunt: false,
     
     /* 2. GETTERS */
     get lviddn() {
