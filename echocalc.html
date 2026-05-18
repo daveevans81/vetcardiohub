@@ -534,10 +534,13 @@ get diastolicClassification() {
 },
 
 hasSectionData(fieldsArray) {
-    return fieldsArray.some(function(field) {
+    for (const field of fieldsArray) {
         const val = parseFloat(this[field]);
-        return val && !isNaN(val) && val > 0;
-    }.bind(this)); // Notice .bind(this) to keep Alpine's 'this' context safe
+        if (val && !isNaN(val) && val !== 0) {
+            return true;
+        }
+    }
+    return false;
 },
 
     /* 3. ALLOMETRIC GETTERS */
