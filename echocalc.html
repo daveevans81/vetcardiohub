@@ -1185,72 +1185,83 @@
             </section>
 
             <!-- SECTION: ADVANCED MINE RISK STRATIFICATION -->
-            <section class="card" style="margin-top: 18px;" x-show="isDog" x-transition>
-              <div style="justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
-                <h2 style="color: #16325F; margin: 0; font-size: 1.3rem;">
-                  <i class="fa-solid fa-square-poll-vertical"></i> Advanced MINE Risk Stratification
-                </h2>
+            <section class="card" style="margin-top: 18px; max-width: 100%; overflow: hidden;" x-show="isDog" x-transition>
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <h2 style="color: #16325F; margin: 0; font-size: 1.3rem;">
+            <i class="fa-solid fa-square-poll-vertical"></i> Advanced MINE Risk Stratification
+        </h2>
+        <p style="margin: 0; font-size: 0.9rem; color: #475569;"><em>Applicable to <strong>Degenerative Mitral Valve Disease</strong> Cases Only</em></p>
+        
+        <select x-model="selectedMineModel" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background-color: #f8fafc; font-weight: 600; color: #1e3a8a;">
+            <template x-if="typeof mineModels !== 'undefined'">
+                <template x-for="(model, key) in mineModels" :key="key">
+                    <option :value="key" x-text="model.label"></option>
+                </template>
+            </template>
+        </select>
+    </div>
 
-                <select x-model="selectedMineModel" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background-color: #f8fafc; font-weight: 600; color: #1e3a8a;">
-                  <template x-if="typeof mineModels !== 'undefined'">
-                    <template x-for="(model, key) in mineModels" :key="key">
-                      <option :value="key" x-text="model.label"></option>
-                    </template>
-                  </template>
-                </select>
-              </div>
+    <div x-show="calculatedMineScore && calculatedMineScore.score === null" style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 6px; text-align: center; color: #64748b; font-size: 0.9rem;">
+        <p style="margin: 0;"><i class="fa-solid fa-circle-info"></i> <span x-text="calculatedMineScore.status"></span></p>
+    </div>
 
-              <div x-show="calculatedMineScore && calculatedMineScore.score === null" style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 6px; text-align: center; color: #64748b; font-size: 0.9rem;">
-                <p style="margin: 0;"><i class="fa-solid fa-circle-info"></i> <span x-text="calculatedMineScore.status"></span></p>
-              </div>
+    <div x-show="calculatedMineScore && calculatedMineScore.score !== null">
+        <!-- FIX 1: Auto-stacks columns vertically on mobile screens instead of breaking boundaries -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; box-sizing: border-box;">
+            
+            <div style="text-align: center; padding: 10px; display: flex; flex-direction: column; justify-content: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;">
+                <span style="font-size: 0.8rem; font-weight: bold; color: #64748b; text-transform: uppercase;">MINE Score</span>
+                <span style="font-size: 2.5rem; font-weight: 900; color: #1e40af;" x-text="calculatedMineScore.score"></span>
+            </div>
 
-              <div x-show="calculatedMineScore && calculatedMineScore.score !== null">
-                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                  <div style="text-align: center; border-right: 2px solid #e2e8f0; padding-right: 15px; display: flex; flex-direction: column; justify-content: center;">
-                    <span style="font-size: 0.8rem; font-weight: bold; color: #64748b; text-transform: uppercase;">MINE Score</span>
-                    <span style="font-size: 2.5rem; font-weight: 900; color: #1e40af;" x-text="calculatedMineScore.score"></span>
-                  </div>
-                  <div>
-                    <h4 style="margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; color: #64748b;">Prognostic Risk Category</h4>
-                    <div style="font-size: 1.25rem; font-weight: bold; margin-bottom: 12px;" :class="calculatedMineScore.class === 'normal' ? 'normal' : 'abnormal'" x-text="calculatedMineScore.tier"></div>
-                    <h4 style="margin: 0 0 3px 0; font-size: 0.85rem; text-transform: uppercase; color: #64748b;">Median Survival Time (MST)</h4>
-                    <p style="margin: 0; font-size: 1.05rem; font-weight: bold; color: #1e293b;">
-                      <i class="fa-solid fa-hourglass-half" style="color: #0284c7;"></i> <span x-text="calculatedMineScore.mst"></span>
-                    </p>
-                  </div>
-                </div>
-                <p style="font-size: 0.8rem; color: #64748b; font-style: italic; margin-top: 10px; margin-bottom: 0;">
-                  *Survival estimates represent median time to cardiac death or congestive heart failure entry as validated by Vezzosi et al.
+            <div>
+                <h4 style="margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; color: #64748b;">Prognostic Risk Category</h4>
+                <div style="font-size: 1.25rem; font-weight: bold; margin-bottom: 12px;" 
+                     :class="calculatedMineScore.class === 'normal' ? 'normal' : 'abnormal'"
+                     x-text="calculatedMineScore.tier"></div>
+
+                <h4 style="margin: 0 0 3px 0; font-size: 0.85rem; text-transform: uppercase; color: #64748b;">Median Survival Time (MST)</h4>
+                <p style="margin: 0; font-size: 1.05rem; font-weight: bold; color: #1e293b;">
+                    <i class="fa-solid fa-hourglass-half" style="color: #0284c7;"></i> <span x-text="calculatedMineScore.mst"></span>
                 </p>
-              </div>
+            </div>
+        </div>
 
-              <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-                <h3 style="font-size: 0.85rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-                  <i class="fa-solid fa-chart-line"></i> MINE Scoring Points Breakdown
-                </h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
-                  <thead>
+        <p style="font-size: 0.8rem; color: #64748b; font-style: italic; margin-top: 10px; margin-bottom: 0;">
+            *Survival estimates represent median time to cardiac death or congestive heart failure entry as validated by Vezzosi et al.
+        </p>
+    </div>
+
+    <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px; width: 100%;">
+        <h3 style="font-size: 0.85rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-chart-line"></i> MINE Scoring Points Breakdown
+        </h3>
+        
+        <!-- FIX 2: Insulates the table layout with an independent x-axis scrolling wrapper -->
+        <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <table style="width: 100%; min-width: 460px; border-collapse: collapse; font-size: 0.85rem; text-align: left; table-layout: fixed;">
+                <thead>
                     <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
-                      <th style="padding: 8px 10px; color: #475569; font-weight: 700;">Echo Variable</th>
-                      <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Patient Entry</th>
-                      <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center;">Triggered Interval</th>
-                      <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: right;">Points</th>
+                        <th style="padding: 8px 10px; color: #475569; font-weight: 700; width: 40%;">Echo Variable</th>
+                        <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center; width: 20%;">Patient Entry</th>
+                        <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: center; width: 25%;">Triggered Interval</th>
+                        <th style="padding: 8px 10px; color: #475569; font-weight: 700; text-align: right; width: 15%;">Points</th>
                     </tr>
-                  </thead>
-                  <tbody>
+                </thead>
+                <tbody>
                     <template x-for="item in calculatedMineScore?.breakdown" :key="item.name">
-                      <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#fdfdfd'" onmouseout="this.style.backgroundColor='transparent'">
-                        <td style="padding: 10px; font-weight: 600; color: #334155;" x-text="item.name"></td>
-                        <td style="padding: 10px; text-align: center; font-weight: bold; color: #1e40af;" x-text="item.val"></td>
-                        <td style="padding: 10px; text-align: center; color: #64748b; font-style: italic;" x-text="item.threshold"></td>
-                        <td style="padding: 10px; text-align: right; font-weight: bold; color: #1e293b;" x-text="item.val === '—' ? '0' : `+${item.pts}`"></td>
-                      </tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#fdfdfd'" onmouseout="this.style.backgroundColor='transparent'">
+                            <td style="padding: 10px; font-weight: 600; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="item.name"></td>
+                            <td style="padding: 10px; text-align: center; font-weight: bold; color: #1e40af;" x-text="item.val"></td>
+                            <td style="padding: 10px; text-align: center; color: #64748b; font-style: italic;" x-text="item.threshold"></td>
+                            <td style="padding: 10px; text-align: right; font-weight: bold; color: #1e293b;" x-text="item.val === '—' ? '0' : `+${item.pts}`"></td>
+                        </tr>
                     </template>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
             <!-- SECTION: BREED NORMALS REFERENCE -->
             <section class="card" style="margin-top:18px" id="breed-normals-card">
               <h3>Is your patient a breed with recorded echo normals?</h3>
