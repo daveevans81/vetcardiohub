@@ -1030,7 +1030,7 @@
             </section>
 
             <!-- SECTION: CANINE EPIC / FELINE ASSESSMENT -->
-            <section class="card" style="margin-top:18px">
+            <section class="card" style="margin-top: 18px; border-left: 4px solid #0e50e9; background: #ffffff;">
               <article class="epic-check" style="margin-top:12px">
                 <div x-show="isDog">
                   <h2 style="color: #16325F;"><i class="fa-solid fa-shield-dog"></i> Canine EPIC Check</h2>
@@ -1123,7 +1123,7 @@
                 </h3>
                 
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; width: 100%; box-sizing: border-box;">
-                  <!-- Step 1 -->
+                  <!-- NORMAL -->
                   <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 2px; position: relative; transition: all 0.3s ease; box-sizing: border-box;" 
                        :style="diastolicClassification?.stepIndex === 0 ? 'opacity: 1; border-color: #16a34a; background: #f0fdf4; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
                     <span style="position: absolute; top: -8px; left: -6px; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; color: white; background-color: #16a34a; display: flex; align-items: center; justify-content: center;">1</span>
@@ -1132,7 +1132,7 @@
                     <span style="font-size: 0.62rem; font-weight: 600; color: #16a34a; background: #e8f5e9; padding: 1px 3px; border-radius: 3px; display: inline-block; white-space: nowrap; max-width: 95%; overflow: hidden; text-overflow: ellipsis;">E &gt; A Inflow</span>
                   </div>
 
-                  <!-- Step 2 -->
+                  <!-- GRADE I -->
                   <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 2px; position: relative; transition: all 0.3s ease; box-sizing: border-box;" 
                        :style="diastolicClassification?.stepIndex === 1 ? 'opacity: 1; border-color: #ea580c; background: #fff7ed; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
                     <span style="position: absolute; top: -8px; left: -6px; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; color: white; background-color: #ea580c; display: flex; align-items: center; justify-content: center;">2</span>
@@ -1141,7 +1141,7 @@
                     <span style="font-size: 0.62rem; font-weight: 600; color: #c2410c; background: #ffedd5; padding: 1px 3px; border-radius: 3px; display: inline-block; white-space: nowrap; max-width: 95%; overflow: hidden; text-overflow: ellipsis;">E &lt; A Rev</span>
                   </div>
 
-                  <!-- Step 3 -->
+                  <!-- GRADE II -->
                   <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 2px; position: relative; transition: all 0.3s ease; box-sizing: border-box;" 
                        :style="diastolicClassification?.stepIndex === 2 ? 'opacity: 1; border-color: #dc2626; background: #fef2f2; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
                     <span style="position: absolute; top: -8px; left: -6px; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; color: white; background-color: #dc2626; display: flex; align-items: center; justify-content: center;">3</span>
@@ -1150,7 +1150,7 @@
                     <span style="font-size: 0.62rem; font-weight: 600; color: #b91c1c; background: #fee2e2; padding: 1px 3px; border-radius: 3px; display: inline-block; white-space: nowrap; max-width: 95%; overflow: hidden; text-overflow: ellipsis;">Pseudo E&gt;A</span>
                   </div>
 
-                  <!-- Step 4 -->
+                  <!-- GRADE III -->
                   <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 2px; position: relative; transition: all 0.3s ease; box-sizing: border-box;" 
                        :style="diastolicClassification?.stepIndex === 3 ? 'opacity: 1; border-color: #7f1d1d; background: #fff5f5; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
                     <span style="position: absolute; top: -8px; left: -6px; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; color: white; background-color: #7f1d1d; display: flex; align-items: center; justify-content: center;">4</span>
@@ -1220,9 +1220,9 @@
             </section>
 
             <!-- SECTION: ADVANCED MINE RISK STRATIFICATION -->
- <section class="card" style="margin-top: 18px; max-width: 100% !important; width: 100%; min-width: 0; overflow: hidden !important; box-sizing: border-box;" x-show="isDog" x-transition>
+ <section class="card" style="margin-top: 18px; max-width: 100% !important; width: 100%; min-width: 0; overflow: hidden !important; box-sizing: border-box; border-left: 4px solid #0ee953; background: #ffffff;" x-show="isDog" x-transition>
     
-    <!-- FIX 1: Complete Block Architecture for Header (Zero Row Math) -->
+    <!-- Complete Block Architecture for Header (Zero Row Math) -->
     <div style="display: block; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px; width: 100%;">
         
         <h2 style="color: #16325F; margin: 0 0 8px 0; font-size: 1.2rem; line-height: 1.3; display: block; word-break: break-word;">
@@ -1312,7 +1312,7 @@
     </div>
 </section>
             <!-- SECTION: BREED NORMALS REFERENCE -->
-            <section class="card" style="margin-top:18px" id="breed-normals-card">
+            <section class="card" style="margin-top: 18px; border-left: 4px solid #e9de0e; background: #ffffff;" id="breed-normals-card">
               <h3>Is your patient a breed with recorded echo normals?</h3>
               <p>Select a breed to compare patient results with published breed-specific intervals.</p>
               <div class="input-group">
@@ -1324,7 +1324,7 @@
             </section>
 
             <!-- SECTION: ALLOMETRIC CALCULATOR ENGINE -->
-            <section class="card" style="margin-top:25px; border: 2px solid #e2e8f0;" id="allometric-card">
+            <section class="card" style="margin-top: 18px; border-left: 4px solid #e94c0e; background: #ffffff;" id="allometric-card">
               <div class="reference-section">
                 <h3 style="color: #1e40af; display: flex; align-items: center; gap: 10px;">
                   <i class="fa-solid fa-calculator"></i> Allometric Prediction Tool
