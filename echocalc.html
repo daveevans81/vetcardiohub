@@ -1111,33 +1111,53 @@
                 <div x-show="diastolicClassification.evaluatedCount < 2">
                    <div style="font-weight: 700; font-size: 1.1rem; padding: 4px 10px; border-radius: 6px;" x-text="'AWAITING DATA'"></div>
                 </div>
-                <div style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa; padding: 15px; margin-bottom: 20px;">
-                  <h3 style="font-size: 0.8rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
-                  <i class="fa-solid fa-chart-gantt"></i> Hemodynamic Progression Waveform Map
-                  </h3>
-                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; text-align: center;">
-                    <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;" :style="diastolicClassification?.stepIndex === 0 ? 'opacity: 1; border-color: #16a34a; background: #f0fdf4; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
-                     <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #16a34a; display: flex; align-items: center; justify-content: center;">1</span>
-                      <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Physiologic</p>
-                      <span style="font-size: 0.7rem; font-weight: 600; color: #16a34a; background: #e8f5e9; padding: 1px 5px; border-radius: 3px;">E > A Inflow</span>
-                    </div>
-                    <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;" :style="diastolicClassification?.stepIndex === 1 ? 'opacity: 1; border-color: #ea580c; background: #fff7ed; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
-                      <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #ea580c; display: flex; align-items: center; justify-content: center;">2</span>
-                      <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade I</p>
-                      <span style="font-size: 0.7rem; font-weight: 600; color: #c2410c; background: #ffedd5; padding: 1px 5px; border-radius: 3px;">E &lt; A Reversal</span>
-                    </div>
-                    <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;" :style="diastolicClassification?.stepIndex === 2 ? 'opacity: 1; border-color: #dc2626; background: #fef2f2; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
-                    <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #dc2626; display: flex; align-items: center; justify-content: center;">3</span>
-                    <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade II</p>
-                    <span style="font-size: 0.7rem; font-weight: 600; color: #b91c1c; background: #fee2e2; padding: 1px 5px; border-radius: 3px;">Pseudo E > A</span>
-                  </div>
-                  <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px 6px; position: relative; transition: all 0.3s ease;" :style="diastolicClassification?.stepIndex === 3 ? 'opacity: 1; border-color: #7f1d1d; background: #fff5f5; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
-                    <span style="position: absolute; top: -10px; left: -10px; font-size: 0.7rem; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; color: white; background-color: #7f1d1d; display: flex; align-items: center; justify-content: center;">4</span>
-                    <p style="margin: 5px 0 2px 0; font-size: 0.85rem; font-weight: bold; color: #1e293b;">Grade III</p>
-                    <span style="font-size: 0.7rem; font-weight: 600; color: #7f1d1d; background: #ffeeee; padding: 1px 5px; border-radius: 3px;">E &gt;&gt; A Spike</span>
-                  </div>
-                </div>
-              </div>
+                <div style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa; padding: 12px 8px; margin-bottom: 20px; box-sizing: border-box;">
+  <h3 style="font-size: 0.8rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
+    <i class="fa-solid fa-chart-gantt"></i> Hemodynamic Progression Waveform Map
+  </h3>
+  
+  <!-- FIX 1: Strict 4-column layout with a smaller gap to preserve precious horizontal pixels -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; width: 100%; box-sizing: border-box;">
+    
+    <!-- Step 1 -->
+    <!-- FIX 2: Added micro-padding (8px 2px) to prevent inner layout blowouts -->
+    <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 2px; position: relative; transition: all 0.3s ease; box-sizing: border-box;" 
+         :style="diastolicClassification?.stepIndex === 0 ? 'opacity: 1; border-color: #16a34a; background: #f0fdf4; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+      
+      <!-- FIX 3: Shrunk the relative step badge slightly so it scales cleanly on small viewports -->
+      <span style="position: absolute; top: -8px; left: -6px; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; color: white; background-color: #16a34a; display: flex; align-items: center; justify-content: center;">1</span>
+      
+      <!-- FIX 4: Reduced font tracking sizes and forced strings onto 1 line with text-ellipsis overrides -->
+      <p style="margin: 2px 0; font-size: 0.72rem; font-weight: bold; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Physiologic</p>
+      <span style="font-size: 0.62rem; font-weight: 600; color: #16a34a; background: #e8f5e9; padding: 1px 3px; border-radius: 3px; display: inline-block; white-space: nowrap; max-width: 95%; overflow: hidden; text-overflow: ellipsis;">E &gt; A Inflow</span>
+    </div>
+
+    <!-- Step 2 -->
+    <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 2px; position: relative; transition: all 0.3s ease; box-sizing: border-box;" 
+         :style="diastolicClassification?.stepIndex === 1 ? 'opacity: 1; border-color: #ea580c; background: #fff7ed; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+      <span style="position: absolute; top: -8px; left: -6px; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; color: white; background-color: #ea580c; display: flex; align-items: center; justify-content: center;">2</span>
+      <p style="margin: 2px 0; font-size: 0.72rem; font-weight: bold; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Grade I</p>
+      <span style="font-size: 0.62rem; font-weight: 600; color: #c2410c; background: #ffedd5; padding: 1px 3px; border-radius: 3px; display: inline-block; white-space: nowrap; max-width: 95%; overflow: hidden; text-overflow: ellipsis;">E &lt; A Rev</span>
+    </div>
+
+    <!-- Step 3 -->
+    <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 2px; position: relative; transition: all 0.3s ease; box-sizing: border-box;" 
+         :style="diastolicClassification?.stepIndex === 2 ? 'opacity: 1; border-color: #dc2626; background: #fef2f2; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+      <span style="position: absolute; top: -8px; left: -6px; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; color: white; background-color: #dc2626; display: flex; align-items: center; justify-content: center;">3</span>
+      <p style="margin: 2px 0; font-size: 0.72rem; font-weight: bold; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Grade II</p>
+      <span style="font-size: 0.62rem; font-weight: 600; color: #b91c1c; background: #fee2e2; padding: 1px 3px; border-radius: 3px; display: inline-block; white-space: nowrap; max-width: 95%; overflow: hidden; text-overflow: ellipsis;">Pseudo E&gt;A</span>
+    </div>
+
+    <!-- Step 4 -->
+    <div style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 2px; position: relative; transition: all 0.3s ease; box-sizing: border-box;" 
+         :style="diastolicClassification?.stepIndex === 3 ? 'opacity: 1; border-color: #7f1d1d; background: #fff5f5; transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : 'opacity: 0.4; background: white;'">
+      <span style="position: absolute; top: -8px; left: -6px; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; color: white; background-color: #7f1d1d; display: flex; align-items: center; justify-content: center;">4</span>
+      <p style="margin: 2px 0; font-size: 0.72rem; font-weight: bold; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Grade III</p>
+      <span style="font-size: 0.62rem; font-weight: 600; color: #7f1d1d; background: #ffeeee; padding: 1px 3px; border-radius: 3px; display: inline-block; white-space: nowrap; max-width: 95%; overflow: hidden; text-overflow: ellipsis;">E &gt;&gt; A Spike</span>
+    </div>
+
+  </div>
+</div>
               <div x-show="diastolicClassification && diastolicClassification.evaluatedCount >= 2">
               <div style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
                 <h3 style="font-size: 0.8rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
