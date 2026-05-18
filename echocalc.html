@@ -442,19 +442,15 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
          </div>
 
       <div style="display: flex; gap: 15px;">
-<div class="input-group">
-        <label style="font-weight: 600; font-size: 0.85rem;">Mitral DT (ms)</label>
-        <input type="number" step="1" x-model="mdt" placeholder="e.g. 80">
-    </div>
-    <div class="input-group">
+        <div class="input-group"  style="flex: 1;">>
+          <label style="font-weight: 600; font-size: 0.85rem;">Mitral DT (ms)</label>
+          <input type="number" step="1" x-model="mdt" placeholder="e.g. 80" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;">
+       </div>
+       <div class="input-group"  style="flex: 1;">
         <label style="font-weight: 600; font-size: 0.85rem;">Mitral E' (cm/s)</label>
-        <input type="number" step="0.1" x-model="ePrime" placeholder="e.g. 6.5">
-    </div>
-</div>
-
-      <div style="display: flex; gap: 15px;">
-
-            <div class="input-group" style="flex: 1;">
+        <input type="number" step="0.1" x-model="ePrime" placeholder="e.g. 6.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;">
+       </div>
+            <div class="input-group"  style="flex: 1;">>
                 <label style="font-weight: 600; font-size: 0.85rem;">Ao VMax (m/s)</label>
                 <input type="number" step="0.01" x-model="aovmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
             'input-warning': aovmax > 0 && aovmax < 0.2, 
@@ -469,57 +465,33 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     </template>
             </div>
 
-            <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">LVOT VTI (<strong>cm</strong>)</label>
-                <input type="number" step="0.01" x-model="lvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': lvotvti > 0 && lvotvti < 4, 
-            'input-error': lvotvti > 50
-        }">
-    <template x-if="lvotvti > 0 && lvotvti < 4">
-        <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
-    </template>
-    
-    <template x-if="lvotvti > 50">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for cm. Or consistent with severe aortic stenosis.</div>
-    </template>
+  
 
-            </div>
-
-            <div class="input-group" style="flex: 1;">
+          <div class="input-group"  style="flex: 1;">>
                 <label style="font-weight: 600; font-size: 0.85rem;">PA VMax (m/s)</label>
                 <input type="number" step="0.01" x-model="pavmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
             'input-warning': pavmax > 0 && pavmax < 0.2, 
             'input-error': pavmax > 10
         }">
     <template x-if="pavmax > 0 && pavmax < 0.2">
-        <div class="warning-text">⚠️ Value too low for m/s.</div>
+            <div class="warning-text">⚠️ Value too low for m/s.</div>
     </template>
     
     <template x-if="pavmax > 10">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
+            <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
     </template>
-            </div>
+          </div>
+      </div>
+    </div>
+</div>
 
-
-            <div class="input-group" style="flex: 1;">
-                <label style="font-weight: 600; font-size: 0.85rem;">RVOT VTI (<strong>cm</strong>)</label>
-                <input type="number" step="0.01" x-model="rvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
-            'input-warning': rvotvti > 0 && rvotvti < 4, 
-            'input-error': rvotvti > 50
-        }">
-    <template x-if="rvotvti > 0 && rvotvti < 4">
-        <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
-    </template>
-    
-    <template x-if="rvotvti > 50">
-        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for cm. Or consistent with severe pulmonic stenosis.</div>
-    </template>
-
-            </div>
-
-        </div>
-      <div style="display: flex; gap: 15px;">
-
+<div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
+    <button @click="showShunt = !showShunt" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
+        <span><i class="fa-solid fa-scale-balanced"></i> Shunt and VTI Ratios</span>
+        <i class="fa-solid" :class="showShunt ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+    </button>
+    <div x-show="showShunt" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
+        <div style="display: flex; gap: 15px;">
             <div class="input-group" style="flex: 1;">
                 <label style="font-weight: 600; font-size: 0.85rem;">LVOT diameter (mm)</label>
                 <input type="number" step="0.01" x-model="lvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
@@ -535,8 +507,23 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     </template>
             </div>
 
+          <div class="input-group" style="flex: 1;">
+                <label style="font-weight: 600; font-size: 0.85rem;">LVOT VTI (<strong>cm</strong>)</label>
+                <input type="number" step="0.01" x-model="lvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+            'input-warning': lvotvti > 0 && lvotvti < 4, 
+            'input-error': lvotvti > 50
+        }">
+    <template x-if="lvotvti > 0 && lvotvti < 4">
+        <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
+    </template>
+    
+    <template x-if="lvotvti > 50">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for cm. Or consistent with severe aortic stenosis.</div>
+    </template>
 
-            <div class="input-group" style="flex: 1;">
+            </div>
+
+<div class="input-group" style="flex: 1;">
                 <label style="font-weight: 600; font-size: 0.85rem;">RVOT diameter (mm)</label>
                 <input type="number" step="0.01" x-model="rvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
             'input-warning': rvotd > 0 && rvotd < 5, 
@@ -551,12 +538,26 @@ x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
     </template>
             </div>
 
-     </div>
+          <div class="input-group" style="flex: 1;">
+                <label style="font-weight: 600; font-size: 0.85rem;">RVOT VTI (<strong>cm</strong>)</label>
+                <input type="number" step="0.01" x-model="rvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 
+            'input-warning': rvotvti > 0 && rvotvti < 4, 
+            'input-error': rvotvti > 50
+        }">
+    <template x-if="rvotvti > 0 && rvotvti < 4">
+        <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
+    </template>
+    
+    <template x-if="rvotvti > 50">
+        <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for cm. Or consistent with severe pulmonic stenosis.</div>
+    </template>
 
+            </div>
+
+
+        </div>
     </div>
 </div>
-
-
 
 <div style="margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">
     <button @click="showRightHeart = !showRightHeart" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
