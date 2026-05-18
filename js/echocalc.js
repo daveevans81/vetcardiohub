@@ -356,10 +356,10 @@ get calculatedMineScore() {
 
     model.variables.forEach(v => {
         // Map keys to clean clinical display names
-        const displayName = v === 'laAo' ? 'LA:Ao Ratio' : 
+        const displayName = v === 'laAo' ? 'LA:Ao' : 
                             v === 'lviddn' ? 'LVIDdn' : 
-                            v === 'fs' ? 'Fractional Shortening' : 
-                            v === 'eVel' ? 'E-wave Peak Velocity' : v.toUpperCase();
+                            v === 'fs' ? 'FS' : 
+                            v === 'eVel' ? 'E-wave Vel' : v.toUpperCase();
 
         const val = parseFloat(this[v]);
         
