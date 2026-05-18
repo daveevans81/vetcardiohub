@@ -628,6 +628,10 @@ if (this.diastolicClassification && this.diastolicClassification.evaluatedCount 
         } else if (ladVal >= 16.5) {
             text += `ATE RISK: Moderate LA enlargement. Risk of thrombus formation present.\n`;
         }
+        if (this.felineLvotoAssessment && parseFloat(this.aovmax) > 1.9) {
+            text += `OUTFLOW TRACT: ${this.felineLvotoAssessment.label}\n`;
+            text += `NOTE: ${this.felineLvotoAssessment.note}\n`;
+        }
     }
 // --- SECTION 4: CLINICAL OBSERVATIONS ---
 if (this.clinicalComments && this.clinicalComments.trim() !== '') {
@@ -667,6 +671,7 @@ this.copySuccess = true;
 setTimeout(() => { this.copySuccess = false; }, 2500);
 });
 }
+};
 }
 
 
