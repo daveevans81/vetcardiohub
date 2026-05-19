@@ -1946,27 +1946,40 @@
             </button>
         </div>
 
-        <div style="padding: 20px;">
-            <div style="width: 100%; height: 180px; background: #f1f5f9; border-radius: 6px; border: 1px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; color: #94a3b8;">
-                <i class="fa-regular fa-image" style="font-size: 2rem; margin-bottom: 8px;"></i>
-                <span style="font-size: 0.8rem;">[ Measurement Image Placeholder ]</span>
-                <span style="font-size: 0.7rem; margin-top: 4px;" x-text="activeGlossaryTerm?.imgPlaceholder"></span>
+      <div style="padding: 20px;">
+            
+            <template x-if="activeGlossaryTerm?.imgPlaceholder">
+                <div style="width: 100%; max-height: 220px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 18px; overflow: hidden; background: #f8fafc; display: flex; justify-content: center; align-items: center;">
+                    <img :src="activeGlossaryTerm.imgPlaceholder" 
+                         :alt="activeGlossaryTerm.title" 
+                         style="max-width: 100%; max-height: 220px; object-fit: contain; display: block; border-radius: 4px;">
+                </div>
+            </template>
+
+            <div style="margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px;">
+                <i class="fa-solid fa-satellite-dish" style="color: #0ea5e9; margin-top: 2px;"></i>
+                <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b; letter-spacing: 0.05em;">Optimal View / Source</span>
+                    <p style="margin: 2px 0 0 0; font-size: 0.95rem; font-weight: 600; color: #1e293b;" x-text="activeGlossaryTerm?.view"></p>
+                </div>
             </div>
 
-            <div style="margin-bottom: 12px;">
-                <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #0ea5e9; letter-spacing: 0.05em;">Optimal View</span>
-                <p style="margin: 2px 0 0 0; font-size: 0.95rem; font-weight: 600; color: #1e293b;" x-text="activeGlossaryTerm?.view"></p>
+            <div style="margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px;">
+                <i class="fa-solid fa-stethoscope" style="color: #10b981; margin-top: 2px;"></i>
+                <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b; letter-spacing: 0.05em;">Clinical Purpose</span>
+                    <p style="margin: 2px 0 0 0; font-size: 0.9rem; color: #334155; line-height: 1.4;" x-text="activeGlossaryTerm?.description"></p>
+                </div>
             </div>
 
-            <div style="margin-bottom: 12px;">
-                <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #0ea5e9; letter-spacing: 0.05em;">Clinical Purpose</span>
-                <p style="margin: 2px 0 0 0; font-size: 0.9rem; color: #334155; line-height: 1.4;" x-text="activeGlossaryTerm?.description"></p>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+                <i class="fa-solid fa-ruler-combined" style="color: #8b5cf6; margin-top: 2px;"></i>
+                <div style="width: 100%;">
+                    <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b; letter-spacing: 0.05em;">Technique / Formula</span>
+                    <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #1e293b; line-height: 1.5; background: #f8fafc; padding: 10px 12px; border-left: 3px solid #cbd5e1; border-radius: 0 4px 4px 0;" x-text="activeGlossaryTerm?.method"></p>
+                </div>
             </div>
 
-            <div>
-                <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #0ea5e9; letter-spacing: 0.05em;">Measurement Technique</span>
-                <p style="margin: 2px 0 0 0; font-size: 0.9rem; color: #334155; line-height: 1.5; background: #f8fafc; padding: 10px; border-left: 3px solid #cbd5e1; border-radius: 0 4px 4px 0;" x-text="activeGlossaryTerm?.method"></p>
-            </div>
         </div>
     </div>
 </div>
