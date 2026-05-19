@@ -2556,6 +2556,19 @@ details[open] summary {
 .input-error { border: 2px solid #ef4444 !important; background-color: #fef2f2 !important; }
 .warning-text { color: #d97706; font-size: 0.75rem; font-weight: bold; margin-top: 4px; }
 
+/* Style all info glossary icons across the calculator */
+.fa-circle-info {
+    margin-left: 4px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+/* Hover Accent Switch */
+.fa-circle-info:hover {
+    color: #0ea5e9;
+}
+
 /* ACVIM stages */
 .stage-card {
     background: linear-gradient(135deg, #2B66AE 0%, #183A63 100%);
