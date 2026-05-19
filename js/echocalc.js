@@ -1025,26 +1025,31 @@ for (const line of lines) {
         const trimmedLine = line.trim();
         if (!trimmedLine) continue;
 
-        // 1. Garbage filter: Skip headers and calculated ratios
+        // Apply Garbage Skip filter
         if (skipPatterns.some(p => p.test(trimmedLine))) continue;
 
-        // 2. Search for data
         for (const rule of extractionMap) {
             for (const pattern of rule.patterns) {
                 if (pattern.test(trimmedLine)) {
-                    // Look for a number that appears AFTER the pattern match
-                    const regex = new RegExp(pattern.source + "[^0-9-]*(-?[0-9]+(?:\\.[0-9]+)?)", "i");
-                    const match = trimmedLine.match(regex);
-
-                    if (match && match[1]) {
-                        const numericValue = parseFloat(match[1]);
+                    const matchObj = trimmedLine.match(pattern);
+                    if (matchObj) {
+                        // Calculate where the label string finishes on this row
+                        const index = trimmedLine.indexOf(matchObj[0]) + matchObj[0].length;
+                        const remainder = trimmedLine.substring(index);
                         
-                        if (!isNaN(numericValue)) {
-                            this[rule.key] = numericValue;
+                        // Grab the true mathematical numerical sequence immediately following
+                        const numMatch = remainder.match(/-?[0-9]+(?:\.[0-9]+)?/);
+
+                        if (numMatch) {
+                            const numericValue = parseFloat(numMatch[0]);
                             
-                            if (!filled.has(rule.key)) {
-                                filled.add(rule.key);
-                                matchCount++;
+                            if (!isNaN(numericValue)) {
+                                this[rule.key] = numericValue;
+                                
+                                if (!filled.has(rule.key)) {
+                                    filled.add(rule.key);
+                                    matchCount++;
+                                }
                             }
                         }
                     }
