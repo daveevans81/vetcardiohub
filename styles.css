@@ -2524,7 +2524,18 @@ details[open] summary {
 /* ECHO calculator styles */
         .reference { color: #050505; font-size: 8px; }
         .input-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; font-weight: 600; font-size: 0.8rem;}
+        label { 
+    font-weight: bold; 
+    margin-bottom: 5px; 
+    color: #333; 
+    font-weight: 600; 
+    font-size: 0.8rem;
+    
+    /* The Alignment Fix */
+    min-height: 32px; 
+    display: flex; 
+    align-items: flex-end; 
+}
         input { 
             width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; 
             box-sizing: border-box; /* Ensures padding doesn't break width */

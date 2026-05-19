@@ -1185,7 +1185,7 @@ lviddn: {
     ladao: {
         title: "LAD:Ao Ratio (Long Axis to Aorta)",
         view: "Derived Index",
-        description: "Compares the longitudinal length of the left atrium to the aortic root. Highly sensitive for asymmetric atrial dilation that might be missed on a standard short-axis view.",
+        description: "Scales the long-axis (or apical) left atrial dimension to the aortic root. Aortic measurement is made in short axis for using these cut-offs. If measuring aorta in long axis view cut off is 2.4.",
         method: "Calculated dynamically as: LAD (mm) / Ao (mm)."
     },
     RWT: { // Capitalized to match your exact state getter
