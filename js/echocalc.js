@@ -1162,7 +1162,10 @@ lviddn: {
         title: "LVIDdn (Normalized LVID Diastole)",
         view: "Derived Index (Allometric Scaling)",
         description: "Scales the left ventricular diastolic diameter to the patient's body weight. This is the gold-standard metric for diagnosing eccentric hypertrophy (e.g., MMVD, DCM) across vastly different canine body sizes.",
-        method: "Calculated as: (LVIDd in cm) / (Body Weight in kg)^0.294. A value > 1.70 is a primary criteria for ACVIM Stage B2 MMVD."
+        method: "Calculated as: (LVIDd in cm) / (Body Weight in kg)^0.294. A value > 1.70 is a primary criteria for ACVIM Stage B2 MMVD.",
+
+        reference: "Cornell et al. Allometric scaling of M-mode cardiac measurements in normal adult dogs.",
+        pmid: "15188817"
     },
     lvidsn: {
         title: "LVIDsn (Normalized LVID Systole)",
