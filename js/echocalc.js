@@ -1201,8 +1201,7 @@ glossaryDatabase: {
         title: "Fractional Shortening (FS%)",
         view: "Derived Index",
         description: "A functional index representing the percentage change in the left ventricular diameter during systole. Normal in dogs is typically > 25%.",
-        method: "Calculated automatically as: ((LVIDd - LVIDs) / LVIDd) × 100. Note: FS% can be falsely elevated in severe mitral regurgitation due to the low-resistance left atrium.",
-        imgPlaceholder: "/images/fs-reference.jpg"
+        method: "Calculated automatically as: ((LVIDd - LVIDs) / LVIDd) × 100. Note: FS% can be falsely elevated in severe mitral regurgitation due to the low-resistance left atrium."
     },
     laAo: {
         title: "LA:Ao Ratio",
@@ -1350,15 +1349,13 @@ glossaryDatabase: {
         title: "Stroke Volume (SV)",
         view: "Derived Index",
         description: "The total volume of blood ejected by the ventricle per beat.",
-        method: "Calculated automatically by subtracting End-Systolic Volume (ESV) from End-Diastolic Volume (EDV).",
-        imgPlaceholder: "/images/sv-reference.jpg"
+        method: "Calculated automatically by subtracting End-Systolic Volume (ESV) from End-Diastolic Volume (EDV)."
     },
     ef: {
         title: "Ejection Fraction (EF%)",
         view: "Derived Index",
         description: "The percentage of diastolic volume ejected per beat. A key indicator of systolic function.",
-        method: "Calculated as: (Stroke Volume / LVEDV) × 100.",
-        imgPlaceholder: "/images/ef-reference.jpg"
+        method: "Calculated as: (Stroke Volume / LVEDV) × 100."
     },
     rwt: {
         title: "Relative Wall Thickness (RWT)",
@@ -1371,43 +1368,37 @@ glossaryDatabase: {
         title: "E:IVRT Ratio",
         view: "Derived Index",
         description: "An excellent hybrid predictor of left atrial pressure, combining early filling velocity with the relaxation time interval.",
-        method: "Calculated as: (E-wave velocity × 100) / IVRT. Ratios > 2.5 strongly correlate with elevated Left Atrial Pressure.",
-        imgPlaceholder: "/images/eivrt-reference.jpg"
+        method: "Calculated as: (E-wave velocity × 100) / IVRT. Ratios > 2.5 strongly correlate with elevated Left Atrial Pressure."
     },
     lveio: {
         title: "LVEIO (E:LVOT VTI)",
         view: "Derived Index",
         description: "Compares diastolic filling velocity against forward stroke distance. High ratios indicate the ventricle requires massive filling pressures to drive normal forward flow.",
-        method: "Calculated as: E-wave velocity / LVOT VTI.",
-        imgPlaceholder: "/images/lveio-reference.jpg"
+        method: "Calculated as: E-wave velocity / LVOT VTI."
     },
     eePrime: {
         title: "E:e' Ratio",
         view: "Derived Index",
         description: "The gold-standard non-invasive surrogate for left atrial filling pressure.",
-        method: "Calculated as: Transmitral E-wave velocity / TDI e' velocity. Normalizes blood flow against muscle relaxation speed.",
-        imgPlaceholder: "/images/eeprime-reference.jpg"
+        method: "Calculated as: Transmitral E-wave velocity / TDI e' velocity. Normalizes blood flow against muscle relaxation speed."
     },
     eplar: {
         title: "ePLAR (Echocardiographic Pulmonary to Left Atrial Ratio)",
         view: "Derived Index",
         description: "Differentiates pre-capillary from post-capillary pulmonary hypertension.",
-        method: "Calculated as: TR Vmax / E:e' Ratio. A high value (>0.28) points to primary lung vascular disease; a low value (<0.23) points to left heart failure backing up into the lungs.",
-        imgPlaceholder: "/images/eplar-reference.jpg"
+        method: "Calculated as: TR Vmax / E:e' Ratio. A high value (>0.28) points to primary lung vascular disease; a low value (<0.23) points to left heart failure backing up into the lungs."
     },
     vtir: {
         title: "VTI Ratio (P:S / Qp:Qs)",
         view: "Derived Index",
         description: "Assesses the balance between pulmonary (Qp) and systemic (Qs) flow volumes. Used to quantify the severity of shunts (e.g., PDA, VSD).",
-        method: "Calculated as: RVOT VTI / LVOT VTI (or cross-sectional areas for true volumetric Qp:Qs). Normal is roughly 1.0.",
-        imgPlaceholder: "/images/vtir-reference.jpg"
+        method: "Calculated as: RVOT VTI / LVOT VTI (or cross-sectional areas for true volumetric Qp:Qs). Normal is roughly 1.0."
     },
     rfac: {
         title: "RV FAC% (Right Ventricular Fractional Area Change)",
         view: "Derived Index",
         description: "A robust 2D estimation of global right ventricular systolic function. Preferred over TAPSE as it accounts for both longitudinal and radial contraction.",
-        method: "Calculated as: ((RVEDA - RVESA) / RVEDA) × 100.",
-        imgPlaceholder: "/images/rvfac-reference.jpg"
+        method: "Calculated as: ((RVEDA - RVESA) / RVEDA) × 100."
     },
     trPG: {
         title: "Pressure Gradient (TR PG)",
@@ -1420,8 +1411,7 @@ glossaryDatabase: {
         title: "Regurgitant Fraction (MR%)",
         view: "Derived Index",
         description: "Quantifies the percentage of the total LV stroke volume that leaks backward into the left atrium rather than going out the aorta.",
-        method: "Calculated as: (Mitral Regurgitant Volume / Total LV Stroke Volume) × 100.",
-        imgPlaceholder: "/images/mrfraction-reference.jpg"
+        method: "Calculated as: (Mitral Regurgitant Volume / Total LV Stroke Volume) × 100."
     },
     lvei: {
         title: "LVEI (LV Eccentricity Index)",
