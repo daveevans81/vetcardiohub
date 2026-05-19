@@ -614,7 +614,8 @@ const rightHeartModels = {
             tapse: { a: 4.12, b: 0.331, see: 1.15 }, // TAPSE scaling parameters
             rveda: { a: 0.145, b: 0.612, see: 0.08 }, // End-Diastolic Area scaling
             rvesa: { a: 0.072, b: 0.598, see: 0.04 }, // End-Systolic Area scaling
-            rvd1:  { a: 0.85,  b: 0.312, see: 0.21 }  // Basal diameter
+            rvd1:  { a: 0.85,  b: 0.312, see: 0.21 },  // Basal diameter
+            rpamin: { a: 3.0, b: 0.364 }
         }
     },
     gentile_solomon_2022: {

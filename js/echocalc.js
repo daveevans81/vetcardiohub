@@ -224,37 +224,130 @@ get lveiAssessment() {
 },
 
 
-   /* PHT Scorer */
-get phtLikelihood() {
-    let signCount = 0;
+ 
+/* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
+get phClassification() {
+    if (!this.isDog) return null;
+
+    let evaluatedCount = 0;
+    let breakdown = [];
+    
+    // ACVIM Anatomic Site Trackers
+    let siteVentricle = false;
+    let sitePA = false;
+    let siteRA = false;
+
+    // --- 1. Evaluate TR Velocity Vector ---
     const tr = parseFloat(this.trMax) || 0;
-    const pr = parseFloat(this.prMax) || 0;
-    const mpa = parseFloat(this.mpaAo) || 0;
-    const rvwtVal = parseFloat(this.rvwt) || 0;
-
-    // 1. Velocity Threshold Vectors
-    if (tr > 3.4) return { label: 'HIGH LIKELIHOOD', class: 'abnormal', risk: 'high' };
-    
-    // 2. Accumulate Secondary Anatomical Co-factors
-    if (tr >= 2.8 && tr <= 3.4) signCount++; // Intermediate baseline velocity
-    if (pr > 2.2) signCount++;               // High diastolic pulmonary jet
-    if (this.lveiAssessment?.active) signCount++;     // Mechanical ventricular septal shift
-    if (mpa > 1.0) signCount++;              // Pulmonary artery dilation signature
-    
-    // Cross-reference with allometric left-side comparison
-    const lvParams = this.allometricResults; 
-    if (rvwtVal > 0 && lvParams.lvpwd?.available) {
-        // If RV wall approaches or exceeds 50% of the normal mean left ventricular wall
-        if (rvwtVal >= (lvParams.lvpwd.mean * 0.5)) signCount++;
+    if (tr > 0) {
+        evaluatedCount++;
+        let label = tr > 3.4 ? 'Severe / High Velocity' : (tr >= 2.9 ? 'Moderate / Intermediate Velocity' : 'Normal / Low Velocity');
+        let pg = (4 * (tr * tr)).toFixed(1);
+        breakdown.push({
+            name: 'TR Peak Velocity',
+            category: 'Primary Doppler Hemodynamics',
+            val: `${tr} m/s`,
+            threshold: tr > 3.4 ? '> 3.4 m/s' : (tr >= 2.9 ? '2.9 - 3.4 m/s' : '< 2.9 m/s'),
+            grade: label,
+            isTrigger: tr >= 2.9
+        });
     }
 
-    // 3. Output ACVIM Consensus Mapping
-    if (tr < 2.8 && signCount < 2) return { label: 'LOW LIKELIHOOD', class: 'normal', risk: 'low' };
-    if ((tr >= 2.8 && tr <= 3.4) || signCount >= 2) {
-        return { label: 'INTERMEDIATE LIKELIHOOD', class: 'abnormal', risk: 'intermediate' };
+    // --- 2. Evaluate ACVIM Site 1: Ventricles ---
+    let rvSigns = [];
+    if (this.lvei >= 1.2) { siteVentricle = true; rvSigns.push('Septal Flattening'); }
+    if (this.rvwt && this.rightAllometricResults?.rvwt?.max && parseFloat(this.rvwt) > this.rightAllometricResults.rvwt.max) { siteVentricle = true; rvSigns.push('RV Hypertrophy'); }
+    if (this.rveda && this.rightAllometricResults?.rveda?.max && parseFloat(this.rveda) > this.rightAllometricResults.rveda.max) { siteVentricle = true; rvSigns.push('RV Dilation'); }
+
+    if (rvSigns.length > 0) {
+        breakdown.push({
+            name: 'Ventricles (Site 1)',
+            category: 'Right Ventricular Structure',
+            val: rvSigns.join(', '),
+            threshold: 'ACVIM Anatomic Criteria Met',
+            grade: 'Positive Site',
+            isTrigger: true
+        });
     }
-    return { label: 'LOW LIKELIHOOD', class: 'normal', risk: 'low' };
-},
+
+    // --- 3. Evaluate ACVIM Site 2: Pulmonary Artery ---
+    let paSigns = [];
+    if (parseFloat(this.mpaAo) > 1.0) { sitePA = true; paSigns.push('MPA:Ao > 1.0'); }
+    
+    // NOTE: Insert your specific RPAmin allometric logic here once you pull the formula
+    if (this.rpamin && parseFloat(this.rpamin) > 3.0 /* Replace with strict allometric formula logic */) { 
+        sitePA = true; 
+        paSigns.push('RPAmin Enlargement'); 
+    }
+
+    if (paSigns.length > 0) {
+        breakdown.push({
+            name: 'Pulmonary Artery (Site 2)',
+            category: 'Vascular Dimensions',
+            val: paSigns.join(', '),
+            threshold: 'ACVIM Anatomic Criteria Met',
+            grade: 'Positive Site',
+            isTrigger: true
+        });
+    }
+
+    // --- 4. Evaluate ACVIM Site 3: Right Atrium ---
+    if (this.rad && this.rightAllometricResults?.rad?.max && parseFloat(this.rad) > this.rightAllometricResults.rad.max) { 
+        siteRA = true;
+        breakdown.push({
+            name: 'Right Atrium (Site 3)',
+            category: 'Atrial Dimensions',
+            val: `${this.rad} mm`,
+            threshold: `> ${this.rightAllometricResults.rad.max} mm`,
+            grade: 'RA Enlargement',
+            isTrigger: true
+        });
+    }
+    
+    const anatomicSites = (siteVentricle ? 1 : 0) + (sitePA ? 1 : 0) + (siteRA ? 1 : 0);
+    if (tr === 0 && anatomicSites === 0) return null; // Nothing to show yet
+    
+    // --- 5. Determine Final ACVIM Probability Matrix ---
+    let probability = "Low Probability";
+    let stepIndex = 0;
+    let riskClass = "normal"; // normal, warning, abnormal
+    
+    if (tr > 3.4) {
+        probability = "High Probability";
+        stepIndex = 2;
+        riskClass = "abnormal";
+    } else if (tr >= 2.9 && tr <= 3.4) {
+        if (anatomicSites >= 2) {
+            probability = "High Probability";
+            stepIndex = 2;
+            riskClass = "abnormal";
+        } else {
+            probability = "Intermediate Probability";
+            stepIndex = 1;
+            riskClass = "warning";
+        }
+    } else {
+        // TR < 2.9 or unmeasurable
+        if (anatomicSites >= 2) {
+            probability = "Intermediate Probability";
+            stepIndex = 1;
+            riskClass = "warning";
+        } else {
+            probability = "Low Probability";
+            stepIndex = 0;
+            riskClass = "normal";
+        }
+    }
+    
+    return { 
+        probability, 
+        stepIndex, 
+        riskClass, 
+        breakdown, 
+        anatomicSites,
+        siteDetails: { siteVentricle, sitePA, siteRA }
+    };
+}
 
 /* Specialized Decoupled Right Heart Allometric Evaluator */
 get availableRightModels() {
