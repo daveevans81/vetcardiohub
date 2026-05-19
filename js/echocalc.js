@@ -13,9 +13,6 @@ function advancedEchoSuite() {
     selectedModel: 'cornell_standard',
     lvedv: '',
     lvesv: '',
-    copySuccess: false,
-    showComments: false,
-    clinicalComments: '',
     eVel: '',
     aVel: '',
     ivrt: '',
@@ -49,6 +46,11 @@ function advancedEchoSuite() {
     showShunt: false,
     rawEchoText: '',
     parseMessage: '',
+    activeGlossaryTerm: null,
+        glossaryOpen: false,
+   copySuccess: false,
+    showComments: false,
+    clinicalComments: '',
     
     /* 2. GETTERS */
     get lviddn() {
@@ -238,7 +240,7 @@ get lveiAssessment() {
     }
     return { label: 'Normal Circular Geometry', class: 'normal', active: false };
 },
-/* Pulmonary Artery Indexing */
+
 
  
 /* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
@@ -660,12 +662,21 @@ get calculatedMineScore() {
     /* 4. METHODS */
 
 openGlossary(termKey) {
-    this.activeGlossaryTerm = this.glossaryDatabase[termKey];
-    this.glossaryOpen = true;
-},
+            // This looks up the term in the database and sets it as the active term
+            if (this.glossaryDatabase[termKey]) {
+                this.activeGlossaryTerm = this.glossaryDatabase[termKey];
+                this.glossaryOpen = true;
+            } else {
+                console.warn("Glossary term not found:", termKey);
+            }
+        },
+        
 closeGlossary() {
-    this.glossaryOpen = false;
-    setTimeout(() => { this.activeGlossaryTerm = null; }, 300); // Wait for transition
+            this.glossaryOpen = false;
+            // The slight delay allows the fade-out animation to finish before clearing the data
+            setTimeout(() => { 
+                this.activeGlossaryTerm = null; 
+            }, 300); 
 },
 
 
