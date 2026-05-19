@@ -954,7 +954,6 @@ parseRawText() {
     const extractionMap = [
         // PATIENT
         { key: 'weight',   patterns: [/^\s*weight\b/i, /^\s*Wt\b/i, /^\s*Body\s+Wt\b/i, /^\s*Body\s+Weight\b/i] },
-Weight||Body Wt|Body Weight
         // LEFT VENTRICLE 
         { key: 'lvidd',    patterns: [/^\s*LVIDd\b/i, /^\s*LVID\s*D\b/i, /^\s*LVID\s*\(d\)\b/i, /^\s*LVDd\b/i] },
         { key: 'lvids',    patterns: [/^\s*LVIDs\b/i, /^\s*LVID\s*S\b/i, /^\s*LVID\s*\(s\)\b/i, /^\s*LVDs\b/i] },
@@ -1014,7 +1013,7 @@ Weight||Body Wt|Body Weight
         /\bNorm\b/i, /\bnLA\b/i,
         /Cornell/i, /2D/i,       // composite labels like "LVDDN 2D" or "LVDDN (Cornell)"
         /\bN\b.*[<>]/,           // anything with N followed by a reference bracket
-        /^(Referral|Chambers|Valves|Additional|Interpretation)/i
+        /^(Referral|Chambers|Valves|Additional|Interpretation)/i,
     ];
 
     // --- FIRST-MATCH WINS SET: once a key is filled, ignore subsequent lines ---
