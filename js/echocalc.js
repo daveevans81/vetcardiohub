@@ -37,7 +37,8 @@ function advancedEchoSuite() {
     rad: '',     // RA Minor Axis (Width/Diameter)
     prMax: '',    // Pulmonic Regurgitation Max Velocity (m/s)
     mpamin: '',    // Main Pulmonary Artery minimum
-    rpamin: '',    / Right Pulmonary Artery
+    rpamin: '',    // Right Pulmonary Artery min
+    rpamax: '',    // Right Pulmonary Artery max
     ivsFlattening: false, // UI Boolean for "D-shaped" Septum
     lvidd2:'',
     selectedRightModel: 'visser_2015', // Default right heart validation framework
@@ -145,6 +146,10 @@ function advancedEchoSuite() {
     if (!this.trMax || !this.eePrime || parseFloat(this.eePrime) === 0) return 0;
     // ePLAR = TR Vmax (m/s) / trans-mitral E / TDI e' ratio
     return parseFloat((parseFloat(this.trMax) / this.eePrime).toFixed(2));
+    },
+    get mpaAo() {
+        if(!this.mpamin || !this.ao || parseFloat(this.ao) === 0) return 0;
+        return (this.mpamin / this.ao).toFixed(2);
     },
     get trPG() {
     if (!this.trMax || parseFloat(this.trMax) === 0) return 0;
@@ -308,34 +313,34 @@ get phClassification() {
     if (tr === 0 && anatomicSites === 0) return null; // Nothing to show yet
     
     // --- 5. Determine Final ACVIM Probability Matrix ---
-    let probability = "Low Probability";
+    let probability = 'Low Probability';
     let stepIndex = 0;
-    let riskClass = "normal"; // normal, warning, abnormal
+    let riskClass = 'normal'; // normal, warning, abnormal
     
     if (tr > 3.4) {
-        probability = "High Probability";
+        probability = 'High Probability';
         stepIndex = 2;
         riskClass = "abnormal";
     } else if (tr >= 2.9 && tr <= 3.4) {
         if (anatomicSites >= 2) {
-            probability = "High Probability";
+            probability = 'High Probability';
             stepIndex = 2;
-            riskClass = "abnormal";
+            riskClass = 'abnormal';
         } else {
-            probability = "Intermediate Probability";
+            probability = 'Intermediate Probability';
             stepIndex = 1;
-            riskClass = "warning";
+            riskClass = 'warning';
         }
     } else {
         // TR < 2.9 or unmeasurable
         if (anatomicSites >= 2) {
             probability = "Intermediate Probability";
             stepIndex = 1;
-            riskClass = "warning";
+            riskClass = 'warning';
         } else {
             probability = "Low Probability";
             stepIndex = 0;
-            riskClass = "normal";
+            riskClass = 'normal';
         }
     }
     
