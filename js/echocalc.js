@@ -1021,7 +1021,7 @@ parseRawText() {
 
     for (const line of lines) {
         // This splits on any sequence of whitespace, tabs, or commas
-        const cols = line.trim().split(/,|\t|\s{2,}/);
+        const cols = line.trim().split(/,|\t|\s+/);
         if (cols.length < 2) continue;
 
         const labelCol = cols[0].trim();
