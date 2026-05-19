@@ -47,6 +47,8 @@ function advancedEchoSuite() {
     showDoppler: false,
     showRightHeart: false,
     showShunt: false,
+    rawEchoText: '',
+    parseMessage: '',
     
     /* 2. GETTERS */
     get lviddn() {
@@ -937,6 +939,100 @@ shareReport() {
         // Fallback for browsers that don't support sharing (like Chrome on Windows)
         this.exportToClipboard();
         alert('Copied to clipboard.');
+    }
+},
+
+parseRawText() {
+    if (!this.rawEchoText) return;
+
+    let matchCount = 0;
+
+    // The Master Extraction Dictionary
+    // \b ensures we only match whole words.
+    // [^0-9\n]* tells the parser "skip over any letters or tabs until you hit the first number on this line".
+    const extractionRules = [
+        // PATIENT INFO
+        { key: 'weight',  pattern: /\b(?:Weight|Wt|Body Wt|Body Weight)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+
+        // LEFT VENTRICLE & ATRIUM (Structured to prevent overlap)
+        { key: 'lvidd2',  pattern: /\b(?:LVIDd2|LVIDd perp|LVIDd perpendicular)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi }, 
+        { key: 'lvidd',   pattern: /\b(?:LVIDd|LVDd|LVID\s*\(d\)|LVID D)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'lvids',   pattern: /\b(?:LVIDs|LVDs|LVID\s*\(s\)|LVID S)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'ivsd',    pattern: /\b(?:IVSd|IVS\s*\(d\)|IVS)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'lvpwd',   pattern: /\b(?:LVPWd|LVPW\s*\(d\)|PWd|LVPW)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'lad',     pattern: /\b(?:LAD|LA Long Axis|LA LAx)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'la',      pattern: /\b(?:LA Diam|LA s-ax|LA sx|LA sax|LA|LA\s*\(s\))\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'ao',      pattern: /\b(?:Ao Diam|Ao|Aorta|Ao root)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+
+        // VOLUMETRICS
+        { key: 'lvedv',   pattern: /\b(?:LVEDV|LVEDV MOD|LVEDV MOD A4C|EDV)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'lvesv',   pattern: /\b(?:LVESV|LVESV MOD|LVESV MOD A4C|ESV)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+
+        // MITRAL & DIASTOLIC DOPPLER
+        { key: 'eVel',    pattern: /\b(?:MV E Vel|MV E Vmax|E wave|E vel|E peak|MV E|E\s*Vmax)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'aVel',    pattern: /\b(?:MV A Vel|MV A Vmax|A wave|A vel|A peak|MV A|A\s*Vmax)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'ivrt',    pattern: /\b(?:IVRT)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'mdt',     pattern: /\b(?:MV DecT|DecT|MDT|E wave DT|E DT|MV DT)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        
+        // E' (Apostrophes break word boundaries, so this rule is specifically formatted)
+        { key: 'ePrime',  pattern: /(?:\bMV E'|\bE'|\bE\s*prime|\bMitral E'|\bLat E'|\bSep E'|\bMedial E')[^0-9\n]*([0-9]*\.?[0-9]+)/gi }, 
+
+        // OUTFLOW TRACTS & SHUNT METRICS
+        { key: 'lvotd',   pattern: /\b(?:LVOT Diam|LVOTd|LVOT d|LVOT diameter)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rvotd',   pattern: /\b(?:RVOT Diam|RVOTd|RVOT d|RVOT diameter)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'lvotvti', pattern: /\b(?:LVOT VTI|LVOTVTI)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rvotvti', pattern: /\b(?:RVOT VTI|RVOTVTI)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'aovmax',  pattern: /\b(?:AV Vmax|Ao Vmax|AoV Vmax|AoVmax|AV max|AV Vel|LVOT Vmax)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'pavmax',  pattern: /\b(?:PV Vmax|PA Vmax|PAV Vmax|PVmax|PV max|PV Vel|Pulm Vmax|RVOT Vmax)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        
+        // RIGHT HEART & TRICUSPID
+        { key: 'tapse',   pattern: /\b(?:TAPSE)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'trMax',   pattern: /\b(?:TR Vmax|TR Vel|TR max|TR)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'prMax',   pattern: /\b(?:PR Vmax|PR Vel|PR max|PI Vmax|PI Vel|PI max|PR)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        
+        // RV DIMENSIONS & AREAS
+        { key: 'rvwt',    pattern: /\b(?:RVW|RVFW|RV wall|RVWT|RVFWd)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rveda',   pattern: /\b(?:RVEDA|RVA d|RVAd A4C|RVAd|RV Ad|RV Area Diastole)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rvesa',   pattern: /\b(?:RVESA|RVA s|RVAs A4C|RVAs|RV As|RV Area Systole)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rvd1',    pattern: /\b(?:RVD1|RV basal|RV base|RVD basal)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rvd2',    pattern: /\b(?:RVD2|RV mid|RVD mid)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rad',     pattern: /\b(?:RAD|RA Diam|RA minor|RA width|RA)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        
+        // PULMONARY ARTERY BRANCHES
+        { key: 'mpamin',  pattern: /\b(?:MPA min|MPA|MPAd|Main PA)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rpamin',  pattern: /\b(?:RPA min|RPA|RPA d|RPA diastole)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rpamax',  pattern: /\b(?:RPA max|RPA s|RPA systole)\b[^0-9\n]*([0-9]*\.?[0-9]+)/gi }
+    ];
+
+    // 1. Process all numerical rules
+    extractionRules.forEach(rule => {
+        const matches = [...this.rawEchoText.matchAll(rule.pattern)];
+        
+        if (matches.length > 0) {
+            // Always grab the LAST match found (prioritizes M-mode block over 2D block)
+            const lastMatch = matches[matches.length - 1]; 
+            
+            if (lastMatch && lastMatch[1]) {
+                this[rule.key] = parseFloat(lastMatch[1]);
+                matchCount++;
+            }
+        }
+    });
+
+    // 2. Process Boolean/Text checks (e.g., finding D-shaped septum in the comments)
+    if (this.rawEchoText.match(/\b(?:flattening|flattened|D-shape|D-shaped|D shape)\b/i)) {
+        this.ivsFlattening = true;
+        matchCount++;
+    }
+
+    // 3. UI Feedback
+    if (matchCount > 0) {
+        this.parseMessage = `Success: Auto-filled ${matchCount} parameters!`;
+        this.rawEchoText = ''; // Clear text box on success
+        setTimeout(() => this.parseMessage = '', 4000);
+    } else {
+        this.parseMessage = 'Could not find recognizable measurements.';
+        setTimeout(() => this.parseMessage = '', 4000);
     }
 },
 
