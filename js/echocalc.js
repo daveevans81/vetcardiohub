@@ -1158,6 +1158,68 @@ glossaryDatabase: {
         method: "Measure the minimal internal diameter of the left ventricle at peak systole (end of the T wave or maximal septal deviation).",
         imgPlaceholder: "/images/lvids-reference.jpg"
     },
+lviddn: {
+        title: "LVIDdn (Normalized LVID Diastole)",
+        view: "Derived Index (Allometric Scaling)",
+        description: "Scales the left ventricular diastolic diameter to the patient's body weight. This is the gold-standard metric for diagnosing eccentric hypertrophy (e.g., MMVD, DCM) across vastly different canine body sizes.",
+        method: "Calculated as: (LVIDd in cm) / (Body Weight in kg)^0.294. A value > 1.70 is a primary criteria for ACVIM Stage B2 MMVD."
+    },
+    lvidsn: {
+        title: "LVIDsn (Normalized LVID Systole)",
+        view: "Derived Index (Allometric Scaling)",
+        description: "Scales the systolic diameter to body weight to accurately assess myocardial contractility and systolic function independently of the dog's size.",
+        method: "Calculated as: (LVIDs in cm) / (Body Weight in kg)^0.315. Normal range is typically 0.71 to 1.26."
+    },
+    lan: {
+        title: "LAn (Normalized LA Short Axis)",
+        view: "Derived Index (Allometric Scaling)",
+        description: "Scales the short-axis left atrial dimension directly to body weight. Useful when the aortic root size is abnormal or difficult to measure, throwing off the standard LA:Ao ratio.",
+        method: "Calculated as: (LA in cm) / (Body Weight in kg)^0.355."
+    },
+    ladn: {
+        title: "LADn (Normalized LA Long Axis)",
+        view: "Derived Index (Allometric Scaling)",
+        description: "Scales the long-axis (or apical) left atrial dimension to body weight. Provides a comprehensive assessment of 3D atrial remodeling.",
+        method: "Calculated as: (LAD in cm) / (Body Weight in kg)^0.309."
+    },
+    ladao: {
+        title: "LAD:Ao Ratio (Long Axis to Aorta)",
+        view: "Derived Index",
+        description: "Compares the longitudinal length of the left atrium to the aortic root. Highly sensitive for asymmetric atrial dilation that might be missed on a standard short-axis view.",
+        method: "Calculated dynamically as: LAD (mm) / Ao (mm)."
+    },
+    RWT: { // Capitalized to match your exact state getter
+        title: "Relative Wall Thickness (RWT)",
+        view: "Derived Index",
+        description: "Classifies LV geometry as normal, concentric hypertrophy (high RWT, e.g., HCM or systemic hypertension), or eccentric hypertrophy (low RWT, e.g., volume overload).",
+        method: "Calculated as: (2 × LV Posterior Wall) / LVIDd."
+    },
+
+    // --- VOLUME INDICES (WEIGHT & BSA) ---
+    lvedvbw: {
+        title: "LVEDV/BW (Diastolic Volume Index - Weight)",
+        view: "Derived Index",
+        description: "Indexes the maximal diastolic volume directly to body weight (ml/kg). Simpson's volumetric assessments are more sensitive for early volume overload states than 1D linear measurements.",
+        method: "Calculated as: LVEDV (ml) / Body Weight (kg). Normal is typically 1.25 – 3.00 ml/kg."
+    },
+    lvesvbw: {
+        title: "LVESV/BW (Systolic Volume Index - Weight)",
+        view: "Derived Index",
+        description: "Indexes the minimum systolic volume to body weight (ml/kg) to evaluate myocardial failure. Elevated values indicate the heart is struggling to eject its volume.",
+        method: "Calculated as: LVESV (ml) / Body Weight (kg)."
+    },
+    edvim2: {
+        title: "EDVI (End-Diastolic Volume Index - BSA)",
+        view: "Derived Index",
+        description: "Indexes LV diastolic volume to Body Surface Area (BSA) rather than raw weight. Standard in human medicine and increasingly utilized in advanced veterinary research to account for varying canine body condition scores.",
+        method: "Calculated as: LVEDV (ml) / BSA (m²). BSA is derived using standard canine conversion constants."
+    },
+    esvim2: {
+        title: "ESVI (End-Systolic Volume Index - BSA)",
+        view: "Derived Index",
+        description: "Indexes LV systolic volume to Body Surface Area (BSA) to standardize contractility and failure assessments across vastly different body shapes (e.g., Greyhounds vs. Bulldogs).",
+        method: "Calculated as: LVESV (ml) / BSA (m²)."
+    },
     la: {
         title: "LA (Left Atrium Dimension)",
         view: "Right Parasternal Short Axis (Heart Base)",
