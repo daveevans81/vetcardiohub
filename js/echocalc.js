@@ -953,14 +953,14 @@ parseRawText() {
     // Order matters for ambiguous labels — put more specific patterns first.
     const extractionMap = [
         // PATIENT
-        { key: 'weight',   patterns: [/^weight\b/i] },
-
-        // LEFT VENTRICLE — M-mode preferred (appears earlier in most reports)
-        { key: 'lvidd',    patterns: [/^LVIDd\b/i, /^LVID\s*D\b/i, /^LVID\s*\(d\)\b/i, /^LVDd\b/i] },
-        { key: 'lvids',    patterns: [/^LVIDs\b/i, /^LVID\s*S\b/i, /^LVID\s*\(s\)\b/i, /^LVDs\b/i] },
-        { key: 'ivsd',     patterns: [/^IVSd\b/i, /^IVS\s*\(d\)\b/i, /^IVS\b/i] },
-        { key: 'lvpwd',    patterns: [/^LVPWd\b/i, /^LVFW\s*d\b/i, /^LVPW\s*\(d\)\b/i, /^LVPWd\b/i] },
-        { key: 'lvidd2',   patterns: [/^LVIDd2\b/i, /^LVIDd\s+perp\b/i] },
+        { key: 'weight',   patterns: [/^\s*weight\b/i, /^\s*Wt\b/i, /^\s*Body\s+Wt\b/i, /^\s*Body\s+Weight\b/i] },
+Weight||Body Wt|Body Weight
+        // LEFT VENTRICLE 
+        { key: 'lvidd',    patterns: [/^\s*LVIDd\b/i, /^\s*LVID\s*D\b/i, /^\s*LVID\s*\(d\)\b/i, /^\s*LVDd\b/i] },
+        { key: 'lvids',    patterns: [/^\s*LVIDs\b/i, /^\s*LVID\s*S\b/i, /^\s*LVID\s*\(s\)\b/i, /^\s*LVDs\b/i] },
+        { key: 'ivsd',     patterns: [/^\s*IVSd\b/i, /^\s*IVS\s*\(d\)\b/i, /^\s*IVS\b/i] },
+        { key: 'lvpwd',    patterns: [/^\s*LVPWd\b/i, /^\s*LVFW\s*d\b/i, /^\s*LVPW\s*\(d\)\b/i, /^LVPWd\b/i] },
+        { key: 'lvidd2',   patterns: [/^\s*LVIDd2\b/i, /^\s*LVIDd\s+perp\b/i] },
 
         // LEFT ATRIUM
         { key: 'lad',      patterns: [/^LAD\b/i, /^LA\s+long\s+axis\b/i, /^LA\s+LAx\b/i] },
@@ -1014,14 +1014,15 @@ parseRawText() {
         /\bNorm\b/i, /\bnLA\b/i,
         /Cornell/i, /2D/i,       // composite labels like "LVDDN 2D" or "LVDDN (Cornell)"
         /\bN\b.*[<>]/,           // anything with N followed by a reference bracket
+        /^(Referral|Chambers|Valves|Additional|Interpretation)/i
     ];
 
     // --- FIRST-MATCH WINS SET: once a key is filled, ignore subsequent lines ---
     const filled = new Set();
 
     for (const line of lines) {
-        // Split on tab, comma, or 2+ spaces — handles TSV, CSV, and fixed-width
-        const cols = line.trim().split(/\t|,|  +/);
+        // This splits on any sequence of whitespace, tabs, or commas
+        const cols = line.trim().split(/,|\t|\s{2,}/);
         if (cols.length < 2) continue;
 
         const labelCol = cols[0].trim();
