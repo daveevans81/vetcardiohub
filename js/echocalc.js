@@ -117,7 +117,7 @@ function advancedEchoSuite() {
     },
     get eivrt() {
       if (!this.eVel || !this.ivrt || parseFloat(this.ivrt) === 0) return 0;
-      return parseFloat(((parseFloat(this.eVel) * 1000) / parseFloat(this.ivrt)).toFixed(2));
+      return parseFloat(((parseFloat(this.eVel) * 100) / parseFloat(this.ivrt)).toFixed(2));
     },
     get vtir() {
         if (!this.lvotvti || !this.rvotvti || parseFloat(this.rvotvti) === 0) return 0;
