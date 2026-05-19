@@ -151,6 +151,10 @@ function advancedEchoSuite() {
         if(!this.mpamin || !this.ao || parseFloat(this.ao) === 0) return 0;
         return (this.mpamin / this.ao).toFixed(2);
     },
+    get ref() {
+        if(!this.rveda || !this.rvesa || parseFloat(this.rveda) === 0) return 0;
+        return (((this.rveda - this.rvesa) / this.rveda) * 100).toFixed(1);
+    },
     get trPG() {
     if (!this.trMax || parseFloat(this.trMax) === 0) return 0;
     return parseFloat((Math.pow(this.trMax, 2) * 4).toFixed(2));
