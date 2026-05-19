@@ -347,7 +347,7 @@ get phClassification() {
         anatomicSites,
         siteDetails: { siteVentricle, sitePA, siteRA }
     };
-}
+},
 
 /* Specialized Decoupled Right Heart Allometric Evaluator */
 get availableRightModels() {
@@ -365,7 +365,7 @@ get rightAllometricResults() {
     const modelData = rightHeartModels[this.selectedRightModel];
     if (!modelData) return results;
 
-    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad'];
+    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rpamin'];
     
     targets.forEach(param => {
         const formula = modelData.params?.[param];
