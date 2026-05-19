@@ -1200,42 +1200,39 @@
                 </div>
         
                 <div class="result-row" x-show="lvidd2" >
-                    <span><strong>LV Eccentricity Index (LVEI)</strong></span>
+                    <span><strong>LVEI</strong></span>
                     <span>
                         <span style="font-weight: bold; color: var(--text-main);" x-text="lvei"></span>
                         <span x-show="lveiAssessment?.active" :class="lveiAssessment?.class" x-text="' (' + lveiAssessment?.label + ')'"></span>
                         <span x-show="!lveiAssessment?.active && lvei > 0" class="normal">(Normal Circular)</span>
                     </span>
                 </div>
-                
-                
-                <template x-if="lvei > 0"> 
-                  <div>       
-                   <div class="result-row">
-                     <span><strong>LVEI</strong></span>
-                     <span x-text="lvei"></span>
-                   </div>
-                   <div :class="lveiAssessment?.class" x-text="lveiAssessment?.label"></div>
-                  </div>
-                 </template>
-                 
-                <div class="result-row" x-show="prMax" >
-                    <span><strong>Pulmonic Regurgitation (PR Vel)</strong></span>
+                <div class="result-row" x-show="mpamin" >
+                    <span><strong>MPA min</strong></span>
                     <span>
-                        <span x-text="prMax"></span> m/s
-                        <span x-show="parseFloat(prMax) > 2.2" class="abnormal">[Elevated Diastolic PA Pressure]</span>
-                        <span x-show="parseFloat(prMax) <= 2.2" class="normal">(Normal Profile)</span>
+                        <span x-text="mpamin"></span> 
+                    </span>
+                </div>
+                <div class="result-row" x-show="rpamax" >
+                    <span><strong>RPA max</strong></span>
+                    <span>
+                        <span x-text="rpamax"></span> 
+                    </span>
+                </div>
+                <div class="result-row" x-show="rpamin" >
+                    <span><strong>RPA min</strong></span>
+                    <span>
+                        <span x-text="rpamin"></span> 
                     </span>
                 </div>
                 <div class="result-row" x-show="mpaAo" >
-                    <span><strong>MAP:Ao</strong></span>
+                    <span><strong>MPA:Ao</strong></span>
                     <span>
                         <span x-text="mpaAo"></span> 
                         <span x-show="parseFloat(mpaAo) > 1.1" class="abnormal">[Enlarged PA]</span>
                         <span x-show="parseFloat(mpaAo) <= 1.1" class="normal">(Normal)</span>
                     </span>
                 </div>
-        
                 <div class="result-row" x-show="eplar > 0">
                     <span><strong>ePLAR</strong></span>
                     <span>

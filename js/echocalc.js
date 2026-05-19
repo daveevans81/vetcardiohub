@@ -972,77 +972,76 @@ shareReport() {
 parseRawText() {
     if (!this.rawEchoText) return;
 
-// Pre-seed the filled list with values already present in the calculator layout.
-// This ensures the parser won't overwrite things you've manually typed!
-for (const rule of extractionMap) {
-    if (this[rule.key] !== '' && this[rule.key] !== null && this[rule.key] !== undefined) {
-        filled.add(rule.key);
-    }
-}
-
     let matchCount = 0;
     const lines = this.rawEchoText.split(/\r?\n/);
     const filled = new Set();
 
     // --- 1. THE EXTRACTION MAP ---
+    // (Moved to the top so everything below can access it safely)
     const extractionMap = [
-    // PATIENT
-    { key: 'weight',  patterns: [/\bweight\b/i, /\bwt\b/i, /\bbody\s+wt\b/i, /\bbody\s+weight\b/i] },
+        // PATIENT
+        { key: 'weight',  patterns: [/\bweight\b/i, /\bwt\b/i, /\bbody\s+wt\b/i, /\bbody\s+weight\b/i] },
 
-    // LEFT VENTRICLE
-    { key: 'lvidd2',  patterns: [/\blvidd2\b/i, /\blvidd\s+perp\b/i] },
-    { key: 'lvidd',   patterns: [/\blvidd\b/i, /\blvid\s*d\b/i, /\blvid\s*\(d\)\b/i, /\blvdd\b/i] },
-    { key: 'lvids',   patterns: [/\blvids\b/i, /\blvid\s*s\b/i, /\blvid\s*\(s\)\b/i, /\blvds\b/i] },
-    { key: 'ivsd',    patterns: [/\bivsd\b/i, /\bivs\s*\(d\)\b/i, /\bivs\b/i] },
-    { key: 'lvpwd',   patterns: [/\blvpwd\b/i, /\blvfw\s*d\b/i, /\blvpw\s*\(d\)\b/i, /\blvpwd\b/i] },
+        // LEFT VENTRICLE
+        { key: 'lvidd2',  patterns: [/\blvidd2\b/i, /\blvidd\s+perp\b/i] },
+        { key: 'lvidd',   patterns: [/\blvidd\b/i, /\blvid\s*d\b/i, /\blvid\s*\(d\)\b/i, /\blvdd\b/i] },
+        { key: 'lvids',   patterns: [/\blvids\b/i, /\blvid\s*s\b/i, /\blvid\s*\(s\)\b/i, /\blvds\b/i] },
+        { key: 'ivsd',    patterns: [/\bivsd\b/i, /\bivs\s*\(d\)\b/i, /\bivs\b/i] },
+        { key: 'lvpwd',   patterns: [/\blvpwd\b/i, /\blvfw\s*d\b/i, /\blvpw\s*\(d\)\b/i, /\blvpwd\b/i] },
 
-    // LEFT ATRIUM (LAD listed before LA to prevent LA stealing the value)
-    { key: 'lad',     patterns: [/\blad\b/i, /\bla\s+long\s+axis\b/i, /\bla\s+lax\b/i] },
-    { key: 'la',      patterns: [/\bla\s+diam\b/i, /\bla\s+s[- ]?ax\b/i, /\bla\s+short\b/i, /\bla\s*\(s\)\b/i, /\bla\b/i] },
-    { key: 'ao',      patterns: [/\bao\s+diam\b/i, /\bao\s+root\b/i, /\baorta\b/i, /\bao\b/i] },
+        // LEFT ATRIUM (LAD listed before LA to prevent LA stealing the value)
+        { key: 'lad',     patterns: [/\blad\b/i, /\bla\s+long\s+axis\b/i, /\bla\s+lax\b/i] },
+        { key: 'la',      patterns: [/\bla\s+diam\b/i, /\bla\s+s[- ]?ax\b/i, /\bla\s+short\b/i, /\bla\s*\(s\)\b/i, /\bla\b/i] },
+        { key: 'ao',      patterns: [/\bao\s+diam\b/i, /\bao\s+root\b/i, /\baorta\b/i, /\bao\b/i] },
 
-    // VOLUMETRICS
-    { key: 'lvedv',   patterns: [/\blvedv\s+mod\s+a4c\b/i, /\blvedv\s+mod\b/i, /\blvedv\b/i, /\bedv\b/i] },
-    { key: 'lvesv',   patterns: [/\blvesv\s+mod\s+a4c\b/i, /\blvesv\s+mod\b/i, /\blvesv\b/i, /\besv\b/i] },
+        // VOLUMETRICS
+        { key: 'lvedv',   patterns: [/\blvedv\s+mod\s+a4c\b/i, /\blvedv\s+mod\b/i, /\blvedv\b/i, /\bedv\b/i] },
+        { key: 'lvesv',   patterns: [/\blvesv\s+mod\s+a4c\b/i, /\blvesv\s+mod\b/i, /\blvesv\b/i, /\besv\b/i] },
 
-    // DOPPLER
-    { key: 'eVel',    patterns: [/\bmv\s+e\s+vel\b/i, /\bmv\s+e\s+vmax\b/i, /\be\s+wave\b/i, /\be\s+vel\b/i, /\be\s+peak\b/i, /\bmv\s+e\b/i] },
-    { key: 'aVel',    patterns: [/\bmv\s+a\s+vel\b/i, /\bmv\s+a\s+vmax\b/i, /\ba\s+wave\b/i, /\ba\s+vel\b/i, /\ba\s+peak\b/i, /\bmv\s+a\b/i] },
-    { key: 'ivrt',    patterns: [/\bivrt\b/i] },
-    { key: 'mdt',     patterns: [/\bmv\s+dect\b/i, /\bdect\b/i, /\bmdt\b/i, /\be\s+wave\s+dt\b/i, /\be\s+dt\b/i, /\bmv\s+dt\b/i] },
-    { key: 'ePrime',  patterns: [/\bmv\s+e'\b/i, /\be'\b/i, /\be\s+prime\b/i, /\bmitral\s+e'\b/i, /\blat\s+e'\b/i, /\bsep\s+e'\b/i, /\bmedial\s+e'\b/i] },
+        // DOPPLER
+        { key: 'eVel',    patterns: [/\bmv\s+e\s+vel\b/i, /\bmv\s+e\s+vmax\b/i, /\be\s+wave\b/i, /\be\s+vel\b/i, /\be\s+peak\b/i, /\bmv\s+e\b/i] },
+        { key: 'aVel',    patterns: [/\bmv\s+a\s+vel\b/i, /\bmv\s+a\s+vmax\b/i, /\ba\s+wave\b/i, /\ba\s+vel\b/i, /\ba\s+peak\b/i, /\bmv\s+a\b/i] },
+        { key: 'ivrt',    patterns: [/\bivrt\b/i] },
+        { key: 'mdt',     patterns: [/\bmv\s+dect\b/i, /\bdect\b/i, /\bmdt\b/i, /\be\s+wave\s+dt\b/i, /\be\s+dt\b/i, /\bmv\s+dt\b/i] },
+        { key: 'ePrime',  patterns: [/\bmv\s+e'\b/i, /\be'\b/i, /\be\s+prime\b/i, /\bmitral\s+e'\b/i, /\blat\s+e'\b/i, /\bsep\s+e'\b/i, /\bmedial\s+e'\b/i] },
 
-    // OUTFLOW TRACTS
-    { key: 'lvotd',   patterns: [/\blvot\s+diam\b/i, /\blvotd\b/i, /\blvot\s+d\b/i, /\blvot\s+diameter\b/i] },
-    { key: 'rvotd',   patterns: [/\brvot\s+diam\b/i, /\brvotd\b/i, /\brvot\s+d\b/i, /\brvot\s+diameter\b/i] },
-    { key: 'lvotvti', patterns: [/\blvot\s+vti\b/i, /\blvotvti\b/i] },
-    { key: 'rvotvti', patterns: [/\brvot\s+vti\b/i, /\brvotvti\b/i] },
-    { key: 'aovmax',  patterns: [/\bav\s+vmax\b/i, /\bao\s+vmax\b/i, /\baov\s+vmax\b/i, /\baovmax\b/i, /\bav\s+max\b/i, /\bav\s+vel\b/i, /\blvot\s+vmax\b/i] },
-    { key: 'pavmax',  patterns: [/\bpv\s+vmax\b/i, /\bpa\s+vmax\b/i, /\bpav\s+vmax\b/i, /\bpvmax\b/i, /\bpv\s+max\b/i, /\bpv\s+vel\b/i, /\brvot\s+vmax\b/i] },
+        // OUTFLOW TRACTS
+        { key: 'lvotd',   patterns: [/\blvot\s+diam\b/i, /\blvotd\b/i, /\blvot\s+d\b/i, /\blvot\s+diameter\b/i] },
+        { key: 'rvotd',   patterns: [/\brvot\s+diam\b/i, /\brvotd\b/i, /\brvot\s+d\b/i, /\brvot\s+diameter\b/i] },
+        { key: 'lvotvti', patterns: [/\blvot\s+vti\b/i, /\blvotvti\b/i] },
+        { key: 'rvotvti', patterns: [/\brvot\s+vti\b/i, /\brvotvti\b/i] },
+        { key: 'aovmax',  patterns: [/\bav\s+vmax\b/i, /\bao\s+vmax\b/i, /\baov\s+vmax\b/i, /\baovmax\b/i, /\bav\s+max\b/i, /\bav\s+vel\b/i, /\blvot\s+vmax\b/i] },
+        { key: 'pavmax',  patterns: [/\bpv\s+vmax\b/i, /\bpa\s+vmax\b/i, /\bpav\s+vmax\b/i, /\bpvmax\b/i, /\bpv\s+max\b/i, /\bpv\s+vel\b/i, /\brvot\s+vmax\b/i] },
 
-    // RIGHT HEART
-    { key: 'tapse',   patterns: [/\btapse\b/i] },
-    { key: 'trMax',   patterns: [/\btr\s+vmax\b/i, /\btr\s+vel\b/i, /\btr\s+max\b/i, /\btr\b/i] },
-    { key: 'prMax',   patterns: [/\bpr\s+vmax\b/i, /\bpr\s+vel\b/i, /\bpr\s+max\b/i, /\bpi\s+vmax\b/i, /\bpi\s+vel\b/i, /\bpi\s+max\b/i] },
-    { key: 'rvwt',    patterns: [/\brvw\b/i, /\brvfw\b/i, /\brv\s+wall\b/i, /\brvwt\b/i, /\brvfwd\b/i] },
-    { key: 'rveda',   patterns: [/\brveda\b/i, /\brvad\s+a4c\b/i, /\brvad\b/i, /\brv\s+ad\b/i, /\brv\s+area\s+diastole\b/i] },
-    { key: 'rvesa',   patterns: [/\brvesa\b/i, /\brvas\s+a4c\b/i, /\brvas\b/i, /\brv\s+as\b/i, /\brv\s+area\s+systole\b/i] },
-    { key: 'rvd1',    patterns: [/\brvd1\b/i, /\brv\s+basal\b/i, /\brv\s+base\b/i, /\brvd\s+basal\b/i] },
-    { key: 'rad',     patterns: [/\brad\b/i, /\bra\s+diam\b/i, /\bra\s+minor\b/i, /\bra\s+width\b/i] },
+        // RIGHT HEART
+        { key: 'tapse',   patterns: [/\btapse\b/i] },
+        { key: 'trMax',   patterns: [/\btr\s+vmax\b/i, /\btr\s+vel\b/i, /\btr\s+max\b/i, /\btr\b/i] },
+        { key: 'prMax',   patterns: [/\bpr\s+vmax\b/i, /\bpr\s+vel\b/i, /\bpr\s+max\b/i, /\bpi\s+vmax\b/i, /\bpi\s+vel\b/i, /\bpi\s+max\b/i] },
+        { key: 'rvwt',    patterns: [/\brvw\b/i, /\brvfw\b/i, /\brv\s+wall\b/i, /\brvwt\b/i, /\brvfwd\b/i] },
+        { key: 'rveda',   patterns: [/\brveda\b/i, /\brvad\s+a4c\b/i, /\brvad\b/i, /\brv\s+ad\b/i, /\brv\s+area\s+diastole\b/i] },
+        { key: 'rvesa',   patterns: [/\brvesa\b/i, /\brvas\s+a4c\b/i, /\brvas\b/i, /\brv\s+as\b/i, /\brv\s+area\s+systole\b/i] },
+        { key: 'rvd1',    patterns: [/\brvd1\b/i, /\brv\s+basal\b/i, /\brv\s+base\b/i, /\brvd\s+basal\b/i] },
+        { key: 'rad',     patterns: [/\brad\b/i, /\bra\s+diam\b/i, /\bra\s+minor\b/i, /\bra\s+width\b/i] },
 
-    // PULMONARY ARTERY
-    { key: 'mpamin',  patterns: [/\bmpa\s+min\b/i, /\bmpad\b/i, /\bmain\s+pa\b/i] },
-    { key: 'rpamin',  patterns: [/\brpa\s+min\b/i, /\brpa\s+d\b/i, /\brpa\s+diastole\b/i] },
-    { key: 'rpamax',  patterns: [/\brpa\s+max\b/i, /\brpa\s+s\b/i, /\brpa\s+systole\b/i] },
-];
+        // PULMONARY ARTERY
+        { key: 'mpamin',  patterns: [/\bmpa\s+min\b/i, /\bmpad\b/i, /\bmain\s+pa\b/i] },
+        { key: 'rpamin',  patterns: [/\brpa\s+min\b/i, /\brpa\s+d\b/i, /\brpa\s+diastole\b/i] },
+        { key: 'rpamax',  patterns: [/\brpa\s+max\b/i, /\brpa\s+s\b/i, /\brpa\s+systole\b/i] },
+    ];
 
- // --- 2. INTELLIGENT LABEL-ONLY SKIP LIST ---
-    // These indicate calculated values/headers inside the label section specifically.
+    // --- 2. INTELLIGENT LABEL-ONLY SKIP LIST ---
     const skipLabelPatterns = [
         /ratio/i, /RPLA/i, /\bDDN\b/i, /\bDSN\b/i, /\bEF\b/i, /\bFS\b/i, /\bFAC\b/i, 
         /\bRWT\b/i, /\bNorm\b/i, /\bnLA\b/i, /Cornell/i, /2D/i,
         /^(Referral|Chambers|Valves|Additional|Interpretation|Name|Age|Date)/i
     ];
+
+    // PRE-SEED ACTION: Locks fields that contain user adjustments before parsing text
+    for (const rule of extractionMap) {
+        if (this[rule.key] !== '' && this[rule.key] !== null && this[rule.key] !== undefined) {
+            filled.add(rule.key);
+        }
+    }
 
     // --- 3. THE PARSING ENGINE LOOP ---
     for (const line of lines) {
@@ -1050,26 +1049,19 @@ for (const rule of extractionMap) {
         if (!trimmedLine) continue;
 
         for (const rule of extractionMap) {
-            // FIRST-MATCH SECURITY: If this variable key is already filled, 
-            // skip completely to prevent allometric calculations from overwriting it.
             if (filled.has(rule.key)) continue;
 
             for (const pattern of rule.patterns) {
                 if (pattern.test(trimmedLine)) {
                     const matchObj = trimmedLine.match(pattern);
                     if (matchObj) {
-                        // Isolate the piece of text matched as the label column
                         const labelSegment = trimmedLine.substring(0, trimmedLine.indexOf(matchObj[0]) + matchObj[0].length);
                         
-                        // Check for an inline ratio syntax inside the label segment specifically
                         if (labelSegment.includes(':') || labelSegment.includes('/') || skipLabelPatterns.some(p => p.test(labelSegment))) {
                             continue; 
                         }
 
-                        // Pull out the remaining text on the right side of the row
                         const remainder = trimmedLine.substring(labelSegment.length);
-                        
-                        // Extract the primary raw value sequence
                         const numMatch = remainder.match(/-?[0-9]+(?:\.[0-9]+)?/);
 
                         if (numMatch) {
@@ -1077,9 +1069,9 @@ for (const rule of extractionMap) {
                             
                             if (!isNaN(numericValue)) {
                                 this[rule.key] = numericValue;
-                                filled.add(rule.key); // Lock the key permanently for this session
+                                filled.add(rule.key); 
                                 matchCount++;
-                                break; // Break out of pattern loop for this rule
+                                break; 
                             }
                         }
                     }
@@ -1097,7 +1089,7 @@ for (const rule of extractionMap) {
     this.parseMessage = matchCount > 0 ? `Success: Auto-filled ${matchCount} parameters!` : 'No recognizable measurements found.';
     this.rawEchoText = '';
     setTimeout(() => this.parseMessage = '', 4000);
-},
+}
 
 // The Clinical Reference Database
 glossaryDatabase: {
