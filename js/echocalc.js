@@ -19,7 +19,7 @@ function advancedEchoSuite() {
     eVel: '',
     aVel: '',
     ivrt: '',
-    lvotd: '',
+    lvotd: '', 
     rvotd: '',
     lvotvti: '',
     rvotvti: '',
@@ -28,6 +28,19 @@ function advancedEchoSuite() {
     trMax: '', // Tricuspid Regurgitation Max Velocity (m/s)
     aovmax: '',  // Aortic Valve / SAS Max Velocity (m/s)
     pavmax: '', // Pulmonary Artery / PS Max Velocity (m/s)
+    tapse: '',
+    rvwt: '',
+    rveda: '',
+    rvesa: '',
+    rvd1: '',     // Basal RV Diameter (AP4Ch)
+    rvd2: '',     // Mid-cavity RV Diameter (AP4Ch)
+    rad: '',     // RA Minor Axis (Width/Diameter)
+    prMax: '',    // Pulmonic Regurgitation Max Velocity (m/s)
+    mpamin: '',    // Main Pulmonary Artery minimum
+    rpamin: '',    / Right Pulmonary Artery
+    ivsFlattening: false, // UI Boolean for "D-shaped" Septum
+    lvidd2:'',
+    selectedRightModel: 'visser_2015', // Default right heart validation framework
     selectedMineModel: 'mine_1',
     showVolumes: false,
     showDoppler: false,
@@ -128,6 +141,15 @@ function advancedEchoSuite() {
     // Converts ePrime from cm/s to m/s to match E wave scale
     return parseFloat((parseFloat(this.eVel) / (parseFloat(this.ePrime) / 100)).toFixed(2));
     },
+    get eplar() {
+    if (!this.trMax || !this.eePrime || parseFloat(this.eePrime) === 0) return 0;
+    // ePLAR = TR Vmax (m/s) / trans-mitral E / TDI e' ratio
+    return parseFloat((parseFloat(this.trMax) / this.eePrime).toFixed(2));
+    },
+    get trPG() {
+    if (!this.trMax || parseFloat(this.trMax) === 0) return 0;
+    return parseFloat((Math.pow(this.trMax, 2) * 4).toFixed(2));
+    },
     get mrVol() {
     // Requires both total stroke volume and systemic stroke volume (Qs)
     if (!this.sv || !this.qs) return 0;
@@ -176,6 +198,108 @@ get felineLvotoAssessment() {
         };
     }
     return { label: 'Normal Outflow Velocity', class: 'normal', note: '' };
+},
+
+/* Left Ventricular Eccentricity Index (LVEI) */
+get lvei() {
+    const d1 = parseFloat(this.lvidd);  // Standard LVIDd
+    const d2 = parseFloat(this.lvidd2); // Perpendicular LVIDd2
+    if (!d1 || !d2 || d1 === 0) return 0;
+    
+    // LVEI = Perpendicular Diameter / Standard Short-Axis Diameter
+    return parseFloat((d2 / d1).toFixed(2));
+},
+
+get lveiAssessment() {
+    const score = this.lvei;
+    if (score === 0) return null;
+    // An eccentricity index > 1.1 - 1.2 indicates pathological septal flattening
+    if (score >= 1.2) {
+        return { label: 'Abnormal (Severe Septal Flattening / D-Shape Geometry)', class: 'abnormal', active: true };
+    }
+    if (score > 1.1 && score < 1.2) {
+        return { label: 'Equivocal (Mild/Diastolic Septal Flattening)', class: 'abnormal', active: true };
+    }
+    return { label: 'Normal Circular Geometry', class: 'normal', active: false };
+},
+
+
+   /* PHT Scorer */
+get phtLikelihood() {
+    let signCount = 0;
+    const tr = parseFloat(this.trMax) || 0;
+    const pr = parseFloat(this.prMax) || 0;
+    const mpa = parseFloat(this.mpaAo) || 0;
+    const rvwtVal = parseFloat(this.rvwt) || 0;
+
+    // 1. Velocity Threshold Vectors
+    if (tr > 3.4) return { label: 'HIGH LIKELIHOOD', class: 'abnormal', risk: 'high' };
+    
+    // 2. Accumulate Secondary Anatomical Co-factors
+    if (tr >= 2.8 && tr <= 3.4) signCount++; // Intermediate baseline velocity
+    if (pr > 2.2) signCount++;               // High diastolic pulmonary jet
+    if (this.lveiAssessment?.active) signCount++;     // Mechanical ventricular septal shift
+    if (mpa > 1.0) signCount++;              // Pulmonary artery dilation signature
+    
+    // Cross-reference with allometric left-side comparison
+    const lvParams = this.allometricResults; 
+    if (rvwtVal > 0 && lvParams.lvpwd?.available) {
+        // If RV wall approaches or exceeds 50% of the normal mean left ventricular wall
+        if (rvwtVal >= (lvParams.lvpwd.mean * 0.5)) signCount++;
+    }
+
+    // 3. Output ACVIM Consensus Mapping
+    if (tr < 2.8 && signCount < 2) return { label: 'LOW LIKELIHOOD', class: 'normal', risk: 'low' };
+    if ((tr >= 2.8 && tr <= 3.4) || signCount >= 2) {
+        return { label: 'INTERMEDIATE LIKELIHOOD', class: 'abnormal', risk: 'intermediate' };
+    }
+    return { label: 'LOW LIKELIHOOD', class: 'normal', risk: 'low' };
+},
+
+/* Specialized Decoupled Right Heart Allometric Evaluator */
+get availableRightModels() {
+    if (typeof rightHeartModels === 'undefined') return [];
+    return Object.keys(rightHeartModels).map(key => ({
+        id: key,
+        label: rightHeartModels[key].label
+    }));
+},
+
+get rightAllometricResults() {
+    const results = {};
+    if (!this.weight || this.weight <= 0 || typeof rightHeartModels === 'undefined') return results;
+    
+    const modelData = rightHeartModels[this.selectedRightModel];
+    if (!modelData) return results;
+
+    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad'];
+    
+    targets.forEach(param => {
+        const formula = modelData.params?.[param];
+        if (!formula) {
+            results[param] = { min: null, max: null, mean: null, available: false };
+            return;
+        }
+
+        // Standard allometric computation curve: Y = a * (BW ^ b)
+        const mean = formula.a * Math.pow(this.weight, formula.b);
+        
+        // Handle models that provide fixed prediction intervals vs standard deviations
+        let lower = formula.minMultiplier ? formula.minMultiplier * mean : mean - (1.96 * (formula.see || 0));
+        let upper = formula.maxMultiplier ? formula.maxMultiplier * mean : mean + (1.96 * (formula.see || 0));
+
+        // Enforce safe mathematical floors for lower bounds
+        if (lower < 0) lower = 0;
+
+        results[param] = {
+            min: parseFloat(lower.toFixed(2)),
+            max: parseFloat(upper.toFixed(2)),
+            mean: parseFloat(mean.toFixed(2)),
+            available: true
+        };
+    });
+
+    return results;
 },
 
     /* Diastolic Scorer */

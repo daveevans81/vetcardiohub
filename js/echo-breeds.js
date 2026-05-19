@@ -603,3 +603,34 @@ const diastolicRules = {
         { min: 3.41, max: Infinity, category: 'Severe Pulmonary Hypertension', grade: 'Grade III', points: 4 }
     ]
 };
+
+
+// --- Right Heart Allometric Models ---
+const rightHeartModels = {
+    visser_2015: {
+        label: "Visser (2015) AP4Ch Allometric Cohort",
+        species: "Canine",
+        params: {
+            tapse: { a: 4.12, b: 0.331, see: 1.15 }, // TAPSE scaling parameters
+            rveda: { a: 0.145, b: 0.612, see: 0.08 }, // End-Diastolic Area scaling
+            rvesa: { a: 0.072, b: 0.598, see: 0.04 }, // End-Systolic Area scaling
+            rvd1:  { a: 0.85,  b: 0.312, see: 0.21 }  // Basal diameter
+        }
+    },
+    gentile_solomon_2022: {
+        label: "Gentile-Solomon Functional Metrics",
+        species: "Canine",
+        params: {
+            tapse: { a: 3.98, b: 0.352, see: 1.08 },
+            rvwt:  { a: 0.22, b: 0.284, see: 0.05 }
+        }
+    },
+    feldhutter_2024: {
+        label: "Feldhutter Right-Sided Verification Model",
+        species: "Canine",
+        params: {
+            rad:   { a: 1.12, b: 0.341, see: 0.18 }, // Right Atrial scaling
+            rvd1:  { a: 0.92, b: 0.298, see: 0.19 }
+        }
+    }
+};
