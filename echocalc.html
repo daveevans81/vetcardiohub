@@ -296,7 +296,7 @@
                     <h2>LV Measurements:</h2>
                     <div style="display: flex; gap: 15px;">
                       <div class="input-group" style="flex: 1;">
-                        <label>LVIDd (mm)</label>
+                        <label class="input-label">LVIDd (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvidd')"></i></label>
                         <input type="number" step="0.01" x-model="lvidd" placeholder="e.g. 32" :class="{ 'input-warning': lvidd > 0 && lvidd < 8, 'input-error': lvidd > 100 }">
                         <template x-if="lvidd > 0 && lvidd < 8">
                           <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
@@ -306,7 +306,7 @@
                         </template>
                       </div>
                       <div class="input-group" style="flex: 1;">
-                        <label>LVIDs (mm)</label>
+                        <label class="input-label">LVIDs (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvids')"></i></label>
                         <input type="number" step="0.01" x-model="lvids" placeholder="e.g. 21" :class="{ 'input-warning': lvids > 0 && lvids < 8, 'input-error': lvids > 100 }">
                         <template x-if="lvids > 0 && lvids < 6">
                           <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
@@ -316,11 +316,11 @@
                         </template>
                       </div>
                       <div class="input-group" style="flex: 1;">
-                        <label>IVSd (mm)</label>
+                        <label class="input-label">IVSd (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ivsd')"></i></label>
                         <input type="number" step="0.01" x-model="ivsd" placeholder="e.g. 8">
                       </div>
                       <div class="input-group" style="flex: 1;">
-                        <label>LVPWd (mm)</label>
+                        <label class="input-label">LVPWd (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvpwd')"></i></label>
                         <input type="number" step="0.01" x-model="lvpwd" placeholder="e.g. 8">
                       </div>
                     </div>
@@ -334,11 +334,11 @@
                       <div x-show="showVolumes" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
                         <div style="display: flex; gap: 15px;">
                           <div class="input-group" style="flex: 1;">
-                            <label>LVEDV modified Simpsons (ml)</label>
+                            <label class="input-label">LVEDV modified Simpsons (ml)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvedv')"></i></label>
                             <input type="number" step="0.01" x-model="lvedv" placeholder="e.g. 65">
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label>LVESV modified Simpsons (ml)</label>
+                            <label class="input-label">LVESV modified Simpsons (ml)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvesv')"></i></label>
                             <input type="number" step="0.01" x-model="lvesv" placeholder="e.g. 35">
                           </div>
                         </div>
@@ -348,7 +348,7 @@
                     <h2>LA Measurements:</h2>
                     <div style="display: flex; gap: 15px;">
                       <div class="input-group" style="flex: 1;">
-                        <label>LA short-axis (mm)</label>
+                        <label class="input-label">LA short-axis (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('la')"></i></label>
                         <input type="number" step="0.01" x-model="la" placeholder="e.g. 20" :class="{ 'input-warning': la > 0 && la < 6, 'input-error': la > 100 }">
                         <template x-if="la > 0 && la < 6">
                           <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
@@ -358,7 +358,7 @@
                         </template>
                       </div>
                       <div class="input-group" style="flex: 1;">
-                        <label>Ao Diameter (mm)</label>
+                        <label class="input-label">Ao Diameter (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ao')"></i></label>
                         <input type="number" step="0.01" x-model="ao" placeholder="e.g. 15" :class="{ 'input-warning': ao > 0 && ao < 4, 'input-error': ao > 100 }">
                         <template x-if="ao > 0 && ao < 4">
                           <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
@@ -370,7 +370,7 @@
                     </div>
 
                     <div class="input-group">
-                      <label>LA Long Axis (LAD) (mm)</label>
+                      <label class="input-label">LA Long Axis (LAD) (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lad')"></i></label>
                       <input type="number" step="0.1" x-model="lad" placeholder="e.g. 20" :class="{ 'input-warning': lad > 0 && lad < 8, 'input-error': lad > 100 }">
                       <template x-if="lad > 0 && lad < 8">
                         <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
@@ -389,7 +389,7 @@
                       <div x-show="showDoppler" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
                         <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">E-wave Peak Vel (m/s)</label>
+                            <label  class="input-label">E-wave Peak Vel (m/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('eVel')"></i></label>
                             <input type="number" step="0.01" x-model="eVel" placeholder="e.g. 0.85" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': eVel > 0 && eVel < 0.2, 'input-error': eVel > 5 }">
                             <template x-if="eVel > 0 && eVel < 0.2">
                               <div class="warning-text">⚠️ Value too low.</div>
@@ -399,7 +399,7 @@
                             </template>
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">A-wave Peak Vel (m/s)</label>
+                            <label  class="input-label">A-wave Peak Vel (m/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('aVel')"></i></label>
                             <input type="number" step="0.01" x-model="aVel" placeholder="e.g. 0.55" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': aVel > 0 && aVel < 0.2, 'input-error': aVel > 5 }">
                             <template x-if="aVel > 0 && aVel < 0.2">
                               <div class="warning-text">⚠️ Value too low.</div>
@@ -409,7 +409,7 @@
                             </template>
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">IVRT (ms)</label>
+                            <label class="input-label">IVRT (ms)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ivrt')"></i></label>
                             <input type="number" step="1" x-model="ivrt" placeholder="e.g. 55" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': ivrt > 0 && ivrt < 15, 'input-error': ivrt > 150 }">
                             <template x-if="ivrt > 0 && ivrt < 15">
                               <div class="warning-text">⚠️ Value too low for ms.</div>
@@ -422,15 +422,15 @@
 
                         <div style="display: flex; gap: 15px;">
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">Mitral DT (ms)</label>
+                            <label  class="input-label">Mitral DT (ms)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mdt')"></i></label>
                             <input type="number" step="1" x-model="mdt" placeholder="e.g. 80" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;">
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">Mitral E' (cm/s)</label>
+                            <label  class="input-label">Mitral E' (cm/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ePrime')"></i></label>
                             <input type="number" step="0.1" x-model="ePrime" placeholder="e.g. 6.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;">
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">Ao VMax (m/s)</label>
+                            <label  class="input-label">Ao VMax (m/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('aovmax')"></i></label>
                             <input type="number" step="0.01" x-model="aovmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': aovmax > 0 && aovmax < 0.2, 'input-error': aovmax > 10 }">
                             <template x-if="aovmax > 0 && aovmax < 0.2">
                               <div class="warning-text">⚠️ Value too low for m/s.</div>
@@ -440,7 +440,7 @@
                             </template>
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">PA VMax (m/s)</label>
+                            <label  class="input-label">PA VMax (m/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('pavmax')"></i></label>
                             <input type="number" step="0.01" x-model="pavmax" placeholder="e.g. 1.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': pavmax > 0 && pavmax < 0.2, 'input-error': pavmax > 10 }">
                             <template x-if="pavmax > 0 && pavmax < 0.2">
                               <div class="warning-text">⚠️ Value too low for m/s.</div>
@@ -462,7 +462,7 @@
                       <div x-show="showShunt" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
                         <div style="display: flex; gap: 15px;">
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">LVOT diam (mm)</label>
+                            <label  class="input-label">LVOT diam (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvotd')"></i></label>
                             <input type="number" step="0.01" x-model="lvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': lvotd > 0 && lvotd < 5, 'input-error': lvotd > 30 }">
                             <template x-if="lvotd > 0 && lvotd < 5">
                               <div class="warning-text">⚠️ Value too low for mm.</div>
@@ -472,7 +472,7 @@
                             </template>
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">LVOT VTI (<strong>cm</strong>)</label>
+                            <label  class="input-label">LVOT VTI (<strong>cm</strong>)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvotvti')"></i></label>
                             <input type="number" step="0.01" x-model="lvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': lvotvti > 0 && lvotvti < 4, 'input-error': lvotvti > 50 }">
                             <template x-if="lvotvti > 0 && lvotvti < 4">
                               <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
@@ -482,7 +482,7 @@
                             </template>
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">RVOT diam (mm)</label>
+                            <label  class="input-label">RVOT diam (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvotd')"></i></label>
                             <input type="number" step="0.01" x-model="rvotd" placeholder="e.g. 10.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvotd > 0 && rvotd < 5, 'input-error': rvotd > 30 }">
                             <template x-if="rvotd > 0 && rvotd < 5">
                               <div class="warning-text">⚠️ Value too low for mm.</div>
@@ -492,7 +492,7 @@
                             </template>
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">RVOT VTI (<strong>cm</strong>)</label>
+                            <label  class="input-label">RVOT VTI (<strong>cm</strong>)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvotvti')"></i></label>
                             <input type="number" step="0.01" x-model="rvotvti" placeholder="e.g. 25" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvotvti > 0 && rvotvti < 4, 'input-error': rvotvti > 50 }">
                             <template x-if="rvotvti > 0 && rvotvti < 4">
                               <div class="warning-text">⚠️ Value too low. Is this VTI or Vmax?</div>
@@ -514,7 +514,7 @@
                       
                       <div x-show="showRightHeart" x-collapse style="padding: 12px; border-top: 1px solid #f1f5f9;">
                         <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-                            <span><i class="fa-solid fa-heart-circle-bolt" style="color: #0ea5e9;"></i> Right Heart Compartment Analysis</span>
+                            <span style="font-size: 0.8rem;"><i class="fa-solid fa-heart-circle-bolt" style="color: #0ea5e9;"></i> Right Heart Model Analysis</span>
                             
                               <select x-model="selectedRightModel" style="font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: #fff;">
                                  <template x-for="model in availableRightModels" :key="model.id">
@@ -525,7 +525,7 @@
                         
                         <div style="display: flex; gap: 15px;">
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">TR Peak Vel (m/s)</label>
+                            <label  class="input-label">TR Peak Vel (m/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('trMax')"></i></label>
                             <input type="number" step="0.01" x-model="trMax" placeholder="e.g. 2.6" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': trMax > 0 && trMax < 0.9, 'input-error': trMax > 8 }">
                             <template x-if="trMax > 0 && trMax < 0.9">
                               <div class="warning-text">⚠️ Value too low.</div>
@@ -535,7 +535,7 @@
                             </template>
                           </div>
                           <div class="input-group" style="flex: 1;">
-                            <label style="font-weight: 600; font-size: 0.85rem;">PR Peak Vel (m/s)</label>
+                            <label  class="input-label">PR Peak Vel (m/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('prMax')"></i></label>
                             <input type="number" step="0.01" x-model="prMax" placeholder="e.g. 1.8" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': prMax > 0 && prMax < 0.5, 'input-error': prMax > 5 }">
                             <template x-if="prMax > 0 && prMax < 0.5"><div class="warning-text">⚠️ Value too low.</div></template>
                             <template x-if="prMax > 5"><div class="warning-text" style="color: #ef4444;">⚠️ Check velocity units.</div></template>
@@ -543,28 +543,28 @@
                          </div>
                          <div style="display: flex; gap: 15px;">
                               <div class="input-group" style="flex: 1;">
-                                <label style="font-weight: 600; font-size: 0.85rem;">RV Basal Diam (mm)</label>
+                                <label  class="input-label">RV Basal Diam (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvd1')"></i></label>
                                 <input type="number" step="0.1" x-model="rvd1" placeholder="e.g. 18.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvd1 > 0 && rvd1 < 3, 'input-error': rvd1 > 80 }">
                                 <template x-if="rvd1 > 0 && rvd1 < 3"><div class="warning-text">⚠️ Value too low (check cm vs mm).</div></template>
                                 <template x-if="rvd1 > 80"><div class="warning-text" style="color: #ef4444;">⚠️ Extravagant diameter limit.</div></template>
                               </div>
                         
                               <div class="input-group" style="flex: 1;">
-                                <label style="font-weight: 600; font-size: 0.85rem;">RV Wall Thickness (mm)</label>
+                                <label  class="input-label">RV Wall Thickness (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvwt')"></i></label>
                                 <input type="number" step="0.1" x-model="rvwt" placeholder="e.g. 4.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvwt > 0 && rvwt < 0.8, 'input-error': rvwt > 20 }">
                                 <template x-if="rvwt > 0 && rvwt < 0.8"><div class="warning-text">⚠️ Value too low.</div></template>
                                 <template x-if="rvwt > 20"><div class="warning-text" style="color: #ef4444;">⚠️ Exceeds logical right wall constraints.</div></template>
                               </div>
                         
                               <div class="input-group" style="flex: 1;">
-                                <label style="font-weight: 600; font-size: 0.85rem;">RV Area Diast (cm²)</label>
+                                <label  class="input-label">RV Area Diast (cm²)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rveda')"></i></label>
                                 <input type="number" step="0.01" x-model="rveda" placeholder="e.g. 4.8" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rveda > 0 && rveda < 0.2, 'input-error': rveda > 50 }">
                                 <template x-if="rveda > 0 && rveda < 0.2"><div class="warning-text">⚠️ Value too small for cm².</div></template>
                                 <template x-if="rveda > 50"><div class="warning-text" style="color: #ef4444;">⚠️ Area signature seems too high.</div></template>
                               </div>
                         
                               <div class="input-group" style="flex: 1;">
-                                <label style="font-weight: 600; font-size: 0.85rem;">RV Area Syst (cm²)</label>
+                                <label  class="input-label">RV Area Syst (cm²)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvesa')"></i></label>
                                 <input type="number" step="0.01" x-model="rvesa" placeholder="e.g. 2.1" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvesa > 0 && rvesa < 0.05, 'input-error': rvesa >= parseFloat(rveda) }">
                                 <template x-if="rvesa > 0 && rvesa < 0.05"><div class="warning-text">⚠️ Value too small.</div></template>
                                 <template x-if="rvesa > 0 && rvesa >= parseFloat(rveda)"><div class="warning-text" style="color: #ef4444;">⚠️ Systolic area must be smaller than Diastolic area.</div></template>
@@ -572,7 +572,7 @@
                             </div>
                             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                               <div class="input-group" style="flex: 1;">
-                                <label style="font-weight: 600; font-size: 0.85rem;">TAPSE (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('tapse')"></i></label> 
+                                <label  class="input-label">TAPSE (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('tapse')"></i></label> 
                                 
                                 <input type="number" step="0.1" x-model="tapse" placeholder="e.g. 14.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': tapse > 0 && tapse < 2, 'input-error': tapse > 45 }">
                                 <template x-if="tapse > 0 && tapse < 2"><div class="warning-text">⚠️ Value too low (check cm vs mm).</div></template>
@@ -580,14 +580,14 @@
                               </div>
                         
                               <div class="input-group" style="flex: 1;">
-                                <label style="font-weight: 600; font-size: 0.85rem;">RA Diameter (mm)</label>
+                                <label  class="input-label">RA Diameter (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rad')"></i></label>
                                 <input type="number" step="0.1" x-model="rad" placeholder="e.g. 22.4" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rad > 0 && rad < 3, 'input-error': rad > 90 }">
                                 <template x-if="rad > 0 && rad < 3"><div class="warning-text">⚠️ Value too small for mm size.</div></template>
                                 <template x-if="rad > 90"><div class="warning-text" style="color: #ef4444;">⚠️ Exceeds standard atrial limits.</div></template>
                               </div>
                         
                               <div class="input-group" style="flex: 1; ">
-                                <label style="font-weight: 600; font-size: 0.85rem;">Perpendicular LVIDd (mm)</label>
+                                <label  class="input-label">Perpendicular LVIDd (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvidd2')"></i></label>
                                 <input type="number" step="0.1" x-model="lvidd2" placeholder="e.g. 34.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': lvidd2 > 0 && lvidd2 < 4, 'input-error': lvidd2 > 95 }">
                                 <template x-if="lvidd2 > 0 && lvidd2 < 4"><div class="warning-text">⚠️ Check units (mm scale).</div></template>
                                 <template x-if="lvidd2 > 95"><div class="warning-text" style="color: #ef4444;">⚠️ Outer validation threshold exceeded.</div></template>
@@ -667,7 +667,7 @@
                 <div class="result-row" x-show="fs">
                   <span><strong>Fractional Shortening</strong></span>
                   <span>
-                    <span x-text="`${fs}%`"></span>
+                    <span x-text="`${fs}%`"><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('fs')"></i></span>
                     <span x-show="fs >= 25" class="normal">(Normal)</span>
                     <span x-show="fs < 25 && fs > 0" class="abnormal">(Abnormal)</span>
                     <span style="font-size: 0.8em; color: #666;"> (ref &gt;25) </span>
