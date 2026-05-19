@@ -534,7 +534,7 @@
                               <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for m/s.</div>
                             </template>
                           </div>
-                          <div class="input-group" style="flex: 1; min-width: 150px;">
+                          <div class="input-group" style="flex: 1;">
                             <label style="font-weight: 600; font-size: 0.85rem;">PR Peak Vel (m/s)</label>
                             <input type="number" step="0.01" x-model="prMax" placeholder="e.g. 1.8" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': prMax > 0 && prMax < 0.5, 'input-error': prMax > 5 }">
                             <template x-if="prMax > 0 && prMax < 0.5"><div class="warning-text">⚠️ Value too low.</div></template>
@@ -542,28 +542,28 @@
                           </div>
                          </div>
                          <div style="display: flex; gap: 15px;">
-                              <div class="input-group" style="flex: 1; min-width: 150px;">
+                              <div class="input-group" style="flex: 1;">
                                 <label style="font-weight: 600; font-size: 0.85rem;">RV Basal Diam (mm)</label>
                                 <input type="number" step="0.1" x-model="rvd1" placeholder="e.g. 18.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvd1 > 0 && rvd1 < 3, 'input-error': rvd1 > 80 }">
                                 <template x-if="rvd1 > 0 && rvd1 < 3"><div class="warning-text">⚠️ Value too low (check cm vs mm).</div></template>
                                 <template x-if="rvd1 > 80"><div class="warning-text" style="color: #ef4444;">⚠️ Extravagant diameter limit.</div></template>
                               </div>
                         
-                              <div class="input-group" style="flex: 1; min-width: 150px;">
+                              <div class="input-group" style="flex: 1;">
                                 <label style="font-weight: 600; font-size: 0.85rem;">RV Wall Thickness (mm)</label>
                                 <input type="number" step="0.1" x-model="rvwt" placeholder="e.g. 4.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvwt > 0 && rvwt < 0.8, 'input-error': rvwt > 20 }">
                                 <template x-if="rvwt > 0 && rvwt < 0.8"><div class="warning-text">⚠️ Value too low.</div></template>
                                 <template x-if="rvwt > 20"><div class="warning-text" style="color: #ef4444;">⚠️ Exceeds logical right wall constraints.</div></template>
                               </div>
                         
-                              <div class="input-group" style="flex: 1; min-width: 150px;">
+                              <div class="input-group" style="flex: 1;">
                                 <label style="font-weight: 600; font-size: 0.85rem;">RV Area Diast (cm²)</label>
                                 <input type="number" step="0.01" x-model="rveda" placeholder="e.g. 4.8" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rveda > 0 && rveda < 0.2, 'input-error': rveda > 50 }">
                                 <template x-if="rveda > 0 && rveda < 0.2"><div class="warning-text">⚠️ Value too small for cm².</div></template>
                                 <template x-if="rveda > 50"><div class="warning-text" style="color: #ef4444;">⚠️ Area signature seems too high.</div></template>
                               </div>
                         
-                              <div class="input-group" style="flex: 1; min-width: 150px;">
+                              <div class="input-group" style="flex: 1;">
                                 <label style="font-weight: 600; font-size: 0.85rem;">RV Area Syst (cm²)</label>
                                 <input type="number" step="0.01" x-model="rvesa" placeholder="e.g. 2.1" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rvesa > 0 && rvesa < 0.05, 'input-error': rvesa >= parseFloat(rveda) }">
                                 <template x-if="rvesa > 0 && rvesa < 0.05"><div class="warning-text">⚠️ Value too small.</div></template>
@@ -571,21 +571,21 @@
                               </div>
                             </div>
                             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                              <div class="input-group" style="flex: 1; min-width: 150px;">
+                              <div class="input-group" style="flex: 1;">
                                 <label style="font-weight: 600; font-size: 0.85rem;">TAPSE (mm)</label>
                                 <input type="number" step="0.1" x-model="tapse" placeholder="e.g. 14.5" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': tapse > 0 && tapse < 2, 'input-error': tapse > 45 }">
                                 <template x-if="tapse > 0 && tapse < 2"><div class="warning-text">⚠️ Value too low (check cm vs mm).</div></template>
                                 <template x-if="tapse > 45"><div class="warning-text" style="color: #ef4444;">⚠️ Exceeds physiologic excursion limits.</div></template>
                               </div>
                         
-                              <div class="input-group" style="flex: 1; min-width: 150px;">
+                              <div class="input-group" style="flex: 1;">
                                 <label style="font-weight: 600; font-size: 0.85rem;">RA Diameter (mm)</label>
                                 <input type="number" step="0.1" x-model="rad" placeholder="e.g. 22.4" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rad > 0 && rad < 3, 'input-error': rad > 90 }">
                                 <template x-if="rad > 0 && rad < 3"><div class="warning-text">⚠️ Value too small for mm size.</div></template>
                                 <template x-if="rad > 90"><div class="warning-text" style="color: #ef4444;">⚠️ Exceeds standard atrial limits.</div></template>
                               </div>
                         
-                              <div class="input-group" style="flex: 1; min-width: 150px;">
+                              <div class="input-group" style="flex: 1; ">
                                 <label style="font-weight: 600; font-size: 0.85rem;">Perpendicular LVIDd (mm)</label>
                                 <input type="number" step="0.1" x-model="lvidd2" placeholder="e.g. 34.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': lvidd2 > 0 && lvidd2 < 4, 'input-error': lvidd2 > 95 }">
                                 <template x-if="lvidd2 > 0 && lvidd2 < 4"><div class="warning-text">⚠️ Check units (mm scale).</div></template>
