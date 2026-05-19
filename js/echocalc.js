@@ -946,88 +946,133 @@ parseRawText() {
     if (!this.rawEchoText) return;
 
     let matchCount = 0;
+    const lines = this.rawEchoText.split(/\r?\n/);
 
-// The Master Extraction Dictionary
-    // \b ensures we only match whole words.
-    // [^a-zA-Z\n]* tells the parser: "You can skip spaces, colons, or tabs to find the number, 
-    // BUT if you hit another letter (like 'Ao' or 'Ratio'), abort the match."
-const extractionRules = [
-        // PATIENT INFO
-        { key: 'weight',  pattern: /\b(?:Weight|Wt|Body Wt|Body Weight)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+    // --- EXTRACTION MAP ---
+    // Each entry: { key: stateVariable, patterns: [regex for label column] }
+    // Order matters for ambiguous labels — put more specific patterns first.
+    const extractionMap = [
+        // PATIENT
+        { key: 'weight',   patterns: [/^weight\b/i] },
 
-        // LEFT VENTRICLE & ATRIUM
-        { key: 'lvidd2',  pattern: /\b(?:LVIDd2|LVIDd perp|LVIDd perpendicular)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi }, 
-        { key: 'lvidd',   pattern: /\b(?:LVIDd|LVDd|LVID\s*\(d\)|LVID D)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'lvids',   pattern: /\b(?:LVIDs|LVDs|LVID\s*\(s\)|LVID S)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'ivsd',    pattern: /\b(?:IVSd|IVS\s*\(d\)|IVS)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'lvpwd',   pattern: /\b(?:LVPWd|LVPW\s*\(d\)|PWd|LVPW)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'lad',     pattern: /\b(?:LAD|LA Long Axis|LA LAx)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'la',      pattern: /\b(?:LA Diam|LA s-ax|LA sx|LA sax|LA|LA\s*\(s\))\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'ao',      pattern: /\b(?:Ao Diam|Ao|Aorta|Ao root)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        // LEFT VENTRICLE — M-mode preferred (appears earlier in most reports)
+        { key: 'lvidd',    patterns: [/^LVIDd\b/i, /^LVID\s*D\b/i, /^LVID\s*\(d\)\b/i, /^LVDd\b/i] },
+        { key: 'lvids',    patterns: [/^LVIDs\b/i, /^LVID\s*S\b/i, /^LVID\s*\(s\)\b/i, /^LVDs\b/i] },
+        { key: 'ivsd',     patterns: [/^IVSd\b/i, /^IVS\s*\(d\)\b/i, /^IVS\b/i] },
+        { key: 'lvpwd',    patterns: [/^LVPWd\b/i, /^LVFW\s*d\b/i, /^LVPW\s*\(d\)\b/i, /^LVPWd\b/i] },
+        { key: 'lvidd2',   patterns: [/^LVIDd2\b/i, /^LVIDd\s+perp\b/i] },
+
+        // LEFT ATRIUM
+        { key: 'lad',      patterns: [/^LAD\b/i, /^LA\s+long\s+axis\b/i, /^LA\s+LAx\b/i] },
+        { key: 'la',       patterns: [/^LA\s+Diam\b/i, /^LA\s+s[- ]?ax\b/i, /^LA\s+short\b/i, /^LA\s*\(s\)\b/i] },
+        { key: 'ao',       patterns: [/^Ao\s+Diam\b/i, /^Ao\s+Root\b/i, /^Aorta\b/i, /^Ao\b/i] },
 
         // VOLUMETRICS
-        { key: 'lvedv',   pattern: /\b(?:LVEDV MOD A4C|LVEDV MOD|LVEDV|EDV)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'lvesv',   pattern: /\b(?:LVESV MOD A4C|LVESV MOD|LVESV|ESV)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'lvedv',    patterns: [/^LVEDV\s+MOD\b/i, /^LVEDV\b/i, /^EDV\b/i] },
+        { key: 'lvesv',    patterns: [/^LVESV\s+MOD\b/i, /^LVESV\b/i, /^ESV\b/i] },
 
-        // MITRAL & DIASTOLIC DOPPLER
-        { key: 'eVel',    pattern: /\b(?:MV E Vel|MV E Vmax|E wave|E vel|E peak|MV E|E\s*Vmax)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'aVel',    pattern: /\b(?:MV A Vel|MV A Vmax|A wave|A vel|A peak|MV A|A\s*Vmax)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'ivrt',    pattern: /\b(?:IVRT)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'mdt',     pattern: /\b(?:MV DecT|DecT|MDT|E wave DT|E DT|MV DT)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'ePrime',  pattern: /(?:\bMV E'|\bE'|\bE\s*prime|\bMitral E'|\bLat E'|\bSep E'|\bMedial E')[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi }, 
+        // DOPPLER
+        { key: 'eVel',     patterns: [/^MV\s+E\s+Vel\b/i, /^MV\s+E\s+Vmax\b/i, /^E\s+wave\b/i, /^E\s+vel\b/i, /^E\s+peak\b/i, /^MV\s+E\b/i] },
+        { key: 'aVel',     patterns: [/^MV\s+A\s+Vel\b/i, /^MV\s+A\s+Vmax\b/i, /^A\s+wave\b/i, /^A\s+vel\b/i, /^A\s+peak\b/i, /^MV\s+A\b/i] },
+        { key: 'ivrt',     patterns: [/^IVRT\b/i] },
+        { key: 'mdt',      patterns: [/^MV\s+DecT\b/i, /^DecT\b/i, /^MDT\b/i, /^E\s+wave\s+DT\b/i, /^E\s+DT\b/i, /^MV\s+DT\b/i] },
+        { key: 'ePrime',   patterns: [/^MV\s+E'\b/i, /^E'\b/i, /^E\s+prime\b/i, /^Mitral\s+E'\b/i, /^Lat\s+E'\b/i, /^Sep\s+E'\b/i, /^Medial\s+E'\b/i] },
 
-        // OUTFLOW TRACTS & SHUNT METRICS
-        { key: 'lvotd',   pattern: /\b(?:LVOT Diam|LVOTd|LVOT d|LVOT diameter)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'rvotd',   pattern: /\b(?:RVOT Diam|RVOTd|RVOT d|RVOT diameter)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'lvotvti', pattern: /\b(?:LVOT VTI|LVOTVTI)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'rvotvti', pattern: /\b(?:RVOT VTI|RVOTVTI)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'aovmax',  pattern: /\b(?:AV Vmax|Ao Vmax|AoV Vmax|AoVmax|AV max|AV Vel|LVOT Vmax)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'pavmax',  pattern: /\b(?:PV Vmax|PA Vmax|PAV Vmax|PVmax|PV max|PV Vel|Pulm Vmax|RVOT Vmax)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        
-        // RIGHT HEART & TRICUSPID
-        { key: 'tapse',   pattern: /\b(?:TAPSE)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'trMax',   pattern: /\b(?:TR Vmax|TR Vel|TR max|TR)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'prMax',   pattern: /\b(?:PR Vmax|PR Vel|PR max|PI Vmax|PI Vel|PI max|PR)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        
-        // RV DIMENSIONS & AREAS
-        { key: 'rvwt',    pattern: /\b(?:RVW|RVFW|RV wall|RVWT|RVFWd)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'rveda',   pattern: /\b(?:RVEDA|RVA d|RVAd A4C|RVAd|RV Ad|RV Area Diastole)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'rvesa',   pattern: /\b(?:RVESA|RVA s|RVAs A4C|RVAs|RV As|RV Area Systole)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'rvd1',    pattern: /\b(?:RVD1|RV basal|RV base|RVD basal)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'rvd2',    pattern: /\b(?:RVD2|RV mid|RVD mid)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'rad',     pattern: /\b(?:RAD|RA Diam|RA minor|RA width|RA)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        
-        // PULMONARY ARTERY BRANCHES
-        { key: 'mpamin',  pattern: /\b(?:MPA min|MPA|MPAd|Main PA)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'rpamin',  pattern: /\b(?:RPA min|RPA|RPA d|RPA diastole)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
-        { key: 'rpamax',  pattern: /\b(?:RPA max|RPA s|RPA systole)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi }
+        // OUTFLOW TRACTS
+        { key: 'lvotd',    patterns: [/^LVOT\s+Diam\b/i, /^LVOTd\b/i, /^LVOT\s+d\b/i, /^LVOT\s+diameter\b/i] },
+        { key: 'rvotd',    patterns: [/^RVOT\s+Diam\b/i, /^RVOTd\b/i, /^RVOT\s+d\b/i, /^RVOT\s+diameter\b/i] },
+        { key: 'lvotvti',  patterns: [/^LVOT\s+VTI\b/i, /^LVOTVTI\b/i] },
+        { key: 'rvotvti',  patterns: [/^RVOT\s+VTI\b/i, /^RVOTVTI\b/i] },
+        { key: 'aovmax',   patterns: [/^AV\s+Vmax\b/i, /^Ao\s+Vmax\b/i, /^AoV\s+Vmax\b/i, /^AoVmax\b/i, /^AV\s+max\b/i, /^AV\s+Vel\b/i, /^LVOT\s+Vmax\b/i] },
+        { key: 'pavmax',   patterns: [/^PV\s+Vmax\b/i, /^PA\s+Vmax\b/i, /^PAV\s+Vmax\b/i, /^PVmax\b/i, /^PV\s+max\b/i, /^PV\s+Vel\b/i, /^RVOT\s+Vmax\b/i] },
+
+        // RIGHT HEART
+        { key: 'tapse',    patterns: [/^TAPSE\b/i] },
+        { key: 'trMax',    patterns: [/^TR\s+Vmax\b/i, /^TR\s+Vel\b/i, /^TR\s+max\b/i, /^TR\b/i] },
+        { key: 'prMax',    patterns: [/^PR\s+Vmax\b/i, /^PR\s+Vel\b/i, /^PR\s+max\b/i, /^PI\s+Vmax\b/i, /^PI\s+Vel\b/i, /^PI\s+max\b/i] },
+        { key: 'rvwt',     patterns: [/^RVW\b/i, /^RVFW\b/i, /^RV\s+wall\b/i, /^RVWT\b/i, /^RVFWd\b/i] },
+        { key: 'rveda',    patterns: [/^RVEDA\b/i, /^RVAd\s+A4C\b/i, /^RVAd\b/i, /^RV\s+Ad\b/i, /^RV\s+Area\s+Diastole\b/i] },
+        { key: 'rvesa',    patterns: [/^RVESA\b/i, /^RVAs\s+A4C\b/i, /^RVAs\b/i, /^RV\s+As\b/i, /^RV\s+Area\s+Systole\b/i] },
+        { key: 'rvd1',     patterns: [/^RVD1\b/i, /^RV\s+basal\b/i, /^RV\s+base\b/i, /^RVD\s+basal\b/i] },
+        { key: 'rad',      patterns: [/^RAD\b/i, /^RA\s+Diam\b/i, /^RA\s+minor\b/i, /^RA\s+width\b/i] },
+
+        // PULMONARY ARTERY
+        { key: 'mpamin',   patterns: [/^MPA\s+min\b/i, /^MPAd\b/i, /^Main\s+PA\b/i] },
+        { key: 'rpamin',   patterns: [/^RPA\s+min\b/i, /^RPA\s+d\b/i, /^RPA\s+diastole\b/i] },
+        { key: 'rpamax',   patterns: [/^RPA\s+max\b/i, /^RPA\s+s\b/i, /^RPA\s+systole\b/i] },
     ];
 
-    // 1. Process all numerical rules
-    extractionRules.forEach(rule => {
-        const matches = [...this.rawEchoText.matchAll(rule.pattern)];
-        
-        if (matches.length > 0) {
-            // Always grab the LAST match found (prioritizes M-mode block over 2D block)
-            const lastMatch = matches[matches.length - 1]; 
-            
-            if (lastMatch && lastMatch[1]) {
-                this[rule.key] = parseFloat(lastMatch[1]);
-                matchCount++;
+    // --- SKIP LIST: label fragments that indicate a calculated ratio or index ---
+    // If the label column matches any of these, skip the line entirely.
+    const skipPatterns = [
+        /ratio/i, /[:,/]/,       // explicit ratio labels or separator chars in label
+        /RPLA/i,                  // normalized-by-BW variants
+        /\/BW/i, /\/Ao/i, /\/kg/i, /\/m/i,
+        /N\s*\(/i,               // e.g. "LADN (< 1.730)"
+        /\bDDN\b/i, /\bDSN\b/i, // LVD normalized labels
+        /\bEF\b/i, /\bFS\b/i, /\bFAC\b/i, /\bRWT\b/i,  // derived indices
+        /\bNorm\b/i, /\bnLA\b/i,
+        /Cornell/i, /2D/i,       // composite labels like "LVDDN 2D" or "LVDDN (Cornell)"
+        /\bN\b.*[<>]/,           // anything with N followed by a reference bracket
+    ];
+
+    // --- FIRST-MATCH WINS SET: once a key is filled, ignore subsequent lines ---
+    const filled = new Set();
+
+    for (const line of lines) {
+        // Split on tab, comma, or 2+ spaces — handles TSV, CSV, and fixed-width
+        const cols = line.trim().split(/\t|,|  +/);
+        if (cols.length < 2) continue;
+
+        const labelCol = cols[0].trim();
+        if (!labelCol) continue;
+
+        // Skip lines where label looks like a calculated field
+        if (skipPatterns.some(p => p.test(labelCol))) continue;
+
+        // Find the first column after the label that contains a plain number
+        // (Allows for a unit column before the number, or after)
+        let numericValue = null;
+        for (let i = 1; i < cols.length; i++) {
+            const cell = cols[i].trim();
+            // Accept a plain number (integer or decimal, optional leading minus)
+            // Reject if it contains letters (units like "mm" or "kg" are ok IF the number is separate)
+            if (/^-?[0-9]+(\.[0-9]+)?$/.test(cell)) {
+                numericValue = parseFloat(cell);
+                break;
+            }
+            // Also handle "31.19 mm" merged into one cell — extract just the number
+            const embedded = cell.match(/^(-?[0-9]+(?:\.[0-9]+)?)\s*(?:mm|cm|ml|m\/s|ms|kg|%|cm²)?$/i);
+            if (embedded) {
+                numericValue = parseFloat(embedded[1]);
+                break;
             }
         }
-    });
 
-    // 2. Process Boolean/Text checks (e.g., finding D-shaped septum in the comments)
-    if (this.rawEchoText.match(/\b(?:flattening|flattened|D-shape|D-shaped|D shape)\b/i)) {
+        if (numericValue === null || isNaN(numericValue)) continue;
+
+        // Try to match the label against our extraction map
+        for (const rule of extractionMap) {
+            if (filled.has(rule.key)) continue; // already captured this field
+
+            if (rule.patterns.some(p => p.test(labelCol))) {
+                this[rule.key] = numericValue;
+                filled.add(rule.key);
+                matchCount++;
+                break;
+            }
+        }
+    }
+
+    // Boolean check for D-shape / septal flattening in full text
+    if (/\b(?:flattening|flattened|D-shape|D-shaped|D shape)\b/i.test(this.rawEchoText)) {
         this.ivsFlattening = true;
         matchCount++;
     }
 
-    // 3. UI Feedback
     if (matchCount > 0) {
         this.parseMessage = `Success: Auto-filled ${matchCount} parameters!`;
-        this.rawEchoText = ''; // Clear text box on success
+        this.rawEchoText = '';
         setTimeout(() => this.parseMessage = '', 4000);
     } else {
         this.parseMessage = 'Could not find recognizable measurements.';
