@@ -969,8 +969,8 @@ const extractionMap = [
     { key: 'ao',      patterns: [/\bao\s+diam\b/i, /\bao\s+root\b/i, /\baorta\b/i, /\bao\b/i] },
 
     // VOLUMETRICS
-    { key: 'lvedv',   patterns: [/\blvedv\s+mod\b/i, /\blvedv\b/i, /\bedv\b/i] },
-    { key: 'lvesv',   patterns: [/\blvesv\s+mod\b/i, /\blvesv\b/i, /\besv\b/i] },
+    { key: 'lvedv',   patterns: [/\blvedv\s+mod\s+a4c\b/i, /\blvedv\s+mod\b/i, /\blvedv\b/i, /\bedv\b/i] },
+    { key: 'lvesv',   patterns: [/\blvesv\s+mod\s+a4c\b/i, /\blvesv\s+mod\b/i, /\blvesv\b/i, /\besv\b/i] },
 
     // DOPPLER
     { key: 'eVel',    patterns: [/\bmv\s+e\s+vel\b/i, /\bmv\s+e\s+vmax\b/i, /\be\s+wave\b/i, /\be\s+vel\b/i, /\be\s+peak\b/i, /\bmv\s+e\b/i] },
