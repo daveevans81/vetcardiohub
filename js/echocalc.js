@@ -1020,49 +1020,42 @@ parseRawText() {
     const filled = new Set();
 
     for (const line of lines) {
-        // This splits on any sequence of whitespace, tabs, or commas
-        const cols = line.trim().split(/,|\t|\s+/);
-        if (cols.length < 2) continue;
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
 
-        const labelCol = cols[0].trim();
-        if (!labelCol) continue;
+    // 1. Skip sections that aren't data (headers, comments, etc.)
+    if (skipPatterns.some(p => p.test(trimmedLine))) continue;
 
-        // Skip lines where label looks like a calculated field
-        if (skipPatterns.some(p => p.test(labelCol))) continue;
+    // 2. Iterate through your extraction map
+    for (const rule of extractionMap) {
+        if (filled.has(rule.key)) continue;
 
-        // Find the first column after the label that contains a plain number
-        // (Allows for a unit column before the number, or after)
-        let numericValue = null;
-        for (let i = 1; i < cols.length; i++) {
-            const cell = cols[i].trim();
-            // Accept a plain number (integer or decimal, optional leading minus)
-            // Reject if it contains letters (units like "mm" or "kg" are ok IF the number is separate)
-            if (/^-?[0-9]+(\.[0-9]+)?$/.test(cell)) {
-                numericValue = parseFloat(cell);
-                break;
-            }
-            // Also handle "31.19 mm" merged into one cell — extract just the number
-            const embedded = cell.match(/^(-?[0-9]+(?:\.[0-9]+)?)\s*(?:mm|cm|ml|m\/s|ms|kg|%|cm²)?$/i);
-            if (embedded) {
-                numericValue = parseFloat(embedded[1]);
-                break;
-            }
-        }
-
-        if (numericValue === null || isNaN(numericValue)) continue;
-
-        // Try to match the label against our extraction map
-        for (const rule of extractionMap) {
-            if (filled.has(rule.key)) continue; // already captured this field
-
-            if (rule.patterns.some(p => p.test(labelCol))) {
-                this[rule.key] = numericValue;
-                filled.add(rule.key);
-                matchCount++;
-                break;
+        for (const pattern of rule.patterns) {
+            // We use the pattern to find the label at the start of the line
+            if (pattern.test(trimmedLine)) {
+                
+                // 3. Extract the number from the WHOLE LINE 
+                // We strip the label away and find the first number in the remaining text
+                const remainingText = trimmedLine.replace(pattern, '').trim();
+                
+                // This regex finds the first number (integer or decimal) in the remaining text
+                const numMatch = remainingText.match(/-?[0-9]+(\.[0-9]+)?/);
+                
+                if (numMatch) {
+                    const numericValue = parseFloat(numMatch[0]);
+                    
+                    if (!isNaN(numericValue)) {
+                        this[rule.key] = numericValue;
+                        filled.add(rule.key);
+                        matchCount++;
+                        // We found this metric, stop looking for other patterns for this key
+                        break; 
+                    }
+                }
             }
         }
     }
+}
 
     // Boolean check for D-shape / septal flattening in full text
     if (/\b(?:flattening|flattened|D-shape|D-shaped|D shape)\b/i.test(this.rawEchoText)) {
