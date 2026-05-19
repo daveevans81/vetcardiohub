@@ -153,7 +153,7 @@ function advancedEchoSuite() {
         if(!this.mpamin || !this.ao || parseFloat(this.ao) === 0) return 0;
         return (this.mpamin / this.ao).toFixed(2);
     },
-    get ref() {
+    get rfac() {
         if(!this.rveda || !this.rvesa || parseFloat(this.rveda) === 0) return 0;
         return (((this.rveda - this.rvesa) / this.rveda) * 100).toFixed(1);
     },
@@ -161,6 +161,11 @@ function advancedEchoSuite() {
     if (!this.trMax || parseFloat(this.trMax) === 0) return 0;
     return parseFloat((Math.pow(this.trMax, 2) * 4).toFixed(2));
     },
+    get prPG() {
+    if (!this.prMax || parseFloat(this.prMax) === 0) return 0;
+    return parseFloat((Math.pow(this.prMax, 2) * 4).toFixed(2));
+    },
+
     get mrVol() {
     // Requires both total stroke volume and systemic stroke volume (Qs)
     if (!this.sv || !this.qs) return 0;
@@ -233,7 +238,7 @@ get lveiAssessment() {
     }
     return { label: 'Normal Circular Geometry', class: 'normal', active: false };
 },
-
+/* Pulmonary Artery Indexing */
 
  
 /* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
@@ -653,6 +658,17 @@ get calculatedMineScore() {
 },
 
     /* 4. METHODS */
+
+openGlossary(termKey) {
+    this.activeGlossaryTerm = this.glossaryDatabase[termKey];
+    this.glossaryOpen = true;
+},
+closeGlossary() {
+    this.glossaryOpen = false;
+    setTimeout(() => { this.activeGlossaryTerm = null; }, 300); // Wait for transition
+},
+
+
     calculateRef(paramKey) {
         if (!this.weight || this.weight <= 0 || typeof allometricModels === 'undefined') {
             return { min: 0, max: 0, mean: 0, available: false };
@@ -1000,7 +1016,8 @@ parseRawText() {
     { key: 'rpamin',  patterns: [/\brpa\s+min\b/i, /\brpa\s+d\b/i, /\brpa\s+diastole\b/i] },
     { key: 'rpamax',  patterns: [/\brpa\s+max\b/i, /\brpa\s+s\b/i, /\brpa\s+systole\b/i] },
 ];
-// --- 2. INTELLIGENT LABEL-ONLY SKIP LIST ---
+
+ // --- 2. INTELLIGENT LABEL-ONLY SKIP LIST ---
     // These indicate calculated values/headers inside the label section specifically.
     const skipLabelPatterns = [
         /ratio/i, /RPLA/i, /\bDDN\b/i, /\bDSN\b/i, /\bEF\b/i, /\bFS\b/i, /\bFAC\b/i, 
@@ -1059,6 +1076,356 @@ parseRawText() {
     this.parseMessage = matchCount > 0 ? `Success: Auto-filled ${matchCount} parameters!` : 'No recognizable measurements found.';
     this.rawEchoText = '';
     setTimeout(() => this.parseMessage = '', 4000);
+},
+
+// The Clinical Reference Database
+glossaryDatabase: {
+// --- RIGHT HEART  ---
+    tapse: {
+        title: "TAPSE (Tricuspid Annular Plane Systolic Excursion)",
+        view: "Left Apical 4-Chamber (RV Optimized)",
+        description: "Assesses longitudinal right ventricular systolic function.",
+        method: "Place the M-mode cursor directly through the lateral aspect of the tricuspid valve annulus. Measure the total vertical displacement from end-diastole (lowest point) to peak systole (highest point).",
+        imgPlaceholder: "/images/tapse-reference.jpg"
+    },
+    rvwt: {
+        title: "RVWT (Right Ventricular Wall Thickness)",
+        view: "Right Parasternal Long or Short Axis",
+        description: "Evaluates right ventricular concentric hypertrophy secondary to pressure overload.",
+        method: "Measure the free wall thickness at end-diastole using 2D or M-mode, avoiding papillary muscles and trabeculae.",
+        imgPlaceholder: "/images/rvwt-reference.jpg"
+    },
+    rveda: {
+        title: "RVEDA (RV End-Diastolic Area)",
+        view: "Left Apical 4-Chamber (RV Optimized)",
+        description: "Quantifies global right ventricular dilation.",
+        method: "Trace the endocardial border of the RV at end-diastole (maximum volume). Exclude the trabeculae and papillary muscles from the trace line. Close the trace flat across the tricuspid annulus.",
+        imgPlaceholder: "/images/rveda-reference.jpg"
+    },
+    rvesa: {
+        title: "RVESA (RV End-Systolic Area)",
+        view: "Left Apical 4-Chamber (RV Optimized)",
+        description: "Quantifies RV systolic failure and volume retention.",
+        method: "Trace the endocardial border at end-systole (minimum volume), following the same exclusion rules as RVEDA.",
+        imgPlaceholder: "/images/rvesa-reference.jpg"
+    },
+    rvd1: {
+        title: "RVD1 (Basal RV Diameter)",
+        view: "Left Apical 4-Chamber (RV Optimized)",
+        description: "Assesses basal segment right ventricular dilation.",
+        method: "Measure the maximal transverse diameter of the RV basal third at end-diastole, typically just above the level of the tricuspid valve leaflets.",
+        imgPlaceholder: "/images/rvd1-reference.jpg"
+    },
+    rad: {
+        title: "RAD (Right Atrial Diameter)",
+        view: "Left Apical 4-Chamber",
+        description: "Evaluates right atrial dilation secondary to volume/pressure overload.",
+        method: "Measure the maximal right atrial major dimension (base to apex) at end-systole (when the atrium is maximally full), parallel to the interatrial septum.",
+        imgPlaceholder: "/images/rad-reference.jpg"
+    },
+    lvidd2: {
+        title: "LVIDd₂ (Perpendicular Eccentricity)",
+        view: "Right Parasternal Short Axis (Papillary Level)",
+        description: "Quantifies septal flattening (D-shape) to calculate the LV Eccentricity Index.",
+        method: "Measure the LV internal diameter at end-diastole perpendicular to the normal vertical LVIDd. If the septum is flattened by RV pressure, this horizontal measurement will be significantly larger than the vertical one.",
+        imgPlaceholder: "/images/lvidd2-reference.jpg"
+    },
+// --- LEFT HEART STRUCTURAL ---
+    lvidd: {
+        title: "LVIDd (LV Internal Diameter - Diastole)",
+        view: "Right Parasternal Short Axis (Papillary Level)",
+        description: "Primary metric for assessing left ventricular volume overload (eccentric hypertrophy) commonly seen in MMVD or PDA.",
+        method: "Measure the maximal internal diameter of the left ventricle at end-diastole (onset of the QRS complex). Ensure the cursor is perpendicular to the septum and free wall.",
+        imgPlaceholder: "/images/lvidd-reference.jpg"
+    },
+    lvids: {
+        title: "LVIDs (LV Internal Diameter - Systole)",
+        view: "Right Parasternal Short Axis (Papillary Level)",
+        description: "Assesses left ventricular systolic function and contractility.",
+        method: "Measure the minimal internal diameter of the left ventricle at peak systole (end of the T wave).",
+        imgPlaceholder: "/images/lvids-reference.jpg"
+    },
+    la: {
+        title: "LA (Left Atrium Dimension)",
+        view: "Right Parasternal Short Axis (Heart Base)",
+        description: "Evaluates left atrial enlargement, the primary structural indicator of elevated left-sided filling pressures.",
+        method: "Measure the internal diameter of the LA at end-systole (when maximally filled), extending from the center of the aortic valve commissure to the dorsal LA wall.",
+        imgPlaceholder: "/images/la-reference.jpg"
+    },
+    ao: {
+        title: "Ao (Aortic Root Dimension)",
+        view: "Right Parasternal Short Axis (Heart Base)",
+        description: "Serves as a patient-specific internal baseline to normalize left atrial size.",
+        method: "Measure the internal diameter of the aortic root at end-diastole (when closed), along the commissure of the non-coronary and right coronary cusps.",
+        imgPlaceholder: "/images/ao-reference.jpg"
+    },
+    ivsd: {
+        title: "IVSd (Interventricular Septum - Diastole)",
+        view: "Right Parasternal Short Axis (Papillary Level)",
+        description: "Assesses septal thickness for signs of concentric hypertrophy (e.g., HCM, Subaortic Stenosis).",
+        method: "Measure the thickness of the septum at end-diastole, excluding the right ventricular trabeculae.",
+        imgPlaceholder: "/images/ivsd-reference.jpg"
+    },
+
+    // --- LEFT HEART DOPPLER ---
+    eVel: {
+        title: "Transmitral E-Wave Velocity",
+        view: "Left Apical 4-Chamber",
+        description: "Represents early, passive left ventricular diastolic filling. Highly dependent on Left Atrial Pressure (LAP) and myocardial relaxation.",
+        method: "Place the Pulsed Wave (PW) Doppler sample volume exactly at the tips of the open mitral valve leaflets during diastole.",
+        imgPlaceholder: "/images/ewave-reference.jpg"
+    },
+    aVel: {
+        title: "Transmitral A-Wave Velocity",
+        view: "Left Apical 4-Chamber",
+        description: "Represents late, active diastolic filling driven by atrial contraction (the 'atrial kick').",
+        method: "Measured from the same PW Doppler trace as the E-wave. Occurs immediately following the P-wave on the concurrent ECG.",
+        imgPlaceholder: "/images/awave-reference.jpg"
+    },
+
+    // --- CALCULATED INDICES ---
+    fs: {
+        title: "Fractional Shortening (FS%)",
+        view: "Derived Index",
+        description: "A functional index representing the percentage change in the left ventricular diameter during systole. Normal in dogs is typically > 25%.",
+        method: "Calculated automatically as: ((LVIDd - LVIDs) / LVIDd) × 100. Note: FS% can be falsely elevated in severe mitral regurgitation due to the low-resistance left atrium.",
+        imgPlaceholder: "/images/fs-reference.jpg"
+    },
+    laAo: {
+        title: "LA:Ao Ratio",
+        view: "Derived Index",
+        description: "An objective, body-weight independent metric for staging left atrial enlargement. A ratio ≥ 1.6 is a primary criterion for ACVIM Stage B2 MMVD.",
+        method: "Calculated automatically by dividing the LA dimension by the Ao dimension measured at the heart base.",
+        imgPlaceholder: "/images/laao-reference.jpg"
+    },
+    ear: {
+        title: "E:A Ratio",
+        view: "Derived Index",
+        description: "The primary initial assessment for diastolic function and left atrial pressure.",
+        method: "Normal physiologic filling results in an E > A pattern (Ratio > 1.0). An E:A ratio < 1.0 indicates impaired relaxation (Grade 1), while a ratio > 2.0 suggests restrictive filling (Grade 3).",
+        imgPlaceholder: "/images/earatio-reference.jpg"
+    },
+// --- LEFT HEART VOLUMES & WALLS ---
+    lvpwd: {
+        title: "LVPWd (LV Posterior/Free Wall - Diastole)",
+        view: "Right Parasternal Short/Long Axis",
+        description: "Assesses left ventricular free wall thickness for signs of concentric hypertrophy.",
+        method: "Measure the thickness of the LV free wall at end-diastole, placing calipers from the endocardial border to the epicardial border. Exclude papillary muscles.",
+        imgPlaceholder: "/images/lvpwd-reference.jpg"
+    },
+    lvedv: {
+        title: "LVEDV (LV End-Diastolic Volume)",
+        view: "Right Parasternal Long Axis / Apical 4-Chamber",
+        description: "Quantifies the maximal diastolic blood volume in the left ventricle. More accurate than 1D linear measurements for assessing eccentric hypertrophy.",
+        method: "Typically calculated using the Simpson's Method of Discs (SMOD) or Area-Length method by tracing the endocardial border at maximum diastole.",
+        imgPlaceholder: "/images/lvedv-reference.jpg"
+    },
+    lvesv: {
+        title: "LVESV (LV End-Systolic Volume)",
+        view: "Right Parasternal Long Axis / Apical 4-Chamber",
+        description: "Quantifies the minimal systolic blood volume. Elevated volumes indicate myocardial systolic failure.",
+        method: "Trace the endocardial border at maximum systole (minimum chamber size).",
+        imgPlaceholder: "/images/lvesv-reference.jpg"
+    },
+
+    // --- OUTFLOW TRACTS & TISSUE DOPPLER ---
+    lvotd: {
+        title: "LVOTd (LV Outflow Tract Diameter)",
+        view: "Right Parasternal Long Axis (5-Chamber)",
+        description: "Crucial for calculating forward systemic stroke volume (Qs) and evaluating left-to-right shunts.",
+        method: "Measure the internal diameter of the left ventricular outflow tract in mid-systole, positioned just below the aortic valve insertion points.",
+        imgPlaceholder: "/images/lvotd-reference.jpg"
+    },
+    rvotd: {
+        title: "RVOTd (RV Outflow Tract Diameter)",
+        view: "Right Parasternal Short Axis (Heart Base)",
+        description: "Used alongside LVOTd to calculate Qp:Qs shunt ratios (e.g., PDA, VSD).",
+        method: "Measure the internal diameter of the RVOT just proximal to the pulmonic valve annulus during mid-systole.",
+        imgPlaceholder: "/images/rvotd-reference.jpg"
+    },
+    lvotvti: {
+        title: "LVOT VTI (Velocity-Time Integral)",
+        view: "Subcostal or Left Apical 5-Chamber",
+        description: "Represents the stroke distance of blood ejected from the left ventricle. Combines with LVOT area to calculate systemic stroke volume.",
+        method: "Trace the envelope of the Pulsed Wave (PW) Doppler spectral signal obtained from the center of the LVOT.",
+        imgPlaceholder: "/images/lvotvti-reference.jpg"
+    },
+    rvotvti: {
+        title: "RVOT VTI (Velocity-Time Integral)",
+        view: "Right Parasternal Short Axis (Heart Base)",
+        description: "Represents the stroke distance of blood ejected into the pulmonary circulation.",
+        method: "Trace the envelope of the PW Doppler signal obtained from the center of the RVOT, just proximal to the pulmonic valve.",
+        imgPlaceholder: "/images/rvotvti-reference.jpg"
+    },
+    ePrime: {
+        title: "e' (Mitral Annular Early Diastolic Velocity)",
+        view: "Left Apical 4-Chamber",
+        description: "A Tissue Doppler Imaging (TDI) metric representing true myocardial active relaxation.",
+        method: "Place the TDI sample volume over the lateral or septal mitral annulus. Measure the peak of the first negative (moving away) diastolic wave.",
+        imgPlaceholder: "/images/eprime-reference.jpg"
+    },
+
+    // --- PULMONARY & TRICUSPID DOPPLER / TIMING ---
+    mdt: {
+        title: "MDT (Mitral Deceleration Time)",
+        view: "Left Apical 4-Chamber",
+        description: "Measures the rate of pressure equalization between the LA and LV. Shortened times (<60ms) strongly suggest restrictive filling.",
+        method: "Measure the time interval from the peak of the transmitral E-wave down the deceleration slope to the baseline (0 m/s).",
+        imgPlaceholder: "/images/mdt-reference.jpg"
+    },
+    ivrt: {
+        title: "IVRT (Isovolumic Relaxation Time)",
+        view: "Left Apical 5-Chamber",
+        description: "The time required for the LV to relax and drop pressure below LA pressure before the mitral valve opens. Prolonged in impaired relaxation; shortened in high LAP.",
+        method: "Place PW Doppler between the LVOT and Mitral inflow to capture both. Measure the time from aortic valve closure (end of ejection) to mitral valve opening (start of E-wave).",
+        imgPlaceholder: "/images/ivrt-reference.jpg"
+    },
+    trMax: {
+        title: "TR Vmax (Tricuspid Regurgitation Peak Velocity)",
+        view: "Left Apical 4-Chamber (RV Optimized) / Right Parasternal",
+        description: "The gold standard surrogate for estimating Right Ventricular Systolic Pressure (RVSP) and diagnosing pulmonary hypertension.",
+        method: "Align a Continuous Wave (CW) Doppler beam parallel to the TR jet. Measure the maximum peak velocity of the spectral envelope.",
+        imgPlaceholder: "/images/trmax-reference.jpg"
+    },
+    prMax: {
+        title: "PR Vmax (Pulmonic Regurgitation Peak Velocity)",
+        view: "Right Parasternal Short Axis",
+        description: "Used to estimate diastolic pulmonary artery pressures.",
+        method: "Align CW Doppler with the diastolic regurgitant jet across the pulmonic valve. Measure the peak early diastolic velocity.",
+        imgPlaceholder: "/images/prmax-reference.jpg"
+    },
+    aovmax: {
+        title: "Ao Vmax (Aortic Peak Velocity)",
+        view: "Subcostal / Left Apical 5-Chamber",
+        description: "Evaluates left ventricular outflow tract obstruction (e.g., Subaortic Stenosis).",
+        method: "Use CW Doppler aligned with the aortic outflow. Measure the peak systolic velocity.",
+        imgPlaceholder: "/images/aovmax-reference.jpg"
+    },
+    pavmax: {
+        title: "PA Vmax (Pulmonic Peak Velocity)",
+        view: "Right Parasternal Short Axis",
+        description: "Evaluates right ventricular outflow tract obstruction (e.g., Pulmonic Stenosis).",
+        method: "Use CW Doppler aligned with the pulmonic outflow. Measure the peak systolic velocity.",
+        imgPlaceholder: "/images/pavmax-reference.jpg"
+    },
+
+    // --- PULMONARY ARTERY BRANCHES ---
+    mpamin: {
+        title: "MPA min (Main Pulmonary Artery Minimum)",
+        view: "Right Parasternal Short Axis (Heart Base)",
+        description: "Used to assess pulmonary artery dilation, a hallmark of precapillary pulmonary hypertension.",
+        method: "Measure the minimal internal diameter of the main pulmonary artery at end-diastole (just before pulmonic valve opening).",
+        imgPlaceholder: "/images/mpamin-reference.jpg"
+    },
+    rpamin: {
+        title: "RPA min (Right Pulmonary Artery Minimum)",
+        view: "Right Parasternal Short Axis",
+        description: "A highly sensitive, body-weight indexed marker for pulmonary hypertension (Vezzosi/Grosso criteria).",
+        method: "Measure the internal diameter of the right pulmonary artery branch at end-diastole.",
+        imgPlaceholder: "/images/rpamin-reference.jpg"
+    },
+    rpamax: {
+        title: "RPA max (Right Pulmonary Artery Maximum)",
+        view: "Right Parasternal Short Axis",
+        description: "Evaluates the maximum distension of the RPA during peak systole.",
+        method: "Measure the maximal internal diameter of the right pulmonary artery branch during peak systole.",
+        imgPlaceholder: "/images/rpamax-reference.jpg"
+    },
+
+    // --- DERIVED CLINICAL INDICES ---
+    sv: {
+        title: "Stroke Volume (SV)",
+        view: "Derived Index",
+        description: "The total volume of blood ejected by the ventricle per beat.",
+        method: "Calculated automatically by subtracting End-Systolic Volume (ESV) from End-Diastolic Volume (EDV).",
+        imgPlaceholder: "/images/sv-reference.jpg"
+    },
+    ef: {
+        title: "Ejection Fraction (EF%)",
+        view: "Derived Index",
+        description: "The percentage of diastolic volume ejected per beat. A key indicator of systolic function.",
+        method: "Calculated as: (Stroke Volume / LVEDV) × 100.",
+        imgPlaceholder: "/images/ef-reference.jpg"
+    },
+    rwt: {
+        title: "Relative Wall Thickness (RWT)",
+        view: "Derived Index",
+        description: "Classifies LV geometry as normal, concentric hypertrophy (high RWT), or eccentric hypertrophy (low RWT).",
+        method: "Calculated as: (2 × LV Posterior Wall) / LVIDd.",
+        imgPlaceholder: "/images/rwt-reference.jpg"
+    },
+    eivrt: {
+        title: "E:IVRT Ratio",
+        view: "Derived Index",
+        description: "An excellent hybrid predictor of left atrial pressure, combining early filling velocity with the relaxation time interval.",
+        method: "Calculated as: (E-wave velocity × 100) / IVRT. Ratios > 2.5 strongly correlate with elevated Left Atrial Pressure.",
+        imgPlaceholder: "/images/eivrt-reference.jpg"
+    },
+    lveio: {
+        title: "LVEIO (E:LVOT VTI)",
+        view: "Derived Index",
+        description: "Compares diastolic filling velocity against forward stroke distance. High ratios indicate the ventricle requires massive filling pressures to drive normal forward flow.",
+        method: "Calculated as: E-wave velocity / LVOT VTI.",
+        imgPlaceholder: "/images/lveio-reference.jpg"
+    },
+    eePrime: {
+        title: "E:e' Ratio",
+        view: "Derived Index",
+        description: "The gold-standard non-invasive surrogate for left atrial filling pressure.",
+        method: "Calculated as: Transmitral E-wave velocity / TDI e' velocity. Normalizes blood flow against muscle relaxation speed.",
+        imgPlaceholder: "/images/eeprime-reference.jpg"
+    },
+    eplar: {
+        title: "ePLAR (Echocardiographic Pulmonary to Left Atrial Ratio)",
+        view: "Derived Index",
+        description: "Differentiates pre-capillary from post-capillary pulmonary hypertension.",
+        method: "Calculated as: TR Vmax / E:e' Ratio. A high value (>0.28) points to primary lung vascular disease; a low value (<0.23) points to left heart failure backing up into the lungs.",
+        imgPlaceholder: "/images/eplar-reference.jpg"
+    },
+    vtir: {
+        title: "VTI Ratio (P:S / Qp:Qs)",
+        view: "Derived Index",
+        description: "Assesses the balance between pulmonary (Qp) and systemic (Qs) flow volumes. Used to quantify the severity of shunts (e.g., PDA, VSD).",
+        method: "Calculated as: RVOT VTI / LVOT VTI (or cross-sectional areas for true volumetric Qp:Qs). Normal is roughly 1.0.",
+        imgPlaceholder: "/images/vtir-reference.jpg"
+    },
+    rfac: {
+        title: "RV FAC% (Right Ventricular Fractional Area Change)",
+        view: "Derived Index",
+        description: "A robust 2D estimation of global right ventricular systolic function. Preferred over TAPSE as it accounts for both longitudinal and radial contraction.",
+        method: "Calculated as: ((RVEDA - RVESA) / RVEDA) × 100.",
+        imgPlaceholder: "/images/rvfac-reference.jpg"
+    },
+    trPG: {
+        title: "Pressure Gradient (TR PG)",
+        view: "Derived Index",
+        description: "Estimates the pressure difference between the right ventricle and right atrium during systole.",
+        method: "Calculated using the modified Bernoulli equation: 4 × (Velocity²). When added to estimated Right Atrial Pressure (RAP), it yields Right Ventricular Systolic Pressure (RVSP).",
+        imgPlaceholder: "/images/bernoulli-reference.jpg"
+    },
+    mrFraction: {
+        title: "Regurgitant Fraction (MR%)",
+        view: "Derived Index",
+        description: "Quantifies the percentage of the total LV stroke volume that leaks backward into the left atrium rather than going out the aorta.",
+        method: "Calculated as: (Mitral Regurgitant Volume / Total LV Stroke Volume) × 100.",
+        imgPlaceholder: "/images/mrfraction-reference.jpg"
+    },
+    lvei: {
+        title: "LVEI (LV Eccentricity Index)",
+        view: "Derived Index",
+        description: "Quantifies septal flattening (D-shape) caused by right ventricular volume or pressure overload.",
+        method: "Calculated as: Perpendicular LVIDd₂ / Standard LVIDd. An index > 1.2 indicates significant geometric distortion.",
+        imgPlaceholder: "/images/lvei-reference.jpg"
+    }
+},
+
+    exportToClipboard() {
+navigator.clipboard.writeText(this.generateReportText()).then(() => {
+this.copySuccess = true;
+setTimeout(() => { this.copySuccess = false; }, 2500);
+});
+}
+};
 }
 
 
