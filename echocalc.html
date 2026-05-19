@@ -585,14 +585,37 @@
                                 <template x-if="rad > 0 && rad < 3"><div class="warning-text">⚠️ Value too small for mm size.</div></template>
                                 <template x-if="rad > 90"><div class="warning-text" style="color: #ef4444;">⚠️ Exceeds standard atrial limits.</div></template>
                               </div>
-                        
                               <div class="input-group" style="flex: 1; ">
                                 <label  class="input-label">LVIDd perp. (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvidd2')"></i></label>
                                 <input type="number" step="0.1" x-model="lvidd2" placeholder="e.g. 34.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': lvidd2 > 0 && lvidd2 < 4, 'input-error': lvidd2 > 95 }">
                                 <template x-if="lvidd2 > 0 && lvidd2 < 4"><div class="warning-text">⚠️ Check units (mm scale).</div></template>
                                 <template x-if="lvidd2 > 95"><div class="warning-text" style="color: #ef4444;">⚠️ Outer validation threshold exceeded.</div></template>
-                              </div>
+                              </div>                
+
                             </div>
+                              <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                              <div class="input-group" style="flex: 1; ">
+                                <label  class="input-label">RPA max (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rpamax')"></i></label>
+                                <input type="number" step="0.1" x-model="rpamax" placeholder="e.g. 7.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rpamax > 0 && rpamax < 2, 'input-error': rpamax > 25 }">
+                                <template x-if="rpamax > 0 && rpamax < 2"><div class="warning-text">⚠️ Check units (mm scale).</div></template>
+                                <template x-if="rpamax > 25"><div class="warning-text" style="color: #ef4444;">⚠️ Outer validation threshold exceeded.</div></template>
+                              </div>  
+                        
+                              <div class="input-group" style="flex: 1; ">
+                                <label  class="input-label">RPA min (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rpamin')"></i></label>
+                                <input type="number" step="0.1" x-model="rpamin" placeholder="e.g. 6.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rpamin > 0 && rpamin < 2, 'input-error': rpamin > 25 }">
+                                <template x-if="rpamin > 0 && rpamin < 2"><div class="warning-text">⚠️ Check units (mm scale).</div></template>
+                                <template x-if="rpamin > 25"><div class="warning-text" style="color: #ef4444;">⚠️ Outer validation threshold exceeded.</div></template>
+                              </div>  
+                              <div class="input-group" style="flex: 1; ">
+                                <label  class="input-label">MPA min (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mpamin')"></i></label>
+                                <input type="number" step="0.1" x-model="mpamin" placeholder="e.g. 8.2" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': mpamin > 0 && mpamin < 2, 'input-error': mpamin > 25 }">
+                                <template x-if="mpamin > 0 && mpamin < 2"><div class="warning-text">⚠️ Check units (mm scale).</div></template>
+                                <template x-if="mpamin > 25"><div class="warning-text" style="color: #ef4444;">⚠️ Outer validation threshold exceeded.</div></template>
+                              </div>                      
+
+                            </div>                          
+
                         </div> <!-- Close R heart Accordion-->
                     </div> <!-- Close R heart Section-->
 
@@ -665,9 +688,9 @@
                 </div>
 
                 <div class="result-row" x-show="fs">
-                  <span><strong>Fractional Shortening</strong></span>
+                  <span><strong>Fractional Shortening</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('fs')"></i></span>
                   <span>
-                    <span x-text="`${fs}%`"><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('fs')"></i></span>
+                    <span x-text="`${fs}%`"></span>
                     <span x-show="fs >= 25" class="normal">(Normal)</span>
                     <span x-show="fs < 25 && fs > 0" class="abnormal">(Abnormal)</span>
                     <span style="font-size: 0.8em; color: #666;"> (ref &gt;25) </span>
