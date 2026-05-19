@@ -1089,7 +1089,7 @@ parseRawText() {
     this.parseMessage = matchCount > 0 ? `Success: Auto-filled ${matchCount} parameters!` : 'No recognizable measurements found.';
     this.rawEchoText = '';
     setTimeout(() => this.parseMessage = '', 4000);
-}
+},
 
 // The Clinical Reference Database
 glossaryDatabase: {
