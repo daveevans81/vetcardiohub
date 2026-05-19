@@ -1146,14 +1146,14 @@ glossaryDatabase: {
         title: "LVIDd (LV Internal Diameter - Diastole)",
         view: "Right Parasternal Short Axis (Papillary Level)",
         description: "Primary metric for assessing left ventricular volume overload (eccentric hypertrophy) commonly seen in MMVD or PDA.",
-        method: "Measure the maximal internal diameter of the left ventricle at end-diastole (onset of the QRS complex). Ensure the cursor is perpendicular to the septum and free wall.",
+        method: "Measure the maximal internal diameter of the left ventricle at end-diastole (peak R wave). Ensure the cursor is perpendicular to the septum and free wall.",
         imgPlaceholder: "/images/lvidd-reference.jpg"
     },
     lvids: {
         title: "LVIDs (LV Internal Diameter - Systole)",
         view: "Right Parasternal Short Axis (Papillary Level)",
         description: "Assesses left ventricular systolic function and contractility.",
-        method: "Measure the minimal internal diameter of the left ventricle at peak systole (end of the T wave).",
+        method: "Measure the minimal internal diameter of the left ventricle at peak systole (end of the T wave or maximal septal deviation).",
         imgPlaceholder: "/images/lvids-reference.jpg"
     },
     la: {
@@ -1272,7 +1272,7 @@ glossaryDatabase: {
         title: "e' (Mitral Annular Early Diastolic Velocity)",
         view: "Left Apical 4-Chamber",
         description: "A Tissue Doppler Imaging (TDI) metric representing true myocardial active relaxation.",
-        method: "Place the TDI sample volume over the lateral or septal mitral annulus. Measure the peak of the first negative (moving away) diastolic wave.",
+        method: "Place the TDI sample volume over the lateral mitral annulus. Measure the peak of the first negative (moving away) diastolic wave.",
         imgPlaceholder: "/images/eprime-reference.jpg"
     },
 
