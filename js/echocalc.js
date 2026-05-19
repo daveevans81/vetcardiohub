@@ -951,58 +951,56 @@ parseRawText() {
     // \b ensures we only match whole words.
     // [^a-zA-Z\n]* tells the parser: "You can skip spaces, colons, or tabs to find the number, 
     // BUT if you hit another letter (like 'Ao' or 'Ratio'), abort the match."
-    const extractionRules = [
+const extractionRules = [
         // PATIENT INFO
-        { key: 'weight',  pattern: /\b(?:Weight|Wt|Body Wt|Body Weight)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'weight',  pattern: /\b(?:Weight|Wt|Body Wt|Body Weight)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
 
         // LEFT VENTRICLE & ATRIUM
-        { key: 'lvidd2',  pattern: /\b(?:LVIDd2|LVIDd perp|LVIDd perpendicular)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi }, 
-        { key: 'lvidd',   pattern: /\b(?:LVIDd|LVDd|LVID\s*\(d\)|LVID D)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'lvids',   pattern: /\b(?:LVIDs|LVDs|LVID\s*\(s\)|LVID S)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'ivsd',    pattern: /\b(?:IVSd|IVS\s*\(d\)|IVS)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'lvpwd',   pattern: /\b(?:LVPWd|LVPW\s*\(d\)|PWd|LVPW)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'lad',     pattern: /\b(?:LAD|LA Long Axis|LA LAx)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'la',      pattern: /\b(?:LA Diam|LA s-ax|LA sx|LA sax|LA|LA\s*\(s\))\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'ao',      pattern: /\b(?:Ao Diam|Ao|Aorta|Ao root)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'lvidd2',  pattern: /\b(?:LVIDd2|LVIDd perp|LVIDd perpendicular)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi }, 
+        { key: 'lvidd',   pattern: /\b(?:LVIDd|LVDd|LVID\s*\(d\)|LVID D)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'lvids',   pattern: /\b(?:LVIDs|LVDs|LVID\s*\(s\)|LVID S)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'ivsd',    pattern: /\b(?:IVSd|IVS\s*\(d\)|IVS)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'lvpwd',   pattern: /\b(?:LVPWd|LVPW\s*\(d\)|PWd|LVPW)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'lad',     pattern: /\b(?:LAD|LA Long Axis|LA LAx)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'la',      pattern: /\b(?:LA Diam|LA s-ax|LA sx|LA sax|LA|LA\s*\(s\))\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'ao',      pattern: /\b(?:Ao Diam|Ao|Aorta|Ao root)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
 
-        // VOLUMETRICS (Explicitly including the 'MOD A4C' text from your export)
-        { key: 'lvedv',   pattern: /\b(?:LVEDV MOD A4C|LVEDV MOD|LVEDV|EDV)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'lvesv',   pattern: /\b(?:LVESV MOD A4C|LVESV MOD|LVESV|ESV)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
+        // VOLUMETRICS
+        { key: 'lvedv',   pattern: /\b(?:LVEDV MOD A4C|LVEDV MOD|LVEDV|EDV)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'lvesv',   pattern: /\b(?:LVESV MOD A4C|LVESV MOD|LVESV|ESV)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
 
         // MITRAL & DIASTOLIC DOPPLER
-        { key: 'eVel',    pattern: /\b(?:MV E Vel|MV E Vmax|E wave|E vel|E peak|MV E|E\s*Vmax)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'aVel',    pattern: /\b(?:MV A Vel|MV A Vmax|A wave|A vel|A peak|MV A|A\s*Vmax)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'ivrt',    pattern: /\b(?:IVRT)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'mdt',     pattern: /\b(?:MV DecT|DecT|MDT|E wave DT|E DT|MV DT)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        
-        // E' (Apostrophes break word boundaries, handled specially)
-        { key: 'ePrime',  pattern: /(?:\bMV E'|\bE'|\bE\s*prime|\bMitral E'|\bLat E'|\bSep E'|\bMedial E')[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi }, 
+        { key: 'eVel',    pattern: /\b(?:MV E Vel|MV E Vmax|E wave|E vel|E peak|MV E|E\s*Vmax)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'aVel',    pattern: /\b(?:MV A Vel|MV A Vmax|A wave|A vel|A peak|MV A|A\s*Vmax)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'ivrt',    pattern: /\b(?:IVRT)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'mdt',     pattern: /\b(?:MV DecT|DecT|MDT|E wave DT|E DT|MV DT)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'ePrime',  pattern: /(?:\bMV E'|\bE'|\bE\s*prime|\bMitral E'|\bLat E'|\bSep E'|\bMedial E')[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi }, 
 
         // OUTFLOW TRACTS & SHUNT METRICS
-        { key: 'lvotd',   pattern: /\b(?:LVOT Diam|LVOTd|LVOT d|LVOT diameter)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'rvotd',   pattern: /\b(?:RVOT Diam|RVOTd|RVOT d|RVOT diameter)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'lvotvti', pattern: /\b(?:LVOT VTI|LVOTVTI)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'rvotvti', pattern: /\b(?:RVOT VTI|RVOTVTI)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'aovmax',  pattern: /\b(?:AV Vmax|Ao Vmax|AoV Vmax|AoVmax|AV max|AV Vel|LVOT Vmax)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'pavmax',  pattern: /\b(?:PV Vmax|PA Vmax|PAV Vmax|PVmax|PV max|PV Vel|Pulm Vmax|RVOT Vmax)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'lvotd',   pattern: /\b(?:LVOT Diam|LVOTd|LVOT d|LVOT diameter)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'rvotd',   pattern: /\b(?:RVOT Diam|RVOTd|RVOT d|RVOT diameter)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'lvotvti', pattern: /\b(?:LVOT VTI|LVOTVTI)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'rvotvti', pattern: /\b(?:RVOT VTI|RVOTVTI)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'aovmax',  pattern: /\b(?:AV Vmax|Ao Vmax|AoV Vmax|AoVmax|AV max|AV Vel|LVOT Vmax)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'pavmax',  pattern: /\b(?:PV Vmax|PA Vmax|PAV Vmax|PVmax|PV max|PV Vel|Pulm Vmax|RVOT Vmax)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
         
         // RIGHT HEART & TRICUSPID
-        { key: 'tapse',   pattern: /\b(?:TAPSE)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'trMax',   pattern: /\b(?:TR Vmax|TR Vel|TR max|TR)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'prMax',   pattern: /\b(?:PR Vmax|PR Vel|PR max|PI Vmax|PI Vel|PI max|PR)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'tapse',   pattern: /\b(?:TAPSE)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'trMax',   pattern: /\b(?:TR Vmax|TR Vel|TR max|TR)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'prMax',   pattern: /\b(?:PR Vmax|PR Vel|PR max|PI Vmax|PI Vel|PI max|PR)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
         
         // RV DIMENSIONS & AREAS
-        { key: 'rvwt',    pattern: /\b(?:RVW|RVFW|RV wall|RVWT|RVFWd)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'rveda',   pattern: /\b(?:RVEDA|RVA d|RVAd A4C|RVAd|RV Ad|RV Area Diastole)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'rvesa',   pattern: /\b(?:RVESA|RVA s|RVAs A4C|RVAs|RV As|RV Area Systole)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'rvd1',    pattern: /\b(?:RVD1|RV basal|RV base|RVD basal)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'rvd2',    pattern: /\b(?:RVD2|RV mid|RVD mid)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'rad',     pattern: /\b(?:RAD|RA Diam|RA minor|RA width|RA)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
+        { key: 'rvwt',    pattern: /\b(?:RVW|RVFW|RV wall|RVWT|RVFWd)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'rveda',   pattern: /\b(?:RVEDA|RVA d|RVAd A4C|RVAd|RV Ad|RV Area Diastole)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'rvesa',   pattern: /\b(?:RVESA|RVA s|RVAs A4C|RVAs|RV As|RV Area Systole)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'rvd1',    pattern: /\b(?:RVD1|RV basal|RV base|RVD basal)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'rvd2',    pattern: /\b(?:RVD2|RV mid|RVD mid)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'rad',     pattern: /\b(?:RAD|RA Diam|RA minor|RA width|RA)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
         
         // PULMONARY ARTERY BRANCHES
-        { key: 'mpamin',  pattern: /\b(?:MPA min|MPA|MPAd|Main PA)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'rpamin',  pattern: /\b(?:RPA min|RPA|RPA d|RPA diastole)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi },
-        { key: 'rpamax',  pattern: /\b(?:RPA max|RPA s|RPA systole)\b[^a-zA-Z\n]*([0-9]*\.?[0-9]+)/gi }
+        { key: 'mpamin',  pattern: /\b(?:MPA min|MPA|MPAd|Main PA)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'rpamin',  pattern: /\b(?:RPA min|RPA|RPA d|RPA diastole)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi },
+        { key: 'rpamax',  pattern: /\b(?:RPA max|RPA s|RPA systole)\b[^a-zA-Z\n:]*([0-9]+(?:\.[0-9]+)?)/gi }
     ];
 
     // 1. Process all numerical rules
