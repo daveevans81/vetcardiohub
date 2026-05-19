@@ -698,7 +698,7 @@
                 </div>
 
                 <div class="result-row" x-show="ef">
-                  <span><strong>Ejection Fraction</strong></span>
+                  <span><strong>Ejection Fraction</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ef')"></i></span>
                   <span>
                     <span x-text="`${ef}%`"></span>
                     <span x-show="ef >= 50" class="normal">(Normal)</span>
@@ -719,7 +719,7 @@
 
                 <div x-show="isDog" x-transition>
                   <div class="result-row" x-show="lviddn">
-                    <span><strong>LVIDDN</strong> (Cornell)</span>
+                    <span><strong>LVIDDN</strong> (Cornell)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lviddn')"></i></span>
                     <span>
                       <span x-text="lviddn"></span>
                       <span x-show="lviddn >= 1.85" class="abnormal">(Enlarged)</span>
@@ -731,7 +731,7 @@
                   </div>
 
                   <div class="result-row" x-show="lvidsn">
-                    <span><strong>LVIDSN</strong> (Cornell)</span>
+                    <span><strong>LVIDSN</strong> (Cornell)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvidsn')"></i></span>
                     <span>
                       <span x-text="lvidsn"></span>
                       <span x-show="lvidsn >= 1.26" class="abnormal">(Enlarged)</span>
@@ -742,7 +742,7 @@
                   </div>
 
                   <div class="result-row" x-show="RWT">
-                    <span><strong>Relative Wall Thickness</strong></span>
+                    <span><strong>Relative Wall Thickness</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('RWT')"></i></span>
                     <span>
                       <span x-text="RWT"></span>
                       <span x-show="RWT >= 0.43" class="abnormal">(Thick Walls)</span>
@@ -753,7 +753,7 @@
                   </div>
 
                   <div class="result-row" x-show="lvedvbw">
-                    <span><strong>LVEDV / BW</strong></span>
+                    <span><strong>LVEDV / BW</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvedvbw')"></i></span>
                     <span>
                       <span x-text="lvedvbw"></span>
                       <span x-show="lvedvbw >= 3" class="abnormal">(Enlarged)</span>
@@ -764,7 +764,7 @@
                   </div>
 
                   <div class="result-row" x-show="lvesvbw">
-                    <span><strong>LVESV / BW</strong></span>
+                    <span><strong>LVESV / BW</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvesvbw')"></i></span>
                     <span>
                       <span x-text="lvesvbw"></span>
                       <span x-show="lvesvbw >= 1.35" class="abnormal">(Enlarged)</span>
@@ -775,7 +775,7 @@
                   </div>
 
                   <div class="result-row" x-show="edvim2">
-                    <span><strong>LVEDV / m²</strong></span>
+                    <span><strong>LVEDV / m²</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('edvim2')"></i></span>
                     <span>
                       <span x-text="edvim2"></span>
                       <span x-show="edvim2 < 100 " class="normal">(Normal)</span>
@@ -785,7 +785,7 @@
                   </div>
 
                   <div class="result-row" x-show="esvim2">
-                    <span><strong>LVESV / m²</strong></span>
+                    <span><strong>LVESV / m²</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('esvim2')"></i></span>
                     <span>
                       <span x-text="esvim2"></span>
                       <span x-show="esvim2 >= 30" class="abnormal">(Enlarged)</span>
@@ -794,22 +794,22 @@
                   </div>
 
                   <div class="result-row" x-show="sv">
-                    <span><strong>LV Stroke Vol</strong></span>
+                    <span><strong>LV Stroke Vol</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('sv')"></i></span>
                     <span><span x-text="sv"></span><span style="font-size: 0.8em; color: #666;"> ml</span></span>
                   </div>
 
                   <div class="result-row" x-show="qs">
-                    <span><strong>Systemic Stroke Vol</strong></span>
+                    <span><strong>Systemic Stroke Vol</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('qs')"></i></span>
                     <span><span x-text="qs"></span><span style="font-size: 0.8em; color: #666;"> ml</span></span>
                   </div>
 
                   <div class="result-row" x-show="mrVol">
-                    <span><strong>Mitral Regurgitant Vol</strong></span>
+                    <span><strong>Mitral Regurgitant Vol</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mrVol')"></i></span>
                     <span><span x-text="mrVol"></span><span style="font-size: 0.8em; color: #666;"> ml</span></span>
                   </div>
 
                   <div class="result-row" x-show="mrFraction > 0" x-transition>
-                    <span><strong>MR Fraction</strong></span>
+                    <span><strong>MR Fraction</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mrFraction')"></i></span>
                     <span>
                       <span x-text="`${mrFraction}%` "></span>
                       <span x-show="mrFraction >= 50" class="abnormal">(Severe Regurgitation)</span>
@@ -874,7 +874,7 @@
                 </div>
 
                 <div class="result-row" x-show="laAo">
-                  <span><strong>LA:Ao Ratio</strong></span>
+                  <span><strong>LA:Ao Ratio</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('laAo')"></i></span>
                   <span>
                     <span x-text="laAo"></span>
                     <span x-show="laAo >= 1.65" class="abnormal">(Enlarged)</span>
@@ -885,7 +885,7 @@
 
                 <div x-show="isDog" x-transition>
                   <div class="result-row" x-show="lan">
-                    <span><strong>LA (short axis) Normalised</strong></span>
+                    <span><strong>LA (short axis) Normalised</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lan')"></i></span>
                     <span>
                       <span x-text="lan"></span>
                       <span x-show="lan >= 1.17" class="abnormal">(Enlarged)</span>
@@ -895,7 +895,7 @@
                   </div>
 
                   <div class="result-row" x-show="ladao">
-                    <span><strong>LAD : Ao(short axis)</strong></span>
+                    <span><strong>LAD : Ao(short axis)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ladao')"></i></span>
                     <span>
                       <span x-text="ladao"></span>
                       <span x-show="ladao >= 2.1" class="abnormal">(Enlarged)</span>
@@ -905,7 +905,7 @@
                   </div>
 
                   <div class="result-row" x-show="ladn">
-                    <span><strong>LADN</strong></span>
+                    <span><strong>LADN</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ladn')"></i></span>
                     <span>
                       <span x-text="ladn"></span>
                       <span x-show="ladn >= 1.6" class="abnormal">(Enlarged)</span>
@@ -964,7 +964,7 @@
                 </div>
 
                 <div class="result-row" x-show="ear">
-                  <span><strong>E:A Ratio</strong></span>
+                  <span><strong>E:A Ratio</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ear')"></i></span>
                   <span>
                     <span x-text="ear"></span>
                     <span x-show="ear > 1.6" class="abnormal">(High)</span>
@@ -975,7 +975,7 @@
                 </div>
 
                 <div class="result-row" x-show="eivrt">
-                  <span><strong>E:IVRT Ratio</strong></span>
+                  <span><strong>E:IVRT Ratio</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('eivrt')"></i></span>
                   <span>
                     <span x-text="eivrt"></span>
                     <span x-show="eivrt >= 2.5" class="abnormal">(HIGH LAP)</span>
@@ -985,7 +985,7 @@
                 </div>
                 
                 <div class="result-row" x-show="lveio">
-                  <span><strong>LVEIO</strong></span>
+                  <span><strong>LVEIO</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lveio')"></i></span>
                   <span>
                     <span x-text="lveio"></span>
                     <span x-show="lveio >= 11.85" class="abnormal">(HIGH LAP)</span>
@@ -1006,7 +1006,7 @@
                 </div>
 
                 <div class="result-row" x-show="eePrime">
-                  <span><strong>E:E' ratio</strong></span>
+                  <span><strong>E:E' ratio</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('eePrime')"></i></span>
                   <span>
                     <span x-text="eePrime"></span>
                     <span x-show="eePrime >= 12" class="abnormal">(HIGH LAP)</span>
@@ -1059,7 +1059,7 @@
                 </div>
 
                 <div class="result-row" x-show="vtir">
-                  <span><strong>VTI Ratio P:S</strong></span>
+                  <span><strong>VTI Ratio P:S</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('vtir')"></i></span>
                   <span>
                     <span x-text="vtir"></span>
                     <span x-show="vtir > 1.1" class="abnormal">(High)</span>
@@ -1070,7 +1070,7 @@
                 </div>
 
                 <div class="result-row" x-show="qpqs">
-                  <span><strong>Qp:Qs Ratio</strong></span>
+                  <span><strong>Qp:Qs Ratio</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('qpqs')"></i></span>
                   <span>
                     <span x-text="qpqs"></span>
                     <span x-show="qpqs > 1.1" class="abnormal">(High)</span>
@@ -1095,7 +1095,7 @@
                   </span>
                 </div>
                 <div class="result-row" x-show="trPG">
-                  <span><strong>TR PG</strong></span>
+                  <span><strong>TR PG</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('trPG')"></i></span>
                   <span>
                     <span x-text="trPG"></span>
                     <span x-show="trPG >= 40" class="abnormal">(HIGH)</span>
@@ -1115,7 +1115,7 @@
                   </span>
                 </div>
                 <div class="result-row" x-show="prPG">
-                  <span><strong>PR PG</strong></span>
+                  <span><strong>PR PG</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('prPG')"></i></span>
                   <span>
                     <span x-text="prPG"></span>
                     <span x-show="prPG >= 25" class="abnormal">(HIGH)</span>
@@ -1167,13 +1167,13 @@
                         <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.rvesa?.available" x-text="' (ref ' + rightAllometricResults.rvesa.min + '-' + rightAllometricResults.rvesa.max + ')'"></span>
                     </span>
                 </div>
-                        <div class="result-row" x-show="rfac">
-                    <span><strong>RV FAC</strong></span>
+                <div class="result-row" x-show="rfac">
+                    <span><strong>RV FAC</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rfac')"></i></span>
                     <span>
                         <span x-text="rfac"></span> &percnt;
-                        <span x-show="prPG < 25" class="abnormal">(Low)</span>
-                        <span x-show="prPG >= 32" class="normal">(Normal)</span>
-                        <span x-show="prPG < 32 && prPG >= 25" class="abnormal">(Equivocal)</span>
+                        <span x-show="rfac < 25" class="abnormal">(Low)</span>
+                        <span x-show="rfac >= 32" class="normal">(Normal)</span>
+                        <span x-show="rfac < 32 && rfac >= 25" class="abnormal">(Equivocal)</span>
                         <span style="font-size: 0.8em; color: #666;" x-text="` (ref >25)`"></span>
                     </span>
                 </div>
@@ -1200,7 +1200,7 @@
                 </div>
         
                 <div class="result-row" x-show="lvidd2" >
-                    <span><strong>LVEI</strong></span>
+                    <span><strong>LVEI</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvei')"></i></span>
                     <span>
                         <span style="font-weight: bold; color: var(--text-main);" x-text="lvei"></span>
                         <span x-show="lveiAssessment?.active" :class="lveiAssessment?.class" x-text="' (' + lveiAssessment?.label + ')'"></span>
@@ -1226,7 +1226,7 @@
                     </span>
                 </div>
                 <div class="result-row" x-show="mpaAo" >
-                    <span><strong>MPA:Ao</strong></span>
+                    <span><strong>MPA:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mpaAo')"></i></span>
                     <span>
                         <span x-text="mpaAo"></span> 
                         <span x-show="parseFloat(mpaAo) > 1.1" class="abnormal">[Enlarged PA]</span>
@@ -1234,7 +1234,7 @@
                     </span>
                 </div>
                 <div class="result-row" x-show="eplar > 0">
-                    <span><strong>ePLAR</strong></span>
+                    <span><strong>ePLAR</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('eplar')"></i></span>
                     <span>
                         <span style="font-weight: bold; color: #1e3a8a;" x-text="eplar"></span>
                         <span x-show="eplar >= 0.28" class="abnormal" style="background: #eff6ff; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-left: 4px;">Pre-Capillary PH Pattern</span>
