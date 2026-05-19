@@ -962,20 +962,20 @@ parseRawText() {
         { key: 'lvidd2',   patterns: [/^\s*LVIDd2\b/i, /^\s*LVIDd\s+perp\b/i] },
 
         // LEFT ATRIUM
-        { key: 'lad',      patterns: [/^LAD\b/i, /^LA\s+long\s+axis\b/i, /^LA\s+LAx\b/i] },
-        { key: 'la',       patterns: [/^LA\s+Diam\b/i, /^LA\s+s[- ]?ax\b/i, /^LA\s+short\b/i, /^LA\s*\(s\)\b/i] },
-        { key: 'ao',       patterns: [/^Ao\s+Diam\b/i, /^Ao\s+Root\b/i, /^Aorta\b/i, /^Ao\b/i] },
+        { key: 'lad',      patterns: [/^\s*LAD\b/i, /^\s*LA\s+long\s+axis\b/i, /^\s*LA\s+LAx\b/i] },
+        { key: 'la',       patterns: [/^\s*LA\s+Diam\b/i, /^\s*LA\s+s[- ]?ax\b/i, /^\s*LA\s+short\b/i, /^\s*LA\s*\(s\)\b/i] },
+        { key: 'ao',       patterns: [/^\s*Ao\s+Diam\b/i, /^\s*Ao\s+Root\b/i, /^\s*Aorta\b/i, /^\s*Ao\b/i] },
 
         // VOLUMETRICS
-        { key: 'lvedv',    patterns: [/^LVEDV\s+MOD\b/i, /^LVEDV\b/i, /^EDV\b/i] },
-        { key: 'lvesv',    patterns: [/^LVESV\s+MOD\b/i, /^LVESV\b/i, /^ESV\b/i] },
+        { key: 'lvedv',    patterns: [/^\s*LVEDV\s+MOD\b/i, /^\s*LVEDV\b/i, /^\s*EDV\b/i] },
+        { key: 'lvesv',    patterns: [/^\s*LVESV\s+MOD\b/i, /^\s*LVESV\b/i, /^\s*ESV\b/i] },
 
         // DOPPLER
-        { key: 'eVel',     patterns: [/^MV\s+E\s+Vel\b/i, /^MV\s+E\s+Vmax\b/i, /^E\s+wave\b/i, /^E\s+vel\b/i, /^E\s+peak\b/i, /^MV\s+E\b/i] },
-        { key: 'aVel',     patterns: [/^MV\s+A\s+Vel\b/i, /^MV\s+A\s+Vmax\b/i, /^A\s+wave\b/i, /^A\s+vel\b/i, /^A\s+peak\b/i, /^MV\s+A\b/i] },
-        { key: 'ivrt',     patterns: [/^IVRT\b/i] },
-        { key: 'mdt',      patterns: [/^MV\s+DecT\b/i, /^DecT\b/i, /^MDT\b/i, /^E\s+wave\s+DT\b/i, /^E\s+DT\b/i, /^MV\s+DT\b/i] },
-        { key: 'ePrime',   patterns: [/^MV\s+E'\b/i, /^E'\b/i, /^E\s+prime\b/i, /^Mitral\s+E'\b/i, /^Lat\s+E'\b/i, /^Sep\s+E'\b/i, /^Medial\s+E'\b/i] },
+        { key: 'eVel',     patterns: [/^\s*MV\s+E\s+Vel\b/i, /^\s*MV\s+E\s+Vmax\b/i, /^\s*E\s+wave\b/i, /^\s*E\s+vel\b/i, /^\s*E\s+peak\b/i, /^\s*MV\s+E\b/i] },
+        { key: 'aVel',     patterns: [/^\s*MV\s+A\s+Vel\b/i, /^\s*MV\s+A\s+Vmax\b/i, /^\s*A\s+wave\b/i, /^\s*A\s+vel\b/i, /^\s*A\s+peak\b/i, /^\s*MV\s+A\b/i] },
+        { key: 'ivrt',     patterns: [/^\s*IVRT\b/i] },
+        { key: 'mdt',      patterns: [/^\s*MV\s+DecT\b/i, /^\s*DecT\b/i, /^\s*MDT\b/i, /^\s*E\s+wave\s+DT\b/i, /^\s*E\s+DT\b/i, /^\s*MV\s+DT\b/i] },
+        { key: 'ePrime',   patterns: [/^\s*MV\s+E'\b/i, /^\s*E'\b/i, /^\s*E\s+prime\b/i, /^\s*Mitral\s+E'\b/i, /^\s*Lat\s+E'\b/i, /^\s*Sep\s+E'\b/i, /^\s*Medial\s+E'\b/i] },
 
         // OUTFLOW TRACTS
         { key: 'lvotd',    patterns: [/^LVOT\s+Diam\b/i, /^LVOTd\b/i, /^LVOT\s+d\b/i, /^LVOT\s+diameter\b/i] },
