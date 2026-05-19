@@ -947,12 +947,10 @@ parseRawText() {
 
     let matchCount = 0;
     const lines = this.rawEchoText.split(/\r?\n/);
+    const filled = new Set();
 
-    // --- EXTRACTION MAP ---
-    // Each entry: { key: stateVariable, patterns: [regex for label column] }
-    // Order matters for ambiguous labels — put more specific patterns first.
-  
-const extractionMap = [
+    // --- 1. THE EXTRACTION MAP ---
+    const extractionMap = [
     // PATIENT
     { key: 'weight',  patterns: [/\bweight\b/i, /\bwt\b/i, /\bbody\s+wt\b/i, /\bbody\s+weight\b/i] },
 
@@ -1002,42 +1000,36 @@ const extractionMap = [
     { key: 'rpamin',  patterns: [/\brpa\s+min\b/i, /\brpa\s+d\b/i, /\brpa\s+diastole\b/i] },
     { key: 'rpamax',  patterns: [/\brpa\s+max\b/i, /\brpa\s+s\b/i, /\brpa\s+systole\b/i] },
 ];
-
-    // --- SKIP LIST: label fragments that indicate a calculated ratio or index ---
-    // If the label column matches any of these, skip the line entirely.
-    const skipPatterns = [
-        /ratio/i, /[:,/]/,       // explicit ratio labels or separator chars in label
-        /RPLA/i,                  // normalized-by-BW variants
-        /\/BW/i, /\/Ao/i, /\/kg/i, /\/m/i,
-        /N\s*\(/i,               // e.g. "LADN (< 1.730)"
-        /\bDDN\b/i, /\bDSN\b/i, // LVD normalized labels
-        /\bEF\b/i, /\bFS\b/i, /\bFAC\b/i, /\bRWT\b/i,  // derived indices
-        /\bNorm\b/i, /\bnLA\b/i,
-        /Cornell/i, /2D/i,       // composite labels like "LVDDN 2D" or "LVDDN (Cornell)"
-        /\bN\b.*[<>]/,           // anything with N followed by a reference bracket
-        /^(Referral|Chambers|Valves|Additional|Interpretation)/i,
+// --- 2. INTELLIGENT LABEL-ONLY SKIP LIST ---
+    // These indicate calculated values/headers inside the label section specifically.
+    const skipLabelPatterns = [
+        /ratio/i, /RPLA/i, /\bDDN\b/i, /\bDSN\b/i, /\bEF\b/i, /\bFS\b/i, /\bFAC\b/i, 
+        /\bRWT\b/i, /\bNorm\b/i, /\bnLA\b/i, /Cornell/i, /2D/i,
+        /^(Referral|Chambers|Valves|Additional|Interpretation|Name|Age|Date)/i
     ];
 
-    // --- FIRST-MATCH WINS SET: once a key is filled, ignore subsequent lines ---
-    const filled = new Set();
-
-for (const line of lines) {
+    // --- 3. THE PARSING ENGINE LOOP ---
+    for (const line of lines) {
         const trimmedLine = line.trim();
         if (!trimmedLine) continue;
-
-        // Apply Garbage Skip filter
-        if (skipPatterns.some(p => p.test(trimmedLine))) continue;
 
         for (const rule of extractionMap) {
             for (const pattern of rule.patterns) {
                 if (pattern.test(trimmedLine)) {
                     const matchObj = trimmedLine.match(pattern);
                     if (matchObj) {
-                        // Calculate where the label string finishes on this row
-                        const index = trimmedLine.indexOf(matchObj[0]) + matchObj[0].length;
-                        const remainder = trimmedLine.substring(index);
+                        // Isolate the exact piece of text matched as the label column
+                        const labelSegment = trimmedLine.substring(0, trimmedLine.indexOf(matchObj[0]) + matchObj[0].length);
                         
-                        // Grab the true mathematical numerical sequence immediately following
+                        // FIX: Explicitly check for an inline ratio syntax inside the label segment BEFORE jumping to values
+                        if (labelSegment.includes(':') || labelSegment.includes('/') || skipLabelPatterns.some(p => p.test(labelSegment))) {
+                            continue; 
+                        }
+
+                        // Pull out the remaining text on the right side of the row
+                        const remainder = trimmedLine.substring(labelSegment.length);
+                        
+                        // Extract the primary raw value sequence
                         const numMatch = remainder.match(/-?[0-9]+(?:\.[0-9]+)?/);
 
                         if (numMatch) {
@@ -1058,29 +1050,15 @@ for (const line of lines) {
         }
     }
 
-    // Boolean check for D-shape / septal flattening in full text
+    // --- 4. TEXTUAL CLINICAL SCANNERS ---
     if (/\b(?:flattening|flattened|D-shape|D-shaped|D shape)\b/i.test(this.rawEchoText)) {
         this.ivsFlattening = true;
-        matchCount++;
     }
 
-    if (matchCount > 0) {
-        this.parseMessage = `Success: Auto-filled ${matchCount} parameters!`;
-        this.rawEchoText = '';
-        setTimeout(() => this.parseMessage = '', 4000);
-    } else {
-        this.parseMessage = 'Could not find recognizable measurements.';
-        setTimeout(() => this.parseMessage = '', 4000);
-    }
-},
-
-    exportToClipboard() {
-navigator.clipboard.writeText(this.generateReportText()).then(() => {
-this.copySuccess = true;
-setTimeout(() => { this.copySuccess = false; }, 2500);
-});
-}
-};
+    // --- 5. UI NOTIFICATION FEEDBACK ---
+    this.parseMessage = matchCount > 0 ? `Success: Auto-filled ${matchCount} parameters!` : 'No recognizable measurements found.';
+    this.rawEchoText = '';
+    setTimeout(() => this.parseMessage = '', 4000);
 }
 
 
