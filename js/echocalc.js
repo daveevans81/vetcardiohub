@@ -1430,7 +1430,7 @@ glossaryDatabase: {
     }
 },
 
-    exportToClipboard() {
+exportToClipboard() {
 navigator.clipboard.writeText(this.generateReportText()).then(() => {
 this.copySuccess = true;
 setTimeout(() => { this.copySuccess = false; }, 2500);
