@@ -972,6 +972,14 @@ shareReport() {
 parseRawText() {
     if (!this.rawEchoText) return;
 
+// Pre-seed the filled list with values already present in the calculator layout.
+// This ensures the parser won't overwrite things you've manually typed!
+for (const rule of extractionMap) {
+    if (this[rule.key] !== '' && this[rule.key] !== null && this[rule.key] !== undefined) {
+        filled.add(rule.key);
+    }
+}
+
     let matchCount = 0;
     const lines = this.rawEchoText.split(/\r?\n/);
     const filled = new Set();
@@ -1042,14 +1050,18 @@ parseRawText() {
         if (!trimmedLine) continue;
 
         for (const rule of extractionMap) {
+            // FIRST-MATCH SECURITY: If this variable key is already filled, 
+            // skip completely to prevent allometric calculations from overwriting it.
+            if (filled.has(rule.key)) continue;
+
             for (const pattern of rule.patterns) {
                 if (pattern.test(trimmedLine)) {
                     const matchObj = trimmedLine.match(pattern);
                     if (matchObj) {
-                        // Isolate the exact piece of text matched as the label column
+                        // Isolate the piece of text matched as the label column
                         const labelSegment = trimmedLine.substring(0, trimmedLine.indexOf(matchObj[0]) + matchObj[0].length);
                         
-                        // FIX: Explicitly check for an inline ratio syntax inside the label segment BEFORE jumping to values
+                        // Check for an inline ratio syntax inside the label segment specifically
                         if (labelSegment.includes(':') || labelSegment.includes('/') || skipLabelPatterns.some(p => p.test(labelSegment))) {
                             continue; 
                         }
@@ -1065,11 +1077,9 @@ parseRawText() {
                             
                             if (!isNaN(numericValue)) {
                                 this[rule.key] = numericValue;
-                                
-                                if (!filled.has(rule.key)) {
-                                    filled.add(rule.key);
-                                    matchCount++;
-                                }
+                                filled.add(rule.key); // Lock the key permanently for this session
+                                matchCount++;
+                                break; // Break out of pattern loop for this rule
                             }
                         }
                     }
