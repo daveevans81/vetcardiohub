@@ -155,6 +155,14 @@ function advancedEchoSuite() {
         if(!this.mpamin || !this.ao || parseFloat(this.ao) === 0) return 0;
         return (this.mpamin / this.ao).toFixed(2);
     },
+    get rvedan() {
+        if(!this.weight || ! this.rveda) return 0;
+        return ((this.rveda) / Math.pow(this.weight, 0.665)).toFixed(2);
+    },
+    get rvesan() {
+        if(!this.weight || ! this.rvesa) return 0;
+        return ((this.rvesa) / Math.pow(this.weight, 0.695)).toFixed(2);
+    },
     get rfac() {
         if(!this.rveda || !this.rvesa || parseFloat(this.rveda) === 0) return 0;
         return (((this.rveda - this.rvesa) / this.rveda) * 100).toFixed(1);
@@ -167,7 +175,10 @@ function advancedEchoSuite() {
     if (!this.prMax || parseFloat(this.prMax) === 0) return 0;
     return parseFloat((Math.pow(this.prMax, 2) * 4).toFixed(2));
     },
-
+    get tapsen() {
+        if(!this.weight || !this.tapse) return 0;
+        return ((this.tapse) / Math.pow(this.weight, 0.309)).toFixed(2);
+    },
     get mrVol() {
     // Requires both total stroke volume and systemic stroke volume (Qs)
     if (!this.sv || !this.qs) return 0;
@@ -1101,6 +1112,12 @@ glossaryDatabase: {
         method: "Place the M-mode cursor directly through the lateral aspect of the tricuspid valve annulus. Measure the total vertical displacement from end-diastole (lowest point) to peak systole (highest point).",
         imgPlaceholder: "/images/tapse-reference.jpg"
     },
+    tapsen: {
+        title: "TAPSEn (Tricuspid Annular Plane Systolic Excursion - Normalised)",
+        view: "Left Apical 4-Chamber (RV Optimized)",
+        description: "Assesses longitudinal right ventricular systolic function - normalised for body weight.",
+        method: "Measure TAPSE as the vertical displacement of the tricuspid valve annulus, then normalised to body weight. Calculated as: (TAPSE in mm) / (Body Weight in kg)^0.285. A value < 4.5 is a primary criteria for right ventricular systolic dysfunction"
+    },
     rvwt: {
         title: "RVWT (Right Ventricular Wall Thickness)",
         view: "Right Parasternal Long or Short Axis",
@@ -1114,6 +1131,18 @@ glossaryDatabase: {
         description: "Quantifies global right ventricular dilation.",
         method: "Trace the endocardial border of the RV at end-diastole (maximum volume). Exclude the trabeculae and papillary muscles from the trace line. Close the trace flat across the tricuspid annulus.",
         imgPlaceholder: "/images/rveda-reference.jpg"
+    },
+    rvesan: {
+        title: "RVESAn (RV End-Systolic Area - Normalised)",
+        view: "Left Apical 4-Chamber (RV Optimized)",
+        description: "Quantifies RV systolic failure and volume retention - normalised for body weight.",
+        method: "Trace the endocardial border at end-systole (minimum volume), then normalised to body weight. Calculated as: (RVESA in cm2) / (Body Weight in kg)^0.695. A value > 1.2 is a primary criteria for right ventricular systolic dysfunction"
+    },
+    rvedan: {
+        title: "RVEDAn (RV End-Diastolic Area - Normalised)",
+        view: "Left Apical 4-Chamber (RV Optimized)",
+        description: "Quantifies global right ventricular dilation - normalised for body weight.",
+        method: "Trace the endocardial border at end-systole (minimum volume), then normalised to body weight. Calculated as: (RVEDA in cm2) / (Body Weight in kg)^0.665. A value > 1.4 is a primary criteria for right ventricular dilation"
     },
     rvesa: {
         title: "RVESA (RV End-Systolic Area)",

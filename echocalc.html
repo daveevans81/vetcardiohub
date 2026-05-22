@@ -1136,7 +1136,15 @@
                         <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.tapse?.available" x-text="' (ref ' + rightAllometricResults.tapse.min + '-' + rightAllometricResults.tapse.max + ')'"></span>
                     </span>
                 </div>
-        
+                 <div class="result-row" x-show="tapsen">
+                    <span><strong>TAPSEn</strong></span>
+                    <span>
+                        <span x-text="tapsen"></span> 
+                     <span x-show="tapsen < 4.5" class="abnormal">(Low)</span>
+                    <span x-show="tapsen >= 4.5" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref >4.5)`"></span>
+                    </span>
+                </div>       
                 <div class="result-row" x-show="rvwt">
                     <span><strong>RVWT</strong></span>
                     <span>
@@ -1158,7 +1166,15 @@
                         <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.rveda?.available" x-text="' (ref ' + rightAllometricResults.rveda.min + '-' + rightAllometricResults.rveda.max + ')'"></span>
                     </span>
                 </div>
-        
+                <div class="result-row" x-show="rvedan">
+                    <span><strong>RVEDAn</strong></span>
+                    <span>
+                        <span x-text="rvedan"></span>
+                     <span x-show="rvedan > 1.4" class="abnormal">(High)</span>
+                    <span x-show="rvedan <= 1.4" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref <1.4)`"></span>
+                    </span>
+                </div>     
                 <div class="result-row" x-show="rvesa">
                     <span><strong>RVESA</strong></span>
                     <span>
@@ -1169,6 +1185,15 @@
                         <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.rvesa?.available" x-text="' (ref ' + rightAllometricResults.rvesa.min + '-' + rightAllometricResults.rvesa.max + ')'"></span>
                     </span>
                 </div>
+                <div class="result-row" x-show="rvesan">
+                    <span><strong>RVESAn</strong></span>
+                    <span>
+                        <span x-text="rvesan"></span>
+                     <span x-show="rvesan > 1.2" class="abnormal">(High)</span>
+                    <span x-show="rvesan <= 1.2" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref <1.2)`"></span>
+                    </span>
+                </div>  
                 <div class="result-row" x-show="rfac">
                     <span><strong>RV FAC</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rfac')"></i></span>
                     <span>
