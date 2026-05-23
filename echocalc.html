@@ -248,7 +248,7 @@
                   <div class="measurements">
 
                     <p style="color: #666; font-size: 0.9em;">Enter measurements in <strong>mm</strong> and weight in <strong>kg</strong>.</p>
-                      <button @click="weight = ''; lvidd = ''; lvids = ''; la = ''; ao = ''; lad = ''; lvpwd = ''; lvedv = ''; lvesv = ''; ivsd: ''; clinicalComments: '';
+                      <button @click="weight = ''; lvidd = ''; lvids = ''; la = ''; ao = ''; aola = ''; lad = ''; lvpwd = ''; lvedv = ''; lvesv = ''; ivsd: ''; clinicalComments: '';
     eVel: '';
     aVel: '';
     ivrt: '';
@@ -268,6 +268,7 @@
     rvd1: '';
     rvd2: '';
     rad: '';
+        rad2: '';
     prMax: '';
     mpamin: ''; 
     rpamin: '';  
@@ -368,8 +369,8 @@
                         </template>
                       </div>
                     </div>
-
-                    <div class="input-group">
+                   <div style="display: flex; gap: 15px;">
+                    <div class="input-group" style="flex: 1;">
                       <label class="input-label">LA Long Axis (LAD) (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lad')"></i></label>
                       <input type="number" step="0.1" x-model="lad" placeholder="e.g. 20" :class="{ 'input-warning': lad > 0 && lad < 8, 'input-error': lad > 100 }">
                       <template x-if="lad > 0 && lad < 8">
@@ -378,6 +379,17 @@
                       <template x-if="lad > 100">
                         <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
                       </template>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label class="input-label">Ao D - Long Axis (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('aola')"></i></label>
+                        <input type="number" step="0.01" x-model="aola" placeholder="e.g. 15" :class="{ 'input-warning': aola > 0 && aola < 4, 'input-error': aola > 100 }">
+                        <template x-if="aola > 0 && aola < 4">
+                          <div class="warning-text">⚠️ Is this in cm? Convert to mm.</div>
+                        </template>
+                        <template x-if="aola > 100">
+                          <div class="warning-text" style="color: #ef4444;">⚠️ Value seems too high for mm.</div>
+                        </template>
+                      </div>
                     </div>
 
                     <!-- ACCORDION: SPECTRAL DOPPLER -->
@@ -582,10 +594,16 @@
                               </div>
                         
                               <div class="input-group" style="flex: 1;">
-                                <label  class="input-label">RA Diameter (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rad')"></i></label>
+                                <label  class="input-label">RAD Ap4Ch (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rad')"></i></label>
                                 <input type="number" step="0.1" x-model="rad" placeholder="e.g. 22.4" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rad > 0 && rad < 3, 'input-error': rad > 90 }">
                                 <template x-if="rad > 0 && rad < 3"><div class="warning-text">⚠️ Value too small for mm size.</div></template>
                                 <template x-if="rad > 90"><div class="warning-text" style="color: #ef4444;">⚠️ Exceeds standard atrial limits.</div></template>
+                              </div>
+                              <div class="input-group" style="flex: 1;">
+                                <label  class="input-label">RAD RPLA (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rad2')"></i></label>
+                                <input type="number" step="0.1" x-model="rad2" placeholder="e.g. 22.4" style="width:100%; padding: 8px; border-radius:4px; border:1px solid #cbd5e1;" :class="{ 'input-warning': rad2 > 0 && rad2 < 3, 'input-error': rad2 > 90 }">
+                                <template x-if="rad2 > 0 && rad2 < 3"><div class="warning-text">⚠️ Value too small for mm size.</div></template>
+                                <template x-if="rad2 > 90"><div class="warning-text" style="color: #ef4444;">⚠️ Exceeds standard atrial limits.</div></template>
                               </div>
                               <div class="input-group" style="flex: 1; ">
                                 <label  class="input-label">LVIDd perp. (mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvidd2')"></i></label>

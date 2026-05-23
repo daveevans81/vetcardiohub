@@ -607,28 +607,20 @@ const diastolicRules = {
 
 // --- Right Heart Allometric Models ---
 const rightHeartModels = {
-    visser_2015: {
-        label: "Visser (2015) AP4Ch Allometric Cohort",
-        species: "Canine",
-        params: {
-            tapse: { a: 4.12, b: 0.331, see: 1.15 }, // TAPSE scaling parameters
-            rveda: { a: 0.145, b: 0.612, see: 0.08 }, // End-Diastolic Area scaling
-            rvesa: { a: 0.072, b: 0.598, see: 0.04 }, // End-Systolic Area scaling
-            rvd1:  { a: 0.85,  b: 0.312, see: 0.21 },  // Basal diameter
-            rpamin: { a: 3.0, b: 0.364 }
-        }
-    },
-    gentile_solomon_2022: {
+
+    gentile_solomon_2016: {
         label: "Gentile-Solomon Functional Metrics",
         species: "Canine",
+        PMID: 27453517,
         params: {
             tapse: { a: 3.98, b: 0.352, see: 1.08 },
             rvwt:  { a: 0.22, b: 0.284, see: 0.05 }
         }
     },
-    feldhutter_2024: {
-        label: "Feldhutter (2024) 3D & Functional Model",
+    feldhutter_2022: {
+        label: "Feldhutter (2022) 3D & Functional Model",
         species: "Canine",
+        PMID: 34874066,
         params: {
             rveda:    { type: 'log_direct', a: -0.004, b: 0.665, see: 0.094 }, 
             rvesa:    { type: 'log_direct', a: -0.296, b: 0.695, see: 0.126 },

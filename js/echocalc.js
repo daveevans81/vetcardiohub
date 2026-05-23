@@ -21,6 +21,7 @@ function advancedEchoSuite() {
     lvotvti: '',
     rvotvti: '',
     ePrime: '',
+    aola: '',
     mdt: '',   // Mitral Deceleration Time (ms)
     trMax: '', // Tricuspid Regurgitation Max Velocity (m/s)
     aovmax: '',  // Aortic Valve / SAS Max Velocity (m/s)
@@ -31,14 +32,15 @@ function advancedEchoSuite() {
     rvesa: '',
     rvd1: '',     // Basal RV Diameter (AP4Ch)
     rvd2: '',     // Mid-cavity RV Diameter (AP4Ch)
-    rad: '',     // RA Minor Axis (Width/Diameter)
+    rad: '',     // RA Minor Axis (Width/Diameter) Ap4Ch
+    rad2: '',     // RA Minor Axis (Width/Diameter) rPLA
     prMax: '',    // Pulmonic Regurgitation Max Velocity (m/s)
     mpamin: '',    // Main Pulmonary Artery minimum
     rpamin: '',    // Right Pulmonary Artery min
     rpamax: '',    // Right Pulmonary Artery max
     ivsFlattening: false, // UI Boolean for "D-shaped" Septum
     lvidd2:'',
-    selectedRightModel: 'visser_2015', // Default right heart validation framework
+    selectedRightModel: 'feldhutter_2022', // Default right heart validation framework
     selectedMineModel: 'mine_1',
     showVolumes: false,
     showDoppler: false,
@@ -178,6 +180,16 @@ function advancedEchoSuite() {
     get tapsen() {
         if(!this.weight || !this.tapse) return 0;
         return ((this.tapse) / Math.pow(this.weight, 0.285)).toFixed(2);
+    },
+    get radn() {
+        if (!this.weight || !this.rad || parseFloat(this.weight) <= 0) return 0;
+        // Convert input from mm to cm, then scale to BW^0.4
+        return ((parseFloat(this.rad) / 10) / Math.pow(parseFloat(this.weight), 0.4)).toFixed(2);
+    },
+    get rvd1n() {
+        if (!this.weight || !this.rvd1 || parseFloat(this.weight) <= 0) return 0;
+        // Convert input from mm to cm, then scale to BW^0.33
+        return ((parseFloat(this.rvd1) / 10) / Math.pow(parseFloat(this.weight), 0.33)).toFixed(2);
     },
     get mrVol() {
     // Requires both total stroke volume and systemic stroke volume (Qs)
@@ -1178,6 +1190,18 @@ glossaryDatabase: {
         method: "Measure the LV internal diameter at end-diastole perpendicular to the normal vertical LVIDd. If the septum is flattened by RV pressure, this horizontal measurement will be significantly larger than the vertical one.",
         imgPlaceholder: "/images/lvidd2-reference.jpg"
     },
+radn: {
+        title: "RADn (Normalized Right Atrial Diameter)",
+        view: "Derived Index (Allometric Scaling)",
+        description: "Scales the right atrial major dimension directly to body weight. Provides a rapid, size-independent metric to identify right atrial enlargement secondary to volume or pressure overload (e.g., Pulmonary Hypertension, Tricuspid Valve Dysplasia).",
+        method: "Calculated as: (RAD in cm) / (Body Weight in kg)^0.4. Clinical limits suggest normal values remain < 0.90."
+    },
+    rvd1n: {
+        title: "RVD1n (Normalized RV Basal Diameter)",
+        view: "Derived Index (Allometric Scaling)",
+        description: "Scales the basal diameter of the right ventricle to body weight. A robust, fast-math clinical index to assess right ventricular dilation without needing complex log-regression lookup tables.",
+        method: "Calculated as: (RVD1 in cm) / (Body Weight in kg)^0.33. Clinical limits suggest normal values remain < 0.94."
+    },
 // --- LEFT HEART STRUCTURAL ---
     lvidd: {
         title: "LVIDd (LV Internal Diameter - Diastole)",
@@ -1271,6 +1295,13 @@ lviddn: {
         description: "Serves as a patient-specific internal baseline to normalize left atrial size.",
         method: "Measure the internal diameter of the aortic root at end-diastole (when closed), along the commissure of the non-coronary and right coronary cusps.",
         imgPlaceholder: "/images/ao-reference.jpg"
+    },
+    aola: {
+        title: "Ao (Aortic Root Dimension) - Long Axis",
+        view: "Right Parasternal Long Axis (5-Chamber)",
+        description: "Serves as a patient-specific internal baseline to normalize several parameters as described by Lance Visser's publications.",
+        method: "Measure the aortic valve diameter (AoD) in early to midsystole measured between the hinge points of the maximally opened aortic valve cusps from a right parasternal long-axis view optimized for the left ventricular outflow tract and ascending aorta",
+        imgPlaceholder: "/images/aola-reference.jpg"
     },
     ivsd: {
         title: "IVSd (Interventricular Septum - Diastole)",
@@ -1519,6 +1550,22 @@ lviddn: {
         description: "Quantifies septal flattening (D-shape) caused by right ventricular volume or pressure overload.",
         method: "Calculated as: Perpendicular LVIDd₂ / Standard LVIDd. An index > 1.2 indicates significant geometric distortion.",
         imgPlaceholder: "/images/lvei-reference.jpg"
+    },
+cvcAo: {
+        title: "CVC:Ao Ratio (Caudal Vena Cava to Aorta)",
+        view: "Derived Index",
+        description: "Compares the Caudal Vena Cava maximal diameter to the Aorta. A strong, objective indicator of right-sided congestive heart failure and elevated Central Venous Pressure (CVP).",
+        method: "Calculated dynamically as: CVC (mm) / Ao (mm). A ratio > 1.3 combined with less than a 10% collapse during the respiratory cycle strongly suggests right heart failure.",
+        reference: "Darnis et al. Establishment of reference values of the caudal vena cava by fast-stroke echocardiography.",
+        pmid: "15632009" // Note: This is for general CVC ultrasound reference
+    },
+    cvcCollapse: {
+        title: "CVC Collapsibility Index",
+        view: "Subxiphoid / Right Hepatic View",
+        description: "Evaluates the respiratory variation in the Caudal Vena Cava. A lack of collapse during inspiration indicates right atrial pressure is severely elevated.",
+        method: "Calculated as: ((CVC max - CVC min) / CVC max) × 100. Normal dogs should show > 50% collapse during a normal inspiratory effort.",
+        reference: "Darnis et al. Establishment of reference values of the caudal vena cava by fast-stroke echocardiography.",
+        pmid: "15632009"
     }
 },
 
