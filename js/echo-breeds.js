@@ -627,11 +627,19 @@ const rightHeartModels = {
         }
     },
     feldhutter_2024: {
-        label: "Feldhutter Right-Sided Verification Model",
+        label: "Feldhutter (2024) 3D & Functional Model",
         species: "Canine",
         params: {
-            rad:   { a: 1.12, b: 0.341, see: 0.18 }, // Right Atrial scaling
-            rvd1:  { a: 0.92, b: 0.298, see: 0.19 }
+            rveda:    { type: 'log_direct', a: -0.004, b: 0.665, see: 0.094 }, 
+            rvesa:    { type: 'log_direct', a: -0.296, b: 0.695, see: 0.126 },
+            tapse:    { type: 'log_direct', a: 0.790,  b: 0.285, see: 0.087 },
+            rvedv:    { type: 'log_direct', a: 0.235,  b: 0.942, see: 0.109 }, 
+            rvesv:    { type: 'log_direct', a: -0.095, b: 0.962, see: 0.118 }, 
+            rvSPrime: { type: 'log_direct', a: -1.076, b: 0.186, see: 0.113 },
+            
+            // Retained from your previous block (linear models)
+            rad:      { a: 1.12, b: 0.341, see: 0.18 }, 
+            rvd1:     { a: 0.92, b: 0.298, see: 0.19 }
         }
     }
 };
