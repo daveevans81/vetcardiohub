@@ -1292,7 +1292,7 @@ glossaryDatabase: {
         method: "Calculated as: RVOTd (PA) / Aorta.",
         reference: "Sankisov et al. Echocardiographic reference intervals for right heart indices normalized to aortic diameter in healthy dogs.",
         pmid: "39350563"
-    }
+    },
 
 
     lvidd2: {
