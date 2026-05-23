@@ -177,7 +177,7 @@ function advancedEchoSuite() {
     },
     get tapsen() {
         if(!this.weight || !this.tapse) return 0;
-        return ((this.tapse) / Math.pow(this.weight, 0.309)).toFixed(2);
+        return ((this.tapse) / Math.pow(this.weight, 0.285)).toFixed(2);
     },
     get mrVol() {
     // Requires both total stroke volume and systemic stroke volume (Qs)
@@ -1117,8 +1117,8 @@ glossaryDatabase: {
         view: "Left Apical 4-Chamber (RV Optimized)",
         description: "Assesses longitudinal right ventricular systolic function - normalised for body weight.",
         method: "Measure TAPSE as the vertical displacement of the tricuspid valve annulus, then normalised to body weight. Calculated as: (TAPSE in mm) / (Body Weight in kg)^0.285. A value < 4.5 is a primary criteria for right ventricular systolic dysfunction",
-        reference: "Feldhütter et al. Right ventricular size and function evaluated by various echocardiographic indices in dogs with pulmonary hypertension.",
-        pmid: "36168939"
+        reference: "Feldhütter et al. Echocardiographic reference intervals for right ventricular indices, including 3‐dimensional volume and 2‐dimensional strain measurements in healthy dogs",
+        pmid: "34874066"
     },
     rvwt: {
         title: "RVWT (Right Ventricular Wall Thickness)",
@@ -1138,17 +1138,17 @@ glossaryDatabase: {
         title: "RVESAn (RV End-Systolic Area - Normalised)",
         view: "Left Apical 4-Chamber (RV Optimized)",
         description: "Quantifies RV systolic failure and volume retention - normalised for body weight.",
-        method: "Trace the endocardial border at end-systole (minimum volume), then normalised to body weight. Calculated as: (RVESA in cm2) / (Body Weight in kg)^0.695. A value > 1.2 is a primary criteria for right ventricular systolic dysfunction",
-        reference: "Feldhütter et al. Right ventricular size and function evaluated by various echocardiographic indices in dogs with pulmonary hypertension.",
-        pmid: "36168939"
+        method: "Trace the endocardial border at end-systole (minimum volume), then normalised to body weight. Calculated as: (RVESA in cm2) / (Body Weight in kg)^0.695. A value > 0.8 is a primary criteria for right ventricular systolic dysfunction",
+        reference: "Feldhütter et al. Echocardiographic reference intervals for right ventricular indices, including 3‐dimensional volume and 2‐dimensional strain measurements in healthy dogs",
+        pmid: "34874066"
     },
     rvedan: {
         title: "RVEDAn (RV End-Diastolic Area - Normalised)",
         view: "Left Apical 4-Chamber (RV Optimized)",
         description: "Quantifies global right ventricular dilation - normalised for body weight.",
         method: "Trace the endocardial border at end-systole (minimum volume), then normalised to body weight. Calculated as: (RVEDA in cm2) / (Body Weight in kg)^0.665. A value > 1.4 is a primary criteria for right ventricular dilation",
-        reference: "Feldhütter et al. Right ventricular size and function evaluated by various echocardiographic indices in dogs with pulmonary hypertension.",
-        pmid: "36168939"
+        reference: "Feldhütter et al. Echocardiographic reference intervals for right ventricular indices, including 3‐dimensional volume and 2‐dimensional strain measurements in healthy dogs",
+        pmid: "34874066"
     },
     rvesa: {
         title: "RVESA (RV End-Systolic Area)",
