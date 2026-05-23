@@ -100,8 +100,12 @@ function advancedEchoSuite() {
         return ((2 * this.lvpwd) / this.lvidd).toFixed(2);
     },
     get ladao() {
-        if(!this.la || !this.lad || !this.ao || parseFloat(this.ao) === 0) return 0;
+        if(!this.lad || !this.ao || parseFloat(this.ao) === 0) return 0;
         return (this.lad / this.ao).toFixed(3);
+    },
+    get ladaola() {
+        if(!this.lad || !this.aola || parseFloat(this.aola) === 0) return 0;
+        return (this.lad / this.aola).toFixed(3);
     },
     get bsa() {
         if (!this.weight || parseFloat(this.weight) <= 0) return 0;
@@ -181,6 +185,10 @@ function advancedEchoSuite() {
         if(!this.weight || !this.tapse) return 0;
         return ((this.tapse) / Math.pow(this.weight, 0.285)).toFixed(2);
     },
+    get tapseaola() {
+        if(!this.tapse || !this.aola || parseFloat(this.aola) === 0) return 0;
+        return (this.tapse / this.aola).toFixed(3);
+    },
     get radn() {
         if (!this.weight || !this.rad || parseFloat(this.weight) <= 0) return 0;
         // Convert input from mm to cm, then scale to BW^0.4
@@ -190,6 +198,35 @@ function advancedEchoSuite() {
         if (!this.weight || !this.rvd1 || parseFloat(this.weight) <= 0) return 0;
         // Convert input from mm to cm, then scale to BW^0.33
         return ((parseFloat(this.rvd1) / 10) / Math.pow(parseFloat(this.weight), 0.33)).toFixed(2);
+    },
+    get rad2aola() {
+        if(!this.rad2 || !this.aola || parseFloat(this.aola) === 0) return 0;
+        return (this.rad2 / this.aola).toFixed(3);
+    },
+    get radaola() {
+        if(!this.rad || !this.aola || parseFloat(this.aola) === 0) return 0;
+        return (this.rad / this.aola).toFixed(3);
+    },
+    get rad2lad() {
+        if(!this.rad2 || !this.lad ||  parseFloat(this.lad) === 0) return 0;
+        return (this.rad2 / this.lad).toFixed(3);
+    },
+    get rvd1aola() {
+        if(!this.rvd1 || !this.aola || parseFloat(this.aola) === 0) return 0;
+        return (this.rvd1 / this.aola).toFixed(3);
+    },
+    get rvwtaola() {
+        if(!this.rvwt || !this.aola || parseFloat(this.aola) === 0) return 0;
+        return (this.rvwt / this.aola).toFixed(3);
+    },
+    get rvwtlvpwd() {
+        if(!this.rvwt || !this.lvpwd || parseFloat(this.lvpwd) === 0) return 0;
+        return (this.rvwt / this.lvpwd).toFixed(3);
+    },
+   
+    get paaola() {
+        if(!this.rvotd || !this.aola || parseFloat(this.aola) === 0) return 0;
+        return (this.rvotd / this.aola).toFixed(3);
     },
     get mrVol() {
     // Requires both total stroke volume and systemic stroke volume (Qs)
@@ -1177,12 +1214,87 @@ glossaryDatabase: {
         imgPlaceholder: "/images/rvd1-reference.jpg"
     },
     rad: {
-        title: "RAD (Right Atrial Diameter)",
-        view: "Left Apical 4-Chamber",
+        title: "RAD (Right Atrial Diameter - Apical 4 Chamber View)",
+        view: "Left Apical 4-Chamber - optimised to see right heart",
         description: "Evaluates right atrial dilation secondary to volume/pressure overload.",
         method: "Measure the maximal right atrial major dimension (base to apex) at end-systole (when the atrium is maximally full), parallel to the interatrial septum.",
         imgPlaceholder: "/images/rad-reference.jpg"
     },
+    rad2: {
+        title: "RAD RPLA (Right Atrial Diameter - Right Parasternal Long Axis view)",
+        view: "Right Parasternal Long Axis view - optimised to see right heart",
+        description: "Evaluates right atrial dilation secondary to volume/pressure overload.",
+        method: "Measure the maximal right atrial major dimension (base to apex) at end-systole (when the atrium is maximally full), parallel to the interatrial septum.",
+        imgPlaceholder: "/images/rad2-reference.jpg"
+    },
+
+// --- INTERNAL SCALAR INDICES (SANKISOV 2024) ---
+    tapseaola: {
+        title: "TAPSE:Ao Ratio",
+        view: "Derived Index",
+        description: "Evaluates right ventricular longitudinal systolic function normalized to the patient's internal aortic dimension, bypassing the need for body-weight scaling.",
+        method: "Calculated as: TAPSE / Aorta.",
+        reference: "Sankisov et al. Echocardiographic reference intervals for right heart indices normalized to aortic diameter in healthy dogs.",
+        pmid: "39350563"
+    },
+    radaola: {
+        title: "RAD:Ao Ratio (RA Major Axis)",
+        view: "Derived Index",
+        description: "Indexes the maximal (longitudinal) right atrial diameter to the aortic root. A rapid, body-weight-independent marker for right atrial dilation.",
+        method: "Calculated as: RAD / Aorta.",
+        reference: "Sankisov et al. Echocardiographic reference intervals for right heart indices normalized to aortic diameter in healthy dogs.",
+        pmid: "39350563"
+    },
+    rad2aola: {
+        title: "RAD2:Ao Ratio (RA RPLA Axis)",
+        view: "Derived Index",
+        description: "Indexes the right atrial dimension to the aorta both measured in RPLA 4 chamber view. Evaluates lateral stretching of the right atrium secondary to pressure/volume overload.",
+        method: "Calculated as: RAD2  / Aorta.",
+        reference: "Sankisov et al. Echocardiographic reference intervals for right heart indices normalized to aortic diameter in healthy dogs.",
+        pmid: "39350563"
+    },
+    rad2lad: {
+        title: "RAD2:LAD Ratio (Right to Left Atrial Ratio)",
+        view: "Derived Index",
+        description: "Directly compares the size of the right atrium to the left atrium both measured in RPLA 4 chamber view. Highly useful for identifying asymmetrical right-sided volume overload (e.g., Tricuspid Regurgitation) versus generalized bi-atrial enlargement.",
+        method: "Calculated as: RAD2 (RA RPLA) / LAD (LA Dimension).",
+        reference: "Sankisov et al. Echocardiographic reference intervals for right heart indices normalized to aortic diameter in healthy dogs.",
+        pmid: "39350563"
+    },
+    rvd1aola: {
+        title: "RVD1:Ao Ratio (RV Basal Diameter)",
+        view: "Derived Index",
+        description: "Indexes the basal diameter of the right ventricle to the aortic root. A quick clinical surrogate for identifying RV dilation without regression tables.",
+        method: "Calculated as: RVD1 / Aorta.",
+        reference: "Sankisov et al. Echocardiographic reference intervals for right heart indices normalized to aortic diameter in healthy dogs.",
+        pmid: "39350563"
+    },
+    rvwtaola: {
+        title: "RVWT:Ao Ratio",
+        view: "Derived Index",
+        description: "Indexes right ventricular free wall thickness to the aortic dimension. Used to identify right-sided concentric hypertrophy (e.g., secondary to Pulmonic Stenosis or Pulmonary Hypertension).",
+        method: "Calculated as: RVWT / Aorta.",
+        reference: "Sankisov et al. Echocardiographic reference intervals for right heart indices normalized to aortic diameter in healthy dogs.",
+        pmid: "39350563"
+    },
+    rvwtlvpwd: {
+        title: "RVWT:LVPWd Ratio (Wall Thickness Ratio)",
+        view: "Derived Index",
+        description: "Directly compares the right ventricular free wall to the left ventricular free wall. The RV free wall is normally about 1/3 the thickness of the LV wall; an elevated ratio highlights disproportionate right-sided hypertrophy.",
+        method: "Calculated as: RVWT / LVPWd.",
+        reference: "Sankisov et al. Echocardiographic reference intervals for right heart indices normalized to aortic diameter in healthy dogs.",
+        pmid: "39350563"
+    },
+    paaola: {
+        title: "PA:Ao Ratio (Pulmonary Artery to Aorta)",
+        view: "Derived Index",
+        description: "Compares the size of the pulmonary outflow tract/artery directly to the aorta. Values > 1.0 strongly suggest pulmonary hypertension or post-stenotic dilation.",
+        method: "Calculated as: RVOTd (PA) / Aorta.",
+        reference: "Sankisov et al. Echocardiographic reference intervals for right heart indices normalized to aortic diameter in healthy dogs.",
+        pmid: "39350563"
+    }
+
+
     lvidd2: {
         title: "LVIDd₂ (Perpendicular Eccentricity)",
         view: "Right Parasternal Short Axis (Papillary Level)",
@@ -1247,7 +1359,13 @@ lviddn: {
     ladao: {
         title: "LAD:Ao Ratio (Long Axis to Aorta)",
         view: "Derived Index",
-        description: "Scales the long-axis (or apical) left atrial dimension to the aortic root. Aortic measurement is made in short axis for using these cut-offs. If measuring aorta in long axis view cut off is 2.4.",
+        description: "Scales the long-axis (or apical) left atrial dimension to the aortic root. Aortic measurement is made in short axis for using these cut-offs. If measuring aorta in short axis view cut off is 2.1.",
+        method: "Calculated dynamically as: LAD (mm) / Ao (mm)."
+    },
+    ladaola: {
+        title: "LAD:Ao Ratio (Long Axis to Aorta long axis)",
+        view: "Derived Index",
+        description: "Scales the long-axis (or apical) left atrial dimension to the aortic root measured in right parasternal long axis view. Aortic measurement is made in long axis 5 chamber view for using these cut-offs. If measuring aorta in long axis view cut off is 2.4.",
         method: "Calculated dynamically as: LAD (mm) / Ao (mm)."
     },
     RWT: { // Capitalized to match your exact state getter
@@ -1299,7 +1417,7 @@ lviddn: {
     aola: {
         title: "Ao (Aortic Root Dimension) - Long Axis",
         view: "Right Parasternal Long Axis (5-Chamber)",
-        description: "Serves as a patient-specific internal baseline to normalize several parameters as described by Lance Visser's publications.",
+        description: "Serves as a patient-specific internal baseline to normalize several parameters - chiefly Right sided heart and LAD - as described by Lance Visser's publications.",
         method: "Measure the aortic valve diameter (AoD) in early to midsystole measured between the hinge points of the maximally opened aortic valve cusps from a right parasternal long-axis view optimized for the left ventricular outflow tract and ascending aorta",
         imgPlaceholder: "/images/aola-reference.jpg"
     },
@@ -1376,7 +1494,7 @@ lviddn: {
         title: "LVOTd (LV Outflow Tract Diameter)",
         view: "Right Parasternal Long Axis (5-Chamber)",
         description: "Crucial for calculating forward systemic stroke volume (Qs) and evaluating left-to-right shunts.",
-        method: "Measure the internal diameter of the left ventricular outflow tract in mid-systole, positioned just below the aortic valve insertion points.",
+        method: "Measure the internal diameter of the left ventricular outflow tract in mid-systole, positioned just below the aortic valve insertion points. Very similar measurement to Aortic valve (long axis) measurement.",
         imgPlaceholder: "/images/lvotd-reference.jpg"
     },
     rvotd: {

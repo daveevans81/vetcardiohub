@@ -923,6 +923,15 @@
                       <span style="font-size: 0.8em; color: #666;"> (ref &lt;2.1) </span>
                     </span>
                   </div>
+                  <div class="result-row" x-show="ladaola">
+                    <span><strong>LAD : Ao(long axis)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ladaola')"></i></span>
+                    <span>
+                      <span x-text="ladaola"></span>
+                      <span x-show="ladaola >= 2.4" class="abnormal">(Enlarged)</span>
+                      <span x-show="ladaola < 2.4 && ladao > 0" class="normal">(Normal)</span>
+                      <span style="font-size: 0.8em; color: #666;"> (ref &lt;2.4) </span>
+                    </span>
+                  </div> 
 
                   <div class="result-row" x-show="ladn">
                     <span><strong>LADN</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ladn')"></i></span>
@@ -1053,6 +1062,16 @@
                     <span style="font-size: 0.85em; color: #475569; font-weight: 600;" x-text="` (${paGradient} mmHg)`"></span>
                   </span>
                 </div>
+                <div class="result-row" x-show="paaola">
+                    <span><strong>PAdia:Ao(LA)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('paaola')"></i></span>
+                    <span>
+                        <span x-text="paaola"></span> 
+                     <span x-show="paaola < 0.76" class="abnormal">(Low)</span>
+                    <span x-show="paaola >= 0.76 && paaola <= 1.53" class="normal">(Normal)</span>
+                    <span x-show="paaola > 1.53" class="abnormal">(High)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.76-1.53)`"></span>
+                    </span>
+                </div> 
 
                 <div x-show="hasSectionData(['lvotd', 'rvotd', 'lvotvti', 'rvotvti'])">
                   <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">Shunt Ratios (Qp:Qs):</p>
@@ -1100,7 +1119,7 @@
                   </span>
                 </div>
 
-                <div x-show="hasSectionData(['trMax', 'tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'lvidd2', 'prMax'])">
+                <div x-show="hasSectionData(['trMax', 'tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad','rad2', 'lvidd2', 'prMax'])">
                   <p style="text-align: left; font-size: 1.2rem; font-weight: bold; color: #1e40af; margin-bottom: 20px; margin-top: 20px;">Right Heart:</p>
                 </div>
 
@@ -1163,6 +1182,15 @@
                     <span style="font-size: 0.8em; color: #666;" x-text="` (ref >4.5)`"></span>
                     </span>
                 </div>       
+                <div class="result-row" x-show="tapseaola">
+                    <span><strong>TAPSE:Ao(LA)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('tapseaola')"></i></span>
+                    <span>
+                        <span x-text="tapseaola"></span> 
+                     <span x-show="tapseaola < 0.47" class="abnormal">(Low)</span>
+                    <span x-show="tapseaola >= 0.47" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.47-1.2)`"></span>
+                    </span>
+                </div> 
                 <div class="result-row" x-show="rvwt">
                     <span><strong>RVWT</strong></span>
                     <span>
@@ -1173,7 +1201,24 @@
                         <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.rvwt?.available" x-text="' (ref ' + rightAllometricResults.rvwt.min + '-' + rightAllometricResults.rvwt.max + ')'"></span>
                     </span>
                 </div>
-        
+                <div class="result-row" x-show="rvwtaola">
+                    <span><strong>RVWT:Ao(LA)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvwtaola')"></i></span>
+                    <span>
+                        <span x-text="rvwtaola"></span> 
+                     <span x-show="rvwtaola > 0.58" class="abnormal">(Thick)</span>
+                    <span x-show="rvwtaola <= 0.58" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.24-0.58)`"></span>
+                    </span>
+                </div> 
+                <div class="result-row" x-show="rvwtlvpwd">
+                    <span><strong>RVWT:LVPWD</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvwtlvpwd')"></i></span>
+                    <span>
+                        <span x-text="rvwtlvpwd"></span> 
+                     <span x-show="rvwtlvpwd > 0.88" class="abnormal">(Thick)</span>
+                    <span x-show="rvwtlvpwd <= 0.88" class="normal">(Normal)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.44-0.88)`"></span>
+                    </span>
+                </div> 
                 <div class="result-row" x-show="rveda">
                     <span><strong>RVEDA</strong></span>
                     <span>
@@ -1232,9 +1277,28 @@
                         <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.rvd1?.available" x-text="' (ref ' + rightAllometricResults.rvd1.min + '-' + rightAllometricResults.rvd1.max + ')'"></span>
                     </span>
                 </div>
-        
+                <div class="result-row" x-show="rvd1n" >
+                    <span><strong>MPA:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvd1n')"></i></span>
+                    <span>
+                        <span x-text="RVD1 (basal) n"></span> 
+                        <span x-show="parseFloat(rvd1n) > 1.1" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(rvd1n) <= 0.94" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref <0.94)`"></span>
+                    </span>
+                    </span>
+                </div> 
+                 <div class="result-row" x-show="rvd1aola" >
+                    <span><strong>MPA:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvd1aola')"></i></span>
+                    <span>
+                        <span x-text="RVD1 (basal):Ao(LA)"></span> 
+                        <span x-show="parseFloat(rvd1aola) > 1.94" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(rvd1aola) <= 1.94" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.81-1.94)`"></span>
+                    </span>
+                    </span>
+                </div>       
                 <div class="result-row" x-show="rad" >
-                    <span><strong>Right Atrial Diameter (RAD)</strong></span>
+                    <span><strong>RAD1 (Ap4Ch view)</strong></span>
                     <span>
                         <span x-text="rad"></span> mm
                         <span x-show="parseFloat(rad) > rightAllometricResults.rad?.max" class="abnormal">(RA Enlargement)</span>
@@ -1243,7 +1307,56 @@
                         <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.rad?.available" x-text="' (ref ' + rightAllometricResults.rad.min + '-' + rightAllometricResults.rad.max + ')'"></span>
                     </span>
                 </div>
-        
+                <div class="result-row" x-show="radaola" >
+                    <span><strong>RAD1 (Ap4Ch view):Ao (LA)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('radaola')"></i></span>
+                    <span>
+                        <span x-text="radaola"></span> 
+                        <span x-show="parseFloat(radaola) > 2.02" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(radaola) <= 2.02" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.79-2.02)`"></span>
+                    </span>
+                    </span>
+                </div>  
+                <div class="result-row" x-show="radn" >
+                    <span><strong>RADn (Ap4Ch)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('radn')"></i></span>
+                    <span>
+                        <span x-text="RADn"></span> 
+                        <span x-show="parseFloat(radn) > 1.1" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(radn) <= 0.9" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref <0.9)`"></span>
+                    </span>
+                    </span>
+                </div>  
+                <div class="result-row" x-show="rad2" >
+                    <span><strong>RAD2 (RPLA view)</strong></span>
+                    <span>
+                        <span x-text="rad2"></span> mm
+                        <span x-show="parseFloat(rad2) > rightAllometricResults.rad2?.max" class="abnormal">(RA Enlargement)</span>
+                        <span x-show="parseFloat(rad2) < rightAllometricResults.rad2?.min" class="abnormal">(Small)</span>
+                        <span x-show="parseFloat(rad2) >= rightAllometricResults.rad2?.min && parseFloat(rad2) <= rightAllometricResults.rad?.max" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.rad2?.available" x-text="' (ref ' + rightAllometricResults.rad2.min + '-' + rightAllometricResults.rad2.max + ')'"></span>
+                    </span>
+                </div>
+                <div class="result-row" x-show="rad2lad" >
+                    <span><strong>RAD2 (RPLA):LAD</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rad2lad')"></i></span>
+                    <span>
+                        <span x-text="rad2lad"></span> 
+                        <span x-show="parseFloat(rad2lad) > 0.99" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(rad2lad) <= 0.99" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.51-0.99)`"></span>
+                    </span>
+                    </span>
+                </div>  
+                <div class="result-row" x-show="rad2aola" >
+                    <span><strong>RAD (RPLA):Ao (LA)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rad2aola')"></i></span>
+                    <span>
+                        <span x-text="rad2aola"></span> 
+                        <span x-show="parseFloat(rad2aola) > 2.07" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(rad2aola) <= 2.07" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.97-2.07)`"></span>
+                    </span>
+                    </span>
+                </div>  
                 <div class="result-row" x-show="lvidd2" >
                     <span><strong>LVEI</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvei')"></i></span>
                     <span>
