@@ -2777,6 +2777,18 @@ details[open] summary {
     transform: scale(1.02);
 }
 
+/* Ensure glossary images never break the modal layout */
+.glossary-img {
+    max-width: 100%;       /* Can't be wider than the modal */
+    max-height: 300px;     /* Forces a consistent vertical limit */
+    width: auto;           /* Maintains aspect ratio */
+    height: auto;          /* Maintains aspect ratio */
+    margin: 0 auto 15px;   /* Centers the image */
+    display: block;        /* Ensures center alignment works */
+    border-radius: 4px;
+    object-fit: contain;   /* Prevents distortion */
+}
+
 /* Attribution text */
 .image-attribution {
     font-size: 0.65rem;
