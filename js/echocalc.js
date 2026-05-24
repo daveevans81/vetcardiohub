@@ -387,6 +387,7 @@ get changScoreResults() {
 
  
 /* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
+/* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
 get phClassification() {
     if (!this.isDog) return null;
 
@@ -416,9 +417,17 @@ get phClassification() {
 
     // --- 2. Evaluate ACVIM Site 1: Ventricles ---
     let rvSigns = [];
-    if (this.lvei >= 1.2) { siteVentricle = true; rvSigns.push('Septal Flattening'); }
-    if (this.rvwt && this.rightAllometricResults?.rvwt?.max && parseFloat(this.rvwt) > this.rightAllometricResults.rvwt.max) { siteVentricle = true; rvSigns.push('RV Hypertrophy'); }
-    if (this.rveda && this.rightAllometricResults?.rveda?.max && parseFloat(this.rveda) > this.rightAllometricResults.rveda.max) { siteVentricle = true; rvSigns.push('RV Dilation'); }
+    
+    // Geometry & Size
+    if (this.lvei >= 1.2) { siteVentricle = true; rvSigns.push('Septal Flattening (LVEI ≥ 1.2)'); }
+    if (this.rveda && this.rightAllometricResults?.rveda?.max && parseFloat(this.rveda) > this.rightAllometricResults.rveda.max) { siteVentricle = true; rvSigns.push('RV Dilation (Allometric)'); }
+    
+    // Hypertrophy (Checks both Allometric Max and Sankisov Ratio)
+    if (this.rvwt && this.rightAllometricResults?.rvwt?.max && parseFloat(this.rvwt) > this.rightAllometricResults.rvwt.max) { 
+        siteVentricle = true; rvSigns.push('RV Hypertrophy (Allometric)'); 
+    } else if (this.rvwtlvpwd && parseFloat(this.rvwtlvpwd) > 1.0) {
+        siteVentricle = true; rvSigns.push('RVWT > LVPWd');
+    }
 
     if (rvSigns.length > 0) {
         breakdown.push({
@@ -433,12 +442,22 @@ get phClassification() {
 
     // --- 3. Evaluate ACVIM Site 2: Pulmonary Artery ---
     let paSigns = [];
-    if (parseFloat(this.mpaAo) > 1.0) { sitePA = true; paSigns.push('MPA:Ao > 1.0'); }
     
-    // NOTE: Insert your specific RPAmin allometric logic here once you pull the formula
-    if (this.rpamin && parseFloat(this.rpamin) > 3.0 /* Replace with strict allometric formula logic */) { 
-        sitePA = true; 
-        paSigns.push('RPAmin Enlargement'); 
+    // Standard and Internal Scalar Ratios
+    if (this.mpaAo && parseFloat(this.mpaAo) > 1.0) { sitePA = true; paSigns.push('MPA:Ao > 1.0'); }
+    if (this.paaola && parseFloat(this.paaola) > 1.0) { sitePA = true; paSigns.push('PA:Ao > 1.0'); }
+    
+    // Grosso/Vezzosi RPA Indexing
+    if (this.rpaIndex && this.rpaIndex >= 3.0) { 
+        sitePA = true; paSigns.push(`RPA Index (${this.rpaIndex}) ≥ 3.0`); 
+    }
+    
+    // Grosso Allometric Maximums
+    if (this.mpamin && this.rightAllometricResults?.mpamin?.max && parseFloat(this.mpamin) > this.rightAllometricResults.mpamin.max) {
+        sitePA = true; paSigns.push('MPA > Allometric Max');
+    }
+    if (this.rpamin && this.rightAllometricResults?.rpamin?.max && parseFloat(this.rpamin) > this.rightAllometricResults.rpamin.max) {
+        sitePA = true; paSigns.push('RPAmin > Allometric Max');
     }
 
     if (paSigns.length > 0) {
@@ -466,9 +485,13 @@ get phClassification() {
     }
     
     const anatomicSites = (siteVentricle ? 1 : 0) + (sitePA ? 1 : 0) + (siteRA ? 1 : 0);
-    if (tr === 0 && anatomicSites === 0) return null; // Nothing to show yet
+    if (tr === 0 && anatomicSites === 0 && (!this.changScoreResults || this.changScoreResults.total === 0)) return null; 
     
-    // --- 5. Determine Final ACVIM Probability Matrix ---
+    // --- 5. Fetch Chang 2026 Score for Evaluation ---
+    const chang = this.changScoreResults;
+    const hasChangWarning = (chang && chang.total >= 4);
+
+    // --- 6. Determine Final ACVIM Probability Matrix (With Chang Integration) ---
     let probability = 'Low Probability';
     let stepIndex = 0;
     let riskClass = 'normal'; // normal, warning, abnormal
@@ -493,6 +516,21 @@ get phClassification() {
             probability = "Intermediate Probability";
             stepIndex = 1;
             riskClass = 'warning';
+        } else if (hasChangWarning) {
+            // THE CHANG OVERRIDE: ACVIM is technically "Low", but Chang predicts severe/moderate PH
+            probability = "Intermediate Probability (Chang Score Override)";
+            stepIndex = 1;
+            riskClass = 'warning';
+            
+            // Push the Chang trigger into the visual audit table
+            breakdown.push({
+                name: 'Chang PH Score Alert',
+                category: '2026 Predictive Override',
+                val: `${chang.total} / 25 Pts`,
+                threshold: '≥ 4 Points',
+                grade: 'Elevated Pre-Capillary Risk',
+                isTrigger: true
+            });
         } else {
             probability = "Low Probability";
             stepIndex = 0;
@@ -506,9 +544,11 @@ get phClassification() {
         riskClass, 
         breakdown, 
         anatomicSites,
-        siteDetails: { siteVentricle, sitePA, siteRA }
+        siteDetails: { siteVentricle, sitePA, siteRA },
+        changScore: chang // Passes the full Chang object to the UI if needed separately
     };
 },
+
 
 /* Specialized Decoupled Right Heart Allometric Evaluator */
 get availableRightModels() {
