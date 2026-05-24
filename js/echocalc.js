@@ -56,6 +56,7 @@ function advancedEchoSuite() {
 showChangScore: false, // Toggles the UI section
 ivsFlatteningChang: '0', // 0=Normal, 2=Subtle, 4=Moderate/Severe
 rvotNotching: false, // 0=Normal, 1=Abnormal
+
     
     /* 2. GETTERS */
     get lviddn() {
@@ -1873,6 +1874,14 @@ cvcAo: {
         method: "Calculated as: ((CVC max - CVC min) / CVC max) × 100. Normal dogs should show > 50% collapse during a normal inspiratory effort.",
         reference: "Darnis et al. Establishment of reference values of the caudal vena cava by fast-stroke echocardiography.",
         pmid: "15632009"
+    },
+    changScore: {
+        title: "Chang (2026) PH Predictive Score",
+        view: "Derived Multi-parametric Index",
+        description: "A 25-point echocardiographic scoring system designed to assess the probability of moderate-to-severe pulmonary hypertension in dogs lacking a measurable tricuspid regurgitation (TR) jet. It integrates right and left heart structural ratios with subjective visual findings.",
+        method: "Calculates cumulative risk using: RV:LV dilation (0-6 pts), RVWT:LVPWd ratio (0-2 pts), RA:LA ratio (0-6 pts), PA:Ao ratio (0-6 pts), IVS flattening severity (0-4 pts), and RVOT mid-systolic notching (0-1 pt). Scores ≥ 4 predict pTRV ≥ 3.4 m/s; Scores ≥ 9 predict pTRV ≥ 4.3 m/s.",
+        reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
+        pmid: "41742574"
     }
 },
 

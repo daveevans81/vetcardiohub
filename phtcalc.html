@@ -1,12 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-This is the perfect way to structure your page head. Using that schema markup (MedicalWebPage and MedicalDevice) is an incredibly powerful SEO strategy that tells Google exactly what this tool does and who it is for, establishing massive authority.
-
-I have adapted your template specifically for the new Pulmonary Hypertension Calculator. I updated the title, meta descriptions, keywords, Open Graph data, and swapped out the academic citations in the schema to perfectly reflect the Reinero (ACVIM 2020), Grosso (2023), Sankisov (2024), and Chang (2026) papers powering this specific engine.
-
-Here is the fully optimized <head> block for your ph-calculator.html page:
-
-HTML
 <head>
     <script src="/js/global-head.js" defer></script>
 
@@ -82,7 +75,7 @@ HTML
 </header>
 
 <main x-data="advancedEchoSuite()"  class="card" style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2rem;">
-<p>Need More Echo Calculations? <a href="\echocalc.html" class="btn">Access the Fully Integrated VetCardioHub EchoCalc here</a></p>
+
     <section class="input-panel card">
         <h2><i class="fa-solid fa-keyboard"></i> Diagnostic Inputs</h2>
 
@@ -128,6 +121,7 @@ HTML
                 </div>
             </div>
         </div>
+        <p>Need More Echo Calculations? <a href="\echocalc.html" class="btn">Access the Fully Integrated VetCardioHub EchoCalc here</a></p>
     </section>
 
     <aside class="results-panel" style="position: sticky; top: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
@@ -189,6 +183,33 @@ HTML
                     <div class="empty-state">Awaiting sufficient structural or Doppler data.</div>
                 </template>
             </div>
+            
+            <div class="result-widget card" style="margin-top: 1rem;">
+            <header>
+                <h3 style="font-size: 0.9rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                    <i class="fa-solid fa-book-medical"></i> Literature & Evidence
+                </h3>
+            </header>
+            <div class="widget-body" style="padding: 15px; font-size: 0.8rem; color: #475569; display: flex; flex-direction: column; gap: 12px;">
+                
+                <div>
+                    <span style="font-weight: 700; color: #334155; display: block;">Chang PH Predictive Score</span>
+                    <span style="font-style: italic;">Chang et al. Echocardiographic predictive score for pulmonary hypertension in dogs lacking measurable tricuspid regurgitation. (2026).</span>
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/41742574/" target="_blank" rel="noopener noreferrer" style="color: #0ea5e9; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
+                        [PMID: 41742574] <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.7rem;"></i>
+                    </a>
+                </div>
+
+                <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px;">
+                    <span style="font-weight: 700; color: #334155; display: block;">ACVIM Consensus Guidelines</span>
+                    <span style="font-style: italic;">Reinero et al. ACVIM consensus statement guidelines for the diagnosis, classification, treatment, and monitoring of pulmonary hypertension in dogs. (2020).</span>
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/32065428/" target="_blank" rel="noopener noreferrer" style="color: #0ea5e9; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
+                        [PMID: 32065428] <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.7rem;"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
         </div>
     </aside>
 
