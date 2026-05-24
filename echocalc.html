@@ -661,7 +661,7 @@
                                    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; background: #fff; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px;">
             
                                         <div class="input-group" style="flex: 1; min-width: 200px;">
-                                            <label style="font-weight: 600; font-size: 0.85rem; color: #334155;">Visual IVS Flattening</label>
+                                            <label style="font-weight: 600; font-size: 0.85rem; color: #334155;">Visual IVS Flattening<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ivsFlattening')"></i></label>
                                             <select x-model="ivsFlatteningChang" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
                                                 <option value="0">Normal (No flattening)</option>
                                                 <option value="2">Subtle-Mild (Deviated, but not flat)</option>
@@ -670,7 +670,7 @@
                                         </div>
                             
                                         <div class="input-group" style="flex: 1; min-width: 200px;">
-                                            <label style="font-weight: 600; font-size: 0.85rem; color: #334155;">RVOT Mid-Systolic Notching</label>
+                                            <label style="font-weight: 600; font-size: 0.85rem; color: #334155;">RVOT Mid-Systolic Notching<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvotNotching')"></i></label>
                                             <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
                                                 <input type="checkbox" id="rvotNotch" x-model="rvotNotching" style="width: 18px; height: 18px;">
                                                 <label for="rvotNotch" style="margin: 0; font-size: 0.85rem; cursor: pointer; color: #475569; font-weight: normal;">Present on Doppler profile</label>

@@ -1882,6 +1882,24 @@ cvcAo: {
         method: "Calculates cumulative risk using: RV:LV dilation (0-6 pts), RVWT:LVPWd ratio (0-2 pts), RA:LA ratio (0-6 pts), PA:Ao ratio (0-6 pts), IVS flattening severity (0-4 pts), and RVOT mid-systolic notching (0-1 pt). Scores ≥ 4 predict pTRV ≥ 3.4 m/s; Scores ≥ 9 predict pTRV ≥ 4.3 m/s.",
         reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
         pmid: "41742574"
+    },
+ivsFlattening: {
+        title: "Interventricular Septal (IVS) Flattening",
+        view: "Right Parasternal Short Axis",
+        description: "A key structural marker of right ventricular pressure or volume overload. As RV pressures equalize with or exceed LV pressures, the normally circular left ventricle becomes compressed into a 'D' shape.",
+        method: "Evaluated subjectively or objectively via the Eccentricity Index (LVEI). Graded as Normal (circular), Subtle-Mild (deviated but not completely flat), or Moderate-Severe (visibly flattened or convex into the LV chamber).",
+        reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
+        pmid: "41742574",
+        imgPlaceholder: "/images/ivsflattening-reference.jpg"
+    },
+    rvotNotching: {
+        title: "RVOT Mid-Systolic Notching",
+        view: "Right Parasternal Short Axis (Heart Base)",
+        description: "A highly specific Doppler finding indicating severely elevated pulmonary vascular resistance and pre-capillary pulmonary hypertension. It is caused by a premature reflection of pressure waves from the stiffened pulmonary arterial tree.",
+        method: "Obtain a Pulsed Wave (PW) Doppler profile of the Right Ventricular Outflow Tract (RVOT). Look for a characteristic 'W-shape' or a distinct notch on the deceleration slope of the forward systolic waveform.",
+        reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
+        pmid: "41742574",
+        imgPlaceholder: "/images/rvotnotch-reference.jpg"
     }
 },
 
