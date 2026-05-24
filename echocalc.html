@@ -1335,23 +1335,21 @@
                     </span>
                 </div>
                 <div class="result-row" x-show="rvd1n" >
-                    <span><strong>MPA:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvd1n')"></i></span>
+                    <span><strong>RVD Basal (normalised)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvd1n')"></i></span>
                     <span>
-                        <span x-text="RVD1 (basal) n"></span> 
+                        <span x-text="rvd1n"></span> 
                         <span x-show="parseFloat(rvd1n) > 1.1" class="abnormal">(Enlarged)</span>
                         <span x-show="parseFloat(rvd1n) <= 0.94" class="normal">(Normal)</span>
                         <span style="font-size: 0.8em; color: #666;" x-text="` (ref <0.94)`"></span>
                     </span>
-                    </span>
                 </div> 
                  <div class="result-row" x-show="rvd1aola" >
-                    <span><strong>MPA:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvd1aola')"></i></span>
+                    <span><strong>RVD1 (basal):Ao(LA)</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rvd1aola')"></i></span>
                     <span>
-                        <span x-text="RVD1 (basal):Ao(LA)"></span> 
+                        <span x-text="rvd1aola"></span> 
                         <span x-show="parseFloat(rvd1aola) > 1.94" class="abnormal">(Enlarged)</span>
                         <span x-show="parseFloat(rvd1aola) <= 1.94" class="normal">(Normal)</span>
                         <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.81-1.94)`"></span>
-                    </span>
                     </span>
                 </div>       
                 <div class="result-row" x-show="rad" >
