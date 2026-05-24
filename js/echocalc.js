@@ -1881,7 +1881,8 @@ cvcAo: {
         description: "A 25-point echocardiographic scoring system designed to assess the probability of moderate-to-severe pulmonary hypertension in dogs lacking a measurable tricuspid regurgitation (TR) jet. It integrates right and left heart structural ratios with subjective visual findings.",
         method: "Calculates cumulative risk using: RV:LV dilation (0-6 pts), RVWT:LVPWd ratio (0-2 pts), RA:LA ratio (0-6 pts), PA:Ao ratio (0-6 pts), IVS flattening severity (0-4 pts), and RVOT mid-systolic notching (0-1 pt). Scores ≥ 4 predict pTRV ≥ 3.4 m/s; Scores ≥ 9 predict pTRV ≥ 4.3 m/s.",
         reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
-        pmid: "41742574"
+        pmid: "41742574",
+        imgPlaceholder: "/images/reference-phtscoring.jpg"
     },
 ivsFlattening: {
         title: "Interventricular Septal (IVS) Flattening",
@@ -1890,7 +1891,7 @@ ivsFlattening: {
         method: "Evaluated subjectively or objectively via the Eccentricity Index (LVEI). Graded as Normal (circular), Subtle-Mild (deviated but not completely flat), or Moderate-Severe (visibly flattened or convex into the LV chamber).",
         reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
         pmid: "41742574",
-        imgPlaceholder: "/images/ivsflattening-reference.jpg"
+        imgPlaceholder: "/images/reference-ivsflattening.jpg"
     },
     rvotNotching: {
         title: "RVOT Mid-Systolic Notching",
@@ -1899,7 +1900,7 @@ ivsFlattening: {
         method: "Obtain a Pulsed Wave (PW) Doppler profile of the Right Ventricular Outflow Tract (RVOT). Look for a characteristic 'W-shape' or a distinct notch on the deceleration slope of the forward systolic waveform.",
         reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
         pmid: "41742574",
-        imgPlaceholder: "/images/rvotnotch-reference.jpg"
+        imgPlaceholder: "/images/reference-rvotnotch.jpg"
     }
 },
 
