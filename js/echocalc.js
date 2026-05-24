@@ -1754,7 +1754,8 @@ lviddn: {
         description: "Used to assess pulmonary artery dilation, a hallmark of precapillary pulmonary hypertension.",
         method: "Measure the maximum internal diameter of the right pulmonary artery at end-diastole (just before pulmonic valve opening). Index to the aortic valve in short axis. Calculated as RPAmax / Ao. A value under 0.98 is considered normal.",
         reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
-        pmid: "37918089"
+        pmid: "37918089",
+imgAttribution: "CC-BY 4.0"
     },
     rpamin: {
         title: "RPA min (Right Pulmonary Artery Minimum)",
@@ -1763,7 +1764,8 @@ lviddn: {
         method: "Measure the internal diameter of the right pulmonary artery branch at end-diastole.",
         imgPlaceholder: "/images/reference-rpa.jpg",
         reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
-        pmid: "37918089"
+        pmid: "37918089",
+imgAttribution: "CC-BY 4.0"
     },
     rpamax: {
         title: "RPA max (Right Pulmonary Artery Maximum)",
@@ -1772,7 +1774,8 @@ lviddn: {
         method: "Measure the maximal internal diameter of the right pulmonary artery branch during peak systole.",
         imgPlaceholder: "/images/reference-rpa.jpg",
         reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
-        pmid: "37918089"
+        pmid: "37918089",
+imgAttribution: "CC-BY 4.0"
     },
     rpadi: {
         title: "RPAD index",
