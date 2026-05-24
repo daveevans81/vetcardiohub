@@ -67,7 +67,6 @@ rvotNotching: false, // 0=Normal, 1=Abnormal
 showPatientDetails: false, // Toggles the concertina
 patientName: '',
 ownerName: '',
-species: 'Canine', // Default
 breed: '',
 
     
