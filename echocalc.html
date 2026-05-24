@@ -1368,39 +1368,71 @@
                 <div class="result-row" x-show="mpamin" >
                     <span><strong>MPA min</strong></span>
                     <span>
-                        <span x-text="mpamin"></span> 
+                        <span x-text="mpamin"> mm</span> 
+                        <span x-show="parseFloat(mpamin) > rightAllometricResults.mpamin?.max" class="abnormal">(Enlargement)</span>
+                        <span x-show="parseFloat(mpamin) < rightAllometricResults.mpamin?.min" class="abnormal">(Small)</span>
+                        <span x-show="parseFloat(mpamin) >= rightAllometricResults.mpamin?.min && parseFloat(mpamin) <= rightAllometricResults.mpamin?.max" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.mpamin?.available" x-text="' (ref ' + rightAllometricResults.mpamin.min + '-' + rightAllometricResults.mpamin.max + ')'"></span>
+                    </span>
+                </div>
+                <div class="result-row" x-show="mpaAo" >
+                    <span><strong>MPA:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mpaAo')"></i></span>
+                    <span>
+                        <span x-text="mpaAo"></span> 
+                        <span x-show="parseFloat(mpaAo) > 1.01" class="abnormal">[Enlarged PA]</span>
+                        <span x-show="parseFloat(mpaAo) <= 1.01" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.78-1.01)`"></span>
                     </span>
                 </div>
                 <div class="result-row" x-show="rpamax" >
                     <span><strong>RPA max</strong></span>
                     <span>
-                        <span x-text="rpamax"></span> 
+                        <span x-text="rpamax"> mm</span>
+                        <span x-show="parseFloat(rpamax) > rightAllometricResults.rpamax?.max" class="abnormal">(Enlargement)</span>
+                        <span x-show="parseFloat(rpamax) < rightAllometricResults.rpamax?.min" class="abnormal">(Small)</span>
+                        <span x-show="parseFloat(rpamax) >= rightAllometricResults.rpamax?.min && parseFloat(rpamax) <= rightAllometricResults.rpamax?.max" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.rpamax?.available" x-text="' (ref ' + rightAllometricResults.rpamax.min + '-' + rightAllometricResults.rpamax.max + ')'"></span>
+                    </span>
+                </div>
+                <div class="result-row" x-show="rpamaxao" >
+                    <span><strong>RPAmin:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rpamaxao')"></i></span>
+                    <span>
+                        <span x-text="rpamaxao"></span> 
+                        <span x-show="parseFloat(rpamaxao) > 0.98" class="abnormal">[Enlarged PA]</span>
+                        <span x-show="parseFloat(rpamaxao) <= 0.98" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.53-0.98)`"></span>
                     </span>
                 </div>
                 <div class="result-row" x-show="rpamin" >
                     <span><strong>RPA min</strong></span>
                     <span>
-                        <span x-text="rpamin"></span> 
+                        <span x-text="rpamin"> mm</span> 
+                        <span x-show="parseFloat(rpamin) > rightAllometricResults.rpamin?.max" class="abnormal">(Enlargement)</span>
+                        <span x-show="parseFloat(rpamin) < rightAllometricResults.rpamin?.min" class="abnormal">(Small)</span>
+                        <span x-show="parseFloat(rpamin) >= rightAllometricResults.rpamin?.min && parseFloat(rpamin) <= rightAllometricResults.rpamin?.max" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-show="rightAllometricResults.rpamin?.available" x-text="' (ref ' + rightAllometricResults.rpamin.min + '-' + rightAllometricResults.rpamin.max + ')'"></span>
+                    </span>
+                </div>
+                <div class="result-row" x-show="rpaminao" >
+                    <span><strong>RPAmin:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rpaminao')"></i></span>
+                    <span>
+                        <span x-text="rpaminao"></span> 
+                        <span x-show="parseFloat(rpaminao) > 0.61" class="abnormal">[Enlarged PA]</span>
+                        <span x-show="parseFloat(rpaminao) <= 0.61" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref 0.29-0.61)`"></span>
                     </span>
                 </div>
                 <div class="result-row" x-show="rpadi" >
                     <span><strong>RPAD index</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rpadi')"></i></span>
                     <span>
                         <span x-text="rpadi"></span> 
-                        <span x-show="parseFloat(rpadi) > 1.1" class="abnormal">(Enlarged)</span>
-                        <span x-show="parseFloat(rpadi) <= 0.9" class="normal">(Normal)</span>
-                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref <0.9)`"></span>
+                        <span x-show="parseFloat(rpadi) < 31.2" class="abnormal">(Reduced)</span>
+                        <span x-show="parseFloat(rpadi) >= 31.2" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref 31.2-54.2)`"></span>
                     </span>
                     </span>
                 </div>  
-                <div class="result-row" x-show="mpaAo" >
-                    <span><strong>MPA:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mpaAo')"></i></span>
-                    <span>
-                        <span x-text="mpaAo"></span> 
-                        <span x-show="parseFloat(mpaAo) > 1.1" class="abnormal">[Enlarged PA]</span>
-                        <span x-show="parseFloat(mpaAo) <= 1.1" class="normal">(Normal)</span>
-                    </span>
-                </div>
+
                 <div class="result-row" x-show="eplar > 0">
                     <span><strong>ePLAR</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('eplar')"></i></span>
                     <span>

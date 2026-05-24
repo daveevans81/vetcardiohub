@@ -161,6 +161,15 @@ function advancedEchoSuite() {
         if(!this.mpamin || !this.ao || parseFloat(this.ao) === 0) return 0;
         return (this.mpamin / this.ao).toFixed(2);
     },
+    get rpaminao() {
+        if(!this.rpamin || !this.ao || parseFloat(this.ao) === 0) return 0;
+        return (this.rpamin / this.ao).toFixed(2);
+    },
+
+    get rpamaxao() {
+        if(!this.rpamax || !this.ao || parseFloat(this.ao) === 0) return 0;
+        return (this.rpamax / this.ao).toFixed(2);
+    },
     get rvedan() {
         if(!this.weight || ! this.rveda) return 0;
         return ((this.rveda) / Math.pow(this.weight, 0.665)).toFixed(2);
@@ -1374,7 +1383,9 @@ lviddn: {
         title: "LADn (Normalized LA Long Axis)",
         view: "Derived Index (Allometric Scaling)",
         description: "Scales the long-axis (or apical) left atrial dimension to body weight. Provides a comprehensive assessment of 3D atrial remodeling.",
-        method: "Calculated as: (LAD in cm) / (Body Weight in kg)^0.309."
+        method: "Calculated as: (LAD in cm) / (Body Weight in kg)^0.309.",
+        reference: "Marchesotti et al (2019). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
+        pmid: "31611490"
     },
     ladao: {
         title: "LAD:Ao Ratio (Long Axis to Aorta)",
@@ -1426,6 +1437,15 @@ lviddn: {
         description: "Evaluates left atrial enlargement, the primary structural indicator of elevated left-sided filling pressures.",
         method: "Measure the internal diameter of the LA at end-systole (when maximally filled), extending from the center of the aortic valve commissure to the dorsal LA wall.",
         imgPlaceholder: "/images/la-reference.jpg"
+    },
+    lad: {
+        title: "LA diameter - long axis (Left Atrium Dimension)",
+        view: "Right Parasternal Long Axis (4 chamber)",
+        description: "Evaluates left atrial enlargement, the primary structural indicator of elevated left-sided filling pressures.",
+        method: "Measure the internal diameter of the LA at end-systole (when maximally filled, the frame just before mitral valve opening), at the widest point, extending from the center of the interatrial septum to the inner wall of the posterior free wall, parallel to the mitral valve annulus.",
+        imgPlaceholder: "/images/LADmeasure.jpg",
+        reference: "Marchesotti et al (2019). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
+        pmid: "31611490"
     },
     ao: {
         title: "Ao (Aortic Root Dimension)",
@@ -1596,25 +1616,49 @@ lviddn: {
         view: "Right Parasternal Short Axis (Heart Base)",
         description: "Used to assess pulmonary artery dilation, a hallmark of precapillary pulmonary hypertension.",
         method: "Measure the minimal internal diameter of the main pulmonary artery at end-diastole (just before pulmonic valve opening).",
-        imgPlaceholder: "/images/mpamin-reference.jpg",
+        imgPlaceholder: "/images/reference-mpamin.jpg",
+        reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
+        pmid: "37918089"
+    },
+    mpaAo: {
+        title: "MPA : Ao index (Main Pulmonary Artery to Aorta Sax Index)",
+        view: "Right Parasternal Short Axis (Heart Base)",
+        description: "Used to assess pulmonary artery dilation, a hallmark of precapillary pulmonary hypertension.",
+        method: "Measure the minimal internal diameter of the main pulmonary artery at end-diastole (just before pulmonic valve opening). Index to the aortic valve in short axis. Calculated as MPAmin / Ao. A value under 1.01 is considered normal.",
+        reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
+        pmid: "37918089"
+    },
+    rpaminao: {
+        title: "RPAmin : Ao index (Right Pulmonary Artery minimum to Aorta Sax Index)",
+        view: "Right Parasternal Short Axis (Heart Base), using M-mode through the RPA",
+        description: "Used to assess pulmonary artery dilation, a hallmark of precapillary pulmonary hypertension.",
+        method: "Measure the minimal internal diameter of the right pulmonary artery at end-diastole (just before pulmonic valve opening). Index to the aortic valve in short axis. Calculated as RPAmin / Ao. A value under 0.61 is considered normal.",
+        reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
+        pmid: "37918089"
+    },
+    rpamaxao: {
+        title: "MPA : Ao index (Right Pulmonary Artery maximum to Aorta Sax Index)",
+        view: "Right Parasternal Short Axis (Heart Base), using M-mode through the RPA",
+        description: "Used to assess pulmonary artery dilation, a hallmark of precapillary pulmonary hypertension.",
+        method: "Measure the maximum internal diameter of the right pulmonary artery at end-diastole (just before pulmonic valve opening). Index to the aortic valve in short axis. Calculated as RPAmax / Ao. A value under 0.98 is considered normal.",
         reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
         pmid: "37918089"
     },
     rpamin: {
         title: "RPA min (Right Pulmonary Artery Minimum)",
-        view: "Right Parasternal Short Axis",
+        view: "Right Parasternal Short Axis, using M-mode through the RPA",
         description: "A highly sensitive, body-weight indexed marker for pulmonary hypertension (Vezzosi/Grosso criteria).",
         method: "Measure the internal diameter of the right pulmonary artery branch at end-diastole.",
-        imgPlaceholder: "/images/rpamin-reference.jpg",
+        imgPlaceholder: "/images/reference-rpa.jpg",
         reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
         pmid: "37918089"
     },
     rpamax: {
         title: "RPA max (Right Pulmonary Artery Maximum)",
-        view: "Right Parasternal Short Axis",
+        view: "Right Parasternal Short Axis, using M-mode through the RPA",
         description: "Evaluates the maximum distension of the RPA during peak systole.",
         method: "Measure the maximal internal diameter of the right pulmonary artery branch during peak systole.",
-        imgPlaceholder: "/images/rpamax-reference.jpg",
+        imgPlaceholder: "/images/reference-rpa.jpg",
         reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
         pmid: "37918089"
     },
@@ -1622,7 +1666,7 @@ lviddn: {
         title: "RPAD index",
         view: "Derived Index",
         description: "The percentage change in diameter of the right pulmonary artery throughout a singe cardiac cycle.",
-        method: "Calculated as: RPAD index = [(RPAmax  RPAmin) / RPAmax] x 100.",
+        method: "Calculated as: RPAD index = [(RPAmax  RPAmin) / RPAmax] x 100. A value over 31.2% is considered normal.",
         reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
         pmid: "37918089"
     },
