@@ -2225,8 +2225,18 @@
             <div class="glossary-modal-body">
         
                 <template x-if="activeGlossaryTerm?.imgPlaceholder">
-                    <div class="glossary-image-wrapper" :style="`background-image: url('${activeGlossaryTerm.imgPlaceholder}')`"></div>
-                </template>
+    <div class="glossary-image-container">
+        <img :src="activeGlossaryTerm.imgPlaceholder" 
+             class="glossary-img clickable" 
+             @click="zoomImage(activeGlossaryTerm.imgPlaceholder)"
+             alt="Reference diagram">
+        
+        <p class="image-attribution">
+            Source: <span x-text="activeGlossaryTerm.reference"></span>. 
+            Licensed CC-BY-NC. <a :href="`https://pubmed.ncbi.nlm.nih.gov/${activeGlossaryTerm.pmid}/`" target="_blank">[PMID: <span x-text="activeGlossaryTerm.pmid"></span>]</a>
+        </p>
+    </div>
+</template>
             
                 <div class="glossary-content">
                     
@@ -2279,7 +2289,14 @@
             </div>
         </div>
     </div>
-
+    <div x-data="{ zoomedImg: null }" 
+         @image-zoom.window="zoomedImg = $event.detail"
+         x-show="zoomedImg"
+         class="zoom-overlay" 
+         @click="zoomedImg = null"
+         style="display: none;">
+        <img :src="zoomedImg" class="zoomed-img" @click.stop>
+    </div>
   </div> <!-- x-data (Closes Alpine component scope perfectly) -->
 
   <div id="site-footer"></div>

@@ -1904,6 +1904,10 @@ ivsFlattening: {
     }
 },
 
+zoomImage(url) {
+    window.dispatchEvent(new CustomEvent('image-zoom', { detail: url }));
+},
+
 exportToClipboard() {
 navigator.clipboard.writeText(this.generateReportText()).then(() => {
 this.copySuccess = true;
@@ -1912,6 +1916,7 @@ setTimeout(() => { this.copySuccess = false; }, 2500);
 }
 };
 }
+
 
 
 // Function to show instructions (existing)
