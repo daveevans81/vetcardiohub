@@ -2224,19 +2224,25 @@
     
             <div class="glossary-modal-body">
         
-                <template x-if="activeGlossaryTerm?.imgPlaceholder">
-    <div class="glossary-image-container">
-        <img :src="activeGlossaryTerm.imgPlaceholder" 
-             class="glossary-img clickable" 
-             @click="zoomImage(activeGlossaryTerm.imgPlaceholder)"
-             alt="Reference diagram">
-        
-        <p class="image-attribution">
-            Source: <span x-text="activeGlossaryTerm.reference"></span>. 
-            Licensed CC-BY-NC. <a :href="`https://pubmed.ncbi.nlm.nih.gov/${activeGlossaryTerm.pmid}/`" target="_blank">[PMID: <span x-text="activeGlossaryTerm.pmid"></span>]</a>
-        </p>
-    </div>
-</template>
+             <template x-if="activeGlossaryTerm?.imgPlaceholder">
+                <div class="glossary-image-container">
+                    <img :src="activeGlossaryTerm.imgPlaceholder" 
+                         class="glossary-img clickable" 
+                         @click="zoomImage(activeGlossaryTerm.imgPlaceholder)"
+                         alt="Diagnostic reference diagram">
+                    
+                    <template x-if="activeGlossaryTerm?.imgAttribution">
+                        <p class="image-attribution">
+                            Source: <span x-text="activeGlossaryTerm.reference"></span>. 
+                            Licensed <span x-text="activeGlossaryTerm.imgAttribution"></span>. 
+                            <a :href="`https://pubmed.ncbi.nlm.nih.gov/${activeGlossaryTerm.pmid}/`" 
+                               target="_blank" rel="noopener noreferrer">
+                               [PMID: <span x-text="activeGlossaryTerm.pmid"></span>]
+                            </a>
+                        </p>
+                    </template>
+                </div>
+            </template>
             
                 <div class="glossary-content">
                     
