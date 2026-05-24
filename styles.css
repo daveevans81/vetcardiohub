@@ -2564,6 +2564,209 @@ details[open] summary {
     transition: color 0.2s ease;
 }
 
+/* ==========================================================================
+   GLOSSARY MODAL STYLES
+   ========================================================================== */
+
+/* Overlay & Positioning */
+.glossary-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: rgba(15, 23, 42, 0.6);
+}
+
+.glossary-backdrop {
+    position: absolute;
+    inset: 0;
+}
+
+.glossary-modal {
+    position: relative;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column; /* Allows internal scrolling to work properly */
+}
+
+/* Header */
+.glossary-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0; /* Prevents the header from shrinking when content scrolls */
+}
+
+.glossary-title {
+    margin: 0;
+    color: #16325F;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.glossary-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #64748b;
+    transition: color 0.2s;
+}
+
+.glossary-close:hover {
+    color: #1e293b;
+}
+
+/* Body & Scroll Fixes */
+.glossary-modal-body {
+    padding: 20px;
+    max-height: 75vh; /* Prevents modal from overflowing the screen viewport */
+    overflow-y: auto; /* Activates vertical scrolling for large definitions */
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbar for the Glossary */
+.glossary-modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+.glossary-modal-body::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 4px;
+}
+.glossary-modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.glossary-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Dynamic Image Handling */
+.glossary-image-wrapper {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 18px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+}
+
+/* Content Layout */
+.glossary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    text-align: left;
+}
+
+.glossary-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.glossary-icon {
+    margin-top: 3px;
+    width: 16px;
+    text-align: center;
+}
+
+.glossary-text-block {
+    flex: 1;
+}
+
+/* Typography & Semantic Elements */
+.glossary-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    display: block;
+}
+
+.glossary-value {
+    margin: 2px 0 0 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.glossary-desc {
+    margin: 2px 0 0 0;
+    font-size: 0.9rem;
+    color: #334155;
+    line-height: 1.4;
+}
+
+.glossary-formula-box {
+    margin: 4px 0 0 0;
+    font-size: 0.9rem;
+    color: #1e293b;
+    line-height: 1.5;
+    background: #f8fafc;
+    padding: 10px 12px;
+    border-left: 3px solid #cbd5e1;
+    border-radius: 0 4px 4px 0;
+}
+
+/* References Section */
+.glossary-reference-section {
+    margin-top: 4px;
+    padding-top: 16px;
+    border-top: 1px dashed #cbd5e1;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.ref-icon {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.glossary-reference-text {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #475569;
+    line-height: 1.4;
+}
+
+.pubmed-link {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+}
+
+.pubmed-link:hover {
+    color: #0284c7;
+}
+
+.pubmed-link i {
+    font-size: 0.7rem;
+}
+
 /* Hover Accent Switch */
 .fa-circle-info:hover {
     color: #0ea5e9;
