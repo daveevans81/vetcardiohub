@@ -614,7 +614,12 @@ const rightHeartModels = {
         PMID: 27453517,
         params: {
             tapse: { a: 3.98, b: 0.352, see: 1.08 },
-            rvwt:  { a: 0.22, b: 0.284, see: 0.05, multiplier: 10 } // cm -> mm
+            rvwt:  { a: 0.22, b: 0.284, see: 0.05, multiplier: 10 }, // cm -> mm
+
+            //  (Grosso 2023)
+            mpamin: { type: 'log_direct', a: -0.084, b: 0.306, see: 0.042, multiplier: 10 },
+            rpamax: { type: 'log_direct', a: -0.201, b: 0.335, see: 0.061, multiplier: 10 },
+            rpamin: { type: 'log_direct', a: -0.439, b: 0.364, see: 0.079, multiplier: 10 }
         }
     },
     feldhutter_2022: {
@@ -631,7 +636,12 @@ const rightHeartModels = {
             
             //  (linear models)
             rad:      { a: 1.12, b: 0.341, see: 0.18, multiplier: 10 }, // cm -> mm
-            rvd1:     { a: 0.92, b: 0.298, see: 0.19, multiplier: 10 }  // cm -> mm
+            rvd1:     { a: 0.92, b: 0.298, see: 0.19, multiplier: 10 },  // cm -> mm
+
+            //  Vascular scaling (Grosso 2023)
+            mpamin: { type: 'log_direct', a: -0.084, b: 0.306, see: 0.042, multiplier: 10 },
+            rpamax: { type: 'log_direct', a: -0.201, b: 0.335, see: 0.061, multiplier: 10 },
+            rpamin: { type: 'log_direct', a: -0.439, b: 0.364, see: 0.079, multiplier: 10 }
         }
     }
 };

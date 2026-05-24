@@ -223,7 +223,10 @@ function advancedEchoSuite() {
         if(!this.rvwt || !this.lvpwd || parseFloat(this.lvpwd) === 0) return 0;
         return (this.rvwt / this.lvpwd).toFixed(3);
     },
-   
+    get rpadi() {
+        if(!this.rpamax || !this.rpamin|| parseFloat(this.rpamax) === 0) return 0;
+        return ((this.rpamax - this.rpamin ) / this.rpamax).toFixed(3);
+    },
     get paaola() {
         if(!this.rvotd || !this.aola || parseFloat(this.aola) === 0) return 0;
         return (this.rvotd / this.aola).toFixed(3);
@@ -444,7 +447,7 @@ get rightAllometricResults() {
     const modelData = rightHeartModels[this.selectedRightModel];
     if (!modelData) return results;
 
-    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rvedv', 'rvesv', 'rvSPrime'];
+    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rvedv', 'rvesv', 'rvSPrime','mpamin', 'rpamax', 'rpamin'];
     
     targets.forEach(param => {
         const formula = modelData.params?.[param];
@@ -1593,21 +1596,35 @@ lviddn: {
         view: "Right Parasternal Short Axis (Heart Base)",
         description: "Used to assess pulmonary artery dilation, a hallmark of precapillary pulmonary hypertension.",
         method: "Measure the minimal internal diameter of the main pulmonary artery at end-diastole (just before pulmonic valve opening).",
-        imgPlaceholder: "/images/mpamin-reference.jpg"
+        imgPlaceholder: "/images/mpamin-reference.jpg",
+        reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
+        pmid: "37918089"
     },
     rpamin: {
         title: "RPA min (Right Pulmonary Artery Minimum)",
         view: "Right Parasternal Short Axis",
         description: "A highly sensitive, body-weight indexed marker for pulmonary hypertension (Vezzosi/Grosso criteria).",
         method: "Measure the internal diameter of the right pulmonary artery branch at end-diastole.",
-        imgPlaceholder: "/images/rpamin-reference.jpg"
+        imgPlaceholder: "/images/rpamin-reference.jpg",
+        reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
+        pmid: "37918089"
     },
     rpamax: {
         title: "RPA max (Right Pulmonary Artery Maximum)",
         view: "Right Parasternal Short Axis",
         description: "Evaluates the maximum distension of the RPA during peak systole.",
         method: "Measure the maximal internal diameter of the right pulmonary artery branch during peak systole.",
-        imgPlaceholder: "/images/rpamax-reference.jpg"
+        imgPlaceholder: "/images/rpamax-reference.jpg",
+        reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
+        pmid: "37918089"
+    },
+    rpadi: {
+        title: "RPAD index",
+        view: "Derived Index",
+        description: "The percentage change in diameter of the right pulmonary artery throughout a singe cardiac cycle.",
+        method: "Calculated as: RPAD index = [(RPAmax  RPAmin) / RPAmax] x 100.",
+        reference: "Grosso et al (2023). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
+        pmid: "37918089"
     },
 
     // --- DERIVED CLINICAL INDICES ---
