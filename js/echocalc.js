@@ -38,7 +38,6 @@ function advancedEchoSuite() {
     mpamin: '',    // Main Pulmonary Artery minimum
     rpamin: '',    // Right Pulmonary Artery min
     rpamax: '',    // Right Pulmonary Artery max
-    ivsFlattening: false, // UI Boolean for "D-shaped" Septum
     lvidd2:'',
     selectedRightModel: 'feldhutter_2022', // Default right heart validation framework
     selectedMineModel: 'mine_1',
@@ -53,6 +52,10 @@ function advancedEchoSuite() {
    copySuccess: false,
     showComments: false,
     clinicalComments: '',
+// --- Chang 2026 PH Score Variables ---
+showChangScore: false, // Toggles the UI section
+ivsFlatteningChang: '0', // 0=Normal, 2=Subtle, 4=Moderate/Severe
+rvotNotching: false, // 0=Normal, 1=Abnormal
     
     /* 2. GETTERS */
     get lviddn() {
@@ -311,6 +314,74 @@ get lveiAssessment() {
         return { label: 'Equivocal (Mild/Diastolic Septal Flattening)', class: 'abnormal', active: true };
     }
     return { label: 'Normal Circular Geometry', class: 'normal', active: false };
+},
+
+/* Chang 2026 Pre-Capillary PH Score (For TR-Negative Patients) */
+get changScoreResults() {
+    // Only calculate if we have baseline left and right comparators
+    if (!this.rvd1 || !this.lvidd || !this.rvwt || !this.lvpwd || !this.rad || !this.lad) return null;
+
+    let score = 0;
+    let breakdown = [];
+
+    // 1. RV Dilatation (RVID vs LVID)
+    const rvRatio = parseFloat(this.rvd1) / parseFloat(this.lvidd);
+    let rvPts = 0;
+    if (rvRatio >= 1.0) rvPts = 6;
+    else if (rvRatio >= 0.75) rvPts = 4;
+    else if (rvRatio > 0.50) rvPts = 2;
+    score += rvPts;
+    breakdown.push({ name: 'RV Dilatation', val: rvPts, desc: rvPts === 0 ? '≤ 50% of LV' : `> ${(rvRatio*100).toFixed(0)}% of LV` });
+
+    // 2. RV Wall Thickening (RVWT vs LVPWd)
+    const wallRatio = parseFloat(this.rvwt) / parseFloat(this.lvpwd);
+    let wallPts = 0;
+    // Note: Due to measurement variance, we treat 0.9 to 1.1 as "Equal"
+    if (wallRatio > 1.1) wallPts = 2;
+    else if (wallRatio >= 0.9) wallPts = 1;
+    score += wallPts;
+    breakdown.push({ name: 'RV Wall Thickness', val: wallPts, desc: wallPts === 2 ? 'Thicker than LV' : (wallPts === 1 ? 'Equal to LV' : 'Thinner than LV') });
+
+    // 3. RA Enlargement (RAD vs LAD)
+    const raRatio = parseFloat(this.rad) / parseFloat(this.lad);
+    let raPts = 0;
+    if (raRatio >= 1.5) raPts = 6;
+    else if (raRatio > 1.1) raPts = 4;
+    else if (raRatio >= 0.9) raPts = 2; // Equal
+    score += raPts;
+    breakdown.push({ name: 'RA Enlargement', val: raPts, desc: raPts === 6 ? '≥ 1.5x LA' : (raPts === 4 ? '> LA' : (raPts === 2 ? 'Equal to LA' : 'Normal')) });
+
+    // 4. IVS Flattening (Subjective Input)
+    const ivsPts = parseInt(this.ivsFlatteningChang) || 0;
+    score += ivsPts;
+    breakdown.push({ name: 'IVS Flattening', val: ivsPts, desc: ivsPts === 4 ? 'Moderate-Severe' : (ivsPts === 2 ? 'Subtle-Mild' : 'Normal') });
+
+    // 5. PA Enlargement (PA/Ao) -> Fallback to mpaAo if paaola not set
+    const paRatio = parseFloat( this.mpaAo || 0);
+    let paPts = 0;
+    if (paRatio >= 2.0) paPts = 6;
+    else if (paRatio >= 1.5) paPts = 4;
+    else if (paRatio > 1.0) paPts = 2;
+    score += paPts;
+    breakdown.push({ name: 'PA Enlargement', val: paPts, desc: paPts > 0 ? `Ratio: ${paRatio}` : 'Normal' });
+
+    // 6. RVOT Flow Profile (Notching)
+    const notchingPts = this.rvotNotching ? 1 : 0;
+    score += notchingPts;
+    breakdown.push({ name: 'RVOT Notching', val: notchingPts, desc: this.rvotNotching ? 'Present' : 'Absent' });
+
+    // Determine Prediction Status based on Youden index cutoffs
+    let prediction = "Low Risk of Severe PH";
+    let alertClass = "normal";
+    if (score >= 9) {
+        prediction = "Predicts pTRV ≥ 4.3 m/s (Severe Pre-Capillary PH)";
+        alertClass = "abnormal"; // Deep Red
+    } else if (score >= 4) {
+        prediction = "Predicts pTRV ≥ 3.4 m/s (Moderate-Severe Pre-Capillary PH)";
+        alertClass = "warning"; // Orange
+    }
+
+    return { total: score, breakdown, prediction, alertClass };
 },
 
 
