@@ -1383,6 +1383,16 @@
                         <span x-text="rpamin"></span> 
                     </span>
                 </div>
+                <div class="result-row" x-show="rpadi" >
+                    <span><strong>RPAD index</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rpadi')"></i></span>
+                    <span>
+                        <span x-text="rpadi"></span> 
+                        <span x-show="parseFloat(rpadi) > 1.1" class="abnormal">(Enlarged)</span>
+                        <span x-show="parseFloat(rpadi) <= 0.9" class="normal">(Normal)</span>
+                        <span style="font-size: 0.8em; color: #666;" x-text="` (ref <0.9)`"></span>
+                    </span>
+                    </span>
+                </div>  
                 <div class="result-row" x-show="mpaAo" >
                     <span><strong>MPA:Ao</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mpaAo')"></i></span>
                     <span>
