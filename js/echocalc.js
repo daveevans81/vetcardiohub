@@ -1090,7 +1090,7 @@ if (this.qpqs > 0) {
 }
 
 // --- RIGHT HEART
-if (this.trMax > 0 || this.rvotd > 0 || this.lvotvti || this.rvotvti) {
+if (this.trMax > 0 || this.prMax > 0 || this.tapse > 0  || this.rvwt || this.rveda > 0 || this.rvesa > 0 || this.rvd1 > 0 || this.rad > 0 || this.rad2 > 0  || this.mpamin > 0 || this.rpamax > 0 || this.rpamin > 0 || this.lvei > 0) {
         text += `\nRight Heart:\n`;
 }
 if (this.trMax > 0) {
@@ -1100,10 +1100,10 @@ if (this.trPG > 0) {
     text += `TR PG: ${this.trPG} (Ref: <30)${this.trPG > 30 ? ' [High]' :  ''}\n`;
 }
 if (this.prMax > 0) {
-    text += `TR Vel: ${this.trMax} (Ref: <2.0)${this.trMax > 2 ? ' [High]' :  ''}\n`;
+    text += `PR Vel: ${this.prMax} (Ref: <2.0)${this.prMax > 2 ? ' [High]' :  ''}\n`;
 }
 if (this.prPG > 0) {
-    text += `TR PG: ${this.trPG} (Ref: <16)${this.trPG > 16 ? ' [High]' :  ''}\n`;
+    text += `PR PG: ${this.prPG} (Ref: <16)${this.prPG > 16 ? ' [High]' :  ''}\n`;
 }
 
 const addMeasure = (label, val, refKey, unit = '', isHighOnly = false) => {
@@ -1145,7 +1145,7 @@ const addMeasure = (label, val, refKey, unit = '', isHighOnly = false) => {
     if (this.radaola) text += `RAD:Ao(LA): ${this.radaola}(Ref: 0.79-2.02)${this.radaola > 2.02 ? ' [Dilated]' :  ''}\n`;
 
     addMeasure('RAD (RPLA)', this.rad2, 'rad2', ' mm');
-    if (this.rad2lad) text += `RAD2:LAD: ${this.rad2lad}\n`(Ref: 0.51-0.99)${this.rad2lad > 0.99 ? ' [Dilated]' :  ''}\n`;;
+    if (this.rad2lad) text += `RAD2:LAD: ${this.rad2lad} (Ref: 0.51-0.99)${this.rad2lad > 0.99 ? ' [Dilated]' :  ''}\n`;
     if (this.rad2aola) text += `RAD2:Ao(LA): ${this.rad2aola}(Ref: 0.97-2.07)${this.rad2aola > 2.07 ? ' [Dilated]' :  ''}\n`;
 
     // 4. Pulmonary Artery
