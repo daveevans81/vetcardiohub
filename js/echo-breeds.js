@@ -614,7 +614,7 @@ const rightHeartModels = {
         PMID: 27453517,
         params: {
             tapse: { a: 3.98, b: 0.352, see: 1.08 },
-            rvwt:  { a: 0.22, b: 0.284, see: 0.05 }
+            rvwt:  { a: 0.22, b: 0.284, see: 0.05, multiplier: 10 } // cm -> mm
         }
     },
     feldhutter_2022: {
@@ -629,9 +629,9 @@ const rightHeartModels = {
             rvesv:    { type: 'log_direct', a: -0.095, b: 0.962, see: 0.118 }, 
             rvSPrime: { type: 'log_direct', a: -1.076, b: 0.186, see: 0.113 },
             
-            // Retained from your previous block (linear models)
-            rad:      { a: 1.12, b: 0.341, see: 0.18 }, 
-            rvd1:     { a: 0.92, b: 0.298, see: 0.19 }
+            //  (linear models)
+            rad:      { a: 1.12, b: 0.341, see: 0.18, multiplier: 10 }, // cm -> mm
+            rvd1:     { a: 0.92, b: 0.298, see: 0.19, multiplier: 10 }  // cm -> mm
         }
     }
 };

@@ -436,6 +436,7 @@ get availableRightModels() {
     }));
 },
 
+/* Specialized Decoupled Right Heart Allometric Evaluator */
 get rightAllometricResults() {
     const results = {};
     if (!this.weight || this.weight <= 0 || typeof rightHeartModels === 'undefined') return results;
@@ -443,7 +444,7 @@ get rightAllometricResults() {
     const modelData = rightHeartModels[this.selectedRightModel];
     if (!modelData) return results;
 
-    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rpamin'];
+    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rvedv', 'rvesv', 'rvSPrime'];
     
     targets.forEach(param => {
         const formula = modelData.params?.[param];
@@ -452,12 +453,28 @@ get rightAllometricResults() {
             return;
         }
 
-        // Standard allometric computation curve: Y = a * (BW ^ b)
-        const mean = formula.a * Math.pow(this.weight, formula.b);
-        
-        // Handle models that provide fixed prediction intervals vs standard deviations
-        let lower = formula.minMultiplier ? formula.minMultiplier * mean : mean - (1.96 * (formula.see || 0));
-        let upper = formula.maxMultiplier ? formula.maxMultiplier * mean : mean + (1.96 * (formula.see || 0));
+        let mean, lower, upper;
+
+        if (formula.type === 'log_direct') {
+            // FELDHÜTTER MATH
+            const logMean = formula.a + (formula.b * Math.log10(this.weight));
+            mean = Math.pow(10, logMean); 
+            const see = formula.see || 0; 
+            lower = Math.pow(10, logMean - (1.96 * see));
+            upper = Math.pow(10, logMean + (1.96 * see));
+        } else {
+            // VISSER & GENTILE MATH
+            mean = formula.a * Math.pow(this.weight, formula.b);
+            lower = formula.minMultiplier ? formula.minMultiplier * mean : mean - (1.96 * (formula.see || 0));
+            upper = formula.maxMultiplier ? formula.maxMultiplier * mean : mean + (1.96 * (formula.see || 0));
+        }
+
+        // --- APPLY UNIT SCALING FACTOR ---
+        // If the database has a multiplier (like 10 for cm to mm), apply it. Otherwise, default to 1.
+        const scale = formula.multiplier || 1;
+        mean *= scale;
+        lower *= scale;
+        upper *= scale;
 
         // Enforce safe mathematical floors for lower bounds
         if (lower < 0) lower = 0;
