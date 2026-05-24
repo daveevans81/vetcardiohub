@@ -52,10 +52,19 @@ function advancedEchoSuite() {
    copySuccess: false,
     showComments: false,
     clinicalComments: '',
+
 // --- Chang 2026 PH Score Variables ---
 showChangScore: false, // Toggles the UI section
 ivsFlatteningChang: '0', // 0=Normal, 2=Subtle, 4=Moderate/Severe
 rvotNotching: false, // 0=Normal, 1=Abnormal
+
+// --- Patient & Clinical Metadata ---
+showPatientDetails: false, // Toggles the concertina
+patientName: '',
+ownerName: '',
+species: 'Canine', // Default
+breed: '',
+clinicalComments: ''
 
     
     /* 2. GETTERS */
@@ -1177,6 +1186,52 @@ parseRawText() {
     const lines = this.rawEchoText.split(/\r?\n/);
     const filled = new Set();
 
+// --- 0. EXTRACT PATIENT METADATA (Header Scan) ---
+const headerMarkers = /\b(Patient|Name|Owner|Breed|Species|Client):\s*(.*)/i;
+const namePattern = /\b(Name|Patient|Owner)\b[:\s]*([A-Za-z]+)\s+([A-Za-z]+)/i;
+
+for (const line of lines.slice(0, 5)) { // Only scan the first 5 lines of the report
+    
+    // 1. Explicit Label Match (e.g., "Patient: Buster Smith")
+    if (line.match(/Patient|Name/i) && !this.patientName) {
+        const parts = line.replace(/Patient|Name|:|Owner/gi, '').trim().split(/\s+/);
+        if (parts.length >= 2) {
+            this.patientName = parts[0];
+            this.ownerName = parts[1];
+        }
+    }
+    
+    // 2. Breed Scan
+    if (/\b(Breed|Canine|Feline|Dog|Cat)\b/i.test(line)) {
+        const breedMatch = line.match(/\b(Breed|Canine|Feline|Dog|Cat)\b[:\s]*([A-Za-z\s]+)/i);
+        if (breedMatch && breedMatch[2]) this.breed = breedMatch[2].trim();
+    }
+}
+
+    // --- 0. EXTRACT CLINICAL COMMENTS (If Empty) ---
+    // Look for keywords common in echo reports that signal clinical prose
+    if (!this.clinicalComments || this.clinicalComments.trim() === '') {
+        const commentMarkers = /\b(Impression|Conclusion|Summary|Comments|Interpretation):/i;
+        let foundComments = [];
+        let capturing = false;
+
+        for (const line of lines) {
+            if (commentMarkers.test(line)) {
+                capturing = true;
+                foundComments.push(line.replace(commentMarkers, '').trim());
+            } else if (capturing && line.trim().length > 0) {
+                // Keep capturing until we hit a line that looks like a measurement (has a number)
+                if (!/[0-9]/.test(line)) {
+                    foundComments.push(line.trim());
+                } else {
+                    capturing = false;
+                }
+            }
+        }
+        if (foundComments.length > 0) {
+            this.clinicalComments = foundComments.join('\n');
+        }
+
     // --- 1. THE EXTRACTION MAP ---
     // (Moved to the top so everything below can access it safely)
     const extractionMap = [
@@ -1244,10 +1299,13 @@ parseRawText() {
         }
     }
 
-    // --- 3. THE PARSING ENGINE LOOP ---
+// --- 3. THE PARSING ENGINE LOOP ---
     for (const line of lines) {
         const trimmedLine = line.trim();
         if (!trimmedLine) continue;
+
+        // Skip lines that are likely part of the clinical comments we already grabbed
+        if (this.clinicalComments && this.clinicalComments.includes(trimmedLine)) continue;
 
         for (const rule of extractionMap) {
             if (filled.has(rule.key)) continue;
@@ -1283,7 +1341,7 @@ parseRawText() {
 
     // --- 4. TEXTUAL CLINICAL SCANNERS ---
     if (/\b(?:flattening|flattened|D-shape|D-shaped|D shape)\b/i.test(this.rawEchoText)) {
-        this.ivsFlattening = true;
+        this.ivsFlatteningChang = '4'; // Set to 4 (Moderate-Severe) if found in text
     }
 
     // --- 5. UI NOTIFICATION FEEDBACK ---
