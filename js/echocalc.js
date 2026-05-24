@@ -64,7 +64,6 @@ patientName: '',
 ownerName: '',
 species: 'Canine', // Default
 breed: '',
-clinicalComments: ''
 
     
     /* 2. GETTERS */
