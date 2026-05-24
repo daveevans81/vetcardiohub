@@ -705,7 +705,7 @@
                   <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">
                   <strong>Patient Name: </strong> <span x-text="patientName || '—'"></span>  |
                   <strong>Owner: </strong> <span x-text="ownerName || '—'"></span> |
-                  <strong>Species:</strong> <span x-text="isDog">Canine</span><span x-text="isCat">Feline</span> |
+                  <strong>Species:</strong> <span x-show="isDog">Canine</span><span x-show="isCat">Feline</span> |
                   <strong>Breed:</strong> <span x-text="breed"></span> 
                 </p>
                 </div>
@@ -1537,6 +1537,8 @@
                   <textarea x-model="clinicalComments" placeholder="e.g. Mild MR. No evidence of CHF. Recheck 6 months." style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem;"></textarea>
                 </div>
               </div>
+              
+              
               <div style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
     
                 <button @click="showPatientDetails = !showPatientDetails" type="button" class="toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 15px; border: none; background: #f8fafc; cursor: pointer; font-weight: 700; color: #1e293b;">
@@ -1560,8 +1562,17 @@
                                 <label>Breed</label>
                                 <input type="text" x-model="breed" placeholder="e.g. Cavalier">
                             </div>
+                             <div class="input-group">
+                               <label>Selected species: <span x-show="isDog">Canine</span><span x-show="isCat">Feline</span></label><p>Change allometric model if incorrect</p>
+                             </div>
+                             
+                             <div class="input-group">
+                                <label>Report Date</label>
+                                <input type="text" x-model="reportDate" placeholder="DD/MM/YYYY">
+
+                            </div>
                         </div>
-            
+                      
                     </div>
                 </div>
             </div>

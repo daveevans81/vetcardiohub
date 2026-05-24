@@ -52,6 +52,11 @@ function advancedEchoSuite() {
    copySuccess: false,
     showComments: false,
     clinicalComments: '',
+    reportDate: new Date().toLocaleDateString('en-GB', { 
+       day: 'numeric', 
+       month: 'long', 
+       year: 'numeric' 
+    }    ),
 
 // --- Chang 2026 PH Score Variables ---
 showChangScore: false, // Toggles the UI section
@@ -1197,6 +1202,10 @@ for (const line of lines.slice(0, 5)) { // Only scan the first 5 lines of the re
         if (parts.length >= 2) {
             this.patientName = parts[0];
             this.ownerName = parts[1];
+        }
+        const dateMatch = line.match(/\bDate\s+([\d\/.-]+)/i);
+            if (dateMatch && dateMatch[1]) {
+        this.reportDate = dateMatch[1].trim();
         }
     }
     
