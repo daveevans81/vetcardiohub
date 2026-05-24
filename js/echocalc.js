@@ -1230,6 +1230,7 @@ for (const line of lines.slice(0, 5)) { // Only scan the first 5 lines of the re
         if (foundComments.length > 0) {
             this.clinicalComments = foundComments.join('\n');
         }
+    }
 
     // --- 1. THE EXTRACTION MAP ---
     // (Moved to the top so everything below can access it safely)
