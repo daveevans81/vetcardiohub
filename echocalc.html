@@ -697,7 +697,7 @@
               <div class="results-box" x-transition>
                 <p style="font-weight: bold; color: #1e40af; border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-bottom: 5px; font-size: 1.2rem;">
                   <span style="text-transform: capitalize;" x-text="allometricModels[selectedModel].species"></span> Echocardiography Report
-                <span>Date:</span><span x-text="reportDate"></span></p>
+                <br><span>Date:</span><span x-text="reportDate"></span></p>
 
                 <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">
                   <strong>Weight:</strong> <span x-text="weight || '—'"></span> kg |
@@ -1482,7 +1482,7 @@
                 <div class="result-row" x-show="rpadi" >
                     <span><strong>RPAD index</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('rpadi')"></i></span>
                     <span>
-                        <span x-text="rpadi"></span> 
+                        <span x-text="rpadi"></span> &percnt;
                         <span x-show="parseFloat(rpadi) < 31.2" class="abnormal">(Reduced)</span>
                         <span x-show="parseFloat(rpadi) >= 31.2" class="normal">(Normal)</span>
                         <span style="font-size: 0.8em; color: #666;" x-text="` (ref 31.2-54.2)`"></span>

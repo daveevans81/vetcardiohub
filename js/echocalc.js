@@ -952,7 +952,9 @@ closeGlossary() {
         const species = (model.species || 'VETERINARY').toUpperCase();
         
         let text = `${species} ECHOCARDIOGRAPHY REPORT\n`;
+        text += `Date: ${this.reportDate} \n`;
         text += `Weight: ${this.weight}kg | BSA: ${this.bsa}m² | Model: ${modelLabel} \n`;
+        text += `Patient Name: ${this.patientName} | Owner Name: ${this.ownerName} | Breed: ${this.breed} \n`;
         text += `--------------------------------------------------\n\n`;
 
         text += `LEFT VENTRICLE:\n`;
@@ -1023,10 +1025,9 @@ if (this.mrFraction > 0) {
 
 if (this.isDog) {
         if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${this.getTag(this.lan, null, 1.17)}\n`;
-        if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${this.getTag(this.ladn, null, 1.60)}\n`;
         if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${this.getTag(this.ladao, null, 2.10)}\n`;
-        
-
+        if (this.ladaola > 0)  text += `LAD:Ao(lax) Ratio: ${this.ladao} (Ref: <2.40)${this.getTag(this.ladaola, null, 2.40)}\n`;        
+        if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${this.getTag(this.ladn, null, 1.60)}\n`;
     }
 
         text += `\nSPECTRAL DOPPLER:\n`;
@@ -1052,7 +1053,7 @@ if (this.ePrime > 0) {
     text += `Eprime: ${this.ePrime} (Ref: 0.95-1.6)${this.ear >= 1.6 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
 }
 if (this.eePrime > 0) {
-    text += `E:Eprime Ratio: ${this.eePrime} (Ref: 0.95-1.6)${this.ear >= 12 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+    text += `E:Eprime Ratio: ${this.eePrime} (Ref: <12)${this.ear >= 12 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
 }
 if (this.lveio > 0) {
     text += `LVEIO: ${this.lveio} (Ref: <11.85)${this.ear >= 11.85 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
@@ -1073,13 +1074,13 @@ if (this.lvotd > 0) {
     text += `LVOT diameter: ${this.lvotd} \n`;
 }
 if (this.rvotd > 0) {
-    text += `RVOT diameter: ${this.lvotd} \n`;
+    text += `RVOT diameter: ${this.rvotd} \n`;
 }
 if (this.lvotvti > 0) {
-    text += `LVOT VTI: ${this.lvotd} \n`;
+    text += `LVOT VTI: ${this.lvotvti} \n`;
 }
 if (this.rvotvti > 0) {
-    text += `RVOT VTI: ${this.lvotd} \n`;
+    text += `RVOT VTI: ${this.rvotvti} \n`;
 }
 if (this.vtir > 0) {
     text += `VTI Ratio P:S: ${this.vtir} (Ref: 0.9-1.1)${this.vtir >= 1.1 ? ' [High]' :  ''}\n`;
@@ -1095,9 +1096,80 @@ if (this.trMax > 0 || this.rvotd > 0 || this.lvotvti || this.rvotvti) {
 if (this.trMax > 0) {
     text += `TR Vel: ${this.trMax} (Ref: <2.7)${this.trMax > 2.7 ? ' [High]' :  ''}\n`;
 }
+if (this.trPG > 0) {
+    text += `TR PG: ${this.trPG} (Ref: <30)${this.trPG > 30 ? ' [High]' :  ''}\n`;
+}
+if (this.prMax > 0) {
+    text += `TR Vel: ${this.trMax} (Ref: <2.0)${this.trMax > 2 ? ' [High]' :  ''}\n`;
+}
+if (this.prPG > 0) {
+    text += `TR PG: ${this.trPG} (Ref: <16)${this.trPG > 16 ? ' [High]' :  ''}\n`;
+}
 
+const addMeasure = (label, val, refKey, unit = '', isHighOnly = false) => {
+        if (!val || val <= 0) return;
+        let note = '';
+        if (refKey && this.rightAllometricResults[refKey]?.available) {
+            const { min, max } = this.rightAllometricResults[refKey];
+            if (val > max) note = ' [High]';
+            else if (val < min) note = ' [Low]';
+            else note = ' (Normal)';
+            note += ` (Ref: ${min}-${max})`;
+        }
+        text += `${label}: ${val}${unit}${note}\n`;
+    };
 
+// 2. RV Dimensions & TAPSE
+    addMeasure('TAPSE', this.tapse, 'tapse', ' mm');
+    if (this.tapsen) text += `TAPSEn: ${this.tapsen} ${this.tapsen < 4.5 ? '[Low]' : '(Normal)'}\n`;
+    if (this.tapseaola) text += `TAPSE:Ao(LA): ${this.tapseaola} (Ref: 0.47-1.2)${this.tapseaola < 0.47 ? ' [Low]' :  ''}\n`;
+    
+    addMeasure('RVWT', this.rvwt, 'rvwt', ' mm');
+    if (this.rvwtaola) text += `RVWT:Ao(LA): ${this.rvwtaola} (Ref: 0.24-0.58)${this.rvwtaola > 0.58 ? ' [Thick]' :  ''}\n`;
+    if (this.rvwtlvpwd) text += `RVWT:LVPWd: ${this.rvwtlvpwd}(Ref: 0.44-0.88)${this.rvwtlvpwd > 0.88 ? ' [Thick]' :  ''}\n`;
 
+    // 3. Right Atrium & RV Area
+    addMeasure('RVEDA', this.rveda, 'rveda', ' cm²');
+    if (this.rvedan) text += `RVEDAn: ${this.rvedan} (Ref: <1.4)${this.rvedan > 1.4 ? ' [Dilated]' :  ''}\n`;
+
+    addMeasure('RVESA', this.rvesa, 'rvesa', ' cm²');
+    if (this.rvesan) text += `RVESAn: ${this.rvesan} (Ref: <0.8)${this.rvesan > 0.8 ? ' [Dilated]' :  ''}\n`;
+    if (this.rfac) text += `RV FAC: ${this.rfac}% ${this.rfac < 25 ? '[Low]' : '(Normal)'}\n`;
+
+    addMeasure('RVD Basal', this.rvd1, 'rvd1', ' mm');
+    if (this.rvd1n) text += `RVD1n: ${this.rvd1n} (Ref: <0.94)${this.rvd1n > 0.94 ? ' [Dilated]' :  ''}\n`;
+    if (this.rvd1aola) text += `RVD1:Ao(LA): ${this.rvd1aola} (Ref: 0.81-1.94)${this.rvd1aola > 1.94 ? ' [Dilated]' :  ''}\n`;
+
+    addMeasure('RAD (Ap4Ch)', this.rad, 'rad', ' mm');
+    if (this.radn) text += `RADn (Ap4Ch): ${this.radn} (Ref: <0.9)${this.radn > 0.9 ? ' [Dilated]' :  ''}\n`;
+    if (this.radaola) text += `RAD:Ao(LA): ${this.radaola}(Ref: 0.79-2.02)${this.radaola > 2.02 ? ' [Dilated]' :  ''}\n`;
+
+    addMeasure('RAD (RPLA)', this.rad2, 'rad2', ' mm');
+    if (this.rad2lad) text += `RAD2:LAD: ${this.rad2lad}\n`(Ref: 0.51-0.99)${this.rad2lad > 0.99 ? ' [Dilated]' :  ''}\n`;;
+    if (this.rad2aola) text += `RAD2:Ao(LA): ${this.rad2aola}(Ref: 0.97-2.07)${this.rad2aola > 2.07 ? ' [Dilated]' :  ''}\n`;
+
+    // 4. Pulmonary Artery
+    addMeasure('MPA min', this.mpamin, 'mpamin', ' mm');
+    if (this.mpaAo) text += `MPA:Ao: ${this.mpaAo}(Ref: 0.78-1.01)${this.mpaAo > 1.01 ? ' [Dilated]' :  ''}\n`;
+    addMeasure('RPA max', this.rpamax, 'rpamax', ' mm');
+  if (this.rpamaxao) text += `RPA:Ao: ${this.rpamaxao}(Ref: 0.53-0.98)${this.rpamaxao > 0.98 ? ' [Dilated]' :  ''}\n`;
+    addMeasure('RPA min', this.rpamin, 'rpamin', ' mm');
+    if (this.rpaminao) text += `RPA:Ao: ${this.rpaminao}(Ref: 0.29-0.61)${this.rpaminao > 0.61 ? ' [Dilated]' :  ''}\n`;
+    if (this.rpadi) text += `RPAD Index: ${this.rpadi}(Ref: 31.2-54.2)${this.rpadi < 31 ? ' [Reduced]' :  ''}\n`;
+
+    // 5. Advanced PHT Metrics
+    if (this.lvei) text += `LVEI: ${this.lvei}\n`;
+   if (this.IVSFlatteningChang > 0) text += `IVS flattening seen\n`;
+     if (this.rvotNotching) text += `RVOT notch seen\n`;
+    if (this.eplar > 0) text += `ePLAR: ${this.eplar} ${this.eplar >= 0.28 ? '[Pre-Capillary PH Pattern]' : '[Post-Capillary Backup]'}\n`;
+
+    // --- SUMMARY ---
+    if (this.changScoreResults) {
+        text += `\nChang (2026) PHT Score: ${this.changScoreResults.total}/25 - ${this.changScoreResults.prediction}\n`;
+    }
+    if (this.phClassification) {
+        text += `ACVIM PH Probability: ${this.phClassification.probability} (${this.phClassification.anatomicSites}/3 sites)\n`;
+    }
         if (this.isDog && this.lviddn > 0 && this.laAo > 0) {
             text += `\nCANINE CLINICAL ASSESSMENT (EPIC B2):\n`;
             const meetsLA = this.laAo >= 1.65;
