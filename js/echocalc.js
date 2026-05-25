@@ -447,7 +447,8 @@ get phClassification() {
     }
     if (this.rvwtlvpwd > 0) addMetric('site1', 'RVWT:LVPWd', this.rvwtlvpwd, parseFloat(this.rvwtlvpwd) > 1.0, '> 1.0', 'rvwtlvpwd');
 
-    // --- 3. Evaluate ACVIM Site 2: Pulmonary Artery ---
+
+// --- 3. Evaluate ACVIM Site 2: Pulmonary Artery ---
     if (this.mpaAo > 0) addMetric('site2', 'MPA:Ao', this.mpaAo, parseFloat(this.mpaAo) > 1.0, '> 1.0', 'mpaAo');
     if (this.paaola > 0) addMetric('site2', 'PA:Ao(LA)', this.paaola, parseFloat(this.paaola) > 1.0, '> 1.0', 'paaola');
     if (this.rpaIndex > 0) addMetric('site2', 'RPA Index', this.rpaIndex, this.rpaIndex >= 3.0, '≥ 3.0', 'rpadi');
@@ -457,6 +458,14 @@ get phClassification() {
     }
     if (this.rpamin > 0 && this.rightAllometricResults?.rpamin?.available) {
         addMetric('site2', 'RPA min', `${this.rpamin} mm`, parseFloat(this.rpamin) > this.rightAllometricResults.rpamin.max, `> ${this.rightAllometricResults.rpamin.max} (Allo Max)`, 'rpamin');
+    }
+
+    //  PR Velocity Evaluation (ACVIM Site 2 Criteria)
+    const pr = parseFloat(this.prMax) || 0;
+    if (pr > 0) {
+        let isAbnormal = pr >= 2.5;
+        let thresholdStr = pr >= 2.5 ? '≥ 2.5 m/s (High)' : (pr >= 2.0 ? '2.0-2.5 m/s (Borderline)' : '< 2.0 m/s (Normal)');
+        addMetric('site2', 'PR Peak Velocity', `${pr} m/s`, isAbnormal, thresholdStr, 'prMax');
     }
 
     // --- 4. Evaluate ACVIM Site 3: Right Atrium ---

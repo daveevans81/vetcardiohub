@@ -81,10 +81,24 @@
             <span><i class="fa-solid fa-keyboard" style="color: #0ea5e9;"></i> Diagnostic Inputs</span>
         </h2>
 
-        <h3 class="section-subtitle">1. Patient Baseline</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="input-group"><label>Body Weight (kg)</label><input type="number" step="0.1" x-model="weight" placeholder="e.g. 12.5"></div>
-            <div class="input-group"><label>TR Peak Velocity (m/s) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('trMax')"></i></label><input type="number" step="0.1" x-model="trMax"></div>
+        <h3 class="section-subtitle">1. Patient Baseline & Primary Doppler</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            
+            <div class="input-group">
+                <label>Body Weight (kg)</label>
+                <input type="number" step="0.1" x-model="weight" placeholder="e.g. 12.5">
+            </div>
+            
+            <div class="input-group">
+                <label>TR Peak Vel (m/s) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('trMax')"></i></label>
+                <input type="number" step="0.1" x-model="trMax">
+            </div>
+            
+            <div class="input-group">
+                <label>PR Peak Vel (m/s) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('prMax')"></i></label>
+                <input type="number" step="0.1" x-model="prMax">
+            </div>
+            
         </div>
 
         <h3 class="section-subtitle">2. Ventricles (ACVIM Site 1)</h3>
