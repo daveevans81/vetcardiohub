@@ -1495,6 +1495,17 @@ quizDeck: [],
 currentQuizIndex: 0,
 quizRevealed: false,
 
+// Category Filter for quiz
+selectedCategory: 'All',
+availableCategories: ['All', 'Doppler', 'Anatomy', 'Calculations', 'Guidelines'],
+quizMode: 'flashcard', // 'flashcard' or 'mcq'
+mcqOptions: [],
+mcqAnswered: false,
+mcqSelectedIndex: null,
+selectedDifficulty: 'All',
+availableDifficulties: ['All', 1, 2, 3, 4],
+
+
 // --- LEARNING HUB METHODS ---
 // Converts your glossary object into an array for easy mapping and searching
 get glossaryArray() {
@@ -1532,9 +1543,6 @@ nextQuizCard() {
     }
 },
 
-
-
-
 markCard(status) {
     if (status === 'correct') {
         this.sessionScore.correct++;
@@ -1546,15 +1554,21 @@ markCard(status) {
 
 startQuiz() {
     this.learningMode = 'quiz';
-    this.quizDeck = [...this.glossaryArray].sort(() => Math.random() - 0.5);
+    
+    // MAGIC TOUCH: Create the deck from the FILTERED list, not the whole database!
+    // Fallback to the whole array if their filter resulted in 0 cards.
+    const deckToUse = this.filteredGlossary.length > 0 ? this.filteredGlossary : this.glossaryArray;
+    
+    this.quizDeck = [...deckToUse].sort(() => Math.random() - 0.5);
     this.currentQuizIndex = 0;
     this.quizRevealed = false;
-    this.sessionScore = { correct: 0, review: 0 }; // Reset score
+    this.sessionScore = { correct: 0, review: 0 };
+    
+    // If they were already in MCQ mode, generate the first question
+    if (this.quizMode === 'mcq') this.generateMCQ();
 },
 
-// Category Filter 
-selectedCategory: 'All',
-availableCategories: ['All', 'Doppler', 'Anatomy', 'Calculations', 'Guidelines'],
+
 
 // Update the filtered list
 get filteredGlossary() {
@@ -1565,7 +1579,13 @@ get filteredGlossary() {
         list = list.filter(item => item.category === this.selectedCategory);
     }
     
-    // 2. Filter by Search Query
+    // 2. Filter by Difficulty
+    if (this.selectedDifficulty !== 'All') {
+        // Convert to integer since select dropdowns often return strings
+        list = list.filter(item => item.difficulty === parseInt(this.selectedDifficulty));
+    }
+    
+    // 3. Filter by Search Query
     if (this.searchQuery.trim() !== '') {
         const q = this.searchQuery.toLowerCase();
         list = list.filter(item => 
@@ -1575,6 +1595,65 @@ get filteredGlossary() {
     }
     return list;
 },
+
+generateMCQ() {
+    const correctCard = this.quizDeck[this.currentQuizIndex];
+    
+    // Find 3 random distractor cards (ideally from the same category to make it tricky)
+    let possibleDistractors = this.glossaryArray.filter(item => 
+        item.key !== correctCard.key && item.category === correctCard.category
+    );
+    
+    // If not enough in the same category, pull from anywhere
+    if (possibleDistractors.length < 3) {
+        possibleDistractors = this.glossaryArray.filter(item => item.key !== correctCard.key);
+    }
+    
+    // Shuffle and pick top 3
+    const shuffledDistractors = possibleDistractors.sort(() => 0.5 - Math.random()).slice(0, 3);
+    
+    // Combine correct answer with distractors
+    let options = [
+        { text: correctCard.description, isCorrect: true },
+        { text: shuffledDistractors[0].description, isCorrect: false },
+        { text: shuffledDistractors[1].description, isCorrect: false },
+        { text: shuffledDistractors[2].description, isCorrect: false }
+    ];
+    
+    // Shuffle the final options so 'A' isn't always correct
+    this.mcqOptions = options.sort(() => 0.5 - Math.random());
+    this.mcqAnswered = false;
+    this.mcqSelectedIndex = null;
+},
+
+selectMCQAnswer(index) {
+    if (this.mcqAnswered) return; // Prevent double guessing
+    this.mcqSelectedIndex = index;
+    this.mcqAnswered = true;
+    
+    // Score it
+    if (this.mcqOptions[index].isCorrect) {
+        this.sessionScore.correct++;
+    } else {
+        this.sessionScore.review++;
+    }
+},
+
+nextQuestion() {
+    this.currentQuizIndex++;
+    if (this.currentQuizIndex >= this.quizDeck.length) {
+        this.startQuiz(); // Reshuffle if at the end
+    } else {
+        // Generate the next format based on current toggle
+        if (this.quizMode === 'mcq') this.generateMCQ();
+        else this.quizRevealed = false;
+    }
+},
+
+
+
+
+
 
 
 
@@ -1727,7 +1806,9 @@ glossaryDatabase: {
         view: "Right Parasternal Short Axis (Papillary Level)",
         description: "Quantifies septal flattening (D-shape) to calculate the LV Eccentricity Index.",
         method: "Measure the LV internal diameter at end-diastole perpendicular to the normal vertical LVIDd. If the septum is flattened by RV pressure, this horizontal measurement will be significantly larger than the vertical one.",
-        imgPlaceholder: "/images/lvidd2-reference.jpg"
+        imgPlaceholder: "/images/lvidd2-reference.jpg",
+category: "Right Heart",
+        difficulty: 3
     },
 radn: {
         title: "RADn (Normalized Right Atrial Diameter)",
@@ -1747,14 +1828,18 @@ radn: {
         view: "Right Parasternal Short Axis (Papillary Level)",
         description: "Primary metric for assessing left ventricular volume overload (eccentric hypertrophy) commonly seen in MMVD or PDA.",
         method: "Measure the maximal internal diameter of the left ventricle at end-diastole (peak R wave). Ensure the cursor is perpendicular to the septum and free wall.",
-        imgPlaceholder: "/images/lvidd-reference.jpg"
+        imgPlaceholder: "/images/lvidd-reference.jpg",
+category: "Left Heart",
+        difficulty: 1
     },
     lvids: {
         title: "LVIDs (LV Internal Diameter - Systole)",
         view: "Right Parasternal Short Axis (Papillary Level)",
         description: "Assesses left ventricular systolic function and contractility.",
         method: "Measure the minimal internal diameter of the left ventricle at peak systole (end of the T wave or maximal septal deviation).",
-        imgPlaceholder: "/images/lvids-reference.jpg"
+        imgPlaceholder: "/images/lvids-reference.jpg",
+category: "Left Heart",
+        difficulty: 1
     },
 lviddn: {
         title: "LVIDdn (Normalized LVID Diastole)",
@@ -1763,19 +1848,25 @@ lviddn: {
         method: "Calculated as: (LVIDd in cm) / (Body Weight in kg)^0.294. A value > 1.70 is a primary criteria for ACVIM Stage B2 MMVD.",
 
         reference: "Cornell et al. Allometric scaling of M-mode cardiac measurements in normal adult dogs.",
-        pmid: "15188817"
+        pmid: "15188817",
+category: "Left Heart",
+        difficulty: 2
     },
     lvidsn: {
         title: "LVIDsn (Normalized LVID Systole)",
         view: "Derived Index (Allometric Scaling)",
         description: "Scales the systolic diameter to body weight to accurately assess myocardial contractility and systolic function independently of the dog's size.",
-        method: "Calculated as: (LVIDs in cm) / (Body Weight in kg)^0.315. Normal range is typically 0.71 to 1.26."
+        method: "Calculated as: (LVIDs in cm) / (Body Weight in kg)^0.315. Normal range is typically 0.71 to 1.26.",
+category: "Left Heart",
+        difficulty: 2
     },
     lan: {
         title: "LAn (Normalized LA Short Axis)",
         view: "Derived Index (Allometric Scaling)",
         description: "Scales the short-axis left atrial dimension directly to body weight. Useful when the aortic root size is abnormal or difficult to measure, throwing off the standard LA:Ao ratio.",
-        method: "Calculated as: (LA in cm) / (Body Weight in kg)^0.355."
+        method: "Calculated as: (LA in cm) / (Body Weight in kg)^0.355.",
+category: "Left Heart",
+        difficulty: 2
     },
     ladn: {
         title: "LADn (Normalized LA Long Axis)",
@@ -1783,25 +1874,33 @@ lviddn: {
         description: "Scales the long-axis (or apical) left atrial dimension to body weight. Provides a comprehensive assessment of 3D atrial remodeling.",
         method: "Calculated as: (LAD in cm) / (Body Weight in kg)^0.309.",
         reference: "Marchesotti et al (2019). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
-        pmid: "31611490"
+        pmid: "31611490",
+category: "Left Heart",
+        difficulty: 2
     },
     ladao: {
         title: "LAD:Ao Ratio (Long Axis to Aorta)",
         view: "Derived Index",
         description: "Scales the long-axis (or apical) left atrial dimension to the aortic root. Aortic measurement is made in short axis for using these cut-offs. If measuring aorta in short axis view cut off is 2.1.",
-        method: "Calculated dynamically as: LAD (mm) / Ao (mm)."
+        method: "Calculated dynamically as: LAD (mm) / Ao (mm).",
+category: "Left Heart",
+        difficulty: 2
     },
     ladaola: {
         title: "LAD:Ao Ratio (Long Axis to Aorta long axis)",
         view: "Derived Index",
         description: "Scales the long-axis (or apical) left atrial dimension to the aortic root measured in right parasternal long axis view. Aortic measurement is made in long axis 5 chamber view for using these cut-offs. If measuring aorta in long axis view cut off is 2.4.",
-        method: "Calculated dynamically as: LAD (mm) / Ao (mm)."
+        method: "Calculated dynamically as: LAD (mm) / Ao (mm).",
+category: "Left Heart",
+        difficulty: 2
     },
     RWT: { // Capitalized to match your exact state getter
         title: "Relative Wall Thickness (RWT)",
         view: "Derived Index",
         description: "Classifies LV geometry as normal, concentric hypertrophy (high RWT, e.g., HCM or systemic hypertension), or eccentric hypertrophy (low RWT, e.g., volume overload).",
-        method: "Calculated as: (2 × LV Posterior Wall) / LVIDd."
+        method: "Calculated as: (2 × LV Posterior Wall) / LVIDd.",
+category: "Left Heart",
+        difficulty: 2
     },
 
     // --- VOLUME INDICES (WEIGHT & BSA) ---
@@ -1809,32 +1908,42 @@ lviddn: {
         title: "LVEDV/BW (Diastolic Volume Index - Weight)",
         view: "Derived Index",
         description: "Indexes the maximal diastolic volume directly to body weight (ml/kg). Simpson's volumetric assessments are more sensitive for early volume overload states than 1D linear measurements.",
-        method: "Calculated as: LVEDV (ml) / Body Weight (kg). Normal is typically 1.25 – 3.00 ml/kg."
+        method: "Calculated as: LVEDV (ml) / Body Weight (kg). Normal is typically 1.25 – 3.00 ml/kg.",
+category: "Left Heart",
+        difficulty: 3
     },
     lvesvbw: {
         title: "LVESV/BW (Systolic Volume Index - Weight)",
         view: "Derived Index",
         description: "Indexes the minimum systolic volume to body weight (ml/kg) to evaluate myocardial failure. Elevated values indicate the heart is struggling to eject its volume.",
-        method: "Calculated as: LVESV (ml) / Body Weight (kg)."
+        method: "Calculated as: LVESV (ml) / Body Weight (kg).",
+category: "Left Heart",
+        difficulty: 3
     },
     edvim2: {
         title: "EDVI (End-Diastolic Volume Index - BSA)",
         view: "Derived Index",
         description: "Indexes LV diastolic volume to Body Surface Area (BSA) rather than raw weight. Standard in human medicine and increasingly utilized in advanced veterinary research to account for varying canine body condition scores.",
-        method: "Calculated as: LVEDV (ml) / BSA (m²). BSA is derived using standard canine conversion constants."
+        method: "Calculated as: LVEDV (ml) / BSA (m²). BSA is derived using standard canine conversion constants.",
+category: "Left Heart",
+        difficulty: 3
     },
     esvim2: {
         title: "ESVI (End-Systolic Volume Index - BSA)",
         view: "Derived Index",
         description: "Indexes LV systolic volume to Body Surface Area (BSA) to standardize contractility and failure assessments across vastly different body shapes (e.g., Greyhounds vs. Bulldogs).",
-        method: "Calculated as: LVESV (ml) / BSA (m²)."
+        method: "Calculated as: LVESV (ml) / BSA (m²).",
+category: "Left Heart",
+        difficulty: 3
     },
     la: {
         title: "LA (Left Atrium Dimension)",
         view: "Right Parasternal Short Axis (Heart Base)",
         description: "Evaluates left atrial enlargement, the primary structural indicator of elevated left-sided filling pressures.",
         method: "Measure the internal diameter of the LA at end-systole (when maximally filled), extending from the center of the aortic valve commissure to the dorsal LA wall.",
-        imgPlaceholder: "/images/la-reference.jpg"
+        imgPlaceholder: "/images/la-reference.jpg",
+category: "Left Heart",
+        difficulty: 1
     },
     lad: {
         title: "LA diameter - long axis (Left Atrium Dimension)",
@@ -1843,28 +1952,36 @@ lviddn: {
         method: "Measure the internal diameter of the LA at end-systole (when maximally filled, the frame just before mitral valve opening), at the widest point, extending from the center of the interatrial septum to the inner wall of the posterior free wall, parallel to the mitral valve annulus.",
         imgPlaceholder: "/images/LADmeasure.jpg",
         reference: "Marchesotti et al (2019). Echocardiographic reference intervals of the dimensions of the main pulmonary artery and the right pulmonary artery: a prospective study in 269 healthy dogs.",
-        pmid: "31611490"
+        pmid: "31611490",
+category: "Left Heart",
+        difficulty: 1
     },
     ao: {
         title: "Ao (Aortic Root Dimension)",
         view: "Right Parasternal Short Axis (Heart Base)",
         description: "Serves as a patient-specific internal baseline to normalize left atrial size.",
         method: "Measure the internal diameter of the aortic root at end-diastole (when closed), along the commissure of the non-coronary and right coronary cusps.",
-        imgPlaceholder: "/images/ao-reference.jpg"
+        imgPlaceholder: "/images/ao-reference.jpg",
+category: "Left Heart",
+        difficulty: 1
     },
     aola: {
         title: "Ao (Aortic Root Dimension) - Long Axis",
         view: "Right Parasternal Long Axis (5-Chamber)",
         description: "Serves as a patient-specific internal baseline to normalize several parameters - chiefly Right sided heart and LAD - as described by Lance Visser's publications.",
         method: "Measure the aortic valve diameter (AoD) in early to midsystole measured between the hinge points of the maximally opened aortic valve cusps from a right parasternal long-axis view optimized for the left ventricular outflow tract and ascending aorta",
-        imgPlaceholder: "/images/aola-reference.jpg"
+        imgPlaceholder: "/images/aola-reference.jpg",
+category: "Left Heart",
+        difficulty: 2
     },
     ivsd: {
         title: "IVSd (Interventricular Septum - Diastole)",
         view: "Right Parasternal Short Axis (Papillary Level)",
         description: "Assesses septal thickness for signs of concentric hypertrophy (e.g., HCM, Subaortic Stenosis).",
         method: "Measure the thickness of the septum at end-diastole, excluding the right ventricular trabeculae.",
-        imgPlaceholder: "/images/ivsd-reference.jpg"
+        imgPlaceholder: "/images/ivsd-reference.jpg",
+category: "Left Heart",
+        difficulty: 1
     },
 
     // --- LEFT HEART DOPPLER ---

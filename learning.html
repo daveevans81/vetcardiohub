@@ -68,8 +68,8 @@
     <header class="hero card">
 
 
-    <h1>Canine Pulmonary Hypertension Calculator</h1>
-    <p>Integrated clinical tool featuring the ACVIM (2020) Probability Matrix and the Chang (2026) Predictive Score for TR-negative patients.</p>
+    <h1><i class="fa-solid fa-graduation-cap" style="color: #0ea5e9;"></i> Echo Learning Hub</h1>
+    <p>Integrated learning tool featuring multiple echo variables, measurements and scoring systems.</p>
 </header>
 
 <main x-data="advancedEchoSuite()" class="card pht-layout">
@@ -77,9 +77,7 @@
     <section class="card" style="max-width: 800px; margin: 0 auto; background: #ffffff;">
     
     <header style="border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <h2 style="color: #16325F; margin: 0; font-size: 1.5rem;">
-            <i class="fa-solid fa-graduation-cap" style="color: #0ea5e9;"></i> PHT Learning Hub
-        </h2>
+
         <div style="display: flex; background: #f1f5f9; padding: 4px; border-radius: 8px;">
             <button @click="learningMode = 'glossary'" 
                     style="border: none; padding: 6px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
@@ -106,7 +104,13 @@
         <div style="display: flex; flex-direction: column; gap: 12px;">
             <template x-for="item in filteredGlossary" :key="item.key">
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; background: #f8fafc; transition: transform 0.1s;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'">
-                    <h4 style="margin: 0 0 8px 0; color: #1e3a8a; font-size: 1.1rem;" x-text="item.title"></h4>
+                    <h4 style="margin: 0 0 8px 0; color: #1e3a8a; font-size: 1.1rem;" x-text="item.title"></h4><span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 12px; white-space: nowrap;"
+          :style="item.difficulty === 1 ? 'background: #dcfce7; color: #166534;' : 
+                 (item.difficulty === 2 ? 'background: #fef08a; color: #854d0e;' : 
+                 (item.difficulty === 3 ? 'background: #fed7aa; color: #9a3412;' : 
+                 'background: #fecaca; color: #991b1b;'))"
+          x-text="`Level ${item.difficulty}`">
+    </span>
                     <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #334155; line-height: 1.5;" x-text="item.description"></p>
                     
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.8rem;">
@@ -125,24 +129,101 @@
         </div>
     </div>
     
-    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
-    <template x-for="cat in availableCategories" :key="cat">
-        <button @click="selectedCategory = cat" 
-                style="padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; border: 1px solid #cbd5e1;"
-                :style="selectedCategory === cat ? 'background: #0ea5e9; color: white; border-color: #0ea5e9;' : 'background: #f8fafc; color: #475569;'">
-            <span x-text="cat"></span>
-        </button>
-    </template>
-</div>
+<div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+    
+    <div style="display: flex; gap: 8px; overflow-x: auto; flex: 1;">
+        <template x-for="cat in availableCategories" :key="cat">
+            <button @click="selectedCategory = cat" 
+                    style="padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; border: 1px solid #cbd5e1; transition: all 0.2s;"
+                    :style="selectedCategory === cat ? 'background: #0ea5e9; color: white; border-color: #0ea5e9;' : 'background: white; color: #475569; hover:border-color: #0ea5e9;'">
+                <span x-text="cat"></span>
+            </button>
+        </template>
+    </div>
 
-    <div x-show="learningMode === 'quiz'" x-transition
-     @keyup.space.window.prevent="if(!quizRevealed) quizRevealed = true"
-     @keyup.right.window="if(quizRevealed) nextQuizCard()">
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #64748b; font-size: 0.9rem; font-weight: 600;">
-            <span>Clinical Knowledge Check</span>
-            <span x-text="`Card ${currentQuizIndex + 1} of ${quizDeck.length}`"></span>
+    <div style="display: flex; align-items: center; gap: 8px; border-left: 2px solid #cbd5e1; padding-left: 15px;">
+        <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Difficulty:</label>
+        <select x-model="selectedDifficulty" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; color: #1e3a8a; background: white; outline: none; cursor: pointer; font-size: 0.85rem;">
+            <template x-for="diff in availableDifficulties" :key="diff">
+                <option :value="diff" x-text="diff === 'All' ? 'All Levels' : `Level ${diff}`"></option>
+            </template>
+        </select>
+    </div>
+    
+</div>
+            <div x-show="learningMode === 'quiz'" x-transition
+             @keyup.space.window.prevent="if(!quizRevealed) quizRevealed = true"
+             @keyup.right.window="if(quizRevealed) nextQuizCard()">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #64748b; font-size: 0.9rem; font-weight: 600;">
+                    <span>Clinical Knowledge Check</span>
+                    <span x-text="`Card ${currentQuizIndex + 1} of ${quizDeck.length}`"></span>
+                </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="background: #e2e8f0; padding: 4px; border-radius: 8px; display: inline-flex;">
+                <button @click="quizMode = 'flashcard'; quizRevealed = false;" 
+                        style="border: none; padding: 4px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.8rem;"
+                        :style="quizMode === 'flashcard' ? 'background: #fff; color: #1e3a8a; box-shadow: 0 1px 2px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'">
+                    Flashcards
+                </button>
+                <button @click="quizMode = 'mcq'; generateMCQ();" 
+                        style="border: none; padding: 4px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.8rem;"
+                        :style="quizMode === 'mcq' ? 'background: #fff; color: #1e3a8a; box-shadow: 0 1px 2px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'">
+                    Multiple Choice
+                </button>
+            </div>
+            
+            <div style="font-size: 0.85rem; font-weight: 700; color: #475569;">
+                <span style="color: #16a34a; margin-right: 8px;"><i class="fa-solid fa-check"></i> <span x-text="sessionScore.correct"></span></span>
+                <span style="color: #b91c1c;"><i class="fa-solid fa-xmark"></i> <span x-text="sessionScore.review"></span></span>
+            </div>
         </div>
+
+        <div x-show="quizMode === 'mcq'" x-transition style="border: 2px solid #e2e8f0; border-radius: 12px; background: #fafafa; padding: 30px;">
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <span style="text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 8px;">
+                    Level <span x-text="quizDeck[currentQuizIndex].difficulty"></span> • <span x-text="quizDeck[currentQuizIndex].category"></span>
+                </span>
+                <h3 style="margin: 0; font-size: 1.5rem; color: #0f172a; line-height: 1.3;">
+                    Which of the following best describes <span style="color: #0ea5e9; font-weight: 900;" x-text="quizDeck[currentQuizIndex].title"></span>?
+                </h3>
+            </div>
+        
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <template x-for="(option, index) in mcqOptions" :key="index">
+                    <button @click="selectMCQAnswer(index)" 
+                            :disabled="mcqAnswered"
+                            style="text-align: left; padding: 15px 20px; border-radius: 8px; border: 2px solid #e2e8f0; background: white; font-size: 0.95rem; color: #334155; cursor: pointer; transition: all 0.2s; position: relative;"
+                            :style="mcqAnswered 
+                                ? (option.isCorrect 
+                                    ? 'background: #f0fdf4; border-color: #22c55e; color: #15803d;' 
+                                    : (mcqSelectedIndex === index ? 'background: #fef2f2; border-color: #ef4444; color: #b91c1c;' : 'opacity: 0.5;')) 
+                                : 'hover:border-color: #0ea5e9; hover:background: #f8fafc;'">
+                        
+                        <span x-text="option.text"></span>
+                        
+                        <span x-show="mcqAnswered && option.isCorrect" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #22c55e; font-size: 1.2rem;">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </span>
+                        <span x-show="mcqAnswered && mcqSelectedIndex === index && !option.isCorrect" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #ef4444; font-size: 1.2rem;">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </span>
+                    </button>
+                </template>
+            </div>
+        
+            <div x-show="mcqAnswered" x-transition style="margin-top: 25px; border-top: 2px dashed #cbd5e1; padding-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 0.85rem; color: #64748b; max-width: 70%;">
+                    <strong>Pro Tip:</strong> Measured from the <span x-text="quizDeck[currentQuizIndex].view"></span>.
+                </div>
+                <button @click="nextQuestion()" style="background: #1e293b; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    Next <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        
+        </div>
+
 
         <template x-if="quizDeck.length > 0">
             <div style="min-height: 300px; border: 2px solid #e2e8f0; border-radius: 12px; display: flex; flex-direction: column; background: #fafafa; position: relative;">
