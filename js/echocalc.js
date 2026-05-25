@@ -1510,7 +1510,23 @@ availableDifficulties: ['All', 1, 2, 3, 4],
 // Converts your glossary object into an array for easy mapping and searching
 get glossaryArray() {
     if (!this.glossaryDatabase) return [];
-    return Object.entries(this.glossaryDatabase).map(([key, value]) => ({ key, ...value }));
+    
+    return Object.entries(this.glossaryDatabase)
+        .map(([key, value]) => ({ key, ...value }))
+        .sort((a, b) => {
+            // Primary Sort: By Difficulty Level (1 -> 4)
+            const diffA = a.difficulty || 1; // Defaults to 1 if you forget to add a level
+            const diffB = b.difficulty || 1;
+            
+            if (diffA !== diffB) {
+                return diffA - diffB; 
+            }
+            
+            // Secondary Sort: Alphabetical A-Z (if difficulty levels match)
+            const titleA = a.title || '';
+            const titleB = b.title || '';
+            return titleA.localeCompare(titleB);
+        });
 },
 
 // Powers the live search bar
