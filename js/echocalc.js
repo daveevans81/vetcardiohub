@@ -1400,6 +1400,78 @@ for (const line of lines.slice(0, 5)) { // Only scan the first 5 lines of the re
     setTimeout(() => this.parseMessage = '', 4000);
 },
 
+copyPHTAudit() {
+    if (!this.phClassification) return;
+    
+    let text = `--- PULMONARY HYPERTENSION CLINICAL AUDIT ---\n`;
+    text += `Date: ${this.reportDate || new Date().toLocaleDateString('en-GB')}\n`;
+    text += `Patient: ${this.patientName || 'Not specified'} | Species: ${this.species}\n\n`;
+
+    // ACVIM Topline
+    text += `[ ACVIM (2020) PROBABILITY ]\n`;
+    text += `Assessment: ${this.phClassification.probability}\n`;
+    text += `Anatomic Sites Positive: ${this.phClassification.anatomicSites}/3\n\n`;
+
+    // Granular Evidence Grouping
+    text += `[ CLINICAL EVIDENCE BREAKDOWN ]\n`;
+    this.phClassification.comprehensiveAudit.forEach(group => {
+        text += `${group.title.toUpperCase()}${group.isActive && group.title !== 'Primary Doppler' ? ' (*SITE POSITIVE*)' : ''}:\n`;
+        group.items.forEach(item => {
+            text += `  • ${item.name}: ${item.val} ${item.isAbnormal ? '[ABNORMAL]' : '(Normal)'}\n`;
+        });
+        text += '\n';
+    });
+
+    // ePLAR Differentiator
+    if (this.eplar > 0 && this.phClassification.stepIndex >= 1) {
+        text += `[ ETIOLOGY DIFFERENTIATION ]\n`;
+        text += `ePLAR: ${this.eplar} -> `;
+        if (this.eplar >= 0.28) text += `Pre-Capillary PH Pattern\n\n`;
+        else if (this.eplar <= 0.23) text += `Post-Capillary (Left Heart Backup)\n\n`;
+        else text += `Borderline Zone\n\n`;
+    }
+
+    // Chang Score
+    if (this.changScoreResults) {
+        text += `[ CHANG (2026) PREDICTIVE SCORE ]\n`;
+        text += `Total Score: ${this.changScoreResults.total}/25\n`;
+        text += `Prediction: ${this.changScoreResults.prediction}\n`;
+        const breakdownStr = this.changScoreResults.breakdown.map(item => `${item.name} (+${item.val})`).join(', ');
+        text += `Breakdown: ${breakdownStr}\n\n`;
+    }
+
+    text += `Generated via VetCardioHub.com`;
+
+    // Execute Clipboard Copy
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('PHT Clinical Audit copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+            this.fallbackCopy(text);
+        });
+    } else {
+        this.fallbackCopy(text);
+    }
+},
+
+// Simple fallback for older browsers / non-HTTPS local testing
+fallbackCopy(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed"; 
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        alert('PHT Clinical Audit copied to clipboard!');
+    } catch (err) {
+        console.error('Fallback copy failed', err);
+    }
+    document.body.removeChild(textArea);
+},
+
 // The Clinical Reference Database
 glossaryDatabase: {
 // --- RIGHT HEART  ---
