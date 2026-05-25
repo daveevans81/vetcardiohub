@@ -1497,7 +1497,7 @@ quizRevealed: false,
 
 // Category Filter for quiz
 selectedCategory: 'All',
-availableCategories: ['All', 'Doppler', 'Anatomy', 'Calculations', 'Guidelines'],
+availableCategories: ['All', 'Doppler', 'Left Heart', 'Right Heart', 'Haemodynamics', 'Anatomy', 'Calculations', 'Guidelines'],
 quizMode: 'flashcard', // 'flashcard' or 'mcq'
 mcqOptions: [],
 mcqAnswered: false,
