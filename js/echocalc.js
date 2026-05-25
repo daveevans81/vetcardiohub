@@ -1641,28 +1641,40 @@ get filteredGlossary() {
 generateMCQ() {
     const correctCard = this.quizDeck[this.currentQuizIndex];
     
-    // Find 3 random distractor cards (ideally from the same category to make it tricky)
-    let possibleDistractors = this.glossaryArray.filter(item => 
-        item.key !== correctCard.key && item.category === correctCard.category
+    // 1. Filter out the correct card AND any cards with the exact same description
+    let uniquePool = this.glossaryArray.filter(item => 
+        item.key !== correctCard.key && 
+        item.description && // Ensure it actually has a description
+        item.description.trim() !== correctCard.description.trim()
     );
     
-    // If not enough in the same category, pull from anywhere
-    if (possibleDistractors.length < 3) {
-        possibleDistractors = this.glossaryArray.filter(item => item.key !== correctCard.key);
-    }
+    // 2. Prevent duplicate descriptions from appearing alongside each other
+    const seenDescriptions = new Set();
+    uniquePool = uniquePool.filter(item => {
+        if (seenDescriptions.has(item.description)) return false;
+        seenDescriptions.add(item.description);
+        return true;
+    });
     
-    // Shuffle and pick top 3
-    const shuffledDistractors = possibleDistractors.sort(() => 0.5 - Math.random()).slice(0, 3);
+    // 3. Try to pull distractors from the same category to make the quiz tricky
+    let categoryPool = uniquePool.filter(item => item.category === correctCard.category);
     
-    // Combine correct answer with distractors
+    // 4. If we don't have at least 3 unique distractors in the same category, broaden the search
+    let finalPool = categoryPool.length >= 3 ? categoryPool : uniquePool;
+    
+    // 5. Shuffle the pool and slice the top 3
+    const selectedDistractors = finalPool.sort(() => 0.5 - Math.random()).slice(0, 3);
+    
+    // 6. Safely build the options array (This prevents crashes if your database is very small)
     let options = [
-        { text: correctCard.description, isCorrect: true },
-        { text: shuffledDistractors[0].description, isCorrect: false },
-        { text: shuffledDistractors[1].description, isCorrect: false },
-        { text: shuffledDistractors[2].description, isCorrect: false }
+        { text: correctCard.description, isCorrect: true }
     ];
     
-    // Shuffle the final options so 'A' isn't always correct
+    selectedDistractors.forEach(dist => {
+        options.push({ text: dist.description, isCorrect: false });
+    });
+    
+    // 7. Shuffle the final output so 'A' isn't always the right answer
     this.mcqOptions = options.sort(() => 0.5 - Math.random());
     this.mcqAnswered = false;
     this.mcqSelectedIndex = null;
