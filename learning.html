@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/js/global-head.js" defer></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <title>Veterinary Echocardiography Learning Hub & PHT Quiz | VetCardioHub</title>
+    <meta name="description" content="Master canine pulmonary hypertension with our interactive veterinary echocardiography dictionary and flashcard quiz. Covering ACVIM guidelines, ePLAR, and Chang scores.">
+    <meta name="keywords" content="veterinary echocardiography learning, PHT flashcards dog, pulmonary hypertension quiz vet, ePLAR explanation, ACVIM PHT guidelines study tool, cardiology resident study, VetCardioHub dictionary">
+    
+    <link rel="canonical" href="https://vetcardiohub.com/learning.html">
+    
+    <meta property="og:title" content="Interactive Vet Echo Dictionary & Flashcards | VetCardioHub">
+    <meta property="og:description" content="Test your clinical knowledge of pulmonary hypertension and right heart echocardiography with our live dictionary and interactive flashcard generator.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vetcardiohub.com/learning.html">
+    <meta property="og:image" content="https://vetcardiohub.com/images/learning-hub-preview.png">
+    
+    <script src="/js/echo-breeds.js" defer></script>
+    <script src="/js/echocalc.js" defer></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MedicalWebPage",
+      "name": "Veterinary Pulmonary Hypertension Learning Hub & Glossary",
+      "description": "An educational resource featuring a searchable clinical dictionary and interactive flashcards for veterinary professionals studying echocardiography and pulmonary hypertension.",
+      "url": "https://vetcardiohub.com/learning.html",
+      "learningResourceType": ["Glossary", "Flashcards", "Interactive Quiz"],
+      "educationalUse": ["Test Preparation", "Professional Development"],
+      "medicalAudience": {
+        "@type": "MedicalAudience",
+        "audienceType": ["Veterinary Students", "Cardiology Residents", "Veterinary Professionals"]
+      },
+      "specialty": {
+        "@type": "MedicalSpecialty",
+        "name": "Cardiology"
+      },
+      "citation": [
+        "Reinero et al. (2020) ACVIM consensus statement guidelines for the diagnosis, classification, treatment, and monitoring of pulmonary hypertension in dogs.",
+        "Chang et al. (2026) Echocardiographic predictive score for pulmonary hypertension in dogs lacking measurable tricuspid regurgitation.",
+        "Willis et al. (2018) Echocardiographic pulmonary to left atrial ratio (ePLAR) in dogs."
+      ],
+      "lastReviewed": "2026-05-25",
+      "isAccessibleForFree": "true"
+    }
+    </script>
+</head>
+<body>
+<div id="site-header"></div>
+
+<div class="content">
+<div class="container">
+    
+    <header class="hero card">
+
+
+    <h1>Canine Pulmonary Hypertension Calculator</h1>
+    <p>Integrated clinical tool featuring the ACVIM (2020) Probability Matrix and the Chang (2026) Predictive Score for TR-negative patients.</p>
+</header>
+
+<main x-data="advancedEchoSuite()" class="card pht-layout">
+
+    <section class="card" style="max-width: 800px; margin: 0 auto; background: #ffffff;">
+    
+    <header style="border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="color: #16325F; margin: 0; font-size: 1.5rem;">
+            <i class="fa-solid fa-graduation-cap" style="color: #0ea5e9;"></i> PHT Learning Hub
+        </h2>
+        <div style="display: flex; background: #f1f5f9; padding: 4px; border-radius: 8px;">
+            <button @click="learningMode = 'glossary'" 
+                    style="border: none; padding: 6px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                    :style="learningMode === 'glossary' ? 'background: #fff; color: #0ea5e9; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'">
+                <i class="fa-solid fa-book"></i> Dictionary
+            </button>
+            <button @click="startQuiz()" 
+                    style="border: none; padding: 6px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                    :style="learningMode === 'quiz' ? 'background: #fff; color: #0ea5e9; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'">
+                <i class="fa-solid fa-bolt"></i> Flashcards
+            </button>
+        </div>
+    </header>
+
+    <div x-show="learningMode === 'glossary'" x-transition>
+        
+        <div style="position: relative; margin-bottom: 20px;">
+            <i class="fa-solid fa-search" style="position: absolute; left: 15px; top: 12px; color: #94a3b8;"></i>
+            <input type="text" x-model="searchQuery" placeholder="Search parameters, guidelines, or PMIDs..." 
+                   style="width: 100%; padding: 12px 12px 12px 40px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;"
+                   onfocus="this.style.borderColor='#0ea5e9'" onblur="this.style.borderColor='#e2e8f0'">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <template x-for="item in filteredGlossary" :key="item.key">
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; background: #f8fafc; transition: transform 0.1s;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'">
+                    <h4 style="margin: 0 0 8px 0; color: #1e3a8a; font-size: 1.1rem;" x-text="item.title"></h4>
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #334155; line-height: 1.5;" x-text="item.description"></p>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.8rem;">
+                        <span x-show="item.view" style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-weight: 600;">
+                            <i class="fa-solid fa-eye"></i> <span x-text="item.view"></span>
+                        </span>
+                        <a x-show="item.pmid" :href="`https://pubmed.ncbi.nlm.nih.gov/${item.pmid}/`" target="_blank" style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-weight: 600; text-decoration: none;">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> PMID: <span x-text="item.pmid"></span>
+                        </a>
+                    </div>
+                </div>
+            </template>
+            <div x-show="filteredGlossary.length === 0" style="text-align: center; padding: 30px; color: #94a3b8;">
+                No matching terms found.
+            </div>
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+    <template x-for="cat in availableCategories" :key="cat">
+        <button @click="selectedCategory = cat" 
+                style="padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; border: 1px solid #cbd5e1;"
+                :style="selectedCategory === cat ? 'background: #0ea5e9; color: white; border-color: #0ea5e9;' : 'background: #f8fafc; color: #475569;'">
+            <span x-text="cat"></span>
+        </button>
+    </template>
+</div>
+
+    <div x-show="learningMode === 'quiz'" x-transition
+     @keyup.space.window.prevent="if(!quizRevealed) quizRevealed = true"
+     @keyup.right.window="if(quizRevealed) nextQuizCard()">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #64748b; font-size: 0.9rem; font-weight: 600;">
+            <span>Clinical Knowledge Check</span>
+            <span x-text="`Card ${currentQuizIndex + 1} of ${quizDeck.length}`"></span>
+        </div>
+
+        <template x-if="quizDeck.length > 0">
+            <div style="min-height: 300px; border: 2px solid #e2e8f0; border-radius: 12px; display: flex; flex-direction: column; background: #fafafa; position: relative;">
+                
+                <div style="padding: 40px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <span style="text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; font-size: 0.8rem; font-weight: 700; margin-bottom: 10px;">Define & Explain</span>
+                    <h3 style="margin: 0; font-size: 1.8rem; color: #0f172a; max-width: 80%; line-height: 1.3;" x-text="quizDeck[currentQuizIndex].title"></h3>
+                </div>
+
+                <div x-show="!quizRevealed" style="position: absolute; bottom: 30px; left: 0; width: 100%; text-align: center;">
+                    <button @click="quizRevealed = true" style="background: #0ea5e9; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
+                        Reveal Answer
+                    </button>
+                </div>
+
+                <div x-show="quizRevealed" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" 
+                     style="border-top: 2px dashed #cbd5e1; padding: 25px; background: white; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                    
+                    <p style="margin: 0 0 15px 0; font-size: 1.05rem; color: #334155; line-height: 1.6;" x-text="quizDeck[currentQuizIndex].description"></p>
+                    
+                    <div x-show="quizDeck[currentQuizIndex].method" style="margin-bottom: 15px; background: #f8fafc; padding: 10px; border-left: 3px solid #0ea5e9; font-size: 0.9rem; color: #475569;">
+                        <strong>Method:</strong> <span x-text="quizDeck[currentQuizIndex].method"></span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                        <a x-show="quizDeck[currentQuizIndex].pmid" :href="`https://pubmed.ncbi.nlm.nih.gov/${quizDeck[currentQuizIndex].pmid}/`" target="_blank" style="color: #64748b; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+                            <i class="fa-solid fa-book"></i> Read Source
+                        </a>
+                        
+                        <div style="display: flex; gap: 10px; width: 100%; justify-content: flex-end;">
+                            <button @click="markCard('review')" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; padding: 10px 20px; border-radius: 6px; font-weight: 700; cursor: pointer;">
+                                Need to Review
+                            </button>
+                            <button @click="markCard('correct')" style="background: #16a34a; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                Got It! <i class="fa-solid fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </template>
+        
+    </div>
+</section>
+
+
+
+
+    <!-- Pop up Glossary Window -->
+    <div x-show="glossaryOpen" 
+         class="glossary-overlay"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @keydown.escape.window="closeGlossary()"
+         style="display: none;">
+        
+        <div class="glossary-backdrop" @click="closeGlossary()"></div>
+    
+        <div class="card glossary-modal" 
+             x-show="glossaryOpen"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 transform translate-y-0 sm:scale-100">
+            
+            <header class="glossary-header">
+                <h3 class="glossary-title">
+                    <i class="fa-solid fa-book-medical" style="color: #0ea5e9;"></i>
+                    <span x-text="activeGlossaryTerm?.title"></span>
+                </h3>
+                <button @click="closeGlossary()" class="glossary-close" aria-label="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </header>
+    
+            <div class="glossary-modal-body">
+        
+             <template x-if="activeGlossaryTerm?.imgPlaceholder">
+                <div class="glossary-image-container">
+                    <img :src="activeGlossaryTerm.imgPlaceholder" 
+                         class="glossary-img clickable" 
+                         @click="zoomImage(activeGlossaryTerm.imgPlaceholder)"
+                         alt="Diagnostic reference diagram">
+                    
+                    <template x-if="activeGlossaryTerm?.imgAttribution">
+                        <p class="image-attribution">
+                            Source: <span x-text="activeGlossaryTerm.reference"></span>. 
+                            Licensed <span x-text="activeGlossaryTerm.imgAttribution"></span>. 
+                            <a :href="`https://pubmed.ncbi.nlm.nih.gov/${activeGlossaryTerm.pmid}/`" 
+                               target="_blank" rel="noopener noreferrer">
+                               [PMID: <span x-text="activeGlossaryTerm.pmid"></span>]
+                            </a>
+                        </p>
+                    </template>
+                </div>
+            </template>
+            
+                <div class="glossary-content">
+                    
+                    <div class="glossary-row">
+                        <i class="fa-solid fa-satellite-dish glossary-icon" style="color: #0ea5e9;"></i>
+                        <div class="glossary-text-block">
+                            <span class="glossary-label">Optimal View / Source</span>
+                            <p class="glossary-value" x-text="activeGlossaryTerm?.view"></p>
+                        </div>
+                    </div>
+            
+                    <div class="glossary-row">
+                        <i class="fa-solid fa-stethoscope glossary-icon" style="color: #10b981;"></i>
+                        <div class="glossary-text-block">
+                            <span class="glossary-label">Clinical Purpose</span>
+                            <p class="glossary-desc" x-text="activeGlossaryTerm?.description"></p>
+                        </div>
+                    </div>
+            
+                    <div class="glossary-row">
+                        <i class="fa-solid fa-ruler-combined glossary-icon" style="color: #8b5cf6;"></i>
+                        <div class="glossary-text-block">
+                            <span class="glossary-label">Technique / Formula</span>
+                            <p class="glossary-formula-box" x-text="activeGlossaryTerm?.method"></p>
+                        </div>
+                    </div>
+            
+                    <template x-if="activeGlossaryTerm?.reference || activeGlossaryTerm?.pmid">
+                        <div class="glossary-reference-section">
+                            <i class="fa-solid fa-book-open-reader glossary-icon ref-icon"></i>
+                            <div class="glossary-text-block">
+                                <span class="glossary-label">Evidence & Literature</span>
+                                <p class="glossary-reference-text">
+                                    <span x-text="activeGlossaryTerm?.reference" style="font-style: italic;"></span>
+                                    
+                                    <template x-if="activeGlossaryTerm?.pmid">
+                                        <a :href="`https://pubmed.ncbi.nlm.nih.gov/${activeGlossaryTerm.pmid}/`" 
+                                           target="_blank" 
+                                           rel="noopener noreferrer"
+                                           class="pubmed-link">
+                                            [PMID: <span x-text="activeGlossaryTerm.pmid"></span>] 
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                        </a>
+                                    </template>
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div x-data="{ zoomedImg: null }" 
+         @image-zoom.window="zoomedImg = $event.detail"
+         x-show="zoomedImg"
+         class="zoom-overlay" 
+         @click="zoomedImg = null"
+         style="display: none;">
+        <img :src="zoomedImg" class="zoomed-img" @click.stop>
+    </div>
+</main>
+
+</div>
+</div>
+
+<div id="site-footer"></div>
+
+<script src="/js/load-partials.js"></script>
+
+</body>
+</html>

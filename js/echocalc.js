@@ -69,6 +69,8 @@ patientName: '',
 ownerName: '',
 breed: '',
 
+sessionScore: { correct: 0, review: 0 },
+
     
     /* 2. GETTERS */
     get lviddn() {
@@ -1531,6 +1533,48 @@ nextQuizCard() {
 },
 
 
+
+
+markCard(status) {
+    if (status === 'correct') {
+        this.sessionScore.correct++;
+    } else {
+        this.sessionScore.review++;
+    }
+    this.nextQuizCard();
+},
+
+startQuiz() {
+    this.learningMode = 'quiz';
+    this.quizDeck = [...this.glossaryArray].sort(() => Math.random() - 0.5);
+    this.currentQuizIndex = 0;
+    this.quizRevealed = false;
+    this.sessionScore = { correct: 0, review: 0 }; // Reset score
+},
+
+// Category Filter 
+selectedCategory: 'All',
+availableCategories: ['All', 'Doppler', 'Anatomy', 'Calculations', 'Guidelines'],
+
+// Update the filtered list
+get filteredGlossary() {
+    let list = this.glossaryArray;
+    
+    // 1. Filter by Category
+    if (this.selectedCategory !== 'All') {
+        list = list.filter(item => item.category === this.selectedCategory);
+    }
+    
+    // 2. Filter by Search Query
+    if (this.searchQuery.trim() !== '') {
+        const q = this.searchQuery.toLowerCase();
+        list = list.filter(item => 
+            (item.title && item.title.toLowerCase().includes(q)) || 
+            (item.description && item.description.toLowerCase().includes(q))
+        );
+    }
+    return list;
+},
 
 
 
