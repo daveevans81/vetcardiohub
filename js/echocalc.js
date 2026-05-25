@@ -1481,6 +1481,59 @@ fallbackCopy(text) {
     document.body.removeChild(textArea);
 },
 
+
+
+
+
+
+// --- LEARNING HUB STATE ---
+learningMode: 'glossary', // Toggles between 'glossary' and 'quiz'
+searchQuery: '',
+quizDeck: [],
+currentQuizIndex: 0,
+quizRevealed: false,
+
+// --- LEARNING HUB METHODS ---
+// Converts your glossary object into an array for easy mapping and searching
+get glossaryArray() {
+    if (!this.glossaryDatabase) return [];
+    return Object.entries(this.glossaryDatabase).map(([key, value]) => ({ key, ...value }));
+},
+
+// Powers the live search bar
+get filteredGlossary() {
+    if (this.searchQuery.trim() === '') return this.glossaryArray;
+    const q = this.searchQuery.toLowerCase();
+    return this.glossaryArray.filter(item => 
+        (item.title && item.title.toLowerCase().includes(q)) || 
+        (item.description && item.description.toLowerCase().includes(q))
+    );
+},
+
+// Initializes a new randomized flashcard deck
+startQuiz() {
+    this.learningMode = 'quiz';
+    // Create a shuffled copy of the glossary array
+    this.quizDeck = [...this.glossaryArray].sort(() => Math.random() - 0.5);
+    this.currentQuizIndex = 0;
+    this.quizRevealed = false;
+},
+
+// Moves to the next card
+nextQuizCard() {
+    if (this.currentQuizIndex < this.quizDeck.length - 1) {
+        this.currentQuizIndex++;
+        this.quizRevealed = false;
+    } else {
+        // Automatically reshuffle if they hit the end
+        this.startQuiz(); 
+    }
+},
+
+
+
+
+
 // The Clinical Reference Database
 glossaryDatabase: {
 // --- RIGHT HEART  ---
