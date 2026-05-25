@@ -132,7 +132,10 @@
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
             <template x-for="item in filteredGlossary" :key="item.key">
-                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; background: #f8fafc; transition: transform 0.1s;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'">
+                <div @click="openGlossary(item.key)" 
+                     style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; background: #f8fafc; transition: all 0.1s; cursor: pointer;" 
+                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='#0ea5e9';" 
+                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='#e2e8f0';">
                     
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                         <h4 style="margin: 0; color: #1e3a8a; font-size: 1.1rem;" x-text="item.title"></h4>
@@ -141,14 +144,14 @@
                               x-text="`Level ${item.difficulty || 1}`">
                         </span>
                     </div>
-
+            
                     <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #334155; line-height: 1.5;" x-text="item.description"></p>
                     
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.8rem;">
                         <span x-show="item.view" style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-weight: 600;">
                             <i class="fa-solid fa-eye"></i> <span x-text="item.view"></span>
                         </span>
-                        <a x-show="item.pmid" :href="`https://pubmed.ncbi.nlm.nih.gov/${item.pmid}/`" target="_blank" style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-weight: 600; text-decoration: none;">
+                        <a x-show="item.pmid" :href="`https://pubmed.ncbi.nlm.nih.gov/${item.pmid}/`" target="_blank" @click.stop style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-weight: 600; text-decoration: none;">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i> PMID: <span x-text="item.pmid"></span>
                         </a>
                     </div>
