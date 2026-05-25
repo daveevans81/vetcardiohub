@@ -545,7 +545,7 @@ get phClassification() {
         siteDetails: { siteVentricle, sitePA, siteRA },
         changScore: chang 
     };
-}
+},
 
 
 /* Specialized Decoupled Right Heart Allometric Evaluator */
