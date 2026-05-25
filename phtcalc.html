@@ -74,39 +74,49 @@
     <p>Integrated clinical tool featuring the ACVIM (2020) Probability Matrix and the Chang (2026) Predictive Score for TR-negative patients.</p>
 </header>
 
-<main x-data="advancedEchoSuite()"  class="card" style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2rem;">
+<main x-data="advancedEchoSuite()" class="card pht-layout">
 
     <section class="input-panel card">
-        <h2><i class="fa-solid fa-keyboard"></i> Diagnostic Inputs</h2>
+        <h2 class="panel-title">
+            <span><i class="fa-solid fa-keyboard" style="color: #0ea5e9;"></i> Diagnostic Inputs</span>
+        </h2>
 
-        <h3>1. Patient Baseline</h3>
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <div class="input-group" style="flex: 1;"><label>Body Weight (kg)</label><input type="number" step="0.1" x-model="weight"></div>
-            <div class="input-group" style="flex: 1;"><label>TR Peak Velocity (m/s)</label><input type="number" step="0.1" x-model="trMax"></div>
-        </div>
-
-        <h3>2. Structural Comparators (Chang 2026)</h3>
+        <h3 class="section-subtitle">1. Patient Baseline</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="input-group"><label>RV Basal Diam (RVD1)</label><input type="number" step="0.1" x-model="rvd1"></div>
-            <div class="input-group"><label>LV Diastole (LVIDd)</label><input type="number" step="0.1" x-model="lvidd"></div>
-            
-            <div class="input-group"><label>RV Free Wall (RVWT)</label><input type="number" step="0.1" x-model="rvwt"></div>
-            <div class="input-group"><label>LV Free Wall (LVPWd)</label><input type="number" step="0.1" x-model="lvpwd"></div>
-            
-            <div class="input-group"><label>Right Atrium (RAD)</label><input type="number" step="0.1" x-model="rad"></div>
-            <div class="input-group"><label>Left Atrium (LAD)</label><input type="number" step="0.1" x-model="lad"></div>
+            <div class="input-group"><label>Body Weight (kg)</label><input type="number" step="0.1" x-model="weight" placeholder="e.g. 12.5"></div>
+            <div class="input-group"><label>TR Peak Velocity (m/s) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('trMax')"></i></label><input type="number" step="0.1" x-model="trMax"></div>
         </div>
 
-        <h3>3. Vascular Dimensions</h3>
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <div class="input-group" style="flex: 1;"><label>PA:Ao Ratio</label><input type="number" step="0.01" x-model="paaola"></div>
-            <div class="input-group" style="flex: 1;"><label>RPA min (mm)</label><input type="number" step="0.1" x-model="rpamin"></div>
+        <h3 class="section-subtitle">2. Ventricles (ACVIM Site 1)</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="input-group"><label>RV Basal Diam (RVD1) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('rvd1')"></i></label><input type="number" step="0.1" x-model="rvd1"></div>
+            <div class="input-group"><label>LV Diastole (LVIDd) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('lvidd')"></i></label><input type="number" step="0.1" x-model="lvidd"></div>
+            <div class="input-group"><label>RV Free Wall (RVWT) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('rvwt')"></i></label><input type="number" step="0.1" x-model="rvwt"></div>
+            <div class="input-group"><label>LV Free Wall (LVPWd) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('lvpwd')"></i></label><input type="number" step="0.1" x-model="lvpwd"></div>
+            <div class="input-group"><label>RV Diastolic Area (RVEDA) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('rveda')"></i></label><input type="number" step="0.1" x-model="rveda" placeholder="cm²"></div>
+            <div class="input-group"><label>TAPSE <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('tapse')"></i></label><input type="number" step="0.1" x-model="tapse" placeholder="mm"></div>
         </div>
 
-        <h3>4. Subjective Findings</h3>
+        <h3 class="section-subtitle">3. Pulmonary Artery (ACVIM Site 2)</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="input-group"><label>MPA min (mm) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('mpamin')"></i></label><input type="number" step="0.1" x-model="mpamin"></div>
+            <div class="input-group"><label>RPA min (mm) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('rpamin')"></i></label><input type="number" step="0.1" x-model="rpamin"></div>
+            <div class="input-group"><label>PA:Ao Ratio <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('paaola')"></i></label><input type="number" step="0.01" x-model="paaola"></div>
+            <div class="input-group"><label>RPA max (mm) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('rpamax')"></i></label><input type="number" step="0.1" x-model="rpamax"></div>
+        </div>
+
+        <h3 class="section-subtitle">4. Atria & Filling Pressures (Site 3 / ePLAR)</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="input-group"><label>Right Atrium (RAD) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('rad')"></i></label><input type="number" step="0.1" x-model="rad"></div>
+            <div class="input-group"><label>Left Atrium (LAD) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('lad')"></i></label><input type="number" step="0.1" x-model="lad"></div>
+            <div class="input-group"><label>MV E Vel (m/s) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('eVel')"></i></label><input type="number" step="0.01" x-model="eVel"></div>
+            <div class="input-group"><label>MV e' Vel (m/s) <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('ePrime')"></i></label><input type="number" step="0.01" x-model="ePrime"></div>
+        </div>
+
+        <h3 class="section-subtitle">5. Subjective Findings</h3>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
             <div class="input-group" style="flex: 1;">
-                <label>Visual IVS Flattening</label>
+                <label>Visual IVS Flattening <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('ivsFlattening')"></i></label>
                 <select x-model="ivsFlatteningChang">
                     <option value="0">Normal (No flattening)</option>
                     <option value="2">Subtle-Mild (Deviated, not flat)</option>
@@ -114,107 +124,260 @@
                 </select>
             </div>
             <div class="input-group" style="flex: 1;">
-                <label>RVOT Flow Profile</label>
-                <div class="checkbox-group">
+                <label>RVOT Flow Profile <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('rvotNotching')"></i></label>
+                <div class="checkbox-group" style="margin-top: 8px;">
                     <input type="checkbox" id="rvotNotchStandalone" x-model="rvotNotching">
                     <label for="rvotNotchStandalone">Mid-Systolic Notching Present</label>
                 </div>
             </div>
         </div>
-        <p>Need More Echo Calculations? <a href="\echocalc.html" class="btn">Access the Fully Integrated VetCardioHub EchoCalc here</a></p>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #cbd5e1; text-align: center;">
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 10px;">Need full left-heart quantitation?</p>
+            <a href="/echocalc.html" class="btn" style="background: #f1f5f9; color: #1e293b;">Launch Integrated EchoCalc</a>
+        </div>
     </section>
 
-    <aside class="results-panel" style="position: sticky; top: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
+    <aside class="pht-sticky-panel">
         
-        <div class="result-widget card">
-            <header><h3><i class="fa-solid fa-scale-unbalanced"></i> Chang (2026) Predictive Score</h3></header>
+        <div class="result-widget card" style="border-top: 4px solid #ea580c;">
+            <header style="border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px;">
+                <h2 class="panel-title" style="border:none; padding:0; font-size: 1.25rem;">
+                    <span><i class="fa-solid fa-lungs-virus" style="color: #ea580c;"></i> ACVIM Probability</span>
+                    <div x-show="phClassification" class="dash-badge" :class="phClassification?.riskClass" x-text="phClassification?.probability" style="font-size: 1rem;"></div>
+                </h2>
+            </header>
             
             <div class="widget-body">
-                <template x-if="changScoreResults">
-                    <div>
-                        <div class="score-display" style="text-align: center;">
-                            <span class="score-total" x-text="changScoreResults.total"></span>
-                            <span class="score-max">/ 25</span>
-                        </div>
-                        
-                        <div class="alert-banner" :class="changScoreResults.alertClass" x-text="changScoreResults.prediction"></div>
+                
+                <div x-show="!phClassification" class="empty-state-box">
+                    <i class="fa-solid fa-stethoscope" style="font-size: 2rem; display: block; margin-bottom: 12px; color: #cbd5e1;"></i>
+                    <p style="margin: 0 0 10px 0; font-weight: 500;">Enter TR velocity or anatomic site metrics to calculate probability.</p>
+                </div>
 
-                        <div class="score-breakdown" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 1rem;">
-                            <template x-for="item in changScoreResults.breakdown" :key="item.name">
-                                <div class="breakdown-item" style="display: flex; justify-content: space-between;">
-                                    <span x-text="item.name"></span>
-                                    <strong x-text="`+${item.val}`"></strong>
-                                </div>
-                            </template>
+                <div x-show="phClassification" x-transition>
+                    
+                    <div class="acvim-grid">
+                        <div class="acvim-step" :class="{'active-low': phClassification?.stepIndex === 0}">
+                            <p>Low</p><span>Normal TR</span>
+                        </div>
+                        <div class="acvim-step" :class="{'active-intermediate': phClassification?.stepIndex === 1}">
+                            <p>Intermediate</p><span>Borderline TR or ≥2 Sites</span>
+                        </div>
+                        <div class="acvim-step" :class="{'active-high': phClassification?.stepIndex === 2}">
+                            <p>High</p><span>Severe TR</span>
                         </div>
                     </div>
-                </template>
-                
-                <template x-if="!changScoreResults">
-                    <div class="empty-state">Enter structural comparators to calculate the score.</div>
-                </template>
+                    
+                    <div class="audit-container">
+                        <template x-for="group in phClassification?.comprehensiveAudit" :key="group.title">
+                            <div class="audit-card">
+                                <div class="audit-header" :class="{'is-positive': group.isActive}">
+                                    <span x-text="group.title"></span>
+                                    <span x-show="group.isActive && !['Primary Doppler', '2026 Predictive Score'].includes(group.title)" class="site-positive-tag">Site Positive</span>
+                                </div>
+                                <div>
+                                    <template x-for="item in group.items" :key="item.name">
+                                        <div class="audit-row">
+                                            <div>
+                                                <strong class="audit-name">
+                                                    <span x-text="item.name"></span>
+                                                    
+                                                    <template x-if="item.glossaryKey">
+                                                        <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary(item.glossaryKey)"></i>
+                                                    </template>
+                                                </strong>
+                                                <span class="audit-val" x-text="item.val"></span>
+                                            </div>
+                                            <div style="text-align: right;">
+                                                <span class="audit-ref" x-text="`Ref: ${item.threshold}`"></span>
+                                                <span class="dash-badge" :class="item.isAbnormal ? 'abnormal' : 'normal'" x-text="item.statusLabel"></span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="summary-box">
+                        <p style="font-size: 0.85rem; color: #334155; margin: 0;">
+                            <strong>Anatomic Sites Positive:</strong> <span x-text="phClassification?.anatomicSites" style="font-weight: 900; color: #1e3a8a; font-size: 1.1rem;"></span> / 3
+                        </p>
+                    </div>
+
+                    <div x-show="eplar > 0 && phClassification?.stepIndex >= 1" x-transition class="eplar-box">
+                        <h4 style="margin: 0 0 6px 0; color: #1e3a8a; font-size: 0.85rem; display: flex; align-items: center;">
+                            <i class="fa-solid fa-code-compare" style="margin-right: 6px;"></i> ePLAR Differentiation
+                            <i class="fa-solid fa-circle-info glossary-trigger" @click="openGlossary('eplar')"></i>
+                        </h4>
+                        <div class="eplar-inner">
+                            <div style="display: flex; align-items: baseline; gap: 6px;">
+                                <span style="font-weight: 900; font-size: 1.1rem; color: #0f172a;" x-text="eplar"></span>
+                                <span style="font-size: 0.7rem; color: #64748b; font-weight: bold;">(ePLAR)</span>
+                            </div>
+                            <span x-show="eplar >= 0.28" class="eplar-badge eplar-pre">Pre-Capillary</span>
+                            <span x-show="eplar <= 0.23" class="eplar-badge eplar-post">Post-Capillary Backup</span>
+                            <span x-show="eplar > 0.23 && eplar < 0.28" class="eplar-badge eplar-border">Borderline</span>
+                        </div>
+                    </div>
+
+                    <template x-if="changScoreResults">
+                        <div class="summary-box" style="text-align: left; padding: 12px; background: white;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 8px;">
+                                <span style="font-weight: 800; color: #1e293b; font-size: 0.8rem;"><i class="fa-solid fa-scale-unbalanced" style="color: #6366f1; margin-right: 4px;"></i> Chang 2026 Score: <span x-text="changScoreResults.total"></span>/25</span>
+                                <span class="dash-badge" :class="changScoreResults.alertClass" x-text="changScoreResults.prediction"></span>
+                            </div>
+                            <div class="chang-grid">
+                                <template x-for="item in changScoreResults.breakdown" :key="item.name">
+                                    <div class="chang-item">
+                                        <span style="color: #475569; font-weight: 600;" x-text="item.name"></span>
+                                        <strong style="color: #1e40af;" x-text="`+${item.val}`"></strong> 
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <button @click="copyPHTAudit()" type="button" class="btn-export">
+                        <i class="fa-solid fa-clipboard-check"></i> Export PHT Audit
+                    </button>
+                    
+                </div>
             </div>
         </div>
-
+        
         <div class="result-widget card">
-            <header><h3><i class="fa-solid fa-lungs-virus"></i> ACVIM (2020) Probability</h3></header>
-            
-            <div class="widget-body">
-                <template x-if="phClassification">
-                    <div>
-                        <div class="alert-banner" :class="phClassification.riskClass" x-text="phClassification.probability"></div>
-
-                        <div class="acvim-summary" style="margin-top: 1rem;">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span>Anatomic Sites Positive:</span>
-                                <strong x-text="`${phClassification.anatomicSites} / 3`"></strong>
-                            </div>
-                            <template x-for="item in phClassification.breakdown" :key="item.name">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span x-text="item.name"></span>
-                                    <strong x-text="item.grade"></strong>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-
-                <template x-if="!phClassification">
-                    <div class="empty-state">Awaiting sufficient structural or Doppler data.</div>
-                </template>
-            </div>
-            
-            <div class="result-widget card" style="margin-top: 1rem;">
             <header>
-                <h3 style="font-size: 0.9rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
-                    <i class="fa-solid fa-book-medical"></i> Literature & Evidence
+                <h3 style="font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                    <i class="fa-solid fa-book-medical"></i> Literature Reference
                 </h3>
             </header>
-            <div class="widget-body" style="padding: 15px; font-size: 0.8rem; color: #475569; display: flex; flex-direction: column; gap: 12px;">
-                
+            <div class="widget-body" style="padding: 15px; font-size: 0.75rem; color: #475569; display: flex; flex-direction: column; gap: 10px;">
                 <div>
                     <span style="font-weight: 700; color: #334155; display: block;">Chang PH Predictive Score</span>
                     <span style="font-style: italic;">Chang et al. Echocardiographic predictive score for pulmonary hypertension in dogs lacking measurable tricuspid regurgitation. (2026).</span>
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/41742574/" target="_blank" rel="noopener noreferrer" style="color: #0ea5e9; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
-                        [PMID: 41742574] <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.7rem;"></i>
-                    </a>
                 </div>
-
-                <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px;">
+                <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px;">
                     <span style="font-weight: 700; color: #334155; display: block;">ACVIM Consensus Guidelines</span>
                     <span style="font-style: italic;">Reinero et al. ACVIM consensus statement guidelines for the diagnosis, classification, treatment, and monitoring of pulmonary hypertension in dogs. (2020).</span>
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/32065428/" target="_blank" rel="noopener noreferrer" style="color: #0ea5e9; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
-                        [PMID: 32065428] <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.7rem;"></i>
-                    </a>
                 </div>
-
             </div>
         </div>
-        </div>
+
     </aside>
-
+    <!-- Pop up Glossary Window -->
+    <div x-show="glossaryOpen" 
+         class="glossary-overlay"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @keydown.escape.window="closeGlossary()"
+         style="display: none;">
+        
+        <div class="glossary-backdrop" @click="closeGlossary()"></div>
+    
+        <div class="card glossary-modal" 
+             x-show="glossaryOpen"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 transform translate-y-0 sm:scale-100">
+            
+            <header class="glossary-header">
+                <h3 class="glossary-title">
+                    <i class="fa-solid fa-book-medical" style="color: #0ea5e9;"></i>
+                    <span x-text="activeGlossaryTerm?.title"></span>
+                </h3>
+                <button @click="closeGlossary()" class="glossary-close" aria-label="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </header>
+    
+            <div class="glossary-modal-body">
+        
+             <template x-if="activeGlossaryTerm?.imgPlaceholder">
+                <div class="glossary-image-container">
+                    <img :src="activeGlossaryTerm.imgPlaceholder" 
+                         class="glossary-img clickable" 
+                         @click="zoomImage(activeGlossaryTerm.imgPlaceholder)"
+                         alt="Diagnostic reference diagram">
+                    
+                    <template x-if="activeGlossaryTerm?.imgAttribution">
+                        <p class="image-attribution">
+                            Source: <span x-text="activeGlossaryTerm.reference"></span>. 
+                            Licensed <span x-text="activeGlossaryTerm.imgAttribution"></span>. 
+                            <a :href="`https://pubmed.ncbi.nlm.nih.gov/${activeGlossaryTerm.pmid}/`" 
+                               target="_blank" rel="noopener noreferrer">
+                               [PMID: <span x-text="activeGlossaryTerm.pmid"></span>]
+                            </a>
+                        </p>
+                    </template>
+                </div>
+            </template>
+            
+                <div class="glossary-content">
+                    
+                    <div class="glossary-row">
+                        <i class="fa-solid fa-satellite-dish glossary-icon" style="color: #0ea5e9;"></i>
+                        <div class="glossary-text-block">
+                            <span class="glossary-label">Optimal View / Source</span>
+                            <p class="glossary-value" x-text="activeGlossaryTerm?.view"></p>
+                        </div>
+                    </div>
+            
+                    <div class="glossary-row">
+                        <i class="fa-solid fa-stethoscope glossary-icon" style="color: #10b981;"></i>
+                        <div class="glossary-text-block">
+                            <span class="glossary-label">Clinical Purpose</span>
+                            <p class="glossary-desc" x-text="activeGlossaryTerm?.description"></p>
+                        </div>
+                    </div>
+            
+                    <div class="glossary-row">
+                        <i class="fa-solid fa-ruler-combined glossary-icon" style="color: #8b5cf6;"></i>
+                        <div class="glossary-text-block">
+                            <span class="glossary-label">Technique / Formula</span>
+                            <p class="glossary-formula-box" x-text="activeGlossaryTerm?.method"></p>
+                        </div>
+                    </div>
+            
+                    <template x-if="activeGlossaryTerm?.reference || activeGlossaryTerm?.pmid">
+                        <div class="glossary-reference-section">
+                            <i class="fa-solid fa-book-open-reader glossary-icon ref-icon"></i>
+                            <div class="glossary-text-block">
+                                <span class="glossary-label">Evidence & Literature</span>
+                                <p class="glossary-reference-text">
+                                    <span x-text="activeGlossaryTerm?.reference" style="font-style: italic;"></span>
+                                    
+                                    <template x-if="activeGlossaryTerm?.pmid">
+                                        <a :href="`https://pubmed.ncbi.nlm.nih.gov/${activeGlossaryTerm.pmid}/`" 
+                                           target="_blank" 
+                                           rel="noopener noreferrer"
+                                           class="pubmed-link">
+                                            [PMID: <span x-text="activeGlossaryTerm.pmid"></span>] 
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                        </a>
+                                    </template>
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div x-data="{ zoomedImg: null }" 
+         @image-zoom.window="zoomedImg = $event.detail"
+         x-show="zoomedImg"
+         class="zoom-overlay" 
+         @click="zoomedImg = null"
+         style="display: none;">
+        <img :src="zoomedImg" class="zoomed-img" @click.stop>
+    </div>
 </main>
-
 
 </div>
 </div>

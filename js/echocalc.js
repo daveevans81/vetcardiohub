@@ -479,6 +479,21 @@ get phClassification() {
         if (hasChangWarning) auditGroups.chang.isActive = true;
     }
 
+    const addMetric = (groupKey, name, valStr, isAbnormal, thresholdStr, glossaryKey = null) => {
+    evaluatedCount++;
+    auditGroups[groupKey].items.push({
+        name,
+        val: valStr,
+        isAbnormal,
+        threshold: thresholdStr,
+        statusLabel: isAbnormal ? 'Abnormal' : 'Normal',
+        glossaryKey // Passes the key to the UI
+    });
+    if (isAbnormal && groupKey !== 'chang') {
+        auditGroups[groupKey].isActive = true;
+    }
+};
+
     // If absolutely no PH data exists, return null
     if (evaluatedCount === 0) return null; 
 

@@ -3456,3 +3456,192 @@ input {
 .widget-body {
     padding: 20px;
 }
+
+/* ==========================================================================
+   PHT DASHBOARD & AUDIT STYLES
+   ========================================================================== */
+
+/* Layout & Typography */
+.pht-layout {
+    display: grid; 
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); 
+    gap: 2rem;
+}
+.pht-sticky-panel {
+    position: sticky; 
+    top: 2rem; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 1.5rem;
+}
+.panel-title {
+    color: #16325F; 
+    border-bottom: 2px solid #f1f5f9; 
+    padding-bottom: 10px; 
+    margin-top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.section-subtitle {
+    font-size: 0.95rem; 
+    color: #475569; 
+    margin-top: 20px;
+}
+.empty-state-box {
+    background: #f8fafc; 
+    border: 2px dashed #cbd5e1; 
+    padding: 30px 20px; 
+    border-radius: 8px; 
+    text-align: center; 
+    color: #64748b;
+}
+
+/* Badges */
+.dash-badge {
+    font-weight: 700; 
+    padding: 2px 8px; 
+    border-radius: 4px; 
+    font-size: 0.75rem;
+    display: inline-block;
+    border: 1px solid transparent;
+}
+.dash-badge.normal { background-color: #f0fdf4; color: #15803d; border-color: #86efac; }
+.dash-badge.warning { background-color: #fffbeb; color: #b45309; border-color: #fcd34d; }
+.dash-badge.abnormal { background-color: #fef2f2; color: #b91c1c; border-color: #fca5a5; }
+
+.site-positive-tag {
+    font-size: 0.6rem; 
+    background: #dc2626; 
+    color: white; 
+    padding: 2px 6px; 
+    border-radius: 12px; 
+    text-transform: uppercase;
+}
+
+/* ACVIM 3-Step Grid */
+.acvim-grid {
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px; 
+    text-align: center; 
+    margin-bottom: 20px;
+}
+.acvim-step {
+    border: 2px solid #cbd5e1; 
+    border-radius: 6px; 
+    padding: 10px 4px; 
+    transition: all 0.3s ease; 
+    opacity: 0.4; 
+    background: white;
+}
+.acvim-step p { margin: 0; font-size: 0.75rem; font-weight: bold; color: #1e293b; text-transform: uppercase; }
+.acvim-step span { font-size: 0.65rem; font-weight: 600; display: block; margin-top: 4px; }
+
+/* Active States for ACVIM Grid */
+.acvim-step.active-low { opacity: 1; border-color: #16a34a; background: #f0fdf4; transform: translateY(-2px); }
+.acvim-step.active-low span { color: #16a34a; }
+
+.acvim-step.active-intermediate { opacity: 1; border-color: #d97706; background: #fffbeb; transform: translateY(-2px); }
+.acvim-step.active-intermediate span { color: #b45309; }
+
+.acvim-step.active-high { opacity: 1; border-color: #dc2626; background: #fef2f2; transform: translateY(-2px); }
+.acvim-step.active-high span { color: #b91c1c; }
+
+/* Clinical Evidence Audit List */
+.audit-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.audit-card { border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; }
+.audit-header {
+    padding: 6px 12px; 
+    font-size: 0.75rem; 
+    font-weight: 700; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    background-color: #f8fafc; 
+    color: #475569; 
+    border-bottom: 1px solid #e2e8f0;
+}
+.audit-header.is-positive {
+    background-color: #fee2e2; 
+    color: #991b1b; 
+    border-bottom-color: #fca5a5;
+}
+.audit-row {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 8px 12px; 
+    border-bottom: 1px solid #f1f5f9; 
+    font-size: 0.8rem; 
+    background: white;
+}
+.audit-name { color: #334155; display: block; font-weight: bold;}
+.audit-val { font-family: monospace; color: #0f172a; font-size: 0.85rem; }
+.audit-ref { font-size: 0.65rem; color: #64748b; display: block; margin-bottom: 2px; }
+
+/* Summary & Callout Boxes */
+.summary-box {
+    background-color: #f8fafc; 
+    padding: 10px; 
+    border-radius: 6px; 
+    border: 1px solid #e2e8f0; 
+    text-align: center; 
+    margin-bottom: 20px;
+}
+.eplar-box {
+    margin-bottom: 20px; 
+    border: 1px solid #bfdbfe; 
+    border-radius: 6px; 
+    background: #eff6ff; 
+    padding: 12px;
+}
+.eplar-inner {
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    background: white; 
+    padding: 10px; 
+    border-radius: 4px; 
+    border: 1px solid #cbd5e1;
+}
+
+/* Chang Score Breakdown Elements */
+.chang-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; }
+.chang-item {
+    font-size: 0.7rem; 
+    background: #f8fafc; 
+    padding: 4px 6px; 
+    border-radius: 4px; 
+    border: 1px solid #e2e8f0; 
+    display: flex; 
+    justify-content: space-between;
+}
+
+/* Actions & Triggers */
+.glossary-trigger {
+    color: #0ea5e9;
+    cursor: pointer;
+    margin-left: 6px;
+    font-size: 0.85em;
+    transition: color 0.2s;
+}
+.glossary-trigger:hover { color: #0284c7; }
+
+.btn-export {
+    width: 100%; 
+    padding: 12px; 
+    background: #0f172a; 
+    color: white; 
+    border: none; 
+    border-radius: 6px; 
+    font-weight: 700; 
+    font-size: 0.9rem; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 8px; 
+    transition: background 0.2s;
+}
+.btn-export:hover { background: #1e293b; }
