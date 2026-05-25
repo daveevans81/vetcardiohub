@@ -2441,7 +2441,7 @@ cvcAo: {
         description: "Compares the Caudal Vena Cava maximal diameter to the Aorta. A strong, objective indicator of right-sided congestive heart failure and elevated Central Venous Pressure (CVP).",
         method: "Calculated dynamically as: CVC (mm) / Ao (mm). A ratio > 1.3 combined with less than a 10% collapse during the respiratory cycle strongly suggests right heart failure.",
         reference: "Darnis et al. Establishment of reference values of the caudal vena cava by fast-stroke echocardiography.",
-        pmid: "15632009" // Note: This is for general CVC ultrasound reference,
+        pmid: "15632009", // Note: This is for general CVC ultrasound reference,
 category: "Right Heart",
         difficulty: 4
     },
