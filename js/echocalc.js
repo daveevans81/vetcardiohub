@@ -1489,7 +1489,7 @@ fallbackCopy(text) {
 
 
 // --- LEARNING HUB STATE ---
-learningMode: 'glossary', // Toggles between 'glossary' and 'quiz'
+learningMode: 'quiz', // Toggles between 'glossary' and 'quiz'
 searchQuery: '',
 quizDeck: [],
 currentQuizIndex: 0,
@@ -1498,7 +1498,7 @@ quizRevealed: false,
 // Category Filter for quiz
 selectedCategory: 'All',
 availableCategories: ['All', 'Doppler', 'Left Heart', 'Right Heart', 'Haemodynamics', 'Anatomy', 'Calculations', 'Guidelines'],
-quizMode: 'flashcard', // 'flashcard' or 'mcq'
+quizMode: 'mcq', // 'flashcard' or 'mcq'
 mcqOptions: [],
 mcqAnswered: false,
 mcqSelectedIndex: null,
@@ -1555,7 +1555,6 @@ markCard(status) {
 startQuiz() {
     this.learningMode = 'quiz';
     
-    // MAGIC TOUCH: Create the deck from the FILTERED list, not the whole database!
     // Fallback to the whole array if their filter resulted in 0 cards.
     const deckToUse = this.filteredGlossary.length > 0 ? this.filteredGlossary : this.glossaryArray;
     
@@ -1564,11 +1563,25 @@ startQuiz() {
     this.quizRevealed = false;
     this.sessionScore = { correct: 0, review: 0 };
     
-    // If they were already in MCQ mode, generate the first question
-    if (this.quizMode === 'mcq') this.generateMCQ();
+    // Ensure we generate the first question if we are in MCQ mode
+    if (this.quizMode === 'mcq' && this.quizDeck.length > 0) {
+        this.generateMCQ();
+    }
 },
 
-
+// --- INITIALIZATION ---
+initLearningHub() {
+    // Check the URL for a mode parameter (e.g., ?mode=glossary)
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    
+    if (mode === 'glossary') {
+        this.learningMode = 'glossary';
+    } else {
+        this.learningMode = 'quiz';
+        this.startQuiz(); // Auto-start the quiz if we land on it
+    }
+},
 
 // Update the filtered list
 get filteredGlossary() {
