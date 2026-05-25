@@ -398,9 +398,7 @@ get changScoreResults() {
 },
 
 
- 
-/* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
-/* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
+ /* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
 get phClassification() {
     if (!this.isDog) return null;
 
@@ -415,15 +413,16 @@ get phClassification() {
         chang: { title: '2026 Predictive Score', isActive: false, items: [] }
     };
 
-    // Helper to evaluate and push to audit
-    const addMetric = (groupKey, name, valStr, isAbnormal, thresholdStr) => {
+    // SINGLE, CORRECTED HELPER: Evaluates, pushes to audit, and attaches Glossary Key
+    const addMetric = (groupKey, name, valStr, isAbnormal, thresholdStr, glossaryKey = null) => {
         evaluatedCount++;
         auditGroups[groupKey].items.push({
             name,
             val: valStr,
             isAbnormal,
             threshold: thresholdStr,
-            statusLabel: isAbnormal ? 'Abnormal' : 'Normal'
+            statusLabel: isAbnormal ? 'Abnormal' : 'Normal',
+            glossaryKey // Passes the key to the UI
         });
         if (isAbnormal && groupKey !== 'chang') {
             auditGroups[groupKey].isActive = true;
@@ -435,34 +434,34 @@ get phClassification() {
     if (tr > 0) {
         let isAbnormal = tr >= 2.9;
         let thresholdStr = tr > 3.4 ? '> 3.4 m/s (Severe)' : (tr >= 2.9 ? '2.9-3.4 m/s (Mod)' : '< 2.9 m/s (Normal)');
-        addMetric('doppler', 'TR Peak Velocity', `${tr} m/s`, isAbnormal, thresholdStr);
+        addMetric('doppler', 'TR Peak Velocity', `${tr} m/s`, isAbnormal, thresholdStr, 'trMax');
     }
 
     // --- 2. Evaluate ACVIM Site 1: Ventricles ---
-    if (this.lvei > 0) addMetric('site1', 'LVEI (Septal Flattening)', this.lvei, this.lvei >= 1.2, '≥ 1.2');
+    if (this.lvei > 0) addMetric('site1', 'LVEI (Septal Flattening)', this.lvei, this.lvei >= 1.2, '≥ 1.2', 'lvei');
     if (this.rveda > 0 && this.rightAllometricResults?.rveda?.available) {
-        addMetric('site1', 'RVEDA', `${this.rveda} cm²`, parseFloat(this.rveda) > this.rightAllometricResults.rveda.max, `> ${this.rightAllometricResults.rveda.max} (Allo Max)`);
+        addMetric('site1', 'RVEDA', `${this.rveda} cm²`, parseFloat(this.rveda) > this.rightAllometricResults.rveda.max, `> ${this.rightAllometricResults.rveda.max} (Allo Max)`, 'rveda');
     }
     if (this.rvwt > 0 && this.rightAllometricResults?.rvwt?.available) {
-        addMetric('site1', 'RVWT', `${this.rvwt} mm`, parseFloat(this.rvwt) > this.rightAllometricResults.rvwt.max, `> ${this.rightAllometricResults.rvwt.max} (Allo Max)`);
+        addMetric('site1', 'RVWT', `${this.rvwt} mm`, parseFloat(this.rvwt) > this.rightAllometricResults.rvwt.max, `> ${this.rightAllometricResults.rvwt.max} (Allo Max)`, 'rvwt');
     }
-    if (this.rvwtlvpwd > 0) addMetric('site1', 'RVWT:LVPWd', this.rvwtlvpwd, parseFloat(this.rvwtlvpwd) > 1.0, '> 1.0');
+    if (this.rvwtlvpwd > 0) addMetric('site1', 'RVWT:LVPWd', this.rvwtlvpwd, parseFloat(this.rvwtlvpwd) > 1.0, '> 1.0', 'rvwtlvpwd');
 
     // --- 3. Evaluate ACVIM Site 2: Pulmonary Artery ---
-    if (this.mpaAo > 0) addMetric('site2', 'MPA:Ao', this.mpaAo, parseFloat(this.mpaAo) > 1.0, '> 1.0');
-    if (this.paaola > 0) addMetric('site2', 'PA:Ao(LA)', this.paaola, parseFloat(this.paaola) > 1.0, '> 1.0');
-    if (this.rpaIndex > 0) addMetric('site2', 'RPA Index', this.rpaIndex, this.rpaIndex >= 3.0, '≥ 3.0');
+    if (this.mpaAo > 0) addMetric('site2', 'MPA:Ao', this.mpaAo, parseFloat(this.mpaAo) > 1.0, '> 1.0', 'mpaAo');
+    if (this.paaola > 0) addMetric('site2', 'PA:Ao(LA)', this.paaola, parseFloat(this.paaola) > 1.0, '> 1.0', 'paaola');
+    if (this.rpaIndex > 0) addMetric('site2', 'RPA Index', this.rpaIndex, this.rpaIndex >= 3.0, '≥ 3.0', 'rpadi');
     
     if (this.mpamin > 0 && this.rightAllometricResults?.mpamin?.available) {
-        addMetric('site2', 'MPA min', `${this.mpamin} mm`, parseFloat(this.mpamin) > this.rightAllometricResults.mpamin.max, `> ${this.rightAllometricResults.mpamin.max} (Allo Max)`);
+        addMetric('site2', 'MPA min', `${this.mpamin} mm`, parseFloat(this.mpamin) > this.rightAllometricResults.mpamin.max, `> ${this.rightAllometricResults.mpamin.max} (Allo Max)`, 'mpamin');
     }
     if (this.rpamin > 0 && this.rightAllometricResults?.rpamin?.available) {
-        addMetric('site2', 'RPA min', `${this.rpamin} mm`, parseFloat(this.rpamin) > this.rightAllometricResults.rpamin.max, `> ${this.rightAllometricResults.rpamin.max} (Allo Max)`);
+        addMetric('site2', 'RPA min', `${this.rpamin} mm`, parseFloat(this.rpamin) > this.rightAllometricResults.rpamin.max, `> ${this.rightAllometricResults.rpamin.max} (Allo Max)`, 'rpamin');
     }
 
     // --- 4. Evaluate ACVIM Site 3: Right Atrium ---
     if (this.rad > 0 && this.rightAllometricResults?.rad?.available) {
-        addMetric('site3', 'RAD (Ap4Ch)', `${this.rad} mm`, parseFloat(this.rad) > this.rightAllometricResults.rad.max, `> ${this.rightAllometricResults.rad.max} (Allo Max)`);
+        addMetric('site3', 'RAD (Ap4Ch)', `${this.rad} mm`, parseFloat(this.rad) > this.rightAllometricResults.rad.max, `> ${this.rightAllometricResults.rad.max} (Allo Max)`, 'rad');
     }
 
     // Determine Anatomic Sites Count
@@ -475,24 +474,10 @@ get phClassification() {
     const chang = this.changScoreResults;
     const hasChangWarning = (chang && chang.total >= 4);
     if (chang && chang.total > 0) {
+        // We leave glossaryKey null here because we have a separate link to the paper in the UI
         addMetric('chang', 'Total Score', `${chang.total} / 25`, hasChangWarning, '≥ 4 Points');
         if (hasChangWarning) auditGroups.chang.isActive = true;
     }
-
-    const addMetric = (groupKey, name, valStr, isAbnormal, thresholdStr, glossaryKey = null) => {
-    evaluatedCount++;
-    auditGroups[groupKey].items.push({
-        name,
-        val: valStr,
-        isAbnormal,
-        threshold: thresholdStr,
-        statusLabel: isAbnormal ? 'Abnormal' : 'Normal',
-        glossaryKey // Passes the key to the UI
-    });
-    if (isAbnormal && groupKey !== 'chang') {
-        auditGroups[groupKey].isActive = true;
-    }
-};
 
     // If absolutely no PH data exists, return null
     if (evaluatedCount === 0) return null; 
@@ -500,7 +485,7 @@ get phClassification() {
     // --- 6. Determine Final ACVIM Probability Matrix ---
     let probability = 'Low Probability';
     let stepIndex = 0;
-    let riskClass = 'normal'; // normal, warning, abnormal
+    let riskClass = 'normal'; 
     
     if (tr > 3.4) {
         probability = 'High Probability';
@@ -533,7 +518,7 @@ get phClassification() {
         }
     }
     
-    // We convert the auditGroups object into an array for easier Alpine rendering
+    // Convert the auditGroups object into an array for easier Alpine rendering
     const comprehensiveAudit = Object.values(auditGroups).filter(group => group.items.length > 0);
 
     return { 
