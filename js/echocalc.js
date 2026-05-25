@@ -1610,7 +1610,7 @@ initLearningHub() {
     if (this.learningMode === 'quiz') {
         this.startQuiz();
     }
-}
+},
 
 // Update the filtered list
 get filteredGlossary() {
