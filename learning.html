@@ -76,27 +76,30 @@
 
     <header style="border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center;">
 
-        <div style="display: flex; background: #f8fafc; padding: 4px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <button @click="learningMode = 'glossary'" 
-                    style="border: none; padding: 6px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-                    :style="learningMode === 'glossary' ? 'background: #fff; color: #0ea5e9; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'">
-                <i class="fa-solid fa-book-open"></i> Dictionary
-            </button>
-            
-            <div style="width: 1px; background: #cbd5e1; margin: 0 4px;"></div>
-            
-            <button @click="learningMode = 'quiz'; quizMode = 'flashcard'; startQuiz();" 
-                    style="border: none; padding: 6px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-                    :style="(learningMode === 'quiz' && quizMode === 'flashcard') ? 'background: #fff; color: #8b5cf6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'">
-                <i class="fa-solid fa-clone"></i> Flashcards
-            </button>
-            
-            <button @click="learningMode = 'quiz'; quizMode = 'mcq'; startQuiz();" 
-                    style="border: none; padding: 6px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-                    :style="(learningMode === 'quiz' && quizMode === 'mcq') ? 'background: #fff; color: #10b981; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'">
-                <i class="fa-solid fa-list-check"></i> Practice Test
-            </button>
-        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: #f1f5f9; padding: 6px; border-radius: 12px; border: 1px solid #cbd5e1; width: 100%; max-width: 650px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);">
+                
+                <button @click="learningMode = 'glossary'" 
+                        style="border: none; padding: 14px 10px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.25s ease; display: flex; flex-direction: column; align-items: center; gap: 4px;"
+                        :style="learningMode === 'glossary' ? 'background: #fff; color: #0ea5e9; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-bottom: 3px solid #0ea5e9;' : 'background: transparent; color: #475569;'">
+                    <i class="fa-solid fa-book-open" style="font-size: 1.2rem;"></i>
+                    <span>Interactive Dictionary</span>
+                </button>
+                
+                <button @click="learningMode = 'quiz'; quizMode = 'flashcard'; startQuiz();" 
+                        style="border: none; padding: 14px 10px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.25s ease; display: flex; flex-direction: column; align-items: center; gap: 4px;"
+                        :style="(learningMode === 'quiz' && quizMode === 'flashcard') ? 'background: #fff; color: #8b5cf6; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-bottom: 3px solid #8b5cf6;' : 'background: transparent; color: #475569;'">
+                    <i class="fa-solid fa-clone" style="font-size: 1.2rem;"></i>
+                    <span>Active Recall Cards</span>
+                </button>
+                
+                <button @click="learningMode = 'quiz'; quizMode = 'mcq'; startQuiz();" 
+                        style="border: none; padding: 14px 10px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.25s ease; display: flex; flex-direction: column; align-items: center; gap: 4px;"
+                        :style="(learningMode === 'quiz' && quizMode === 'mcq') ? 'background: #fff; color: #10b981; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-bottom: 3px solid #10b981;' : 'background: transparent; color: #475569;'">
+                    <i class="fa-solid fa-list-check" style="font-size: 1.2rem;"></i>
+                    <span>Multiple Choice Test</span>
+                </button>
+                
+            </div>
     </header>
 
     <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
@@ -140,7 +143,10 @@
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                         <h4 style="margin: 0; color: #1e3a8a; font-size: 1.1rem;" x-text="item.title"></h4>
                         <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 12px; white-space: nowrap;"
-                              :style="item.difficulty === 1 ? 'background: #dcfce7; color: #166534;' : (item.difficulty === 2 ? 'background: #fef08a; color: #854d0e;' : (item.difficulty === 3 ? 'background: #fed7aa; color: #9a3412;' : 'background: #fecaca; color: #991b1b;'))"
+                              :style="item.difficulty == 1 ? 'background: #dcfce7; color: #166534;' : 
+                                   (item.difficulty == 2 ? 'background: #fef08a; color: #854d0e;' : 
+                                   (item.difficulty == 3 ? 'background: #fed7aa; color: #9a3412;' : 
+                                   'background: #fecaca; color: #991b1b;'))"
                               x-text="`Level ${item.difficulty || 1}`">
                         </span>
                     </div>
