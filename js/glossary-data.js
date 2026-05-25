@@ -1,7 +1,40 @@
 const VET_GLOSSARY_DB = {
-mmvd: {
+    
+    // ==========================================
+    // GROUP: DISEASES & CONDITIONS
+    // ==========================================
+    hcm: {
+        title: "Hypertrophic Cardiomyopathy (HCM)",
+        group: "Diseases",
+        category: "Feline Cardiology",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "The most common heart disease in cats. The heart muscle becomes abnormally thick and stiff, making it harder for the heart to relax and fill with blood properly.",
+        textClinical: "A primary myocardial disease characterized by concentric hypertrophy of the left ventricle in the absence of other systemic causes (e.g., hyperthyroidism, hypertension). It results in severe diastolic dysfunction and left atrial enlargement.",
+        pmid: "32239713" // ACVIM Feline Cardiomyopathy Guidelines
+    },
+    murmur: {
+        title: "Heart Murmur",
+        group: "Clinical Concepts",
+        category: "Physical Exam",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "An extra 'whooshing' sound your vet hears through the stethoscope. It happens when blood flows in a turbulent or swishing way through the heart, often due to a leaky valve.",
+        textClinical: "Audible turbulent blood flow detected on auscultation. Pathologic murmurs are typically caused by valvular regurgitation, stenotic lesions, or congenital shunts.",
+    },
+    murmurGrade: {
+        title: "Murmur Grading (1 to 6)",
+        group: "Clinical Concepts",
+        category: "Physical Exam",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "A scale from 1 to 6 that vets use to describe how loud a murmur is. Grade 1 is very quiet, while Grade 6 is so loud you can sometimes feel it buzzing against the chest.",
+        textClinical: "The Levine grading system for murmur intensity. Ranges from I/VI (barely audible in a quiet room) to VI/VI (audible with the stethoscope lifted off the chest wall, accompanied by a precordial thrill).",
+    },
+    
+    mmvd: {
         title: "Myxomatous Mitral Valve Disease (MMVD)",
-        category: "Disease",
+        category: "Canine Cardiology",
         audience: ["vet", "owner"], // Shows up for both
         difficulty: 1, // Useful for the vet quiz
         group: "diseases",
@@ -13,7 +46,189 @@ mmvd: {
         
         pmid: "30974015" // Vets get the paper, owners ignore it
     },
-  
+
+    // ==========================================
+    // GROUP: ACVIM MMVD STAGING
+    // ==========================================
+    acvimStageA: {
+        title: "ACVIM Stage A (MMVD)",
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Dogs in Stage A are completely healthy right now, but they are a breed (like a Cavalier King Charles Spaniel) that is at high risk of developing heart disease in the future.",
+        textClinical: "Patients at high risk for developing MMVD but with no current identifiable structural disorder of the heart (e.g., normal auscultation, normal echocardiogram).",
+        pmid: "30974015"
+    },
+    acvimStageB1: {
+        title: "ACVIM Stage B1 (MMVD)",
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "Your dog has a heart murmur and a leaky valve, but the heart hasn't stretched out yet. No medications are needed at this stage, just monitoring.",
+        textClinical: "Asymptomatic patients with a structural abnormality (murmur of mitral regurgitation) but no radiographic or echocardiographic evidence of cardiac remodeling that meets the criteria for initiating therapy.",
+        pmid: "30974015"
+    },
+    acvimStageB2: {
+        title: "ACVIM Stage B2 (MMVD)",
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "The leaky valve has caused the heart to stretch and enlarge significantly, though your dog still feels fine. Starting medication (Pimobendan) now delays the onset of heart failure.",
+        textClinical: "Asymptomatic patients with hemodynamically significant mitral regurgitation causing left-sided cardiomegaly (LA:Ao ≥ 1.6, LVIDdn ≥ 1.7) that meet the EPIC trial criteria for initiating pimobendan.",
+        pmid: "30974015"
+    },
+    acvimStageC: {
+        title: "ACVIM Stage C (MMVD)",
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        difficulty: 3,
+        textOwner: "The heart can no longer compensate for the leaky valve, causing fluid to build up in the lungs (heart failure). Dogs need multiple daily medications (like diuretics) to breathe comfortably.",
+        textClinical: "Patients with past or current clinical signs of congestive heart failure (CHF) secondary to MMVD. Requires standard quadruple therapy (Furosemide, Pimobendan, ACEi, Spironolactone).",
+        pmid: "30974015"
+    },
+    acvimStageD: {
+        title: "ACVIM Stage D (MMVD)",
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        difficulty: 3,
+        textOwner: "Advanced or 'end-stage' heart failure. The standard medications are no longer keeping the fluid out of the lungs, requiring specialized drug adjustments or hospital visits.",
+        textClinical: "Refractory congestive heart failure. Patients require advanced diuretic strategies (Torsemide, sequential nephron blockade), afterload reduction, and frequent monitoring to manage clinical signs.",
+        pmid: "30974015"
+    },
+
+    // ==========================================
+    // GROUP: PHARMACOLOGY & THERAPY
+    // ==========================================
+    diuretic: {
+        title: "Diuretic",
+        group: "Pharmacology",
+        category: "Drug Classes",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Often called a 'water pill.' It helps the kidneys pull excess fluid out of the body and lungs so your dog can breathe easier, which will make them pee more often.",
+        textClinical: "A class of agents that promote diuresis. In cardiology, they are the cornerstone of resolving pulmonary edema, ascites, and pleural effusion by reducing systemic and pulmonary venous hydrostatic pressure.",
+    },
+    loopDiuretic: {
+        title: "Loop Diuretic",
+        group: "Pharmacology",
+        category: "Drug Classes",
+        audience: ["vet"], // Hidden from owners, too technical
+        difficulty: 3,
+        textClinical: "The most potent class of diuretics (e.g., Furosemide, Torsemide). They inhibit the Na+/K+/2Cl- symporter in the thick ascending limb of the loop of Henle, leading to profound sodium and water excretion.",
+    },
+    furosemide: {
+        title: "Furosemide",
+        group: "Pharmacology",
+        category: "Medications",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "The most commonly prescribed 'water pill' used to clear fluid from the lungs in dogs and cats with heart failure. It acts quickly and is a lifesaver.",
+        textClinical: "A short-acting loop diuretic. It is the first-line emergency and chronic maintenance drug for treating congestive heart failure, titratable to the patient's Sleeping Respiratory Rate (SRR).",
+    },
+    pimobendan: {
+        title: "Pimobendan",
+        group: "Pharmacology",
+        category: "Medications",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "A highly effective heart medication that does two things: it opens up blood vessels to lower blood pressure, and it helps the heart muscle squeeze much harder.",
+        textClinical: "An 'inodilator' (inotropic mixed vasodilator) that acts via phosphodiesterase III (PDE3) inhibition and calcium sensitization. Proven to prolong the preclinical phase in Stage B2 MMVD and improve survival in Stage C.",
+        pmid: "27678719" // EPIC Trial
+    },
+    rapamycin: {
+        title: "Rapamycin",
+        group: "Pharmacology",
+        category: "Experimental / Research",
+        audience: ["vet", "owner"],
+        difficulty: 4,
+        textOwner: "An experimental drug currently being studied in veterinary medicine for its potential 'anti-aging' effects and ability to protect heart muscle over time.",
+        textClinical: "An mTOR inhibitor with potent immunomodulatory and anti-proliferative properties. Currently under investigation in veterinary cardiology (e.g., the Dog Aging Project) for its potential to reverse or slow myocardial remodeling and age-related cardiac decline.",
+    },
+    oxygen: {
+        title: "Oxygen Therapy",
+        group: "Therapy",
+        category: "Emergency",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Placing a pet in an oxygen-rich cage to immediately ease their breathing. It is the most important first step when a pet arrives at the clinic in respiratory distress.",
+        textClinical: "First-line stabilization for cardiogenic pulmonary edema or severe pulmonary hypertension. Typically provided via oxygen cage (FiO2 40-60%) to relieve hypoxemia and reduce myocardial work while awaiting diuretic onset.",
+    },
+
+    // ==========================================
+    // GROUP: SUPPLEMENTS & NUTRITION
+    // ==========================================
+    omega3: {
+        title: "Omega-3 Fatty Acids",
+        group: "Supplements",
+        category: "Nutraceuticals",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Healthy fats (often from fish oil) that help reduce inflammation in the body and can help prevent dangerous weight loss in pets with severe heart disease.",
+        textClinical: "EPA and DHA supplementation provides anti-inflammatory effects, may reduce arrhythmogenesis, and is specifically indicated to combat cardiac cachexia in advanced heart failure patients.",
+    },
+    coq10: {
+        title: "Co-Enzyme Q10 (CoQ10)",
+        group: "Supplements",
+        category: "Nutraceuticals",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "An antioxidant supplement that helps cells produce energy. It is sometimes recommended to support the heart muscle, though clinical proof of its benefit is still limited.",
+        textClinical: "An essential cofactor in the mitochondrial electron transport chain. Often supplemented as an antioxidant in myocardial diseases (like DCM), though robust randomized controlled trials demonstrating efficacy in veterinary patients are lacking.",
+    },
+    potassium: {
+        title: "Potassium (K+)",
+        group: "Supplements",
+        category: "Electrolytes",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "An essential mineral that helps the heart beat properly. Pets on heavy doses of 'water pills' often lose too much potassium in their urine and need a supplement.",
+        textClinical: "An intracellular cation critical for myocardial resting membrane potential. Hypokalemia is a frequent complication of chronic loop diuretic therapy and significantly increases the risk of ventricular tachyarrhythmias.",
+    },
+    magnesium: {
+        title: "Magnesium (Mg2+)",
+        group: "Supplements",
+        category: "Electrolytes",
+        audience: ["vet", "owner"],
+        difficulty: 3,
+        textOwner: "A mineral that works closely with potassium to keep the heart rhythm stable. Vets will sometimes check this level if your pet is having irregular heartbeats.",
+        textClinical: "An essential cofactor for the Na+/K+-ATPase pump. Hypomagnesemia can lead to refractory hypokalemia and promotes arrhythmogenesis. It is often depleted by chronic diuresis.",
+    },
+
+    // ==========================================
+    // GROUP: HOME MONITORING & DEVICES
+    // ==========================================
+    srr: {
+        title: "Sleeping Respiratory Rate (SRR)",
+        group: "Monitoring",
+        category: "Home Care",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Counting how many breaths your pet takes in one minute while they are deeply asleep. A rate consistently over 30 breaths per minute is an early warning sign of fluid in the lungs.",
+        textClinical: "The most sensitive and specific at-home monitoring tool for predicting the onset of left-sided congestive heart failure. An SRR consistently >30 breaths/min indicates rising left atrial pressures and impending pulmonary edema.",
+        pmid: "30312604"
+    },
+    smartCollar: {
+        title: "Smart Collars (Wearable Tech)",
+        group: "Monitoring",
+        category: "Technology",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Special collars (like PetPace) that act like an Apple Watch for your dog. They track heart rate, breathing rate, and activity levels while you are away from home.",
+        textClinical: "Wearable biometric sensors that provide continuous remote monitoring of heart rate, heart rate variability (HRV), and respiratory rate. Increasingly used to monitor treatment efficacy in pre-clinical and clinical heart failure patients remotely.",
+    }, 
+    
+
+    
+    
+    
+      // ==========================================
+    // GROUP: The Clinical ECHO Reference Database
+    // ==========================================
 // The Clinical ECHO Reference Database
 
 // --- RIGHT HEART  ---
