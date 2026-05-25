@@ -405,106 +405,84 @@ get phClassification() {
     if (!this.isDog) return null;
 
     let evaluatedCount = 0;
-    let breakdown = [];
     
-    // ACVIM Anatomic Site Trackers
-    let siteVentricle = false;
-    let sitePA = false;
-    let siteRA = false;
+    // We will build a structured audit for the UI to group by site
+    let auditGroups = {
+        doppler: { title: 'Primary Doppler', isActive: false, items: [] },
+        site1: { title: 'Site 1: Ventricles', isActive: false, items: [] },
+        site2: { title: 'Site 2: Pulm. Artery', isActive: false, items: [] },
+        site3: { title: 'Site 3: Right Atrium', isActive: false, items: [] },
+        chang: { title: '2026 Predictive Score', isActive: false, items: [] }
+    };
+
+    // Helper to evaluate and push to audit
+    const addMetric = (groupKey, name, valStr, isAbnormal, thresholdStr) => {
+        evaluatedCount++;
+        auditGroups[groupKey].items.push({
+            name,
+            val: valStr,
+            isAbnormal,
+            threshold: thresholdStr,
+            statusLabel: isAbnormal ? 'Abnormal' : 'Normal'
+        });
+        if (isAbnormal && groupKey !== 'chang') {
+            auditGroups[groupKey].isActive = true;
+        }
+    };
 
     // --- 1. Evaluate TR Velocity Vector ---
     const tr = parseFloat(this.trMax) || 0;
     if (tr > 0) {
-        evaluatedCount++;
-        let label = tr > 3.4 ? 'Severe / High Velocity' : (tr >= 2.9 ? 'Moderate / Intermediate Velocity' : 'Normal / Low Velocity');
-        let pg = (4 * (tr * tr)).toFixed(1);
-        breakdown.push({
-            name: 'TR Peak Velocity',
-            category: 'Primary Doppler Hemodynamics',
-            val: `${tr} m/s`,
-            threshold: tr > 3.4 ? '> 3.4 m/s' : (tr >= 2.9 ? '2.9 - 3.4 m/s' : '< 2.9 m/s'),
-            grade: label,
-            isTrigger: tr >= 2.9
-        });
+        let isAbnormal = tr >= 2.9;
+        let thresholdStr = tr > 3.4 ? '> 3.4 m/s (Severe)' : (tr >= 2.9 ? '2.9-3.4 m/s (Mod)' : '< 2.9 m/s (Normal)');
+        addMetric('doppler', 'TR Peak Velocity', `${tr} m/s`, isAbnormal, thresholdStr);
     }
 
     // --- 2. Evaluate ACVIM Site 1: Ventricles ---
-    let rvSigns = [];
-    
-    // Geometry & Size
-    if (this.lvei >= 1.2) { siteVentricle = true; rvSigns.push('Septal Flattening (LVEI ≥ 1.2)'); }
-    if (this.rveda && this.rightAllometricResults?.rveda?.max && parseFloat(this.rveda) > this.rightAllometricResults.rveda.max) { siteVentricle = true; rvSigns.push('RV Dilation (Allometric)'); }
-    
-    // Hypertrophy (Checks both Allometric Max and Sankisov Ratio)
-    if (this.rvwt && this.rightAllometricResults?.rvwt?.max && parseFloat(this.rvwt) > this.rightAllometricResults.rvwt.max) { 
-        siteVentricle = true; rvSigns.push('RV Hypertrophy (Allometric)'); 
-    } else if (this.rvwtlvpwd && parseFloat(this.rvwtlvpwd) > 1.0) {
-        siteVentricle = true; rvSigns.push('RVWT > LVPWd');
+    if (this.lvei > 0) addMetric('site1', 'LVEI (Septal Flattening)', this.lvei, this.lvei >= 1.2, '≥ 1.2');
+    if (this.rveda > 0 && this.rightAllometricResults?.rveda?.available) {
+        addMetric('site1', 'RVEDA', `${this.rveda} cm²`, parseFloat(this.rveda) > this.rightAllometricResults.rveda.max, `> ${this.rightAllometricResults.rveda.max} (Allo Max)`);
     }
-
-    if (rvSigns.length > 0) {
-        breakdown.push({
-            name: 'Ventricles (Site 1)',
-            category: 'Right Ventricular Structure',
-            val: rvSigns.join(', '),
-            threshold: 'ACVIM Anatomic Criteria Met',
-            grade: 'Positive Site',
-            isTrigger: true
-        });
+    if (this.rvwt > 0 && this.rightAllometricResults?.rvwt?.available) {
+        addMetric('site1', 'RVWT', `${this.rvwt} mm`, parseFloat(this.rvwt) > this.rightAllometricResults.rvwt.max, `> ${this.rightAllometricResults.rvwt.max} (Allo Max)`);
     }
+    if (this.rvwtlvpwd > 0) addMetric('site1', 'RVWT:LVPWd', this.rvwtlvpwd, parseFloat(this.rvwtlvpwd) > 1.0, '> 1.0');
 
     // --- 3. Evaluate ACVIM Site 2: Pulmonary Artery ---
-    let paSigns = [];
+    if (this.mpaAo > 0) addMetric('site2', 'MPA:Ao', this.mpaAo, parseFloat(this.mpaAo) > 1.0, '> 1.0');
+    if (this.paaola > 0) addMetric('site2', 'PA:Ao(LA)', this.paaola, parseFloat(this.paaola) > 1.0, '> 1.0');
+    if (this.rpaIndex > 0) addMetric('site2', 'RPA Index', this.rpaIndex, this.rpaIndex >= 3.0, '≥ 3.0');
     
-    // Standard and Internal Scalar Ratios
-    if (this.mpaAo && parseFloat(this.mpaAo) > 1.0) { sitePA = true; paSigns.push('MPA:Ao > 1.0'); }
-    if (this.paaola && parseFloat(this.paaola) > 1.0) { sitePA = true; paSigns.push('PA:Ao > 1.0'); }
-    
-    // Grosso/Vezzosi RPA Indexing
-    if (this.rpaIndex && this.rpaIndex >= 3.0) { 
-        sitePA = true; paSigns.push(`RPA Index (${this.rpaIndex}) ≥ 3.0`); 
+    if (this.mpamin > 0 && this.rightAllometricResults?.mpamin?.available) {
+        addMetric('site2', 'MPA min', `${this.mpamin} mm`, parseFloat(this.mpamin) > this.rightAllometricResults.mpamin.max, `> ${this.rightAllometricResults.mpamin.max} (Allo Max)`);
     }
-    
-    // Grosso Allometric Maximums
-    if (this.mpamin && this.rightAllometricResults?.mpamin?.max && parseFloat(this.mpamin) > this.rightAllometricResults.mpamin.max) {
-        sitePA = true; paSigns.push('MPA > Allometric Max');
-    }
-    if (this.rpamin && this.rightAllometricResults?.rpamin?.max && parseFloat(this.rpamin) > this.rightAllometricResults.rpamin.max) {
-        sitePA = true; paSigns.push('RPAmin > Allometric Max');
-    }
-
-    if (paSigns.length > 0) {
-        breakdown.push({
-            name: 'Pulmonary Artery (Site 2)',
-            category: 'Vascular Dimensions',
-            val: paSigns.join(', '),
-            threshold: 'ACVIM Anatomic Criteria Met',
-            grade: 'Positive Site',
-            isTrigger: true
-        });
+    if (this.rpamin > 0 && this.rightAllometricResults?.rpamin?.available) {
+        addMetric('site2', 'RPA min', `${this.rpamin} mm`, parseFloat(this.rpamin) > this.rightAllometricResults.rpamin.max, `> ${this.rightAllometricResults.rpamin.max} (Allo Max)`);
     }
 
     // --- 4. Evaluate ACVIM Site 3: Right Atrium ---
-    if (this.rad && this.rightAllometricResults?.rad?.max && parseFloat(this.rad) > this.rightAllometricResults.rad.max) { 
-        siteRA = true;
-        breakdown.push({
-            name: 'Right Atrium (Site 3)',
-            category: 'Atrial Dimensions',
-            val: `${this.rad} mm`,
-            threshold: `> ${this.rightAllometricResults.rad.max} mm`,
-            grade: 'RA Enlargement',
-            isTrigger: true
-        });
+    if (this.rad > 0 && this.rightAllometricResults?.rad?.available) {
+        addMetric('site3', 'RAD (Ap4Ch)', `${this.rad} mm`, parseFloat(this.rad) > this.rightAllometricResults.rad.max, `> ${this.rightAllometricResults.rad.max} (Allo Max)`);
     }
-    
+
+    // Determine Anatomic Sites Count
+    let siteVentricle = auditGroups.site1.isActive;
+    let sitePA = auditGroups.site2.isActive;
+    let siteRA = auditGroups.site3.isActive;
     const anatomicSites = (siteVentricle ? 1 : 0) + (sitePA ? 1 : 0) + (siteRA ? 1 : 0);
-    if (tr === 0 && anatomicSites === 0 && (!this.changScoreResults || this.changScoreResults.total === 0)) return null; 
-    
-    // --- 5. Fetch Chang 2026 Score for Evaluation ---
+
+    // --- 5. Fetch Chang 2026 Score ---
     const chang = this.changScoreResults;
     const hasChangWarning = (chang && chang.total >= 4);
+    if (chang && chang.total > 0) {
+        addMetric('chang', 'Total Score', `${chang.total} / 25`, hasChangWarning, '≥ 4 Points');
+        if (hasChangWarning) auditGroups.chang.isActive = true;
+    }
 
-    // --- 6. Determine Final ACVIM Probability Matrix (With Chang Integration) ---
+    // If absolutely no PH data exists, return null
+    if (evaluatedCount === 0) return null; 
+
+    // --- 6. Determine Final ACVIM Probability Matrix ---
     let probability = 'Low Probability';
     let stepIndex = 0;
     let riskClass = 'normal'; // normal, warning, abnormal
@@ -530,20 +508,9 @@ get phClassification() {
             stepIndex = 1;
             riskClass = 'warning';
         } else if (hasChangWarning) {
-            // THE CHANG OVERRIDE: ACVIM is technically "Low", but Chang predicts severe/moderate PH
             probability = "Intermediate Probability (Chang Score Override)";
             stepIndex = 1;
             riskClass = 'warning';
-            
-            // Push the Chang trigger into the visual audit table
-            breakdown.push({
-                name: 'Chang PH Score Alert',
-                category: '2026 Predictive Override',
-                val: `${chang.total} / 25 Pts`,
-                threshold: '≥ 4 Points',
-                grade: 'Elevated Pre-Capillary Risk',
-                isTrigger: true
-            });
         } else {
             probability = "Low Probability";
             stepIndex = 0;
@@ -551,16 +518,19 @@ get phClassification() {
         }
     }
     
+    // We convert the auditGroups object into an array for easier Alpine rendering
+    const comprehensiveAudit = Object.values(auditGroups).filter(group => group.items.length > 0);
+
     return { 
         probability, 
         stepIndex, 
         riskClass, 
-        breakdown, 
+        comprehensiveAudit, 
         anatomicSites,
         siteDetails: { siteVentricle, sitePA, siteRA },
-        changScore: chang // Passes the full Chang object to the UI if needed separately
+        changScore: chang 
     };
-},
+}
 
 
 /* Specialized Decoupled Right Heart Allometric Evaluator */
