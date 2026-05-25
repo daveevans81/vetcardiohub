@@ -1571,17 +1571,30 @@ startQuiz() {
 
 // --- INITIALIZATION ---
 initLearningHub() {
-    // Check the URL for a mode parameter (e.g., ?mode=glossary)
+    // 1. Grab the parameters from the URL (e.g., ?mode=quiz&type=flashcard)
     const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    
-    if (mode === 'glossary') {
+    const requestedMode = urlParams.get('mode');
+    const requestedType = urlParams.get('type');
+
+    // 2. Set the main learning mode (Defaults to 'quiz' if nothing is in the URL)
+    if (requestedMode === 'glossary') {
         this.learningMode = 'glossary';
     } else {
         this.learningMode = 'quiz';
-        this.startQuiz(); // Auto-start the quiz if we land on it
     }
-},
+
+    // 3. Set the specific quiz type (Defaults to 'mcq' if nothing is in the URL)
+    if (requestedType === 'flashcard') {
+        this.quizMode = 'flashcard';
+    } else {
+        this.quizMode = 'mcq';
+    }
+
+    // 4. Start the engine if the user landed on the quiz
+    if (this.learningMode === 'quiz') {
+        this.startQuiz();
+    }
+}
 
 // Update the filtered list
 get filteredGlossary() {
