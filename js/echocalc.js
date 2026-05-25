@@ -2422,14 +2422,18 @@ category: "Doppler",
         title: "Regurgitant Fraction (MR%)",
         view: "Derived Index",
         description: "Quantifies the percentage of the total LV stroke volume that leaks backward into the left atrium rather than going out the aorta.",
-        method: "Calculated as: (Mitral Regurgitant Volume / Total LV Stroke Volume) × 100."
+        method: "Calculated as: (Mitral Regurgitant Volume / Total LV Stroke Volume) × 100.",
+category: "Left Heart",
+        difficulty: 4
     },
     lvei: {
         title: "LVEI (LV Eccentricity Index)",
         view: "Derived Index",
         description: "Quantifies septal flattening (D-shape) caused by right ventricular volume or pressure overload.",
         method: "Calculated as: Perpendicular LVIDd₂ / Standard LVIDd. An index > 1.2 indicates significant geometric distortion.",
-        imgPlaceholder: "/images/lvei-reference.jpg"
+        imgPlaceholder: "/images/lvei-reference.jpg",
+category: "Right Heart",
+        difficulty: 3
     },
 cvcAo: {
         title: "CVC:Ao Ratio (Caudal Vena Cava to Aorta)",
@@ -2437,7 +2441,9 @@ cvcAo: {
         description: "Compares the Caudal Vena Cava maximal diameter to the Aorta. A strong, objective indicator of right-sided congestive heart failure and elevated Central Venous Pressure (CVP).",
         method: "Calculated dynamically as: CVC (mm) / Ao (mm). A ratio > 1.3 combined with less than a 10% collapse during the respiratory cycle strongly suggests right heart failure.",
         reference: "Darnis et al. Establishment of reference values of the caudal vena cava by fast-stroke echocardiography.",
-        pmid: "15632009" // Note: This is for general CVC ultrasound reference
+        pmid: "15632009" // Note: This is for general CVC ultrasound reference,
+category: "Right Heart",
+        difficulty: 4
     },
     cvcCollapse: {
         title: "CVC Collapsibility Index",
@@ -2445,7 +2451,9 @@ cvcAo: {
         description: "Evaluates the respiratory variation in the Caudal Vena Cava. A lack of collapse during inspiration indicates right atrial pressure is severely elevated.",
         method: "Calculated as: ((CVC max - CVC min) / CVC max) × 100. Normal dogs should show > 50% collapse during a normal inspiratory effort.",
         reference: "Darnis et al. Establishment of reference values of the caudal vena cava by fast-stroke echocardiography.",
-        pmid: "15632009"
+        pmid: "15632009",
+category: "Right Heart",
+        difficulty: 4
     },
     changScore: {
         title: "Chang (2026) PH Predictive Score",
@@ -2455,7 +2463,9 @@ cvcAo: {
         reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
         pmid: "41742574",
         imgPlaceholder: "/images/reference-phtscoring.jpg",
-imgAttribution: "CC-BY-NC 4.0"
+imgAttribution: "CC-BY-NC 4.0",
+category: "Calculations",
+        difficulty: 4
     },
 ivsFlattening: {
         title: "Interventricular Septal (IVS) Flattening",
@@ -2465,7 +2475,9 @@ ivsFlattening: {
         reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
         pmid: "41742574",
         imgPlaceholder: "/images/reference-ivsflattening.jpg",
-imgAttribution: "CC-BY-NC 4.0"
+imgAttribution: "CC-BY-NC 4.0",
+category: "Right Heart",
+        difficulty: 3
     },
     rvotNotching: {
         title: "RVOT Mid-Systolic Notching",
@@ -2475,8 +2487,59 @@ imgAttribution: "CC-BY-NC 4.0"
         reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
         pmid: "41742574",
         imgPlaceholder: "/images/reference-rvotnotch.jpg",
-imgAttribution: "CC-BY-NC 4.0"
-    }
+imgAttribution: "CC-BY-NC 4.0",
+category: "Doppler",
+        difficulty: 4
+    },
+
+
+// --- PROGNOSTIC SCORING ---
+
+mine1: {
+    title: "MINE Score (Original 4-Parameter)",
+    category: "Calculations",
+    difficulty: 3,
+    description: "The Mitral INsufficiency Echocardiographic (MINE) score is an objective classification system used to grade the severity of preclinical myxomatous mitral valve disease (MMVD). A score >8 is highly predictive of cardiac death.",
+    view: "Multiple (RPSAX & Ap4Ch)",
+    method: "Summates severity scores (1-4) across four parameters: LA:Ao ratio, LVIDdn, Fractional Shortening (FS%), and transmitral E-wave peak velocity.",
+    reference: "Vezzosi et al. (2021)",
+    pmid: "33951235"
+},
+
+mine2: {
+    title: "MINE 2 Score (Simplified)",
+    category: "Calculations",
+    difficulty: 3,
+    description: "A revised and simplified version of the original MINE score. Researchers found that Fractional Shortening (FS%) did not show independent association with cardiac outcomes, so it was removed to streamline the staging process.",
+    view: "Right Parasternal Short Axis & Left Apical",
+    method: "Calculates an MMVD severity score using only three independent predictors of survival: LA:Ao ratio, LVIDdn, and transmitral E-wave velocity. Used to identify 'advanced B2' patients.",
+    reference: "Vezzosi et al. (2025)",
+    pmid: "40865020"
+},
+
+// --- ACVIM CONSENSUS GUIDELINES ---
+
+acvimPht: {
+    title: "ACVIM Guidelines: Pulmonary Hypertension",
+    category: "Guidelines",
+    difficulty: 3,
+    description: "The standardized veterinary algorithm for diagnosing and classifying pulmonary hypertension (PHT) into probability tiers (Low, Intermediate, High) based on tricuspid regurgitation and anatomic remodeling.",
+    view: "Multiple Right & Left Parasternal Views",
+    method: "Assess Peak TR Velocity (m/s). If TR is unmeasurable or <3.4 m/s, evaluate three anatomic sites (Ventricles, Pulmonary Artery, Right Atrium) for signs of chronic pressure overload.",
+    reference: "Reinero et al. (2020)",
+    pmid: "32065428"
+},
+
+acvimMmvd: {
+    title: "ACVIM Guidelines: MMVD (EPIC Criteria)",
+    category: "Guidelines",
+    difficulty: 2,
+    description: "The global staging system (Stages A through D) for classifying canine myxomatous mitral valve disease (MMVD) and dictating pharmaceutical management, heavily reliant on the findings of the EPIC trial.",
+    view: "Right Parasternal Short Axis",
+    method: "To classify a preclinical patient as Stage B2 (warranting the initiation of pimobendan), there must be a murmur ≥3/6 and echocardiographic cardiomegaly defined strictly as an LA:Ao ≥ 1.6 AND an LVIDdn ≥ 1.7.",
+    reference: "Keene et al. (2019)",
+    pmid: "30974015"
+}
 },
 
 zoomImage(url) {
