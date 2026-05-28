@@ -1514,6 +1514,12 @@ get glossaryArray() {
     
     return Object.entries(this.glossaryDatabase)
         .map(([key, value]) => ({ key, ...value }))
+        
+        .filter(item => {
+            const groupName = item.group ? item.group.toLowerCase() : 'echo';
+            return groupName === 'echo'; 
+        })
+        
         .sort((a, b) => {
             // Primary Sort: By Difficulty Level (1 -> 4)
             const diffA = a.difficulty || 1; // Defaults to 1 if you forget to add a level
