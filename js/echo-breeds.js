@@ -131,13 +131,15 @@ const breedSpecificReferenceRanges = {
 
   "Cavalier King Charles Spaniel": {
     "is_deviant": true,
-    "reference": "Cerbu et al. (2023)",
-    "pmid": "37760386",
+    "reference": "Misbach et al. (2013)",
+    "pmid": "24834861",
     "clinical_note": "Flatter mitral annulus. Up to 10% of healthy CKCS exceed the standard Stage B2 LVIDdN limit of 1.7. VHS up to 11.9 can be normal.",
     "lvidd_mm": { "min": 21.4, "max": 41.1 },
     "lvids_mm": { "min": 10.9, "max": 24.6 },
     "ivsd_mm": { "min": 4.8, "max": 8.8 },
-    "lvfwd_mm": { "min": 4.9, "max": 8.5 }
+    "lvfwd_mm": { "min": 4.9, "max": 8.5 },
+    "FS_PCT": { "min": 31, "max": 50.8 },
+    "ao_vmax": { "min": 0.8, "max": 1.62 },
   },
 
   "Dachshund": {
@@ -312,6 +314,26 @@ const breedSpecificReferenceRanges = {
     "esvi_smod_kg": { "min": 0.43 , "max": 1.43 }
   },
 
+
+  "English Springer Spaniel": {
+    "is_deviant": true,
+    "pmid": "27492994",
+    "reference": "Dickson et al. (2016)", 
+    "clinical_note": "Large globoid heart and low resting FS and EF mean that DCM is potentially overdiagnosed in the breed.",
+    "la_ao": {  "min": 1.06, "max": 1.65 },
+    "lvidd_mm": { "median": 43.8, "min": 35, "max": 47.8 },
+    "edvi_smod_m2": { "median": 77.7, "min": 58.1, "max": 114 },
+    "esvi_smod_m2": { "min": 20.6, "max": 68.1 },
+    "lvids_mm": { "min": 22.6, "max": 39 },
+    "ivsd_mm": { "min": 7.7, "max": 12.2 },
+    "lvfwd_mm": { "min": 6.5, "max": 10.9 },
+    "FS_PCT": { "min": 16, "max": 35.9 },
+    "EF_PCT": { "min": 36, "max": 68.2 },
+    "ao_vmax": { "min": 1.05,"max": 1.87 },
+
+    
+    "LAD_mm": { "min": 30.7, "max": 42.5 },
+  },
   "Whippet": {
     "is_deviant": true,
     "sources": [
@@ -333,7 +355,7 @@ const breedSpecificReferenceRanges = {
         }
       },
       {
-        "pmid": "17508509", // Standardized to String
+        "pmid": "17508509", 
         "reference": "Bavegems et al. (2007)", 
         "metrics": {
           "lvidd_mm": { "median": 37.3, "min": 29.7, "max": 44.8 },
