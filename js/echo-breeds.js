@@ -1,4 +1,4 @@
-const breedSpecificReferenceRanges = {
+    const breedSpecificReferenceRanges = {
   "Afghan Hound": {
     "is_deviant": true,
     "pmid": "37760386",
@@ -116,7 +116,7 @@ const breedSpecificReferenceRanges = {
         "metrics": {
           "lvidd_mm": { "min": 32.8, "max": 46.4 },
           "lvids_mm": { "min": 19.9, "max": 34.7 },
-          "esvi_smod": { "max": 50.0 },
+          "esv_smod": { "max": 50.0 },
           "ao_vmax": { "min": 1.26, "max": 2.34 },
           "edvi_smod_m2": { "median": 71, "min": 49, "max": 93 },
           "esvi_smod_m2": { "median": 36, "min": 22, "max": 50 },
@@ -207,6 +207,26 @@ const breedSpecificReferenceRanges = {
       }
     ] 
   },
+  
+    "English Springer Spaniel": {
+    "is_deviant": true,
+    "pmid": "27492994",
+    "reference": "Dickson et al. (2016)", 
+    "clinical_note": "Large globoid heart and low resting FS and EF mean that DCM is potentially overdiagnosed in the breed.",
+    "la_ao": {  "min": 1.06, "max": 1.65 },
+    "lvidd_mm": { "median": 43.8, "min": 35, "max": 47.8 },
+    "edvi_smod_m2": { "median": 77.7, "min": 58.1, "max": 114 },
+    "esvi_smod_m2": { "min": 20.6, "max": 68.1 },
+    "lvids_mm": { "min": 22.6, "max": 39 },
+    "ivsd_mm": { "min": 7.7, "max": 12.2 },
+    "lvfwd_mm": { "min": 6.5, "max": 10.9 },
+    "FS_PCT": { "min": 16, "max": 35.9 },
+    "EF_PCT": { "min": 36, "max": 68.2 },
+    "ao_vmax": { "min": 1.05,"max": 1.87 },
+
+    
+    "LAD_mm": { "min": 30.7, "max": 42.5 },
+  },
 
   "German Shepherd": {
     "is_deviant": false,
@@ -284,6 +304,16 @@ const breedSpecificReferenceRanges = {
     "esvi_smod_m2": { "min": 21.9, "max": 47.0 },
     "lvidd_n": { "min": 1.3, "max": 1.64 }
   },
+  
+    "Irish Wolfhound": {
+    "reference": "Tyrrell et al. (2020)",
+    "is_deviant": false,
+    "pmid": "32112595",
+    "ivsd_mm": { "min": 5.6, "max": 13.5 },
+    "lvidd_mm": { "min": 44.4, "max": 60.1 },
+        "FS": { "min": 26.8, "max": 48.8 },
+    "la_ao": { "min": 0.88, "max": 1.36  },
+  },
 
   "Labrador Retriever": {
     "reference": "Cerbu et al. (2023)",
@@ -315,25 +345,7 @@ const breedSpecificReferenceRanges = {
   },
 
 
-  "English Springer Spaniel": {
-    "is_deviant": true,
-    "pmid": "27492994",
-    "reference": "Dickson et al. (2016)", 
-    "clinical_note": "Large globoid heart and low resting FS and EF mean that DCM is potentially overdiagnosed in the breed.",
-    "la_ao": {  "min": 1.06, "max": 1.65 },
-    "lvidd_mm": { "median": 43.8, "min": 35, "max": 47.8 },
-    "edvi_smod_m2": { "median": 77.7, "min": 58.1, "max": 114 },
-    "esvi_smod_m2": { "min": 20.6, "max": 68.1 },
-    "lvids_mm": { "min": 22.6, "max": 39 },
-    "ivsd_mm": { "min": 7.7, "max": 12.2 },
-    "lvfwd_mm": { "min": 6.5, "max": 10.9 },
-    "FS_PCT": { "min": 16, "max": 35.9 },
-    "EF_PCT": { "min": 36, "max": 68.2 },
-    "ao_vmax": { "min": 1.05,"max": 1.87 },
 
-    
-    "LAD_mm": { "min": 30.7, "max": 42.5 },
-  },
   "Whippet": {
     "is_deviant": true,
     "sources": [
@@ -369,10 +381,46 @@ const breedSpecificReferenceRanges = {
           "FS_PCT": { "min": 17.4, "max": 38.1 },
           "ao_vmax": { "mean": 1.39, "min": 0.9, "max": 1.89 }
         }
+      },
+      { 
+           "pmid": "26476964", 
+        "reference": "Seckerdieck et al. (2015)", 
+        "metrics": {
+          "lvidd_mm": { "median": 35, "min": 28.2, "max": 41.5 },
+          "lvids_mm": { "median": 25.5, "min": 18, "max": 32.6 },
+          "ivsd_mm": { "median": 9.4, "min": 6.7, "max": 12.2 },
+          "lvfwd_mm": { "median": 9.1, "min": 6.6, "max": 10.9 },
+          "la_ao": { "median": 1.35, "min": 1.15, "max": 1.64 },        
+          "FS_PCT": { "min": 16, "max": 38 },
+          "ao_vmax": { "mean": 1.72, "min": 1.2, "max": 2.23 },
+          "edv_smod": {  "min": 27, "max": 67 },
+          "esv_smod": { "min": 7, "max": 33 },
+          "edvi_smod_m2": {  "min": 59, "max": 109 },
+          "esvi_smod_m2": { "min": 16, "max": 55 },
+          "EF_PCT": { "min": 45, "max": 70 }
       }
     ]
   },
-
+  "Saluki": {
+    "is_deviant": true,
+        "pmid": "26476964", 
+        "reference": "Seckerdieck et al. (2015)", 
+          "lvidd_mm": { "median": 40.8, "min": 33.9, "max": 47.8 },
+          "lvids_mm": { "median": 31.3, "min": 24, "max": 38.8},
+          "ivsd_mm": { "median": 10.5, "min": 7.3, "max": 13.5 },
+          "lvfwd_mm": { "median": 10.4, "min": 8.4, "max": 12.3 },
+          "la_ao": { "median": 1.33, "min": 1.18, "max": 1.49 },        
+          "FS_PCT": { "min": 12, "max": 34 },
+          "ao_vmax": { "min": 0.97, "max": 1.96 },
+          "edv_smod": {  "min": 49, "max": 103 },
+          "esv_smod": { "min": 20, "max": 53 },
+          "edvi_smod_m2": {  "min": 59, "max": 109 },
+          "esvi_smod_m2": { "min": 16, "max": 55 },
+          "EF_PCT": { "min": 41, "max": 64 }
+       },     
+          
+          
+          
   "Toy Breeds (<5kg)": {
     "is_deviant": true,
     "reference": "Isayama et al. (2022)",
