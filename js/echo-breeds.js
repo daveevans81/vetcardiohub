@@ -463,6 +463,7 @@
           "esvi_smod_m2": { "min": 16, "max": 55 },
           "EF_PCT": { "min": 45, "max": 70 }
       }
+      }
     ]
   },
   "Saluki": {
