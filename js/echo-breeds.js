@@ -208,6 +208,32 @@
     ] 
   },
   
+      "English Setter": {
+    "is_deviant": true,
+    "pmid": "34517274",
+    "reference": "Vatne et al. (2021)", 
+    "clinical_note": "The upper limits of the intervals for left-atrial-to-aortic ratios and normalised left ventricular volumes exceeded those of various, previously published studies of other breeds.",
+    "la_ao": {  "min": 1.2, "max": 1.7 },
+    "lvidd_mm": { "min": 32.7, "max": 55.6 },
+    "edvi_smod_m2": { "min": 64.9, "max": 136.5 },
+    "esvi_smod_m2": { "min": 23.1, "max": 71.9},
+    "edvi_smod_kg": { "min": 2.4, "max": 4.8 },
+    "esvi_smod_kg": { "min": 0.8, "max": 2.7},
+    "lvids_mm": { "min": 21.6, "max": 40.5 },
+    "ivsd_mm": { "min": 7, "max": 12.5 },
+    "lvfwd_mm": { "min": 7.1, "max": 11.2 },
+    "FS_PCT": { "min": 15.9, "max": 34.5 },
+    "EF_PCT": { "min": 36.2, "max": 68.7 },
+    "ao_vmax": { "min": 1.1,"max": 2.1 },    
+    "lad": { "min": 30.2, "max": 47.9},
+    "lad_n": { "min": 1.3, "max": 1.8},
+    "lvidd_n": {  "min": 1.4, "max": 2.0 },
+    "lvids_n": {  "min": 0.9, "max": 1.5 },
+    "TAPSE_mm": {  "min": 13.9, "max": 23.7 },
+    "TAPSE_Ao": {  "min": 0.6, "max": 1 },
+    "eivrt": {  "min": 0.4, "max": 1.4 }
+},
+ 
     "English Springer Spaniel": {
     "is_deviant": true,
     "pmid": "27492994",
@@ -222,10 +248,8 @@
     "lvfwd_mm": { "min": 6.5, "max": 10.9 },
     "FS_PCT": { "min": 16, "max": 35.9 },
     "EF_PCT": { "min": 36, "max": 68.2 },
-    "ao_vmax": { "min": 1.05,"max": 1.87 },
-
-    
-    "LAD_mm": { "min": 30.7, "max": 42.5 },
+    "ao_vmax": { "min": 1.05,"max": 1.87 },    
+    "lad": { "min": 30.7, "max": 42.5 }
   },
 
   "German Shepherd": {
@@ -305,13 +329,53 @@
     "lvidd_n": { "min": 1.3, "max": 1.64 }
   },
   
+    "Hungarian Vizsla": {
+    "is_deviant": false,
+    "pmid": "19584035",
+    "reference": "Vörös et al. (2009)", 
+    "la_ao": { "median": 1.2, "sd": 0.1 },
+    "lvidd_mm": { "median": 42.9, "sd": 4.9 },
+    "lvids_mm": { "median": 26.7, "sd": 4.3 },
+    "ivsd_mm": { "median":10.6, "sd": 1.4 },
+    "lvfwd_mm": { "median": 11.1, "sd": 1.6 },
+    "FS_PCT": { "median": 38.6, "sd": 5.1 },
+    "EF_PCT": { "median": 68.8, "sd": 6.5 },
+    "lad": { "median": 36.8, "sd": 4.4 }
+  },
+      "Hungarian Mudi": {
+    "is_deviant": false,
+    "pmid": "19584035",
+    "reference": "Vörös et al. (2009)", 
+    "la_ao": { "median": 1.3, "sd": 0.1 },
+    "lvidd_mm": { "median": 33.6, "sd": 2.8 },
+    "lvids_mm": { "median": 21.4, "sd": 2.1 },
+    "ivsd_mm": { "median":8.4, "sd": 1 },
+    "lvfwd_mm": { "median": 9.2, "sd": 1.1 },
+    "FS_PCT": { "median": 36.3, "sd": 4.6 },
+    "EF_PCT": { "median": 67, "sd": 5.8 },
+    "lad": { "median": 27.4, "sd": 3.0 }
+  },
+    "Hungarian Greyhound": {
+    "is_deviant": true,
+    "pmid": "19584035",
+    "reference": "Vörös et al. (2009)", 
+    "la_ao": { "median": 1.2, "sd": 0.1 },
+    "lvidd_mm": { "median": 45.3, "sd": 3 },
+    "lvids_mm": { "median": 28.9, "sd": 3.8 },
+    "ivsd_mm": { "median":11.8, "sd": 1.7 },
+    "lvfwd_mm": { "median": 12.3, "sd": 1.5 },
+    "FS_PCT": { "median": 36.8, "sd": 6.3 },
+    "EF_PCT": { "median": 65.8, "sd": 8.3 },
+    "lad": { "median": 41.7, "sd": 2.7 }
+  },
+  
     "Irish Wolfhound": {
     "reference": "Tyrrell et al. (2020)",
     "is_deviant": false,
     "pmid": "32112595",
     "ivsd_mm": { "min": 5.6, "max": 13.5 },
     "lvidd_mm": { "min": 44.4, "max": 60.1 },
-        "FS": { "min": 26.8, "max": 48.8 },
+    "FS": { "min": 26.8, "max": 48.8 },
     "la_ao": { "min": 0.88, "max": 1.36  },
   },
 
@@ -414,8 +478,8 @@
           "ao_vmax": { "min": 0.97, "max": 1.96 },
           "edv_smod": {  "min": 49, "max": 103 },
           "esv_smod": { "min": 20, "max": 53 },
-          "edvi_smod_m2": {  "min": 59, "max": 109 },
-          "esvi_smod_m2": { "min": 16, "max": 55 },
+          "edvi_smod_m2": {  "min": 68, "max": 127 },
+          "esvi_smod_m2": { "min": 26, "max": 65 },
           "EF_PCT": { "min": 41, "max": 64 }
        },     
           

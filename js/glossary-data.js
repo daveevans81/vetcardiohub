@@ -499,12 +499,17 @@ category: "Left Heart",
         difficulty: 2
     },
     ladaola: {
-        audience: ["vet"], title: "LAD:Ao Ratio (Long Axis to Aorta long axis)",
+        audience: ["vet"], title: "LAD:AoD Ratio (Long Axis to Aorta long axis)",
         view: "Derived Index",
         description: "Scales the long-axis (or apical) left atrial dimension to the aortic root measured in right parasternal long axis view. Aortic measurement is made in long axis 5 chamber view for using these cut-offs. If measuring aorta in long axis view cut off is 2.4.",
-        group: "echo", method: "Calculated dynamically as: LAD (mm) / Ao (mm).",
+        group: "echo", method: "Calculated dynamically as: LAD (mm) / AoD (mm).",
 category: "Left Heart",
-        difficulty: 2
+        difficulty: 2,
+        reference: "Visser et al (2019). Echocardiographic quantitation of left heart size and function in 122 healthy dogs: A prospective study proposing reference intervals and assessing repeatability",
+        pmid: "31313382"
+        
+        
+        
     },
     RWT: { // Capitalized to match your exact state getter
         audience: ["vet"], title: "Relative Wall Thickness (RWT)",
@@ -584,7 +589,10 @@ category: "Left Heart",
         group: "echo", method: "Measure the aortic valve diameter (AoD) in early to midsystole measured between the hinge points of the maximally opened aortic valve cusps from a right parasternal long-axis view optimized for the left ventricular outflow tract and ascending aorta",
         imgPlaceholder: "/images/aola-reference.jpg",
 category: "Left Heart",
-        difficulty: 2
+        difficulty: 2,
+                reference: "Visser et al (2019). Echocardiographic quantitation of left heart size and function in 122 healthy dogs: A prospective study proposing reference intervals and assessing repeatability",
+        pmid: "31313382"
+        
     },
     ivsd: {
         audience: ["vet"], title: "IVSd (Interventricular Septum - Diastole)",

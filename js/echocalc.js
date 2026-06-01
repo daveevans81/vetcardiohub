@@ -1835,6 +1835,16 @@ function updateBreedTable() {
                 
                 let rangeString = '—';
                 if (typeof val === 'object' && val !== null) {
+                    
+                    // --- SD CONVERSION LOGIC ---
+                    // If median and sd exist, but min/max don't, calculate the 90% range
+                    if (val.median !== undefined && val.sd !== undefined && val.min === undefined && val.max === undefined) {
+                        // Using Z-score 1.96 for 95% interval. Using toFixed(2) to keep numbers clean.
+                        val.min = (val.median - (1.96 * val.sd)).toFixed(2);
+                        val.max = (val.median + (1.96 * val.sd)).toFixed(2);
+                    }
+               
+
                     if (val.min !== undefined && val.max !== undefined) rangeString = `${val.min}–${val.max}`;
                     else if (val.max !== undefined) rangeString = `< ${val.max}`;
                     else if (val.median !== undefined) rangeString = `~${val.median}`;
