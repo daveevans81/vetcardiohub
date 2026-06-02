@@ -773,7 +773,111 @@ hasSectionData(fieldsArray) {
         if (typeof allometricModels === 'undefined') return false;
         return allometricModels[this.selectedModel]?.species?.toLowerCase() === 'feline'; 
     },
+    get isSighthound() {
+        return this.selectedModel === 'stepien_sighthound';
+    },
+    
+    calculateRef(paramKey) {
+    if (!this.weight || this.weight <= 0 || typeof allometricModels === 'undefined') {
+        return { min: 0, max: 0, mean: 0, available: false };
+    }
+    const modelData = allometricModels[this.selectedModel];
+    const model = modelData?.params?.[paramKey];
+    if (!model) return { min: null, max: null, mean: null, available: false };
 
+    const scaleFactor = modelData.isCm ? 10 : 1;
+    const multiplier = modelData.multiplier || 1.96;
+    let lower, upper, mean;
+
+    if (model.type === 'log_direct' || model.type === 'log') {
+        const logMean = (model.type === 'log_direct') 
+            ? model.a + (model.b * Math.log10(this.weight))
+            : Math.log10(model.a) + (model.b * Math.log10(this.weight));
+        mean = Math.pow(10, logMean);
+        lower = Math.pow(10, logMean - (multiplier * model.see));
+        upper = Math.pow(10, logMean + (multiplier * model.see));
+    } else {
+        const bwPower = Math.pow(this.weight, model.b);
+        mean = model.a * bwPower;
+        lower = (model.normMin || model.a) * bwPower;
+        upper = (model.normMax || model.a) * bwPower;
+    }
+
+    return {
+        min: parseFloat((lower * scaleFactor).toFixed(1)),
+        max: parseFloat((upper * scaleFactor).toFixed(1)),
+        mean: parseFloat((mean * scaleFactor).toFixed(1)),
+        available: true
+    };
+},
+
+
+calculateVolumetricRef(paramKey) {
+        // paramKey should be 'edv' or 'esv'
+        
+        if (!this.weight || this.weight <= 0 || typeof leftHeartModels === 'undefined') {
+            return { min: 0, max: 0, available: false };
+        }
+
+        // Feline data is not yet available for this model
+        if (this.isCat) {
+            return { min: 0, max: 0, available: false };
+        }
+
+        // Route to the correct array based on the selected linear model
+        const isSighthound = this.selectedModel === 'stepien_sighthound';
+        const modelKey = isSighthound ? 'wess_2021_smod_sighthound' : 'wess_2021_smod_nonsighthound';
+        const modelData = leftHeartModels[modelKey]?.data;
+
+        if (!modelData) return { min: 0, max: 0, available: false };
+
+        const minProp = `${paramKey}Min`; // e.g., 'edvMin'
+        const maxProp = `${paramKey}Max`; // e.g., 'edvMax'
+
+        // Inline interpolation helper
+        const interpolate = (prop) => {
+            const wt = this.weight;
+            
+            // Handle extremes outside the published table
+            if (wt <= modelData[0].weight) return modelData[0][prop];
+            if (wt >= modelData[modelData.length - 1].weight) return modelData[modelData.length - 1][prop];
+
+            // Find upper and lower brackets
+            let lowerObj = modelData[0];
+            let upperObj = modelData[1];
+
+            for (let i = 0; i < modelData.length - 1; i++) {
+                if (wt >= modelData[i].weight && wt <= modelData[i + 1].weight) {
+                    lowerObj = modelData[i];
+                    upperObj = modelData[i + 1];
+                    break;
+                }
+            }
+
+            const weightDiff = upperObj.weight - lowerObj.weight;
+            const paramDiff = upperObj[prop] - lowerObj[prop];
+            const weightOffset = wt - lowerObj.weight;
+
+            return lowerObj[prop] + (weightOffset * paramDiff / weightDiff);
+        };
+
+        const lowerVal = interpolate(minProp);
+        const upperVal = interpolate(maxProp);
+
+        return {
+            min: parseFloat(lowerVal.toFixed(1)),
+            max: parseFloat(upperVal.toFixed(1)),
+            available: true
+        };
+    },
+
+    get volumetricResults() {
+        return {
+            edv: this.calculateVolumetricRef('edv'),
+            esv: this.calculateVolumetricRef('esv')
+        };
+    },
+    
 get calculatedMineScore() {
     if (!this.isDog || typeof mineModels === 'undefined') return null;
     const model = mineModels[this.selectedMineModel];

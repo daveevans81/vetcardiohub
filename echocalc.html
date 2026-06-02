@@ -787,11 +787,19 @@
                 <div class="result-row" x-show="lvedv">
                   <span><strong>LVEDV</strong></span>
                   <span><span x-text="lvedv"></span>ml</span>
+                  <span x-show="parseFloat(lvedv) > volumetricResults.edv.max" class="abnormal">(Dilated)</span>
+                       <span x-show="lvedv <= volumetricResults.edv.max && lvedv >= volumetricResults.edv.min" class="normal">(Normal)</span>
+                      <span x-show="lvedv < volumetricResults.edv.min && lvedv > 0" class="abnormal">(Underfilled)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-show="volumetricResults.edv.available" x-text="isSighthound ? '(Sighthound Ref' : '(ref ' + volumetricResults.edv.min + '-' + volumetricResults.edv.max + ')'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('edvwess')"></i>
                 </div>
 
                 <div class="result-row" x-show="lvesv">
                   <span><strong>LVESV</strong></span>
                   <span><span x-text="lvesv"></span>ml</span>
+                  <span x-show="parseFloat(lvesv) > volumetricResults.esv.max" class="abnormal">(Dilated)</span>
+                       <span x-show="lvesv <= volumetricResults.esv.max && lvesv >= volumetricResults.esv.min" class="normal">(Normal)</span>
+                      <span x-show="lvesv < volumetricResults.esv.min && lvesv > 0" class="abnormal">(Underfilled)</span>
+                    <span style="font-size: 0.8em; color: #666;" x-show="volumetricResults.esv.available" x-text="isSighthound ? '(Sighthound Ref' : '(ref ' + volumetricResults.esv.min + '-' + volumetricResults.esv.max + ')'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('edvwess')"></i>
                 </div>
 
                 <div x-show="isDog" x-transition>
@@ -833,10 +841,10 @@
                     <span><strong>LVEDV / BW</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvedvbw')"></i></span>
                     <span>
                       <span x-text="lvedvbw"></span>
-                      <span x-show="lvedvbw >= 3" class="abnormal">(Enlarged)</span>
-                      <span x-show="lvedvbw < 3 && lvedvbw >= 1.25" class="normal">(Normal)</span>
-                      <span x-show="lvedvbw < 1.25 && lvedvbw > 0" class="abnormal">(Underfilled)</span>
-                      <span style="font-size: 0.8em; color: #666;"> (ref 1.25 - 3.00) </span>
+                      <span x-show="isSighthound ?  lvedvbw >= 4.17 : lvedvbw >= 3.27" class="abnormal">(Enlarged)</span>
+                      <span x-show="isSighthound ? (lvedvbw < 4.17 && lvedvbw >= 1.92) : (lvedvbw < 3.27 && lvedvbw >= 1.25)" class="normal">(Normal)</span>
+                      <span x-show="isSighthound ? (lvedvbw < 1.92 && lvedvbw > 0) :  (lvedvbw < 1.25 && lvedvbw > 0)" class="abnormal">(Underfilled)</span>
+                      <span style="font-size: 0.8em; color: #666;" x-text="isSighthound ? '(Sighthound ref 1.92-4.17)' : 'ref 1.25 - 3.27)'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('edviwess')"></i>
                     </span>
                   </div>
 
@@ -844,10 +852,10 @@
                     <span><strong>LVESV / BW</strong><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvesvbw')"></i></span>
                     <span>
                       <span x-text="lvesvbw"></span>
-                      <span x-show="lvesvbw >= 1.35" class="abnormal">(Enlarged)</span>
-                      <span x-show="lvesvbw < 1.35 && lvesvbw >= 0.3" class="normal">(Normal)</span>
-                      <span x-show="lvesvbw < 0.3 && lvesvbw > 0" class="abnormal">(Underfilled)</span>
-                      <span style="font-size: 0.8em; color: #666;"> (ref 0.3 - 1.35) </span>
+                      <span x-show="isSighthound ?  lvesvbw >= 2.11 : lvesvbw >= 1.54" class="abnormal">(Enlarged)</span>
+                      <span x-show="isSighthound ? (lvesvbw < 2.11 && lvesvbw >= 0.72) : (lvesvbw < 1.54 && lvesvbw >= 0.3)" class="normal">(Normal)</span>
+                      <span x-show="isSighthound ? (lvesvbw < 0.72 && lvesvbw > 0) :  (lvesvbw < 0.3 && lvesvbw > 0)" class="abnormal">(Underfilled)</span>
+                      <span style="font-size: 0.8em; color: #666;" x-text="isSighthound ? '(Sighthound ref 0.72-2.11)' : 'ref 0.3 - 1.54)'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('esviwess')"></i>
                     </span>
                   </div>
 
