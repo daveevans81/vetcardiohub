@@ -790,7 +790,7 @@
                   <span x-show="parseFloat(lvedv) > volumetricResults.edv.max" class="abnormal">(Dilated)</span>
                        <span x-show="lvedv <= volumetricResults.edv.max && lvedv >= volumetricResults.edv.min" class="normal">(Normal)</span>
                       <span x-show="lvedv < volumetricResults.edv.min && lvedv > 0" class="abnormal">(Underfilled)</span>
-                    <span style="font-size: 0.8em; color: #666;" x-show="volumetricResults.edv.available" x-text="isSighthound ? '(Sighthound Ref' : '(ref ' + volumetricResults.edv.min + '-' + volumetricResults.edv.max + ')'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('edvwess')"></i>
+                    <span style="font-size: 0.8em; color: #666;" x-show="volumetricResults.edv.available" x-text="(isSighthound ? '(Sighthound Ref' : '(ref ') + volumetricResults.edv.min + '-' + volumetricResults.edv.max + ')'"></span><span x-show="volumetricResults.edv.available"><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('edvwess')"></i></span>
                 </div>
 
                 <div class="result-row" x-show="lvesv">
@@ -799,7 +799,7 @@
                   <span x-show="parseFloat(lvesv) > volumetricResults.esv.max" class="abnormal">(Dilated)</span>
                        <span x-show="lvesv <= volumetricResults.esv.max && lvesv >= volumetricResults.esv.min" class="normal">(Normal)</span>
                       <span x-show="lvesv < volumetricResults.esv.min && lvesv > 0" class="abnormal">(Underfilled)</span>
-                    <span style="font-size: 0.8em; color: #666;" x-show="volumetricResults.esv.available" x-text="isSighthound ? '(Sighthound Ref' : '(ref ' + volumetricResults.esv.min + '-' + volumetricResults.esv.max + ')'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('esvwess')"></i>
+                    <span style="font-size: 0.8em; color: #666;" x-show="volumetricResults.esv.available" x-text="(isSighthound ? '(Sighthound Ref' : '(ref ') + volumetricResults.esv.min + '-' + volumetricResults.esv.max + ')'"></span><span x-show="volumetricResults.esv.available"><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('esvwess')"></i></span>
                 </div>
 
                 <div x-show="isDog" x-transition>
