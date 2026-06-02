@@ -1586,7 +1586,7 @@
                                 <label>Breed-Specific Reference Data</label>
                                 <select id="breed-selector" 
                                         x-model="selectedBreed" 
-                                        @change="if(selectedBreed) breed = selectedBreed; updateBreedTable()">
+                                        @change="handleBreedSelection()">
                                     <option value="">-- Select or type above --</option>
                                     </select>
                             </div>
@@ -1942,7 +1942,7 @@
               <h3>Is your patient a breed with recorded echo normals?</h3>
               <p>Select a breed to compare patient results with published breed-specific intervals.</p>
               <div class="input-group">
-                <select id="breed-selector" x-model="selectedBreed" @change="updateBreedTable()">
+                <select id="breed-selector" x-model="selectedBreed" @change="handleBreedSelection()">
                   <option value="">-- Select a Breed --</option>
                 </select>
               </div>

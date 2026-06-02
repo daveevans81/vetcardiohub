@@ -1587,7 +1587,31 @@ fallbackCopy(text) {
     document.body.removeChild(textArea);
 },
 
+showSighthoundToast: false,
 
+handleBreedSelection() {
+    // Sync the text box with the dropdown
+    if (this.selectedBreed) {
+        this.breed = this.selectedBreed;
+    }
+
+    const breedData = breedSpecificReferenceRanges[this.selectedBreed];
+
+    // If it is a sighthound and we are not already using the sighthound model
+    if (breedData && breedData.isSighthound && this.selectedModel !== 'stepien_sighthound') {
+        this.selectedModel = 'stepien_sighthound';
+        this.showSighthoundToast = true;
+        
+        // Hide the toast after 5 seconds
+        setTimeout(() => {
+            this.showSighthoundToast = false;
+        }, 5000);
+    }
+
+    // Call your existing table render function
+    // Note: You may need to pass 'this' or access global state depending on how updateBreedTable is scoped
+    updateBreedTable();
+},
 
 
 
