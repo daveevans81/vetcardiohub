@@ -1587,32 +1587,57 @@ fallbackCopy(text) {
     document.body.removeChild(textArea);
 },
 
-showSighthoundToast: false,
+// Dynamic toast state
+    showModelChangeToast: false,
+    toastTitle: '',
+    toastMessage: '',
 
-handleBreedSelection() {
-    // Sync the text box with the dropdown
-    if (this.selectedBreed) {
-        this.breed = this.selectedBreed;
-    }
+    handleBreedSelection() {
+        // Sync the text box with the dropdown
+        if (this.selectedBreed) {
+            this.breed = this.selectedBreed;
+        }
 
-    const breedData = breedSpecificReferenceRanges[this.selectedBreed];
-
-    // If it is a sighthound and we are not already using the sighthound model
-    if (breedData && breedData.isSighthound && this.selectedModel !== 'stepien_sighthound') {
-        this.selectedModel = 'stepien_sighthound';
-        this.showSighthoundToast = true;
+        const breedData = breedSpecificReferenceRanges[this.selectedBreed];
         
-        // Hide the toast after 5 seconds
-        setTimeout(() => {
-            this.showSighthoundToast = false;
-        }, 5000);
-    }
+        if (!breedData) {
+            updateBreedTable();
+            return;
+        }
 
-    // Call your existing table render function
-    // Note: You may need to pass 'this' or access global state depending on how updateBreedTable is scoped
-    updateBreedTable();
-},
+        let targetModel = null;
+        let title = '';
+        let message = '';
 
+        // Check for Sighthound flag
+        if (breedData.isSighthound && this.selectedModel !== 'stepien_sighthound') {
+            targetModel = 'stepien_sighthound';
+            title = 'Model Updated: Sighthound';
+            message = 'We automatically switched the allometric model to the Sighthound/Whippet references.';
+        } 
+        // Check for Feline flag
+        else if (breedData.isFeline && this.selectedModel !== 'karsten_adult_cat') {
+            targetModel = 'karsten_adult_cat'; 
+            title = 'Model Updated: Feline';
+            message = 'We automatically switched the allometric model to the standard feline references.';
+        }
+
+        // If a change is needed, update state and trigger the dynamic toast
+        if (targetModel) {
+            this.selectedModel = targetModel;
+            this.toastTitle = title;
+            this.toastMessage = message;
+            this.showModelChangeToast = true;
+            
+            // Hide the toast after 5 seconds
+            setTimeout(() => {
+                this.showModelChangeToast = false;
+            }, 5000);
+        }
+
+        // Render the breed table
+        updateBreedTable();
+    },
 
 
 
