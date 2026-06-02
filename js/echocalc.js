@@ -1817,6 +1817,7 @@ function updateBreedTable() {
         if (title) blockHtml += `<h4 style="margin: 25px 0 10px 0; color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">${title}</h4>`;
 
         const metricsSource = dataObj.metrics || dataObj;
+        let usesCalculatedSd = false;
 
         blockHtml += `<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; border: 1px solid #dee2e6;">
                         <thead style="background-color: #f8f9fa;">
@@ -1839,6 +1840,7 @@ function updateBreedTable() {
                     // --- SD CONVERSION LOGIC ---
                     // If median and sd exist, but min/max don't, calculate the 90% range
                     if (val.median !== undefined && val.sd !== undefined && val.min === undefined && val.max === undefined) {
+                       usesCalculatedSd = true;
                         // Using Z-score 1.96 for 95% interval. Using toFixed(2) to keep numbers clean.
                         val.min = (val.median - (1.96 * val.sd)).toFixed(2);
                         val.max = (val.median + (1.96 * val.sd)).toFixed(2);
@@ -1864,6 +1866,21 @@ function updateBreedTable() {
         });
 
         blockHtml += `</tbody></table>`;
+        
+        // --- DYNAMIC VERIFICATION NOTE ---
+        if (usesCalculatedSd) {
+            blockHtml += `
+                <div style="background-color: #f0fdf4; padding: 10px 12px; border-radius: 4px; color: #166534; border: 1px solid #bbf7d0; font-size: 0.8rem; margin-top: 10px; display: flex; align-items: flex-start; gap: 8px;">
+                    <i class="fa-solid fa-calculator" style="margin-top: 2px;"></i>
+                    <div>
+                        <strong>Statistical Derivation Note:</strong> This study originally published data as Median ± SD. 
+                        The reference intervals shown above were programmatically derived using a standard two-sided 95% confidence interval 
+                        where <code>Reference Range = Median ± (1.96 × SD)</code> to identify values falling outside the normal 95% population distribution.
+                    </div>
+                </div>`;
+        }
+    
+    
         if (dataObj.clinical_note) blockHtml += `<div style="background-color: #f1f5f9; padding: 12px; border-radius: 4px; font-style: italic; margin-top: 15px; border-left: 4px solid #64748b; font-size: 0.9rem;"><strong>Note:</strong> ${dataObj.clinical_note}</div>`;
         if (dataObj.pmid) blockHtml += `<p style="margin-top:10px;"><a href="https://pubmed.ncbi.nlm.nih.gov/${dataObj.pmid}" target="_blank" style="color: #2563eb; font-size: 0.85rem; text-decoration: underline;">🔗 View Research (PMID: ${dataObj.pmid})</a></p>`;
 
