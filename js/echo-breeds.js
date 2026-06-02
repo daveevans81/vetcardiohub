@@ -1,6 +1,7 @@
     const breedSpecificReferenceRanges = {
   "Afghan Hound": {
     "is_deviant": true,
+    isSighthound: true,
     "pmid": "37760386",
     "lvidd_mm": { "min": 33.0, "max": 52.0 },
     "lvids_mm": { "min": 20.0, "max": 37.0 },
@@ -357,6 +358,7 @@
   },
     "Hungarian Greyhound": {
     "is_deviant": true,
+    isSighthound: true,
     "pmid": "19584035",
     "reference": "Vörös et al. (2009)", 
     "la_ao": { "median": 1.2, "sd": 0.1 },
@@ -412,6 +414,7 @@
 
   "Whippet": {
     "is_deviant": true,
+    isSighthound: true,
     "sources": [
       {
         "pmid": "36975003",
@@ -468,6 +471,7 @@
   },
   "Saluki": {
     "is_deviant": true,
+    isSighthound: true,
         "pmid": "26476964", 
         "reference": "Seckerdieck et al. (2015)", 
           "lvidd_mm": { "median": 40.8, "min": 33.9, "max": 47.8 },
@@ -499,6 +503,7 @@
 
   "Maine Coon": {
     "pmid": "15776945",
+    isFeline: true,
     "reference": "Drourr et al. (2005)",
     "clinical_note": "Despite larger raw measurements, healthy Maine Coons follow feline allometric scaling. Wall thickness <5mm is typical for average weights.",
     "lvidd_mm": { "min": 18.1, "max": 18.9 },
@@ -510,6 +515,7 @@
   },
   "Sphynx": {
     "is_deviant": true,
+    isFeline: true,
     "pmid": "23131204",
     "clinical_note": "Naturally higher LA dimensions and LA:Ao ratios compared to DSH. High prevalence of MVD and HCM reported.",
     "la_ao": { "max": 1.45 },
@@ -517,6 +523,7 @@
   },
   "Bengal": {
     "is_deviant": false,
+    isFeline: true,
     "pmid": "26526189",
     "clinical_note": "Higher raw LVIDd than DSH but aligns with allometry. Unique sex-based reference intervals are recommended.",
     "la_ao": { "mean": 1.18 }
@@ -524,6 +531,7 @@
 
   "Healthy Kitten (6-16 weeks)": {
     "is_deviant": true,
+    isKitten: true,
     "pmid": "32812464",
     "clinical_note": "TR and low-grade murmurs are common and often benign. Median VHS is 9.5, significantly higher than the adult baseline.",
     "vhs": { "median": 9.5, "min": 8.0, "max": 10.9 },
