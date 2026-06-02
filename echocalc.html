@@ -1579,13 +1579,18 @@
                                 <input type="text" x-model="breed" placeholder="e.g. Cavalier">
                             </div>
                              <div class="input-group">
-                               <label>Selected species: <span x-show="isDog">Canine</span><span x-show="isCat">Feline</span></label><p>Change allometric model if incorrect</p>
-                             </div>
-                             
+                               <label>Selected species: <span x-show="isDog">Canine</span><span x-show="isCat">Feline</span></label>            
+                  
+                               <select x-model="selectedModel" class="form-select">
+                                <template x-for="(model, key) in allometricModels" :key="key">
+                                 <option :value="key" x-text="model.label"></option>
+                                </template>
+                               </select>
+                              </div>
+
                              <div class="input-group">
                                 <label>Report Date</label>
                                 <input type="text" x-model="reportDate" placeholder="DD/MM/YYYY">
-
                             </div>
                         </div>
                       
