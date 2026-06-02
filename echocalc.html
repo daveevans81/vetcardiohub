@@ -1576,7 +1576,19 @@
                             </div>
                             <div class="input-group">
                                 <label>Breed</label>
-                                <input type="text" x-model="breed" placeholder="e.g. Cavalier">
+                                <input type="text" 
+                                       x-model="breed" 
+                                       @input="selectedBreed = ''; updateBreedTable()" 
+                                       placeholder="e.g. Cavalier">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Breed-Specific Reference Data</label>
+                                <select id="breed-selector" 
+                                        x-model="selectedBreed" 
+                                        @change="if(selectedBreed) breed = selectedBreed; updateBreedTable()">
+                                    <option value="">-- Select or type above --</option>
+                                    </select>
                             </div>
                              <div class="input-group">
                                <label>Selected species: <span x-show="isDog">Canine</span><span x-show="isCat">Feline</span></label>            
