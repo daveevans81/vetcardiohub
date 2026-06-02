@@ -786,7 +786,7 @@ const leftHeartModels = {
 wess_2021_smod_sighthound: {
         label: "Wess SMOD Volumetric RIs (Sighthound)",
         species: "Canine",
-        PMID: 33783907,
+        PMID: 33675121,
         type: 'interpolation_table',
         data: [
             { weight: 1, edvMin: 2.4, edvMax: 12.9, esvMin: 0.9, esvMax: 5.1 },
@@ -834,7 +834,7 @@ wess_2021_smod_sighthound: {
     wess_2021_smod_nonsighthound: {
         label: "Wess SMOD Volumetric RIs (Non-Sighthound)",
         species: "Canine",
-        PMID: 33783907,
+        PMID: 33675121,
         type: 'interpolation_table',
         data: [
             { weight: 1, edvMin: 1.4, edvMax: 4.7, esvMin: 0.4, esvMax: 1.5 },

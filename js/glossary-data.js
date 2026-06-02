@@ -507,9 +507,7 @@ category: "Left Heart",
         difficulty: 2,
         reference: "Visser et al (2019). Echocardiographic quantitation of left heart size and function in 122 healthy dogs: A prospective study proposing reference intervals and assessing repeatability",
         pmid: "31313382"
-        
-        
-        
+   
     },
     RWT: { // Capitalized to match your exact state getter
         audience: ["vet"], title: "Relative Wall Thickness (RWT)",
@@ -525,18 +523,48 @@ category: "Left Heart",
         audience: ["vet"], title: "LVEDV/BW (Diastolic Volume Index - Weight)",
         view: "Derived Index",
         description: "Indexes the maximal diastolic volume directly to body weight (ml/kg). Simpson's volumetric assessments are more sensitive for early volume overload states than 1D linear measurements.",
-        group: "echo", method: "Calculated as: LVEDV (ml) / Body Weight (kg). Normal is typically 1.25 – 3.00 ml/kg.",
+        group: "echo", method: "Calculated as: LVEDV (ml) / Body Weight (kg). Normal is variously described but using Wess's data we have listed 1.25 – 3.27 ml/kg for non-sighthound dogs, and 1.92-4.17 for sighthound breeds.",
 category: "Left Heart",
-        difficulty: 3
+        difficulty: 3,
+                reference: "Wess et al (2021). Echocardiographic reference intervals for volumetric measurements of the left ventricle using the Simpson's method of discs in 1331 dogs",
+        pmid: "33675121"
     },
     lvesvbw: {
         audience: ["vet"], title: "LVESV/BW (Systolic Volume Index - Weight)",
         view: "Derived Index",
         description: "Indexes the minimum systolic volume to body weight (ml/kg) to evaluate myocardial failure. Elevated values indicate the heart is struggling to eject its volume.",
-        group: "echo", method: "Calculated as: LVESV (ml) / Body Weight (kg).",
+        group: "echo", method: "Calculated as: LVESV (ml) / Body Weight (kg). Normal is variously described but using Wess's data we have listed 0.3 – 1.54 ml/kg for non-sighthound dogs, and 0.72-2.11 for sighthound breeds.",
 category: "Left Heart",
-        difficulty: 3
+        difficulty: 3,
+                        reference: "Wess et al (2021). Echocardiographic reference intervals for volumetric measurements of the left ventricle using the Simpson's method of discs in 1331 dogs",
+        pmid: "33675121"
     },
+    
+  edvwess: {
+        audience: ["vet"], 
+        title: "LVEDV (Left Ventricular End-Diastolic Volume) - Wess Model",
+        view: "Simpson's Method of Discs (SMOD) - Tabulated Data",
+        description: "Measures the maximum volume of the left ventricle right before contraction. Volumetric assessment gives us a much clearer picture of overall diastolic loading and early chamber enlargement compared to standard 1D linear measurements.",
+        group: "echo", 
+        method: "Calculated via LVEDV interpolation table. Wess deliberately avoided a single formula because simple scaling breaks down at the extremes of body weight. The calculator interpolates the patient's exact weight against a tabulated data array to find the true upper and lower bounds. Sighthounds have a dedicated reference array due to their naturally larger athletic heart phenotype.",
+        category: "Left Heart",
+        difficulty: 3,
+        reference: "Wess et al (2021). Echocardiographic reference intervals for volumetric measurements of the left ventricle using the Simpson's method of discs in 1331 dogs.",
+        pmid: "33675121"
+    },
+    esvwess: {
+        audience: ["vet"], 
+        title: "LVESV (Left Ventricular End-Systolic Volume) - Wess Model",
+        view: "Simpson's Method of Discs (SMOD) - Tabulated Data",
+        description: "Measures the residual volume in the left ventricle at the end of contraction. An elevated LVESV indicates the heart is struggling to eject its volume forward. This is a critical marker for declining myocardial systolic function.",
+        group: "echo", 
+        method: "Calculated via LVESV interpolation table. Similar to LVEDV, this avoids simple ml/kg division in favour of an additive statistical model mapped to specific body weight brackets. The calculator automatically routes standard breeds and sighthounds to their respective data tables to find the exact upper and lower reference limits.",
+        category: "Left Heart",
+        difficulty: 3,
+        reference: "Wess et al (2021). Echocardiographic reference intervals for volumetric measurements of the left ventricle using the Simpson's method of discs in 1331 dogs.",
+        pmid: "33675121"
+    },
+    
     edvim2: {
         audience: ["vet"], title: "EDVI (End-Diastolic Volume Index - BSA)",
         view: "Derived Index",
