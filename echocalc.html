@@ -2331,13 +2331,13 @@
       </div> <!-- .container -->
     </div> <!-- .content -->
     
-       <!-- Pop up Sighthound Window -->
-    <div x-show="showSighthoundToast" 
+       <!-- Pop up Sighthound and cat Window -->
+<div x-show="showModelChangeToast" 
      x-transition.opacity.duration.500ms
      style="display: none; position: fixed; bottom: 20px; right: 20px; background-color: #1e3a8a; color: #ffffff; padding: 15px 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 100; max-width: 300px;">
-    <div style="font-weight: bold; margin-bottom: 5px;">Model Updated</div>
+    <div style="font-weight: bold; margin-bottom: 5px;" x-text="toastTitle"></div>
     <div style="font-size: 0.9em;">
-        We automatically switched the allometric model to the Sighthound/Whippet references. You can revert this in the model settings if needed.
+        <span x-text="toastMessage"></span> You can revert this in the model settings if needed.
     </div>
 </div>
 
