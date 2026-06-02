@@ -1556,9 +1556,10 @@
               
               <div style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
     
-                <button @click="showPatientDetails = !showPatientDetails" type="button" class="toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 15px; border: none; background: #f8fafc; cursor: pointer; font-weight: 700; color: #1e293b;">
-                    <span><i class="fa-solid fa-user-pen"></i> Patient Details & Report Date</span>
-                    <i class="fa-solid" :class="showPatientDetails ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                <button @click="showPatientDetails = !showPatientDetails" class="btn-text" style="font-size: 0.85rem; margin-bottom: 10px;">
+                    <i class="fa-solid" :class="showPatientDetails ? 'fa-minus' : 'fa-plus'"></i>
+                    <span x-text="showComments ? ' Hide Patient Details & Report Date' : ' Add Patient Details & Report Date'"></span> 
+                    
                 </button>
             
                 <div x-show="showPatientDetails" x-collapse>
