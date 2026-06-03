@@ -224,7 +224,7 @@
 
 <div id="site-header"></div>
 
-<div x-data="advancedEchoSuite()" x-effect="if(typeof updateBreedTable === 'function') updateBreedTable();">
+<div x-data="advancedEchoSuite()">
 
     <div id="app-only-branding" class="app-branding">VetCardioHub EchoCalc</div>
 
@@ -1584,11 +1584,15 @@
                             
                             <div class="input-group">
                                 <label>Breed-Specific Reference Data</label>
-                                <select id="breed-selector" 
-                                        x-model="selectedBreed" 
-                                        @change="handleBreedSelection()">
-                                    <option value="">-- Select or type above --</option>
+                                    <select x-model="selectedBreed" @change="handleBreedSelection()">
+                                        <option value="">-- Select or type above --</option>
+                                        <template x-for="breedName in availableBreeds" :key="breedName">
+                                            <option :value="breedName" x-text="breedName"></option>
+                                        </template>
                                     </select>
+                                
+                                
+                                </div>
                             </div>
                              <div class="input-group">
                                <label>Selected species: <span x-show="isDog">Canine</span><span x-show="isCat">Feline</span></label>            
@@ -1941,13 +1945,18 @@
             <section class="card" style="margin-top: 18px; border-left: 4px solid #e9de0e; background: #ffffff;" id="breed-normals-card">
               <h3>Is your patient a breed with recorded echo normals?</h3>
               <p>Select a breed to compare patient results with published breed-specific intervals.</p>
-              <div class="input-group">
-                <select id="breed-selector" x-model="selectedBreed" @change="handleBreedSelection()">
-                  <option value="">-- Select a Breed --</option>
-                </select>
-              </div>
-              <div id="breed-data-container" style="margin-top: 20px;"></div>
+                <div class="input-group">
+                    <label>Breed-Specific Reference Data</label>
+                    <select x-model="selectedBreed" @change="handleBreedSelection()">
+                        <option value="">-- Select or type above --</option>
+                        <template x-for="breedName in availableBreeds" :key="breedName">
+                            <option :value="breedName" x-text="breedName"></option>
+                        </template>
+                    </select>
+                </div>
+                <div x-html="breedTableHtml"></div>
             </section>
+            
 
             <!-- SECTION: ALLOMETRIC CALCULATOR ENGINE -->
             <section class="card" style="margin-top: 18px; border-left: 4px solid #e94c0e; background: #ffffff;" id="allometric-card">
