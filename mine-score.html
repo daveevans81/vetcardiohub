@@ -1,373 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="/js/global-head.js" defer></script>
+    <script src="/js/global-head.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="/manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-<link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
     <link rel="stylesheet" href="styles.css">
-
 
     <title>Canine MINE Score Prognostic Calculator | VetCardioHub</title>
     <meta name="description" content="Free interactive veterinary tool to calculate the Mitral INsufficiency Echocardiographic (MINE) score for dogs with MMVD. Predict staging, risk tiers, and Median Survival Times (MST).">
-    <meta name="keywords" content="MINE score calculator, veterinary echo calculator, MMVD prognosis dog, canine mitral insufficiency, Vezzosi MINE score, VetCardioHub">
     
-    <!-- Open Graph Meta Tags for Social Sharing -->
-    <meta property="og:title" content="Canine MINE Score Prognostic Calculator | VetCardioHub">
-    <meta property="og:description" content="Calculate the 4-parameter and 3-parameter MINE score to stratify risk and predict median survival times in dogs with Myxomatous Mitral Valve Disease.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://vetcardiohub.com/mine-score.html">
-    
-    <!-- Alpine.js Core and Collapse Plugin via CDN -->
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <!-- Alpine.js Core and Scripts -->
+    <script src="/js/glossary-data.js" defer></script>
+    <script src="/js/echo-breeds.js" defer></script>
+    <script src="/js/echocalc.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <!-- FontAwesome for clean clinical iconography -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "MedicalWebPage",
-      "name": "Canine MINE Score Prognostic Calculator",
-      "description": "An interactive clinical decision support application to calculate the Mitral INsufficiency Echocardiographic (MINE) score (Vezzosi 2021/2025) for staging dogs with Myxomatous Mitral Valve Disease.",
-      "url": "https://vetcardiohub.com/mine-score.html",
-      "medicalAudience": {
-        "@type": "MedicalAudience",
-        "audienceType": "Veterinary Professionals"
-      },
-      "specialty": {
-        "@type": "MedicalSpecialty",
-        "name": "Cardiology"
-      },
-      "mainEntity": {
-        "@type": "MedicalDevice",
-        "name": "MINE Score Algorithmic Module",
-        "description": "Calculates prognostic risk categories and median survival times using echocardiographic benchmarks including LA:Ao, LVIDdn, FS%, and E-wave velocity.",
-        "purpose": "Prognostic stratification of canine degenerative mitral valve disease"
-      },
-      "citation": [
-        "Vezzosi et al. (2021) An echocardiographic risk score (MINE score) for predicting outcome in dogs with myxomatous mitral valve disease.",
-        "Vezzosi et al. (2025) Validation of a simplified Mitral INsufficiency Echocardiographic scoring system in dogs."
-      ],
-      "lastReviewed": "2026-05-17",
-      "isAccessibleForFree": "true"
-    }
-    </script>
-    <script src="/js/echo-breeds.js"></script>
-
     <style>
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .card-title {
-            color: var(--primary);
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-        }
-
-        .grid-inputs {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .input-group label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-
-
-        .input-group input:focus, .input-group select:focus {
-            outline: 2px solid var(--primary-light);
-            background-color: #fff;
-        }
-
-        .results-panel {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 20px;
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            margin-top: 15px;
-        }
-
-        .score-badge {
-            text-align: center;
-            border-right: 2px solid var(--border);
-            padding-right: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .score-num {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: var(--primary-light);
-            line-height: 1;
-        }
-
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-title { color: var(--primary); font-size: 1.2rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
+        .input-group input:focus, .input-group select:focus { outline: 2px solid var(--primary-light); background-color: #fff; }
+        .results-panel { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 15px; }
+        .score-badge { text-align: center; border-right: 2px solid var(--border); padding-right: 15px; display: flex; flex-direction: column; justify-content: center; }
+        .score-num { font-size: 2.5rem; font-weight: 900; color: var(--primary-light); line-height: 1; }
         .normal { color: var(--normal) !important; font-weight: bold; }
         .abnormal { color: var(--abnormal) !important; font-weight: bold; }
-
-        .breakdown-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            margin-top: 15px;
-            text-align: left;
-        }
-
-        .breakdown-table th {
-            background-color: #f1f5f9;
-            padding: 8px 10px;
-            color: var(--text-muted);
-            font-weight: 700;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .breakdown-table td {
-            padding: 10px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .info-block {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        .info-block h3 {
-            color: var(--primary);
-            margin-bottom: 8px;
-            font-size: 1rem;
-        }
-
-        .info-block ul {
-            margin-left: 20px;
-            margin-top: 5px;
-            margin-bottom: 10px;
-        }
-
-
+        .warning { color: #f59e0b !important; font-weight: bold; }
+        .breakdown-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 15px; text-align: left; }
+        .breakdown-table th { background-color: #f1f5f9; padding: 8px 10px; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+        .breakdown-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+        .info-block { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+        .info-block h3 { color: var(--primary); margin-bottom: 8px; font-size: 1rem; }
+        .info-block ul { margin-left: 20px; margin-top: 5px; margin-bottom: 10px; }
+        
+        /* Specific styling for the glossary icons so they look consistent and clickable */
+        .glossary-icon { color: #94a3b8; cursor: pointer; transition: color 0.2s; }
+        .glossary-icon:hover { color: #0ea5e9; }
     </style>
 </head>
 <body>
 <div id="site-header"></div>
 
 <div class="content">
-<div class="container" x-data="mineCalculator()">
-    
-    <header class="hero card">
-        <h1><i class="fa-solid fa-calculator"></i> Canine MINE Prognostic Suite</h1>
-        <p>Mitral INsufficiency Echocardiographic Scoring System (Vezzosi 2021 & 2025)</p>
-    </header>
 
-    <!-- Calculation Engine Card -->
-    <main class="card">
-        <div class="card-title">
-            <i class="fa-solid fa-square-poll-vertical" style="color: #0ea5e9;"></i>
-            <span>Interactive Diagnostic Engine</span>
-        </div>
+    <!-- set isDog to true so the MINE calculator naturally enables itself -->
+    <div class="container" x-data="advancedEchoSuite()" x-init="isStandaloneMode = true; selectedModel = 'cornell_standard';">
+        
+        <header class="hero card">
+            <h1><i class="fa-solid fa-calculator"></i> Canine MINE Prognostic Suite</h1>
+            <p>Mitral INsufficiency Echocardiographic Scoring System (Vezzosi 2021 & 2025)</p>
+        </header>
 
-        <div class="grid-inputs">
-            <div class="input-group">
-                <label>Scoring Variant Model</label>
-                <select x-model="selectedModel">
-                    <option value="mine_1">MINE 1 (4-Parameter Original)</option>
-                    <option value="mine_2">MINE 2 (3-Parameter Simplified)</option>
-                </select>
+        <main class="card">
+            <div class="card-title">
+                <i class="fa-solid fa-square-poll-vertical" style="color: #0ea5e9;"></i>
+                <span>Interactive Diagnostic Engine</span>
             </div>
-            <div class="input-group">
-                <label>LA:Ao Ratio</label>
-                <input type="number" step="0.01" x-model="laAo" placeholder="e.g. 1.85">
-            </div>
-            <div class="input-group">
-                <label>LVIDdn</label>
-                <input type="number" step="0.01" x-model="lviddn" placeholder="e.g. 1.92">
-            </div>
-            <div class="input-group" x-show="selectedModel === 'mine_1'">
-                <label>Fractional Shortening (FS%)</label>
-                <input type="number" step="0.1" x-model="fs" placeholder="e.g. 42">
-            </div>
-            <div class="input-group">
-                <label>E-wave Velocity (m/s)</label>
-                <input type="number" step="0.01" x-model="eVel" placeholder="e.g. 0.95">
-            </div>
-        </div>
 
-<p>Need Help with Calculating These? <a href="\echocalc.html" class="btn">Access the Fully Integrated VetCardioHub EchoCalc here</a></p>
-
-        <!-- Waiting View -->
-        <div x-show="output === null" style="background: #f8fafc; border: 1px dashed var(--border); padding: 20px; border-radius: 6px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-            <i class="fa-solid fa-circle-info"></i> Enter all parameters above to view live risk stratification and median survival estimates.
-        </div>
-
-        <!-- Output Results Presentation -->
-        <div x-show="output !== null" x-transition>
-            <div class="results-panel">
-                <div class="score-badge">
-                    <span style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase;">MINE Score</span>
-                    <span class="score-num" x-text="output?.score"></span>
+            <div class="grid-inputs">
+                <div class="input-group">
+                    <!-- 2. x-model is now selectedMineModel to match echocalc.js -->
+                    <label>Scoring Variant Model</label>
+                    <select x-model="selectedMineModel">
+                        <option value="mine_1">MINE 1 (4-Parameter Original)</option>
+                        <option value="mine_2">MINE 2 (3-Parameter Simplified)</option>
+                    </select>
                 </div>
-                <div>
-                    <h4 style="margin:0; font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Risk Stratification</h4>
-                    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;" :class="output?.class" x-text="output?.tier"></div>
-                    
-                    <h4 style="margin:0; font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Median Survival Time (MST)</h4>
-                    <p style="margin:0; font-size: 1.1rem; font-weight: bold; color: #1e293b;">
-                        <i class="fa-solid fa-hourglass-half" style="color: #0284c7;"></i> <span x-text="output?.mst"></span>
-                    </p>
+                
+                <div class="input-group">
+                    <!-- 3. Glossary icons hooked directly to your openGlossary method -->
+                    <label>LA:Ao Ratio <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('laAo')"></i></label>
+                    <input type="number" step="0.01" x-model="laAo" placeholder="e.g. 1.85">
+                </div>
+                
+                <div class="input-group">
+                    <label>LVIDdn <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('lviddn')"></i></label>
+                    <input type="number" step="0.01" x-model="lviddn" placeholder="e.g. 1.92">
+                </div>
+                
+                <div class="input-group" x-show="selectedMineModel === 'mine_1'">
+                    <label>Fractional Shortening (FS%) <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('fs')"></i></label>
+                    <input type="number" step="0.1" x-model="fs" placeholder="e.g. 42">
+                </div>
+                
+                <div class="input-group">
+                    <label>E-wave Velocity (m/s) <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('eVel')"></i></label>
+                    <input type="number" step="0.01" x-model="eVel" placeholder="e.g. 0.95">
                 </div>
             </div>
 
-            <!-- Audit Trail Table -->
-            <table class="breakdown-table">
-                <thead>
-                    <tr>
-                        <th>Parameter</th>
-                        <th>Value</th>
-                        <th>Triggered Interval</th>
-                        <th style="text-align: right;">Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template x-for="item in output?.breakdown" :key="item.name">
+            <p>Need Help with Calculating These? <a href="/echocalc.html" class="btn">Access the Fully Integrated VetCardioHub EchoCalc here</a></p>
+
+            <!-- 4. We now look at the calculatedMineScore object from your main script -->
+            <div x-show="calculatedMineScore && calculatedMineScore.score === null" style="background: #f8fafc; border: 1px dashed var(--border); padding: 20px; border-radius: 6px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-info"></i> Enter all parameters above to view live risk stratification and median survival estimates.
+            </div>
+
+            <div x-show="calculatedMineScore && calculatedMineScore.score !== null" x-transition x-cloak>
+                <div class="results-panel">
+                    <div class="score-badge">
+                        <span style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase;">MINE Score</span>
+                        <span class="score-num" x-text="calculatedMineScore?.score"></span>
+                    </div>
+                    <div>
+                        <h4 style="margin:0; font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Risk Stratification</h4>
+                        <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;" :class="calculatedMineScore?.class" x-text="calculatedMineScore?.tier"></div>
+                        
+                        <h4 style="margin:0; font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Median Survival Time (MST)</h4>
+                        <p style="margin:0; font-size: 1.1rem; font-weight: bold; color: #1e293b;">
+                            <i class="fa-solid fa-hourglass-half" style="color: #0284c7;"></i> <span x-text="calculatedMineScore?.mst"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <table class="breakdown-table">
+                    <thead>
                         <tr>
-                            <td style="font-weight: 600;" x-text="item.name"></td>
-                            <td x-text="item.val"></td>
-                            <td style="color: var(--text-muted); font-style: italic;" x-text="item.threshold"></td>
-                            <td style="text-align: right; font-weight: bold;" x-text="`+${item.pts}`"></td>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                            <th>Triggered Interval</th>
+                            <th style="text-align: right;">Points</th>
                         </tr>
-                    </template>
-                </tbody>
-            </table>
-        </div>
-    </main>
+                    </thead>
+                    <tbody>
+                        <template x-for="item in calculatedMineScore?.breakdown" :key="item.name">
+                            <tr>
+                                <td style="font-weight: 600;" x-text="item.name"></td>
+                                <td x-text="item.val"></td>
+                                <td style="color: var(--text-muted); font-style: italic;" x-text="item.threshold"></td>
+                                <td style="text-align: right; font-weight: bold;" x-text="`+${item.pts}`"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </main>
 
-    <!-- Scientific Clinical Reference Card (E-E-A-T Optimization) -->
-    <section class="card info-block">
-        <div class="card-title" style="border:none; margin:0; padding:0;">
-            <i class="fa-solid fa-book-medical" style="color: #16325F;"></i>
-            <h2>Clinical Methodology & Significance</h2>
-        </div>
-        <p style="margin-top: 10px;">
-            The <strong>Mitral INsufficiency Echocardiographic (MINE)</strong> scoring system is an objective, validated, multi-parametric tool designed to predict outcome and cardiac death risk in canine patients suffering from Myxomatous Mitral Valve Disease (MMVD).
-        </p>
-        <p style="margin-top: 10px;">
-            <strong>MINE 1 (Vezzosi 2021):</strong> Evaluates structural remodel tracking markers alongside active systolic and diastolic profiles (LA:Ao, LVIDdn, FS%, and Transmitral E-wave velocity). Scores scale from 4 to 14 points.
-        </p>
-        <p style="margin-top: 10px;">
-            <strong>MINE 2 (Vezzosi 2025):</strong> A simplified model designed to isolate independent structural variables without compromising performance should a clear Fractional Shortening window be compromised or artifact-heavy. Scores scale from 3 to 12 points.
-        </p>
-        <h3 style="margin-top:15px;">Peer-Reviewed References:</h3>
-        <ul style="font-size:0.82rem; color: var(--text-main);">
-            <li>Vezzosi T, et al. An echocardiographic risk score (MINE score) for predicting outcome in dogs with myxomatous mitral valve disease. <em>J Vet Intern Med</em>. 2021;35(3):1238-1245.</li>
-            <li>Vezzosi T, et al. Validation of a simplified Mitral INsufficiency Echocardiographic scoring system in dogs. <em>JVIM Consensus Updates</em>. 2025.</li>
-        </ul>
-    </section>
+        <section class="card info-block">
+            <div class="card-title" style="border:none; margin:0; padding:0;">
+                <i class="fa-solid fa-book-medical" style="color: #16325F;"></i>
+                <h2>Clinical Methodology & Significance</h2>
+            </div>
+            <p style="margin-top: 10px;">
+                The <strong>Mitral INsufficiency Echocardiographic (MINE)</strong> scoring system is an objective, validated, multi-parametric tool designed to predict outcome and cardiac death risk in canine patients suffering from Myxomatous Mitral Valve Disease (MMVD).
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>MINE 1 (Vezzosi 2021):</strong> Evaluates structural remodel tracking markers alongside active systolic and diastolic profiles (LA:Ao, LVIDdn, FS%, and Transmitral E-wave velocity). Scores scale from 4 to 14 points.
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>MINE 2 (Vezzosi 2025):</strong> A simplified model designed to isolate independent structural variables without compromising performance should a clear Fractional Shortening window be compromised or artifact-heavy. Scores scale from 3 to 12 points.
+            </p>
+            <h3 style="margin-top:15px;">Peer-Reviewed References:</h3>
+            <ul style="font-size:0.82rem; color: var(--text-main);">
+                <li>Vezzosi T, et al. An echocardiographic risk score (MINE score) for predicting outcome in dogs with myxomatous mitral valve disease. <em>J Vet Intern Med</em>. 2021;35(3):1238-1245.</li>
+                <li>Vezzosi T, et al. Validation of a simplified Mitral INsufficiency Echocardiographic scoring system in dogs. <em>JVIM Consensus Updates</em>. 2025.</li>
+            </ul>
+        </section>
 
-    <section>
-        <p>Built for clinicians. Access the master <a href="https://vetcardiohub.com/echocalc.html">VetCardioHub Complete Advanced Echo Suite</a> for fully integrated MINE scoring, allometric models and diastolic verification tracking tools. Creating a fully printable report.</p>
-    </section>
+        <!-- 5. Ensure the glossary modal has a place to render -->
+        <div id="glossary-container"></div>
+    </div>
 </div>
-</div>
+
 <div id="site-footer"></div>
-
-
 
 <script src="/js/load-partials.js"></script>
 
-<script>
-function mineCalculator() {
-    return {
-        selectedModel: 'mine_1',
-        laAo: '',
-        lviddn: '',
-        fs: '',
-        eVel: '',
-
-        // Getter method that links Alpine directly to your external js file structure
-        get output() {
-            // Defensive Guard: Ensure echo-breeds.js has loaded and contains the data array
-            if (typeof mineModels === 'undefined' || !mineModels[this.selectedModel]) {
-                return null;
-            }
-
-            const model = mineModels[this.selectedModel];
-            let totalPoints = 0;
-            let missing = false;
-            let breakdown = [];
-
-            model.variables.forEach(v => {
-                const val = parseFloat(this[v]);
-                
-                // Clean display names mapping
-                const name = v === 'laAo' ? 'LA:Ao Ratio' : 
-                             v === 'lviddn' ? 'LVIDdn' : 
-                             v === 'fs' ? 'Fractional Shortening' : 'E-wave Velocity';
-                const unit = v === 'fs' ? '%' : v === 'eVel' ? ' m/s' : '';
-
-                // If any parameters are unentered, mark as incomplete
-                if (!val || isNaN(val) || val <= 0) {
-                    missing = true;
-                    return;
-                }
-
-                const ranges = model.ranges[v];
-                const rule = ranges.find(r => val <= r.max);
-                const pts = rule ? rule.pts : 0;
-                totalPoints += pts;
-
-                // Build text presentation of the matched interval slice (e.g. "1.7 – 2.0")
-                const idx = ranges.indexOf(rule);
-                let thresh = idx === 0 ? `≤ ${rule.max}` : rule.max === Infinity ? `> ${ranges[idx-1].max}` : `${ranges[idx-1].max} – ${rule.max}`;
-
-                breakdown.push({ name: name, val: `${val}${unit}`, threshold: thresh, pts: pts });
-            });
-
-            if (missing) return null;
-
-            // Find matching prognostic tier group based on total accrued points
-            const tier = model.tiers.find(t => totalPoints >= t.min && totalPoints <= t.max);
-            return {
-                score: totalPoints,
-                tier: tier ? tier.label : 'Unclassified',
-                mst: tier ? tier.mst : 'N/A',
-                class: tier ? tier.class : 'normal',
-                breakdown: breakdown
-            };
-        }
-    }
-}
-</script>
 </body>
 </html>
