@@ -2151,6 +2151,39 @@ const formatLabel = (key) => {
             label = label.replace(/\bLVIDS N\b/g, 'LVIDsn');
             return label;
         };
+        
+        // --- NEW: GLOSSARY MAPPER ---
+        // Maps the breed data keys to your exact glossary database keys
+        const glossaryKeyMap = {
+            "lvidd_mm": "lvidd",
+            "lvids_mm": "lvids",
+            "ivsd_mm":  "ivsd",
+            "lvpwd_mm": "lvpwd",
+            "lvfwd_mm": "lvpwd",
+            "lad_mm":   "lad",
+            "lad":      "lad",
+            "TAPSE_mm": "tapse",
+            "lvidd_n":  "lviddn",
+            "lvids_n":  "lvidsn",
+            "la_ao":    "laAo",
+            "la_n":     "lan",
+            "lad_n":    "ladn",
+            "TAPSE_Ao": "tapseaola",
+            "eivrt":    "eivrt",
+            "fs_pct":   "fs",
+            "ef_pct":   "ef",
+            "FS_PCT":   "fs",
+            "EF_PCT":   "ef",
+            "FS":       "fs",
+            "EF":       "ef",
+            "edvi_smod": "lvedv_wess", // Pointing to the new wess descriptions
+            "esvi_smod": "lvesv_wess",
+            "edvi_smod_m2": "edvim2",
+            "esvi_smod_m2": "esvim2",
+            "esv_smod":     "lvesv",
+            "edv_smod":     "lvedv",
+            "ao_vmax":  "aovmax"
+        };
 
     const renderSourceBlock = (dataObj, title = null) => {
         let blockHtml = '';
@@ -2174,6 +2207,19 @@ const formatLabel = (key) => {
                 const val = metricsSource[key];
                 const label = formatLabel(key); // Variable redeclaration error fixed here
                 
+            // ---  AUTO-INJECT INFO ICON ---
+                const targetGlossaryKey = glossaryKeyMap[key];
+                let infoIconHtml = '';
+                
+                // Only render the icon if we successfully mapped the key
+                if (targetGlossaryKey) {
+                    infoIconHtml = ` <i class="fa-solid fa-circle-info" 
+                                        style="color: #94a3b8; cursor: pointer; transition: color 0.2s; margin-left: 6px;" 
+                                        onmouseover="this.style.color='#0ea5e9'" 
+                                        onmouseout="this.style.color='#94a3b8'" 
+                                        @click="openGlossary('${targetGlossaryKey}')"></i>`;
+                }
+            
                 let rangeString = '—';
                 if (typeof val === 'object' && val !== null) {
                     
@@ -2193,6 +2239,8 @@ const formatLabel = (key) => {
                 } else {
                     rangeString = val || '—';
                 }
+                
+                
 
                 const pVal = patientValues[key] || '—';
                 const isAbnormal = (pVal !== '—' && val.max && parseFloat(pVal) > parseFloat(val.max));
