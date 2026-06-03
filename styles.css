@@ -3088,6 +3088,7 @@ input {
     gap: 12px;
     align-items: stretch;
     flex-wrap: wrap; /* Wraps nicely on small mobile screens */
+    margin-bottom: 20px;
 }
 
 /* Base button style for all 3 report share buttons */
