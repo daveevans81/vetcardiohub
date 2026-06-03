@@ -835,19 +835,26 @@ get availableRightModels() {
 /* Specialized Decoupled Right Heart Allometric Evaluator */
 get rightAllometricResults() {
     const results = {};
-    if (!this.weight || this.weight <= 0 || typeof rightHeartModels === 'undefined') return results;
+    // List all possible right heart parameters
+    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rvedv', 'rvesv', 'rvSPrime','mpamin', 'rpamax', 'rpamin'];
+
+    // 1. PRE-FILL SAFE DEFAULTS (This prevents the HTML crash!)
+    targets.forEach(t => {
+        results[t] = { min: '—', max: '—', mean: '—', available: false };
+    });
+
+    // 2. Abort if no weight or models, but return the padded object!
+    if (!this.weight || this.weight <= 0 || typeof rightHeartModels === 'undefined') {
+        return results; 
+    }
     
     const modelData = rightHeartModels[this.selectedRightModel];
     if (!modelData) return results;
 
-    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rvedv', 'rvesv', 'rvSPrime','mpamin', 'rpamax', 'rpamin'];
-    
+    // 3. Calculate actual values if data exists
     targets.forEach(param => {
         const formula = modelData.params?.[param];
-        if (!formula) {
-            results[param] = { min: null, max: null, mean: null, available: false };
-            return;
-        }
+        if (!formula) return; // Keep the default we set in Step 1
 
         let mean, lower, upper;
 
@@ -865,16 +872,14 @@ get rightAllometricResults() {
             upper = formula.maxMultiplier ? formula.maxMultiplier * mean : mean + (1.96 * (formula.see || 0));
         }
 
-        // --- APPLY UNIT SCALING FACTOR ---
-        // If the database has a multiplier (like 10 for cm to mm), apply it. Otherwise, default to 1.
         const scale = formula.multiplier || 1;
         mean *= scale;
         lower *= scale;
         upper *= scale;
 
-        // Enforce safe mathematical floors for lower bounds
         if (lower < 0) lower = 0;
 
+        // Overwrite the defaults with the real numbers
         results[param] = {
             min: parseFloat(lower.toFixed(2)),
             max: parseFloat(upper.toFixed(2)),
@@ -885,6 +890,8 @@ get rightAllometricResults() {
 
     return results;
 },
+
+
 
     /* Diastolic Scorer */
 get diastolicClassification() {
