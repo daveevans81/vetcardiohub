@@ -406,9 +406,9 @@ get breedTableHtml() {
         const breedData = breedSpecificReferenceRanges[breedName];
         if (!breedData) return '';
 
-        const excludedTags = ['is_deviant', 'isSighthound', 'isFeline', 'isToy', 'pmid', 'clinical_note', 'reference', 'sources'];
+        const excludedTags = ['is_deviant', 'isSighthound', 'isFeline', 'isToy', 'isKitten', 'pmid', 'clinical_note', 'reference', 'sources'];
 
-        // Helper to format values cleanly, replacing the old DOM scraper
+        // Helper to format values cleanly
         const getVal = (val) => {
             if (val === null || val === undefined || val === '' || val === 0 || val === '0' || val === '0.00' || isNaN(val)) {
                 return '—';
@@ -416,31 +416,81 @@ get breedTableHtml() {
             return val;
         };
 
+        // Live patient mapping
         const patientValues = {
             "lvidd_mm": getVal(this.lvidd),
             "lvids_mm": getVal(this.lvids),
+            "ivsd_mm":  getVal(this.ivsd),
+            "lvpwd_mm": getVal(this.lvpwd),
+            "lvfwd_mm": getVal(this.lvpwd), 
+            "lad_mm":   getVal(this.lad),
+            "lad":      getVal(this.lad),   
+            "TAPSE_mm": getVal(this.tapse),
             "lvidd_n":  getVal(this.lviddn),
             "lvids_n":  getVal(this.lvidsn),
             "la_ao":    getVal(this.laAo),
             "la_n":     getVal(this.lan),
             "lad_n":    getVal(this.ladn),
+            "TAPSE_Ao": getVal(this.tapseaola),
+            "eivrt":    getVal(this.eivrt),
             "fs_pct":   getVal(this.fs),
             "ef_pct":   getVal(this.ef),
-            "ivsd_mm":  getVal(this.ivsd),
-            "lvpwd_mm": getVal(this.lvpwd),
-            "lad_mm":   getVal(this.lad),
+            "FS_PCT":   getVal(this.fs),
+            "EF_PCT":   getVal(this.ef), 
+            "FS":       getVal(this.fs), 
+            "EF":       getVal(this.ef), 
             "edvi_smod_kg": getVal(this.lvedvbw),
             "esvi_smod_kg": getVal(this.lvesvbw),
             "edvi_smod_m2": getVal(this.edvim2),
-            "esvi_smod_m2": getVal(this.esvim2)
+            "esvi_smod_m2": getVal(this.esvim2),
+            "esv_smod":     getVal(this.lvesv),
+            "edv_smod":     getVal(this.lvedv),
+            "ao_vmax":  getVal(this.aovmax)
+        };
+
+        // --- NEW: GLOSSARY MAPPER ---
+        // Maps the breed data keys to your exact glossary database keys
+        const glossaryKeyMap = {
+            "lvidd_mm": "lvidd",
+            "lvids_mm": "lvids",
+            "ivsd_mm":  "ivsd",
+            "lvpwd_mm": "lvpwd",
+            "lvfwd_mm": "lvpwd",
+            "lad_mm":   "lad",
+            "lad":      "lad",
+            "TAPSE_mm": "tapse",
+            "lvidd_n":  "lviddn",
+            "lvids_n":  "lvidsn",
+            "la_ao":    "laAo",
+            "la_n":     "lan",
+            "lad_n":    "ladn",
+            "TAPSE_Ao": "tapseaola",
+            "eivrt":    "eivrt",
+            "fs_pct":   "fs",
+            "ef_pct":   "ef",
+            "FS_PCT":   "fs",
+            "EF_PCT":   "ef",
+            "FS":       "fs",
+            "EF":       "ef",
+            "edvi_smod_kg": "lvedv_wess", // Pointing to the new wess descriptions we wrote
+            "esvi_smod_kg": "lvesv_wess",
+            "edvi_smod_m2": "edvim2",
+            "esvi_smod_m2": "esvim2",
+            "esv_smod":     "lvesv",
+            "edv_smod":     "lvedv",
+            "ao_vmax":  "aovmax"
         };
 
         const formatLabel = (key) => {
             let label = key.toUpperCase().replace(/_/g, ' ');
             label = label.replace(/\bMM\b/g, '(mm)');
             label = label.replace(/\bLA AO\b/g, 'LA:Ao');
+            label = label.replace(/\bTAPSE AO\b/g, 'TAPSE:Ao');
+            label = label.replace(/\bLVFWD\b/g, 'LVFWd');
             label = label.replace(/\bSMOD KG\b/g, '(smod)/kg');
             label = label.replace(/\bSMOD M2\b/g, '(smod)/m²');
+            label = label.replace(/\bESV SMOD\b/g, 'ESV (smod)');
+            label = label.replace(/\bEDV SMOD\b/g, 'EDV (smod)');
             label = label.replace(/\bVMAX\b/g, '(Vmax)');
             label = label.replace(/\bPCT\b/g, '%');
             label = label.replace(/\bLVIDD N\b/g, 'LVIDdn');
@@ -470,9 +520,21 @@ get breedTableHtml() {
                     const val = metricsSource[key];
                     const label = formatLabel(key);
                     
+                    // --- NEW: AUTO-INJECT INFO ICON ---
+                    const targetGlossaryKey = glossaryKeyMap[key];
+                    let infoIconHtml = '';
+                    
+                    // Only render the icon if we successfully mapped the key
+                    if (targetGlossaryKey) {
+                        infoIconHtml = ` <i class="fa-solid fa-circle-info" 
+                                            style="color: #94a3b8; cursor: pointer; transition: color 0.2s; margin-left: 6px;" 
+                                            onmouseover="this.style.color='#0ea5e9'" 
+                                            onmouseout="this.style.color='#94a3b8'" 
+                                            @click="openGlossary('${targetGlossaryKey}')"></i>`;
+                    }
+
                     let rangeString = '—';
                     if (typeof val === 'object' && val !== null) {
-                        // SD CONVERSION LOGIC
                         if (val.median !== undefined && val.sd !== undefined && val.min === undefined && val.max === undefined) {
                             usesCalculatedSd = true;
                             val.min = (val.median - (1.96 * val.sd)).toFixed(2);
@@ -490,7 +552,9 @@ get breedTableHtml() {
                     const isAbnormal = (pVal !== '—' && val.max && parseFloat(pVal) > parseFloat(val.max));
 
                     blockHtml += `<tr>
-                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 500; background-color: #f9fafb;">${label}</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 500; background-color: #f9fafb;">
+                                        ${label}${infoIconHtml}
+                                    </td>
                                     <td style="padding: 10px; border: 1px solid #dee2e6; ${isAbnormal ? 'background-color: #fef2f2; color: #ef4444; font-weight: bold;' : ''}">${pVal}</td>
                                     <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">${rangeString}</td>
                                   </tr>`;
@@ -539,16 +603,8 @@ get breedTableHtml() {
 
         return html;
     },
-
-    // helper getter to populate the dropdown options dynamically 
-
-    get availableBreeds() {
-        if (typeof breedSpecificReferenceRanges === 'undefined') return [];
-        return Object.keys(breedSpecificReferenceRanges).sort();
-    },
     
     
-
  /* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
 get phClassification() {
     if (!this.isDog) return null;
@@ -1741,18 +1797,19 @@ fallbackCopy(text) {
     toastTitle: '',
     toastMessage: '',
 
-    handleBreedSelection() {
-        // Sync the text box with the dropdown
+ handleBreedSelection() {
+        // Sync the text box with the dropdown (used for your PDF report generator)
         if (this.selectedBreed) {
             this.breed = this.selectedBreed;
         }
 
-        const breedData = breedSpecificReferenceRanges[this.selectedBreed];
-        
-        if (!breedData) {
-            updateBreedTable();
-            return;
+        // Safely exit if the breed data isn't loaded or nothing is selected
+        if (!this.selectedBreed || typeof breedSpecificReferenceRanges === 'undefined') {
+            return; // Alpine automatically clears the table, no manual DOM update needed!
         }
+
+        const breedData = breedSpecificReferenceRanges[this.selectedBreed];
+        if (!breedData) return;
 
         let targetModel = null;
         let title = '';
@@ -1770,7 +1827,6 @@ fallbackCopy(text) {
             title = 'Model Updated: Feline';
             message = 'We automatically switched the allometric model to the standard feline references.';
         }
-        
         // Check for Toy Breed flag
         else if (breedData.isToy && this.selectedModel !== 'isayama_toy_breed_2022') {
             targetModel = 'isayama_toy_breed_2022'; 
@@ -1797,10 +1853,7 @@ fallbackCopy(text) {
             }, 5000);
         }
 
-        // Render the breed table
-        updateBreedTable();
     },
-
 
 
 // --- LEARNING HUB STATE ---
@@ -2075,221 +2128,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function updateBreedTable() {
-    const selector = document.getElementById('breed-selector');
-    const container = document.getElementById('breed-data-container');
-    const breedName = selector.value;
-
-    if (!breedName) { container.innerHTML = ''; return; }
-
-    const breedData = breedSpecificReferenceRanges[breedName];
-    const excludedTags = ['is_deviant', 'pmid', 'clinical_note', 'reference', 'sources'];
-
-    // Helper to get text or value from the DOM
-    const getVal = (selector, isText = false) => {
-        const el = document.querySelector(selector);
-        if (!el) return '—';
-        let val = isText ? el.innerText : el.value;
-        if (typeof val === 'string') val = val.replace('%', '').trim();
-        return (val === '0' || val === '0.0' || val === '' || val === 0) ? '—' : val;
-    };
-
- // Mapping: Data File Key -> Live Calculator Value
-        const patientValues = {
-            // Linear Dimensions (mm)
-            "lvidd_mm": getVal(this.lvidd),
-            "lvids_mm": getVal(this.lvids),
-            "ivsd_mm":  getVal(this.ivsd),
-            "lvpwd_mm": getVal(this.lvpwd),
-            "lvfwd_mm": getVal(this.lvpwd), // Maps LVFWd to your LVPWd input
-            "lad_mm":   getVal(this.lad),
-            "lad":      getVal(this.lad),   // Borzoi / Setter use 'lad'
-            "TAPSE_mm": getVal(this.tapse),
-
-            // Indexed / Ratios
-            "lvidd_n":  getVal(this.lviddn),
-            "lvids_n":  getVal(this.lvidsn),
-            "la_ao":    getVal(this.laAo),
-            "la_n":     getVal(this.lan),
-            "lad_n":    getVal(this.ladn),
-            "TAPSE_Ao": getVal(this.tapseaola),
-            "eivrt":    getVal(this.eivrt),
-
-            // Systolic Function (%)
-            "fs_pct":   getVal(this.fs),
-            "ef_pct":   getVal(this.ef),
-            "FS_PCT":   getVal(this.fs), // Handles uppercase dictionary keys
-            "EF_PCT":   getVal(this.ef), 
-            "FS":       getVal(this.fs), // Great Dane uses 'FS'
-            "EF":       getVal(this.ef), 
-
-            // Volumetrics
-            "edvi_smod_kg": getVal(this.lvedvbw),
-            "esvi_smod_kg": getVal(this.lvesvbw),
-            "edvi_smod_m2": getVal(this.edvim2),
-            "esvi_smod_m2": getVal(this.esvim2),
-            "esv_smod":     getVal(this.lvesv),
-            "edv_smod":     getVal(this.lvedv),
-
-            // Doppler
-            "ao_vmax":  getVal(this.aovmax)
-        };
-
-const formatLabel = (key) => {
-            let label = key.toUpperCase().replace(/_/g, ' ');
-            label = label.replace(/\bMM\b/g, '(mm)');
-            label = label.replace(/\bLA AO\b/g, 'LA:Ao');
-            label = label.replace(/\bTAPSE AO\b/g, 'TAPSE:Ao');
-            label = label.replace(/\bLVFWD\b/g, 'LVFWd');
-            label = label.replace(/\bSMOD KG\b/g, '(smod)/kg');
-            label = label.replace(/\bSMOD M2\b/g, '(smod)/m²');
-            label = label.replace(/\bESV SMOD\b/g, 'ESV (smod)');
-            label = label.replace(/\bEDV SMOD\b/g, 'EDV (smod)');
-            label = label.replace(/\bVMAX\b/g, '(Vmax)');
-            label = label.replace(/\bPCT\b/g, '%');
-            label = label.replace(/\bLVIDD N\b/g, 'LVIDdn');
-            label = label.replace(/\bLVIDS N\b/g, 'LVIDsn');
-            return label;
-        };
-        
-        // --- NEW: GLOSSARY MAPPER ---
-        // Maps the breed data keys to your exact glossary database keys
-        const glossaryKeyMap = {
-            "lvidd_mm": "lvidd",
-            "lvids_mm": "lvids",
-            "ivsd_mm":  "ivsd",
-            "lvpwd_mm": "lvpwd",
-            "lvfwd_mm": "lvpwd",
-            "lad_mm":   "lad",
-            "lad":      "lad",
-            "TAPSE_mm": "tapse",
-            "lvidd_n":  "lviddn",
-            "lvids_n":  "lvidsn",
-            "la_ao":    "laAo",
-            "la_n":     "lan",
-            "lad_n":    "ladn",
-            "TAPSE_Ao": "tapseaola",
-            "eivrt":    "eivrt",
-            "fs_pct":   "fs",
-            "ef_pct":   "ef",
-            "FS_PCT":   "fs",
-            "EF_PCT":   "ef",
-            "FS":       "fs",
-            "EF":       "ef",
-            "edvi_smod": "lvedv_wess", // Pointing to the new wess descriptions
-            "esvi_smod": "lvesv_wess",
-            "edvi_smod_m2": "edvim2",
-            "esvi_smod_m2": "esvim2",
-            "esv_smod":     "lvesv",
-            "edv_smod":     "lvedv",
-            "ao_vmax":  "aovmax"
-        };
-
-        const renderSourceBlock = (dataObj, title = null) => {
-            let blockHtml = '';
-            if (title) blockHtml += `<h4 style="margin: 25px 0 10px 0; color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">${title}</h4>`;
-
-            const metricsSource = dataObj.metrics || dataObj;
-            let usesCalculatedSd = false;
-
-            blockHtml += `<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; border: 1px solid #dee2e6;">
-                            <thead style="background-color: #f8f9fa;">
-                                <tr>
-                                    <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Metric</th>
-                                    <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Patient</th>
-                                    <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed Ref</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-
-            Object.keys(metricsSource).forEach(key => {
-                if (!excludedTags.includes(key)) {
-                    const val = metricsSource[key];
-                    const label = formatLabel(key);
-                    
-                    // --- AUTO-INJECT INFO ICON ---
-                    const targetGlossaryKey = glossaryKeyMap[key];
-                    let infoIconHtml = '';
-                    
-                    if (targetGlossaryKey) {
-                        infoIconHtml = ` <i class="fa-solid fa-circle-info" 
-                                            style="color: #94a3b8; cursor: pointer; transition: color 0.2s; margin-left: 6px;" 
-                                            onmouseover="this.style.color='#0ea5e9'" 
-                                            onmouseout="this.style.color='#94a3b8'" 
-                                            @click="openGlossary('${targetGlossaryKey}')"></i>`;
-                    }
-
-                    let rangeString = '—';
-                    if (typeof val === 'object' && val !== null) {
-                        if (val.median !== undefined && val.sd !== undefined && val.min === undefined && val.max === undefined) {
-                            usesCalculatedSd = true;
-                            val.min = (val.median - (1.96 * val.sd)).toFixed(2);
-                            val.max = (val.median + (1.96 * val.sd)).toFixed(2);
-                        }
-
-                        if (val.min !== undefined && val.max !== undefined) rangeString = `${val.min}–${val.max}`;
-                        else if (val.max !== undefined) rangeString = `< ${val.max}`;
-                        else if (val.median !== undefined) rangeString = `~${val.median}`;
-                    } else {
-                        rangeString = val || '—';
-                    }
-
-                    const pVal = patientValues[key] || '—';
-                    const isAbnormal = (pVal !== '—' && val.max && parseFloat(pVal) > parseFloat(val.max));
-
-                    // FIX IS HERE: ${label}${infoIconHtml} are now safely together in the table cell
-                    blockHtml += `<tr>
-                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 500; background-color: #f9fafb;">
-                                        ${label}${infoIconHtml} 
-                                    </td>
-                                    <td style="padding: 10px; border: 1px solid #dee2e6; ${isAbnormal ? 'background-color: #fef2f2; color: #ef4444; font-weight: bold;' : ''}">${pVal}</td>
-                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">${rangeString}</td>
-                                  </tr>`;
-                }
-            });
-
-            blockHtml += `</tbody></table>`;
-        
-        // --- DYNAMIC VERIFICATION NOTE ---
-        if (usesCalculatedSd) {
-            blockHtml += `
-                <div style="background-color: #f0fdf4; padding: 10px 12px; border-radius: 4px; color: #166534; border: 1px solid #bbf7d0; font-size: 0.8rem; margin-top: 10px; display: flex; align-items: flex-start; gap: 8px;">
-                    <i class="fa-solid fa-calculator" style="margin-top: 2px;"></i>
-                    <div>
-                        <strong>Statistical Derivation Note:</strong> This study originally published data as Median ± SD. 
-                        The reference intervals shown above were programmatically derived using a standard two-sided 95% confidence interval 
-                        where <code>Reference Range = Median ± (1.96 × SD)</code> to identify values falling outside the normal 95% population distribution.
-                    </div>
-                </div>`;
-        }
-    
-    
-        if (dataObj.clinical_note) blockHtml += `<div style="background-color: #f1f5f9; padding: 12px; border-radius: 4px; font-style: italic; margin-top: 15px; border-left: 4px solid #64748b; font-size: 0.9rem;"><strong>Note:</strong> ${dataObj.clinical_note}</div>`;
-        if (dataObj.pmid) blockHtml += `<p style="margin-top:10px;"><a href="https://pubmed.ncbi.nlm.nih.gov/${dataObj.pmid}" target="_blank" style="color: #2563eb; font-size: 0.85rem; text-decoration: underline;">🔗 View Research (PMID: ${dataObj.pmid})</a></p>`;
-
-        return blockHtml;
-    };
-
-    let html = '';
-
-    // Deviant Breed Alert
-    if (breedData.is_deviant) {
-        html += `<div style="background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; color: #856404; font-weight: bold; border-radius: 4px;">
-                    ⚠️ CLINICAL ALERT: ${breedName} is a "deviant" breed.
-                 </div>`;
-    }
-
-    if (breedData.sources && Array.isArray(breedData.sources)) {
-        breedData.sources.forEach((source, index) => {
-            html += renderSourceBlock(source, source.reference || `Source ${index + 1}`);
-        });
-    } else {
-        html += renderSourceBlock(breedData);
-    }
-
-    html += `<div style="background-color: #f9f9f9; padding: 12px; border-radius: 4px; margin-top: 20px; border-left: 4px solid #999999; font-size: 0.85rem;">
-                <strong>Caveat:</strong> In practice, breed normals serve as starting values; each animal’s weight and context must be considered. Clinicians should integrate multiple indices (e.g. body-size normalized LVID, EF, LA/Ao, etc.) when assessing an individual.
-             </div>`;
-
-    container.innerHTML = html;
-}
