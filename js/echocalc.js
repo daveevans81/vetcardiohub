@@ -2185,75 +2185,70 @@ const formatLabel = (key) => {
             "ao_vmax":  "aovmax"
         };
 
-    const renderSourceBlock = (dataObj, title = null) => {
-        let blockHtml = '';
-        if (title) blockHtml += `<h4 style="margin: 25px 0 10px 0; color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">${title}</h4>`;
+        const renderSourceBlock = (dataObj, title = null) => {
+            let blockHtml = '';
+            if (title) blockHtml += `<h4 style="margin: 25px 0 10px 0; color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">${title}</h4>`;
 
-        const metricsSource = dataObj.metrics || dataObj;
-        let usesCalculatedSd = false;
+            const metricsSource = dataObj.metrics || dataObj;
+            let usesCalculatedSd = false;
 
-        blockHtml += `<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; border: 1px solid #dee2e6;">
-                        <thead style="background-color: #f8f9fa;">
-                            <tr>
-                                <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Metric</th>
-                                <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Patient</th>
-                                <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed Ref</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
+            blockHtml += `<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; border: 1px solid #dee2e6;">
+                            <thead style="background-color: #f8f9fa;">
+                                <tr>
+                                    <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Metric</th>
+                                    <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Patient</th>
+                                    <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Breed Ref</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
 
-        Object.keys(metricsSource).forEach(key => {
-            if (!excludedTags.includes(key)) {
-                const val = metricsSource[key];
-                const label = formatLabel(key); // Variable redeclaration error fixed here
-                
-            // ---  AUTO-INJECT INFO ICON ---
-                const targetGlossaryKey = glossaryKeyMap[key];
-                let infoIconHtml = '';
-                
-                // Only render the icon if we successfully mapped the key
-                if (targetGlossaryKey) {
-                    infoIconHtml = ` <i class="fa-solid fa-circle-info" 
-                                        style="color: #94a3b8; cursor: pointer; transition: color 0.2s; margin-left: 6px;" 
-                                        onmouseover="this.style.color='#0ea5e9'" 
-                                        onmouseout="this.style.color='#94a3b8'" 
-                                        @click="openGlossary('${targetGlossaryKey}')"></i>`;
-                }
-            
-                let rangeString = '—';
-                if (typeof val === 'object' && val !== null) {
+            Object.keys(metricsSource).forEach(key => {
+                if (!excludedTags.includes(key)) {
+                    const val = metricsSource[key];
+                    const label = formatLabel(key);
                     
-                    // --- SD CONVERSION LOGIC ---
-                    // If median and sd exist, but min/max don't, calculate the 90% range
-                    if (val.median !== undefined && val.sd !== undefined && val.min === undefined && val.max === undefined) {
-                       usesCalculatedSd = true;
-                        // Using Z-score 1.96 for 95% interval. Using toFixed(2) to keep numbers clean.
-                        val.min = (val.median - (1.96 * val.sd)).toFixed(2);
-                        val.max = (val.median + (1.96 * val.sd)).toFixed(2);
+                    // --- AUTO-INJECT INFO ICON ---
+                    const targetGlossaryKey = glossaryKeyMap[key];
+                    let infoIconHtml = '';
+                    
+                    if (targetGlossaryKey) {
+                        infoIconHtml = ` <i class="fa-solid fa-circle-info" 
+                                            style="color: #94a3b8; cursor: pointer; transition: color 0.2s; margin-left: 6px;" 
+                                            onmouseover="this.style.color='#0ea5e9'" 
+                                            onmouseout="this.style.color='#94a3b8'" 
+                                            @click="openGlossary('${targetGlossaryKey}')"></i>`;
                     }
-               
 
-                    if (val.min !== undefined && val.max !== undefined) rangeString = `${val.min}–${val.max}`;
-                    else if (val.max !== undefined) rangeString = `< ${val.max}`;
-                    else if (val.median !== undefined) rangeString = `~${val.median}`;
-                } else {
-                    rangeString = val || '—';
+                    let rangeString = '—';
+                    if (typeof val === 'object' && val !== null) {
+                        if (val.median !== undefined && val.sd !== undefined && val.min === undefined && val.max === undefined) {
+                            usesCalculatedSd = true;
+                            val.min = (val.median - (1.96 * val.sd)).toFixed(2);
+                            val.max = (val.median + (1.96 * val.sd)).toFixed(2);
+                        }
+
+                        if (val.min !== undefined && val.max !== undefined) rangeString = `${val.min}–${val.max}`;
+                        else if (val.max !== undefined) rangeString = `< ${val.max}`;
+                        else if (val.median !== undefined) rangeString = `~${val.median}`;
+                    } else {
+                        rangeString = val || '—';
+                    }
+
+                    const pVal = patientValues[key] || '—';
+                    const isAbnormal = (pVal !== '—' && val.max && parseFloat(pVal) > parseFloat(val.max));
+
+                    // FIX IS HERE: ${label}${infoIconHtml} are now safely together in the table cell
+                    blockHtml += `<tr>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 500; background-color: #f9fafb;">
+                                        ${label}${infoIconHtml} 
+                                    </td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; ${isAbnormal ? 'background-color: #fef2f2; color: #ef4444; font-weight: bold;' : ''}">${pVal}</td>
+                                    <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">${rangeString}</td>
+                                  </tr>`;
                 }
-                
-                
+            });
 
-                const pVal = patientValues[key] || '—';
-                const isAbnormal = (pVal !== '—' && val.max && parseFloat(pVal) > parseFloat(val.max));
-
-                blockHtml += `<tr>
-                                <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 500; background-color: #f9fafb;">${label}</td>
-                                <td style="padding: 10px; border: 1px solid #dee2e6; ${isAbnormal ? 'background-color: #fef2f2; color: #ef4444; font-weight: bold;' : ''}">${pVal}</td>
-                                <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">${rangeString}</td>
-                             </tr>`;
-            }
-        });
-
-        blockHtml += `</tbody></table>`;
+            blockHtml += `</tbody></table>`;
         
         // --- DYNAMIC VERIFICATION NOTE ---
         if (usesCalculatedSd) {
