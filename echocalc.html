@@ -1595,8 +1595,11 @@
                                 </div>
                             </div>
                              <div class="input-group">
-                               <label>Selected species: <span x-show="isDog">Canine</span><span x-show="isCat">Feline</span></label>            
-                  
+                               <label>Selected species:</label> 
+                               <div> <span x-show="isDog">Canine</span><span x-show="isCat">Feline</span> </div>          
+                             </div>
+                             <div class="input-group">
+                               <label>Change species:</label> 
                                <select x-model="selectedModel" class="form-select">
                                 <template x-for="(model, key) in allometricModels" :key="key">
                                  <option :value="key" x-text="model.label"></option>
