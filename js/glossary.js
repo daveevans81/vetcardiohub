@@ -1,0 +1,118 @@
+<div x-show="glossaryOpen" 
+     class="glossary-overlay"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     @keydown.escape.window="closeGlossary()"
+     style="display: none;">
+    
+    <div class="glossary-backdrop" @click="closeGlossary()"></div>
+
+    <div class="card glossary-modal" 
+         x-show="glossaryOpen"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform translate-y-4 sm:translate-y-0 sm:scale-95"
+         x-transition:enter-end="opacity-100 transform translate-y-0 sm:scale-100">
+        
+        <header class="glossary-header">
+            <h3 class="glossary-title">
+                <i class="fa-solid fa-book-medical" style="color: #0ea5e9;"></i>
+                <span x-text="activeGlossaryTerm?.title"></span>
+            </h3>
+            <button @click="closeGlossary()" class="glossary-close" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+
+        <div class="glossary-modal-body">
+            <template x-if="activeGlossaryTerm?.imgPlaceholder">
+                <div class="glossary-image-container">
+                    <img :src="activeGlossaryTerm.imgPlaceholder" 
+                         class="glossary-img clickable" 
+                         @click="zoomImage(activeGlossaryTerm.imgPlaceholder)"
+                         alt="Diagnostic reference diagram">
+                    
+                    <template x-if="activeGlossaryTerm?.imgAttribution">
+                        <p class="image-attribution">
+                            Source: <span x-text="activeGlossaryTerm.reference"></span>. 
+                            Licensed <span x-text="activeGlossaryTerm.imgAttribution"></span>. 
+                            <a :href="`https://pubmed.ncbi.nlm.nih.gov/${activeGlossaryTerm.pmid}/`" 
+                               target="_blank" rel="noopener noreferrer">
+                               [PMID: <span x-text="activeGlossaryTerm.pmid"></span>]
+                            </a>
+                        </p>
+                    </template>
+                </div>
+            </template>
+            
+            <div class="glossary-content">
+                <div class="glossary-row">
+                    <i class="fa-solid fa-satellite-dish glossary-icon" style="color: #0ea5e9;"></i>
+                    <div class="glossary-text-block">
+                        <span class="glossary-label">Optimal View / Source</span>
+                        <p class="glossary-value" x-text="activeGlossaryTerm?.view"></p>
+                    </div>
+                </div>
+
+                <div class="glossary-row">
+                    <i class="fa-solid fa-stethoscope glossary-icon" style="color: #10b981;"></i>
+                    <div class="glossary-text-block">
+                        <span class="glossary-label">Clinical Purpose</span>
+                        <p class="glossary-desc" x-text="activeGlossaryTerm?.description"></p>
+                    </div>
+                </div>
+
+                <div class="glossary-row">
+                    <i class="fa-solid fa-ruler-combined glossary-icon" style="color: #8b5cf6;"></i>
+                    <div class="glossary-text-block">
+                        <span class="glossary-label">Technique / Formula</span>
+                        <p class="glossary-formula-box" x-text="activeGlossaryTerm?.method"></p>
+                    </div>
+                </div>
+
+                <template x-if="activeGlossaryTerm?.reference || activeGlossaryTerm?.pmid">
+                    <div class="glossary-reference-section">
+                        <i class="fa-solid fa-book-open-reader glossary-icon ref-icon"></i>
+                        <div class="glossary-text-block">
+                            <span class="glossary-label">Evidence & Literature</span>
+                            <p class="glossary-reference-text">
+                                <span x-text="activeGlossaryTerm?.reference" style="font-style: italic;"></span>
+                                
+                                <template x-if="activeGlossaryTerm?.pmid">
+                                    <a :href="`https://pubmed.ncbi.nlm.nih.gov/${activeGlossaryTerm.pmid}/`" 
+                                       target="_blank" 
+                                       rel="noopener noreferrer"
+                                       class="pubmed-link">
+                                        [PMID: <span x-text="activeGlossaryTerm.pmid"></span>] 
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    </a>
+                                </template>
+                            </p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div x-data="{ zoomedImg: null }" 
+     @image-zoom.window="zoomedImg = $event.detail"
+     x-show="zoomedImg"
+     x-transition.opacity.duration.300ms
+     class="zoom-overlay" 
+     @click="zoomedImg = null"
+     style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+    
+    <img :src="zoomedImg" 
+         class="zoomed-img" 
+         @click.stop 
+         style="max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+    
+    <button @click="zoomedImg = null" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+</div>
