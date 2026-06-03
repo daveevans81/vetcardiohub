@@ -399,6 +399,75 @@ get changScoreResults() {
     return { total: score, breakdown, prediction, alertClass };
 },
 
+
+
+//BREED SPECIFIC RANGES LOGIC
+
+
+// Dynamic toast state
+    showModelChangeToast: false,
+    toastTitle: '',
+    toastMessage: '',
+
+ handleBreedSelection() {
+        // Sync the text box with the dropdown (used for your PDF report generator)
+        if (this.selectedBreed) {
+            this.breed = this.selectedBreed;
+        }
+
+        // Safely exit if the breed data isn't loaded or nothing is selected
+        if (!this.selectedBreed || typeof breedSpecificReferenceRanges === 'undefined') {
+            return; // Alpine automatically clears the table, no manual DOM update needed!
+        }
+
+        const breedData = breedSpecificReferenceRanges[this.selectedBreed];
+        if (!breedData) return;
+
+        let targetModel = null;
+        let title = '';
+        let message = '';
+
+        // Check for Sighthound flag
+        if (breedData.isSighthound && this.selectedModel !== 'stepien_sighthound') {
+            targetModel = 'stepien_sighthound';
+            title = 'Model Updated: Sighthound';
+            message = 'We automatically switched the allometric model to the Sighthound/Whippet references.';
+        } 
+        // Check for Feline flag
+        else if (breedData.isFeline && this.selectedModel !== 'karsten_adult_cat') {
+            targetModel = 'karsten_adult_cat'; 
+            title = 'Model Updated: Feline';
+            message = 'We automatically switched the allometric model to the standard feline references.';
+        }
+        // Check for Toy Breed flag
+        else if (breedData.isToy && this.selectedModel !== 'isayama_toy_breed_2022') {
+            targetModel = 'isayama_toy_breed_2022'; 
+            title = 'Model Updated: Toy Breed';
+            message = 'We automatically switched the allometric model to the Isayama Toy Breed references.';
+        }
+        // Check for Kitten flag
+        else if (breedData.isKitten && this.selectedModel !== 'visser_kitten') {
+            targetModel = 'visser_kitten'; 
+            title = 'Model Updated: Pediatric Feline';
+            message = 'We automatically switched the allometric model to the Visser kitten references.';
+        }
+
+        // If a change is needed, update state and trigger the dynamic toast
+        if (targetModel) {
+            this.selectedModel = targetModel;
+            this.toastTitle = title;
+            this.toastMessage = message;
+            this.showModelChangeToast = true;
+            
+            // Hide the toast after 5 seconds
+            setTimeout(() => {
+                this.showModelChangeToast = false;
+            }, 5000);
+        }
+
+    },
+
+
 get breedTableHtml() {
         const breedName = this.selectedBreed;
         if (!breedName || typeof breedSpecificReferenceRanges === 'undefined') return '';
@@ -1792,68 +1861,6 @@ fallbackCopy(text) {
     document.body.removeChild(textArea);
 },
 
-// Dynamic toast state
-    showModelChangeToast: false,
-    toastTitle: '',
-    toastMessage: '',
-
- handleBreedSelection() {
-        // Sync the text box with the dropdown (used for your PDF report generator)
-        if (this.selectedBreed) {
-            this.breed = this.selectedBreed;
-        }
-
-        // Safely exit if the breed data isn't loaded or nothing is selected
-        if (!this.selectedBreed || typeof breedSpecificReferenceRanges === 'undefined') {
-            return; // Alpine automatically clears the table, no manual DOM update needed!
-        }
-
-        const breedData = breedSpecificReferenceRanges[this.selectedBreed];
-        if (!breedData) return;
-
-        let targetModel = null;
-        let title = '';
-        let message = '';
-
-        // Check for Sighthound flag
-        if (breedData.isSighthound && this.selectedModel !== 'stepien_sighthound') {
-            targetModel = 'stepien_sighthound';
-            title = 'Model Updated: Sighthound';
-            message = 'We automatically switched the allometric model to the Sighthound/Whippet references.';
-        } 
-        // Check for Feline flag
-        else if (breedData.isFeline && this.selectedModel !== 'karsten_adult_cat') {
-            targetModel = 'karsten_adult_cat'; 
-            title = 'Model Updated: Feline';
-            message = 'We automatically switched the allometric model to the standard feline references.';
-        }
-        // Check for Toy Breed flag
-        else if (breedData.isToy && this.selectedModel !== 'isayama_toy_breed_2022') {
-            targetModel = 'isayama_toy_breed_2022'; 
-            title = 'Model Updated: Toy Breed';
-            message = 'We automatically switched the allometric model to the Isayama Toy Breed references.';
-        }
-        // Check for Kitten flag
-        else if (breedData.isKitten && this.selectedModel !== 'visser_kitten') {
-            targetModel = 'visser_kitten'; 
-            title = 'Model Updated: Pediatric Feline';
-            message = 'We automatically switched the allometric model to the Visser kitten references.';
-        }
-
-        // If a change is needed, update state and trigger the dynamic toast
-        if (targetModel) {
-            this.selectedModel = targetModel;
-            this.toastTitle = title;
-            this.toastMessage = message;
-            this.showModelChangeToast = true;
-            
-            // Hide the toast after 5 seconds
-            setTimeout(() => {
-                this.showModelChangeToast = false;
-            }, 5000);
-        }
-
-    },
 
 
 // --- LEARNING HUB STATE ---
@@ -1902,25 +1909,6 @@ get glossaryArray() {
             const titleB = b.title || '';
             return titleA.localeCompare(titleB);
         });
-},
-
-// Powers the live search bar
-get filteredGlossary() {
-    if (this.searchQuery.trim() === '') return this.glossaryArray;
-    const q = this.searchQuery.toLowerCase();
-    return this.glossaryArray.filter(item => 
-        (item.title && item.title.toLowerCase().includes(q)) || 
-        (item.description && item.description.toLowerCase().includes(q))
-    );
-},
-
-// Initializes a new randomized flashcard deck
-startQuiz() {
-    this.learningMode = 'quiz';
-    // Create a shuffled copy of the glossary array
-    this.quizDeck = [...this.glossaryArray].sort(() => Math.random() - 0.5);
-    this.currentQuizIndex = 0;
-    this.quizRevealed = false;
 },
 
 // Moves to the next card
@@ -2087,9 +2075,6 @@ glossaryDatabase: typeof VET_GLOSSARY_DB !== 'undefined' ? VET_GLOSSARY_DB : {},
 
 
 
-
-
-
 zoomImage(url) {
     window.dispatchEvent(new CustomEvent('image-zoom', { detail: url }));
 },
@@ -2115,16 +2100,5 @@ function showInstructions() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const selector = document.getElementById('breed-selector');
-    if (selector && typeof breedSpecificReferenceRanges !== 'undefined') {
-        const breedNames = Object.keys(breedSpecificReferenceRanges).sort();
-        breedNames.forEach(breed => {
-            let option = document.createElement('option');
-            option.value = breed;
-            option.text = breed;
-            selector.appendChild(option);
-        });
-    }
-});
+
 
