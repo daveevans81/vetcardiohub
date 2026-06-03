@@ -406,7 +406,7 @@ get breedTableHtml() {
         const breedData = breedSpecificReferenceRanges[breedName];
         if (!breedData) return '';
 
-        const excludedTags = ['is_deviant', 'isSighthound', 'isFeline', 'pmid', 'clinical_note', 'reference', 'sources'];
+        const excludedTags = ['is_deviant', 'isSighthound', 'isFeline', 'isToy', 'pmid', 'clinical_note', 'reference', 'sources'];
 
         // Helper to format values cleanly, replacing the old DOM scraper
         const getVal = (val) => {
@@ -416,7 +416,6 @@ get breedTableHtml() {
             return val;
         };
 
-        // We now pull directly from Alpine's internal state! No DOM queries needed.
         const patientValues = {
             "lvidd_mm": getVal(this.lvidd),
             "lvids_mm": getVal(this.lvids),
@@ -541,8 +540,8 @@ get breedTableHtml() {
         return html;
     },
 
-    // We also need a helper getter to populate the dropdown options dynamically 
-    // since we deleted the global event listener that used to do it.
+    // helper getter to populate the dropdown options dynamically 
+
     get availableBreeds() {
         if (typeof breedSpecificReferenceRanges === 'undefined') return [];
         return Object.keys(breedSpecificReferenceRanges).sort();
@@ -1771,6 +1770,19 @@ fallbackCopy(text) {
             title = 'Model Updated: Feline';
             message = 'We automatically switched the allometric model to the standard feline references.';
         }
+        
+        // Check for Toy Breed flag
+        else if (breedData.isToy && this.selectedModel !== 'isayama_toy_breed_2022') {
+            targetModel = 'isayama_toy_breed_2022'; 
+            title = 'Model Updated: Toy Breed';
+            message = 'We automatically switched the allometric model to the Isayama Toy Breed references.';
+        }
+        // Check for Kitten flag
+        else if (breedData.isKitten && this.selectedModel !== 'visser_kitten') {
+            targetModel = 'visser_kitten'; 
+            title = 'Model Updated: Pediatric Feline';
+            message = 'We automatically switched the allometric model to the Visser kitten references.';
+        }
 
         // If a change is needed, update state and trigger the dynamic toast
         if (targetModel) {
@@ -2082,38 +2094,63 @@ function updateBreedTable() {
         return (val === '0' || val === '0.0' || val === '' || val === 0) ? '—' : val;
     };
 
-    // Mapping: Data File Key -> Live Calculator Value
-    const patientValues = {
-        "lvidd_mm": getVal('[x-model="lvidd"]'),
-        "lvids_mm": getVal('[x-model="lvids"]'),
-        "lvidd_n":  getVal('[x-text="lviddn"]', true),
-        "lvids_n":  getVal('[x-text="lvidsn"]', true),
-        "la_ao":    getVal('[x-text="laAo"]', true),
-        "la_n":     getVal('[x-text="lan"]', true),
-        "lad_n":    getVal('[x-text="ladn"]', true),
-        "fs_pct":   getVal('[x-text="fs"]', true),
-        "ef_pct":   getVal('[x-text="ef"]', true),
-        "ivsd_mm":  getVal('[x-model="ivsd"]'),
-        "lvpwd_mm": getVal('[x-model="lvpwd"]'),
-        "lad_mm":   getVal('[x-model="lad"]'),
-        "edvi_smod_kg": getVal('[x-text="lvedvbw"]', true),
-        "esvi_smod_kg": getVal('[x-text="lvesvbw"]', true),
-        "edvi_smod_m2": getVal('[x-text="edvim2"]', true),
-        "esvi_smod_m2": getVal('[x-text="esvim2"]', true)
-};
+ // Mapping: Data File Key -> Live Calculator Value
+        const patientValues = {
+            // Linear Dimensions (mm)
+            "lvidd_mm": getVal(this.lvidd),
+            "lvids_mm": getVal(this.lvids),
+            "ivsd_mm":  getVal(this.ivsd),
+            "lvpwd_mm": getVal(this.lvpwd),
+            "lvfwd_mm": getVal(this.lvpwd), // Maps LVFWd to your LVPWd input
+            "lad_mm":   getVal(this.lad),
+            "lad":      getVal(this.lad),   // Borzoi / Setter use 'lad'
+            "TAPSE_mm": getVal(this.tapse),
 
-    const formatLabel = (key) => {
-        let label = key.toUpperCase().replace(/_/g, ' ');
-        label = label.replace(/\bMM\b/g, '(mm)');
-        label = label.replace(/\bLA AO\b/g, 'LA:Ao');
-        label = label.replace(/\bSMOD KG\b/g, '(smod)/kg');
-        label = label.replace(/\bSMOD M2\b/g, '(smod)/m²');
-        label = label.replace(/\bVMAX\b/g, '(Vmax)');
-        label = label.replace(/\bPCT\b/g, '%');
-        label = label.replace(/\bLVIDD N\b/g, 'LVIDdn');
-        label = label.replace(/\bLVIDS N\b/g, 'LVIDsn');
-        return label;
-    };
+            // Indexed / Ratios
+            "lvidd_n":  getVal(this.lviddn),
+            "lvids_n":  getVal(this.lvidsn),
+            "la_ao":    getVal(this.laAo),
+            "la_n":     getVal(this.lan),
+            "lad_n":    getVal(this.ladn),
+            "TAPSE_Ao": getVal(this.tapseaola),
+            "eivrt":    getVal(this.eivrt),
+
+            // Systolic Function (%)
+            "fs_pct":   getVal(this.fs),
+            "ef_pct":   getVal(this.ef),
+            "FS_PCT":   getVal(this.fs), // Handles uppercase dictionary keys
+            "EF_PCT":   getVal(this.ef), 
+            "FS":       getVal(this.fs), // Great Dane uses 'FS'
+            "EF":       getVal(this.ef), 
+
+            // Volumetrics
+            "edvi_smod_kg": getVal(this.lvedvbw),
+            "esvi_smod_kg": getVal(this.lvesvbw),
+            "edvi_smod_m2": getVal(this.edvim2),
+            "esvi_smod_m2": getVal(this.esvim2),
+            "esv_smod":     getVal(this.lvesv),
+            "edv_smod":     getVal(this.lvedv),
+
+            // Doppler
+            "ao_vmax":  getVal(this.aovmax)
+        };
+
+const formatLabel = (key) => {
+            let label = key.toUpperCase().replace(/_/g, ' ');
+            label = label.replace(/\bMM\b/g, '(mm)');
+            label = label.replace(/\bLA AO\b/g, 'LA:Ao');
+            label = label.replace(/\bTAPSE AO\b/g, 'TAPSE:Ao');
+            label = label.replace(/\bLVFWD\b/g, 'LVFWd');
+            label = label.replace(/\bSMOD KG\b/g, '(smod)/kg');
+            label = label.replace(/\bSMOD M2\b/g, '(smod)/m²');
+            label = label.replace(/\bESV SMOD\b/g, 'ESV (smod)');
+            label = label.replace(/\bEDV SMOD\b/g, 'EDV (smod)');
+            label = label.replace(/\bVMAX\b/g, '(Vmax)');
+            label = label.replace(/\bPCT\b/g, '%');
+            label = label.replace(/\bLVIDD N\b/g, 'LVIDdn');
+            label = label.replace(/\bLVIDS N\b/g, 'LVIDsn');
+            return label;
+        };
 
     const renderSourceBlock = (dataObj, title = null) => {
         let blockHtml = '';

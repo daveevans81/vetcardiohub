@@ -492,6 +492,7 @@
           
   "Toy Breeds (<5kg)": {
     "is_deviant": true,
+    isToy: true,
     "reference": "Isayama et al. (2022)",
     "pmid": "35812853",
     "clinical_note": "Standard 1.7 LVIDdN threshold is too high for dogs <5kg. Use 1.6 limit and 0.332 exponent for more accurate MMVD staging.",
