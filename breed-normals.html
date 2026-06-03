@@ -54,7 +54,7 @@
 <body>
     <div id="site-header"></div>
 
-<main x-data="advancedEchoSuite()">
+<main x-data="advancedEchoSuite()" x-init="isStandaloneMode = true">
 
     <div x-show="showModelChangeToast" 
          x-transition.opacity.duration.500ms
