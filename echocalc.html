@@ -1558,7 +1558,7 @@
     
                 <button @click="showPatientDetails = !showPatientDetails" class="btn-text" style="font-size: 0.85rem; margin-bottom: 10px;">
                     <i class="fa-solid" :class="showPatientDetails ? 'fa-minus' : 'fa-plus'"></i>
-                    <span x-text="showComments ? ' Hide Patient Details & Report Date' : ' Add Patient Details & Report Date'"></span> 
+                    <span x-text="showPatientDetails ? ' Hide Patient Details & Report Date' : ' Add Patient Details & Report Date'"></span> 
                     
                 </button>
             
@@ -1589,10 +1589,7 @@
                                         <template x-for="breedName in availableBreeds" :key="breedName">
                                             <option :value="breedName" x-text="breedName"></option>
                                         </template>
-                                    </select>
-                                
-                                
-                                </div>
+                                    </select>                               
                             </div>
                              <div class="input-group">
                                <label>Selected species:</label> 
