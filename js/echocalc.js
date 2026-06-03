@@ -466,7 +466,12 @@ get changScoreResults() {
         }
 
     },
-
+    
+get availableBreeds() {
+    return typeof breedSpecificReferenceRanges !== 'undefined' 
+        ? Object.keys(breedSpecificReferenceRanges).sort() 
+        : [];
+},
 
 get breedTableHtml() {
         const breedName = this.selectedBreed;
