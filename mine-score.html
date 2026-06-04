@@ -71,7 +71,7 @@
             <div class="grid-inputs">
                 <div class="input-group">
                     <!-- 2. x-model is now selectedMineModel to match echocalc.js -->
-                    <label>Scoring Variant Model</label>
+                    <label>Scoring Variant Model<span x-show="selectedMineModel === 'mine_1'"><i class="fa-solid fa-circle-info" @click="openGlossary('mine1')"></i></span><span x-show="selectedMineModel === 'mine_2'"><i class="fa-solid fa-circle-info" @click="openGlossary('mine2')"></i></span></label>
                     <select x-model="selectedMineModel">
                         <option value="mine_1">MINE 1 (4-Parameter Original)</option>
                         <option value="mine_2">MINE 2 (3-Parameter Simplified)</option>
@@ -80,18 +80,28 @@
                 
                 <div class="input-group">
                     <!-- 3. Glossary icons hooked directly to openGlossary method -->
-                    <label>LA:Ao Ratio <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('laAo')"></i></label>
-                    <input type="number" step="0.01" x-model="laAo" placeholder="e.g. 1.85">
+                    <label>LA (mm) <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('la')"></i></label>
+                    <input type="number" step="0.01" x-model="la" placeholder="e.g. 22">
                 </div>
                 
                 <div class="input-group">
-                    <label>LVIDdn <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('lviddn')"></i></label>
-                    <input type="number" step="0.01" x-model="lviddn" placeholder="e.g. 1.92">
+                    <!-- 3. Glossary icons hooked directly to openGlossary method -->
+                    <label>LA (mm) <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('la')"></i></label>
+                    <input type="number" step="0.01" x-model="la" placeholder="e.g. 22">
+                </div>
+                
+                <div class="input-group">
+                    <label>LVIDd (mm)<i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('lvidd')"></i></label>
+                    <input type="number" step="0.01" x-model="lvidd" placeholder="e.g. 32.3">
+                </div>
+                 <div class="input-group">
+                    <label>Weight (kg)</label>
+                    <input type="number" step="0.01" x-model="weight" placeholder="e.g. 12">
                 </div>
                 
                 <div class="input-group" x-show="selectedMineModel === 'mine_1'">
-                    <label>Fractional Shortening (FS%) <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('fs')"></i></label>
-                    <input type="number" step="0.1" x-model="fs" placeholder="e.g. 42">
+                    <label>LVIDs (mm)<i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('lvids')"></i></label>
+                    <input type="number" step="0.1" x-model="lvids" placeholder="e.g. 21">
                 </div>
                 
                 <div class="input-group">
