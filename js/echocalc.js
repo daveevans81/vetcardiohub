@@ -1187,26 +1187,23 @@ get calculatedMineScore() {
     let breakdown = [];
 
     model.variables.forEach(v => {
-            // --- Smart Value Fetcher ---
-            let val;
-            if (this.mineInputMode === 'calculated' && v !== 'eVel') {
-                // Use the manual overrides if the user toggled the mode
-                if (v === 'laAo') val = parseFloat(this.manualLaAo);
-                else if (v === 'lviddn') val = parseFloat(this.manualLviddn);
-                else if (v === 'fs') val = parseFloat(this.manualFs);
-            } else {
-                // Otherwise, use the standard raw/getter pipeline
-                val = parseFloat(this[v]);
-            }
-            
-            // Clean display names mapping
-            const name = v === 'laAo' ? 'LA:Ao Ratio' : 
-                         v === 'lviddn' ? 'LVIDdn' : 
-                         v === 'fs' ? 'Fractional Shortening' : 'E-wave Velocity';
-            const unit = v === 'fs' ? '%' : v === 'eVel' ? ' m/s' : '';
-
-            // If any parameters are unentered, mark as incomplete
-            if (!val || isNaN(val) || val <= 0) {
+        // Smart fetcher for the toggle mode
+        let val;
+        if (this.mineInputMode === 'calculated' && v !== 'eVel') {
+            if (v === 'laAo') val = parseFloat(this.manualLaAo);
+            else if (v === 'lviddn') val = parseFloat(this.manualLviddn);
+            else if (v === 'fs') val = parseFloat(this.manualFs);
+        } else {
+            val = parseFloat(this[v]);
+        }
+        
+        const displayName = v === 'laAo' ? 'LA:Ao' : 
+                            v === 'lviddn' ? 'LVIDdn' : 
+                            v === 'fs' ? 'FS' : 
+                            v === 'eVel' ? 'E-wave Vel' : v.toUpperCase();
+                            
+        // Check for missing data
+        if (!val || isNaN(val) || val <= 0) {
             missingFields.push(displayName);
             breakdown.push({
                 name: displayName,
@@ -1214,16 +1211,14 @@ get calculatedMineScore() {
                 threshold: 'Awaiting entry',
                 pts: 0
             });
-            return;
+            return; 
         }
         
-        // Find matching score tier
         const ranges = model.ranges[v];
         const matchRule = ranges.find(r => val <= r.max);
         const ptsAwarded = matchRule ? matchRule.pts : 0;
         totalPoints += ptsAwarded;
 
-        // Calculate text representation of the triggered cutoff bracket
         const matchIndex = ranges.indexOf(matchRule);
         let thresholdText = '';
         if (matchIndex === 0) {
@@ -1234,7 +1229,6 @@ get calculatedMineScore() {
             thresholdText = `${ranges[matchIndex - 1].max} – ${matchRule.max}`;
         }
 
-        // Format values with correct clinical units for the audit trail
         const unitSuffix = v === 'fs' ? '%' : v === 'eVel' ? ' m/s' : '';
 
         breakdown.push({
@@ -1250,7 +1244,7 @@ get calculatedMineScore() {
             score: null, 
             tier: null, 
             mst: null, 
-            status: 'Awaiting inputs for complete assessment', 
+            status: 'Awaiting inputs', 
             breakdown: breakdown 
         };
     }
