@@ -20,6 +20,7 @@
     <meta property="og:description" content="Advance past simple inflow measurements. An automated, peer-reviewed point-allocation dashboard to accurately determine left ventricular filling pressures.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://vetcardiohub.com/diastolic-function.html">
+    
     <script src="/js/glossary-data.js" defer></script>
 <script src="/js/echo-breeds.js" defer></script>
 <script src="/js/echocalc.js" defer></script>
@@ -78,39 +79,39 @@
         
         <div class="grid-inputs">
             <div class="input-group">
-                <label>E-wave Velocity (m/s)</label>
+                <label>E-wave Velocity (m/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('eVel')"></i></label>
                 <input type="number" step="0.01" x-model="eVel" placeholder="e.g. 0.85">
             </div>
             <div class="input-group">
-                <label>A-wave Velocity (m/s)</label>
+                <label>A-wave Velocity (m/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('aVel')"></i></label>
                 <input type="number" step="0.01" x-model="aVel" placeholder="e.g. 0.65">
             </div>
             <div class="input-group">
-                <label>IVRT (ms)</label>
+                <label>IVRT (ms)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ivrt')"></i></label>
                 <input type="number" step="1" x-model="ivrt" placeholder="e.g. 65">
             </div>
             <div class="input-group">
-                <label>Mitral DT / MDT (ms)</label>
+                <label>Mitral DT / MDT (ms)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mdt')"></i></label>
                 <input type="number" step="1" x-model="mdt" placeholder="e.g. 85">
             </div>
             <div class="input-group">
-                <label>Mitral E' Velocity (cm/s)</label>
+                <label>Mitral E' Velocity (cm/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ePrime')"></i></label>
                 <input type="number" step="0.1" x-model="ePrime" placeholder="e.g. 7.5">
             </div>
             <div class="input-group">
-                <label>LVOT VTI (cm)</label>
+                <label>LVOT VTI (cm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('lvotvti')"></i></label>
                 <input type="number" step="0.1" x-model="lvotvti" placeholder="e.g. 15.2">
             </div>
             <div class="input-group">
-                <label>Left Atrium (LA mm)</label>
+                <label>Left Atrium (LA mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('la')"></i></label>
                 <input type="number" step="0.1" x-model="la" placeholder="e.g. 38.4">
             </div>
             <div class="input-group">
-                <label>Aorta (Ao mm)</label>
+                <label>Aorta (Ao mm)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('ao')"></i></label>
                 <input type="number" step="0.1" x-model="ao" placeholder="e.g. 21.2">
             </div>
             <div class="input-group">
-                <label>TR Max Velocity (m/s)</label>
+                <label>TR Max Velocity (m/s)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('trMax')"></i></label>
                 <input type="number" step="0.01" x-model="trMax" placeholder="e.g. 3.15">
             </div>
         </div>
@@ -240,9 +241,10 @@
         <p>This diagnostic engine resolves this pitfall by applying a point-based voting allocation system. If the E:A profile returns an ambiguous 1.2 reading, but tissue Doppler velocities decline (E:E' > 12), structural margins expand (LA:Ao > 2.0), and downstream pulmonary backup emerges (TR Vmax > 3.0 m/s), the algorithm bypasses the transmitral velocity signature to accurately stage **Grade II Pseudonormalization**.</p>
     </article>
 
-    <footer style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-muted);">
+    <div style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-muted);">
         <p>Executing a comprehensive cardiac staging profile? Return to the main <a href="https://vetcardiohub.com/echocalc.html" style="font-weight: bold; color: var(--primary-light); text-decoration: underline;">VetCardioHub Advanced Echo Calculator Workspace</a> to synthesize allometric references, fractional volumes, and full clinical print exports.</p>
-    </footer>
+    </div>
+    <div id="glossary-container"></div>
 </div>
 </div>
 

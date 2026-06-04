@@ -127,33 +127,33 @@
             <div x-show="qpqs > 0" x-transition x-cloak style="margin-top: 20px;">
                 <div class="results-box">
                     <div class="result-row">
-                        <span><strong>Q<sub>p</sub>:Q<sub>s</sub> Ratio</strong></span>
+                        <span><strong>Q<sub>p</sub>:Q<sub>s</sub> Ratio</strong><i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('qpqs')"></i></span>
                         <span style="font-size: 1.4rem; font-weight: 900; color: var(--primary-light);" x-text="qpqs"></span>
                     </div>
 
                     <div class="result-row">
                         <span><strong>Shunt Status</strong></span>
                         <span style="font-weight: bold;">
-                            <span x-show="qpqs === 1.0" class="normal">Physiologic Normal Balance</span>
-                            <span x-show="qpqs > 1.0 && qpqs < 1.5" class="normal">Small Left-to-Right Shunt (Insignificant)</span>
+                            <span x-show="qpqs > 0.8 && qpqs < 1.2" class="normal">Physiologic Normal Balance</span>
+                            <span x-show="qpqs > 1.2 && qpqs < 1.5" class="normal">Small Left-to-Right Shunt (Insignificant)</span>
                             <span x-show="qpqs >= 1.5 && qpqs <= 2.0" class="abnormal">Moderate Left-to-Right Shunt (Significant)</span>
                             <span x-show="qpqs > 2.0" class="abnormal">Large Left-to-Right Shunt (Severe Overload)</span>
-                            <span x-show="qpqs < 1.0" class="abnormal">Reversed Shunt (Eisenmenger Risk)</span>
+                            <span x-show="qpqs < 0.8" class="abnormal">Reversed Shunt (Eisenmenger Risk)</span>
                         </span>
                     </div>
 
                     <div class="result-row">
-                        <span><strong>LVOT:RVOT VTI Ratio</strong></span>
+                        <span><strong>LVOT:RVOT VTI Ratio</strong><i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('vtir')"></i></span>
                         <span style="font-weight: 600; color: var(--text-main);" x-text="vtir"></span>
                     </div>
 
                     <div class="result-row">
-                        <span><strong>Systemic Stroke Volume (Q<sub>s</sub>)</strong></span>
+                        <span><strong>Systemic Stroke Volume (Q<sub>s</sub>)</strong><i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('qs')"></i></span>
                         <span style="font-weight: bold; color: #1e40af;" x-text="`${qs} ml` "></span>
                     </div>
 
                     <div class="result-row">
-                        <span><strong>Pulmonary Stroke Volume (Q<sub>p</sub>)</strong></span>
+                        <span><strong>Pulmonary Stroke Volume (Q<sub>p</sub>)</strong><i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('qp')"></i></span>
                         <span style="font-weight: bold; color: #0284c7;" x-text="`${qp} ml` "></span>
                     </div>
                 </div>
