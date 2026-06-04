@@ -1175,7 +1175,7 @@ calculateVolumetricRef(paramKey) {
     },
 
 
-      // **MINE SCORE LOGIC**
+      // MINE SCORE LOGIC
       
 get calculatedMineScore() {
     if (!this.isDog || typeof mineModels === 'undefined') return null;
@@ -1186,7 +1186,7 @@ get calculatedMineScore() {
     let missingFields = [];
     let breakdown = [];
 
-model.variables.forEach(v => {
+    model.variables.forEach(v => {
             // --- Smart Value Fetcher ---
             let val;
             if (this.mineInputMode === 'calculated' && v !== 'eVel') {
