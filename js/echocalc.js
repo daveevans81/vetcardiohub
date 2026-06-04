@@ -1943,43 +1943,49 @@ get glossaryArray() {
 get dynamicGlossaryFields() {
             if (!this.activeGlossaryTerm) return [];
 
-            // 1. Fields we do NOT want the dynamic loop to print as text boxes
-            const hiddenFields = ['title', 'description', 'category', 'group', 'difficulty', 'audience', 'key', 'imgPlaceholder'];
+            // 1. Fields we handle explicitly elsewhere (like images) or want to hide
+            const hiddenFields = ['title', 'category', 'group', 'difficulty', 'audience', 'key', 'imgPlaceholder', 'imgAttribution', 'pmid'];
             const fields = [];
 
-            // 2. Dictionary to rename database keys into beautiful UI labels
-            const labelOverrides = {
-                textOwner: "Owner Overview",
-                textClinical: "Clinical Details",
-                pmid: "PubMed Reference",
-                view: "Imaging View",
-                method: "Measurement Method",
-                reference: "Literature Source"
+            // 2. Map specific database keys to their UI aesthetics (Icons & Colors)
+            const fieldConfig = {
+                description:  { label: "Clinical Purpose", icon: "fa-stethoscope", color: "#10b981" },
+                view:         { label: "Optimal View / Source", icon: "fa-satellite-dish", color: "#0ea5e9" },
+                method:       { label: "Technique / Formula", icon: "fa-ruler-combined", color: "#8b5cf6" },
+                textOwner:    { label: "Owner Overview", icon: "fa-comments", color: "#f43f5e" },
+                textClinical: { label: "Clinical Details", icon: "fa-user-doctor", color: "#0284c7" },
+                reference:    { label: "Evidence & Literature", icon: "fa-book-open-reader", color: "#475569" }
             };
 
             // 3. Process the data
             Object.entries(this.activeGlossaryTerm).forEach(([key, value]) => {
                 if (!hiddenFields.includes(key) && value !== null && value !== undefined && value !== '') {
                     
-                    // Use the dictionary override, or fallback to auto-formatting
-                    const formattedLabel = labelOverrides[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    // Grab the predefined config, or create a default one for brand new fields
+                    const conf = fieldConfig[key] || {
+                        label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                        icon: "fa-circle-info",
+                        color: "#94a3b8" // Default grey
+                    };
 
-                    // Auto-link PubMed IDs
+                    // Auto-append PMID to the reference field if it exists
                     let formattedValue = value;
-                    if (key === 'pmid') {
-                        formattedValue = `<a href="https://pubmed.ncbi.nlm.nih.gov/${value}" target="_blank" style="color: #0ea5e9; text-decoration: underline; font-weight: bold;"><i class="fa-solid fa-arrow-up-right-from-square" style="margin-right: 4px;"></i> View on PubMed (PMID: ${value})</a>`;
+                    if (key === 'reference' && this.activeGlossaryTerm.pmid) {
+                        formattedValue += ` <a href="https://pubmed.ncbi.nlm.nih.gov/${this.activeGlossaryTerm.pmid}/" target="_blank" rel="noopener noreferrer" style="color: #0ea5e9; font-weight: bold; text-decoration: underline; margin-left: 5px;">[PMID: ${this.activeGlossaryTerm.pmid}] <i class="fa-solid fa-arrow-up-right-from-square"></i></a>`;
                     }
 
                     fields.push({
-                        id: key, // Keep original key for sorting
-                        label: formattedLabel,
+                        id: key,
+                        label: conf.label,
+                        icon: conf.icon,
+                        color: conf.color,
                         value: formattedValue
                     });
                 }
             });
 
-            // 4. Force a logical display order (so Owner always appears above Clinical, etc.)
-            const sortOrder = ['textOwner', 'textClinical', 'view', 'method', 'reference', 'pmid'];
+            // 4. Force logical sorting so the narrative flows correctly
+            const sortOrder = ['description', 'textOwner', 'textClinical', 'view', 'method', 'reference'];
             fields.sort((a, b) => {
                 let indexA = sortOrder.indexOf(a.id);
                 let indexB = sortOrder.indexOf(b.id);
@@ -1989,7 +1995,7 @@ get dynamicGlossaryFields() {
             });
 
             return fields;
-},
+        },
 
 // Moves to the next card
 nextQuizCard() {
