@@ -1940,6 +1940,33 @@ get glossaryArray() {
         });
 },
 
+get dynamicGlossaryFields() {
+            if (!this.activeGlossaryTerm) return [];
+
+            // 1. Define the internal keys we DO NOT want to print as blocks
+            const hiddenFields = ['title', 'description', 'category', 'group', 'difficulty', 'audience', 'key'];
+            const fields = [];
+
+            // 2. Loop through whatever is inside the active term
+            Object.entries(this.activeGlossaryTerm).forEach(([key, value]) => {
+                // If it's a visible field, and actually has data in it...
+                if (!hiddenFields.includes(key) && value !== null && value !== undefined && value !== '') {
+                    
+                    // Format the key to look pretty (e.g., "clinical_significance" -> "Clinical Significance")
+                    const formattedKey = key
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, l => l.toUpperCase());
+
+                    fields.push({
+                        label: formattedKey,
+                        value: value
+                    });
+                }
+            });
+
+            return fields;
+        },
+
 // Moves to the next card
 nextQuizCard() {
     if (this.currentQuizIndex < this.quizDeck.length - 1) {
