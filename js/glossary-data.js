@@ -1034,15 +1034,17 @@ category: "Right Heart",
         difficulty: 3
     },
     rvotNotching: {
-        audience: ["vet"], title: "RVOT Mid-Systolic Notching",
+        audience: ["vet"], 
+        title: "RVOT Mid-Systolic Notching",
         view: "Right Parasternal Short Axis (Heart Base)",
         description: "A highly specific Doppler finding indicating severely elevated pulmonary vascular resistance and pre-capillary pulmonary hypertension. It is caused by a premature reflection of pressure waves from the stiffened pulmonary arterial tree.",
-        group: "echo", method: "Obtain a Pulsed Wave (PW) Doppler profile of the Right Ventricular Outflow Tract (RVOT). Look for a characteristic 'W-shape' or a distinct notch on the deceleration slope of the forward systolic waveform.",
+        group: "echo", 
+        method: "Obtain a Pulsed Wave (PW) Doppler profile of the Right Ventricular Outflow Tract (RVOT). Look for a characteristic 'W-shape' or a distinct notch on the deceleration slope of the forward systolic waveform.",
         reference: "Chang et al. (2026) Development and evaluation of a composite echocardiographic score for predicting pulmonary hypertension severity in dogs.",
         pmid: "41742574",
         imgPlaceholder: "/images/reference-rvotnotch.jpg",
-imgAttribution: "CC-BY-NC 4.0",
-category: "Doppler",
+        imgAttribution: "CC-BY-NC 4.0",
+        category: "Doppler",
         difficulty: 4
     },
 
@@ -1055,18 +1057,21 @@ mine1: {
     difficulty: 3,
     description: "The Mitral INsufficiency Echocardiographic (MINE) score is an objective classification system used to grade the severity of preclinical myxomatous mitral valve disease (MMVD). A score >8 is highly predictive of cardiac death.",
     view: "Multiple (RPSAX & Ap4Ch)",
-    group: "echo", method: "Summates severity scores (1-4) across four parameters: LA:Ao ratio, LVIDdn, Fractional Shortening (FS%), and transmitral E-wave peak velocity.",
+    group: "echo", 
+    method: "Summates severity scores (1-4) across four parameters: LA:Ao ratio, LVIDdn, Fractional Shortening (FS%), and transmitral E-wave peak velocity.",
     reference: "Vezzosi et al. (2021)",
     pmid: "33951235"
 },
 
 mine2: {
-    audience: ["vet"], title: "MINE 2 Score (Simplified)",
+    audience: ["vet"], 
+    title: "MINE 2 Score (Simplified)",
     category: "Calculations",
     difficulty: 3,
     description: "A revised and simplified version of the original MINE score. Researchers found that Fractional Shortening (FS%) did not show independent association with cardiac outcomes, so it was removed to streamline the staging process.",
     view: "Right Parasternal Short Axis & Left Apical",
-    group: "echo", method: "Calculates an MMVD severity score using only three independent predictors of survival: LA:Ao ratio, LVIDdn, and transmitral E-wave velocity. Used to identify 'advanced B2' patients.",
+    group: "echo", 
+    method: "Calculates an MMVD severity score using only three independent predictors of survival: LA:Ao ratio, LVIDdn, and transmitral E-wave velocity. Used to identify 'advanced B2' patients.",
     reference: "Vezzosi et al. (2025)",
     pmid: "40865020"
 },
@@ -1074,18 +1079,21 @@ mine2: {
 // --- ACVIM CONSENSUS GUIDELINES ---
 
 acvimPht: {
-    audience: ["vet"], title: "ACVIM Guidelines: Pulmonary Hypertension",
+    audience: ["vet"], 
+    title: "ACVIM Guidelines: Pulmonary Hypertension",
     category: "Guidelines",
     difficulty: 3,
     description: "The standardized veterinary algorithm for diagnosing and classifying pulmonary hypertension (PHT) into probability tiers (Low, Intermediate, High) based on tricuspid regurgitation and anatomic remodeling.",
     view: "Multiple Right & Left Parasternal Views",
-    group: "echo", method: "Assess Peak TR Velocity (m/s). If TR is unmeasurable or <3.4 m/s, evaluate three anatomic sites (Ventricles, Pulmonary Artery, Right Atrium) for signs of chronic pressure overload.",
+    group: "echo", 
+    method: "Assess Peak TR Velocity (m/s). If TR is unmeasurable or <3.4 m/s, evaluate three anatomic sites (Ventricles, Pulmonary Artery, Right Atrium) for signs of chronic pressure overload.",
     reference: "Reinero et al. (2020)",
     pmid: "32065428"
 },
 
 acvimMmvd: {
-    audience: ["vet"], title: "ACVIM Guidelines: MMVD (EPIC Criteria)",
+    audience: ["vet"], 
+    title: "ACVIM Guidelines: MMVD (EPIC Criteria)",
     category: "Guidelines",
     difficulty: 2,
     description: "The global staging system (Stages A through D) for classifying canine myxomatous mitral valve disease (MMVD) and dictating pharmaceutical management, heavily reliant on the findings of the EPIC trial.",

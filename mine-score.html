@@ -79,7 +79,7 @@
                 </div>
                 
                 <div class="input-group">
-                    <!-- 3. Glossary icons hooked directly to your openGlossary method -->
+                    <!-- 3. Glossary icons hooked directly to openGlossary method -->
                     <label>LA:Ao Ratio <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('laAo')"></i></label>
                     <input type="number" step="0.01" x-model="laAo" placeholder="e.g. 1.85">
                 </div>
@@ -102,9 +102,9 @@
 
             <p>Need Help with Calculating These? <a href="/echocalc.html" class="btn">Access the Fully Integrated VetCardioHub EchoCalc here</a></p>
 
-            <!-- 4. We now look at the calculatedMineScore object from your main script -->
+            <!-- 4.  calculatedMineScore  main script -->
             <div x-show="calculatedMineScore && calculatedMineScore.score === null" style="background: #f8fafc; border: 1px dashed var(--border); padding: 20px; border-radius: 6px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-                <i class="fa-solid fa-circle-info"></i> Enter all parameters above to view live risk stratification and median survival estimates.
+                <i class="fa-solid fa-circle-info" @click="openGlossary('mine1')"></i> Enter all parameters above to view live risk stratification and median survival estimates.
             </div>
 
             <div x-show="calculatedMineScore && calculatedMineScore.score !== null" x-transition x-cloak>
