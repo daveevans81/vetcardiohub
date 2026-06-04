@@ -30,7 +30,7 @@ const glossaryEngine = {
 
     // --- LEARNING HUB METHODS ---
     // Converts your glossary object into an array for easy mapping and searching
-    get glossaryArray() {
+glossaryArray() {
         if (!this.glossaryDatabase) return [];
         
         return Object.entries(this.glossaryDatabase)
@@ -55,7 +55,7 @@ const glossaryEngine = {
             });
     },
 
-    get dynamicGlossaryFields() {
+dynamicGlossaryFields() {
         if (!this.activeGlossaryTerm) return [];
 
         const hiddenFields = ['title', 'category', 'group', 'difficulty', 'audience', 'key', 'imgPlaceholder', 'imgAttribution', 'pmid'];
@@ -127,7 +127,7 @@ const glossaryEngine = {
     startQuiz() {
         this.learningMode = 'quiz';
         
-        const deckToUse = this.filteredGlossary.length > 0 ? this.filteredGlossary : this.glossaryArray;
+        const deckToUse = this.filteredGlossary().length > 0 ? this.filteredGlossary() : this.glossaryArray;
         
         this.quizDeck = [...deckToUse].sort(() => Math.random() - 0.5);
         this.currentQuizIndex = 0;
@@ -161,8 +161,8 @@ const glossaryEngine = {
         }
     },
 
-    get filteredGlossary() {
-        let list = this.glossaryArray;
+filteredGlossary() {
+        let list = this.glossaryArray();
         
         if (this.selectedCategory !== 'All') {
             list = list.filter(item => item.category === this.selectedCategory);
@@ -185,7 +185,7 @@ const glossaryEngine = {
     generateMCQ() {
         const correctCard = this.quizDeck[this.currentQuizIndex];
         
-        let uniquePool = this.glossaryArray.filter(item => 
+        let uniquePool = this.glossaryArray().filter(item => 
             item.key !== correctCard.key && 
             item.description && 
             item.description.trim() !== correctCard.description.trim()
