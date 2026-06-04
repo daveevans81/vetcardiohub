@@ -1943,29 +1943,53 @@ get glossaryArray() {
 get dynamicGlossaryFields() {
             if (!this.activeGlossaryTerm) return [];
 
-            // 1. Define the internal keys we DO NOT want to print as blocks
-            const hiddenFields = ['title', 'description', 'category', 'group', 'difficulty', 'audience', 'key'];
+            // 1. Fields we do NOT want the dynamic loop to print as text boxes
+            const hiddenFields = ['title', 'description', 'category', 'group', 'difficulty', 'audience', 'key', 'imgPlaceholder'];
             const fields = [];
 
-            // 2. Loop through whatever is inside the active term
+            // 2. Dictionary to rename database keys into beautiful UI labels
+            const labelOverrides = {
+                textOwner: "Owner Overview",
+                textClinical: "Clinical Details",
+                pmid: "PubMed Reference",
+                view: "Imaging View",
+                method: "Measurement Method",
+                reference: "Literature Source"
+            };
+
+            // 3. Process the data
             Object.entries(this.activeGlossaryTerm).forEach(([key, value]) => {
-                // If it's a visible field, and actually has data in it...
                 if (!hiddenFields.includes(key) && value !== null && value !== undefined && value !== '') {
                     
-                    // Format the key to look pretty (e.g., "clinical_significance" -> "Clinical Significance")
-                    const formattedKey = key
-                        .replace(/_/g, ' ')
-                        .replace(/\b\w/g, l => l.toUpperCase());
+                    // Use the dictionary override, or fallback to auto-formatting
+                    const formattedLabel = labelOverrides[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                    // Auto-link PubMed IDs
+                    let formattedValue = value;
+                    if (key === 'pmid') {
+                        formattedValue = `<a href="https://pubmed.ncbi.nlm.nih.gov/${value}" target="_blank" style="color: #0ea5e9; text-decoration: underline; font-weight: bold;"><i class="fa-solid fa-arrow-up-right-from-square" style="margin-right: 4px;"></i> View on PubMed (PMID: ${value})</a>`;
+                    }
 
                     fields.push({
-                        label: formattedKey,
-                        value: value
+                        id: key, // Keep original key for sorting
+                        label: formattedLabel,
+                        value: formattedValue
                     });
                 }
             });
 
+            // 4. Force a logical display order (so Owner always appears above Clinical, etc.)
+            const sortOrder = ['textOwner', 'textClinical', 'view', 'method', 'reference', 'pmid'];
+            fields.sort((a, b) => {
+                let indexA = sortOrder.indexOf(a.id);
+                let indexB = sortOrder.indexOf(b.id);
+                if (indexA === -1) indexA = 999;
+                if (indexB === -1) indexB = 999;
+                return indexA - indexB;
+            });
+
             return fields;
-        },
+},
 
 // Moves to the next card
 nextQuizCard() {
