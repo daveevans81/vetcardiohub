@@ -1812,7 +1812,8 @@ copyPHTAudit() {
     
     let text = `--- PULMONARY HYPERTENSION CLINICAL AUDIT ---\n`;
     text += `Date: ${this.reportDate || new Date().toLocaleDateString('en-GB')}\n`;
-    text += `Patient: ${this.patientName || 'Not specified'} | Species: ${this.species}\n\n`;
+    let speciesLabel = this.isDog ? 'Canine' : (this.isCat ? 'Feline' : 'Not specified');
+    text += `Patient: ${this.patientName || 'Not specified'} | Species: ${speciesLabel}\n\n`;
 
     // ACVIM Topline
     text += `[ ACVIM (2020) PROBABILITY ]\n`;
