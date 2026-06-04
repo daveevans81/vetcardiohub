@@ -53,6 +53,10 @@ function advancedEchoSuite() {
     showComments: false,
     clinicalComments: '',
     isStandaloneMode: false, // For use with standalone calculator pages
+    mineInputMode: 'raw', // 'raw' or 'calculated' values for MINE scoring page
+        manualLaAo: '',
+        manualLviddn: '',
+        manualFs: '',
     reportDate: new Date().toLocaleDateString('en-GB', { 
        day: 'numeric', 
        month: 'long', 
@@ -675,6 +679,9 @@ get breedTableHtml() {
     },
     
     
+    
+    
+    
  /* ACVIM Pulmonary Hypertension (PHT) Probability Algorithm */
 get phClassification() {
     if (!this.isDog) return null;
@@ -819,6 +826,11 @@ get phClassification() {
 },
 
 
+
+
+
+
+
 /* Specialized Decoupled Right Heart Allometric Evaluator */
 get availableRightModels() {
     if (typeof rightHeartModels === 'undefined') return [];
@@ -886,6 +898,8 @@ get rightAllometricResults() {
 
     return results;
 },
+
+
 
 
 
@@ -1159,7 +1173,10 @@ calculateVolumetricRef(paramKey) {
             esv: this.calculateVolumetricRef('esv')
         };
     },
-    
+
+
+      // **MINE SCORE LOGIC**
+      
 get calculatedMineScore() {
     if (!this.isDog || typeof mineModels === 'undefined') return null;
     const model = mineModels[this.selectedMineModel];
@@ -1169,17 +1186,27 @@ get calculatedMineScore() {
     let missingFields = [];
     let breakdown = [];
 
-    model.variables.forEach(v => {
-        // Map keys to clean clinical display names
-        const displayName = v === 'laAo' ? 'LA:Ao' : 
-                            v === 'lviddn' ? 'LVIDdn' : 
-                            v === 'fs' ? 'FS' : 
-                            v === 'eVel' ? 'E-wave Vel' : v.toUpperCase();
+model.variables.forEach(v => {
+            // --- Smart Value Fetcher ---
+            let val;
+            if (this.mineInputMode === 'calculated' && v !== 'eVel') {
+                // Use the manual overrides if the user toggled the mode
+                if (v === 'laAo') val = parseFloat(this.manualLaAo);
+                else if (v === 'lviddn') val = parseFloat(this.manualLviddn);
+                else if (v === 'fs') val = parseFloat(this.manualFs);
+            } else {
+                // Otherwise, use the standard raw/getter pipeline
+                val = parseFloat(this[v]);
+            }
+            
+            // Clean display names mapping
+            const name = v === 'laAo' ? 'LA:Ao Ratio' : 
+                         v === 'lviddn' ? 'LVIDdn' : 
+                         v === 'fs' ? 'Fractional Shortening' : 'E-wave Velocity';
+            const unit = v === 'fs' ? '%' : v === 'eVel' ? ' m/s' : '';
 
-        const val = parseFloat(this[v]);
-        
-        // If data is missing or un-entered yet
-        if (!val || isNaN(val) || val <= 0) {
+            // If any parameters are unentered, mark as incomplete
+            if (!val || isNaN(val) || val <= 0) {
             missingFields.push(displayName);
             breakdown.push({
                 name: displayName,
