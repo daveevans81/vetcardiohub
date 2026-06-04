@@ -70,10 +70,10 @@
             
             <div style="background-color: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center;">
                 <span style="font-size: 0.9rem; font-weight: bold; color: var(--text-main);">Data Entry Mode:</span>
-                <label style="cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.9rem;">
+                <label style="cursor: pointer; display: flex; align-items: left; gap: 5px; font-size: 0.8rem;">
                     <input type="radio" x-model="mineInputMode" value="raw"> Raw Measurements (mm)
                 </label>
-                <label style="cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.9rem;">
+                <label style="cursor: pointer; display: flex; align-items: left; gap: 5px; font-size: 0.8rem;">
                     <input type="radio" x-model="mineInputMode" value="calculated"> Direct Values (Ratios/%)
                 </label>
             </div>
@@ -89,34 +89,35 @@
                 </div>
                 
                 <template x-if="mineInputMode === 'raw'">
-                    <div class="input-group">
-                        <label>Weight (kg)</label>
-                        <input type="number" step="0.01" x-model="weight" placeholder="e.g. 12">
+                    <div style="display: contents;">
+                        <div class="input-group">
+                            <label>Weight (kg)</label>
+                            <input type="number" step="0.01" x-model="weight" placeholder="e.g. 12">
+                        </div>
+                        
+                        <div class="input-group">
+                            <!-- 3. Glossary icons hooked directly to openGlossary method -->
+                            <label>LA (mm) <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('la')"></i></label>
+                            <input type="number" step="0.01" x-model="la" placeholder="e.g. 22">
+                        </div>
+                        
+                        <div class="input-group">
+                            <!-- 3. Glossary icons hooked directly to openGlossary method -->
+                            <label>Ao (mm) <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('ao')"></i></label>
+                            <input type="number" step="0.01" x-model="ao" placeholder="e.g. 12">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>LVIDd (mm)<i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('lvidd')"></i></label>
+                            <input type="number" step="0.01" x-model="lvidd" placeholder="e.g. 32.3">
+                        </div>
+         
+                        
+                        <div class="input-group" x-show="selectedMineModel === 'mine_1'">
+                            <label>LVIDs (mm)<i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('lvids')"></i></label>
+                            <input type="number" step="0.1" x-model="lvids" placeholder="e.g. 21">
+                        </div>
                     </div>
-                    
-                    <div class="input-group">
-                        <!-- 3. Glossary icons hooked directly to openGlossary method -->
-                        <label>LA (mm) <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('la')"></i></label>
-                        <input type="number" step="0.01" x-model="la" placeholder="e.g. 22">
-                    </div>
-                    
-                    <div class="input-group">
-                        <!-- 3. Glossary icons hooked directly to openGlossary method -->
-                        <label>Ao (mm) <i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('ao')"></i></label>
-                        <input type="number" step="0.01" x-model="ao" placeholder="e.g. 12">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>LVIDd (mm)<i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('lvidd')"></i></label>
-                        <input type="number" step="0.01" x-model="lvidd" placeholder="e.g. 32.3">
-                    </div>
-     
-                    
-                    <div class="input-group" x-show="selectedMineModel === 'mine_1'">
-                        <label>LVIDs (mm)<i class="fa-solid fa-circle-info glossary-icon" @click="openGlossary('lvids')"></i></label>
-                        <input type="number" step="0.1" x-model="lvids" placeholder="e.g. 21">
-                    </div>
-                    
 
                 </template>
                 <template x-if="mineInputMode === 'calculated'">
