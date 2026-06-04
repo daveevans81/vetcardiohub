@@ -104,7 +104,7 @@
 
             <!-- 4.  calculatedMineScore  main script -->
             <div x-show="calculatedMineScore && calculatedMineScore.score === null" style="background: #f8fafc; border: 1px dashed var(--border); padding: 20px; border-radius: 6px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-                <i class="fa-solid fa-circle-info" @click="openGlossary('mine1')"></i> Enter all parameters above to view live risk stratification and median survival estimates.
+                <span x-show="selectedMineModel === 'mine_1'"><i class="fa-solid fa-circle-info" @click="openGlossary('mine1')"></i></span><span x-show="selectedMineModel === 'mine_2'"><i class="fa-solid fa-circle-info" @click="openGlossary('mine2')"></i></span> Enter all parameters above to view live risk stratification and median survival estimates.
             </div>
 
             <div x-show="calculatedMineScore && calculatedMineScore.score !== null" x-transition x-cloak>
