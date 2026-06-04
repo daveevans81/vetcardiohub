@@ -68,14 +68,19 @@
                 <span>Interactive Diagnostic Engine</span>
             </div>
             
-            <div style="background-color: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center;">
-                <span style="font-size: 0.9rem; font-weight: bold; color: var(--text-main);">Data Entry Mode:</span>
-                <label style="cursor: pointer; display: flex; align-items: left; gap: 5px; font-size: 0.8rem;">
-                    <input type="radio" x-model="mineInputMode" value="raw"> Raw Measurements (mm)
-                </label>
-                <label style="cursor: pointer; display: flex; align-items: left; gap: 5px; font-size: 0.8rem;">
-                    <input type="radio" x-model="mineInputMode" value="calculated"> Direct Values (Ratios/%)
-                </label>
+            <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start;">
+                <span style="font-size: 0.95rem; font-weight: bold; color: var(--text-main); border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; width: 100%;">Data Entry Mode</span>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px; padding-left: 4px;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--text-main);">
+                        <input type="radio" x-model="mineInputMode" value="raw" style="transform: scale(1.2);"> 
+                        Raw Measurements (mm)
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--text-main);">
+                        <input type="radio" x-model="mineInputMode" value="calculated" style="transform: scale(1.2);"> 
+                        Direct Values (Ratios / %)
+                    </label>
+                </div>
             </div>
 
             <div class="grid-inputs">
