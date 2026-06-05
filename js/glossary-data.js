@@ -239,6 +239,19 @@ const VET_GLOSSARY_DB = {
         pmid: "39717788",
         imgAttribution: "CC-BY 4.0",
     }, 
+        teer: {
+        title: "Trans-Catheter Edge to Edge Repair (TEER) Procedure",
+        group: "Procedures",
+        category: "Procedures",
+        audience: ["vet", "owner"],
+        difficulty: 3,
+        textOwner: "The TEER procedure uses a small 'V-clamp' device to clamp together the 2 leaflets of the mitral valve to reduce the amount of regurgitation through the valve and improve the clinical outcome of degenerative mitral valve disease. It is passed via a surgical procedure into the chest and delivered into the heart using a catheter. The bridging of the valve is effective in stopping backwards leakage but still allows blood to pass in a normal direction.",
+        textClinical: "The TEER procedure uses a small 'V-clamp' device to clamp together the 2 leaflets of the mitral valve to reduce the amount of regurgitation through the valve and improve the clinical outcome of MMVD. It is passed via a surgical procedure into the chest and delivered into the heart using a catheter. The bridging of the valve is effective in stopping mitral regurgitation but still allows blood to pass in a normal direction.",
+        article: "/blog-posts/post26.html",
+        imgPlaceholder: "/images/TEER.jpg",
+        reference: "Potter et al (2024)",
+    }, 
+    
     // ==========================================
     // GROUP: Rhythm
     // ==========================================
