@@ -219,7 +219,7 @@ const VET_GLOSSARY_DB = {
         audience: ["vet", "owner"],
         difficulty: 1,
         textOwner: "Special collars (like PetPace) that act like an Apple Watch for your dog. They track heart rate, breathing rate, and activity levels while you are away from home.",
-        textClinical: "Wearable biometric sensors that provide continuous remote monitoring of heart rate, heart rate variability (HRV), and respiratory rate. Increasingly used to monitor treatment efficacy in pre-clinical and clinical heart failure patients remotely.",
+        textClinical: "Wearable biometric sensors that provide continuous remote monitoring of heart rate, heart rate variability (HRV), and respiratory rate. Increasingly used to monitor treatment efficacy in pre-clinical and clinical heart failure patients remotely."
     }, 
     
     // ==========================================
@@ -237,7 +237,7 @@ const VET_GLOSSARY_DB = {
         imgPlaceholder: "/images/vclamp.jpg",
         reference: "Potter et al (2024)",
         pmid: "39717788",
-        imgAttribution: "CC-BY 4.0",
+        imgAttribution: "CC-BY 4.0"
     }, 
         teer: {
         title: "Trans-Catheter Edge to Edge Repair (TEER) Procedure",
@@ -249,7 +249,7 @@ const VET_GLOSSARY_DB = {
         textClinical: "The TEER procedure uses a small 'V-clamp' device to clamp together the 2 leaflets of the mitral valve to reduce the amount of regurgitation through the valve and improve the clinical outcome of MMVD. It is passed via a surgical procedure into the chest and delivered into the heart using a catheter. The bridging of the valve is effective in stopping mitral regurgitation but still allows blood to pass in a normal direction.",
         article: "/blog-posts/post26.html",
         imgPlaceholder: "/images/TEER.jpg",
-        reference: "Potter et al (2024)",
+        reference: "Potter et al (2024)"
     }, 
     
     // ==========================================
@@ -264,7 +264,7 @@ const VET_GLOSSARY_DB = {
         difficulty: 3,
         textOwner: "Atrial fibrillation is a fluttering, uncoordinated electrical signal that affects the atria and causes the ventricles of the heart to beat very irregularly, and sometimes too fast. In dogs it is typically irreversible although electrical conversion is occasionally attempted. Usually it is managed using rate slowing medication like digoxin or diltiazem, or occasionally if the rate is slow - known as 'lone AF' it is not treated at all.",
         textClinical: "Atrial fibrillation is a fluttering, uncoordinated electrical signal that affects the atria and causes the ventricles of the heart to beat very irregularly, and sometimes too fast. It is characterised by a chaotic rhythm on auscultation. ECG shows no P-waves, only very fine F-waves, and a completely random R-R interval. In dogs it is typically irreversible although electrical conversion is occasionally attempted. Usually it is managed using rate slowing medication like digoxin or diltiazem, or occasionally if the rate is slow - known as 'lone AF' it is not treated at all.",
-        imgPlaceholder: "/images/reference-af.jpg",
+        imgPlaceholder: "/images/reference-af.jpg"
     }, 
     
 
@@ -285,7 +285,7 @@ const VET_GLOSSARY_DB = {
         difficulty: 3,
         view: "Left Apical 4-Chamber or Right parasternal long axis",
         description: "The chordae attach to the valve in multiple locations, like the strings of a parachute. They gradually weaken with the degenerative change involved in DMVD. When an already weakened chordae string completely tears, the valve leaflet loses its anchor. During the contraction of the heart, the force of the blood pushing back on the valve flips the unsupported tip backward (like a sail blowing in the wind), billowing directly into the left atrium. It can happen in multiple places along the valve orifice and 3D trans-oesophagel echo is the best way to assess it properly.",
-        imgPlaceholder: "/images/reference-flail.jpg",
+        imgPlaceholder: "/images/reference-flail.jpg"
     }, 
         annulusdiam: {
         title: "Mitral Valve Annulus Diameter",
@@ -295,7 +295,7 @@ const VET_GLOSSARY_DB = {
         difficulty: 3,
         view: "Left Apical 5-Chamber",
         description: "The mitral valve annulus diameter is very important in judging whether repair of the valve is possible using a V-Clamp device in a TEER procedure. It is measured across the valve in an A-P direction from the aortic valve to the lateral annulus, taking care not to include the aorto-mitral curtain in the measurement. Measurements on 2D transthoracic echo are only approximate, as the valve is a complex 3D shape and best assessed via 3D trans-oesophageal echocardiography",
-        imgPlaceholder: "/images/reference-annulus.jpg",
+        imgPlaceholder: "/images/reference-annulus.jpg"
     }, 
     
 // --- RIGHT HEART  ---

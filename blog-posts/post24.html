@@ -18,7 +18,12 @@
 <meta name="apple-mobile-web-app-title" content="MyWebSite" />
 <link rel="manifest" href="/site.webmanifest" />
 
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script src="/js/glossary-data.js" defer></script>
+    <script src="/js/glossary-logic.js" defer></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
 </head>
 
@@ -28,7 +33,7 @@
 <div id="site-header"></div>
 
 
-<main class="blog-layout">
+<main class="blog-layout" x-data="glossaryEngine">
 
   <article class="main-content">
       
@@ -248,6 +253,8 @@ is forced out of the vascular space.</p>
     <div id="featured-posts"></div>
   </aside>
 
+
+<div id="glossary-container"></div>
 </main>
 
 
