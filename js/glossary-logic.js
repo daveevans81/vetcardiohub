@@ -30,13 +30,13 @@ const glossaryEngine = {
     userMode: 'vet',
 
     // --- DYNAMIC FILTER GETTERS ---
-    get availableGroups() {
+    availableGroups() {
         if (!this.glossaryDatabase) return ['All'];
         const groups = new Set(Object.values(this.glossaryDatabase).map(item => item.group || 'Echo'));
         return ['All', ...Array.from(groups).sort()];
     },
 
-    get availableCategories() {
+    availableCategories() {
         if (!this.glossaryDatabase) return ['All'];
         // Only show categories relevant to the currently selected Group
         let items = Object.values(this.glossaryDatabase);
