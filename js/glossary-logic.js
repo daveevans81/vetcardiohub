@@ -64,7 +64,7 @@ const glossaryEngine = {
 
     dynamicGlossaryFields() {
         if (!this.activeGlossaryTerm) return [];
-        const hiddenFields = ['title', 'category', 'group', 'difficulty', 'audience', 'key', 'imgPlaceholder', 'imgAttribution', 'pmid'];
+        const hiddenFields = ['title', 'category', 'group', 'difficulty', 'audience', 'key', 'imgPlaceholder', 'imgAttribution', 'pmid', 'article'];
         const fields = [];
         const fieldConfig = {
             description:  { label: "Clinical Purpose", icon: "fa-stethoscope", color: "#10b981" },

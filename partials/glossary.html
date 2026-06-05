@@ -93,6 +93,20 @@
                     
                 </template>
             </div>
+            <template x-if="activeGlossaryTerm?.article">
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 2px dashed #cbd5e1; text-align: center;">
+                    <p style="font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
+                        Want to learn more?
+                    </p>
+                    <a :href="activeGlossaryTerm.article" 
+                       target="_blank" 
+                       style="display: inline-flex; align-items: center; gap: 10px; background: #0f172a; color: #ffffff; padding: 12px 28px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 1rem; transition: transform 0.2s, background 0.2s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"
+                       onmouseover="this.style.background='#1e293b'; this.style.transform='translateY(-2px)'"
+                       onmouseout="this.style.background='#0f172a'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-book-open-reader"></i> Read Full Deep-Dive Article
+                    </a>
+                </div>
+            </template>
         </div>
     </div>
 </div>
