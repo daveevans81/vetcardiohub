@@ -18,7 +18,12 @@
 <meta name="apple-mobile-web-app-title" content="MyWebSite" />
 <link rel="manifest" href="/site.webmanifest" />
 
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script src="/js/glossary-data.js" defer></script>
+    <script src="/js/glossary-logic.js" defer></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 
 </head>
 
@@ -28,7 +33,7 @@
 <div id="site-header"></div>
 
 
-<main class="blog-layout">
+<main class="blog-layout" x-data="glossaryEngine">
 
   <article class="main-content">
       
@@ -40,7 +45,7 @@
 
 <img src="/images/TEER.jpg" alt="TEER in a mitral valve">
 <h1 id="bridging-the-gap-a-new-era-in-canine-mitral-valve-repair-with-teer">Bridging the Gap: A New Era in Canine Mitral Valve Repair with TEER</h1>
-<p>Myxomatous Mitral Valve Disease (MMVD) remains the most common cardiovascular pathology in dogs, accounting for roughly 75% of all canine heart cases. For decades, the veterinary community has balanced two extremes: palliative medical management, which eases symptoms but cannot stop structural decline, and open-heart surgery, which - while now getting quite sucessful  - is limited by high costs, low geographical availability, and the intensive requirements of cardiopulmonary bypass.</p>
+<p>Myxomatous Mitral Valve Disease (MMVD)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('mmvd')"></i> remains the most common cardiovascular pathology in dogs, accounting for roughly 75% of all canine heart cases. For decades, the veterinary community has balanced two extremes: palliative medical management, which eases symptoms but cannot stop structural decline, and open-heart surgery, which - while now getting quite sucessful  - is limited by high costs, low geographical availability, and the intensive requirements of cardiopulmonary bypass.</p>
 <p>The emergence of Transcatheter Edge-to-Edge Repair (TEER), specifically utilizing the <em>V-Clamp</em> device, holds the potential of provising a “middle ground.” This minimally invasive, beating-heart procedure offers a mechanical solution for patients who are not candidates for bypass or for owners seeking a (possibly) lower-risk or lower-cost alternative.</p>
 <h3 id="the-technology-how-teer-works">The Technology: How TEER Works</h3>
 <p>Adapted from the human MitraClip technology, TEER addresses mitral regurgitation by physically “clipping” the leaking valve leaflets together.</p>
@@ -231,6 +236,8 @@ China - Xinyu Animal Hospital</p>
   <aside class="sidebar">
     <div id="featured-posts"></div>
   </aside>
+  
+<div id="glossary-container"></div>
 
 </main>
 
