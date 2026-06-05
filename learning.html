@@ -70,8 +70,8 @@
     <header class="hero card">
 
 
-    <h1><i class="fa-solid fa-graduation-cap" style="color: #0ea5e9;"></i> Echo Learning Hub</h1>
-    <p>Integrated learning tool featuring multiple echo variables, measurements and scoring systems.</p>
+    <h1><i class="fa-solid fa-graduation-cap" style="color: #0ea5e9;"></i> Learning Hub</h1>
+    <p>Integrated learning tool featuring multiple cardiology terminology, echo variables, measurements and scoring systems.</p>
 </header>
 
 <main x-data="advancedEchoSuite()" x-init="initLearningHub()" class="card" style="max-width: 900px; margin: 0 auto; background: #ffffff;">
@@ -104,8 +104,17 @@
             </div>
     </header>
 
-    <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+<div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
         
+        <div style="display: flex; align-items: center; gap: 8px; border-right: 2px solid #cbd5e1; padding-right: 15px;">
+            <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Subject:</label>
+            <select x-model="selectedGroup" @change="selectedCategory = 'All'; if(learningMode === 'quiz') startQuiz();" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; color: #0ea5e9; background: white; outline: none; cursor: pointer; font-size: 0.85rem;">
+                <template x-for="group in availableGroups" :key="group">
+                    <option :value="group" x-text="group === 'echo' ? 'Echocardiography' : group"></option>
+                </template>
+            </select>
+        </div>
+
         <div style="display: flex; gap: 8px; overflow-x: auto; flex: 1;">
             <template x-for="cat in availableCategories" :key="cat">
                 <button @click="selectedCategory = cat; if(learningMode === 'quiz') startQuiz();" 
@@ -117,10 +126,10 @@
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px; border-left: 2px solid #cbd5e1; padding-left: 15px;">
-            <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Difficulty:</label>
+            <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Difficulty:</label>
             <select x-model="selectedDifficulty" @change="if(learningMode === 'quiz') startQuiz();" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; color: #1e3a8a; background: white; outline: none; cursor: pointer; font-size: 0.85rem;">
                 <template x-for="diff in availableDifficulties" :key="diff">
-                    <option :value="diff" x-text="diff === 'All' ? 'All Levels' : `Level ${diff}`"></option>
+                    <option :value="diff" x-text="diff === 'All' ? 'All' : `Lvl ${diff}`"></option>
                 </template>
             </select>
         </div>
@@ -207,7 +216,8 @@
                     <div x-show="quizRevealed" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" 
                          style="border-top: 2px dashed #cbd5e1; padding: 25px; background: white; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
                         
-                        <p style="margin: 0 0 15px 0; font-size: 1.05rem; color: #334155; line-height: 1.6;" x-text="quizDeck[currentQuizIndex]?.description"></p>
+                        
+                        <p style="margin: 0 0 15px 0; font-size: 1.05rem; color: #334155; line-height: 1.6;" x-html="quizDeck[currentQuizIndex]?.description || quizDeck[currentQuizIndex]?.textClinical || quizDeck[currentQuizIndex]?.textOwner"></p>
                         
                         <div x-show="quizDeck[currentQuizIndex]?.method" style="margin-bottom: 15px; background: #f8fafc; padding: 10px; border-left: 3px solid #0ea5e9; font-size: 0.9rem; color: #475569;">
                             <strong>Method:</strong> <span x-text="quizDeck[currentQuizIndex]?.method"></span>
@@ -266,7 +276,7 @@
                 
                     <div x-show="mcqAnswered" x-transition style="margin-top: 25px; border-top: 2px dashed #cbd5e1; padding-top: 20px; display: flex; justify-content: space-between; align-items: center;">
                         <div style="font-size: 0.85rem; color: #64748b; max-width: 70%;">
-                            <strong>Pro Tip:</strong> Look closely at the <span x-text="quizDeck[currentQuizIndex]?.view || 'recommended view'"></span>.
+                            <strong>Pro Tip:</strong> Context helps! This is related to <span x-text="quizDeck[currentQuizIndex]?.category || quizDeck[currentQuizIndex]?.group || 'cardiology' " style="text-transform: lowercase;"></span>.
                         </div>
                         <button @click="nextQuestion()" style="background: #1e293b; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                             Next Question <i class="fa-solid fa-arrow-right"></i>
