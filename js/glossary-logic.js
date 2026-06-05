@@ -118,6 +118,39 @@ const glossaryEngine = {
     },
 
     // --- QUIZ ENGINE ---
+    
+    currentQuizHint() {
+        if (this.quizDeck.length === 0) return '';
+        const item = this.quizDeck[this.currentQuizIndex];
+        if (!item) return '';
+
+        // Helper to grab just the first sentence safely
+        const getFirstSentence = (text) => {
+            if (!text) return '';
+            const match = text.match(/[^.!?]+[.!?]+/);
+            return match ? match[0].trim() : text.trim();
+        };
+
+        // 1. If it has a Method (Best for Echo)
+        if (item.method) {
+            return `<strong>💡 Technique Hint:</strong> ${getFirstSentence(item.method)}`;
+        }
+        
+        // 2. If it has Layman's Terms (Best for Pharma/Pathology)
+        if (item.textOwner) {
+            return `<strong>💡 Simplified Concept:</strong> ${getFirstSentence(item.textOwner)}`;
+        }
+
+        // 3. Fallback to optimal view
+        if (item.view) {
+            return `<strong>💡 Imaging Hint:</strong> Best evaluated from the ${item.view}.`;
+        }
+
+        // 4. Last resort fallback
+        return `<strong>💡 Context:</strong> Focus on concepts related to ${item.category || item.group || 'cardiology'}.`;
+    },
+    
+    
     startQuiz() {
         this.learningMode = 'quiz';
         const deckToUse = this.filteredGlossary().length > 0 ? this.filteredGlossary() : this.glossaryArray();

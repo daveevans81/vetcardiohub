@@ -274,9 +274,11 @@
                         </template>
                     </div>
                 
+                
+                
+                
                     <div x-show="mcqAnswered" x-transition style="margin-top: 25px; border-top: 2px dashed #cbd5e1; padding-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-                        <div style="font-size: 0.85rem; color: #64748b; max-width: 70%;">
-                            <strong>Pro Tip:</strong> Context helps! This is related to <span x-text="quizDeck[currentQuizIndex]?.category || quizDeck[currentQuizIndex]?.group || 'cardiology' " style="text-transform: lowercase;"></span>.
+                        <div style="font-size: 0.9rem; color: #475569; max-width: 70%; line-height: 1.4;" x-html="currentQuizHint()">
                         </div>
                         <button @click="nextQuestion()" style="background: #1e293b; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                             Next Question <i class="fa-solid fa-arrow-right"></i>
