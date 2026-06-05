@@ -2559,7 +2559,7 @@ details[open] summary {
 /* Style all info glossary icons across the calculator */
 .fa-circle-info {
     margin-left: 2px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #94a3b8;
     cursor: pointer;
     transition: color 0.2s ease;
