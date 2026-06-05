@@ -11,7 +11,8 @@ const VET_GLOSSARY_DB = {
         difficulty: 2,
         textOwner: "The most common heart disease in cats. The heart muscle becomes abnormally thick and stiff, making it harder for the heart to relax and fill with blood properly.",
         textClinical: "A primary myocardial disease characterized by concentric hypertrophy of the left ventricle in the absence of other systemic causes (e.g., hyperthyroidism, hypertension). It results in severe diastolic dysfunction and left atrial enlargement.",
-        pmid: "32239713" // ACVIM Feline Cardiomyopathy Guidelines
+        pmid: "32243654", // ACVIM Feline Cardiomyopathy Guidelines
+        article: "/blog-posts/post10.html"
     },
     murmur: {
         title: "Heart Murmur",
@@ -43,7 +44,7 @@ const VET_GLOSSARY_DB = {
         
         // The Clinical GP Translation
         textClinical: "A progressive, degenerative valvular disease characterized by myxomatous degeneration of the mitral valve apparatus. It is the leading cause of left-sided congestive heart failure in small breed dogs.",
-        
+        article: "/blog-posts/post6.html",
         pmid: "30974015" // Vets get the paper, owners ignore it
     },
 
@@ -58,7 +59,8 @@ const VET_GLOSSARY_DB = {
         difficulty: 1,
         textOwner: "Dogs in Stage A are completely healthy right now, but they are a breed (like a Cavalier King Charles Spaniel) that is at high risk of developing heart disease in the future.",
         textClinical: "Patients at high risk for developing MMVD but with no current identifiable structural disorder of the heart (e.g., normal auscultation, normal echocardiogram).",
-        pmid: "30974015"
+        pmid: "30974015",
+        article: "/blog-posts/post7.html"
     },
     acvimStageB1: {
         title: "ACVIM Stage B1 (MMVD)",
@@ -68,7 +70,8 @@ const VET_GLOSSARY_DB = {
         difficulty: 2,
         textOwner: "Your dog has a heart murmur and a leaky valve, but the heart hasn't stretched out yet. No medications are needed at this stage, just monitoring.",
         textClinical: "Asymptomatic patients with a structural abnormality (murmur of mitral regurgitation) but no radiographic or echocardiographic evidence of cardiac remodeling that meets the criteria for initiating therapy.",
-        pmid: "30974015"
+        pmid: "30974015",
+        article: "/blog-posts/post7.html"
     },
     acvimStageB2: {
         title: "ACVIM Stage B2 (MMVD)",
@@ -78,7 +81,8 @@ const VET_GLOSSARY_DB = {
         difficulty: 2,
         textOwner: "The leaky valve has caused the heart to stretch and enlarge significantly, though your dog still feels fine. Starting medication (Pimobendan) now delays the onset of heart failure.",
         textClinical: "Asymptomatic patients with hemodynamically significant mitral regurgitation causing left-sided cardiomegaly (LA:Ao ≥ 1.6, LVIDdn ≥ 1.7) that meet the EPIC trial criteria for initiating pimobendan.",
-        pmid: "30974015"
+        pmid: "30974015",
+        article: "/blog-posts/post7.html"
     },
     acvimStageC: {
         title: "ACVIM Stage C (MMVD)",
@@ -88,7 +92,8 @@ const VET_GLOSSARY_DB = {
         difficulty: 3,
         textOwner: "The heart can no longer compensate for the leaky valve, causing fluid to build up in the lungs (heart failure). Dogs need multiple daily medications (like diuretics) to breathe comfortably.",
         textClinical: "Patients with past or current clinical signs of congestive heart failure (CHF) secondary to MMVD. Requires standard quadruple therapy (Furosemide, Pimobendan, ACEi, Spironolactone).",
-        pmid: "30974015"
+        pmid: "30974015",
+        article: "/blog-posts/post7.html"
     },
     acvimStageD: {
         title: "ACVIM Stage D (MMVD)",
@@ -98,7 +103,8 @@ const VET_GLOSSARY_DB = {
         difficulty: 3,
         textOwner: "Advanced or 'end-stage' heart failure. The standard medications are no longer keeping the fluid out of the lungs, requiring specialized drug adjustments or hospital visits.",
         textClinical: "Refractory congestive heart failure. Patients require advanced diuretic strategies (Torsemide, sequential nephron blockade), afterload reduction, and frequent monitoring to manage clinical signs.",
-        pmid: "30974015"
+        pmid: "30974015",
+        article: "/blog-posts/post7.html"
     },
 
     // ==========================================
@@ -150,7 +156,8 @@ const VET_GLOSSARY_DB = {
         textOwner: "An experimental drug currently being studied in veterinary medicine for its potential anti-hypertrophy effects and ability to protect heart muscle over time.",
         textClinical: "An mTOR inhibitor with potent immunomodulatory and anti-proliferative properties. Currently under investigation in veterinary cardiology for its potential to reverse or slow myocardial remodeling and hypertrophy - for example in HCM and aortic stenosis. The RAPACAT trial has shown some early signs it might be helpful in slowing wall thickening in HCM.",
         reference: "Kaplan et al (2023). Delayed-release rapamycin halts progression of left ventricular hypertrophy in subclinical feline hypertrophic cardiomyopathy: results of the RAPACAT trial",
-        pmid: "37495229"
+        pmid: "37495229",
+        article: "/blog-posts/post5.html"
     },
     oxygen: {
         title: "Oxygen Therapy",
@@ -214,7 +221,8 @@ const VET_GLOSSARY_DB = {
         textOwner: "Counting how many breaths your pet takes in one minute while they are deeply asleep. A rate consistently over 30 breaths per minute is an early warning sign of fluid in the lungs.",
         textClinical: "The most sensitive and specific at-home monitoring tool for predicting the onset of left-sided congestive heart failure. An SRR consistently >30 breaths/min indicates rising left atrial pressures and impending pulmonary edema. In Schober's paper of 2010, a count of the breathing rate performed equally well alongside complex doppler echocardiographic techniques, demonstrating it's clinical importance.",
         pmid: "20840304",
-        reference: "Schober et al (2010). Detection of congestive heart failure in dogs by Doppler echocardiography."
+        reference: "Schober et al (2010). Detection of congestive heart failure in dogs by Doppler echocardiography.",
+        article: "/blog-posts/post2.html"
     },
     smartCollar: {
         title: "Smart Collars (Wearable Tech)",
