@@ -222,8 +222,40 @@ const VET_GLOSSARY_DB = {
         textClinical: "Wearable biometric sensors that provide continuous remote monitoring of heart rate, heart rate variability (HRV), and respiratory rate. Increasingly used to monitor treatment efficacy in pre-clinical and clinical heart failure patients remotely.",
     }, 
     
-
+    // ==========================================
+    // GROUP: Interventions and procedures
+    // ==========================================
     
+        vclamp: {
+        title: "V-Clamp Device",
+        group: "Procedures",
+        category: "Procedures",
+        audience: ["vet", "owner"],
+        difficulty: 3,
+        textOwner: "The V clamp is small device about 8mm in size that can clamp together the anterior and posterior mitral valve leaflets, bridging the leaflets and reducing the regurgitation. It evolved from the 'MitraClip' human device, used in a similar procedure via in atrial septal puncture technique, but in this case delivered through the heart apex itself. It is made of nitinol alloy, which is a mixture of nickel and titanium, and has a very high shape memory. This allows it to reform its shape after passing through the catheter.",
+        textClinical: "The V clamp is small device about 8mm in size that is used in a surgical procedure to clamp the mitral valve leaflets together and reduce the leakage (regurgitation) with MMVD.",
+        imgPlaceholder: "/images/vclamp.jpg",
+        reference: "Potter et al (2024)",
+        pmid: "39717788",
+        imgAttribution: "CC-BY 4.0",
+    }, 
+    // ==========================================
+    // GROUP: Rhythm
+    // ==========================================
+    
+        af: {
+        title: "Atrial Fibrillation",
+        group: "Arrhythmia",
+        category: "Arrhythmia",
+        audience: ["vet", "owner"],
+        difficulty: 3,
+        textOwner: "Atrial fibrillation is a fluttering, uncoordinated electrical signal that affects the atria and causes the ventricles of the heart to beat very irregularly, and sometimes too fast. In dogs it is typically irreversible although electrical conversion is occasionally attempted. Usually it is managed using rate slowing medication like digoxin or diltiazem, or occasionally if the rate is slow - known as 'lone AF' it is not treated at all.",
+        textClinical: "Atrial fibrillation is a fluttering, uncoordinated electrical signal that affects the atria and causes the ventricles of the heart to beat very irregularly, and sometimes too fast. It is characterised by a chaotic rhythm on auscultation. ECG shows no P-waves, only very fine F-waves, and a completely random R-R interval. In dogs it is typically irreversible although electrical conversion is occasionally attempted. Usually it is managed using rate slowing medication like digoxin or diltiazem, or occasionally if the rate is slow - known as 'lone AF' it is not treated at all.",
+        imgPlaceholder: "/images/reference-af.jpg",
+    }, 
+    
+
+     
     
     
       // ==========================================
@@ -231,9 +263,32 @@ const VET_GLOSSARY_DB = {
     // ==========================================
 // The Clinical ECHO Reference Database
 
+// Anatomy
+        flail: {
+        title: "Flail Leaflet",
+        group: "echo",
+        category: "anatomy",       
+        audience: ["vet"],
+        difficulty: 3,
+        view: "Left Apical 4-Chamber or Right parasternal long axis",
+        description: "The chordae attach to the valve in multiple locations, like the strings of a parachute. They gradually weaken with the degenerative change involved in DMVD. When an already weakened chordae string completely tears, the valve leaflet loses its anchor. During the contraction of the heart, the force of the blood pushing back on the valve flips the unsupported tip backward (like a sail blowing in the wind), billowing directly into the left atrium. It can happen in multiple places along the valve orifice and 3D trans-oesophagel echo is the best way to assess it properly.",
+        imgPlaceholder: "/images/reference-flail.jpg",
+    }, 
+        annulusdiam: {
+        title: "Mitral Valve Annulus Diameter",
+        group: "echo",
+        category: "anatomy",
+        audience: ["vet"],
+        difficulty: 3,
+        view: "Left Apical 5-Chamber",
+        description: "The mitral valve annulus diameter is very important in judging whether repair of the valve is possible using a V-Clamp device in a TEER procedure. It is measured across the valve in an A-P direction from the aortic valve to the lateral annulus, taking care not to include the aorto-mitral curtain in the measurement. Measurements on 2D transthoracic echo are only approximate, as the valve is a complex 3D shape and best assessed via 3D trans-oesophageal echocardiography",
+        imgPlaceholder: "/images/reference-annulus.jpg",
+    }, 
+    
 // --- RIGHT HEART  ---
     tapse: {
-        audience: ["vet"], title: "TAPSE (Tricuspid Annular Plane Systolic Excursion)",
+        audience: ["vet"], 
+        title: "TAPSE (Tricuspid Annular Plane Systolic Excursion)",
         view: "Left Apical 4-Chamber (RV Optimized)",
         description: "Assesses longitudinal right ventricular systolic function.",
         group: "echo", method: "Place the M-mode cursor directly through the lateral aspect of the tricuspid valve annulus. Measure the total vertical displacement from end-diastole (lowest point) to peak systole (highest point).",
@@ -524,7 +579,7 @@ category: "Left Heart",
         view: "Derived Index",
         description: "Indexes the maximal diastolic volume directly to body weight (ml/kg). Simpson's volumetric assessments are more sensitive for early volume overload states than 1D linear measurements.",
         group: "echo", method: "Calculated as: LVEDV (ml) / Body Weight (kg). Normal is variously described but using Wess's data we have listed 1.25 – 3.27 ml/kg for non-sighthound dogs, and 1.92-4.17 for sighthound breeds.",
-category: "Left Heart",
+        category: "Left Heart",
         difficulty: 3,
                 reference: "Wess et al (2021). Echocardiographic reference intervals for volumetric measurements of the left ventricle using the Simpson's method of discs in 1331 dogs",
         pmid: "33675121"
