@@ -2563,6 +2563,7 @@ details[open] summary {
     color: #94a3b8;
     cursor: pointer;
     transition: color 0.2s ease;
+    vertical-align: super;
 }
 
 /* ==========================================================================
