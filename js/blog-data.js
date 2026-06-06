@@ -1,5 +1,23 @@
 window.posts = [
   {
+    slug: "post27.html",
+    title: "The VetCardioHub Echo Calculator: A Clinical Workflow Guide",
+    subtitle: "How to make full use of our comprehensive Echo Calculator",
+    date: "June 6, 2026",
+    reviewed: "June 6, 2026",
+    author: "Dave Evans",
+    authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
+    authorLink: "../about.html#daveevans",
+    category: "Echocardiography",
+    readTime: "9 min read",
+    group: "management",
+    audience: "vet",
+    featured: false,
+    level: "Beginner",
+    image: "/images/echocalc.jpg",
+    snippet: "Performing a diagnostic echocardiogram is only half the battle. The other half is sitting at a computer translating those raw measurements into actionable clinical staging. Let this calculator be a tool and guide."
+  },  
+  {
     slug: "post26.html",
     title: "Bridging the Gap: A New Era in Canine Mitral Valve Repair with TEER",
     subtitle: "The revolutionary new technique to repair the mitral valve and cure Degenerative Mitral Valve Disease in Dogs",
