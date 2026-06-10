@@ -1,5 +1,24 @@
 window.posts = [
   {
+    slug: "post28.html",
+    title: "Torasemide - A game changing Diuretic?",
+    subtitle: "Much more potent than furosemide. But is it better?",
+    date: "June 10, 2026",
+    reviewed: "June 10, 2026",
+    author: "Dave Evans",
+    authorRole: "MA VetMB PgC(SADI) PgC(SAC) MRCVS",
+    authorLink: "../about.html#daveevans",
+    series: "Dog Heart Foundations", // The name of the course
+    seriesOrder: 7,                 // Step 7
+    category: "Medication",
+    readTime: "9 min read",
+    group: "management",
+    audience: "both",
+    featured: false,
+    image: "/images/torasemide.jpg",
+    snippet: "Furosemide often fails when needed at higher doses. Torasemide has several advantages."
+  }, 
+  {
     slug: "post27.html",
     title: "The VetCardioHub Echo Calculator: A Clinical Workflow Guide",
     subtitle: "How to make full use of our comprehensive Echo Calculator",
