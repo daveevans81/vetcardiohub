@@ -31,7 +31,7 @@ jobs:
           import os
           from datetime import datetime
 
-          SITE_URL = "https://www.vetcardiohub.com"
+          SITE_URL = "https://vetcardiohub.com"
           BLOG_DIR = "./blog-posts"
           OUTPUT_FILE = "sitemap.xml"
 
