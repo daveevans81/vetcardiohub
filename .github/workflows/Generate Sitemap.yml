@@ -30,8 +30,9 @@ jobs:
           python3 - <<EOF
           import os
           from datetime import datetime
+          import subprocess
 
-          SITE_URL = "https://www.vetcardiohub.com"
+          SITE_URL = "https://vetcardiohub.com"
           BLOG_DIR = "./blog-posts"
           OUTPUT_FILE = "sitemap.xml"
 
@@ -39,6 +40,19 @@ jobs:
 
           urls = {}
           today = datetime.today().date()
+
+          def get_git_date(filepath):
+              try:
+                  # Asks Git for the date of the last commit to this specific file
+                  date_str = subprocess.check_output(
+                      ['git', 'log', '-1', '--format=%cd', '--date=short', filepath]
+                  ).decode('utf-8').strip()
+                  if date_str:
+                      return date_str
+              except Exception:
+                  pass
+              # Fallback to today if Git fails
+              return datetime.today().strftime('%Y-%m-%d')
 
           def build_url(path):
               if path == "index.html":
@@ -55,7 +69,7 @@ jobs:
               if filename.endswith(".html") and filename not in EXCLUDE_FILES:
                   url = build_url(filename)
                   if url:
-                      lastmod = datetime.fromtimestamp(os.path.getmtime(filename)).date()
+                      lastmod = get_git_date(filename)
                       priority = "1.0" if filename == "index.html" else "0.8"
                       urls[url] = (lastmod, priority)
                       print(f"Added root page: {url}")
@@ -69,7 +83,7 @@ jobs:
                           relative_path = os.path.relpath(full_path, ".")
                           url = build_url(relative_path)
                           if url:
-                              lastmod = datetime.fromtimestamp(os.path.getmtime(full_path)).date()
+                              lastmod = get_git_date(full_path)
                               urls[url] = (lastmod, "0.7")
                               print(f"Added blog post: {url}")
           else:
@@ -79,16 +93,15 @@ jobs:
           sorted_urls = sorted(urls.items(), key=lambda x: x[0])
 
           # 4️⃣ Build sitemap XML
-          sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\\n'
-          sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\\n'
+          sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
+          sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
           for url, (lastmod, priority) in sorted_urls:
               sitemap_content += f"""  <url>
-            <loc>{url}</loc>
-            <lastmod>{lastmod}</lastmod>
-            <priority>{priority}</priority>
-          </url>
-          """
+              <loc>{url}</loc>
+              <lastmod>{lastmod}</lastmod>
+              <priority>{priority}</priority>
+            </url>\n"""
 
           sitemap_content += "</urlset>"
 
