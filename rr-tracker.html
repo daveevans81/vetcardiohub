@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/js/global-head.js" defer></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <title>Respiratory Rate Tracker | VetCardioHub</title>
+    <meta name="description" content="Free interactive respiratory rate counter to track breathing rates and monitor for congestive heart failure for pets.">
+    <meta name="keywords" content="Sleeping respiratory rate, SRR, respiratory tracker, CHF, Congestive heart failure dog, Congestive heart failure cat, VetCardioHub">
+    
+    <meta property="og:title" content="Respiratory Rate Tracker | VetCardioHub">
+    <meta property="og:description" content="Free interactive respiratory rate counter to track breathing rates and monitor for congestive heart failure for pets.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vetcardiohub.com/rr-tracker.html">
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+     <script src="/js/rr-logic.js" defer></script>
+    <script src="/js/glossary-data.js" defer></script>
+        <script src="/js/glossary-logic.js" defer></script>
+    <script src="/js/echo-breeds.js" defer></script>
+    <script src="/js/echocalc.js" defer></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MedicalWebPage",
+      "name": "Veterinary Qp:Qs Shunt Ratio Calculator",
+      "description": "An interactive clinical decision support application to calculate the ratio of pulmonary to systemic blood flow (Qp:Qs) and VTI ratios in canine and feline patients with congenital anomalies.",
+      "url": "https://vetcardiohub.com/qp-qs-calculator.html",
+      "medicalAudience": {
+        "@type": "MedicalAudience",
+        "audienceType": "Veterinary Professionals"
+      },
+      "specialty": {
+        "@type": "MedicalSpecialty",
+        "name": "Cardiology"
+      },
+      "mainEntity": {
+        "@type": "MedicalDevice",
+        "name": "Qp:Qs Algorithmic Computation Module",
+        "description": "Calculates pulmonary (Qp) and systemic (Qs) stroke volumes and ratios using sub-valvular and continuous wave velocities.",
+        "purpose": "Hemodynamic quantification of cardiovascular shunts"
+      },
+      "citation": [
+        "Boon J.A. (2011) Veterinary Echocardiography - Congenital Shunt Flow Analysis.",
+        "Serres et al. (2009) Quantification of echocardiographic left-to-right shunt in dogs with patent ductus arteriosus."
+      ],
+      "lastReviewed": "2026-05-17",
+      "isAccessibleForFree": "true"
+    }
+    </script>
+    
+    <style>
+        /* Glossary specific styling for clickable icons */
+        .glossary-icon { color: #94a3b8; cursor: pointer; transition: color 0.2s; }
+        .glossary-icon:hover { color: #0ea5e9; }
+        
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-title { color: var(--primary); font-size: 1.2rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
+        .input-group input:focus, .input-group select:focus { outline: 2px solid var(--primary-light); background-color: #fff; }
+        .results-box { border: 1px solid var(--border); padding: 10px 15px; border-radius: 6px; background: #fff; }
+        .result-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .result-row:last-child { border-bottom: none; }
+        .normal { color: var(--normal) !important; font-weight: bold; }
+        .abnormal { color: var(--abnormal) !important; font-weight: bold; }
+        .info-block { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+        .info-block h3 { color: var(--primary); margin-bottom: 8px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+<div id="site-header"></div>
+
+<div class="content">
+
+        
+        <header class="hero card">
+            <h1>Resting Respiratory Rate</h1>
+            <p>Counting and Tracking Tool/p>
+        </header>
+
+<div x-data="rrTracker" class="rr-container">
+    
+    <div x-show="!isCounting && finalRate === null" class="setup-panel">
+        <p>Ensure your pet is fully resting or sleeping.</p>
+        
+        <select x-model="species">
+            <option value="dog">Dog</option>
+            <option value="cat">Cat</option>
+        </select>
+        
+        <button @click="startCount()" class="btn-start-massive">
+            <i class="fa-solid fa-stopwatch"></i> Start 30s Timer
+        </button>
+    </div>
+
+    <div x-show="isCounting" class="active-panel">
+        <div class="visual-timer">
+            <h1 x-text="timeLeft + 's'"></h1>
+            <p>Remaining</p>
+        </div>
+        
+        <button @click="registerTap()" class="btn-tap-target">
+            <i class="fa-solid fa-lungs"></i>
+            <span>TAP FOR EACH BREATH</span>
+        </button>
+        
+        <div class="current-count">
+            Count: <span x-text="tapCount"></span>
+        </div>
+    </div>
+
+    <div x-show="finalRate !== null && !isCounting" class="results-panel">
+        <h3>Result</h3>
+        <h1 x-text="finalRate + ' breaths/min'"></h1>
+        
+        <div class="interpretation-box" :class="'status-' + interpretation.level">
+            <p x-text="interpretation.text"></p>
+        </div>
+
+        <button @click="startCount()">Count Again</button>
+    </div>
+
+    <div class="history-panel" x-show="history.length > 0">
+        <h3>Recent History</h3>
+        <template x-for="entry in history" :key="entry.id">
+            <div class="history-item">
+                <span x-text="new Date(entry.date).toLocaleDateString()"></span>: 
+                <strong x-text="entry.rate + ' bpm'"></strong>
+            </div>
+        </template>
+    </div>
+
+</div>
+
+        <div id="glossary-container"></div>
+
+</div>
+
+<div id="site-footer"></div>
+<script src="/js/load-partials.js"></script>
+
+</body>
+</html>
