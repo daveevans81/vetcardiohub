@@ -130,6 +130,29 @@ get currentSpecies() {
             return labels[this.timeScale] || 'Filtered Range';
         },
         
+        // Flattens the formulary into an alphabetical list of "Brand (Generic)"
+        get medicationOptions() {
+            let options = [];
+            for (const [id, drug] of Object.entries(this.formulary)) {
+                if (id === 'other') {
+                    options.push({ value: 'other', label: 'Other / Custom Medication' });
+                    continue;
+                }
+                
+                // Add each brand name separately
+                if (drug.brands && drug.brands.length) {
+                    drug.brands.forEach(brand => {
+                        options.push({ value: id, label: `${brand} (${drug.generic})` });
+                    });
+                }
+                // Add the generic option as well
+                options.push({ value: id, label: `${drug.generic} (Generic)` });
+            }
+            
+            // Sort alphabetically for easy finding
+            return options.sort((a, b) => a.label.localeCompare(b.label));
+        },
+        
         // Helper function to calculate mg/kg dynamically in the UI
         
 // Dynamic mg/kg Calculator (with strict null/clinical safety checks)
@@ -198,42 +221,49 @@ startCount() {
         
         // Save function for the Ledger
 addMedication() {
-    if (!this.newMed.drugId || !this.newMed.doseMg) {
-        alert("Clinical Entry Error: Please select a medication and specify the dose in mg.");
-        return;
-    }
+            // Null safety: Ensure a pet is actually selected
+            if (!this.activePetName) {
+                alert("Clinical Entry Error: No patient selected.");
+                return;
+            }
 
-    // Determine severity for Phase 3 Charting
-    const isMajor = ['Started', 'Stopped'].includes(this.newMed.action);
+            if (!this.newMed.drugId || !this.newMed.doseMg) {
+                alert("Clinical Entry Error: Please select a medication and specify the dose in mg.");
+                return;
+            }
 
-    const entry = {
-        id: Date.now(), // Unique identifier
-        petName: this.activePetProfile.name,
-        eventDate: this.newMed.eventDate,
-        drugId: this.newMed.drugId,
-        customName: this.newMed.drugId === 'other' ? this.newMed.customName : null,
-        action: this.newMed.action,
-        doseMg: parseFloat(this.newMed.doseMg),
-        frequency: this.newMed.frequency,
-        mgPerKg: this.calculatedMgPerKg(), // Store mathematical snapshot
-        isMajorChange: isMajor
-    };
+            const isMajor = ['Started', 'Stopped'].includes(this.newMed.action);
 
-    this.medLedger.push(entry);
-    
-    localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+            const entry = {
+                id: Date.now(), 
+                petName: this.activePetName, // FIXED: Uses the safe string, not the getter object
+                eventDate: this.newMed.eventDate,
+                drugId: this.newMed.drugId,
+                customName: this.newMed.drugId === 'other' ? this.newMed.customName : null,
+                action: this.newMed.action,
+                doseMg: parseFloat(this.newMed.doseMg),
+                frequency: this.newMed.frequency,
+                mgPerKg: this.calculatedMgPerKg(), 
+                isMajorChange: isMajor
+            };
 
-    // Reset the form but keep the current date
-    this.newMed = {
-        eventDate: this.newMed.eventDate, 
-        drugId: '',
-        customName: '',
-        action: 'Started',
-        doseMg: '',
-        frequency: 'q12h'
-    };
-},
+            this.medLedger.push(entry);
+            localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
 
+            // Reset the form but keep the current date
+            this.newMed = {
+                eventDate: this.newMed.eventDate, 
+                drugId: '',
+                customName: '',
+                action: 'Started',
+                doseMg: '',
+                frequency: 'q12h'
+            };
+        },
+
+
+
+        
 // Sort ledger chronologically (newest first) to avoid Alpine array freezing
 sortedMedLedger() {
     return [...this.medLedger].sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));

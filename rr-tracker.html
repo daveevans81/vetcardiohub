@@ -427,9 +427,11 @@
                                 <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Medication</label>
                                 <select x-model="newMed.drugId" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                                     <option value="" disabled>Select Drug...</option>
-                                    <template x-for="[id, drug] in Object.entries(formulary)" :key="id">
-                                        <option :value="id" x-text="drug.generic + (drug.brands.length ? ' (' + drug.brands[0] + ')' : '')"></option>
+                                    
+                                    <template x-for="opt in medicationOptions" :key="opt.label">
+                                        <option :value="opt.value" x-text="opt.label"></option>
                                     </template>
+                                    
                                 </select>
                             </div>
             
