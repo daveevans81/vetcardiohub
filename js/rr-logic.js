@@ -3,44 +3,79 @@ document.addEventListener('alpine:init', () => {
         // Absorb the Glossary Engine for tooltips 
         ...glossaryEngine, 
 
-        species: 'dog',
+// --- CORE STATE ---
+        pets: [], // Array of { name: 'Bella', species: 'dog', age: 8 }
+        activePetName: '', // The currently selected pet
+        showAddPet: false, // Toggles the setup modal
+        newPet: { name: '', species: 'dog', age: '' },
+
         isCounting: false,
         timeLeft: 30,
         tapCount: 0,
         finalRate: null,
         timerInterval: null,
         history: [],
-        petName: '', // For the current counting session
-        filterPet: 'all', // For the chart/history view
-        // Core Data Arrays
-        readings: [], // e.g., { date: '2026-06-15T08:00:00', rate: 24, asleep: true }
-        medications: [], // e.g., { date: '2026-06-12T10:00:00', drug: 'Furosemide', dose: '40mg BID', action: 'Increased' }
         
-        // UI Controls
-        showMedications: true,
-        chartInstance: null,
-        timeScale: 'thisMonth', // Updated default
+        // --- PAGINATION STATE ---
+        currentPage: 1,
+        itemsPerPage: 20,
+
+        // --- CHART & CONTROLS ---
+        timeScale: '180d', // Default to 6 months
         customStartDate: '',
         customEndDate: '',
+        showMedications: true,
+        chartInstance: null,
         chartRenderTimeout: null,
+        
 
 init() {
+            // Load Profiles
+            const savedPets = localStorage.getItem('vch_rrPets');
+            if (savedPets) this.pets = JSON.parse(savedPets);
+
+            // Load History
             const saved = localStorage.getItem('vch_rrHistory');
             if (saved) this.history = JSON.parse(saved);
-            
-            this.$watch('timeScale', () => this.renderChart());
+
+            // Set default active pet
+            if (this.pets.length > 0) {
+                this.activePetName = this.pets[0].name;
+            } else {
+                // If brand new user, force them to set up a pet
+                this.showAddPet = true;
+            }
+
+            // Watchers: Re-render chart and reset pagination if they change the pet or timescale
+            this.$watch('activePetName', () => { this.currentPage = 1; this.renderChart(); });
+            this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); });
             this.$watch('showMedications', () => this.renderChart());
             this.$watch('customStartDate', () => this.renderChart());
             this.$watch('customEndDate', () => this.renderChart());
-            this.$watch('filterPet', () => this.renderChart()); // Re-render when pet changes
             
             this.$nextTick(() => { this.renderChart(); });
         },
         
-        get uniquePets() {
-            if (!this.history.length) return [];
-            const pets = this.history.map(entry => entry.petName).filter(Boolean);
-            return [...new Set(pets)]; // Returns unique names only
+        // --- PET MANAGEMENT ---
+        saveNewPet() {
+            if (!this.newPet.name.trim()) return alert("Please enter a pet name.");
+            
+            // Check for duplicates
+            if (this.pets.find(p => p.name.toLowerCase() === this.newPet.name.toLowerCase())) {
+                return alert("A pet with this name already exists.");
+            }
+
+            this.pets.push({ ...this.newPet });
+            localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
+            
+            this.activePetName = this.newPet.name;
+            this.newPet = { name: '', species: 'dog', age: '' }; // Reset form
+            this.showAddPet = false;
+        },
+
+        get currentSpecies() {
+            const pet = this.pets.find(p => p.name === this.activePetName);
+            return pet ? pet.species : 'dog'; // Fallback
         },
         
 parseDateSafe(dateStr) {
@@ -100,8 +135,8 @@ saveToHistory() {
                 date: new Date().toISOString(),
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                 rate: this.finalRate,
-                species: this.species,
-                petName: finalName, // NEW FIELD
+                species: this.currentSpecies,
+                petName: this.activePetName, // NEW FIELD
                 isEquivocal: this.clinicalInterpretation.status === 'equivocal'
             };
             this.history.unshift(entry);
@@ -199,17 +234,29 @@ saveToHistory() {
             return { startDate, endDate };
         },
         
-// --- UPDATED FILTER (Respects Pet Selection) ---
-        getFilteredReadings() {
-            if (!this.history || this.history.length === 0) return [];
-            let filtered = [...this.history];
-            
-            // 1. Filter by Pet Name First
-            if (this.filterPet !== 'all') {
-                filtered = filtered.filter(item => item.petName === this.filterPet);
-            }
+        // --- PAGINATION GETTERS ---
+        get paginatedHistory() {
+            // We reverse the filtered readings back to Newest-First for the list view
+            const listData = [...this.getFilteredReadings()].reverse(); 
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            return listData.slice(start, start + this.itemsPerPage);
+        },
 
-            // 2. Then Filter by Date (Using your existing getDateRange logic)
+        get totalPages() {
+            return Math.ceil(this.getFilteredReadings().length / this.itemsPerPage) || 1;
+        },
+
+        nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
+        prevPage() { if (this.currentPage > 1) this.currentPage--; },
+        
+// --- UPDATED FILTER (Respects Pet Selection) ---
+getFilteredReadings() {
+            if (!this.history || this.history.length === 0 || !this.activePetName) return [];
+            
+            // 1. Strict Filter by Active Pet
+            let filtered = this.history.filter(item => item.petName === this.activePetName);
+
+            // 2. Filter by Date
             const { startDate, endDate } = this.getDateRange();
             if (startDate) {
                 filtered = filtered.filter(item => {
@@ -217,8 +264,7 @@ saveToHistory() {
                     return itemDate >= startDate && itemDate <= endDate;
                 });
             }
-
-            return filtered.reverse(); 
+            return filtered.reverse(); // For chart chronological order
         },
         
         

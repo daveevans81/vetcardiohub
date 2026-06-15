@@ -25,7 +25,7 @@
     <meta property="og:description" content="Free interactive respiratory rate counter to track breathing rates and monitor for congestive heart failure for pets.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://vetcardiohub.com/rr-tracker.html">
-    
+    <meta name="mobile-web-app-capable" content="yes">
 
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -131,21 +131,41 @@
 
 <div class="rr-dashboard" x-data="rrTracker">
 
-    <div x-show="!isCounting && finalRate === null" x-transition>
-        <div class="summary-box">
-            <h2>Resting Respiratory Rate Tracker</h2>
-            <p>Ensure your pet is fully resting or sleeping. 
-               <a href="#" @click.prevent="openGlossary('rrr_guidelines')" style="color: #1e40af;">
-                 <i class="fa-solid fa-circle-question"></i> How to count
-               </a>
-            </p>
+  <div x-show="!isCounting && finalRate === null" x-transition>
+        
+        <div x-show="showAddPet" class="summary-box" style="border: 2px solid #005f73; background: #f0fdfa;">
+            <h3 style="margin-top: 0; color: #0f766e;"><i class="fa-solid fa-paw"></i> Set Up Patient Profile</h3>
             
-            <div style="margin: 20px 0;">
-                <label><strong>Species:</strong></label>
-                <select x-model="species" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
-                </select>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
+                <label>Name: <input type="text" x-model="newPet.name" placeholder="e.g. Bella" style="width: 100%; padding: 8px; margin-top: 4px;"></label>
+                <label>Species: 
+                    <select x-model="newPet.species" style="width: 100%; padding: 8px; margin-top: 4px;">
+                        <option value="dog">Dog</option>
+                        <option value="cat">Cat</option>
+                    </select>
+                </label>
+                <label>Age (Optional): <input type="number" x-model="newPet.age" placeholder="Years" style="width: 100%; padding: 8px; margin-top: 4px;"></label>
+            </div>
+            
+            <button @click="saveNewPet()" class="btn-nudge-static" style="background: #0f766e; width: 100%; max-width: 300px;">Save Profile</button>
+            <button x-show="pets.length > 0" @click="showAddPet = false" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
+        </div>
+
+        <div x-show="!showAddPet && pets.length > 0" class="summary-box">
+            
+            <div style="background: white; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-dog" x-show="currentSpecies === 'dog'" style="font-size: 1.5rem; color: #64748b;"></i>
+                    <i class="fa-solid fa-cat" x-show="currentSpecies === 'cat'" style="font-size: 1.5rem; color: #64748b;"></i>
+                    <select x-model="activePetName" style="font-size: 1.2rem; font-weight: bold; border: none; background: transparent; cursor: pointer; outline: none; color: #1e293b;">
+                        <template x-for="pet in pets" :key="pet.name">
+                            <option :value="pet.name" x-text="pet.name"></option>
+                        </template>
+                    </select>
+                </div>
+                <button @click="showAddPet = true" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+                    <i class="fa-solid fa-plus"></i> Add Pet
+                </button>
             </div>
 
             <button @click="startCount()" class="btn-massive-tap" style="min-height: 120px;">
@@ -154,19 +174,8 @@
         </div>
     </div>
     
-    <div style="margin: 20px 0; display: flex; gap: 15px; justify-content: center;">
-        <div>
-            <label style="display: block; font-size: 0.9rem; margin-bottom: 5px;"><strong>Pet Name:</strong></label>
-            <input type="text" x-model="petName" placeholder="e.g., Bella" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc; width: 150px;">
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.9rem; margin-bottom: 5px;"><strong>Species:</strong></label>
-            <select x-model="species" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
-                <option value="dog">Dog</option>
-                <option value="cat">Cat</option>
-            </select>
-        </div>
-    </div>
+    
+
 
     <div x-show="isCounting" class="summary-box" style="border: 2px solid #16325F;" x-cloak>
         <div class="timer-pulse" x-text="timeLeft + 's'"></div>
@@ -206,31 +215,37 @@
         </div>
     </div>
 
-    <div x-show="history.length > 0" style="margin-top: 30px;" x-cloak>
+    <div x-show="paginatedHistory.length > 0" style="margin-top: 30px;" x-cloak>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3>Recent Logs</h3>
-            <div style="display: flex; gap: 10px;">
-                <button @click="exportCSV()" class="btn-nudge-static"><i class="fa-solid fa-file-csv"></i> CSV</button>
-                <button @click="exportPDF()" class="btn-nudge-static"><i class="fa-solid fa-print"></i> PDF/Print</button>
-            </div>
+            <h3><span x-text="activePetName"></span>'s Logbook</h3>
         </div>
 
-        <template x-for="log in history" :key="log.id">
+        <template x-for="log in paginatedHistory" :key="log.id">
             <div class="history-item" :class="log.isEquivocal ? 'equivocal-flag' : ''">
                 <div>
-                    <strong x-text="new Date(log.date).toLocaleDateString()"></strong>
+                    <strong x-text="new Date(log.date).toLocaleDateString()"></strong> 
                     <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span x-text="log.species" style="text-transform: capitalize; font-size: 0.8rem; color: #94a3b8;"></span>
                     <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">
                         <span x-text="log.rate"></span> bpm
                     </strong>
                 </div>
             </div>
         </template>
+
+        <div x-show="totalPages > 1" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px; background: #f8fafc; border-radius: 6px;">
+            <button @click="prevPage()" :disabled="currentPage === 1" style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;" :style="currentPage === 1 ? 'opacity: 0.5;' : ''">
+                <i class="fa-solid fa-chevron-left"></i> Prev
+            </button>
+            <span style="font-size: 0.9rem; color: #475569;">Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span></span>
+            <button @click="nextPage()" :disabled="currentPage === totalPages" style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;" :style="currentPage === totalPages ? 'opacity: 0.5;' : ''">
+                Next <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
     </div>
     
+        
     <div class="bg-white rounded-lg shadow-md p-6">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-slate-800">
