@@ -213,6 +213,37 @@
             </div>
         </template>
     </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">
+            <i class="fa-solid fa-lungs text-blue-500 mr-2"></i>Respiratory Rate Analytics
+        </h2>
+        
+        <!-- Controls -->
+        <div class="flex space-x-3">
+            <select x-model="timeScale" class="border rounded p-2 text-sm">
+                <option value="7d">Last 7 Days</option>
+                <option value="60d">Last 2 Months</option>
+                <option value="all">Entire Dataset</option>
+            </select>
+            
+            <label class="flex items-center space-x-2 text-sm">
+                <input type="checkbox" x-model="showMedications" class="rounded text-blue-500">
+                <span>Overlay Medications</span>
+            </label>
+            
+            <button @click="exportData()" class="bg-slate-800 text-white px-3 py-2 rounded text-sm hover:bg-slate-700 transition">
+                <i class="fa-solid fa-file-csv mr-1"></i> Export Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Chart Container (Requires fixed height for Chart.js responsiveness) -->
+    <div class="relative h-96 w-full">
+        <canvas id="rrrChart"></canvas>
+    </div>
+</div>
 
     <section id="install-nudge-static" class="install-footer-box" style="margin-top: 40px; text-align: left;">
         <div class="nudge-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>

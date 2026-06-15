@@ -10,11 +10,24 @@ document.addEventListener('alpine:init', () => {
         finalRate: null,
         timerInterval: null,
         history: [],
+        // Core Data Arrays
+        readings: [], // e.g., { date: '2026-06-15T08:00:00', rate: 24, asleep: true }
+        medications: [], // e.g., { date: '2026-06-12T10:00:00', drug: 'Furosemide', dose: '40mg BID', action: 'Increased' }
+        
+        // UI Controls
+        timeScale: 'all', // '7d', '60d', 'all'
+        showMedications: true,
+        chartInstance: null,
 
         init() {
             const saved = localStorage.getItem('vch_rrHistory');
             if (saved) this.history = JSON.parse(saved);
-        },
+            this.loadLocalData();
+            this.$watch('timeScale', () => this.updateChart());
+            this.$watch('showMedications', () => this.updateChart());
+            // Need a slight delay to ensure canvas is rendered
+            setTimeout(() => this.renderChart(), 100);
+                    },
 
         startCount() {
             this.isCounting = true;
@@ -74,8 +87,140 @@ document.addEventListener('alpine:init', () => {
             }
             return { status: 'normal', title: 'Normal Range', text: 'Resting respiratory rate is within normal expected limits.' };
         },
+        
+        calculateStats(data) {
+            if (!data || data.length === 0) return { mean: 0, upperCI: 0, lowerCI: 0 };
+            
+            const n = data.length;
+            const mean = data.reduce((sum, val) => sum + val.rate, 0) / n;
+            
+            // Calculate Standard Deviation
+            const variance = data.reduce((sum, val) => sum + Math.pow(val.rate - mean, 2), 0) / (n - 1 || 1);
+            const sd = Math.sqrt(variance);
+            
+            // Standard Error
+            const se = sd / Math.sqrt(n);
+            const marginOfError = 1.96 * se;
+
+            return {
+                mean: mean,
+                upperCI: mean + marginOfError,
+                lowerCI: mean - marginOfError
+            };
+        },
+        
+                // --- CHARTING FUNCTIONS ---
+        renderChart() {
+            const ctx = document.getElementById('rrrChart').getContext('2d');
+            const dataToPlot = this.getFilteredReadings();
+            const stats = this.calculateStats(dataToPlot);
+
+            // Dynamically generate vertical line annotations for medications
+            let annotations = {
+                thresholdLine: {
+                    type: 'line',
+                    yMin: 30,
+                    yMax: 30,
+                    borderColor: 'rgb(220, 38, 38)', // Red
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: { display: true, content: 'Clinical Cutoff (30)', position: 'end' }
+                },
+                meanLine: {
+                    type: 'line',
+                    yMin: stats.mean,
+                    yMax: stats.mean,
+                    borderColor: 'rgb(59, 130, 246)', // Blue
+                    borderWidth: 1,
+                    label: { display: true, content: 'Mean', position: 'start' }
+                },
+                upperCILine: {
+                    type: 'line',
+                    yMin: stats.upperCI,
+                    yMax: stats.upperCI,
+                    borderColor: 'rgba(59, 130, 246, 0.5)',
+                    borderWidth: 1,
+                    borderDash: [3, 3]
+                },
+                lowerCILine: {
+                    type: 'line',
+                    yMin: stats.lowerCI,
+                    yMax: stats.lowerCI,
+                    borderColor: 'rgba(59, 130, 246, 0.5)',
+                    borderWidth: 1,
+                    borderDash: [3, 3]
+                }
+            };
+
+            // Add medication markers if toggled on
+            if (this.showMedications) {
+                const meds = this.getFilteredMedications();
+                meds.forEach((med, index) => {
+                    annotations[`med_${index}`] = {
+                        type: 'line',
+                        scaleID: 'x',
+                        value: med.date,
+                        borderColor: 'rgb(16, 185, 129)', // Green
+                        borderWidth: 2,
+                        label: {
+                            display: true,
+                            content: `${med.action} ${med.drug} (${med.dose})`,
+                            position: 'start',
+                            rotation: -90,
+                            yAdjust: 20
+                        }
+                    };
+                });
+            }
+
+            if (this.chartInstance) this.chartInstance.destroy();
+
+            this.chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dataToPlot.map(d => new Date(d.date).toLocaleDateString()),
+                    datasets: [{
+                        label: 'Resting Respiratory Rate',
+                        data: dataToPlot.map(d => d.rate),
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.3,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        annotation: { annotations: annotations }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, suggestedMax: 50 }
+                    }
+                }
+            });
+        }
 
         // --- EXPORT FUNCTIONS ---
+        
+        // Export Functionality
+        exportData() {
+            const filtered = this.getFilteredReadings();
+            if (!filtered.length) return;
+            
+            let csvContent = "data:text/csv;charset=utf-8,Date,Rate,Notes\n";
+            filtered.forEach(row => {
+                csvContent += `${row.date},${row.rate},${row.notes || ''}\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `RRR_Export_${this.timeScale}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        },
+        
         exportCSV() {
             if (!this.history.length) return alert("No data to export");
             let csvContent = "data:text/csv;charset=utf-8,Date,Time,Rate(bpm),Species,Status\n";
