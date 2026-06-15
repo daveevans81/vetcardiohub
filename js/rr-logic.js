@@ -175,17 +175,18 @@ saveToHistory() {
         },
         
         
-        get clinicalInterpretation() {
+		get clinicalInterpretation() {
             if (this.finalRate === null || isNaN(this.finalRate)) return null;
             let rate = this.finalRate;
+            const species = this.currentSpecies; // FIXED: Pull dynamically from active patient context
 
-            if (rate > 40) {
+            if (rate >= 40) {
                 return { status: 'danger', title: 'Action Required', text: 'Resting rate is significantly elevated. Contact your veterinary surgeon.' };
             }
-            if (this.species === 'dog' && rate >= 30 && rate <= 35) {
+            if (species === 'dog' && rate >= 30 && rate < 40) {
                 return { status: 'equivocal', title: 'Equivocal (Borderline)', text: 'This rate is borderline high. Please recount in 2-4 hours while the dog is in deep sleep.' };
             }
-            if (this.species === 'cat' && rate >= 35 && rate <= 40) {
+            if (species === 'cat' && rate >= 35 && rate < 40) {
                 return { status: 'equivocal', title: 'Equivocal (Borderline)', text: 'Cats can occasionally rest at this rate, but it is borderline. Recount in 2 hours.' };
             }
             return { status: 'normal', title: 'Normal Range', text: 'Resting respiratory rate is within normal expected limits.' };
@@ -275,7 +276,7 @@ saveToHistory() {
         nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
         prevPage() { if (this.currentPage > 1) this.currentPage--; },
         
-// --- UPDATED FILTER (Respects Pet Selection) ---
+// ---  FILTER (Respects Pet Selection) ---
 getFilteredReadings() {
             if (!this.history || this.history.length === 0 || !this.activePetName) return [];
             
@@ -290,7 +291,9 @@ getFilteredReadings() {
                     return itemDate >= startDate && itemDate <= endDate;
                 });
             }
-            return filtered.reverse(); // For chart chronological order
+            
+            // Sort via a timestamp calculation rather than using destructive inline reversing
+            return filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
         },
         
         
