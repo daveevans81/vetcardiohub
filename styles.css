@@ -3711,12 +3711,17 @@ input {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    margin-bottom: 8px;
+    padding: 10px 12px;
+    background: #ffffff;
+    border: 1px solid #dde4ef;
+    border-radius: 4px;
+    margin-bottom: 3px;
 }
+
+.history-item:nth-child(even) {
+    background: #e8eef7;
+}
+
 .history-item.equivocal-flag {
     border-color: #fcd34d;
     background: #fffdf6;
