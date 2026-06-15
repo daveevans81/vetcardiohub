@@ -37,6 +37,7 @@
     
     <script src="/js/glossary-data.js" defer></script>
     <script src="/js/glossary-logic.js" defer></script>
+    <script src="/js/med-data.js" defer></script>
     <script src="/js/rr-logic.js" defer></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -241,7 +242,15 @@
                                 <option value="cat">Cat</option>
                             </select>
                         </label>
-                        <label>Weight (Optional): <input type="number" x-model="newPet.weight" placeholder="Kg's" style="width: 100%; padding: 8px; margin-top: 4px;"></label>
+                        <div style="display: flex; gap: 10px; margin-top: 4px;">
+                            <label style="flex-grow: 1;">Weight: <input type="number" step="0.1" x-model="newPet.weight" placeholder="e.g. 12.5" style="width: 100%; padding: 8px; margin-top: 4px;"></label>
+                            <label style="width: 80px;">Unit: 
+                                <select x-model="newPet.weightUnit" style="width: 100%; padding: 8px; margin-top: 4px;">
+                                    <option value="kg">kg</option>
+                                    <option value="lbs">lbs</option>
+                                </select>
+                            </label>
+                        </div>
                         <label>Age (Optional): <input type="number" x-model="newPet.age" placeholder="Years" style="width: 100%; padding: 8px; margin-top: 4px;"></label>
                     </div>
                     
@@ -372,6 +381,151 @@
                         </div>
                     </div>
             </div>
+            
+            <!-- ACCORDION: MEDICATION LEDGER -->
+            <div class="medicationHistory" x-show="hasAnyDataForActivePet" style="border: 1px solid #adc1ed; border-radius: 4px; background: #f2f6fc; margin-top: 15px; padding: 20px;" x-cloak>
+                
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                    <button @click="showMedLog = !showMedLog" type="button" style="
+                        width: 100%;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 12px 16px;
+                        background: #e8eef7;
+                        border: 1px solid #c8d6eb;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        color: #16325F;
+                        transition: background 0.15s ease;
+                    " @mouseenter="$el.style.background='#dde6f3'"
+                       @mouseleave="$el.style.background='#e8eef7'">
+                        
+                        <h3 style="margin: 0;"><i class="fa-solid fa-pills" style="margin-right: 8px;"></i> Pharmacologic Ledger</h3> 
+                        <i class="fa-solid" :class="showMedLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                    </button>
+                </div>
+            
+                <!-- ACCORDION CONTENT -->
+                <div x-show="showMedLog" x-transition>
+                    
+                    <!-- MEDICATION INPUT FORM -->
+                    <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #c8d6eb; margin-bottom: 20px;">
+                        <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Medication Change</h4>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end;">
+                            
+                            <!-- Date -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Event Date</label>
+                                <input type="date" x-model="newMed.eventDate" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            </div>
+            
+                            <!-- Drug Selection -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Medication</label>
+                                <select x-model="newMed.drugId" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                    <option value="" disabled>Select Drug...</option>
+                                    <template x-for="[id, drug] in Object.entries(formulary)" :key="id">
+                                        <option :value="id" x-text="drug.generic + (drug.brands.length ? ' (' + drug.brands[0] + ')' : '')"></option>
+                                    </template>
+                                </select>
+                            </div>
+            
+                            <!-- Custom Drug Input (Shows only if 'Other' is selected) -->
+                            <div x-show="newMed.drugId === 'other'" x-cloak>
+                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Custom Name</label>
+                                <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            </div>
+            
+                            <!-- Action -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Action</label>
+                                <select x-model="newMed.action" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                    <option value="Started">Started</option>
+                                    <option value="Adjusted">Adjusted Dose</option>
+                                    <option value="Stopped">Stopped</option>
+                                </select>
+                            </div>
+            
+                            <!-- Dose (mg) -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Dose (mg)</label>
+                                <input type="number" step="0.1" x-model="newMed.doseMg" placeholder="e.g., 20" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            </div>
+            
+                            <!-- Frequency -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Frequency</label>
+                                <select x-model="newMed.frequency" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                    <option value="q24h">q24h (SID)</option>
+                                    <option value="q12h">q12h (BID)</option>
+                                    <option value="q8h">q8h (TID)</option>
+                                    <option value="PRN">PRN (As Needed)</option>
+                                </select>
+                            </div>
+            
+                            <!-- Save Button -->
+                            <div>
+                                <button @click="addMedication()" type="button" style="width: 100%; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                    <i class="fa-solid fa-plus"></i> Save Entry
+                                </button>
+                            </div>
+                        </div>
+            
+                        <!-- Dynamic mg/kg Display -->
+                        <div x-show="calculatedMgPerKg() !== null" x-transition style="margin-top: 10px; font-size: 0.85rem; color: #059669; font-weight: bold; background: #d1fae5; padding: 6px 12px; border-radius: 4px; display: inline-block;">
+                            Calculated Dosage: <span x-text="calculatedMgPerKg()"></span> mg/kg
+                        </div>
+                    </div>
+            
+                    <!-- MEDICATION HISTORY LIST -->
+                    <div style="background: #ffffff; border-radius: 6px; border: 1px solid #c8d6eb; overflow: hidden;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
+                            <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
+                                <tr>
+                                    <th style="padding: 10px 15px;">Date</th>
+                                    <th style="padding: 10px 15px;">Action</th>
+                                    <th style="padding: 10px 15px;">Medication</th>
+                                    <th style="padding: 10px 15px;">Regimen</th>
+                                    <th style="padding: 10px 15px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="med in sortedMedLedger()" :key="med.id">
+                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        <td style="padding: 10px 15px; font-weight: bold; color: #334155;" x-text="med.eventDate"></td>
+                                        <td style="padding: 10px 15px;">
+                                            <span :style="med.isMajorChange ? 'color: #ef4444; font-weight: bold;' : 'color: #f59e0b; font-weight: bold;'" x-text="med.action"></span>
+                                        </td>
+                                        <td style="padding: 10px 15px;">
+                                            <span x-text="med.drugId === 'other' ? med.customName : formulary[med.drugId].generic"></span>
+                                        </td>
+                                        <td style="padding: 10px 15px; color: #64748b;">
+                                            <span x-text="med.doseMg + 'mg ' + med.frequency"></span> 
+                                            <span x-show="med.mgPerKg" style="font-size: 0.8rem; color: #94a3b8;">(<span x-text="med.mgPerKg"></span> mg/kg)</span>
+                                        </td>
+                                        <td style="padding: 10px 15px; text-align: right;">
+                                            <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <tr x-show="medLedger.length === 0">
+                                    <td colspan="5" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
+                                        No pharmacologic history recorded for this patient.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+            
+                </div>
+            </div>
+
+
             <div class="bg-white rounded-lg shadow-md p-6" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #d9c9f0; background: #fcfaff; border-radius: 4px; padding: 20px;">
                 
                 <div class="flex justify-between items-center mb-4">
@@ -426,27 +580,55 @@
                 </div>
             </div>
 
-        
             <div class="summary-box" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
-                <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Data Management</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Your data is stored locally on this device. Create backups before clearing your browser history.</p>
+                <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Data Management & Backups</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">Your data is stored locally. Create backups before clearing your browser history.</p>
                 
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button @click="exportCSV()" class="btn-nudge-static" style="background: #0284c7;">
-                        <i class="fa-solid fa-download"></i> Backup Data (CSV)
-                    </button>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
                     
-                    <label class="btn-nudge-static" style="background: #10b981; cursor: pointer;">
-                        <i class="fa-solid fa-upload"></i> Restore Data
-                        <input type="file" accept=".csv" @change="importCSV" style="display: none;">
-                    </label>
+                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Respiratory Logs (CSV)</h4>
+                        <div style="display: flex; gap: 10px;">
+                            <button @click="exportCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                            <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                Import
+                                <input type="file" accept=".csv" @change="importCSV" style="display: none;">
+                            </label>
+                        </div>
+                    </div>
             
-                    <button @click="resetData()" class="btn-nudge-static" style="background: #ef4444; margin-left: auto;">
-                        <i class="fa-solid fa-trash-can"></i> Erase All Data
-                    </button>
-                    <button @click="exportPDF()" class="btn-nudge-static"><i class="fa-solid fa-print"></i> PDF/Print</button>
+                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Medication Logs (CSV)</h4>
+                        <div style="display: flex; gap: 10px;">
+                            <button @click="exportMedicationsCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                            <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                Import
+                                <input type="file" accept=".csv" @change="importMedicationsCSV" style="display: none;">
+                            </label>
+                        </div>
+                    </div>
+            
+                    <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)</h4>
+                            <p style="margin: 0; font-size: 0.75rem; color: #64748b;">Backups everything: Patients, Breathing, and Medications.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button @click="exportCompleteBackup()" class="btn-nudge-static" style="background: #334155; font-size: 0.85rem; padding: 8px 12px;">Download Backup</button>
+                            <label class="btn-nudge-static" style="background: #475569; font-size: 0.85rem; padding: 8px 12px; cursor: pointer; text-align: center;">
+                                Restore Backup
+                                <input type="file" accept=".json" @change="importCompleteBackup" style="display: none;">
+                            </label>
+                            <button @click="resetData()" class="btn-nudge-static" style="background: #ef4444; font-size: 0.85rem; padding: 8px 12px; margin-left: 10px;">
+                                <i class="fa-solid fa-trash-can"></i> Erase All
+                            </button>
+                            <button @click="exportPDF()" class="btn-nudge-static"><i class="fa-solid fa-print"></i> PDF/Print</button>
+                        </div>
+                    </div>
+            
                 </div>
             </div>
+
         
             <section id="install-nudge-static" class="install-footer-box" style="margin-top: 40px; text-align: left;">
                 <div class="nudge-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>

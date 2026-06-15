@@ -7,7 +7,7 @@ document.addEventListener('alpine:init', () => {
         pets: [], // Array of { name: 'Bella', species: 'dog', age: 8 }
         activePetName: '', // The currently selected pet
         showAddPet: false, // Toggles the setup modal
-        newPet: { name: '', species: 'dog', age: '' },
+        newPet: { name: '', species: 'dog', age: '',weight: '', weightUnit: 'kg' },
         showLog: true,
 
         isCounting: false,
@@ -25,12 +25,23 @@ document.addEventListener('alpine:init', () => {
         timeScale: '180d', // Default to 6 months
         customStartDate: '',
         customEndDate: '',
-        medications: [],
         showMedications: true,
         chartInstance: null,
         chartRenderTimeout: null,
         isChartExpanded: false,
         
+        // Medication Module State
+medLedger: [], 
+showMedLog: false, // Accordion toggle state
+formulary: VET_FORMULARY, // Expose the global object to Alpine
+newMed: {
+    eventDate: new Date().toISOString().split('T')[0], // Defaults to today YYYY-MM-DD
+    drugId: '',
+    customName: '',
+    action: 'Started', // 'Started', 'Adjusted', 'Stopped'
+    doseMg: '',
+    frequency: 'q12h'
+},
 
 init() {
             // Load Profiles
@@ -40,6 +51,10 @@ init() {
             // Load History
 const savedHistory = localStorage.getItem('vch_rrHistory');
             if (savedHistory) this.history = JSON.parse(savedHistory);
+            
+            // Load Medications
+            const savedMeds = localStorage.getItem('vch_medLedger');
+            if (savedMeds) this.medLedger = JSON.parse(savedMeds);
 
             // Set default active pet
             if (this.pets.length > 0) {
@@ -64,20 +79,24 @@ saveNewPet() {
             const cleanName = this.newPet.name.trim();
             if (!cleanName) return alert("A valid pet name is required.");
 
-            // Enforce strict duplicate safety boundaries
             if (this.pets.find(p => p.name.toLowerCase() === cleanName.toLowerCase())) {
                 return alert("A patient profile with this name already exists.");
             }
 
+            // Save all the new clinical data
             this.pets.push({
                 name: cleanName,
                 species: this.newPet.species,
-                age: this.newPet.age ? parseInt(this.newPet.age, 10) : null
+                age: this.newPet.age ? parseInt(this.newPet.age, 10) : null,
+                weight: this.newPet.weight ? parseFloat(this.newPet.weight) : null,
+                weightUnit: this.newPet.weightUnit || 'kg'
             });
 
             localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
-            this.activePetName = cleanName;
-            this.newPet = { name: '', species: 'dog', age: '' };
+            this.activePetName = cleanName; // This instantly triggers the activePetProfile getter!
+            
+            // Reset form
+            this.newPet = { name: '', species: 'dog', age: '', weight: '', weightUnit: 'kg' };
             this.showAddPet = false;
         },
 
@@ -111,6 +130,22 @@ get currentSpecies() {
             return labels[this.timeScale] || 'Filtered Range';
         },
         
+        // Helper function to calculate mg/kg dynamically in the UI
+        
+// Dynamic mg/kg Calculator (with strict null/clinical safety checks)
+calculatedMgPerKg() {
+    if (!this.activePetProfile || !this.activePetProfile.weight || !this.newMed.doseMg) return null;
+    
+    let weight = parseFloat(this.activePetProfile.weight);
+    let dose = parseFloat(this.newMed.doseMg);
+    
+    // Prevent division by zero or NaN cascade
+    if (isNaN(weight) || isNaN(dose) || weight <= 0) return null;
+
+    let weightInKg = this.activePetProfile.weightUnit === 'lbs' ? weight / 2.2046 : weight;
+    return (dose / weightInKg).toFixed(2);
+},
+
 parseDateSafe(dateStr) {
             // 1. Try standard parsing (Works perfectly for our new ISO strings)
             let d = new Date(dateStr);
@@ -160,6 +195,56 @@ startCount() {
             this.finalRate = this.tapCount * 2; // Extrapolate 30s to 60s
             this.saveToHistory();
         },
+        
+        // Save function for the Ledger
+addMedication() {
+    if (!this.newMed.drugId || !this.newMed.doseMg) {
+        alert("Clinical Entry Error: Please select a medication and specify the dose in mg.");
+        return;
+    }
+
+    // Determine severity for Phase 3 Charting
+    const isMajor = ['Started', 'Stopped'].includes(this.newMed.action);
+
+    const entry = {
+        id: Date.now(), // Unique identifier
+        petName: this.activePetProfile.name,
+        eventDate: this.newMed.eventDate,
+        drugId: this.newMed.drugId,
+        customName: this.newMed.drugId === 'other' ? this.newMed.customName : null,
+        action: this.newMed.action,
+        doseMg: parseFloat(this.newMed.doseMg),
+        frequency: this.newMed.frequency,
+        mgPerKg: this.calculatedMgPerKg(), // Store mathematical snapshot
+        isMajorChange: isMajor
+    };
+
+    this.medLedger.push(entry);
+    
+    localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+
+    // Reset the form but keep the current date
+    this.newMed = {
+        eventDate: this.newMed.eventDate, 
+        drugId: '',
+        customName: '',
+        action: 'Started',
+        doseMg: '',
+        frequency: 'q12h'
+    };
+},
+
+// Sort ledger chronologically (newest first) to avoid Alpine array freezing
+sortedMedLedger() {
+    return [...this.medLedger].sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+},
+
+deleteMedication(id) {
+    if(confirm("Delete this medication entry? This will remove it from the patient's historical chart.")) {
+        this.medLedger = this.medLedger.filter(med => med.id !== id);
+        localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+    }
+},
 
 saveToHistory() {
             // Null safety check: ensure a patient is selected
@@ -573,6 +658,127 @@ importCSV(event) {
             };
             reader.readAsText(file);
         },
+        
+        // --- MEDICATION CSV MANAGEMENT ---
+        exportMedicationsCSV() {
+            if (!this.medLedger || this.medLedger.length === 0) return alert("No medication data to export.");
+
+            const headers = "Date,PetName,Action,Drug,CustomName,Dose(mg),Frequency,mg/kg\n";
+            const rows = this.medLedger.map(med => {
+                const drugName = med.drugId === 'other' ? 'Other' : (this.formulary[med.drugId]?.generic || med.drugId);
+                return `${med.eventDate},"${med.petName}",${med.action},"${drugName}","${med.customName || ''}",${med.doseMg},${med.frequency},${med.mgPerKg || ''}`;
+            }).join("\n");
+
+            const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + rows);
+            const link = document.createElement("a");
+            link.setAttribute("href", csvContent);
+            link.setAttribute("download", `VCH_Medications_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        importMedicationsCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result;
+                    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+                    if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+
+                    let importedCount = 0;
+                    for (let i = 1; i < lines.length; i++) {
+                        const regex = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
+                        const parts = lines[i].match(regex);
+                        
+                        if (parts && parts.length >= 7) {
+                            const entry = {
+                                id: Date.now() + i, // Unique ID
+                                eventDate: parts[0].replace(/"/g, ''),
+                                petName: parts[1].replace(/"/g, ''),
+                                action: parts[2].replace(/"/g, ''),
+                                drugId: 'other', // Safest fallback for imported raw text
+                                customName: parts[3].replace(/"/g, ''),
+                                doseMg: parseFloat(parts[5].replace(/"/g, '')),
+                                frequency: parts[6].replace(/"/g, ''),
+                                mgPerKg: parts[7] ? parseFloat(parts[7].replace(/"/g, '')) : null,
+                                isMajorChange: ['Started', 'Stopped'].includes(parts[2].replace(/"/g, ''))
+                            };
+                            
+                            if (!isNaN(entry.doseMg)) {
+                                this.medLedger.push(entry);
+                                importedCount++;
+                            }
+                        }
+                    }
+                    localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+                    alert(`Imported ${importedCount} medication records.`);
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to parse Medication CSV.");
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        },
+
+        // --- FULL SYSTEM MASTER BACKUP (JSON) ---
+        exportCompleteBackup() {
+            const backupData = {
+                vch_rrPets: this.pets,
+                vch_rrHistory: this.history,
+                vch_medLedger: this.medLedger,
+                exportDate: new Date().toISOString()
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            const link = document.createElement("a");
+            link.setAttribute("href", dataStr);
+            link.setAttribute("download", `VCH_MasterBackup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        importCompleteBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.vch_rrPets && data.vch_rrHistory && data.vch_medLedger) {
+                        if (confirm("This will replace all current data with the backup file. Proceed?")) {
+                            this.pets = data.vch_rrPets;
+                            this.history = data.vch_rrHistory;
+                            this.medLedger = data.vch_medLedger;
+
+                            localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
+                            localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+                            localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+
+                            if (this.pets.length > 0) this.activePetName = this.pets[0].name;
+                            this.currentPage = 1;
+                            this.$nextTick(() => { this.renderChart(); });
+                            alert("Master Backup successfully restored!");
+                        }
+                    } else {
+                        alert("Invalid backup file. Missing required VCH datasets.");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to read JSON backup file.");
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        },
+        
         exportPDF() {
             // Web-native PDF generation using the browser's print dialog.
             // Much lighter than adding jsPDF to the clinical stack.
