@@ -97,24 +97,78 @@
     
     
        
-    <style>
-        /* Glossary specific styling for clickable icons */
-        .glossary-icon { color: #94a3b8; cursor: pointer; transition: color 0.2s; }
-        .glossary-icon:hover { color: #0ea5e9; }
-        
-        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .card-title { color: var(--primary); font-size: 1.2rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
-        .input-group input:focus, .input-group select:focus { outline: 2px solid var(--primary-light); background-color: #fff; }
-        .results-box { border: 1px solid var(--border); padding: 10px 15px; border-radius: 6px; background: #fff; }
-        .result-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-        .result-row:last-child { border-bottom: none; }
-        .normal { color: var(--normal) !important; font-weight: bold; }
-        .abnormal { color: var(--abnormal) !important; font-weight: bold; }
-        .info-block { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
-        .info-block h3 { color: var(--primary); margin-bottom: 8px; font-size: 1rem; }
+<style type="text/css">
+@media print {
+    /* 1. Global Reset - Ensures padding doesn't push width over 100% */
+    * {
+        box-sizing: border-box !important;
+        -webkit-print-color-adjust: exact !important; /* Forces colors/backgrounds */
+        print-color-adjust: exact !important;
+    }
+
+    /* 2. Hide UI Elements */
+    #site-header, #site-footer, .hero, .summary-box, .btn-massive-tap,
+    .install-footer-box {
+        display: none !important;
+    }
+
+    /* 3. Page & Layout Setup */
+    @page {
+        size: auto;
+        margin: 1.5cm !important; /* The physical paper margin */
+    }
+
+    body, html {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Containers must be 100% width so they don't fight the @page margin */
+    main, .container, .content, {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    /* 4. The Report Sections (The Safety Gutter) */
+    .paginatedHistory, #rrrChart {
+        display: block !important;
+        visibility: visible !important;
+        width: 100% !important;
+        padding: 0 15px !important; /* Internal safety gutter to prevent clipping */
+        border: none !important;
+        margin-bottom: 30px !important;
+        page-break-inside: avoid;
+    }
+
+    /* 5. Custom Branding Header */
+    .paginatedHistory::before {
+        content: "VETCARDIOHUB SRR TRACKER";
+        display: block;
+        font-size: 10px;
+        letter-spacing: 2px;
+        color: #94a3b8;
+        margin-bottom: 10px;
+    } 
+
+
+    /* 7. Clinical Colors */
+    .abnormal, [style*="color: #dc2626"] { 
+        color: #dc2626 !important; 
+        font-weight: bold !important; 
+    }
+    .normal, [style*="color: #16a34a"] { 
+        color: #16a34a !important; 
+    }
+    h1, h2, h3, [style*="color: #1e40af"], [style*="color: #16325F"] { 
+        color: #16325F !important; 
+    }
+}
+
     </style>
 </head>
 <body>
@@ -127,7 +181,7 @@
             <h1>Resting Respiratory Rate</h1>
             <p>Counting and Tracking Tool</p>
         </header>
-
+<main>
 <div class="rr-dashboard" x-data="rrTracker">
 
   <div x-show="!isCounting && finalRate === null" x-transition>
@@ -214,7 +268,7 @@
         </div>
     </div>
 
-    <div x-show="paginatedHistory.length > 0" style="margin-top: 30px;" x-cloak>
+    <div class="paginatedHistory" x-show="paginatedHistory.length > 0" style="margin-top: 30px;" x-cloak>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3><span x-text="activePetName"></span>'s Logbook</h3>
         </div>
@@ -282,7 +336,7 @@
     </div>
 
     <!-- Chart Container (Requires fixed height for Chart.js responsiveness) -->
-    <div class="relative h-96 w-full">
+    <div id="rrrChart" class="relative h-96 w-full">
         <canvas x-ref="rrrChartCanvas"></canvas>
     </div>
 </div>
@@ -317,7 +371,7 @@
         <button onclick="showInstructions()" class="btn-nudge-static">How-To</button>
 
     </section>
-
+</main>
 </div>
 
 <div id="glossary-container"></div>
