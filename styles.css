@@ -3742,10 +3742,19 @@ input {
     overflow: hidden;
 }
 
-.btn-nudge-static {
+..btn-nudge-static {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+    box-sizing: border-box;
 }
 
 [x-cloak] { display: none !important; }
