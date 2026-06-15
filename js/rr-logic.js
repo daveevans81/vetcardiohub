@@ -198,7 +198,7 @@ document.addEventListener('alpine:init', () => {
                     }
                 }
             });
-        }
+        },
 
         // --- EXPORT FUNCTIONS ---
         
