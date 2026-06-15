@@ -1,0 +1,28 @@
+{
+  "short_name": "RR Tracker",
+  "name": "VetCardioHub Resp Tracker",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/rr-tracker.html",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "theme_color": "#2563eb"
+}
