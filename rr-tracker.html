@@ -106,12 +106,21 @@
         -webkit-print-color-adjust: exact !important; /* Forces colors/backgrounds */
         print-color-adjust: exact !important;
     }
+    
 
     /* 2. Hide UI Elements */
     #site-header, #site-footer, .hero, .summary-box, .btn-massive-tap,
     .install-footer-box, .under-construction-banner  {
         display: none !important;
     }
+.rr-dashboard, main {
+    min-height: 0 !important;
+    padding-top: 0 !important;
+}
+
+[x-cloak], [style*="display: none"] {
+    display: none !important;
+}
 
     /* 3. Page & Layout Setup */
     @page {
