@@ -3755,6 +3755,7 @@ input {
     cursor: pointer;
     line-height: 1;
     box-sizing: border-box;
+    vertical-align: middle; /* add this */
 }
 
 [x-cloak] { display: none !important; }
