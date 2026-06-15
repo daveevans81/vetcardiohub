@@ -521,7 +521,7 @@ importCSV(event) {
                     if (lastImportedPet) {
                         this.activePetName = lastImportedPet;
                     }
-                    
+                    this.showAddPet = false;
                     this.currentPage = 1;
                     this.$nextTick(() => { this.renderChart(); });
                     alert(`Successfully imported ${importedCount} records.`);
