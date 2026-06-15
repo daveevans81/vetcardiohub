@@ -28,6 +28,7 @@ document.addEventListener('alpine:init', () => {
         showMedications: true,
         chartInstance: null,
         chartRenderTimeout: null,
+        isChartExpanded: false,
         
 
 init() {
@@ -347,6 +348,18 @@ resetData() {
         
                 // --- CHARTING FUNCTIONS ---
                 
+        toggleChartExpansion() {
+            this.isChartExpanded = !this.isChartExpanded;
+            
+            // We must wait for Alpine to apply the fullscreen CSS class, 
+            // then explicitly tell Chart.js to redraw to fit the new massive container.
+            this.$nextTick(() => {
+                if (this.chartInstance) {
+                    this.chartInstance.resize();
+                }
+            });
+        },
+                
  renderChart() {
             if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
 
@@ -414,7 +427,14 @@ resetData() {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { annotation: { annotations: annotations } },
+                        plugins: {
+					        annotation: { annotations: annotations },
+					        tooltip: { callbacks: { title: (context) => context[0].label } },
+					        zoom: {
+					            pan: { enabled: true, mode: 'x' },
+					            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+					        }
+					    },     
                         scales: {
                             y: { beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } },
                             x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } }

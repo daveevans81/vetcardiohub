@@ -3721,3 +3721,24 @@ input {
     border-color: #fcd34d;
     background: #fffdf6;
 }
+
+/* Chart Expansion Overlay */
+.chart-fullscreen-overlay {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #f8fafc;
+    z-index: 10050; /* Safely above glossary modals (10000) */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Ensure the canvas container expands when in fullscreen */
+.chart-fullscreen-overlay .relative {
+    flex-grow: 1;
+    height: 100% !important;
+}
