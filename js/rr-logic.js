@@ -308,15 +308,16 @@ getFilteredMedications() {
         
         // --- DATA MANAGEMENT ---
         
-        resetData() {
-            const confirmed = window.confirm("Are you sure you want to delete ALL respiratory data? This cannot be undone unless you have a backup CSV.");
-            if (confirmed) {
+resetData() {
+            if (window.confirm("CRITICAL WARNING: This action permanently clears ALL local patient profiles, logs, and tracking history. Proceed?")) {
                 this.history = [];
+                this.pets = [];
+                this.activePetName = '';
+                this.showAddPet = true;
                 localStorage.removeItem('vch_rrHistory');
-                this.petName = '';
-                this.filterPet = 'all';
-                this.renderChart();
-                alert("Data successfully erased.");
+                localStorage.removeItem('vch_rrPets');
+                if (this.chartInstance) this.chartInstance.destroy();
+                alert("Database completely flushed.");
             }
         },
         
