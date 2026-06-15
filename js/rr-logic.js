@@ -8,6 +8,7 @@ document.addEventListener('alpine:init', () => {
         activePetName: '', // The currently selected pet
         showAddPet: false, // Toggles the setup modal
         newPet: { name: '', species: 'dog', age: '' },
+        showLog: true,
 
         isCounting: false,
         timeLeft: 30,
