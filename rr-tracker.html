@@ -254,12 +254,7 @@
         
         <!-- Controls -->
         <div class="flex flex-wrap gap-3 items-center">
-            <select x-show="uniquePets.length > 0" x-model="filterPet" class="border rounded p-2 text-sm bg-white cursor-pointer font-bold text-blue-800">
-                <option value="all">All Pets</option>
-                <template x-for="name in uniquePets" :key="name">
-                    <option :value="name" x-text="name"></option>
-                </template>
-            </select>
+
             <select x-model="timeScale" class="border rounded p-2 text-sm bg-white cursor-pointer">
                 <option value="thisWeek">This Week</option>
                 <option value="lastWeek">Last Week</option>
