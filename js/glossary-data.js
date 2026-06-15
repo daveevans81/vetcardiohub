@@ -47,7 +47,30 @@ const VET_GLOSSARY_DB = {
         article: "/blog-posts/post6.html",
         pmid: "30974015" // Vets get the paper, owners ignore it
     },
+// ==========================================\n    
+    // GROUP: MONITORING & AT-HOME CARE
+    // ==========================================\n    
+    rrr_guidelines: {
+        title: "Resting Respiratory Rate (RRR) Guidelines",
+        group: "Monitoring",
+        category: "Home Care",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Counting your pet's breathing rate while they are deeply asleep or fully resting is one of the most reliable ways to monitor for heart failure. One breath equals one complete in-and-out movement of the chest. A normal sleeping rate for dogs and cats is consistently under 30 breaths per minute.",
+        textClinical: "Resting Respiratory Rate (RRR) or Sleeping Respiratory Rate (SRR) is a highly sensitive, non-invasive indicator of left-sided congestive heart failure (CHF). An SRR consistently > 30 breaths/minute in a patient with known at-risk cardiac disease strongly warrants investigation for pulmonary venous congestion or edema.",
+        method: "Ensure the patient is in a thermally neutral environment and completely at rest (ideally deep sleep). Observe the chest wall from a distance to avoid waking them. Count the number of full respiratory cycles (inspiration + expiration = 1 breath) over 30 seconds and multiply by 2."
+    },
 
+    equivocal_rrr: {
+        title: "Equivocal (Borderline) Breathing Rates",
+        group: "Monitoring",
+        category: "Home Care",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "Sometimes a pet may breathe slightly faster (30-40 breaths per minute) because they are dreaming, too warm, or just settling down. This is considered 'equivocal' or borderline. There is no need to panic—simply wait for them to settle into a deeper sleep and count again in 1 to 2 hours. You can tell the difference because if its a concern the breathing rate tends to stay persistently high or climb higher, and tends to be deeper and more laboured. If you get more than one consecutive readinge in this range consider seeking a veterinary opinion.",
+        textClinical: "An equivocal RRR (typically 30-40 bpm) represents a diagnostic grey zone. Elevations in this range may be physiological artifacts caused by REM sleep, thermoregulation, anxiety, or primary respiratory disease, rather than pathological cardiogenic pulmonary edema. Standard clinical protocol requires reassessing the SRR after 2-4 hours of acclimatization to establish a true baseline before initiating or adjusting diuretic therapy."
+    },
+    
     // ==========================================
     // GROUP: ACVIM MMVD STAGING
     // ==========================================
