@@ -90,6 +90,26 @@ get currentSpecies() {
             return this.pets.map(p => p.name);
         },
         
+        get hasAnyDataForActivePet() {
+            if (!this.history || !this.activePetName) return false;
+            return this.history.some(item => item.petName === this.activePetName);
+        },
+
+        get timeScaleLabel() {
+            const labels = {
+                'thisWeek': 'This Week',
+                'lastWeek': 'Last Week',
+                'thisMonth': 'This Month',
+                'lastMonth': 'Last Month',
+                '60d': 'Last 60 Days',
+                '90d': 'Last 90 Days',
+                '180d': 'Last 6 Months',
+                'all': 'Entire Dataset',
+                'custom': 'Custom Range'
+            };
+            return labels[this.timeScale] || 'Filtered Range';
+        },
+        
 parseDateSafe(dateStr) {
             // 1. Try standard parsing (Works perfectly for our new ISO strings)
             let d = new Date(dateStr);

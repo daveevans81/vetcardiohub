@@ -269,15 +269,26 @@
                 </div>
             </div>
         
-            <div class="paginatedHistory" x-show="paginatedHistory.length > 0" style="margin-top: 30px;" x-cloak>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3><span x-text="activePetName"></span>'s Logbook</h3>
+            <div class="paginatedHistory" x-show="hasAnyDataForActivePet" style="margin-top: 30px;" x-cloak>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                    <h3 style="margin: 0;"><span x-text="activePetName"></span>'s Logbook</h3>
+                    
+                    <span style="font-size: 0.8rem; color: #475569; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-filter" style="font-size: 0.7rem; opacity: 0.7;"></i> 
+                        <span x-text="timeScaleLabel"></span>
+                    </span>
+                </div>
+        
+                <div x-show="paginatedHistory.length === 0" style="text-align: center; padding: 25px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; color: #64748b; font-size: 0.9rem;">
+                    <i class="fa-solid fa-calendar-xmark" style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5;"></i><br>
+                    No readings recorded during this specific time period.<br>
+                    <strong>Adjust the Analytics date range above to see older logs.</strong>
                 </div>
         
                 <template x-for="log in paginatedHistory" :key="log.id">
                     <div class="history-item" :class="log.isEquivocal ? 'equivocal-flag' : ''">
                         <div>
-                            <strong x-text="new Date(log.date).toLocaleDateString()"></strong> 
+                            <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
                             <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
@@ -297,8 +308,7 @@
                         Next <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
-            </div>
-            
+            </div>            
                 
             <div class="bg-white rounded-lg shadow-md p-6" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px;">
                 
@@ -346,7 +356,7 @@
             
                 <div x-show="getFilteredReadings().length < 2" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
                     <i class="fa-solid fa-chart-pie text-3xl mb-2"></i>
-                    <p>Log at least 2 resting rates to generate trend analytics.</p>
+                    <p>Log (or include in date range) at least 2 resting rates to generate trend analytics.</p>
                 </div>
             
                 <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: 100%; min-height: 60vh;' : 'height: 384px;'" x-cloak>
