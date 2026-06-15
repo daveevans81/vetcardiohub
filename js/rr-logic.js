@@ -19,15 +19,18 @@ document.addEventListener('alpine:init', () => {
         showMedications: true,
         chartInstance: null,
 
-        init() {
+init() {
             const saved = localStorage.getItem('vch_rrHistory');
             if (saved) this.history = JSON.parse(saved);
-            this.loadLocalData();
-            this.$watch('timeScale', () => this.updateChart());
-            this.$watch('showMedications', () => this.updateChart());
-            // Need a slight delay to ensure canvas is rendered
-            setTimeout(() => this.renderChart(), 100);
-                    },
+           
+            this.$watch('timeScale', () => this.renderChart());
+            this.$watch('showMedications', () => this.renderChart());
+            
+            // Use Alpine's native DOM ready check instead of arbitrary timeouts
+            this.$nextTick(() => {
+                this.renderChart();
+            });
+        },
 
         startCount() {
             this.isCounting = true;
@@ -86,6 +89,31 @@ document.addEventListener('alpine:init', () => {
                 return { status: 'equivocal', title: 'Equivocal (Borderline)', text: 'Cats can occasionally rest at this rate, but it is borderline. Recount in 2 hours.' };
             }
             return { status: 'normal', title: 'Normal Range', text: 'Resting respiratory rate is within normal expected limits.' };
+        },
+        
+        getFilteredReadings() {
+            if (!this.history || this.history.length === 0) return [];
+            
+            // Create a copy of history so we don't mutate the original array
+            let filtered = [...this.history];
+            const now = new Date();
+
+            if (this.timeScale === '7d') {
+                const cutoff = new Date(now.setDate(now.getDate() - 7));
+                filtered = filtered.filter(item => new Date(item.date) >= cutoff);
+            } else if (this.timeScale === '60d') {
+                const cutoff = new Date(now.setDate(now.getDate() - 60));
+                filtered = filtered.filter(item => new Date(item.date) >= cutoff);
+            }
+
+            // History is saved newest-first. For a chart, we want oldest on the left, newest on the right.
+            return filtered.reverse(); 
+        },
+
+        getFilteredMedications() {
+            // Placeholder: Returns the medications array if it exists, safely preventing crashes 
+            // before we build the medication entry UI.
+            return this.medications || [];
         },
         
         calculateStats(data) {
