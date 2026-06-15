@@ -300,14 +300,15 @@
             </div>
             
                 
-            <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="bg-white rounded-lg shadow-md p-6" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px;">
+                
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-slate-800">
-                        <i class="fa-solid fa-lungs text-blue-500 mr-2"></i>Respiratory Rate Analytics
+                    <h2 class="text-xl font-bold text-slate-800" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-chart-line text-blue-500"></i>
+                        <span x-text="activePetName ? activePetName + '\'s Analytics' : 'Analytics'"></span>
                     </h2>
                     
-                    <!-- Controls -->
-                    <div class="flex flex-wrap gap-3 items-center">
+                    <div class="flex flex-wrap gap-3 items-center" x-show="getFilteredReadings().length >= 2" x-cloak>
             
                         <select x-model="timeScale" class="border rounded p-2 text-sm bg-white cursor-pointer">
                             <option value="thisWeek">This Week</option>
@@ -329,15 +330,26 @@
                             </div>
                         </template>
                         
-                        <label class="flex items-center space-x-2 text-sm cursor-pointer ml-auto">
+                        <label class="flex items-center space-x-2 text-sm cursor-pointer">
                             <input type="checkbox" x-model="showMedications" class="rounded text-blue-500 w-4 h-4">
                             <span>Overlay Meds</span>
                         </label>
+            
+                        <button @click="toggleChartExpansion()" class="btn-nudge-static" style="background: #1e293b; padding: 6px 10px; margin-left: auto;">
+                            <i class="fa-solid" :class="isChartExpanded ? 'fa-compress' : 'fa-expand'"></i>
+                            <span x-show="!isChartExpanded" style="margin-left: 5px;">Expand</span>
+                            <span x-show="isChartExpanded" style="margin-left: 5px;">Close</span>
+                        </button>
+                        
                     </div>
                 </div>
-        
-                <!-- Chart Container (Requires fixed height for Chart.js responsiveness) -->
-                <div id="rrrChart" class="relative h-96 w-full">
+            
+                <div x-show="getFilteredReadings().length < 2" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
+                    <i class="fa-solid fa-chart-pie text-3xl mb-2"></i>
+                    <p>Log at least 2 resting rates to generate trend analytics.</p>
+                </div>
+            
+                <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: 100%; min-height: 60vh;' : 'height: 384px;'" x-cloak>
                     <canvas x-ref="rrrChartCanvas"></canvas>
                 </div>
             </div>

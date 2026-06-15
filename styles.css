@@ -3737,6 +3737,8 @@ input {
     overflow: hidden;
 }
 
+[x-cloak] { display: none !important; }
+
 /* Ensure the canvas container expands when in fullscreen */
 .chart-fullscreen-overlay .relative {
     flex-grow: 1;
