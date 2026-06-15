@@ -308,7 +308,7 @@
                         <span x-text="activePetName ? activePetName + '\'s Analytics' : 'Analytics'"></span>
                     </h2>
                     
-                    <div class="flex flex-wrap gap-3 items-center" x-show="getFilteredReadings().length >= 2" x-cloak>
+                    <div class="flex flex-wrap gap-3 items-center">
             
                         <select x-model="timeScale" class="border rounded p-2 text-sm bg-white cursor-pointer">
                             <option value="thisWeek">This Week</option>
@@ -335,7 +335,7 @@
                             <span>Overlay Meds</span>
                         </label>
             
-                        <button @click="toggleChartExpansion()" class="btn-nudge-static" style="background: #1e293b; padding: 6px 10px; margin-left: auto;">
+                        <button x-show="getFilteredReadings().length >= 2" @click="toggleChartExpansion()" class="btn-nudge-static" style="background: #1e293b; padding: 6px 10px; margin-left: auto;">
                             <i class="fa-solid" :class="isChartExpanded ? 'fa-compress' : 'fa-expand'"></i>
                             <span x-show="!isChartExpanded" style="margin-left: 5px;">Expand</span>
                             <span x-show="isChartExpanded" style="margin-left: 5px;">Close</span>
