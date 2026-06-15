@@ -127,28 +127,41 @@ parseDateSafe(dateStr) {
         },
 
 saveToHistory() {
-            // Prevent saving without a name to keep data clean
-            const finalName = this.petName.trim() || 'Unnamed Pet'; 
-            
-            const entry = {
-                id: Date.now(),
-                date: new Date().toISOString(),
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                rate: this.finalRate,
-                species: this.currentSpecies,
-                petName: this.activePetName, // NEW FIELD
-                isEquivocal: this.clinicalInterpretation.status === 'equivocal'
-            };
-            this.history.unshift(entry);
-            
-            // Increased storage limit since they might track multiple pets over months
-            if (this.history.length > 500) this.history.pop(); 
-            localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
-            
-            // Auto-set the filter to the pet they just logged
-            this.filterPet = finalName;
-        },
+            // Null safety check: ensure a patient is selected
+            if (!this.activePetName) {
+                alert("Please select or create a patient profile before saving.");
+                return;
+            }
 
+            const newLog = {
+                id: Date.now(), // Unique identifier for key binding
+                date: new Date().toISOString(),
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                rate: this.finalRate,
+                petName: this.activePetName,
+                species: this.currentSpecies,
+                // Optional: Flag equivocal rates dynamically based on species
+                isEquivocal: this.currentSpecies === 'cat' 
+                    ? (this.finalRate >= 30 && this.finalRate < 40) 
+                    : (this.finalRate >= 25 && this.finalRate < 35)
+            };
+
+            // Unshift places newest records at the top of the raw array
+            this.history.unshift(newLog);
+            localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+
+            // Reset UI state for the next count
+            this.finalRate = null;
+            this.tapCount = 0;
+            this.currentPage = 1; // Snap back to page 1 to see the new entry
+            
+            // Re-render chart with the new data point
+            this.$nextTick(() => {
+                this.renderChart();
+            });
+        },
+        
+        
         get clinicalInterpretation() {
             if (this.finalRate === null || isNaN(this.finalRate)) return null;
             let rate = this.finalRate;
@@ -321,6 +334,18 @@ getFilteredMedications() {
             // 1. Debounce to prevent Alpine watcher race conditions
             if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
             
+            const chartData = this.getFilteredReadings(); // Strict active pet filter
+            
+            if (chartData.length === 0) {
+                // Handle empty state (destroy chart if it exists)
+                if (this.chartInstance) this.chartInstance.destroy();
+                return;
+            }
+
+            // Extract chronological arrays for Chart.js
+            const labels = chartData.map(log => new Date(log.date).toLocaleDateString());
+            const rates = chartData.map(log => log.rate);
+            
             this.chartRenderTimeout = setTimeout(() => {
                 if (!this.$refs.rrrChartCanvas) return;
                 
@@ -480,84 +505,91 @@ getFilteredMedications() {
         },
         
 // Updated Export to include Pet Name
-        exportCSV() {
-            if (!this.history.length) return alert("No data to export");
-            // Standardized Header
-            let csvContent = "data:text/csv;charset=utf-8,Date_ISO,Time,PetName,Species,Rate,Status\n";
-            
-            this.history.forEach(row => {
-                let status = row.isEquivocal ? "Equivocal" : (row.rate > 40 ? "High" : "Normal");
-                // Escape commas in names just in case
-                let safeName = `"${row.petName || 'Unknown'}"`; 
-                csvContent += `${row.date},${row.time},${safeName},${row.species},${row.rate},${status}\n`;
-            });
-            
+exportCSV() {
+            if (!this.history || this.history.length === 0) return alert("No clinical data to export.");
+
+            const headers = "Date,Time,Rate(bpm),PetName,Species\n";
+            const rows = this.history.map(log => {
+                // Provide fallbacks in case of legacy data lacking pet names
+                const pName = log.petName || 'Unknown';
+                const pSpecies = log.species || 'dog';
+                return `${log.date},${log.time},${log.rate},${pName},${pSpecies}`;
+            }).join("\n");
+
+            const csvContent = "data:text/csv;charset=utf-8," + headers + rows;
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `VCH_RRR_Backup_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", `SRR_Export_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
-            link.remove();
+            document.body.removeChild(link);
         },
         
-        importCSV(event) {
+importCSV(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = (e) => {
-                try {
-                    const text = e.target.result;
-                    const lines = text.split('\n').filter(line => line.trim() !== '');
-                    
-                    // Skip the header row
-                    const dataLines = lines.slice(1);
-                    let importedCount = 0;
+                const text = e.target.result;
+                const lines = text.split("\n");
+                
+                let importedCount = 0;
+                let lastImportedPet = null;
 
-                    dataLines.forEach((line, index) => {
-                        // Handle CSV parsing (accounting for quoted pet names)
-                        const regex = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
-                        const parts = line.match(regex);
-                        
-                        if (parts && parts.length >= 5) {
-                            const entry = {
-                                id: Date.now() + index, // Ensure unique IDs
-                                date: parts[0].replace(/"/g, ''),
-                                time: parts[1].replace(/"/g, ''),
-                                petName: parts[2].replace(/"/g, ''),
-                                species: parts[3].replace(/"/g, '').toLowerCase(),
-                                rate: parseInt(parts[4].replace(/"/g, ''), 10),
-                                isEquivocal: parts[5] ? parts[5].replace(/"/g, '').includes('Equivocal') : false
-                            };
-                            
-                            // Only add if it's a valid number
-                            if (!isNaN(entry.rate)) {
-                                this.history.push(entry);
-                                importedCount++;
-                            }
+                // Start at index 1 to skip headers
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const cols = lines[i].split(",");
+                    if (cols.length >= 3) {
+                        const date = cols[0].trim();
+                        const time = cols[1].trim();
+                        const rate = parseInt(cols[2].trim());
+                        const petName = cols[3] ? cols[3].trim() : 'Imported Patient';
+                        const species = cols[4] ? cols[4].trim() : 'dog';
+
+                        // 1. Auto-generate Pet Profile if missing
+                        const existingPet = this.pets.find(p => p.name.toLowerCase() === petName.toLowerCase());
+                        if (!existingPet) {
+                            this.pets.push({ name: petName, species: species, age: null });
+                            lastImportedPet = petName;
                         }
-                    });
 
-                    // Sort history newest first to match our structure
-                    this.history.sort((a, b) => new Date(b.date) - new Date(a.date));
-                    
-                    // Save and refresh
+                        // 2. Push to history
+                        this.history.push({
+                            id: Date.now() + i, // Offset to prevent ID collisions
+                            date: date,
+                            time: time,
+                            rate: rate,
+                            petName: petName,
+                            species: species
+                        });
+                        importedCount++;
+                    }
+                }
+
+                if (importedCount > 0) {
+                    // Save both arrays to localStorage
+                    localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
                     localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
-                    this.renderChart();
-                    alert(`Successfully imported ${importedCount} readings.`);
                     
-                } catch (error) {
-                    console.error("Import failed:", error);
-                    alert("Failed to read CSV. Please ensure it is a valid VetCardioHub backup file.");
+                    // Switch UI to the newly imported pet if one was created
+                    if (lastImportedPet) {
+                        this.activePetName = lastImportedPet;
+                    }
+                    
+                    this.currentPage = 1;
+                    this.$nextTick(() => { this.renderChart(); });
+                    alert(`Successfully imported ${importedCount} records.`);
                 }
                 
-                // Clear the input so the same file can be imported again if needed
+                // Clear the input so the same file can be selected again if needed
                 event.target.value = ''; 
             };
             reader.readAsText(file);
         },
-
         exportPDF() {
             // Web-native PDF generation using the browser's print dialog.
             // Much lighter than adding jsPDF to the clinical stack.
