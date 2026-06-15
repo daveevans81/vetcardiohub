@@ -111,9 +111,13 @@ document.addEventListener('alpine:init', () => {
         
                 // --- CHARTING FUNCTIONS ---
         renderChart() {
-            const ctx = document.getElementById('rrrChart').getContext('2d');
+
             const dataToPlot = this.getFilteredReadings();
             const stats = this.calculateStats(dataToPlot);
+            if (!this.$refs.rrrChartCanvas) return;
+            
+  			  
+ 			const ctx = this.$refs.rrrChartCanvas.getContext('2d'); 			  
 
             // Dynamically generate vertical line annotations for medications
             let annotations = {
