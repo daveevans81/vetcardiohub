@@ -3742,7 +3742,7 @@ input {
     overflow: hidden;
 }
 
-..btn-nudge-static {
+.btn-nudge-static {
     display: inline-flex;
     align-items: center;
     gap: 6px;
