@@ -15,23 +15,40 @@ document.addEventListener('alpine:init', () => {
         medications: [], // e.g., { date: '2026-06-12T10:00:00', drug: 'Furosemide', dose: '40mg BID', action: 'Increased' }
         
         // UI Controls
-        timeScale: 'all', // '7d', '60d', 'all'
         showMedications: true,
         chartInstance: null,
+        timeScale: 'thisMonth', // Updated default
+        customStartDate: '',
+        customEndDate: '',
 
 init() {
             const saved = localStorage.getItem('vch_rrHistory');
             if (saved) this.history = JSON.parse(saved);
-           
+            
             this.$watch('timeScale', () => this.renderChart());
             this.$watch('showMedications', () => this.renderChart());
+            // Watch custom dates so chart updates as they type
+            this.$watch('customStartDate', () => this.renderChart());
+            this.$watch('customEndDate', () => this.renderChart());
             
-            // Use Alpine's native DOM ready check instead of arbitrary timeouts
-            this.$nextTick(() => {
-                this.renderChart();
-            });
+            this.$nextTick(() => { this.renderChart(); });
         },
-
+        
+        parseDateSafe(dateStr) {
+            // First try standard parsing (for ISO strings)
+            let d = new Date(dateStr);
+            if (!isNaN(d.getTime())) return d;
+            
+            // If it fails, assume it's UK format DD/MM/YYYY or DD/MM/YYYY, HH:MM
+            const cleanStr = dateStr.split(',')[0]; // Remove time if present
+            const parts = cleanStr.split('/');
+            if (parts.length === 3) {
+                // Reconstruct as YYYY-MM-DD
+                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
+            }
+            return new Date(); // Fallback
+        },
+        
         startCount() {
             this.isCounting = true;
             this.tapCount = 0;
@@ -91,23 +108,67 @@ init() {
             return { status: 'normal', title: 'Normal Range', text: 'Resting respiratory rate is within normal expected limits.' };
         },
         
-        getFilteredReadings() {
+getFilteredReadings() {
             if (!this.history || this.history.length === 0) return [];
-            
-            // Create a copy of history so we don't mutate the original array
             let filtered = [...this.history];
             const now = new Date();
+            
+            // Normalize 'now' to end of day
+            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            let startDate = null;
+            let endDate = endOfToday;
 
-            if (this.timeScale === '7d') {
-                const cutoff = new Date(now.setDate(now.getDate() - 7));
-                filtered = filtered.filter(item => new Date(item.date) >= cutoff);
-            } else if (this.timeScale === '60d') {
-                const cutoff = new Date(now.setDate(now.getDate() - 60));
-                filtered = filtered.filter(item => new Date(item.date) >= cutoff);
+            const dayOfWeek = startOfToday.getDay(); // 0 is Sun, 1 is Mon
+            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+            switch (this.timeScale) {
+                case 'thisWeek': // Starts Monday
+                    startDate = new Date(startOfToday);
+                    startDate.setDate(startDate.getDate() + daysToMonday);
+                    break;
+                case 'lastWeek':
+                    startDate = new Date(startOfToday);
+                    startDate.setDate(startDate.getDate() + daysToMonday - 7);
+                    endDate = new Date(startDate);
+                    endDate.setDate(endDate.getDate() + 6);
+                    endDate.setHours(23, 59, 59);
+                    break;
+                case 'thisMonth':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'lastMonth':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+                    break;
+                case '60d':
+                    startDate = new Date(startOfToday.getTime() - (60 * 24 * 60 * 60 * 1000));
+                    break;
+                case '90d':
+                    startDate = new Date(startOfToday.getTime() - (90 * 24 * 60 * 60 * 1000));
+                    break;
+                case '180d':
+                    startDate = new Date(startOfToday.getTime() - (180 * 24 * 60 * 60 * 1000));
+                    break;
+                case 'custom':
+                    if (this.customStartDate) startDate = new Date(this.customStartDate + 'T00:00:00');
+                    if (this.customEndDate) endDate = new Date(this.customEndDate + 'T23:59:59');
+                    break;
+                case 'all':
+                default:
+                    startDate = new Date(0); // Beginning of time
+                    break;
             }
 
-            // History is saved newest-first. For a chart, we want oldest on the left, newest on the right.
-            return filtered.reverse(); 
+            if (startDate) {
+                filtered = filtered.filter(item => {
+                    const itemDate = this.parseDateSafe(item.date);
+                    return itemDate >= startDate && itemDate <= endDate;
+                });
+            }
+
+            return filtered.reverse(); // Chart wants oldest to newest (left to right)
         },
 
         getFilteredMedications() {
@@ -210,23 +271,57 @@ init() {
             this.chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: dataToPlot.map(d => new Date(d.date).toLocaleDateString()),
+					labels: dataToPlot.map(d => this.parseDateSafe(d.date)),
                     datasets: [{
                         label: 'Resting Respiratory Rate',
                         data: dataToPlot.map(d => d.rate),
-                        borderColor: 'rgb(75, 192, 192)',
+                        borderColor: 'rgb(14, 165, 233)', // Nice clinical blue
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
                         tension: 0.3,
-                        pointRadius: 4
+                        pointRadius: dataToPlot.length > 30 ? 2 : 5, // Shrink dots if crowded
+                        fill: true
                     }]
                 },
-                options: {
+options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        annotation: { annotations: annotations }
+                        annotation: { annotations: annotations },
+                        tooltip: {
+                            callbacks: {
+                                // Keep tooltips precise (e.g. "Mon, 15 Jun - 24 bpm")
+                                title: function(context) {
+                                    return context[0].label;
+                                }
+                            }
+                        }
                     },
                     scales: {
-                        y: { beginAtZero: true, suggestedMax: 50 }
+                        y: { beginAtZero: true, suggestedMax: 50 },
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 12, // Hard limit to prevent crowding
+                                maxRotation: 45,
+                                minRotation: 0,
+                                callback: function(val, index) {
+                                    // "this" refers to the scale object. val is the index.
+                                    const dateObj = new Date(this.getLabelForValue(val));
+                                    const totalPoints = dataToPlot.length;
+
+                                    // Clever Formatting Logic
+                                    if (totalPoints <= 14) {
+                                        // Show day name and date (e.g., "Mon 15")
+                                        return dateObj.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' });
+                                    } else if (totalPoints <= 60) {
+                                        // Show date and month (e.g., "15 Jun")
+                                        return dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                                    } else {
+                                        // Show month and year (e.g., "Jun '26")
+                                        return dateObj.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+									}
+                                }
+                            }
+                        }
                     }
                 }
             });
