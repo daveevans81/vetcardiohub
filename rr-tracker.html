@@ -306,7 +306,22 @@
                 <div class="paginatedHistory" x-show="hasAnyDataForActivePet"  style="border: 1px solid #adc1ed; border-radius: 4px; background: #f2f6fc; margin-top: 30px; padding: 20px;" x-cloak>
                                     <!-- ACCORDION: LOG -->
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                        <button @click="showLog = !showLog" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; font-weight: bold; color: #16325F;">
+                        <button @click="showLog = !showLog" type="button" style="
+                            width: 100%;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 12px 16px;
+                            background: #e8eef7;
+                            border: 1px solid #c8d6eb;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-weight: bold;
+                            color: #16325F;
+                            transition: background 0.15s ease;
+                        " @mouseenter="$el.style.background='#dde6f3'"
+                           @mouseleave="$el.style.background='#e8eef7'">
+   
                         <h3 style="margin: 0;"><span x-text="activePetName"></span>'s Logbook <i class="fa-solid" :class="showLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i></h3>
                         </button>
                         <span style="font-size: 0.8rem; color: #475569; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 5px;">
