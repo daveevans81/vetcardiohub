@@ -3742,6 +3742,12 @@ input {
     overflow: hidden;
 }
 
+.btn-nudge-static {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 [x-cloak] { display: none !important; }
 
 /* Ensure the canvas container expands when in fullscreen */
