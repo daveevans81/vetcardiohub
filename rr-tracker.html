@@ -198,6 +198,7 @@
                                 <option value="cat">Cat</option>
                             </select>
                         </label>
+                        <label>Weight (Optional): <input type="number" x-model="newPet.weight" placeholder="Kg's" style="width: 100%; padding: 8px; margin-top: 4px;"></label>
                         <label>Age (Optional): <input type="number" x-model="newPet.age" placeholder="Years" style="width: 100%; padding: 8px; margin-top: 4px;"></label>
                     </div>
                     
@@ -269,7 +270,7 @@
                 </div>
             </div>
         
-            <div class="paginatedHistory" x-show="hasAnyDataForActivePet" style="margin-top: 30px;" x-cloak>
+            <div class="paginatedHistory" x-show="hasAnyDataForActivePet"  style="border: 2px solid #b26dfc; background: #e3c9ff; margin-top: 30px;" x-cloak>
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                     <h3 style="margin: 0;"><span x-text="activePetName"></span>'s Logbook</h3>
                     
@@ -310,7 +311,7 @@
                 </div>
             </div>            
                 
-            <div class="bg-white rounded-lg shadow-md p-6" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px;">
+            <div class="bg-white rounded-lg shadow-md p-6" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 2px solid #6da4fc; background: #deebff;">
                 
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-slate-800" style="display: flex; align-items: center; gap: 8px;">
