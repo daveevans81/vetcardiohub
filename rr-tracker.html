@@ -270,7 +270,7 @@
                 </div>
             </div>
         
-            <div class="paginatedHistory" x-show="hasAnyDataForActivePet"  style="border: 2px solid #adc1ed; border-radius: 4px; background: #f2f6fc; margin-top: 30px; padding: 20px;" x-cloak>
+            <div class="paginatedHistory" x-show="hasAnyDataForActivePet"  style="border: 1px solid #adc1ed; border-radius: 4px; background: #f2f6fc; margin-top: 30px; padding: 20px;" x-cloak>
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                     <h3 style="margin: 0;"><span x-text="activePetName"></span>'s Logbook</h3>
                     
@@ -311,7 +311,7 @@
                 </div>
             </div>            
                 
-            <div class="bg-white rounded-lg shadow-md p-6" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 2px solid #d9c9f0; background: #fcfaff; border-radius: 4px; padding: 20px;">
+            <div class="bg-white rounded-lg shadow-md p-6" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #d9c9f0; background: #fcfaff; border-radius: 4px; padding: 20px;">
                 
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-slate-800" style="display: flex; align-items: center; gap: 8px;">
@@ -397,8 +397,33 @@
         
             </section>
         </main>
-    
-    
+         <div class="card" style="margin-top:16px">
+              <h2>SRR FAQ & Clinical Guidance</h2>
+              <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is a normal resting respiratory rate for a dog or cat?</summary>
+                  <p>A normal sleeping or resting respiratory rate for both dogs and cats should consistently be under 30 breaths per minute. Rates between 30 and 40 are considered borderline (equivocal) and should be recounted and interpreted in light of typical normal values for your pet and the current level of concern for heart disease, while rates consistently over 40 require veterinary attention.</p>
+                </details>
+              </div>
+              <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I count my pet's breathing rate?</summary>
+                  <p>Wait until your pet is fully resting or in a deep sleep. Observe their chest moving in and out. One complete in-and-out motion counts as one breath. Count the number of breaths over 30 seconds and multiply by 2 to get the rate per minute. See <a href="/blog-posts/post2.html">our guide</a></p>
+                </details>
+              </div>
+             <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Why is tracking my dog's sleeping breathing rate important?</summary>
+                  <p>In dogs and cats with heart disease, a rising resting respiratory rate is often the first clinical sign of fluid building up in the lungs (congestive heart failure). Tracking this rate allows owners to detect failure early, often before the pet shows signs of coughing or distress. See <a href="/blog-posts/post16.html">our guide</a></p>
+                </details>
+              </div>  
+              <div class="faq-item">
+                <details>
+                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What should I do if my dog's respiratory rate is over 40?</summary>
+                  <p>If your pet is fully asleep (not dreaming or overly warm) and their breathing rate is consistently over 40 breaths per minute, this is a clinical emergency, especially if they have a known heart murmur or heart disease. You should contact your veterinary surgeon immediately.</p>
+                </details>
+              </div>  
+         </div>
         <div id="glossary-container"></div>
     
     </div>         <!-- Close Alpine obj rrTracker -->
