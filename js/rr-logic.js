@@ -35,19 +35,23 @@ init() {
             this.$nextTick(() => { this.renderChart(); });
         },
         
-        parseDateSafe(dateStr) {
-            // First try standard parsing (for ISO strings)
+parseDateSafe(dateStr) {
+            // 1. Try standard parsing (Works perfectly for our new ISO strings)
             let d = new Date(dateStr);
             if (!isNaN(d.getTime())) return d;
             
-            // If it fails, assume it's UK format DD/MM/YYYY or DD/MM/YYYY, HH:MM
-            const cleanStr = dateStr.split(',')[0]; // Remove time if present
-            const parts = cleanStr.split('/');
+            // 2. Legacy Fallback (Sniffs out DD/MM vs MM/DD based on the numbers)
+            const cleanStr = dateStr.split(',')[0]; 
+            const parts = cleanStr.split(/[/\-]/);
             if (parts.length === 3) {
-                // Reconstruct as YYYY-MM-DD
-                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
+                // If the first number is > 12, it MUST be UK format (DD/MM/YYYY)
+                if (parseInt(parts[0]) > 12) {
+                    return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
+                } 
+                // Otherwise, rely on native JS which expects US format (MM/DD/YYYY)
+                return new Date(`${parts[2]}-${parts[0]}-${parts[1]}T12:00:00`);
             }
-            return new Date(); // Fallback
+            return new Date(); // Absolute fallback
         },
         
         startCount() {
@@ -79,10 +83,10 @@ init() {
             this.saveToHistory();
         },
 
-        saveToHistory() {
+saveToHistory() {
             const entry = {
                 id: Date.now(),
-                date: new Date().toLocaleDateString(),
+                date: new Date().toISOString(), // CHANGED: Now universally unambiguous
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                 rate: this.finalRate,
                 species: this.species,
@@ -332,15 +336,15 @@ getFilteredMedications() {
                                     maxTicksLimit: 12,
                                     maxRotation: 45,
                                     minRotation: 0,
-                                    callback: (val, index) => {
-                                        // Clever Date Parsing for X-Axis
+									callback: (val, index) => {
                                         if (!dataToPlot[index]) return '';
                                         const dateObj = this.parseDateSafe(dataToPlot[index].date);
                                         const totalPoints = dataToPlot.length;
 
-                                        if (totalPoints <= 14) return dateObj.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' });
-                                        if (totalPoints <= 60) return dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-                                        return dateObj.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+                                        // passing 'undefined' automatically uses the user's device locale
+                                        if (totalPoints <= 14) return dateObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
+                                        if (totalPoints <= 60) return dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+                                        return dateObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
                                     }
                                 }
                             }

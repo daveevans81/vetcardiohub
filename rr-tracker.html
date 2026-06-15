@@ -204,7 +204,7 @@
         <template x-for="log in history" :key="log.id">
             <div class="history-item" :class="log.isEquivocal ? 'equivocal-flag' : ''">
                 <div>
-                    <strong x-text="log.date"></strong> 
+                    <strong x-text="new Date(log.date).toLocaleDateString()"></strong>
                     <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
