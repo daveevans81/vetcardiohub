@@ -24,6 +24,7 @@ document.addEventListener('alpine:init', () => {
         timeScale: '180d', // Default to 6 months
         customStartDate: '',
         customEndDate: '',
+        medications: [],
         showMedications: true,
         chartInstance: null,
         chartRenderTimeout: null,
@@ -35,8 +36,8 @@ init() {
             if (savedPets) this.pets = JSON.parse(savedPets);
 
             // Load History
-            const saved = localStorage.getItem('vch_rrHistory');
-            if (saved) this.history = JSON.parse(saved);
+const savedHistory = localStorage.getItem('vch_rrHistory');
+            if (savedHistory) this.history = JSON.parse(savedHistory);
 
             // Set default active pet
             if (this.pets.length > 0) {
@@ -57,25 +58,35 @@ init() {
         },
         
         // --- PET MANAGEMENT ---
-        saveNewPet() {
-            if (!this.newPet.name.trim()) return alert("Please enter a pet name.");
-            
-            // Check for duplicates
-            if (this.pets.find(p => p.name.toLowerCase() === this.newPet.name.toLowerCase())) {
-                return alert("A pet with this name already exists.");
+saveNewPet() {
+            const cleanName = this.newPet.name.trim();
+            if (!cleanName) return alert("A valid pet name is required.");
+
+            // Enforce strict duplicate safety boundaries
+            if (this.pets.find(p => p.name.toLowerCase() === cleanName.toLowerCase())) {
+                return alert("A patient profile with this name already exists.");
             }
 
-            this.pets.push({ ...this.newPet });
+            this.pets.push({
+                name: cleanName,
+                species: this.newPet.species,
+                age: this.newPet.age ? parseInt(this.newPet.age, 10) : null
+            });
+
             localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
-            
-            this.activePetName = this.newPet.name;
-            this.newPet = { name: '', species: 'dog', age: '' }; // Reset form
+            this.activePetName = cleanName;
+            this.newPet = { name: '', species: 'dog', age: '' };
             this.showAddPet = false;
         },
 
-        get currentSpecies() {
-            const pet = this.pets.find(p => p.name === this.activePetName);
-            return pet ? pet.species : 'dog'; // Fallback
+get currentSpecies() {
+            if (!this.activePetName) return 'dog';
+            const profile = this.pets.find(p => p.name === this.activePetName);
+            return profile ? profile.species : 'dog';
+        },
+        
+        get uniquePets() {
+            return this.pets.map(p => p.name);
         },
         
 parseDateSafe(dateStr) {
@@ -97,7 +108,8 @@ parseDateSafe(dateStr) {
             return new Date(); // Absolute fallback
         },
         
-        startCount() {
+startCount() {
+            if (!this.activePetName) return alert("Please establish or select a patient profile first.");
             this.isCounting = true;
             this.tapCount = 0;
             this.timeLeft = 30;
@@ -108,7 +120,8 @@ parseDateSafe(dateStr) {
                 if (this.timeLeft <= 0) this.finishCount();
             }, 1000);
         },
-
+        
+        
         registerTap() {
             if (!this.isCounting) return;
             this.tapCount++;
@@ -331,119 +344,65 @@ getFilteredMedications() {
                 // --- CHARTING FUNCTIONS ---
                 
  renderChart() {
-            // 1. Debounce to prevent Alpine watcher race conditions
             if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
-            
-            const chartData = this.getFilteredReadings(); // Strict active pet filter
-            
-            if (chartData.length === 0) {
-                // Handle empty state (destroy chart if it exists)
-                if (this.chartInstance) this.chartInstance.destroy();
-                return;
-            }
 
-            // Extract chronological arrays for Chart.js
-            const labels = chartData.map(log => new Date(log.date).toLocaleDateString());
-            const rates = chartData.map(log => log.rate);
-            
             this.chartRenderTimeout = setTimeout(() => {
                 if (!this.$refs.rrrChartCanvas) return;
-                
+
                 const dataToPlot = this.getFilteredReadings();
                 const ctx = this.$refs.rrrChartCanvas.getContext('2d');
 
-                // Cleanly destroy old chart
                 if (this.chartInstance) {
                     this.chartInstance.destroy();
                     this.chartInstance = null;
                 }
 
-                const hasData = dataToPlot.length > 0;
-                const stats = hasData ? this.calculateStats(dataToPlot) : { mean: 0, upperCI: 0, lowerCI: 0 };
-                let annotations = {};
+                if (dataToPlot.length === 0) return;
 
-                if (hasData) {
-                    annotations = {
-		                thresholdLine: {
-		                    type: 'line',
-		                    yMin: 30,
-		                    yMax: 30,
-		                    borderColor: 'rgb(220, 38, 38)', // Red
-		                    borderWidth: 2,
-		                    borderDash: [5, 5],
-		                    label: { display: true, content: 'Clinical Cutoff (30)', position: 'end' }
-		                },
-		                meanLine: {
-		                    type: 'line',
-		                    yMin: stats.mean,
-		                    yMax: stats.mean,
-		                    borderColor: 'rgb(59, 130, 246)', // Blue
-		                    borderWidth: 1,
-		                    label: { display: true, content: 'Mean', position: 'start' }
-		                },
-		                upperCILine: {
-		                    type: 'line',
-		                    yMin: stats.upperCI,
-		                    yMax: stats.upperCI,
-		                    borderColor: 'rgba(59, 130, 246, 0.5)',
-		                    borderWidth: 1,
-		                    borderDash: [3, 3]
-		                },
-		                lowerCILine: {
-		                    type: 'line',
-		                    yMin: stats.lowerCI,
-		                    yMax: stats.lowerCI,
-		                    borderColor: 'rgba(59, 130, 246, 0.5)',
-		                    borderWidth: 1,
-		                    borderDash: [3, 3]
-		                }
-                    };
-
-                    // Safe Medication Mapping
-                    if (this.showMedications) {
-                        const meds = this.getFilteredMedications();
-                        meds.forEach((med, index) => {
-                            const medDateObj = this.parseDateSafe(med.date).getTime();
-                            let closestIndex = 0;
-                            let minDiff = Infinity;
-                            
-                            // Find the closest recorded reading to the medication date
-                            dataToPlot.forEach((d, i) => {
-                                const diff = Math.abs(this.parseDateSafe(d.date).getTime() - medDateObj);
-                                if (diff < minDiff) {
-                                    minDiff = diff;
-                                    closestIndex = i;
-                                }
-                            });
-
-                            // Attach annotation to a guaranteed existing X-axis label
-                            annotations[`med_${index}`] = {
-                                type: 'line',
-                                scaleID: 'x',
-                                value: dataToPlot[closestIndex].date, 
-                                borderColor: 'rgb(16, 185, 129)',
-                                borderWidth: 2,
-                                label: {
-                                    display: true,
-                                    content: `${med.action} ${med.drug}`,
-                                    position: 'start', rotation: -90, yAdjust: 20
-                                }
-                            };
-                        });
+                const stats = this.calculateStats(dataToPlot);
+                let annotations = {
+                    thresholdLine: {
+                        type: 'line', yMin: 30, yMax: 30,
+                        borderColor: 'rgb(220, 38, 38)', borderWidth: 2, borderDash: [5, 5],
+                        label: { display: true, content: 'Cutoff (30)', position: 'end', backgroundColor: 'rgba(220,38,38,0.8)', color: '#fff' }
+                    },
+                    meanLine: {
+                        type: 'line', yMin: stats.mean, yMax: stats.mean,
+                        borderColor: 'rgb(59, 130, 246)', borderWidth: 1.5,
+                        label: { display: true, content: `Mean: ${stats.mean.toFixed(1)}`, position: 'start' }
                     }
+                };
+
+                // Draw 95% Confidence Interval boundaries if there is sufficient data
+                if (dataToPlot.length >= 2 && stats.upperCI !== stats.lowerCI) {
+                    annotations.upperCILine = {
+                        type: 'line', yMin: stats.upperCI, yMax: stats.upperCI,
+                        borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3]
+                    };
+                    annotations.lowerCILine = {
+                        type: 'line', yMin: stats.lowerCI, yMax: stats.lowerCI,
+                        borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3]
+                    };
                 }
 
-                // Initialize new chart
+                // Standardized X-Axis label strings derived directly from user's localized settings
+                const formattedLabels = dataToPlot.map(d => {
+                    const dObj = this.parseDateSafe(d.date);
+                    if (dataToPlot.length <= 14) return dObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
+                    if (dataToPlot.length <= 60) return dObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+                    return dObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+                });
+
                 this.chartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: dataToPlot.map(d => d.date), // Raw string to ensure annotation matching
+                        labels: formattedLabels,
                         datasets: [{
-                            label: 'Resting Respiratory Rate',
+                            label: `${this.activePetName}'s Respiratory Rate (bpm)`,
                             data: dataToPlot.map(d => d.rate),
                             borderColor: 'rgb(14, 165, 233)',
-                            backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                            tension: 0.3,
+                            backgroundColor: 'rgba(14, 165, 233, 0.08)',
+                            tension: 0.25,
                             pointRadius: dataToPlot.length > 30 ? 2 : 5,
                             fill: true
                         }]
@@ -451,36 +410,15 @@ getFilteredMedications() {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            annotation: { annotations: annotations },
-                            tooltip: { callbacks: { title: (context) => context[0].label } }
-                        },
+                        plugins: { annotation: { annotations: annotations } },
                         scales: {
-                            y: { beginAtZero: true, suggestedMax: 50 },
-                            x: {
-                                ticks: {
-                                    maxTicksLimit: 12,
-                                    maxRotation: 45,
-                                    minRotation: 0,
-									callback: (val, index) => {
-                                        if (!dataToPlot[index]) return '';
-                                        const dateObj = this.parseDateSafe(dataToPlot[index].date);
-                                        const totalPoints = dataToPlot.length;
-
-                                        // passing 'undefined' automatically uses the user's device locale
-                                        if (totalPoints <= 14) return dateObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
-                                        if (totalPoints <= 60) return dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-                                        return dateObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
-                                    }
-                                }
-                            }
+                            y: { beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } },
+                            x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } }
                         }
                     }
                 });
-
-            }, 50); // Execute 50ms after Alpine finishes its reactive updates
-        },
-        
+            }, 50);
+        },        
        
 
         // --- EXPORT FUNCTIONS ---
