@@ -153,6 +153,20 @@
             </button>
         </div>
     </div>
+    
+    <div style="margin: 20px 0; display: flex; gap: 15px; justify-content: center;">
+        <div>
+            <label style="display: block; font-size: 0.9rem; margin-bottom: 5px;"><strong>Pet Name:</strong></label>
+            <input type="text" x-model="petName" placeholder="e.g., Bella" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc; width: 150px;">
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.9rem; margin-bottom: 5px;"><strong>Species:</strong></label>
+            <select x-model="species" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+            </select>
+        </div>
+    </div>
 
     <div x-show="isCounting" class="summary-box" style="border: 2px solid #16325F;" x-cloak>
         <div class="timer-pulse" x-text="timeLeft + 's'"></div>
@@ -225,6 +239,12 @@
         
         <!-- Controls -->
         <div class="flex flex-wrap gap-3 items-center">
+            <select x-show="uniquePets.length > 0" x-model="filterPet" class="border rounded p-2 text-sm bg-white cursor-pointer font-bold text-blue-800">
+                <option value="all">All Pets</option>
+                <template x-for="name in uniquePets" :key="name">
+                    <option :value="name" x-text="name"></option>
+                </template>
+            </select>
             <select x-model="timeScale" class="border rounded p-2 text-sm bg-white cursor-pointer">
                 <option value="thisWeek">This Week</option>
                 <option value="lastWeek">Last Week</option>
@@ -255,6 +275,26 @@
     <!-- Chart Container (Requires fixed height for Chart.js responsiveness) -->
     <div class="relative h-96 w-full">
         <canvas x-ref="rrrChartCanvas"></canvas>
+    </div>
+</div>
+
+<div class="summary-box" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
+    <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Data Management</h3>
+    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Your data is stored locally on this device. Create backups before clearing your browser history.</p>
+    
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button @click="exportCSV()" class="btn-nudge-static" style="background: #0284c7;">
+            <i class="fa-solid fa-download"></i> Backup Data (CSV)
+        </button>
+        
+        <label class="btn-nudge-static" style="background: #10b981; cursor: pointer;">
+            <i class="fa-solid fa-upload"></i> Restore Data
+            <input type="file" accept=".csv" @change="importCSV" style="display: none;">
+        </label>
+
+        <button @click="resetData()" class="btn-nudge-static" style="background: #ef4444; margin-left: auto;">
+            <i class="fa-solid fa-trash-can"></i> Erase All Data
+        </button>
     </div>
 </div>
 

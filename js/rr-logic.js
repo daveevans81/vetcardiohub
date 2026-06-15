@@ -10,6 +10,8 @@ document.addEventListener('alpine:init', () => {
         finalRate: null,
         timerInterval: null,
         history: [],
+        petName: '', // For the current counting session
+        filterPet: 'all', // For the chart/history view
         // Core Data Arrays
         readings: [], // e.g., { date: '2026-06-15T08:00:00', rate: 24, asleep: true }
         medications: [], // e.g., { date: '2026-06-12T10:00:00', drug: 'Furosemide', dose: '40mg BID', action: 'Increased' }
@@ -28,11 +30,17 @@ init() {
             
             this.$watch('timeScale', () => this.renderChart());
             this.$watch('showMedications', () => this.renderChart());
-            // Watch custom dates so chart updates as they type
             this.$watch('customStartDate', () => this.renderChart());
             this.$watch('customEndDate', () => this.renderChart());
+            this.$watch('filterPet', () => this.renderChart()); // Re-render when pet changes
             
             this.$nextTick(() => { this.renderChart(); });
+        },
+        
+        get uniquePets() {
+            if (!this.history.length) return [];
+            const pets = this.history.map(entry => entry.petName).filter(Boolean);
+            return [...new Set(pets)]; // Returns unique names only
         },
         
 parseDateSafe(dateStr) {
@@ -84,17 +92,26 @@ parseDateSafe(dateStr) {
         },
 
 saveToHistory() {
+            // Prevent saving without a name to keep data clean
+            const finalName = this.petName.trim() || 'Unnamed Pet'; 
+            
             const entry = {
                 id: Date.now(),
-                date: new Date().toISOString(), // CHANGED: Now universally unambiguous
+                date: new Date().toISOString(),
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                 rate: this.finalRate,
                 species: this.species,
+                petName: finalName, // NEW FIELD
                 isEquivocal: this.clinicalInterpretation.status === 'equivocal'
             };
             this.history.unshift(entry);
-            if (this.history.length > 100) this.history.pop();
+            
+            // Increased storage limit since they might track multiple pets over months
+            if (this.history.length > 500) this.history.pop(); 
             localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+            
+            // Auto-set the filter to the pet they just logged
+            this.filterPet = finalName;
         },
 
         get clinicalInterpretation() {
@@ -182,11 +199,18 @@ saveToHistory() {
             return { startDate, endDate };
         },
         
-getFilteredReadings() {
+// --- UPDATED FILTER (Respects Pet Selection) ---
+        getFilteredReadings() {
             if (!this.history || this.history.length === 0) return [];
             let filtered = [...this.history];
-            const { startDate, endDate } = this.getDateRange();
+            
+            // 1. Filter by Pet Name First
+            if (this.filterPet !== 'all') {
+                filtered = filtered.filter(item => item.petName === this.filterPet);
+            }
 
+            // 2. Then Filter by Date (Using your existing getDateRange logic)
+            const { startDate, endDate } = this.getDateRange();
             if (startDate) {
                 filtered = filtered.filter(item => {
                     const itemDate = this.parseDateSafe(item.date);
@@ -209,6 +233,20 @@ getFilteredMedications() {
             });
         },
         
+        
+        // --- DATA MANAGEMENT ---
+        
+        resetData() {
+            const confirmed = window.confirm("Are you sure you want to delete ALL respiratory data? This cannot be undone unless you have a backup CSV.");
+            if (confirmed) {
+                this.history = [];
+                localStorage.removeItem('vch_rrHistory');
+                this.petName = '';
+                this.filterPet = 'all';
+                this.renderChart();
+                alert("Data successfully erased.");
+            }
+        },
         
         calculateStats(data) {
             if (!data || data.length === 0) return { mean: 0, upperCI: 0, lowerCI: 0 };
@@ -395,20 +433,83 @@ getFilteredMedications() {
             link.remove();
         },
         
+// Updated Export to include Pet Name
         exportCSV() {
             if (!this.history.length) return alert("No data to export");
-            let csvContent = "data:text/csv;charset=utf-8,Date,Time,Rate(bpm),Species,Status\n";
+            // Standardized Header
+            let csvContent = "data:text/csv;charset=utf-8,Date_ISO,Time,PetName,Species,Rate,Status\n";
+            
             this.history.forEach(row => {
                 let status = row.isEquivocal ? "Equivocal" : (row.rate > 40 ? "High" : "Normal");
-                csvContent += `${row.date},${row.time},${row.rate},${row.species},${status}\n`;
+                // Escape commas in names just in case
+                let safeName = `"${row.petName || 'Unknown'}"`; 
+                csvContent += `${row.date},${row.time},${safeName},${row.species},${row.rate},${status}\n`;
             });
+            
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "VetCardioHub_RRR_Log.csv");
+            link.setAttribute("download", `VCH_RRR_Backup_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
             link.remove();
+        },
+        
+        importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result;
+                    const lines = text.split('\n').filter(line => line.trim() !== '');
+                    
+                    // Skip the header row
+                    const dataLines = lines.slice(1);
+                    let importedCount = 0;
+
+                    dataLines.forEach((line, index) => {
+                        // Handle CSV parsing (accounting for quoted pet names)
+                        const regex = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
+                        const parts = line.match(regex);
+                        
+                        if (parts && parts.length >= 5) {
+                            const entry = {
+                                id: Date.now() + index, // Ensure unique IDs
+                                date: parts[0].replace(/"/g, ''),
+                                time: parts[1].replace(/"/g, ''),
+                                petName: parts[2].replace(/"/g, ''),
+                                species: parts[3].replace(/"/g, '').toLowerCase(),
+                                rate: parseInt(parts[4].replace(/"/g, ''), 10),
+                                isEquivocal: parts[5] ? parts[5].replace(/"/g, '').includes('Equivocal') : false
+                            };
+                            
+                            // Only add if it's a valid number
+                            if (!isNaN(entry.rate)) {
+                                this.history.push(entry);
+                                importedCount++;
+                            }
+                        }
+                    });
+
+                    // Sort history newest first to match our structure
+                    this.history.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    // Save and refresh
+                    localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+                    this.renderChart();
+                    alert(`Successfully imported ${importedCount} readings.`);
+                    
+                } catch (error) {
+                    console.error("Import failed:", error);
+                    alert("Failed to read CSV. Please ensure it is a valid VetCardioHub backup file.");
+                }
+                
+                // Clear the input so the same file can be imported again if needed
+                event.target.value = ''; 
+            };
+            reader.readAsText(file);
         },
 
         exportPDF() {
