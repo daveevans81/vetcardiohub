@@ -3758,6 +3758,10 @@ input {
     vertical-align: middle; /* add this */
 }
 
+label.btn-nudge-static {
+    margin-bottom: 0;
+}
+
 button.btn-nudge-static {
     padding: 8px 14px; /* same as the class — forces override of UA stylesheet */
     appearance: none;
