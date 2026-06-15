@@ -7,14 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="VCH Resp Tracker">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
     
     <link rel="stylesheet" href="styles.css">
 
-    <title>Respiratory Rate Tracker | VetCardioHub</title>
-    <meta name="description" content="Free interactive respiratory rate counter to track breathing rates and monitor for congestive heart failure for pets.">
+    <title>Resting Respiratory Rate Tracker for Dogs & Cats | VetCardioHub</title>
+    <meta name="description" content="Free interactive respiratory rate counter to track breathing rates and monitor for congestive heart failure for pets. Clinically designed to track sleeping breathing rates for early detection of congestive heart failure.">
     <meta name="keywords" content="Sleeping respiratory rate, SRR, respiratory tracker, CHF, Congestive heart failure dog, Congestive heart failure cat, VetCardioHub">
     
     <meta property="og:title" content="Respiratory Rate Tracker | VetCardioHub">
@@ -37,33 +41,60 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "MedicalWebPage",
-      "name": "Veterinary Qp:Qs Shunt Ratio Calculator",
-      "description": "An interactive clinical decision support application to calculate the ratio of pulmonary to systemic blood flow (Qp:Qs) and VTI ratios in canine and feline patients with congenital anomalies.",
-      "url": "https://vetcardiohub.com/qp-qs-calculator.html",
-      "medicalAudience": {
-        "@type": "MedicalAudience",
-        "audienceType": "Veterinary Professionals"
-      },
-      "specialty": {
-        "@type": "MedicalSpecialty",
-        "name": "Cardiology"
-      },
-      "mainEntity": {
-        "@type": "MedicalDevice",
-        "name": "Qp:Qs Algorithmic Computation Module",
-        "description": "Calculates pulmonary (Qp) and systemic (Qs) stroke volumes and ratios using sub-valvular and continuous wave velocities.",
-        "purpose": "Hemodynamic quantification of cardiovascular shunts"
-      },
-      "citation": [
-        "Boon J.A. (2011) Veterinary Echocardiography - Congenital Shunt Flow Analysis.",
-        "Serres et al. (2009) Quantification of echocardiographic left-to-right shunt in dogs with patent ductus arteriosus."
-      ],
-      "lastReviewed": "2026-05-17",
+      "@type": "WebApplication",
+      "name": "VetCardioHub Resting Respiratory Rate Tracker",
+      "description": "A clinical web application designed for pet owners and veterinarians to measure, track, and interpret sleeping respiratory rates in dogs and cats at risk of congestive heart failure.",
+      "url": "https://vetcardiohub.com/rr-tracker",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Any",
       "isAccessibleForFree": "true"
     }
     </script>
     
+     
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is a normal resting respiratory rate for a dog or cat?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A normal sleeping or resting respiratory rate for both dogs and cats should consistently be under 30 breaths per minute. Rates between 30 and 40 are considered borderline (equivocal) and should be recounted and interpreted in light of typical normal values for your pet and the current level of concern for heart disease, while rates consistently over 40 require veterinary attention."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I count my pet's breathing rate?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Wait until your pet is fully resting or in a deep sleep. Observe their chest moving in and out. One complete in-and-out motion counts as one breath. Count the number of breaths over 30 seconds and multiply by 2 to get the rate per minute."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why is tracking my dog's sleeping breathing rate important?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "In dogs and cats with heart disease, a rising resting respiratory rate is often the first clinical sign of fluid building up in the lungs (congestive heart failure). Tracking this rate allows owners to detect failure early, often before the pet shows signs of coughing or distress."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What should I do if my dog's respiratory rate is over 40?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "If your pet is fully asleep (not dreaming or overly warm) and their breathing rate is consistently over 40 breaths per minute, this is a clinical emergency, especially if they have a known heart murmur or heart disease. You should contact your veterinary surgeon immediately."
+          }
+        }
+      ]
+    }
+    </script>
+    
+    
+       
     <style>
         /* Glossary specific styling for clickable icons */
         .glossary-icon { color: #94a3b8; cursor: pointer; transition: color 0.2s; }
