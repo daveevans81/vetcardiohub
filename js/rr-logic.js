@@ -153,9 +153,26 @@ saveToHistory() {
                 case '180d':
                     startDate = new Date(startOfToday.getTime() - (180 * 24 * 60 * 60 * 1000));
                     break;
-                case 'custom':
-                    if (this.customStartDate) startDate = new Date(this.customStartDate + 'T00:00:00');
-                    if (this.customEndDate) endDate = new Date(this.customEndDate + 'T23:59:59');
+				case 'custom':
+                    // 1. Check if BOTH fields contain something
+                    if (this.customStartDate && this.customEndDate) {
+                        const s = new Date(this.customStartDate + 'T00:00:00');
+                        const e = new Date(this.customEndDate + 'T23:59:59');
+                        
+                        // 2. Verify they are valid dates AND logically ordered (Start <= End)
+                        if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && s <= e) {
+                            startDate = s;
+                            endDate = e;
+                        } else {
+                            // Logic failure (e.g., End date is before Start date, or date is invalid)
+                            // Safe fallback: show all data until they fix the inputs
+                            startDate = new Date(0);
+                        }
+                    } else {
+                        // 3. Incomplete: They are still typing or haven't clicked the second box yet
+                        // Safe fallback: show all data so the chart doesn't crash or go blank
+                        startDate = new Date(0);
+                    }
                     break;
                 case 'all':
                 default:
