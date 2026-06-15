@@ -20,6 +20,7 @@ document.addEventListener('alpine:init', () => {
         timeScale: 'thisMonth', // Updated default
         customStartDate: '',
         customEndDate: '',
+        chartRenderTimeout: null,
 
 init() {
             const saved = localStorage.getItem('vch_rrHistory');
@@ -108,23 +109,20 @@ init() {
             return { status: 'normal', title: 'Normal Range', text: 'Resting respiratory rate is within normal expected limits.' };
         },
         
-getFilteredReadings() {
-            if (!this.history || this.history.length === 0) return [];
-            let filtered = [...this.history];
+        // Unified Date Range Calculator
+        getDateRange() {
             const now = new Date();
-            
-            // Normalize 'now' to end of day
             const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
             const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             
             let startDate = null;
             let endDate = endOfToday;
 
-            const dayOfWeek = startOfToday.getDay(); // 0 is Sun, 1 is Mon
+            const dayOfWeek = startOfToday.getDay();
             const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
             switch (this.timeScale) {
-                case 'thisWeek': // Starts Monday
+                case 'thisWeek':
                     startDate = new Date(startOfToday);
                     startDate.setDate(startDate.getDate() + daysToMonday);
                     break;
@@ -157,9 +155,16 @@ getFilteredReadings() {
                     break;
                 case 'all':
                 default:
-                    startDate = new Date(0); // Beginning of time
+                    startDate = new Date(0);
                     break;
             }
+            return { startDate, endDate };
+        },
+        
+getFilteredReadings() {
+            if (!this.history || this.history.length === 0) return [];
+            let filtered = [...this.history];
+            const { startDate, endDate } = this.getDateRange();
 
             if (startDate) {
                 filtered = filtered.filter(item => {
@@ -168,14 +173,21 @@ getFilteredReadings() {
                 });
             }
 
-            return filtered.reverse(); // Chart wants oldest to newest (left to right)
+            return filtered.reverse(); 
         },
-
-        getFilteredMedications() {
-            // Placeholder: Returns the medications array if it exists, safely preventing crashes 
-            // before we build the medication entry UI.
-            return this.medications || [];
+        
+        
+getFilteredMedications() {
+            if (!this.medications || this.medications.length === 0) return [];
+            const { startDate, endDate } = this.getDateRange();
+            
+            return this.medications.filter(med => {
+                if (!startDate) return true;
+                const medDate = this.parseDateSafe(med.date);
+                return medDate >= startDate && medDate <= endDate;
+            });
         },
+        
         
         calculateStats(data) {
             if (!data || data.length === 0) return { mean: 0, upperCI: 0, lowerCI: 0 };
@@ -199,133 +211,147 @@ getFilteredReadings() {
         },
         
                 // --- CHARTING FUNCTIONS ---
-        renderChart() {
-
-            const dataToPlot = this.getFilteredReadings();
-            const stats = this.calculateStats(dataToPlot);
-            if (!this.$refs.rrrChartCanvas) return;
+                
+ renderChart() {
+            // 1. Debounce to prevent Alpine watcher race conditions
+            if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
             
-  			  
- 			const ctx = this.$refs.rrrChartCanvas.getContext('2d'); 			  
+            this.chartRenderTimeout = setTimeout(() => {
+                if (!this.$refs.rrrChartCanvas) return;
+                
+                const dataToPlot = this.getFilteredReadings();
+                const ctx = this.$refs.rrrChartCanvas.getContext('2d');
 
-            // Dynamically generate vertical line annotations for medications
-            let annotations = {
-                thresholdLine: {
-                    type: 'line',
-                    yMin: 30,
-                    yMax: 30,
-                    borderColor: 'rgb(220, 38, 38)', // Red
-                    borderWidth: 2,
-                    borderDash: [5, 5],
-                    label: { display: true, content: 'Clinical Cutoff (30)', position: 'end' }
-                },
-                meanLine: {
-                    type: 'line',
-                    yMin: stats.mean,
-                    yMax: stats.mean,
-                    borderColor: 'rgb(59, 130, 246)', // Blue
-                    borderWidth: 1,
-                    label: { display: true, content: 'Mean', position: 'start' }
-                },
-                upperCILine: {
-                    type: 'line',
-                    yMin: stats.upperCI,
-                    yMax: stats.upperCI,
-                    borderColor: 'rgba(59, 130, 246, 0.5)',
-                    borderWidth: 1,
-                    borderDash: [3, 3]
-                },
-                lowerCILine: {
-                    type: 'line',
-                    yMin: stats.lowerCI,
-                    yMax: stats.lowerCI,
-                    borderColor: 'rgba(59, 130, 246, 0.5)',
-                    borderWidth: 1,
-                    borderDash: [3, 3]
+                // Cleanly destroy old chart
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                    this.chartInstance = null;
                 }
-            };
 
-            // Add medication markers if toggled on
-            if (this.showMedications) {
-                const meds = this.getFilteredMedications();
-                meds.forEach((med, index) => {
-                    annotations[`med_${index}`] = {
-                        type: 'line',
-                        scaleID: 'x',
-                        value: med.date,
-                        borderColor: 'rgb(16, 185, 129)', // Green
-                        borderWidth: 2,
-                        label: {
-                            display: true,
-                            content: `${med.action} ${med.drug} (${med.dose})`,
-                            position: 'start',
-                            rotation: -90,
-                            yAdjust: 20
-                        }
+                const hasData = dataToPlot.length > 0;
+                const stats = hasData ? this.calculateStats(dataToPlot) : { mean: 0, upperCI: 0, lowerCI: 0 };
+                let annotations = {};
+
+                if (hasData) {
+                    annotations = {
+		                thresholdLine: {
+		                    type: 'line',
+		                    yMin: 30,
+		                    yMax: 30,
+		                    borderColor: 'rgb(220, 38, 38)', // Red
+		                    borderWidth: 2,
+		                    borderDash: [5, 5],
+		                    label: { display: true, content: 'Clinical Cutoff (30)', position: 'end' }
+		                },
+		                meanLine: {
+		                    type: 'line',
+		                    yMin: stats.mean,
+		                    yMax: stats.mean,
+		                    borderColor: 'rgb(59, 130, 246)', // Blue
+		                    borderWidth: 1,
+		                    label: { display: true, content: 'Mean', position: 'start' }
+		                },
+		                upperCILine: {
+		                    type: 'line',
+		                    yMin: stats.upperCI,
+		                    yMax: stats.upperCI,
+		                    borderColor: 'rgba(59, 130, 246, 0.5)',
+		                    borderWidth: 1,
+		                    borderDash: [3, 3]
+		                },
+		                lowerCILine: {
+		                    type: 'line',
+		                    yMin: stats.lowerCI,
+		                    yMax: stats.lowerCI,
+		                    borderColor: 'rgba(59, 130, 246, 0.5)',
+		                    borderWidth: 1,
+		                    borderDash: [3, 3]
+		                }
                     };
-                });
-            }
 
-            if (this.chartInstance) this.chartInstance.destroy();
-
-            this.chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-					labels: dataToPlot.map(d => this.parseDateSafe(d.date)),
-                    datasets: [{
-                        label: 'Resting Respiratory Rate',
-                        data: dataToPlot.map(d => d.rate),
-                        borderColor: 'rgb(14, 165, 233)', // Nice clinical blue
-                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                        tension: 0.3,
-                        pointRadius: dataToPlot.length > 30 ? 2 : 5, // Shrink dots if crowded
-                        fill: true
-                    }]
-                },
-options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        annotation: { annotations: annotations },
-                        tooltip: {
-                            callbacks: {
-                                // Keep tooltips precise (e.g. "Mon, 15 Jun - 24 bpm")
-                                title: function(context) {
-                                    return context[0].label;
+                    // Safe Medication Mapping
+                    if (this.showMedications) {
+                        const meds = this.getFilteredMedications();
+                        meds.forEach((med, index) => {
+                            const medDateObj = this.parseDateSafe(med.date).getTime();
+                            let closestIndex = 0;
+                            let minDiff = Infinity;
+                            
+                            // Find the closest recorded reading to the medication date
+                            dataToPlot.forEach((d, i) => {
+                                const diff = Math.abs(this.parseDateSafe(d.date).getTime() - medDateObj);
+                                if (diff < minDiff) {
+                                    minDiff = diff;
+                                    closestIndex = i;
                                 }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, suggestedMax: 50 },
-                        x: {
-                            ticks: {
-                                maxTicksLimit: 12, // Hard limit to prevent crowding
-                                maxRotation: 45,
-                                minRotation: 0,
-                                callback: function(val, index) {
-                                    // "this" refers to the scale object. val is the index.
-                                    const dateObj = new Date(this.getLabelForValue(val));
-                                    const totalPoints = dataToPlot.length;
+                            });
 
-                                    // Clever Formatting Logic
-                                    if (totalPoints <= 14) {
-                                        // Show day name and date (e.g., "Mon 15")
-                                        return dateObj.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' });
-                                    } else if (totalPoints <= 60) {
-                                        // Show date and month (e.g., "15 Jun")
-                                        return dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-                                    } else {
-                                        // Show month and year (e.g., "Jun '26")
+                            // Attach annotation to a guaranteed existing X-axis label
+                            annotations[`med_${index}`] = {
+                                type: 'line',
+                                scaleID: 'x',
+                                value: dataToPlot[closestIndex].date, 
+                                borderColor: 'rgb(16, 185, 129)',
+                                borderWidth: 2,
+                                label: {
+                                    display: true,
+                                    content: `${med.action} ${med.drug}`,
+                                    position: 'start', rotation: -90, yAdjust: 20
+                                }
+                            };
+                        });
+                    }
+                }
+
+                // Initialize new chart
+                this.chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dataToPlot.map(d => d.date), // Raw string to ensure annotation matching
+                        datasets: [{
+                            label: 'Resting Respiratory Rate',
+                            data: dataToPlot.map(d => d.rate),
+                            borderColor: 'rgb(14, 165, 233)',
+                            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                            tension: 0.3,
+                            pointRadius: dataToPlot.length > 30 ? 2 : 5,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            annotation: { annotations: annotations },
+                            tooltip: { callbacks: { title: (context) => context[0].label } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, suggestedMax: 50 },
+                            x: {
+                                ticks: {
+                                    maxTicksLimit: 12,
+                                    maxRotation: 45,
+                                    minRotation: 0,
+                                    callback: (val, index) => {
+                                        // Clever Date Parsing for X-Axis
+                                        if (!dataToPlot[index]) return '';
+                                        const dateObj = this.parseDateSafe(dataToPlot[index].date);
+                                        const totalPoints = dataToPlot.length;
+
+                                        if (totalPoints <= 14) return dateObj.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' });
+                                        if (totalPoints <= 60) return dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
                                         return dateObj.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
-									}
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            });
+                });
+
+            }, 50); // Execute 50ms after Alpine finishes its reactive updates
         },
+        
+       
 
         // --- EXPORT FUNCTIONS ---
         
