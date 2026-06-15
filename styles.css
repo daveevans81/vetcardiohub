@@ -3758,6 +3758,12 @@ input {
     vertical-align: middle; /* add this */
 }
 
+button.btn-nudge-static {
+    padding: 8px 14px; /* same as the class — forces override of UA stylesheet */
+    appearance: none;
+    -webkit-appearance: none;
+}
+
 [x-cloak] { display: none !important; }
 
 /* Ensure the canvas container expands when in fullscreen */
