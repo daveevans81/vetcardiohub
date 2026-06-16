@@ -438,9 +438,8 @@
                                 </div>
                                         <!-- Inline comment expansion -->
                                 <div x-show="expandedCommentId === log.id && log.comment && log.comment.trim().length > 0"
-                                     x-transition:enter="transition ease-out duration-150"
-                                     x-transition:enter-start="opacity-0 -translate-y-1"
-                                     x-transition:enter-end="opacity-100 translate-y-0"
+                                     x-transition
+                                     :id="'comment-expand-' + log.id"
                                      style="background: #eff6ff; border: 1px solid #bfdbfe; border-top: none; border-radius: 0 0 6px 6px; padding: 10px 14px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
                                     <div style="display: flex; gap: 8px; align-items: flex-start;">
                                         <i class="fa-solid fa-comment-dots" style="color: #3b82f6; margin-top: 2px; font-size: 0.8rem; flex-shrink: 0;"></i>
