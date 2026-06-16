@@ -729,7 +729,26 @@ renderChart() {
             if (!this.medLedger || !this.activePetName) return false;
             return this.medLedger.some(m => m.petName === this.activePetName);
         },
+        
+        
+// Validates custom date ranges strictly to protect Chart.js
+            validateCustomDates(startRaw, endRaw) {
+                // 1. Must not be null or empty
+                if (!startRaw || !endRaw) return false;
 
+                const startTimestamp = this.parseDateSafe(startRaw).getTime();
+                const endTimestamp = this.parseDateSafe(endRaw).getTime();
+
+                // 2. Must resolve to valid numbers (not NaN)
+                if (isNaN(startTimestamp) || isNaN(endTimestamp)) return false;
+
+                // 3. Start date must be before or equal to the end date
+                if (startTimestamp > endTimestamp) return false;
+
+                return true;
+            },
+            
+            
         // Duplicate Date Range logic specifically for the Medication Chart
 getMedDateRange() {
             const now = new Date();
@@ -873,139 +892,147 @@ getMedDateRange() {
 
         // The Dedicated Chart.js Renderer
  renderMedChart() {
-            if (this.medChartRenderTimeout) clearTimeout(this.medChartRenderTimeout);
+    if (this.medChartRenderTimeout) clearTimeout(this.medChartRenderTimeout);
 
-            this.medChartRenderTimeout = setTimeout(() => {
-                if (!this.$refs.medChartCanvas) return;
+    this.medChartRenderTimeout = setTimeout(() => {
+        if (!this.$refs.medChartCanvas) return;
 
-                const epochs = this.generateMedEpochs();
-                if (epochs.length === 0) return;
+        // GATEKEEPER: Intercept execution if custom dates are invalid or incomplete
+        if (this.medTimeScale === 'custom') {
+            if (!this.validateCustomDates(this.customStartDate, this.customEndDate)) {
+                console.warn("VetCardioHub: Awaiting valid custom date range...");
+                return; // Abort silently; do not destroy the existing chart yet
+            }
+        }
 
-                const { startDate, endDate } = this.getMedDateRange();
-                const uniqueDrugs = [...new Set(epochs.map(e => e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId)))];
+        const epochs = this.generateMedEpochs();
+        if (epochs.length === 0) return;
 
-                const ctx = this.$refs.medChartCanvas.getContext('2d');
-                if (this.medChartInstance) {
-                    this.medChartInstance.destroy();
+        const { startDate, endDate } = this.getMedDateRange();
+        const uniqueDrugs = [...new Set(epochs.map(e => e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId)))];
+
+        const ctx = this.$refs.medChartCanvas.getContext('2d');
+        if (this.medChartInstance) {
+            this.medChartInstance.destroy();
+        }
+
+        // Evaluate Min/Max Dose across the pet's ENTIRE lifetime history
+        const doseRanges = {};
+        const allPetMeds = this.medLedger.filter(m => m.petName === this.activePetName);
+        allPetMeds.forEach(m => {
+            const key = m.drugId === 'other' ? m.customName : m.drugId;
+            if (!doseRanges[key]) {
+                doseRanges[key] = { min: m.doseMg, max: m.doseMg };
+            } else {
+                if (m.doseMg < doseRanges[key].min) doseRanges[key].min = m.doseMg;
+                if (m.doseMg > doseRanges[key].max) doseRanges[key].max = m.doseMg;
+            }
+        });
+
+        const hex2rgb = (hex) => {
+            const v = parseInt(hex.replace('#', ''), 16);
+            return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+        };
+
+        // Create ONE Dataset per Epoch to force unique bar thicknesses
+        const dynamicDatasets = epochs.map((e, index) => {
+            const genericName = e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
+            const isDiuretic = ['furosemide', 'torasemide'].includes(e.drugId);
+            const baseColor = this.formulary[e.drugId]?.color || '#64748b';
+            const rgb = hex2rgb(baseColor);
+            
+            const key = e.drugId === 'other' ? e.customName : e.drugId;
+            const range = doseRanges[key];
+            
+            let opacity = 0.5;
+            let calculatedThickness = 24; // Base baseline
+
+            if (isDiuretic) {
+                opacity = 0.85; // Solid visibility for diuretics
+                if (range && range.max > range.min) {
+                    const ratio = (e.doseMg - range.min) / (range.max - range.min);
+                    calculatedThickness = 12 + (28 * ratio); // Scales perfectly from 12px to 40px
                 }
+            } else {
+                if (range && range.max > range.min) {
+                    const ratio = (e.doseMg - range.min) / (range.max - range.min);
+                    opacity = 0.3 + (0.7 * ratio); // Scales 30% to 100% solid based on dose
+                }
+            }
 
-                // Evaluate Min/Max Dose across the pet's ENTIRE lifetime history
-                const doseRanges = {};
-                const allPetMeds = this.medLedger.filter(m => m.petName === this.activePetName);
-                allPetMeds.forEach(m => {
-                    const key = m.drugId === 'other' ? m.customName : m.drugId;
-                    if (!doseRanges[key]) {
-                        doseRanges[key] = { min: m.doseMg, max: m.doseMg };
-                    } else {
-                        if (m.doseMg < doseRanges[key].min) doseRanges[key].min = m.doseMg;
-                        if (m.doseMg > doseRanges[key].max) doseRanges[key].max = m.doseMg;
-                    }
-                });
+            return {
+                label: `Epoch_${index}`, // Internal tracker
+                data: [{
+                    x: [e.startTime, e.endTime],
+                    y: genericName,
+                    _rawEpoch: e 
+                }],
+                backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`,
+                borderColor: baseColor,
+                borderWidth: 2,
+                borderSkipped: false,
+                borderRadius: 4,
+                barThickness: calculatedThickness // Now explicitly applied to this specific block!
+            };
+        });
 
-                const hex2rgb = (hex) => {
-                    const v = parseInt(hex.replace('#', ''), 16);
-                    return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
-                };
-
-                // Create ONE Dataset per Epoch to force unique bar thicknesses
-                const dynamicDatasets = epochs.map((e, index) => {
-                    const genericName = e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
-                    const isDiuretic = ['furosemide', 'torasemide'].includes(e.drugId);
-                    const baseColor = this.formulary[e.drugId]?.color || '#64748b';
-                    const rgb = hex2rgb(baseColor);
-                    
-                    const key = e.drugId === 'other' ? e.customName : e.drugId;
-                    const range = doseRanges[key];
-                    
-                    let opacity = 0.5;
-                    let calculatedThickness = 24; // Base baseline
-
-                    if (isDiuretic) {
-                        opacity = 0.85; // Solid visibility for diuretics
-                        if (range && range.max > range.min) {
-                            const ratio = (e.doseMg - range.min) / (range.max - range.min);
-                            calculatedThickness = 12 + (28 * ratio); // Scales perfectly from 12px to 40px
+        this.medChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                datasets: dynamicDatasets
+            },
+            options: {
+                indexAxis: 'y', 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (context) => {
+                                const e = context[0].raw._rawEpoch;
+                                return e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
+                            },
+                            label: (context) => {
+                                const e = context.raw._rawEpoch;
+                                const sDate = new Date(e.startTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                                const todayTs = new Date().getTime();
+                                const diff = Math.abs(e.endTime - todayTs);
+                                const eDate = diff < 1000 ? 'Present' : new Date(e.endTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                                
+                                return [
+                                    `Dose: ${e.doseMg}mg ${e.frequency}`,
+                                    `Duration: ${sDate} to ${eDate}`
+                                ];
+                            }
                         }
-                    } else {
-                        if (range && range.max > range.min) {
-                            const ratio = (e.doseMg - range.min) / (range.max - range.min);
-                            opacity = 0.3 + (0.7 * ratio); // Scales 30% to 100% solid based on dose
-                        }
                     }
-
-                    return {
-                        label: `Epoch_${index}`, // Internal tracker
-                        data: [{
-                            x: [e.startTime, e.endTime],
-                            y: genericName,
-                            _rawEpoch: e 
-                        }],
-                        backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`,
-                        borderColor: baseColor,
-                        borderWidth: 2,
-                        borderSkipped: false,
-                        borderRadius: 4,
-                        barThickness: calculatedThickness // Now explicitly applied to this specific block!
-                    };
-                });
-
-                this.medChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        datasets: dynamicDatasets
+                },
+                zoom: {
+                    pan: { enabled: true, mode: 'x' },
+                    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        stacked: false,
+                        time: { tooltipFormat: 'dd MMM yyyy' },
+                        //  Explicitly check for valid numbers to prevent Uncaught Type Errors
+                        min: (startDate && !isNaN(startDate.getTime())) ? startDate.getTime() : undefined,
+                        max: (endDate && !isNaN(endDate.getTime())) ? endDate.getTime() : undefined,
+                        grid: { color: '#e2e8f0' }
                     },
-                    options: {
-                        indexAxis: 'y', 
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    title: (context) => {
-                                        const e = context[0].raw._rawEpoch;
-                                        return e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
-                                    },
-                                    label: (context) => {
-                                        const e = context.raw._rawEpoch;
-                                        const sDate = new Date(e.startTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-                                        const todayTs = new Date().getTime();
-                                        const diff = Math.abs(e.endTime - todayTs);
-                                        const eDate = diff < 1000 ? 'Present' : new Date(e.endTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-                                        
-                                        return [
-                                            `Dose: ${e.doseMg}mg ${e.frequency}`,
-                                            `Duration: ${sDate} to ${eDate}`
-                                        ];
-                                    }
-                                }
-                            },
-                            zoom: {
-                                pan: { enabled: true, mode: 'x' },
-                                zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-                            }
-                        },
-						scales: {
-                            x: {
-                                type: 'time',
-                                stacked: false,
-                                time: { tooltipFormat: 'dd MMM yyyy' },
-                                //  Explicitly check for valid numbers to prevent Uncaught Type Errors
-                                min: (startDate && !isNaN(startDate.getTime())) ? startDate.getTime() : undefined,
-                                max: (endDate && !isNaN(endDate.getTime())) ? endDate.getTime() : undefined,
-                                grid: { color: '#e2e8f0' }
-                            },
-                            y: {
-                                type: 'category',
-                                stacked: true, 
-                                labels: uniqueDrugs,
-                                grid: { display: false }
-                            }
-                        }
+                    y: {
+                        type: 'category',
+                        stacked: true, 
+                        labels: uniqueDrugs,
+                        grid: { display: false }
                     }
-                });
-            }, 50);
-        },        
+                }
+            }
+        });
+    }, 50);
+},    
         
         
         // --- EXPORT FUNCTIONS ---
