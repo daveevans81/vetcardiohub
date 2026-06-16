@@ -985,18 +985,19 @@ getMedDateRange() {
                                 zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
                             }
                         },
-                        scales: {
+						scales: {
                             x: {
                                 type: 'time',
-                                stacked: false, // Do NOT stack the timeline, let them float horizontally
+                                stacked: false,
                                 time: { tooltipFormat: 'dd MMM yyyy' },
-                                min: startDate ? startDate.getTime() : undefined,
-                                max: endDate ? endDate.getTime() : undefined,
+                                //  Explicitly check for valid numbers to prevent Uncaught Type Errors
+                                min: (startDate && !isNaN(startDate.getTime())) ? startDate.getTime() : undefined,
+                                max: (endDate && !isNaN(endDate.getTime())) ? endDate.getTime() : undefined,
                                 grid: { color: '#e2e8f0' }
                             },
                             y: {
                                 type: 'category',
-                                stacked: true, // CRITICAL: Forces all 50 datasets to overlay perfectly on their Y-axis row
+                                stacked: true, 
                                 labels: uniqueDrugs,
                                 grid: { display: false }
                             }
