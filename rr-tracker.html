@@ -412,14 +412,17 @@
                                     <div>
                                         <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
                                         <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
-                                        <span x-show="log.comment && log.comment.trim().length > 0"
-                                              @click.stop="toggleCommentDisplay(log.id)"
-                                              :title="log.comment"
-                                              :style="expandedCommentId === log.id
-                                                  ? 'color: #1d4ed8; background: #eff6ff; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;'
-                                                  : 'color: #3b82f6; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;'">
-                                            <i class="fa-solid fa-comment-dots"></i>
-                                        </span>
+                                        <template x-if="log.comment && log.comment.trim().length">
+                                            <span
+                                                @click.stop="toggleCommentDisplay(log.id)"
+                                                :title="log.comment"
+                                                :style="expandedCommentId === log.id
+                                                    ? 'color:#1d4ed8; background:#eff6ff; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'
+                                                    : 'color:#3b82f6; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'">
+                                        
+                                                <i class="fa-solid fa-comment-dots"></i>
+                                            </span>
+                                        </template>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">

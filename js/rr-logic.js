@@ -52,8 +52,14 @@ init() {
             if (savedPets) this.pets = JSON.parse(savedPets);
 
             // Load History
-const savedHistory = localStorage.getItem('vch_rrHistory');
-            if (savedHistory) this.history = JSON.parse(savedHistory);
+			const savedHistory = localStorage.getItem('vch_rrHistory');
+			
+			if (savedHistory) {
+			    this.history = JSON.parse(savedHistory).map(log => ({
+			        comment: '',
+			        ...log
+			    }));
+			}
             
             // Load Medications
             const savedMeds = localStorage.getItem('vch_medLedger');
