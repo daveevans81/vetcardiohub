@@ -22,6 +22,7 @@ document.addEventListener('alpine:init', () => {
         itemsPerPage: 20,
         editingCommentId: null,
 		commentDraft: '',
+		expandedCommentId: null,
 
         // --- CHART & CONTROLS ---
         timeScale: '180d', // Default to 6 months
@@ -929,7 +930,7 @@ importCSV(event) {
             reader.readAsText(file);
         },
         
-        //Log entries edits and deletes
+        //Log entries edits and deletes and comments
         
         deleteReading(id) {
     if (confirm("Delete this reading? This cannot be undone.")) {
@@ -938,6 +939,10 @@ importCSV(event) {
         this.currentPage = 1;
         this.$nextTick(() => { this.renderChart(); });
     }
+},
+
+toggleCommentDisplay(id) {
+    this.expandedCommentId = this.expandedCommentId === id ? null : id;
 },
 
 openCommentEditor(log) {

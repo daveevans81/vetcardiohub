@@ -411,9 +411,11 @@
                                 <div>
                                     <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
                                     <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
-                                    <span x-show="log.comment" :title="log.comment"
-                                          style="color: #3b82f6; font-size: 0.8rem; cursor: default; line-height: 1;"
-                                          title="This reading has a note">
+                                    <span x-show="log.comment"
+                                          @click.stop="toggleCommentDisplay(log.id)"
+                                          :title="log.comment"
+                                          style="color: #3b82f6; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;"
+                                          :style="expandedCommentId === log.id ? 'color: #1d4ed8; background: #eff6ff;' : 'color: #3b82f6;'">
                                         <i class="fa-solid fa-comment-dots"></i>
                                     </span>
                                 </div>
@@ -431,6 +433,21 @@
                                             @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
                                             title="Delete this reading">
                                         <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                                        <!-- Inline comment expansion -->
+                                <div x-show="expandedCommentId === log.id && log.comment"
+                                     x-transition:enter="transition ease-out duration-150"
+                                     x-transition:enter-start="opacity-0 -translate-y-1"
+                                     x-transition:enter-end="opacity-100 translate-y-0"
+                                     style="background: #eff6ff; border: 1px solid #bfdbfe; border-top: none; border-radius: 0 0 6px 6px; padding: 10px 14px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                        <i class="fa-solid fa-comment-dots" style="color: #3b82f6; margin-top: 2px; font-size: 0.8rem; flex-shrink: 0;"></i>
+                                        <span style="font-size: 0.85rem; color: #1e40af; line-height: 1.5;" x-text="log.comment"></span>
+                                    </div>
+                                    <button @click="openCommentEditor(log)"
+                                            style="background: none; border: 1px solid #bfdbfe; border-radius: 4px; color: #3b82f6; cursor: pointer; padding: 3px 8px; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">
+                                        Edit
                                     </button>
                                 </div>
                             </div>
