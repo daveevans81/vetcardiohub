@@ -762,6 +762,7 @@ getMedDateRange() {
             const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
             // Safe fallback calculator for 'All Time' or 'Incomplete Custom Dates'
+            
  const getEarliestFallback = () => {
                 const petMeds = this.medLedger.filter(m => m.petName === this.activePetName);
                 if(petMeds.length > 0) {
@@ -899,7 +900,7 @@ getMedDateRange() {
 
         // GATEKEEPER: Intercept execution if custom dates are invalid or incomplete
         if (this.medTimeScale === 'custom') {
-            if (!this.validateCustomDates(this.customStartDate, this.customEndDate)) {
+            if (!this.validateCustomDates(this.medCustomStartDate, this.medCustomEndDate)) {
                 console.warn("VetCardioHub: Awaiting valid custom date range...");
                 return; // Abort silently; do not destroy the existing chart yet
             }
