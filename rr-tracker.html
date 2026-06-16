@@ -414,8 +414,9 @@
                                     <span x-show="log.comment && log.comment.trim().length > 0"
                                           @click.stop="toggleCommentDisplay(log.id)"
                                           :title="log.comment"
-                                          style="color: #3b82f6; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;"
-                                          :style="expandedCommentId === log.id ? 'color: #1d4ed8; background: #eff6ff;' : 'color: #3b82f6;'">
+                                          :style="expandedCommentId === log.id
+                                              ? 'color: #1d4ed8; background: #eff6ff; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;'
+                                              : 'color: #3b82f6; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;'">
                                         <i class="fa-solid fa-comment-dots"></i>
                                     </span>
                                 </div>
