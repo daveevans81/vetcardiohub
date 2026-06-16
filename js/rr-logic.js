@@ -23,6 +23,10 @@ document.addEventListener('alpine:init', () => {
         editingCommentId: null,
 		commentDraft: '',
 		expandedCommentId: null,
+		
+		// Cardalis Import State
+cardalisEmailText: '',
+showCardalisImport: false,
 
         // --- CHART & CONTROLS ---
         timeScale: '180d', // Default to 6 months
@@ -1145,6 +1149,101 @@ importCSV(event) {
             };
             reader.readAsText(file);
         },
+        
+        importCardalisEmail() {
+    const text = this.cardalisEmailText;
+    if (!text || !text.trim()) return alert("Please paste the Cardalis email content first.");
+
+    // --- 1. EXTRACT PET NAME ---
+    const nameMatch = text.match(/breathing\s+rate\s+for\s+([A-Za-z0-9 _'\-]+?)(?:\s*More|\s*\n|\s*$)/i);
+    const petName = nameMatch ? nameMatch[1].trim() : null;
+
+    if (!petName) {
+        return alert("Could not identify a pet name from the email.\n\nExpected format: 'breathing rate for [Name]'");
+    }
+
+    // --- 2. AUTO-CREATE PET PROFILE if not already registered ---
+    const existingPet = this.pets.find(p => p.name.toLowerCase() === petName.toLowerCase());
+    if (!existingPet) {
+        this.pets.push({ 
+            name: petName, 
+            species: 'dog',    // Cardalis is primarily a canine app
+            age: null, 
+            weight: null, 
+            weightUnit: 'kg' 
+        });
+        localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
+    }
+
+    const resolvedSpecies = existingPet ? existingPet.species : 'dog';
+
+    // --- 3. EXTRACT ALL BREATHCOUNT + DATE-TIME PAIRS ---
+    // Uses a lazy wildcard between the two fields to handle any intervening whitespace
+    const entryRegex = /BreathCount:\s*(\d+)[\s\S]*?Date\s*&\s*Time:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})/gi;
+    
+    let match;
+    let importedCount = 0;
+    let skippedDuplicates = 0;
+
+    while ((match = entryRegex.exec(text)) !== null) {
+        const rate = parseInt(match[1], 10);
+        const dateTimeRaw = match[2].trim();
+
+        // Force ISO parse by replacing the space separator
+        const dateObj = new Date(dateTimeRaw.replace(' ', 'T'));
+
+        if (isNaN(dateObj.getTime()) || isNaN(rate) || rate <= 0) continue;
+
+        // --- 4. DUPLICATE DETECTION ---
+        // Flag if an entry for this pet exists within a 60-second window of this timestamp
+        const isDuplicate = this.history.some(h =>
+            h.petName === petName &&
+            Math.abs(new Date(h.date).getTime() - dateObj.getTime()) < 60000
+        );
+
+        if (isDuplicate) {
+            skippedDuplicates++;
+            continue;
+        }
+
+        // --- 5. MAP TO VCH HISTORY FORMAT ---
+        const isEquivocal = resolvedSpecies === 'cat'
+            ? (rate >= 30 && rate < 40)
+            : (rate >= 25 && rate < 35);
+
+        this.history.push({
+            id: dateObj.getTime() + importedCount,   // Unique ID from timestamp + offset
+            date: dateObj.toISOString(),
+            time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            rate: rate,
+            petName: petName,
+            species: resolvedSpecies,
+            comment: 'Imported from Cardalis app',
+            isEquivocal: isEquivocal
+        });
+
+        importedCount++;
+    }
+
+    // --- 6. COMMIT & REFRESH ---
+    if (importedCount === 0) {
+        const msg = skippedDuplicates > 0
+            ? `No new readings imported — ${skippedDuplicates} duplicate(s) already exist in the log.`
+            : "No valid readings found. Please check the email format matches Cardalis export output.";
+        return alert(msg);
+    }
+
+    localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+    this.activePetName = petName;
+    this.cardalisEmailText = '';
+    this.showCardalisImport = false;
+    this.currentPage = 1;
+
+    this.$nextTick(() => { this.renderChart(); });
+
+    const dupNote = skippedDuplicates > 0 ? ` (${skippedDuplicates} duplicate(s) skipped)` : '';
+    alert(`Successfully imported ${importedCount} reading(s) for ${petName}${dupNote}.`);
+},
         
         // --- MEDICATION CSV MANAGEMENT ---
         exportMedicationsCSV() {

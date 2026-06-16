@@ -831,7 +831,59 @@
                             </label>
                         </div>
                     </div>
-            
+                    
+                    
+                    <!-- Cardalis App Import -->
+                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-envelope-open-text" style="color: #7c3aed;"></i>
+                            Cardalis App Email Import
+                        </h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 10px;">
+                            Paste the body of a Cardalis export email to bulk-import readings.
+                        </p>
+                    
+                        <button @click="showCardalisImport = !showCardalisImport" 
+                                class="btn-nudge-static" 
+                                style="background: #7c3aed; font-size: 0.8rem; padding: 6px 12px; width: 100%;">
+                            <i class="fa-solid fa-paste"></i>
+                            <span x-text="showCardalisImport ? 'Cancel' : 'Paste & Import Email'"></span>
+                        </button>
+                    
+                        <div x-show="showCardalisImport" x-transition style="margin-top: 12px;">
+                            <textarea 
+                                x-model="cardalisEmailText"
+                                rows="8"
+                                placeholder="Paste the full Cardalis export email here...
+                    
+                    Example:
+                    Dear Vet:Please find attached breathing rate for Bella
+                    BreathCount: 26
+                    Date & Time: 2025-12-21 11:54:38
+                    ..."
+                                style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                       font-size: 0.8rem; font-family: monospace; resize: vertical; 
+                                       box-sizing: border-box; color: #334155; line-height: 1.5;">
+                            </textarea>
+                            <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">
+                                <button @click="cardalisEmailText = ''" 
+                                        style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                               background: white; cursor: pointer; font-size: 0.8rem; color: #475569;">
+                                    Clear
+                                </button>
+                                <button @click="importCardalisEmail()" 
+                                        class="btn-nudge-static"
+                                        style="background: #7c3aed; font-size: 0.8rem; padding: 6px 14px;">
+                                    <i class="fa-solid fa-file-import"></i> Import Readings
+                                </button>
+                            </div>
+                            <p style="font-size: 0.72rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
+                                <i class="fa-solid fa-circle-info"></i>
+                                Pet name is read from the email header. A new profile is created automatically if needed. 
+                                Duplicate readings (within 60 seconds of an existing entry) are skipped silently.
+                            </p>
+                        </div>
+                    </div>
                     <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <div>
                             <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)</h4>
