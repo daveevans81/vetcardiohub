@@ -7,7 +7,7 @@ const VET_FORMULARY = {
     benazepril: { id: 'benazepril', generic: 'Benazepril', brands: ['Lotensin', 'Nelio', 'Fortekor', 'Benefortin'],  classes: ['ACE-i'], color: '#8b5cf6'},
     enalapril: { id: 'enalapril', generic: 'Enalapril', brands: ['Enacard', 'Nelio', 'Fortekor', 'Benefortin'], classes: ['ACE-i'], color: '#8b5cf6'},
     prilactone: { id: 'prilactone', generic: 'Spironolactone', brands: ['Prilactone'], classes: ['Aldosterone Antagonist'], color: '#a855f7' },
-    clopridogrel: { id: 'clopridogrel', generic: 'Clopridogrel', brands: ['Plavix'],  classes: ['Anti-thrombotic'], color: '#8b5cf6'},
+    clopidogrel: { id: 'clopidogrel', generic: 'Clopidogrel', brands: ['Plavix'],  classes: ['Anti-thrombotic'], color: '#8b5cf6'},
     rivaroxaban: { id: 'rivaroxaban', generic: 'Rivaroxaban', brands: ['Xarelto'],  classes: ['Anti-thrombotic'], color: '#8b5cf6'},
     other:      { id: 'other', generic: 'Custom Medication', brands: [], classes: ['Other/Unspecified'], color: '#64748b' }
 };
