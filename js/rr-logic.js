@@ -925,6 +925,15 @@ importCSV(event) {
             reader.readAsText(file);
         },
         
+        deleteReading(id) {
+    if (confirm("Delete this reading? This cannot be undone.")) {
+        this.history = this.history.filter(log => log.id !== id);
+        localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+        this.currentPage = 1;
+        this.$nextTick(() => { this.renderChart(); });
+    }
+},
+        
         exportPDF() {
             // Web-native PDF generation using the browser's print dialog.
             // Much lighter than adding jsPDF to the clinical stack.

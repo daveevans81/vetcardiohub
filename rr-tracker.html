@@ -321,7 +321,15 @@
                     </button>
                 </div>
             </div>
+            
+            
+            
+                                <!-- ******************************** -->
+                                <!-- SRR LOG - PAGINATED HISTORY LIST -->
+                                <!-- ******************************** -->                               
+                                
                 <div class="paginatedHistory" x-show="hasAnyDataForActivePet"  style="border: 1px solid #adc1ed; border-radius: 4px; background: #f2f6fc; margin-top: 30px; padding: 20px;" x-cloak>
+                
                                     <!-- ACCORDION: LOG -->
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                         <button @click="showLog = !showLog" type="button" style="
@@ -360,6 +368,11 @@
                                     <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">
                                         <span x-text="log.rate"></span> bpm
                                     </strong>
+                                    <button @click="deleteReading(log.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; opacity: 0.5;" 
+                                            @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
+                                            title="Delete this reading">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
                                 </div>
                             </div>
                         </template>
