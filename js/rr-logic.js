@@ -545,31 +545,37 @@ getFilteredReadings() {
         
         
 getFilteredMedications() {
-            if (!this.medications || this.medications.length === 0) return [];
-            const { startDate, endDate } = this.getDateRange();
-            
-            return this.medications.filter(med => {
-                if (!startDate) return true;
-                const medDate = this.parseDateSafe(med.date);
-                return medDate >= startDate && medDate <= endDate;
-            });
-        },
+    if (!this.medLedger || this.medLedger.length === 0) return [];
+    const { startDate, endDate } = this.getDateRange();
+    
+    return this.medLedger.filter(med => {
+        if (!startDate) return true;
+        const medDate = this.parseDateSafe(med.eventDate); // Fixed property name
+        return medDate >= startDate && medDate <= endDate;
+    });
+},
         
         
         // --- DATA MANAGEMENT ---
         
 resetData() {
-            if (window.confirm("CRITICAL WARNING: This action permanently clears ALL local patient profiles, logs, and tracking history. Proceed?")) {
-                this.srrHistory = [];
-                this.patients = [];
-                this.activePatientId = '';
-                this.showAddPet = true;
-                localStorage.removeItem('vch_rrHistory');
-                localStorage.removeItem('vch_rrPets');
-                if (this.chartInstance) this.chartInstance.destroy();
-                alert("Database completely flushed.");
-            }
-        },
+    if (window.confirm("CRITICAL WARNING: This action permanently clears ALL local patient profiles, logs, and tracking history. Proceed?")) {
+        this.srrHistory = [];
+        this.patients = [];
+        this.medLedger = [];
+        this.weightLog = [];
+        this.activePatientId = null;
+        
+        localStorage.removeItem('vch_patients');
+        localStorage.removeItem('vch_srrHistory');
+        localStorage.removeItem('vch_medLedger');
+        localStorage.removeItem('vch_weightLog');
+        
+        if (this.chartInstance) this.chartInstance.destroy();
+        if (this.medChartInstance) this.medChartInstance.destroy();
+        alert("Database completely flushed.");
+    }
+},
         
         get filteredStats() {
     const data = this.getFilteredReadings();
@@ -1174,71 +1180,87 @@ exportCSV() {
         },
         
 importCSV(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const text = e.target.result;
-                const lines = text.split("\n");
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const text = e.target.result;
+        const lines = text.split("\n");
+        
+        let importedCount = 0;
+        let lastImportedPatientId = null; // FIX: Track the ID, not the name
+
+        // Start at index 1 to skip headers
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            
+            const cols = lines[i].split(",");
+            if (cols.length >= 3) {
+                const date = cols[0].trim();
+                const time = cols[1].trim();
+                const rate = parseInt(cols[2].trim());
                 
-                let importedCount = 0;
-                let lastImportedPet = null;
-
-                // Start at index 1 to skip headers
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
-                    
-                    const cols = lines[i].split(",");
-                    if (cols.length >= 3) {
-                        const date = cols[0].trim();
-                        const time = cols[1].trim();
-                        const rate = parseInt(cols[2].trim());
-                        const patientId = cols[3] ? cols[3].trim() : 'Imported Patient';
-                        const species = cols[4] ? cols[4].trim() : 'dog';
-                        const comment = cols[5] ? cols[5].trim().replace(/^"|"$/g, '').replace(/""/g, '"') : '';
-                        
-                        // 1. Auto-generate Pet Profile if missing
-                        const existingPet = this.patients.find(p => p.name.toLowerCase() === patientId.toLowerCase());
-                        if (!existingPet) {
-                            this.patients.push({ name: patientId, species: species, age: null });
-                            lastImportedPet = patientId;
-                        }
-
-                        // 2. Push to history
-                        this.srrHistory.push({
-                            id: Date.now() + i, // Offset to prevent ID collisions
-                            date: date,
-                            time: time,
-                            rate: rate,
-                            patientId: patientId,
-                            species: species,
-                            comment: comment
-                        });
-                        importedCount++;
-                    }
+                // The CSV only contains the string NAME of the pet
+                const csvPetName = cols[3] ? cols[3].trim() : 'Imported Patient';
+                const species = cols[4] ? cols[4].trim() : 'dog';
+                const comment = cols[5] ? cols[5].trim().replace(/^"|"$/g, '').replace(/""/g, '"') : '';
+                
+                // 1. Look up the pet by name, or Auto-generate Profile WITH A UUID
+                let existingPet = this.patients.find(p => p.name.toLowerCase() === csvPetName.toLowerCase());
+                
+                if (!existingPet) {
+                    existingPet = { 
+                        id: this.generateId(), // CRITICAL: Generate the relational UUID
+                        name: csvPetName, 
+                        species: species, 
+                        age: null,
+                        weight: null,
+                        weightUnit: 'kg',
+                        customSrrCutoff: 30
+                    };
+                    this.patients.push(existingPet);
                 }
 
-                if (importedCount > 0) {
-                    // Save both arrays to localStorage
-                    localStorage.setItem('vch_rrPets', JSON.stringify(this.patients));
-                    localStorage.setItem('vch_rrHistory', JSON.stringify(this.srrHistory));
-                    
-                    // Switch UI to the newly imported pet if one was created
-                    if (lastImportedPet) {
-                        this.activePatientId = lastImportedPet;
-                    }
-                    this.showAddPet = false;
-                    this.currentPage = 1;
-                    this.$nextTick(() => { this.renderChart(); });
-                    alert(`Successfully imported ${importedCount} records.`);
-                }
-                
-                // Clear the input so the same file can be selected again if needed
-                event.target.value = ''; 
-            };
-            reader.readAsText(file);
-        },
+                // Track the ID to switch the UI to this patient later
+                lastImportedPatientId = existingPet.id;
+
+                // 2. Push to history using the UUID
+                this.srrHistory.push({
+                    id: this.generateId(), // Use robust ID instead of just Date.now + i
+                    date: date,
+                    time: time,
+                    rate: rate,
+                    patientId: existingPet.id, // CRITICAL: Push the UUID, never the string name!
+                    species: existingPet.species,
+                    comment: comment
+                });
+                importedCount++;
+            }
+        }
+
+        if (importedCount > 0) {
+            // FIX: Save using the new relational local storage keys
+            localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+            localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
+            
+            // Switch UI to the newly imported pet's UUID
+            if (lastImportedPatientId) {
+                this.activePatientId = lastImportedPatientId;
+            }
+            
+            this.showAddPet = false; // Note: Ensure this variable still exists in your UI state, or remove it if obsolete
+            this.currentPage = 1;
+            this.$nextTick(() => { this.renderChart(); });
+            alert(`Successfully imported ${importedCount} records.`);
+        }
+        
+        // Clear the input so the same file can be selected again if needed
+        event.target.value = ''; 
+    };
+    reader.readAsText(file);
+},
+
         
         importCardalisEmail() {
     const text = this.cardalisEmailText;
@@ -1253,19 +1275,23 @@ importCSV(event) {
     }
 
     // --- 2. AUTO-CREATE PET PROFILE if not already registered ---
-    const existingPet = this.patients.find(p => p.name.toLowerCase() === patientId.toLowerCase());
+let existingPet = this.patients.find(p => p.name.toLowerCase() === petName.toLowerCase());
     if (!existingPet) {
-        this.patients.push({ 
-            name: patientId, 
-            species: 'dog',    // Cardalis is primarily a canine app
+        existingPet = { 
+            id: this.generateId(), // MUST HAVE THIS
+            name: petName, 
+            species: 'dog', 
             age: null, 
             weight: null, 
             weightUnit: 'kg' 
-        });
-        localStorage.setItem('vch_rrPets', JSON.stringify(this.patients));
+        };
+        this.patients.push(existingPet);
+        localStorage.setItem('vch_patients', JSON.stringify(this.patients)); // NEW KEY
     }
 
-    const resolvedSpecies = existingPet ? existingPet.species : 'dog';
+    const resolvedSpecies = existingPet.species;
+    const resolvedPatientId = existingPet.id; // Grab the UUID for the log
+
 
     // --- 3. EXTRACT ALL BREATHCOUNT + DATE-TIME PAIRS ---
     // Uses a lazy wildcard between the two fields to handle any intervening whitespace
@@ -1301,12 +1327,12 @@ importCSV(event) {
             ? (rate >= 30 && rate < 40)
             : (rate >= 25 && rate < 35);
 
-        this.srrHistory.push({
-            id: dateObj.getTime() + importedCount,   // Unique ID from timestamp + offset
+ this.srrHistory.push({
+            id: dateObj.getTime() + importedCount,   
             date: dateObj.toISOString(),
             time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             rate: rate,
-            patientId: patientId,
+            patientId: resolvedPatientId, // MUST BE THE UUID, NOT THE NAME
             species: resolvedSpecies,
             comment: 'Imported from Cardalis app',
             isEquivocal: isEquivocal
@@ -1323,8 +1349,8 @@ importCSV(event) {
         return alert(msg);
     }
 
-    localStorage.setItem('vch_rrHistory', JSON.stringify(this.srrHistory));
-    this.activePatientId = patientId;
+localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory)); // NEW KEY
+    this.activePatientId = resolvedPatientId;
     this.cardalisEmailText = '';
     this.showCardalisImport = false;
     this.currentPage = 1;
@@ -1421,40 +1447,45 @@ exportCompleteBackup() {
 },
 
         importCompleteBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    if (data.vch_rrPets && data.vch_rrHistory && data.vch_medLedger) {
-                        if (confirm("This will replace all current data with the backup file. Proceed?")) {
-                            this.patients = data.vch_rrPets;
-                            this.srrHistory = data.vch_rrHistory;
-                            this.medLedger = data.vch_medLedger;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Check for the NEW keys matching your export
+            if (data.vch_patients && data.vch_srrHistory && data.vch_medLedger) {
+                if (confirm("This will replace all current data with the backup file. Proceed?")) {
+                    this.patients = data.vch_patients;
+                    this.srrHistory = data.vch_srrHistory;
+                    this.medLedger = data.vch_medLedger;
+                    this.weightLog = data.vch_weightLog || [];
 
-                            localStorage.setItem('vch_rrPets', JSON.stringify(this.patients));
-                            localStorage.setItem('vch_rrHistory', JSON.stringify(this.srrHistory));
-                            localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+                    localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+                    localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
+                    localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+                    localStorage.setItem('vch_weightLog', JSON.stringify(this.weightLog));
 
-                            if (this.patients.length > 0) this.activePatientId = this.patients[0].name;
-                            this.currentPage = 1;
-                            this.$nextTick(() => { this.renderChart(); });
-                            alert("Master Backup successfully restored!");
-                        }
-                    } else {
-                        alert("Invalid backup file. Missing required VCH datasets.");
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert("Failed to read JSON backup file.");
+                    // FIX: Set to ID, not name
+                    if (this.patients.length > 0) this.activePatientId = this.patients[0].id; 
+                    this.currentPage = 1;
+                    this.$nextTick(() => { this.renderChart(); this.renderMedChart(); });
+                    alert("Master Backup successfully restored!");
                 }
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        },
+            } else {
+                alert("Invalid backup file. Missing required VCH datasets.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to read JSON backup file.");
+        }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
+
         
         //Log entries edits and deletes and comments
         
