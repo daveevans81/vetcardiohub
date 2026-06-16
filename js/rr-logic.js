@@ -88,7 +88,7 @@ init() {
             this.$watch('customEndDate', () => this.renderChart());
             this.$watch('activePetName', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
             
-            this.$nextTick(() => { this.renderChart(); });
+            this.$nextTick(() => { this.renderChart(); this.renderMedChart(); });
         },
         
         // --- PET MANAGEMENT ---
@@ -869,8 +869,6 @@ getMedDateRange() {
 
             this.medChartRenderTimeout = setTimeout(() => {
                 if (!this.$refs.medChartCanvas) return;
-                
-            if (!this.$refs.medChartCanvas) return;
 
             const epochs = this.generateMedEpochs();
             if (epochs.length === 0) return;
@@ -1011,8 +1009,9 @@ getMedDateRange() {
                             grid: { display: false }
                         }
                     }
-                }
-            });
+                } // Closes options {} 
+            });  // Closes new Chart()
+            }, 50); // <-- CLOSES THE setTimeout
         },
         
         
