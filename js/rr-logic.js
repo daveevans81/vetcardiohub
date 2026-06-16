@@ -51,6 +51,7 @@ newMed: {
         medChartInstance: null,
         medCustomStartDate: '',
         medCustomEndDate: '',
+        medChartRenderTimeout: null,
 
 init() {
             // Load Profiles
@@ -864,6 +865,11 @@ getMedDateRange() {
 
         // The Dedicated Chart.js Renderer
  renderMedChart() {
+ 			if (this.medChartRenderTimeout) clearTimeout(this.medChartRenderTimeout);
+
+            this.medChartRenderTimeout = setTimeout(() => {
+                if (!this.$refs.medChartCanvas) return;
+                
             if (!this.$refs.medChartCanvas) return;
 
             const epochs = this.generateMedEpochs();
