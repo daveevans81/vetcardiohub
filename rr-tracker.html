@@ -776,8 +776,17 @@
                             <option value="90d">Last 90 Days</option>
                             <option value="180d">Last 6 Months</option>
                             <option value="all">Entire Dataset</option>
+                            <option value="custom">Custom Range...</option>
                         </select>
-                    </div>
+
+                        <template x-if="medTimeScale === 'custom'">
+                            <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border">
+                                <input type="date" x-model="medCustomStartDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                                <span class="text-slate-400">to</span>
+                                <input type="date" x-model="medCustomEndDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                            </div>
+                        </template>
+                    </div>                
                 </div>
 
                 <div x-show="hasAnyMedData()" id="medChartContainer" class="relative w-full" style="height: 384px;" x-cloak>
