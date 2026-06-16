@@ -5,7 +5,7 @@ const VET_FORMULARY = {
     pimobendan: { id: 'pimobendan', generic: 'Pimobendan', brands: ['Vetmedin', 'Cardisure', 'Zelys'], classes: ['Inodilator'], color: '#ef4444' },
     cardalis:   { id: 'cardalis', generic: 'Spironolactone + Benazepril', brands: ['Cardalis'], classes: ['ACE-i', 'Aldosterone Antagonist'], color: '#8b5cf6' },
     benazepril: { id: 'benazepril', generic: 'Benazepril', brands: ['Lotensin', 'Nelio', 'Fortekor', 'Benefortin'],  classes: ['ACE-i'], color: '#8b5cf6'},
-    enalapril: { id: 'enalapril', generic: 'Enalapril', brands: ['Enacard', 'Nelio', 'Fortekor', 'Benefortin'], classes: ['ACE-i'], color: '#8b5cf6'},
+    enalapril: { id: 'enalapril', generic: 'Enalapril', brands: ['Enacard'], classes: ['ACE-i'], color: '#8b5cf6'},
     prilactone: { id: 'prilactone', generic: 'Spironolactone', brands: ['Prilactone'], classes: ['Aldosterone Antagonist'], color: '#a855f7' },
     clopidogrel: { id: 'clopidogrel', generic: 'Clopidogrel', brands: ['Plavix'],  classes: ['Anti-thrombotic'], color: '#8b5cf6'},
     rivaroxaban: { id: 'rivaroxaban', generic: 'Rivaroxaban', brands: ['Xarelto'],  classes: ['Anti-thrombotic'], color: '#8b5cf6'},
