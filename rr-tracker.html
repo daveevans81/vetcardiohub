@@ -577,7 +577,7 @@
                     <p>Log (or include in date range) at least 2 resting rates to generate trend analytics.</p>
                 </div>
             
-                <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: 100%; min-height: 60vh;' : 'height: 384px;'" x-cloak>
+                <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: calc(100vh - 180px); max-height: calc(100vh - 180px);' : 'height: 384px;'" x-cloak>
                     <canvas x-ref="rrrChartCanvas"></canvas>
                 </div>
             </div>

@@ -3735,8 +3735,9 @@ input {
     width: 100vw;
     height: 100vh;
     background-color: #f8fafc;
-    z-index: 10050; /* Safely above glossary modals (10000) */
-    padding: 20px;
+    z-index: 10050;
+    padding: 16px;
+    box-sizing: border-box;  /* ADD: ensures padding doesn't push past 100vw/100vh */
     display: flex;
     flex-direction: column;
     overflow: hidden;
