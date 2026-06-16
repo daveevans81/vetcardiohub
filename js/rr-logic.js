@@ -20,6 +20,8 @@ document.addEventListener('alpine:init', () => {
         // --- PAGINATION STATE ---
         currentPage: 1,
         itemsPerPage: 20,
+        editingCommentId: null,
+		commentDraft: '',
 
         // --- CHART & CONTROLS ---
         timeScale: '180d', // Default to 6 months
@@ -722,13 +724,13 @@ renderChart() {
 exportCSV() {
             if (!this.history || this.history.length === 0) return alert("No clinical data to export.");
 
-            const headers = "Date,Time,Rate(bpm),PetName,Species\n";
-            const rows = this.history.map(log => {
-                // Provide fallbacks in case of legacy data lacking pet names
-                const pName = log.petName || 'Unknown';
-                const pSpecies = log.species || 'dog';
-                return `${log.date},${log.time},${log.rate},${pName},${pSpecies}`;
-            }).join("\n");
+			const headers = "Date,Time,Rate(bpm),PetName,Species,Comment\n";
+			const rows = this.history.map(log => {
+			    const pName = log.petName || 'Unknown';
+			    const pSpecies = log.species || 'dog';
+			    const comment = (log.comment || '').replace(/"/g, '""'); // escape quotes
+			    return `${log.date},${log.time},${log.rate},${pName},${pSpecies},"${comment}"`;
+			}).join("\n");
 
             const csvContent = "data:text/csv;charset=utf-8," + headers + rows;
             const encodedUri = encodeURI(csvContent);
@@ -763,7 +765,8 @@ importCSV(event) {
                         const rate = parseInt(cols[2].trim());
                         const petName = cols[3] ? cols[3].trim() : 'Imported Patient';
                         const species = cols[4] ? cols[4].trim() : 'dog';
-
+                        const comment = cols[5] ? cols[5].trim().replace(/^"|"$/g, '').replace(/""/g, '"') : '';
+                        
                         // 1. Auto-generate Pet Profile if missing
                         const existingPet = this.pets.find(p => p.name.toLowerCase() === petName.toLowerCase());
                         if (!existingPet) {
@@ -778,7 +781,8 @@ importCSV(event) {
                             time: time,
                             rate: rate,
                             petName: petName,
-                            species: species
+                            species: species,
+                            comment: comment
                         });
                         importedCount++;
                     }
@@ -925,6 +929,8 @@ importCSV(event) {
             reader.readAsText(file);
         },
         
+        //Log entries edits and deletes
+        
         deleteReading(id) {
     if (confirm("Delete this reading? This cannot be undone.")) {
         this.history = this.history.filter(log => log.id !== id);
@@ -932,6 +938,26 @@ importCSV(event) {
         this.currentPage = 1;
         this.$nextTick(() => { this.renderChart(); });
     }
+},
+
+openCommentEditor(log) {
+    this.editingCommentId = log.id;
+    this.commentDraft = log.comment || '';
+},
+
+saveComment() {
+    const entry = this.history.find(log => log.id === this.editingCommentId);
+    if (entry) {
+        entry.comment = this.commentDraft.trim();
+        localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+    }
+    this.editingCommentId = null;
+    this.commentDraft = '';
+},
+
+cancelComment() {
+    this.editingCommentId = null;
+    this.commentDraft = '';
 },
         
         exportPDF() {

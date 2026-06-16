@@ -193,42 +193,84 @@
         <p>Counting and Tracking Tool</p>
     </header>
     
-    <div class="under-construction-banner" style="background: #1e293b; border-radius: 8px; padding: 2.5rem 2rem; text-align: center; overflow: hidden;">
+    
+    
+                                <!-- ******************************** -->
+                                <!-- UNDER CONSTRUCTION BANNER        -->
+                                <!-- ******************************** --> 
+                <div class="under-construction-banner" style="background: #1e293b; border-radius: 8px; padding: 2.5rem 2rem; text-align: center; overflow: hidden;">
+            
+                  <!-- top stripe -->
+                  <div style="display: flex; height: 8px; margin-bottom: 2rem; border-radius: 4px; overflow: hidden;">
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                  </div>
+                
+                  <div style="font-size: 52px; margin-bottom: 1rem;">🚧</div>
+                
+                  <h2 style="color: #f59e0b; font-size: 1.8rem; font-weight: 500; margin: 0 0 0.5rem; letter-spacing: 0.05em; text-transform: uppercase;">Under Construction</h2>
+                
+                  <p style="color: #94a3b8; font-size: 1rem; margin: 0 auto 1.5rem; max-width: 400px; line-height: 1.6;">
+                    This section is being worked on. Check back soon — something good is coming.
+                  </p>
+                
+                  <div style="display: inline-flex; align-items: center; gap: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 10px 20px;">
+                    <span style="color: #94a3b8; font-size: 0.875rem;">⏱ Coming soon</span>
+                  </div>
+                
+                  <!-- bottom stripe -->
+                  <div style="display: flex; height: 8px; margin-top: 2rem; border-radius: 4px; overflow: hidden;">
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                    <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
+                  </div>
+                
+                </div>
 
-      <!-- top stripe -->
-      <div style="display: flex; height: 8px; margin-bottom: 2rem; border-radius: 4px; overflow: hidden;">
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-      </div>
-    
-      <div style="font-size: 52px; margin-bottom: 1rem;">🚧</div>
-    
-      <h2 style="color: #f59e0b; font-size: 1.8rem; font-weight: 500; margin: 0 0 0.5rem; letter-spacing: 0.05em; text-transform: uppercase;">Under Construction</h2>
-    
-      <p style="color: #94a3b8; font-size: 1rem; margin: 0 auto 1.5rem; max-width: 400px; line-height: 1.6;">
-        This section is being worked on. Check back soon — something good is coming.
-      </p>
-    
-      <div style="display: inline-flex; align-items: center; gap: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 10px 20px;">
-        <span style="color: #94a3b8; font-size: 0.875rem;">⏱ Coming soon</span>
-      </div>
-    
-      <!-- bottom stripe -->
-      <div style="display: flex; height: 8px; margin-top: 2rem; border-radius: 4px; overflow: hidden;">
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-        <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
-      </div>
-    
-    </div>
+
+
+
 
     <div class="rr-dashboard" x-data="rrTracker">
         <main>
+                                <!-- ******************************** -->
+                                <!-- COMMENT ENTRY BOX POP UP         -->
+                                <!-- ******************************** --> 
+                                
+            <div x-show="editingCommentId !== null" x-cloak
+                 style="position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10100; display: flex; align-items: center; justify-content: center; padding: 20px;"
+                 @click.self="cancelComment()">
+                <div style="background: white; border-radius: 10px; padding: 24px; width: 100%; max-width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+                    <h3 style="margin: 0 0 6px; color: #16325F; font-size: 1rem;">
+                        <i class="fa-solid fa-comment-medical" style="margin-right: 6px;"></i>Clinical Note
+                    </h3>
+                    <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 14px;">Add a note to this reading — e.g. sleeping deeply, post-exercise, seemed restless.</p>
+                    <textarea x-model="commentDraft" rows="3"
+                              placeholder="Enter note here..."
+                              style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; font-family: inherit;"
+                              @keydown.enter.ctrl="saveComment()"></textarea>
+                    <p style="font-size: 0.75rem; color: #94a3b8; margin: 6px 0 16px;">Ctrl+Enter to save</p>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button @click="cancelComment()" style="padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; cursor: pointer; font-size: 0.875rem; color: #475569;">
+                            Cancel
+                        </button>
+                        <button @click="saveComment()" style="padding: 8px 16px; background: #16325F; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: bold;">
+                            Save Note
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            
+                                <!-- ******************************** -->
+                                <!-- NEW PET LOGIC                    -->
+                                <!-- ******************************** --> 
+            
           <div x-show="!isCounting && finalRate === null" x-transition>
                 
                 <div x-show="showAddPet" class="summary-box" style="border: 2px solid #005f73; background: #f0fdfa;">
@@ -257,6 +299,10 @@
                     <button @click="saveNewPet()" class="btn-nudge-static" style="background: #0f766e; width: 100%; max-width: 300px;">Save Profile</button>
                     <button x-show="pets.length > 0" @click="showAddPet = false" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
                 </div>
+                
+                                <!-- ******************************** -->
+                                <!-- PET EXISTS - START COUNT BOX     -->
+                                <!-- ******************************** --> 
         
                 <div x-show="!showAddPet && pets.length > 0" class="summary-box">
                     
@@ -282,7 +328,9 @@
             </div>
             
             
-        
+                                <!-- ******************************** -->
+                                <!-- COUNTING ACTIVE BOX              -->
+                                <!-- ******************************** --> 
         
             <div x-show="isCounting" class="summary-box" style="border: 2px solid #16325F;" x-cloak>
                 <div class="timer-pulse" x-text="timeLeft + 's'"></div>
@@ -363,11 +411,22 @@
                                 <div>
                                     <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
                                     <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
+                                    <span x-show="log.comment" :title="log.comment"
+                                          style="color: #3b82f6; font-size: 0.8rem; cursor: default; line-height: 1;"
+                                          title="This reading has a note">
+                                        <i class="fa-solid fa-comment-dots"></i>
+                                    </span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">
                                         <span x-text="log.rate"></span> bpm
                                     </strong>
+                                    <button @click="openCommentEditor(log)"
+                                            style="background: none; border: none; color: #3b82f6; cursor: pointer; padding: 4px; opacity: 0.5;"
+                                            @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
+                                            :title="log.comment ? 'Edit note' : 'Add note'">
+                                        <i class="fa-solid" :class="log.comment ? 'fa-comment-dots' : 'fa-comment-medical'"></i>
+                                    </button>
                                     <button @click="deleteReading(log.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; opacity: 0.5;" 
                                             @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
                                             title="Delete this reading">
