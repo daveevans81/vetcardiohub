@@ -81,25 +81,39 @@ newMed: {
         },
         
 init() {
-            // Load Relational DB
-            this.patients = JSON.parse(localStorage.getItem('vch_patients') || '[]');
-            this.weightLog = JSON.parse(localStorage.getItem('vch_weightLog') || '[]');
-            this.srrHistory = JSON.parse(localStorage.getItem('vch_srrHistory') || '[]');
-            this.medLedger = JSON.parse(localStorage.getItem('vch_medLedger') || '[]');
+    // 1. ROBUST DATA LOAD: Prevents the "filter of undefined" crash
+    try {
+        this.patients = JSON.parse(localStorage.getItem('vch_patients')) || [];
+        this.weightLog = JSON.parse(localStorage.getItem('vch_weightLog')) || [];
+        this.srrHistory = JSON.parse(localStorage.getItem('vch_srrHistory')) || [];
+        this.medLedger = JSON.parse(localStorage.getItem('vch_medLedger')) || [];
+    } catch(e) {
+        // Fallback if localStorage was severely corrupted during development
+        this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
+    }
 
-            // Set initial active patient safely
-            if (this.patients.length > 0) {
-                this.activePatientId = this.patients[0].id;
-            } else {
-                this.openPatientManager(true);
-            }
+    // Set initial active patient safely
+    if (this.patients.length > 0) {
+        this.activePatientId = this.patients[0].id;
+    } else {
+        this.openPatientManager(true);
+    }
 
-            // Watchers: Watch activePatientId instead of name
-            this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
-            this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); });
-            
-            this.$nextTick(() => { if (this.patients.length > 0) { this.renderChart(); this.renderMedChart(); } });
-        },
+    // 2. ACCORDION WATCHERS: Forces Chart.js to redraw *only* after Alpine makes the canvas visible
+    this.$watch('showAnalytics', (isVisible) => { 
+        if (isVisible) this.$nextTick(() => { this.renderChart(); }); 
+    });
+    this.$watch('showMedGraph', (isVisible) => { 
+        if (isVisible) this.$nextTick(() => { this.renderMedChart(); }); 
+    });
+
+    // Existing watchers
+    this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
+    this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); });
+    this.$watch('medTimeScale', () => { this.renderMedChart(); });
+    
+    this.$nextTick(() => { if (this.patients.length > 0) { this.renderChart(); this.renderMedChart(); } });
+},
         
         // --- PET MANAGEMENT ---
         
@@ -529,19 +543,20 @@ deleteMedication(id) {
         
 // ---  FILTER (Respects Pet Selection) ---
 getFilteredReadings() {
-            if (!this.srrHistory || this.srrHistory.length === 0 || !this.activePatientId) return [];
-            
-            let filtered = this.srrHistory.filter(item => item.patientId === this.activePatientId);
-            const { startDate, endDate } = this.getDateRange();
-            
-            if (startDate) {
-                filtered = filtered.filter(item => {
-                    const itemDate = this.parseDateSafe(item.date);
-                    return itemDate >= startDate && itemDate <= endDate;
-                });
-            }
-            return filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
-        },
+    // Force array check
+    if (!Array.isArray(this.srrHistory) || this.srrHistory.length === 0 || !this.activePatientId) return [];
+    
+    let filtered = this.srrHistory.filter(item => item.patientId === this.activePatientId);
+    const { startDate, endDate } = this.getDateRange();
+    
+    if (startDate) {
+        filtered = filtered.filter(item => {
+            const itemDate = this.parseDateSafe(item.date);
+            return itemDate >= startDate && itemDate <= endDate;
+        });
+    }
+    return filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+},
         
         
 getFilteredMedications() {
@@ -619,44 +634,46 @@ resetData() {
         },
                 
 renderChart() {
-            if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
+    if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
 
-            this.chartRenderTimeout = setTimeout(() => {
-                if (!this.$refs.rrrChartCanvas) return;
+    this.chartRenderTimeout = setTimeout(() => {
+        const canvas = this.$refs.rrrChartCanvas;
+        
+        // GATEKEEPER: Stop Chart.js from crashing if canvas is display: none
+        if (!canvas || canvas.offsetParent === null) return; 
 
-                const rawSrrData = this.getFilteredReadings();
-                const ctx = this.$refs.rrrChartCanvas.getContext('2d');
+        const rawSrrData = this.getFilteredReadings() || [];
+        const ctx = canvas.getContext('2d');
 
-                if (this.chartInstance) {
-                    this.chartInstance.destroy();
-                    this.chartInstance = null;
-                }
+        if (this.chartInstance) {
+            this.chartInstance.destroy();
+            this.chartInstance = null;
+        }
 
-                if (rawSrrData.length === 0) return;
+        // Require at least 2 points to draw a chart
+        if (rawSrrData.length < 2) return;
 
-                // --- 1. ROBUST DATE NORMALIZATION ---
-                // Defeats the UTC Midnight Timezone drop by forcing pure dates to local Midday
-                const safeTimestamp = (dateStr) => {
-                    if (!dateStr) return new Date().getTime();
-                    // If it's a pure YYYY-MM-DD from the Med Input form
-                    if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                        return new Date(`${dateStr}T12:00:00`).getTime(); 
-                    }
-                    // Otherwise rely on your existing safe parser
-                    return this.parseDateSafe(dateStr).getTime();
-                };
+        const safeTimestamp = (dateStr) => {
+            if (!dateStr) return new Date().getTime();
+            if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                return new Date(`${dateStr}T12:00:00`).getTime(); 
+            }
+            return this.parseDateSafe(dateStr).getTime();
+        };
 
-                // --- 2. BUILD UNIFIED CHRONOLOGICAL TIMELINE ---
-                const combinedEvents = [];
+        const combinedEvents = [];
 
-                // Push all breathing readings into the timeline
-                rawSrrData.forEach(r => {
-                    combinedEvents.push({ type: 'srr', timestamp: safeTimestamp(r.date), data: r });
-                });
+        rawSrrData.forEach(r => {
+            combinedEvents.push({ type: 'srr', timestamp: safeTimestamp(r.date), data: r });
+        });
 
-                // Push all medication events into the timeline
-                if (this.showMedications && this.medLedger) {
-                    const petMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
+        // Ensure medLedger is an array before filtering
+        const safeMedLedger = Array.isArray(this.medLedger) ? this.medLedger : [];
+        
+        if (this.showMedications && safeMedLedger.length > 0) {
+            const petMeds = safeMedLedger.filter(m => m.patientId === this.activePatientId);
+
+             
                     const { startDate, endDate } = this.getDateRange();
                     
                     // Group meds by exact date to prevent stacking overlaps
@@ -823,10 +840,10 @@ renderChart() {
          // --- MED CHART FUNCTIONS ---       
         
         
-        hasAnyMedData() {
-            if (!this.medLedger || !this.activePatientId) return false;
-            return this.medLedger.some(m => m.patientId === this.activePatientId);
-        },
+hasAnyMedData() {
+    if (!Array.isArray(this.medLedger) || !this.activePatientId) return false;
+    return this.medLedger.some(m => m.patientId === this.activePatientId);
+},
         
         
 // Validates custom date ranges strictly to protect Chart.js
@@ -937,14 +954,13 @@ getMedDateRange() {
         
         
         // Converts point-in-time entries into solid blocks of duration (Epochs)
-        generateMedEpochs() {
-            if (!this.medLedger || !this.activePatientId) return [];
-            
-            // 1. Isolate the current pet and sort STRICTLY chronologically (oldest first)
-            const petMeds = this.medLedger
-                .filter(m => m.patientId === this.activePatientId)
-                .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
-
+generateMedEpochs() {
+    // Force array check
+    if (!Array.isArray(this.medLedger) || !this.activePatientId) return [];
+    
+    const petMeds = this.medLedger
+        .filter(m => m.patientId === this.activePatientId)
+        .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
             const epochs = [];
             const activeMeds = {}; // Tracks currently "open" medication blocks by drugId
 
@@ -990,17 +1006,18 @@ getMedDateRange() {
         },
 
         // The Dedicated Chart.js Renderer
- renderMedChart() {
+renderMedChart() {
     if (this.medChartRenderTimeout) clearTimeout(this.medChartRenderTimeout);
 
     this.medChartRenderTimeout = setTimeout(() => {
-        if (!this.$refs.medChartCanvas) return;
+        const canvas = this.$refs.medChartCanvas;
+        
+        // GATEKEEPER: Stop Chart.js from crashing if canvas is display: none
+        if (!canvas || canvas.offsetParent === null) return;
 
-        // GATEKEEPER: Intercept execution if custom dates are invalid or incomplete
         if (this.medTimeScale === 'custom') {
             if (!this.validateCustomDates(this.medCustomStartDate, this.medCustomEndDate)) {
-                console.warn("VetCardioHub: Awaiting valid custom date range...");
-                return; // Abort silently; do not destroy the existing chart yet
+                return; 
             }
         }
 
