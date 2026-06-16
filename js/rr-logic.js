@@ -58,10 +58,10 @@ showCardalisImport: false,
 showMedLog: false, // Accordion toggle state
 formulary: VET_FORMULARY, // Expose the global object to Alpine
 newMed: {
-    eventDate: new Date().toISOString().split('T')[0], // Defaults to today YYYY-MM-DD
+    eventDate: new Date().toISOString().split('T')[0],
     drugId: '',
     customName: '',
-    action: 'Started', // 'Started', 'Adjusted', 'Stopped'
+    isStopped: false,   // replaces the action dropdown
     doseMg: '',
     frequency: 'q12h'
 },
@@ -287,15 +287,19 @@ get hasAnyDataForActivePet() {
         
 // Dynamic mg/kg Calculator (with strict null/clinical safety checks)
 calculatedMgPerKg() {
-    if (!this.activePetProfile || !this.activePetProfile.weight || !this.newMed.doseMg) return null;
-    
-    let weight = parseFloat(this.activePetProfile.weight);
-    let dose = parseFloat(this.newMed.doseMg);
-    
-    // Prevent division by zero or NaN cascade
-    if (isNaN(weight) || isNaN(dose) || weight <= 0) return null;
+    const profile = this.activePatientProfile;  // fix: was activePetProfile
+    if (!profile) return null;
 
-    let weightInKg = this.activePetProfile.weightUnit === 'lbs' ? weight / 2.2046 : weight;
+    const weights = this.weightLog
+        .filter(w => w.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    const latestWeight = weights.length > 0 ? parseFloat(weights[0].weightValue) : null;
+    const dose = parseFloat(this.newMed.doseMg);
+
+    if (!latestWeight || isNaN(dose) || latestWeight <= 0 || isNaN(latestWeight)) return null;
+
+    const weightInKg = profile.weightUnit === 'lbs' ? latestWeight / 2.2046 : latestWeight;
     return (dose / weightInKg).toFixed(2);
 },
 
@@ -352,20 +356,34 @@ startCount() {
         // Save function for the Ledger
 addMedication() {
     if (!this.activePatientId) return alert("Clinical Entry Error: No patient selected.");
-    if (!this.newMed.drugId || !this.newMed.doseMg) return alert("Clinical Entry Error: Please select a medication and specify the dose.");
+    if (!this.newMed.drugId) return alert("Clinical Entry Error: Please select a medication.");
+    if (!this.newMed.isStopped && !this.newMed.doseMg) return alert("Clinical Entry Error: Please specify the dose.");
 
-    const isMajor = ['Started', 'Stopped'].includes(this.newMed.action);
+    // Infer action: Stopped > check history for prior entry > Started vs Adjusted
+    let action;
+    if (this.newMed.isStopped) {
+        action = 'Stopped';
+    } else {
+        const priorEntry = this.medLedger.some(m =>
+            m.patientId === this.activePatientId &&
+            m.drugId === this.newMed.drugId &&
+            m.action !== 'Stopped'
+        );
+        action = priorEntry ? 'Adjusted' : 'Started';
+    }
+
+    const isMajor = ['Started', 'Stopped'].includes(action);
 
     const entry = {
-        id: this.generateId(), 
-        patientId: this.activePatientId, // UPDATED to relational ID
+        id: this.generateId(),
+        patientId: this.activePatientId,
         eventDate: this.newMed.eventDate,
         drugId: this.newMed.drugId,
         customName: this.newMed.drugId === 'other' ? this.newMed.customName : null,
-        action: this.newMed.action,
-        doseMg: parseFloat(this.newMed.doseMg),
-        frequency: this.newMed.frequency,
-        mgPerKg: this.calculatedMgPerKg(), 
+        action: action,
+        doseMg: this.newMed.isStopped ? null : parseFloat(this.newMed.doseMg),
+        frequency: this.newMed.isStopped ? null : this.newMed.frequency,
+        mgPerKg: this.newMed.isStopped ? null : this.calculatedMgPerKg(),
         isMajorChange: isMajor
     };
 
@@ -373,7 +391,14 @@ addMedication() {
     localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
     this.renderMedChart();
 
-    this.newMed = { eventDate: this.newMed.eventDate, drugId: '', customName: '', action: 'Started', doseMg: '', frequency: 'q12h' };
+    this.newMed = {
+        eventDate: this.newMed.eventDate,
+        drugId: '',
+        customName: '',
+        isStopped: false,
+        doseMg: '',
+        frequency: 'q12h'
+    };
 },
 
 
@@ -381,7 +406,10 @@ addMedication() {
         
 // Sort ledger chronologically (newest first) to avoid Alpine array freezing
 sortedMedLedger() {
-    return [...this.medLedger].sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+    if (!this.activePatientId) return [];
+    return this.medLedger
+        .filter(med => med.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
 },
 
 deleteMedication(id) {

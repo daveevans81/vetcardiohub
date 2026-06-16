@@ -239,6 +239,12 @@
 
  <div class="rr-dashboard" x-data="rrTracker">
         <main>
+        
+                                <!-- ******************************** -->
+                                <!-- COMMENT EDITOR                   -->
+                                <!-- ******************************** -->
+                                
+                                
                                 <div x-show="editingCommentId !== null" x-cloak
                  style="position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10100; display: flex; align-items: center; justify-content: center; padding: 20px;"
                  @click.self="cancelComment()">
@@ -263,8 +269,11 @@
                 </div>
             </div>
             
+                                <!-- ******************************** -->
+                                <!-- PATIENT MANAGEMENT               -->
+                                <!-- ******************************** -->
             
-                                <div class="summary-box" x-show="patients.length > 0 && !showPatientManager">
+            <div class="summary-box" x-show="patients.length > 0 && !showPatientManager">
                 <div style="background: white; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <div style="display: flex; flex-direction: column; text-align: left;">
                         <div style="display: flex; align-items: center; gap: 10px;">
@@ -294,15 +303,24 @@
                     </div>
                 </div>
             
+                                <!-- ******************************** -->
+                                <!-- SRR BOX - count and manual       -->
+                                <!-- ******************************** -->
+                                
+                                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                     <button @click="startCount()" class="btn-massive-tap" style="min-height: 80px; background: #0f766e; color: white; border-radius: 8px; border: none; cursor: pointer;">
-                        <i class="fa-solid fa-stopwatch"></i> Tap Timer
+                        <i class="fa-solid fa-stopwatch"></i> Count SRR Now
                     </button>
                     <button @click="showManualSrr = true" class="btn-massive-tap" style="min-height: 80px; background: #e2e8f0; color: #334155; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer;">
                         <i class="fa-solid fa-keyboard"></i> Manual Entry
                     </button>
                 </div>
             </div>
+            
+                                <!-- ******************************** -->
+                                <!-- SRR BOX -           manual       -->
+                                <!-- ******************************** -->
             
             <div x-show="showManualSrr" class="summary-box" style="border: 2px solid #3b82f6; background: #eff6ff;" x-transition>
                 <h3 style="margin-top: 0; color: #1e40af;"><i class="fa-solid fa-pen-to-square"></i> Manual SRR Entry</h3>
@@ -357,8 +375,11 @@
                 <button x-show="patients.length > 0" @click="closePatientManager()" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
             </div>
                 
+                                <!-- ******************************** -->
+                                <!-- SRR  count                       -->
+                                <!-- ******************************** -->
             
-                                <div x-show="isCounting" class="summary-box" style="border: 2px solid #16325F;" x-cloak>
+            <div x-show="isCounting" class="summary-box" style="border: 2px solid #16325F;" x-cloak>
                 <div class="timer-pulse" x-text="timeLeft + 's'"></div>
                 <p style="text-align: center; margin-bottom: 20px;">Time Remaining</p>
                 
@@ -396,11 +417,13 @@
                 </div>
             </div>
             
+                                <!-- ******************************** -->
+                                <!-- SRR LOG history                  -->
+                                <!-- ******************************** -->
             
-            
-                                <div class="paginatedHistory" x-show="patients.length > 0"  style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
+             <div class="paginatedHistory" x-show="patients.length > 0"  style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
                 
-                                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                   <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                         <button @click="showLog = !showLog" type="button" style="
                             width: 100%;
                             display: flex;
@@ -564,6 +587,10 @@
                     </div>
             </div>
             
+                                <!-- ******************************** -->
+                                <!-- Medication History               -->
+                                <!-- ******************************** -->
+            
             <div class="medicationHistory" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
                 
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
@@ -617,30 +644,39 @@
                                 <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                             </div>
             
-                            <div>
-                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Action</label>
-                                <select x-model="newMed.action" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                    <option value="Started">Started</option>
-                                    <option value="Adjusted">Adjusted Dose</option>
-                                    <option value="Stopped">Stopped</option>
-                                </select>
+                            <div style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
+                                <input type="checkbox" 
+                                       id="stoppedCheck" 
+                                       x-model="newMed.isStopped"
+                                       style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
+                                <label for="stoppedCheck" 
+                                       style="font-size: 0.85rem; font-weight: bold; color: #ef4444; cursor: pointer; user-select: none;">
+                                    Stopped
+                                </label>
                             </div>
-            
-                            <div>
+                            
+                            <!-- DOSE — greyed out when Stopped -->
+                            <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
                                 <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Dose (mg)</label>
-                                <input type="number" step="0.1" x-model="newMed.doseMg" placeholder="e.g., 20" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                <input type="number" step="0.1" 
+                                       x-model="newMed.doseMg" 
+                                       :disabled="newMed.isStopped"
+                                       placeholder="e.g., 20" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                             </div>
-            
-                            <div>
+                            
+                            <!-- FREQUENCY — greyed out when Stopped -->
+                            <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
                                 <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Frequency</label>
-                                <select x-model="newMed.frequency" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                <select x-model="newMed.frequency" 
+                                        :disabled="newMed.isStopped"
+                                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                                     <option value="q24h">q24h (SID)</option>
                                     <option value="q12h">q12h (BID)</option>
                                     <option value="q8h">q8h (TID)</option>
                                     <option value="PRN">PRN (As Needed)</option>
                                 </select>
-                            </div>
-            
+                            </div>            
                             <div>
                                 <button @click="addMedication()" type="button" style="width: 100%; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
                                     <i class="fa-solid fa-plus"></i> Save Entry
@@ -697,7 +733,11 @@
                 </div>
             </div>
             
-                                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                                <!-- ******************************** -->
+                                <!-- SRR CHART and Analytics          -->
+                                <!-- ******************************** -->
+            
+            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                     <button @click="showAnalytics = !showAnalytics" type="button" style="
                         width: 100%;
@@ -770,7 +810,11 @@
                 </div>
             </div>
             
-                                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                                <!-- ******************************** -->
+                                <!-- MED GRAPH                        -->
+                                <!-- ******************************** -->
+                                            
+            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                     <button @click="showMedGraph = !showMedGraph" type="button" style="
                         width: 100%;
@@ -830,7 +874,13 @@
                 </div>
             </div>
             
-                                <div class="summary-box" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
+            
+            
+                                <!-- ******************************** -->
+                                <!-- EXPORT IMPORT SECTION            -->
+                                <!-- ******************************** -->
+            
+            <div class="summary-box" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
                 <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Data Management & Backups</h3>
                 <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">Your data is stored locally. Create backups before clearing your browser history.</p>
                 
@@ -932,7 +982,7 @@
                 </div>
             </div>
             
-                                <section id="install-nudge-static" class="install-footer-box" style="margin-top: 40px; text-align: left;">
+            <section id="install-nudge-static" class="install-footer-box" style="margin-top: 40px; text-align: left;">
                 <div class="nudge-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
                 <div class="nudge-text">
                     <h4>Save as a Pet App</h4>
@@ -942,33 +992,37 @@
         
             </section>
          </main>
-         <div class="card" style="margin-top:16px">
-              <h2>SRR FAQ & Clinical Guidance</h2>
-              <div class="faq-item">
-                <details>
-                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is a normal resting respiratory rate for a dog or cat?</summary>
-                  <p>A normal sleeping or resting respiratory rate for both dogs and cats should consistently be under 30 breaths per minute. Rates between 30 and 40 are considered borderline (equivocal) and should be recounted and interpreted in light of typical normal values for your pet and the current level of concern for heart disease, while rates consistently over 40 require veterinary attention.</p>
-                </details>
-              </div>
-              <div class="faq-item">
-                <details>
-                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I count my pet's breathing rate?</summary>
-                  <p>Wait until your pet is fully resting or in a deep sleep. Observe their chest moving in and out. One complete in-and-out motion counts as one breath. Count the number of breaths over 30 seconds and multiply by 2 to get the rate per minute. See <a href="/blog-posts/post2.html">our guide</a></p>
-                </details>
-              </div>
-             <div class="faq-item">
-                <details>
-                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Why is tracking my dog's sleeping breathing rate important?</summary>
-                  <p>In dogs and cats with heart disease, a rising resting respiratory rate is often the first clinical sign of fluid building up in the lungs (congestive heart failure). Tracking this rate allows owners to detect failure early, often before the pet shows signs of coughing or distress. See <a href="/blog-posts/post16.html">our guide</a></p>
-                </details>
-              </div>  
-              <div class="faq-item">
-                <details>
-                  <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What should I do if my dog's respiratory rate is over 40?</summary>
-                  <p>If your pet is fully asleep (not dreaming or overly warm) and their breathing rate is consistently over 40 breaths per minute, this is a clinical emergency, especially if they have a known heart murmur or heart disease. You should contact your veterinary surgeon immediately.</p>
-                </details>
-              </div>  
-         </div>
+         
+         
+         <aside>
+             <div class="card" style="margin-top:16px">
+                  <h2>SRR FAQ & Clinical Guidance</h2>
+                  <div class="faq-item">
+                    <details>
+                      <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is a normal resting respiratory rate for a dog or cat?</summary>
+                      <p>A normal sleeping or resting respiratory rate for both dogs and cats should consistently be under 30 breaths per minute. Rates between 30 and 40 are considered borderline (equivocal) and should be recounted and interpreted in light of typical normal values for your pet and the current level of concern for heart disease, while rates consistently over 40 require veterinary attention.</p>
+                    </details>
+                  </div>
+                  <div class="faq-item">
+                    <details>
+                      <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I count my pet's breathing rate?</summary>
+                      <p>Wait until your pet is fully resting or in a deep sleep. Observe their chest moving in and out. One complete in-and-out motion counts as one breath. Count the number of breaths over 30 seconds and multiply by 2 to get the rate per minute. See <a href="/blog-posts/post2.html">our guide</a></p>
+                    </details>
+                  </div>
+                 <div class="faq-item">
+                    <details>
+                      <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Why is tracking my dog's sleeping breathing rate important?</summary>
+                      <p>In dogs and cats with heart disease, a rising resting respiratory rate is often the first clinical sign of fluid building up in the lungs (congestive heart failure). Tracking this rate allows owners to detect failure early, often before the pet shows signs of coughing or distress. See <a href="/blog-posts/post16.html">our guide</a></p>
+                    </details>
+                  </div>  
+                  <div class="faq-item">
+                    <details>
+                      <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What should I do if my dog's respiratory rate is over 40?</summary>
+                      <p>If your pet is fully asleep (not dreaming or overly warm) and their breathing rate is consistently over 40 breaths per minute, this is a clinical emergency, especially if they have a known heart murmur or heart disease. You should contact your veterinary surgeon immediately.</p>
+                    </details>
+                  </div>  
+             </div>
+          </aside>
         <div id="glossary-container"></div>
     
     </div>         <!-- Close Alpine obj rrTracker -->
