@@ -4,15 +4,27 @@ document.addEventListener('alpine:init', () => {
         ...glossaryEngine, 
 
 // --- CORE STATE ---
-        pets: [], // Array of { name: 'Bella', species: 'dog', age: 8 }
-        activePetName: '', // The currently selected pet
-        showAddPet: false, // Toggles the setup modal
+
+
+
         newPet: { name: '', species: 'dog', age: '',weight: '', weightUnit: 'kg' },
         showLog: true,
         showMedGraph: true,
         showAnalytics: true,
         
+        patients: [],    // Array of patient demographic objects
+        weightLog: [],   // Array of weight entries over time
+        srrHistory: [],  // Array of respiratory rate records
+        medLedger: [],   // Array of medication events
+        
+        activePatientId: null, // UUID of the selected patient
+        showPatientManager: false,
+        showManualSrr: false,
 
+        // Form bindings
+        editingPatient: {}, 
+        manualSrrInput: null,
+        manualSrrDate: '',
 
         isCounting: false,
         timeLeft: 30,
@@ -42,7 +54,7 @@ showCardalisImport: false,
         isChartExpanded: false,
         
         // Medication Module State
-medLedger: [], 
+ 
 showMedLog: false, // Accordion toggle state
 formulary: VET_FORMULARY, // Expose the global object to Alpine
 newMed: {
@@ -61,70 +73,151 @@ newMed: {
         medCustomEndDate: '',
         medChartRenderTimeout: null,
 
+
+// Generate robust UUID (Fallback for older browsers just in case)
+        generateId() {
+            if (window.crypto && window.crypto.randomUUID) return crypto.randomUUID();
+            return 'vch-' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+        },
+        
 init() {
-            // Load Profiles
-            const savedPets = localStorage.getItem('vch_rrPets');
-            if (savedPets) this.pets = JSON.parse(savedPets);
+            // Load Relational DB
+            this.patients = JSON.parse(localStorage.getItem('vch_patients') || '[]');
+            this.weightLog = JSON.parse(localStorage.getItem('vch_weightLog') || '[]');
+            this.srrHistory = JSON.parse(localStorage.getItem('vch_srrHistory') || '[]');
+            this.medLedger = JSON.parse(localStorage.getItem('vch_medLedger') || '[]');
 
-            // Load History
-			const savedHistory = localStorage.getItem('vch_rrHistory');
-			
-			if (savedHistory) {
-			    this.history = JSON.parse(savedHistory).map(log => ({
-			        comment: '',
-			        ...log
-			    }));
-			}
-            
-            // Load Medications
-            const savedMeds = localStorage.getItem('vch_medLedger');
-            if (savedMeds) this.medLedger = JSON.parse(savedMeds);
-
-            // Set default active pet
-            if (this.pets.length > 0) {
-                this.activePetName = this.pets[0].name;
+            // Set initial active patient safely
+            if (this.patients.length > 0) {
+                this.activePatientId = this.patients[0].id;
             } else {
-                // If brand new user, force them to set up a pet
-                this.showAddPet = true;
+                this.openPatientManager(true);
             }
 
-            // Watchers: Re-render chart and reset pagination if they change the pet or timescale
-            this.$watch('activePetName', () => { this.currentPage = 1; this.renderChart(); });
+            // Watchers: Watch activePatientId instead of name
+            this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
             this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); });
-            this.$watch('showMedications', () => this.renderChart());
-            this.$watch('customStartDate', () => this.renderChart());
-            this.$watch('customEndDate', () => this.renderChart());
-            this.$watch('activePetName', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
             
-            this.$nextTick(() => { this.renderChart(); this.renderMedChart(); });
+            this.$nextTick(() => { if (this.patients.length > 0) { this.renderChart(); this.renderMedChart(); } });
         },
         
         // --- PET MANAGEMENT ---
-saveNewPet() {
-            const cleanName = this.newPet.name.trim();
-            if (!cleanName) return alert("A valid pet name is required.");
-
-            if (this.pets.find(p => p.name.toLowerCase() === cleanName.toLowerCase())) {
-                return alert("A patient profile with this name already exists.");
-            }
-
-            // Save all the new clinical data
-            this.pets.push({
-                name: cleanName,
-                species: this.newPet.species,
-                age: this.newPet.age ? parseInt(this.newPet.age, 10) : null,
-                weight: this.newPet.weight ? parseFloat(this.newPet.weight) : null,
-                weightUnit: this.newPet.weightUnit || 'kg'
-            });
-
-            localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
-            this.activePetName = cleanName; // This instantly triggers the activePetProfile getter!
-            
-            // Reset form
-            this.newPet = { name: '', species: 'dog', age: '', weight: '', weightUnit: 'kg' };
-            this.showAddPet = false;
+        
+        get activePatientProfile() {
+            if (!this.activePatientId) return null;
+            return this.patients.find(p => p.id === this.activePatientId) || null;
         },
         
+        get computedAgeText() {
+            const p = this.activePatientProfile;
+            if (!p || !p.dob) return 'Age Unknown';
+            const dob = new Date(p.dob);
+            const diffMs = Date.now() - dob.getTime();
+            const ageDate = new Date(diffMs);
+            const years = Math.abs(ageDate.getUTCFullYear() - 1970);
+            return years > 0 ? `${years}y` : `< 1y`;
+        },
+        
+        get latestWeightText() {
+            if (!this.activePatientId) return '';
+            const weights = this.weightLog
+                .filter(w => w.patientId === this.activePatientId)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (weights.length === 0) return 'No weight logged';
+            const unit = this.activePatientProfile?.weightUnit || 'kg';
+            return `${weights[0].weightValue} ${unit}`;
+        },
+        
+savePatient() {
+            const cleanName = (this.editingPatient.name || '').trim();
+            if (!cleanName) return alert("Patient Name is clinically required.");
+
+            // Find if existing
+            const existingIndex = this.patients.findIndex(p => p.id === this.editingPatient.id);
+            
+            // Extract the weight before saving demographics
+            const currentWeightValue = parseFloat(this.editingPatient.weight);
+            delete this.editingPatient.weight; // We don't store weight directly on the patient object anymore
+
+            if (existingIndex > -1) {
+                this.patients[existingIndex] = { ...this.editingPatient };
+            } else {
+                this.patients.push({ ...this.editingPatient });
+            }
+
+            // Log weight if changed
+            if (!isNaN(currentWeightValue)) {
+                this.logWeight(this.editingPatient.id, currentWeightValue);
+            }
+
+            localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+            this.activePatientId = this.editingPatient.id;
+            this.closePatientManager();
+        },
+        
+        logWeight(patientId, value) {
+            // Only add a new log entry if the weight actually changed today
+            const today = new Date().toISOString().split('T')[0];
+            const recent = this.weightLog.find(w => w.patientId === patientId && w.date.startsWith(today));
+            
+            if (recent) {
+                recent.weightValue = value; // Update today's entry
+            } else {
+                this.weightLog.push({ id: this.generateId(), patientId, date: new Date().toISOString(), weightValue: value });
+            }
+            localStorage.setItem('vch_weightLog', JSON.stringify(this.weightLog));
+        },
+        
+        // --- DATA MERGING ALGORITHM ---
+        
+        mergePatients(targetId, sourceId) {
+            if (!confirm("CRITICAL: Merge all clinical logs from the source patient into the target patient? The source profile will be deleted. This cannot be undone.")) return;
+
+            // Reassign IDs across all normalized arrays
+            this.weightLog = this.weightLog.map(w => w.patientId === sourceId ? { ...w, patientId: targetId } : w);
+            this.srrHistory = this.srrHistory.map(s => s.patientId === sourceId ? { ...s, patientId: targetId } : s);
+            this.medLedger = this.medLedger.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
+
+            // Delete Source Patient
+            this.patients = this.patients.filter(p => p.id !== sourceId);
+
+            // Save state
+            localStorage.setItem('vch_weightLog', JSON.stringify(this.weightLog));
+            localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
+            localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+            localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+
+            this.activePatientId = targetId;
+            alert("Patient records successfully merged.");
+            this.$nextTick(() => { this.renderChart(); this.renderMedChart(); });
+        },
+        
+        openPatientManager(isNew = false, patientId = null) {
+            this.showPatientManager = true;
+            if (isNew || !patientId) {
+                this.editingPatient = {
+                    id: this.generateId(),
+                    name: '',
+                    ownerName: '',
+                    species: 'dog',
+                    breed: '',
+                    sex: 'MN',
+                    dob: '',
+                    weight: null,
+                    weightUnit: 'kg',
+                    customSrrCutoff: 30
+                };
+            } else {
+                const target = this.patients.find(p => p.id === patientId);
+                // Extract latest weight for the form
+                const weights = this.weightLog.filter(w => w.patientId === patientId).sort((a, b) => new Date(b.date) - new Date(a.date));
+                this.editingPatient = { ...target, weight: weights.length > 0 ? weights[0].weightValue : null };
+            }
+        },
+        
+        closePatientManager() {
+            this.showPatientManager = false;
+        },
 
 get currentSpecies() {
             if (!this.activePetName) return 'dog';
@@ -303,39 +396,51 @@ deleteMedication(id) {
     }
 },
 
-saveToHistory() {
-            // Null safety check: ensure a patient is selected
-            if (!this.activePetName) {
-                alert("Please select or create a patient profile before saving.");
-                return;
-            }
+// --- SRR RECORDING (MANUAL & AUTOMATIC) ---
+        
+        saveToHistory(manualRate = null, manualDate = null) {
+            if (!this.activePatientId) return alert("Select a patient profile first.");
+
+            const profile = this.activePatientProfile;
+            const isManual = manualRate !== null;
+            const rate = isManual ? manualRate : this.finalRate;
+            
+            let dateObj = manualDate ? new Date(manualDate) : new Date();
+            if (isNaN(dateObj.getTime())) dateObj = new Date(); // Fallback
+
+            // Determine equivocal status based on patient species
+            const isEquivocal = profile.species === 'cat' 
+                ? (rate >= 30 && rate < 40) 
+                : (rate >= 25 && rate < 35);
 
             const newLog = {
-                id: Date.now(), // Unique identifier for key binding
-                date: new Date().toISOString(),
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                rate: this.finalRate,
-                petName: this.activePetName,
-                species: this.currentSpecies,
-                // Optional: Flag equivocal rates dynamically based on species
-                isEquivocal: this.currentSpecies === 'cat' 
-                    ? (this.finalRate >= 30 && this.finalRate < 40) 
-                    : (this.finalRate >= 25 && this.finalRate < 35)
+                id: this.generateId(),
+                patientId: this.activePatientId,
+                date: dateObj.toISOString(),
+                time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                rate: rate,
+                isManual: isManual,
+                isEquivocal: isEquivocal,
+                comment: isManual ? 'Manually recorded' : ''
             };
 
-            // Unshift places newest records at the top of the raw array
-            this.history.unshift(newLog);
-            localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+            this.srrHistory.unshift(newLog); // Newest first
+            localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
 
-            // Reset UI state for the next count
             this.finalRate = null;
             this.tapCount = 0;
-            this.currentPage = 1; // Snap back to page 1 to see the new entry
+            this.currentPage = 1;
             
-            // Re-render chart with the new data point
-            this.$nextTick(() => {
-                this.renderChart();
-            });
+            this.$nextTick(() => { this.renderChart(); });
+        },
+        
+        saveManualSrr() {
+            const rate = parseFloat(this.manualSrrInput);
+            if (isNaN(rate) || rate < 0) return alert("Invalid respiratory rate.");
+            this.saveToHistory(rate, this.manualSrrDate);
+            this.showManualSrr = false;
+            this.manualSrrInput = null;
+            this.manualSrrDate = '';
         },
         
         
@@ -442,21 +547,17 @@ saveToHistory() {
         
 // ---  FILTER (Respects Pet Selection) ---
 getFilteredReadings() {
-            if (!this.history || this.history.length === 0 || !this.activePetName) return [];
+            if (!this.srrHistory || this.srrHistory.length === 0 || !this.activePatientId) return [];
             
-            // 1. Strict Filter by Active Pet
-            let filtered = this.history.filter(item => item.petName === this.activePetName);
-
-            // 2. Filter by Date
+            let filtered = this.srrHistory.filter(item => item.patientId === this.activePatientId);
             const { startDate, endDate } = this.getDateRange();
+            
             if (startDate) {
                 filtered = filtered.filter(item => {
                     const itemDate = this.parseDateSafe(item.date);
                     return itemDate >= startDate && itemDate <= endDate;
                 });
             }
-            
-            // Sort via a timestamp calculation rather than using destructive inline reversing
             return filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
         },
         
