@@ -9,6 +9,10 @@ document.addEventListener('alpine:init', () => {
         showAddPet: false, // Toggles the setup modal
         newPet: { name: '', species: 'dog', age: '',weight: '', weightUnit: 'kg' },
         showLog: true,
+        showMedGraph: true,
+        showAnalytics: true,
+        
+
 
         isCounting: false,
         timeLeft: 30,
@@ -120,6 +124,7 @@ saveNewPet() {
             this.newPet = { name: '', species: 'dog', age: '', weight: '', weightUnit: 'kg' };
             this.showAddPet = false;
         },
+        
 
 get currentSpecies() {
             if (!this.activePetName) return 'dog';

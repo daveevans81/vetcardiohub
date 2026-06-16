@@ -701,56 +701,76 @@
 
 
             <div class="bg-white rounded-lg shadow-md p-6" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #d9c9f0; background: #fcfaff; border-radius: 4px; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                    <button @click="showAnalytics = !showAnalytics" type="button" style="
+                        width: 100%;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 12px 16px;
+                        background: #e8eef7;
+                        border: 1px solid #c8d6eb;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        color: #16325F;
+                        transition: background 0.15s ease;
+                    " @mouseenter="$el.style.background='#dde6f3'"
+                       @mouseleave="$el.style.background='#e8eef7'">
+                        
+                        <h3 style="margin: 0;"><i class="fa-solid fa-chart-line text-blue-500"></i>
+                            <span x-text="activePetName ? activePetName + '\'s Analytics' : 'Analytics'"></span></h3> 
+                        <i class="fa-solid" :class="showAnalytics ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                    </button>
+                </div>
+            
+                <!-- ACCORDION CONTENT -->
+                <div x-show="showAnalytics" x-transition>
+                    <div class="flex justify-between items-center mb-4">            
+                        <div class="flex flex-wrap gap-3 items-center">
                 
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-slate-800" style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-chart-line text-blue-500"></i>
-                        <span x-text="activePetName ? activePetName + '\'s Analytics' : 'Analytics'"></span>
-                    </h2>
-                    
-                    <div class="flex flex-wrap gap-3 items-center">
-            
-                        <select x-model="timeScale" class="border rounded p-2 text-sm bg-white cursor-pointer">
-                            <option value="thisWeek">This Week</option>
-                            <option value="lastWeek">Last Week</option>
-                            <option value="thisMonth">This Month</option>
-                            <option value="lastMonth">Last Month</option>
-                            <option value="60d">Last 60 Days</option>
-                            <option value="90d">Last 90 Days</option>
-                            <option value="180d">Last 6 Months</option>
-                            <option value="all">Entire Dataset</option>
-                            <option value="custom">Custom Range...</option>
-                        </select>
-                        
-                        <template x-if="timeScale === 'custom'">
-                            <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border">
-                                <input type="date" x-model="customStartDate" class="text-sm p-1 border-none bg-transparent">
-                                <span class="text-slate-400">to</span>
-                                <input type="date" x-model="customEndDate" class="text-sm p-1 border-none bg-transparent">
-                            </div>
-                        </template>
-                        
-                        <label class="flex items-center space-x-2 text-sm cursor-pointer">
-                            <input type="checkbox" x-model="showMedications" class="rounded text-blue-500 w-4 h-4">
-                            <span>Overlay Meds</span>
-                        </label>
-            
-                        <button x-show="getFilteredReadings().length >= 2" @click="toggleChartExpansion()" class="btn-nudge-static" style="background: #1e293b; padding: 6px 10px; margin-left: auto;">
-                            <i class="fa-solid" :class="isChartExpanded ? 'fa-compress' : 'fa-expand'"></i>
-                            <span x-show="!isChartExpanded" style="margin-left: 5px;">Expand</span>
-                            <span x-show="isChartExpanded" style="margin-left: 5px;">Close</span>
-                        </button>
-                        
+                            <select x-model="timeScale" class="border rounded p-2 text-sm bg-white cursor-pointer">
+                                <option value="thisWeek">This Week</option>
+                                <option value="lastWeek">Last Week</option>
+                                <option value="thisMonth">This Month</option>
+                                <option value="lastMonth">Last Month</option>
+                                <option value="60d">Last 60 Days</option>
+                                <option value="90d">Last 90 Days</option>
+                                <option value="180d">Last 6 Months</option>
+                                <option value="all">Entire Dataset</option>
+                                <option value="custom">Custom Range...</option>
+                            </select>
+                            
+                            <template x-if="timeScale === 'custom'">
+                                <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border">
+                                    <input type="date" x-model="customStartDate" class="text-sm p-1 border-none bg-transparent">
+                                    <span class="text-slate-400">to</span>
+                                    <input type="date" x-model="customEndDate" class="text-sm p-1 border-none bg-transparent">
+                                </div>
+                            </template>
+                            
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer">
+                                <input type="checkbox" x-model="showMedications" class="rounded text-blue-500 w-4 h-4">
+                                <span>Overlay Meds</span>
+                            </label>
+                
+                            <button x-show="getFilteredReadings().length >= 2" @click="toggleChartExpansion()" class="btn-nudge-static" style="background: #1e293b; padding: 6px 10px; margin-left: auto;">
+                                <i class="fa-solid" :class="isChartExpanded ? 'fa-compress' : 'fa-expand'"></i>
+                                <span x-show="!isChartExpanded" style="margin-left: 5px;">Expand</span>
+                                <span x-show="isChartExpanded" style="margin-left: 5px;">Close</span>
+                            </button>
+                            
+                        </div>
                     </div>
-                </div>
-            
-                <div x-show="getFilteredReadings().length < 2" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
-                    <i class="fa-solid fa-chart-pie text-3xl mb-2"></i>
-                    <p>Log (or include in date range) at least 2 resting rates to generate trend analytics.</p>
-                </div>
-            
-                <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: calc(100vh - 180px); max-height: calc(100vh - 180px);' : 'height: 384px;'" x-cloak>
-                    <canvas x-ref="rrrChartCanvas"></canvas>
+                
+                    <div x-show="getFilteredReadings().length < 2" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
+                        <i class="fa-solid fa-chart-pie text-3xl mb-2"></i>
+                        <p>Log (or include in date range) at least 2 resting rates to generate trend analytics.</p>
+                    </div>
+                
+                    <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: calc(100vh - 180px); max-height: calc(100vh - 180px);' : 'height: 384px;'" x-cloak>
+                        <canvas x-ref="rrrChartCanvas"></canvas>
+                    </div>
                 </div>
             </div>
             
@@ -760,33 +780,54 @@
             
             
             <div class="bg-white rounded-lg shadow-md p-6" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #d9c9f0; background: #fcfaff; border-radius: 4px; padding: 20px;">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-slate-800" style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-timeline text-emerald-600"></i>
-                        <span x-text="activePetName ? activePetName + '\'s Med Timeline' : 'Med Timeline'"></span>
-                    </h2>
-                    
-                    <div class="flex flex-wrap gap-3 items-center">
-                        <select x-model="medTimeScale" @change="renderMedChart()" class="border rounded p-2 text-sm bg-white cursor-pointer">
-                            <option value="thisWeek">This Week</option>
-                            <option value="lastWeek">Last Week</option>
-                            <option value="thisMonth">This Month</option>
-                            <option value="lastMonth">Last Month</option>
-                            <option value="60d">Last 60 Days</option>
-                            <option value="90d">Last 90 Days</option>
-                            <option value="180d">Last 6 Months</option>
-                            <option value="all">Entire Dataset</option>
-                            <option value="custom">Custom Range...</option>
-                        </select>
-
-                        <template x-if="medTimeScale === 'custom'">
-                            <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border">
-                                <input type="date" x-model="medCustomStartDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
-                                <span class="text-slate-400">to</span>
-                                <input type="date" x-model="medCustomEndDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
-                            </div>
-                        </template>
-                    </div>                
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                    <button @click="showMedGraph = !showMedGraph" type="button" style="
+                        width: 100%;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 12px 16px;
+                        background: #e8eef7;
+                        border: 1px solid #c8d6eb;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        color: #16325F;
+                        transition: background 0.15s ease;
+                    " @mouseenter="$el.style.background='#dde6f3'"
+                       @mouseleave="$el.style.background='#e8eef7'">
+                        
+                        <h3 style="margin: 0;"><i class="fa-solid fa-timeline text-emerald-600"></i>
+                        <span x-text="activePetName ? activePetName + '\'s Med Timeline' : 'Med Timeline'"></span></h3> 
+                        <i class="fa-solid" :class="showMedGraph ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                    </button>
+                </div>
+            
+                <!-- ACCORDION CONTENT -->
+                <div x-show="showMedGraph" x-transition>
+                    <div class="flex justify-between items-center mb-4">         
+                        <div class="flex flex-wrap gap-3 items-center">
+                            <select x-model="medTimeScale" @change="renderMedChart()" class="border rounded p-2 text-sm bg-white cursor-pointer">
+                                <option value="thisWeek">This Week</option>
+                                <option value="lastWeek">Last Week</option>
+                                <option value="thisMonth">This Month</option>
+                                <option value="lastMonth">Last Month</option>
+                                <option value="60d">Last 60 Days</option>
+                                <option value="90d">Last 90 Days</option>
+                                <option value="180d">Last 6 Months</option>
+                                <option value="all">Entire Dataset</option>
+                                <option value="custom">Custom Range...</option>
+                            </select>
+    
+                            <template x-if="medTimeScale === 'custom'">
+                                <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border">
+                                    <input type="date" x-model="medCustomStartDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                                    <span class="text-slate-400">to</span>
+                                    <input type="date" x-model="medCustomEndDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                                </div>
+                            </template>
+                        </div>  
+                    </div>              
                 </div>
 
                 <div x-show="hasAnyMedData()" id="medChartContainer" class="relative w-full" style="height: 384px;" x-cloak>
@@ -854,7 +895,9 @@
                             <textarea 
                                 x-model="cardalisEmailText"
                                 rows="8"
-                                placeholder="Paste the full Cardalis export email here...
+                                placeholder="In the Cardalis App, go to 'Breathing Rate Graph' > 'Email' to generate an export dataset email. You may need to add a 'vet email' in under settings, this could be your own for ease.
+                                
+                                Paste the full Cardalis export email here...
                     
                     Example:
                     Dear Vet:Please find attached breathing rate for Bella
