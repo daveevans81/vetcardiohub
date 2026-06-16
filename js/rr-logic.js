@@ -4,10 +4,14 @@ document.addEventListener('alpine:init', () => {
         ...glossaryEngine, 
 
 // --- CORE STATE ---
-        pets: [], // Array of { name: 'Bella', species: 'dog', age: 8 }
-        activePetName: '', // The currently selected pet
-        showAddPet: false, // Toggles the setup modal
-        newPet: { name: '', species: 'dog', age: '',weight: '', weightUnit: 'kg' },
+        patients: [],
+        activePatientId: '',
+        showAddPet: false, showPatientManagement: false, showManualEntry: false,
+        newPatient: { id: '', name: '', species: 'dog', breed: '', sex: 'MN', dob: '', weight: '', weightUnit: 'kg', ownerName: '', customSRRCutoff: 30 },
+        manualEntry: { date: new Date().toISOString().split('T')[0], time: '12:00', rate: '', comment: '' },
+        mergeSelection: { primaryId: '', secondaryId: '' },
+        showWeightLog: false,
+        weightLedger: [],
         showLog: true,
         showMedGraph: true,
         showAnalytics: true,
@@ -63,11 +67,11 @@ newMed: {
 
 init() {
             // Load Profiles
-            const savedPets = localStorage.getItem('vch_rrPets');
-            if (savedPets) this.pets = JSON.parse(savedPets);
+            const savedPets = localStorage.getItem('vch_patients');
+            if (savedPets) this.patients = JSON.parse(savedPets);
 
             // Load History
-			const savedHistory = localStorage.getItem('vch_rrHistory');
+			const savedHistory = localStorage.getItem('vch_srrLogs');
 			
 			if (savedHistory) {
 			    this.history = JSON.parse(savedHistory).map(log => ({
@@ -77,68 +81,181 @@ init() {
 			}
             
             // Load Medications
-            const savedMeds = localStorage.getItem('vch_medLedger');
+            const savedMeds = localStorage.getItem('vch_medLogs');
+            const savedWeights = localStorage.getItem('vch_weightLogs');
+            if (savedWeights) this.weightLedger = JSON.parse(savedWeights);
             if (savedMeds) this.medLedger = JSON.parse(savedMeds);
 
             // Set default active pet
-            if (this.pets.length > 0) {
-                this.activePetName = this.pets[0].name;
+            if (this.patients.length > 0) {
+                this.activePatientId = this.patients[0].id;
             } else {
-                // If brand new user, force them to set up a pet
                 this.showAddPet = true;
             }
 
             // Watchers: Re-render chart and reset pagination if they change the pet or timescale
-            this.$watch('activePetName', () => { this.currentPage = 1; this.renderChart(); });
+            this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); });
             this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); });
             this.$watch('showMedications', () => this.renderChart());
             this.$watch('customStartDate', () => this.renderChart());
             this.$watch('customEndDate', () => this.renderChart());
-            this.$watch('activePetName', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
+            this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
             
             this.$nextTick(() => { this.renderChart(); this.renderMedChart(); });
         },
         
         // --- PET MANAGEMENT ---
-saveNewPet() {
-            const cleanName = this.newPet.name.trim();
-            if (!cleanName) return alert("A valid pet name is required.");
 
-            if (this.pets.find(p => p.name.toLowerCase() === cleanName.toLowerCase())) {
-                return alert("A patient profile with this name already exists.");
+        get activePatientProfile() {
+            return this.patients.find(p => p.id === this.activePatientId) || null;
+        },
+        
+        currentAge(patientId) {
+            const p = this.patients.find(p => p.id === patientId);
+            if (!p || !p.dob) return null;
+            const dob = new Date(p.dob);
+            const diff = Date.now() - dob.getTime();
+            return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+        },
+        
+        currentWeight(patientId) {
+            const weights = this.weightLedger.filter(w => w.patientId === patientId).sort((a,b) => new Date(b.date) - new Date(a.date));
+            if (weights.length > 0) return weights[0];
+            const p = this.patients.find(p => p.id === patientId);
+            if (p && p.weight) return { weight: p.weight, unit: p.weightUnit };
+            return null;
+        },
+
+        saveNewPatient() {
+            const cleanName = this.newPatient.name.trim();
+            if (!cleanName) return alert("A valid patient name is required.");
+
+            let isNew = !this.newPatient.id;
+            
+            if (isNew) {
+                this.newPatient.id = crypto.randomUUID();
+                this.patients.push({ ...this.newPatient });
+                
+                // Add initial weight to ledger if provided
+                if (this.newPatient.weight) {
+                    this.weightLedger.push({
+                        id: crypto.randomUUID(),
+                        patientId: this.newPatient.id,
+                        date: new Date().toISOString().split('T')[0],
+                        weight: parseFloat(this.newPatient.weight),
+                        unit: this.newPatient.weightUnit
+                    });
+                    localStorage.setItem('vch_weightLogs', JSON.stringify(this.weightLedger));
+                }
+            } else {
+                const idx = this.patients.findIndex(p => p.id === this.newPatient.id);
+                if (idx !== -1) {
+                    this.patients[idx] = { ...this.newPatient };
+                }
             }
 
-            // Save all the new clinical data
-            this.pets.push({
-                name: cleanName,
-                species: this.newPet.species,
-                age: this.newPet.age ? parseInt(this.newPet.age, 10) : null,
-                weight: this.newPet.weight ? parseFloat(this.newPet.weight) : null,
-                weightUnit: this.newPet.weightUnit || 'kg'
-            });
-
-            localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
-            this.activePetName = cleanName; // This instantly triggers the activePetProfile getter!
+            localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+            this.activePatientId = this.newPatient.id;
             
-            // Reset form
-            this.newPet = { name: '', species: 'dog', age: '', weight: '', weightUnit: 'kg' };
+            this.newPatient = { id: '', name: '', species: 'dog', breed: '', sex: 'MN', dob: '', weight: '', weightUnit: 'kg', ownerName: '', customSRRCutoff: 30 };
             this.showAddPet = false;
         },
         
+        editPatient(patientId) {
+            const p = this.patients.find(p => p.id === patientId);
+            if(p) {
+                this.newPatient = { ...p };
+                this.showAddPet = true;
+                this.showPatientManagement = false;
+            }
+        },
+
+        deletePatient(patientId) {
+            if(confirm("Are you sure you want to delete this patient and all associated records?")) {
+                this.patients = this.patients.filter(p => p.id !== patientId);
+                this.history = this.history.filter(h => h.patientId !== patientId);
+                this.medLedger = this.medLedger.filter(m => m.patientId !== patientId);
+                this.weightLedger = this.weightLedger.filter(w => w.patientId !== patientId);
+                
+                localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+                localStorage.setItem('vch_srrLogs', JSON.stringify(this.history));
+                localStorage.setItem('vch_medLogs', JSON.stringify(this.medLedger));
+                localStorage.setItem('vch_weightLogs', JSON.stringify(this.weightLedger));
+                
+                if (this.activePatientId === patientId) {
+                    this.activePatientId = this.patients.length > 0 ? this.patients[0].id : '';
+                }
+            }
+        },
+        
+        mergePatients() {
+            if(!this.mergeSelection.primaryId || !this.mergeSelection.secondaryId || this.mergeSelection.primaryId === this.mergeSelection.secondaryId) {
+                return alert("Please select two different patients to merge.");
+            }
+            if(confirm("This will merge the secondary patient's records into the primary and delete the secondary profile. Proceed?")) {
+                const pId = this.mergeSelection.primaryId;
+                const sId = this.mergeSelection.secondaryId;
+                
+                this.history.forEach(h => { if(h.patientId === sId) h.patientId = pId; });
+                this.medLedger.forEach(m => { if(m.patientId === sId) m.patientId = pId; });
+                this.weightLedger.forEach(w => { if(w.patientId === sId) w.patientId = pId; });
+                
+                this.patients = this.patients.filter(p => p.id !== sId);
+                
+                localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+                localStorage.setItem('vch_srrLogs', JSON.stringify(this.history));
+                localStorage.setItem('vch_medLogs', JSON.stringify(this.medLedger));
+                localStorage.setItem('vch_weightLogs', JSON.stringify(this.weightLedger));
+                
+                this.mergeSelection = { primaryId: '', secondaryId: '' };
+                alert("Patients merged successfully.");
+                this.activePatientId = pId;
+            }
+        },
+        
+        saveManualEntry() {
+            if (!this.activePatientId) return alert("Please select a patient.");
+            if (!this.manualEntry.rate || isNaN(this.manualEntry.rate)) return alert("Please enter a valid rate.");
+            
+            const p = this.activePatientProfile;
+            const cutoff = p.customSRRCutoff || 30;
+            const rate = parseInt(this.manualEntry.rate);
+            
+            const newLog = {
+                id: crypto.randomUUID(),
+                date: new Date(this.manualEntry.date + 'T' + this.manualEntry.time).toISOString(),
+                time: this.manualEntry.time,
+                rate: rate,
+                patientId: this.activePatientId,
+                species: p.species,
+                comment: this.manualEntry.comment,
+                isEquivocal: rate >= (cutoff - 5) && rate < cutoff
+            };
+            
+            this.history.unshift(newLog);
+            localStorage.setItem('vch_srrLogs', JSON.stringify(this.history));
+            
+            this.manualEntry = { date: new Date().toISOString().split('T')[0], time: '12:00', rate: '', comment: '' };
+            this.showManualEntry = false;
+            this.currentPage = 1;
+            this.$nextTick(() => { this.renderChart(); });
+        },
+
+        
 
 get currentSpecies() {
-            if (!this.activePetName) return 'dog';
-            const profile = this.pets.find(p => p.name === this.activePetName);
+            if (!this.activePatientId) return 'dog';
+            const profile = this.patients.find(p => p.id === this.activePatientId);
             return profile ? profile.species : 'dog';
         },
         
-        get uniquePets() {
-            return this.pets.map(p => p.name);
+        get uniquePatients() {
+            return this.patients;
         },
         
-        get hasAnyDataForActivePet() {
-            if (!this.history || !this.activePetName) return false;
-            return this.history.some(item => item.petName === this.activePetName);
+        get hasAnyDataForActivePatient() {
+            if (!this.history || !this.activePatientId) return false;
+            return this.history.some(item => item.patientId === this.activePatientId);
         },
 
         get timeScaleLabel() {
@@ -182,15 +299,17 @@ get currentSpecies() {
         
 // Dynamic mg/kg Calculator (with strict null/clinical safety checks)
 calculatedMgPerKg() {
-    if (!this.activePetProfile || !this.activePetProfile.weight || !this.newMed.doseMg) return null;
     
-    let weight = parseFloat(this.activePetProfile.weight);
+    const cw = this.currentWeight(this.activePatientId);
+    if (!cw || !cw.weight || !this.newMed.doseMg) return null;
+    let weight = parseFloat(cw.weight);
+
     let dose = parseFloat(this.newMed.doseMg);
     
     // Prevent division by zero or NaN cascade
     if (isNaN(weight) || isNaN(dose) || weight <= 0) return null;
 
-    let weightInKg = this.activePetProfile.weightUnit === 'lbs' ? weight / 2.2046 : weight;
+    let weightInKg = cw.unit === 'lbs' ? weight / 2.2046 : weight;
     return (dose / weightInKg).toFixed(2);
 },
 
@@ -214,7 +333,7 @@ parseDateSafe(dateStr) {
         },
         
 startCount() {
-            if (!this.activePetName) return alert("Please establish or select a patient profile first.");
+            if (!this.activePatientId) return alert("Please establish or select a patient profile first.");
             this.isCounting = true;
             this.tapCount = 0;
             this.timeLeft = 30;
@@ -247,7 +366,7 @@ startCount() {
         // Save function for the Ledger
 addMedication() {
             // Null safety: Ensure a pet is actually selected
-            if (!this.activePetName) {
+            if (!this.activePatientId) {
                 alert("Clinical Entry Error: No patient selected.");
                 return;
             }
@@ -261,7 +380,7 @@ addMedication() {
 
             const entry = {
                 id: Date.now(), 
-                petName: this.activePetName, // FIXED: Uses the safe string, not the getter object
+                patientId: this.activePatientId, // FIXED: Uses the safe string, not the getter object
                 eventDate: this.newMed.eventDate,
                 drugId: this.newMed.drugId,
                 customName: this.newMed.drugId === 'other' ? this.newMed.customName : null,
@@ -273,7 +392,7 @@ addMedication() {
             };
 
             this.medLedger.push(entry);
-            localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+            localStorage.setItem('vch_medLogs', JSON.stringify(this.medLedger));
             this.renderMedChart();
 
             // Reset the form but keep the current date
@@ -298,14 +417,14 @@ sortedMedLedger() {
 deleteMedication(id) {
     if(confirm("Delete this medication entry? This will remove it from the patient's historical chart.")) {
         this.medLedger = this.medLedger.filter(med => med.id !== id);
-        localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+        localStorage.setItem('vch_medLogs', JSON.stringify(this.medLedger));
         this.renderMedChart();
     }
 },
 
 saveToHistory() {
             // Null safety check: ensure a patient is selected
-            if (!this.activePetName) {
+            if (!this.activePatientId) {
                 alert("Please select or create a patient profile before saving.");
                 return;
             }
@@ -315,17 +434,15 @@ saveToHistory() {
                 date: new Date().toISOString(),
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 rate: this.finalRate,
-                petName: this.activePetName,
+                patientId: this.activePatientId,
                 species: this.currentSpecies,
                 // Optional: Flag equivocal rates dynamically based on species
-                isEquivocal: this.currentSpecies === 'cat' 
-                    ? (this.finalRate >= 30 && this.finalRate < 40) 
-                    : (this.finalRate >= 25 && this.finalRate < 35)
+                isEquivocal: this.finalRate >= ((this.activePatientProfile?.customSRRCutoff || 30) - 5) && this.finalRate < (this.activePatientProfile?.customSRRCutoff || 30)
             };
 
             // Unshift places newest records at the top of the raw array
             this.history.unshift(newLog);
-            localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+            localStorage.setItem('vch_srrLogs', JSON.stringify(this.history));
 
             // Reset UI state for the next count
             this.finalRate = null;
@@ -344,13 +461,17 @@ saveToHistory() {
             let rate = this.finalRate;
             const species = this.currentSpecies; // FIXED: Pull dynamically from active patient context
 
-            if (rate >= 40) {
+            const cutoff = this.activePatientProfile?.customSRRCutoff || 30;
+            if (rate >= cutoff + 10) {
                 return { status: 'danger', title: 'Action Required', text: 'Resting rate is significantly elevated. Contact your veterinary surgeon.' };
             }
-            if (species === 'dog' && rate >= 30 && rate < 40) {
+            if (rate >= cutoff && rate < cutoff + 10) {
+                return { status: 'danger', title: 'Action Required', text: 'Resting rate is elevated.' };
+            }
+            if (rate >= cutoff - 5 && rate < cutoff) {
                 return { status: 'equivocal', title: 'Equivocal (Borderline)', text: 'This rate is borderline high. Please recount in 2-4 hours while the dog is in deep sleep.' };
             }
-            if (species === 'cat' && rate >= 35 && rate < 40) {
+            if (false) { // Handled above
                 return { status: 'equivocal', title: 'Equivocal (Borderline)', text: 'Cats can occasionally rest at this rate, but it is borderline. Recount in 2 hours.' };
             }
             return { status: 'normal', title: 'Normal Range', text: 'Resting respiratory rate is within normal expected limits.' };
@@ -442,10 +563,9 @@ saveToHistory() {
         
 // ---  FILTER (Respects Pet Selection) ---
 getFilteredReadings() {
-            if (!this.history || this.history.length === 0 || !this.activePetName) return [];
+            if (!this.history || this.history.length === 0 || !this.activePatientId) return [];
             
-            // 1. Strict Filter by Active Pet
-            let filtered = this.history.filter(item => item.petName === this.activePetName);
+            let filtered = this.history.filter(item => item.patientId === this.activePatientId);
 
             // 2. Filter by Date
             const { startDate, endDate } = this.getDateRange();
@@ -478,11 +598,11 @@ getFilteredMedications() {
 resetData() {
             if (window.confirm("CRITICAL WARNING: This action permanently clears ALL local patient profiles, logs, and tracking history. Proceed?")) {
                 this.history = [];
-                this.pets = [];
-                this.activePetName = '';
+                this.patients = [];
+                this.activePatientId = '';
                 this.showAddPet = true;
                 localStorage.removeItem('vch_rrHistory');
-                localStorage.removeItem('vch_rrPets');
+                localStorage.removeItem('vch_patients');
                 if (this.chartInstance) this.chartInstance.destroy();
                 alert("Database completely flushed.");
             }
@@ -567,7 +687,7 @@ renderChart() {
 
                 // Push all medication events into the timeline
                 if (this.showMedications && this.medLedger) {
-                    const petMeds = this.medLedger.filter(m => m.petName === this.activePetName);
+                    const petMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
                     const { startDate, endDate } = this.getDateRange();
                     
                     // Group meds by exact date to prevent stacking overlaps
@@ -666,7 +786,7 @@ renderChart() {
 
                 const datasets = [
                     {
-                        label: `${this.activePetName}'s Respiratory Rate (bpm)`,
+                        label: `${this.activePatientProfile?.name || 'Patient'}'s Respiratory Rate (bpm)`,
                         data: srrDataPoints,
                         borderColor: 'rgb(14, 165, 233)',
                         backgroundColor: 'rgba(14, 165, 233, 0.08)',
@@ -735,8 +855,8 @@ renderChart() {
         
         
         hasAnyMedData() {
-            if (!this.medLedger || !this.activePetName) return false;
-            return this.medLedger.some(m => m.petName === this.activePetName);
+            if (!this.medLedger || !this.activePatientId) return false;
+            return this.medLedger.some(m => m.patientId === this.activePatientId);
         },
         
         
@@ -773,7 +893,7 @@ getMedDateRange() {
             // Safe fallback calculator for 'All Time' or 'Incomplete Custom Dates'
             
  const getEarliestFallback = () => {
-                const petMeds = this.medLedger.filter(m => m.petName === this.activePetName);
+                const petMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
                 if(petMeds.length > 0) {
                      // Use parseDateSafe to handle legacy UK/US dates, avoiding Invalid Date NaNs
                      const earliest = petMeds.reduce((min, p) => 
@@ -849,11 +969,11 @@ getMedDateRange() {
         
         // Converts point-in-time entries into solid blocks of duration (Epochs)
         generateMedEpochs() {
-            if (!this.medLedger || !this.activePetName) return [];
+            if (!this.medLedger || !this.activePatientId) return [];
             
             // 1. Isolate the current pet and sort STRICTLY chronologically (oldest first)
             const petMeds = this.medLedger
-                .filter(m => m.petName === this.activePetName)
+                .filter(m => m.patientId === this.activePatientId)
                 .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
 
             const epochs = [];
@@ -928,7 +1048,7 @@ getMedDateRange() {
 
         // Evaluate Min/Max Dose across the pet's ENTIRE lifetime history
         const doseRanges = {};
-        const allPetMeds = this.medLedger.filter(m => m.petName === this.activePetName);
+        const allPetMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
         allPetMeds.forEach(m => {
             const key = m.drugId === 'other' ? m.customName : m.drugId;
             if (!doseRanges[key]) {
@@ -1072,7 +1192,7 @@ exportCSV() {
 
 			const headers = "Date,Time,Rate(bpm),PetName,Species,Comment\n";
 			const rows = this.history.map(log => {
-			    const pName = log.petName || 'Unknown';
+			    const pName = this.patients.find(p => p.id === log.patientId)?.name || 'Unknown';
 			    const pSpecies = log.species || 'dog';
 			    const comment = (log.comment || '').replace(/"/g, '""'); // escape quotes
 			    return `${log.date},${log.time},${log.rate},${pName},${pSpecies},"${comment}"`;
@@ -1114,10 +1234,11 @@ importCSV(event) {
                         const comment = cols[5] ? cols[5].trim().replace(/^"|"$/g, '').replace(/""/g, '"') : '';
                         
                         // 1. Auto-generate Pet Profile if missing
-                        const existingPet = this.pets.find(p => p.name.toLowerCase() === petName.toLowerCase());
+                        let existingPet = this.patients.find(p => p.name.toLowerCase() === petName.toLowerCase());
                         if (!existingPet) {
-                            this.pets.push({ name: petName, species: species, age: null });
-                            lastImportedPet = petName;
+                            existingPet = { id: crypto.randomUUID(), name: petName, species: species, dob: null, customSRRCutoff: 30 };
+                            this.patients.push(existingPet);
+                            lastImportedPet = existingPet.id;
                         }
 
                         // 2. Push to history
@@ -1126,7 +1247,7 @@ importCSV(event) {
                             date: date,
                             time: time,
                             rate: rate,
-                            petName: petName,
+                            patientId: existingPet.id,
                             species: species,
                             comment: comment
                         });
@@ -1136,12 +1257,12 @@ importCSV(event) {
 
                 if (importedCount > 0) {
                     // Save both arrays to localStorage
-                    localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
-                    localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+                    localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+                    localStorage.setItem('vch_srrLogs', JSON.stringify(this.history));
                     
                     // Switch UI to the newly imported pet if one was created
                     if (lastImportedPet) {
-                        this.activePetName = lastImportedPet;
+                        this.activePatientId = lastImportedPet;
                     }
                     this.showAddPet = false;
                     this.currentPage = 1;
@@ -1177,7 +1298,7 @@ importCSV(event) {
             weight: null, 
             weightUnit: 'kg' 
         });
-        localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
+        localStorage.setItem('vch_patients', JSON.stringify(this.patients));
     }
 
     const resolvedSpecies = existingPet ? existingPet.species : 'dog';
@@ -1202,7 +1323,7 @@ importCSV(event) {
         // --- 4. DUPLICATE DETECTION ---
         // Flag if an entry for this pet exists within a 60-second window of this timestamp
         const isDuplicate = this.history.some(h =>
-            h.petName === petName &&
+            h.patientId === existingPet.id &&
             Math.abs(new Date(h.date).getTime() - dateObj.getTime()) < 60000
         );
 
@@ -1221,7 +1342,7 @@ importCSV(event) {
             date: dateObj.toISOString(),
             time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             rate: rate,
-            petName: petName,
+            patientId: existingPet.id,
             species: resolvedSpecies,
             comment: 'Imported from Cardalis app',
             isEquivocal: isEquivocal
@@ -1238,8 +1359,8 @@ importCSV(event) {
         return alert(msg);
     }
 
-    localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
-    this.activePetName = petName;
+    localStorage.setItem('vch_srrLogs', JSON.stringify(this.history));
+    this.activePatientId = existingPet.id;
     this.cardalisEmailText = '';
     this.showCardalisImport = false;
     this.currentPage = 1;
@@ -1257,7 +1378,7 @@ importCSV(event) {
             const headers = "Date,PetName,Action,Drug,CustomName,Dose(mg),Frequency,mg/kg\n";
             const rows = this.medLedger.map(med => {
                 const drugName = med.drugId === 'other' ? 'Other' : (this.formulary[med.drugId]?.generic || med.drugId);
-                return `${med.eventDate},"${med.petName}",${med.action},"${drugName}","${med.customName || ''}",${med.doseMg},${med.frequency},${med.mgPerKg || ''}`;
+                return `${med.eventDate},"${this.patients.find(p => p.id === med.patientId)?.name || 'Unknown'}",${med.action},"${drugName}","${med.customName || ''}",${med.doseMg},${med.frequency},${med.mgPerKg || ''}`;
             }).join("\n");
 
             const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + rows);
@@ -1289,7 +1410,7 @@ importCSV(event) {
                             const entry = {
                                 id: Date.now() + i, // Unique ID
                                 eventDate: parts[0].replace(/"/g, ''),
-                                petName: parts[1].replace(/"/g, ''),
+                                patientId: (() => { const n = parts[1].replace(/"/g, ''); let ep = this.patients.find(p=>p.name===n); if(!ep){ep={id:crypto.randomUUID(), name:n, customSRRCutoff:30}; this.patients.push(ep); localStorage.setItem('vch_patients', JSON.stringify(this.patients));} return ep.id; })(),
                                 action: parts[2].replace(/"/g, ''),
                                 drugId: 'other', // Safest fallback for imported raw text
                                 customName: parts[3].replace(/"/g, ''),
@@ -1305,7 +1426,7 @@ importCSV(event) {
                             }
                         }
                     }
-                    localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+                    localStorage.setItem('vch_medLogs', JSON.stringify(this.medLedger));
                     alert(`Imported ${importedCount} medication records.`);
                 } catch (err) {
                     console.error(err);
@@ -1319,9 +1440,10 @@ importCSV(event) {
         // --- FULL SYSTEM MASTER BACKUP (JSON) ---
         exportCompleteBackup() {
             const backupData = {
-                vch_rrPets: this.pets,
-                vch_rrHistory: this.history,
-                vch_medLedger: this.medLedger,
+                vch_patients: this.patients,
+                vch_srrLogs: this.history,
+                vch_medLogs: this.medLedger,
+                vch_weightLogs: this.weightLedger,
                 exportDate: new Date().toISOString()
             };
 
@@ -1343,17 +1465,18 @@ importCSV(event) {
                 try {
                     const data = JSON.parse(e.target.result);
                     
-                    if (data.vch_rrPets && data.vch_rrHistory && data.vch_medLedger) {
+                    if (data.vch_patients && data.vch_srrLogs && data.vch_medLogs) {
                         if (confirm("This will replace all current data with the backup file. Proceed?")) {
-                            this.pets = data.vch_rrPets;
-                            this.history = data.vch_rrHistory;
-                            this.medLedger = data.vch_medLedger;
+                            this.patients = data.vch_patients;
+                            this.history = data.vch_srrLogs;
+                            this.medLedger = data.vch_medLogs;
+                            if(data.vch_weightLogs) this.weightLedger = data.vch_weightLogs;
 
-                            localStorage.setItem('vch_rrPets', JSON.stringify(this.pets));
-                            localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
-                            localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+                            localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+                            localStorage.setItem('vch_srrLogs', JSON.stringify(this.history));
+                            localStorage.setItem('vch_medLogs', JSON.stringify(this.medLedger));
 
-                            if (this.pets.length > 0) this.activePetName = this.pets[0].name;
+                            if (this.patients.length > 0) this.activePatientId = this.patients[0].id;
                             this.currentPage = 1;
                             this.$nextTick(() => { this.renderChart(); });
                             alert("Master Backup successfully restored!");
@@ -1375,7 +1498,7 @@ importCSV(event) {
         deleteReading(id) {
     if (confirm("Delete this reading? This cannot be undone.")) {
         this.history = this.history.filter(log => log.id !== id);
-        localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+        localStorage.setItem('vch_srrLogs', JSON.stringify(this.history));
         this.currentPage = 1;
         this.$nextTick(() => { this.renderChart(); });
     }
@@ -1399,7 +1522,7 @@ saveComment() {
         } else {
             delete entry.comment; // Clean removal rather than storing ""
         }
-        localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
+        localStorage.setItem('vch_srrLogs', JSON.stringify(this.history));
     }
     this.editingCommentId = null;
     this.commentDraft = '';
