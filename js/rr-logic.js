@@ -495,13 +495,13 @@ resetData() {
             });
         },
                 
- renderChart() {
+renderChart() {
             if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
 
             this.chartRenderTimeout = setTimeout(() => {
                 if (!this.$refs.rrrChartCanvas) return;
 
-                const dataToPlot = this.getFilteredReadings();
+                const rawSrrData = this.getFilteredReadings();
                 const ctx = this.$refs.rrrChartCanvas.getContext('2d');
 
                 if (this.chartInstance) {
@@ -509,9 +509,109 @@ resetData() {
                     this.chartInstance = null;
                 }
 
-                if (dataToPlot.length === 0) return;
+                if (rawSrrData.length === 0) return;
 
-                const stats = this.calculateStats(dataToPlot);
+                // --- 1. ROBUST DATE NORMALIZATION ---
+                // Defeats the UTC Midnight Timezone drop by forcing pure dates to local Midday
+                const safeTimestamp = (dateStr) => {
+                    if (!dateStr) return new Date().getTime();
+                    // If it's a pure YYYY-MM-DD from the Med Input form
+                    if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                        return new Date(`${dateStr}T12:00:00`).getTime(); 
+                    }
+                    // Otherwise rely on your existing safe parser
+                    return this.parseDateSafe(dateStr).getTime();
+                };
+
+                // --- 2. BUILD UNIFIED CHRONOLOGICAL TIMELINE ---
+                const combinedEvents = [];
+
+                // Push all breathing readings into the timeline
+                rawSrrData.forEach(r => {
+                    combinedEvents.push({ type: 'srr', timestamp: safeTimestamp(r.date), data: r });
+                });
+
+                // Push all medication events into the timeline
+                if (this.showMedications && this.medLedger) {
+                    const petMeds = this.medLedger.filter(m => m.petName === this.activePetName);
+                    const { startDate, endDate } = this.getDateRange();
+                    
+                    // Group meds by exact date to prevent stacking overlaps
+                    const medsByDate = {};
+                    petMeds.forEach(m => {
+                        const ts = safeTimestamp(m.eventDate);
+                        // Filter dynamically by the currently active chart date range
+                        if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) {
+                            const dStr = new Date(ts).toISOString().split('T')[0]; 
+                            if (!medsByDate[dStr]) medsByDate[dStr] = [];
+                            medsByDate[dStr].push(m);
+                        }
+                    });
+
+                    // Add the grouped meds to the timeline bucket
+                    Object.keys(medsByDate).forEach(dStr => {
+                        combinedEvents.push({ 
+                            type: 'med', 
+                            timestamp: new Date(`${dStr}T12:00:00`).getTime(), 
+                            data: medsByDate[dStr] 
+                        });
+                    });
+                }
+
+                // Sort the entire mixed bucket chronologically
+                combinedEvents.sort((a, b) => a.timestamp - b.timestamp);
+
+                // --- 3. EXTRACT CHART DATASETS ---
+                const labels = [];
+                const srrDataPoints = [];
+                const medDataPoints = [];
+                const medColors = [];
+                const medTooltips = [];
+
+                let lastSrrRate = null; // Used to pin the med arrow close to the breathing line
+                const srrValuesForStats = []; 
+
+                combinedEvents.forEach(ev => {
+                    const dObj = new Date(ev.timestamp);
+                    let label = '';
+                    
+                    // Scale X-Axis labelling based on dataset density
+                    if (combinedEvents.length <= 14) label = dObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
+                    else if (combinedEvents.length <= 60) label = dObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+                    else label = dObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+                    
+                    labels.push(label);
+
+                    if (ev.type === 'srr') {
+                        srrDataPoints.push(ev.data.rate);
+                        srrValuesForStats.push(ev.data);
+                        lastSrrRate = ev.data.rate;
+                        
+                        medDataPoints.push(null); // Blank for med layer
+                        medColors.push('transparent');
+                        medTooltips.push([]);
+                    } else if (ev.type === 'med') {
+                        srrDataPoints.push(null); // Chart.js bridges this gap automatically via spanGaps
+                        
+                        // Position the arrow dynamically at the most recent SRR rate, or default to 30
+                        medDataPoints.push(lastSrrRate !== null ? lastSrrRate : 30); 
+                        
+                        const primaryMed = ev.data[0]; // Drives the triangle color
+                        medColors.push(this.formulary[primaryMed.drugId]?.color || '#f59e0b');
+
+                        // Build a multi-line tooltip string if multiple meds were changed today
+                        const medDetails = ev.data.map(m => {
+                            const drugName = m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId);
+                            const doseText = m.doseMg ? `${m.doseMg}mg` : 'Dose unspec.';
+                            return `💊 ${m.action}: ${drugName} (${doseText})`;
+                        });
+                        medTooltips.push(medDetails);
+                    }
+                });
+
+                const stats = this.calculateStats(srrValuesForStats);
+                
+                // Construct standard clinical annotations
                 let annotations = {
                     thresholdLine: {
                         type: 'line', yMin: 30, yMax: 30,
@@ -525,116 +625,60 @@ resetData() {
                     }
                 };
 
-                // Draw 95% Confidence Interval boundaries if there is sufficient data
-                if (dataToPlot.length >= 2 && stats.upperCI !== stats.lowerCI) {
-                    annotations.upperCILine = {
-                        type: 'line', yMin: stats.upperCI, yMax: stats.upperCI,
-                        borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3]
-                    };
-                    annotations.lowerCILine = {
-                        type: 'line', yMin: stats.lowerCI, yMax: stats.lowerCI,
-                        borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3]
-                    };
+                if (srrValuesForStats.length >= 2 && stats.upperCI !== stats.lowerCI) {
+                    annotations.upperCILine = { type: 'line', yMin: stats.upperCI, yMax: stats.upperCI, borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3] };
+                    annotations.lowerCILine = { type: 'line', yMin: stats.lowerCI, yMax: stats.lowerCI, borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3] };
                 }
 
-                // Standardized X-Axis label strings derived directly from user's localized settings
-                const formattedLabels = dataToPlot.map(d => {
-                    const dObj = this.parseDateSafe(d.date);
-                    if (dataToPlot.length <= 14) return dObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
-                    if (dataToPlot.length <= 60) return dObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-                    return dObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
-                });
-
-                // --- NEW MEDICATION OVERLAY LOGIC ---
-                const medDataPoints = [];
-                const medColors = [];
-                const medTooltips = [];
-
-                if (this.showMedications && this.medLedger) {
-                    const petMeds = this.medLedger.filter(m => m.petName === this.activePetName);
-                    
-                    dataToPlot.forEach((reading, index) => {
-                        const readingDateObj = this.parseDateSafe(reading.date);
-                        // Standardize to YYYY-MM-DD to safely cross-match with med.eventDate
-                        const readingDateStr = `${readingDateObj.getFullYear()}-${String(readingDateObj.getMonth() + 1).padStart(2, '0')}-${String(readingDateObj.getDate()).padStart(2, '0')}`;
-                        
-                        const medsOnThisDay = petMeds.filter(m => m.eventDate === readingDateStr);
-                        
-                        if (medsOnThisDay.length > 0) {
-                            // Create array of strings. Chart.js naturally maps array items to separate lines in the tooltip.
-                            const medDetails = medsOnThisDay.map(m => {
-                                const drugName = m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId);
-                                const doseText = m.doseMg ? `${m.doseMg}mg` : 'Dose unspec.';
-                                return `💊 ${m.action}: ${drugName} (${doseText})`;
-                            });
-                            
-                            // Color fallback based on the first med of the day, using formulary data
-                            const primaryMed = medsOnThisDay[0];
-                            const medColor = this.formulary[primaryMed.drugId]?.color || '#f59e0b';
-
-                            medDataPoints.push({ x: index, y: reading.rate });
-                            medColors.push(medColor);
-                            medTooltips.push(medDetails);
-                        }
-                    });
-                }
-
-                // Prepare Datasets
                 const datasets = [
                     {
                         label: `${this.activePetName}'s Respiratory Rate (bpm)`,
-                        data: dataToPlot.map(d => d.rate),
+                        data: srrDataPoints,
                         borderColor: 'rgb(14, 165, 233)',
                         backgroundColor: 'rgba(14, 165, 233, 0.08)',
                         tension: 0.25,
-                        pointRadius: dataToPlot.length > 30 ? 2 : 5,
+                        pointRadius: combinedEvents.length > 30 ? 2 : 5,
+                        spanGaps: true, // CRITICAL: Connects the blue line securely through empty medication nodes
                         fill: true,
                         order: 2
                     }
                 ];
 
-                // Append Medication scatter dataset if active
-                if (this.showMedications && medDataPoints.length > 0) {
+                if (this.showMedications && medDataPoints.some(d => d !== null)) {
                     datasets.push({
                         label: 'Medication Change',
                         type: 'scatter',
                         data: medDataPoints,
                         backgroundColor: medColors,
-                        borderColor: '#ffffff', // Clean white border pops against the grid
+                        borderColor: '#ffffff', 
                         borderWidth: 2,
                         pointStyle: 'triangle',
-                        rotation: 180, // Point downwards precisely at the RR data node
+                        rotation: 180, // Points downwards at the node
                         radius: 10,
                         hoverRadius: 13,
-                        order: 1, // Draw layered over the line
-                        medTooltips: medTooltips // Custom property injection for the tooltip callback
+                        order: 1, 
+                        medTooltips: medTooltips 
                     });
                 }
 
                 this.chartInstance = new Chart(ctx, {
                     type: 'line',
-                    data: {
-                        labels: formattedLabels,
-                        datasets: datasets
-                    },
+                    data: { labels: labels, datasets: datasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        interaction: {
-                            mode: 'index',     // This is the magic key for stacked data tooltips
-                            intersect: false, 
-                        },
+                        interaction: { mode: 'index', intersect: false }, // Allows stacked tooltips
                         plugins: {
                             annotation: { annotations: annotations },
                             tooltip: { 
                                 callbacks: { 
                                     title: (context) => context[0].label,
                                     label: (context) => {
-                                        // Intercept the med dataset to return our custom multi-line string array
                                         if (context.dataset.label === 'Medication Change') {
-                                            const index = context.dataIndex;
-                                            return context.dataset.medTooltips[index];
+                                            return context.dataset.medTooltips[context.dataIndex];
                                         }
+                                        // Ignore drawing a tooltip for the blue line if the line is just spanning a gap
+                                        if (context.raw === null) return null;
                                         return `Rate: ${context.parsed.y} bpm`;
                                     }
                                 } 
