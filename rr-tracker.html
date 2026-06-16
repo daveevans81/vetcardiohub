@@ -458,20 +458,93 @@
                             </div>
                         </template>
                 
-                        <div  style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px; background: #f8fafc; border-radius: 6px;">
-                        <span x-show="totalPages > 1">
-                            <button @click="prevPage()" :disabled="currentPage === 1" style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;" :style="currentPage === 1 ? 'opacity: 0.5;' : ''">
-                                <i class="fa-solid fa-chevron-left"></i> Prev
-                            </button>
-                            <span style="font-size: 0.9rem; color: #475569;">Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span></span>
-                            <button @click="nextPage()" :disabled="currentPage === totalPages" style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;" :style="currentPage === totalPages ? 'opacity: 0.5;' : ''">
-                                Next <i class="fa-solid fa-chevron-right"></i>
-                            </button>
-                            </span>
-                            <span style="font-size: 0.8rem; color: #475569; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 5px;">
-                            <i class="fa-solid fa-filter" style="font-size: 0.7rem; opacity: 0.7;"></i> 
-                            <span x-text="timeScaleLabel"></span>
-                          </span>
+                        <div style="margin-top: 15px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; overflow: hidden;">
+
+                            <!-- Date range control -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap;">
+                                <span style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fa-solid fa-filter" style="opacity: 0.6;"></i>
+                                    <strong>Date range:</strong>
+                                </span>
+                                <select x-model="timeScale" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; color: #334155; cursor: pointer;">
+                                    <option value="thisWeek">This Week</option>
+                                    <option value="lastWeek">Last Week</option>
+                                    <option value="thisMonth">This Month</option>
+                                    <option value="lastMonth">Last Month</option>
+                                    <option value="60d">Last 60 Days</option>
+                                    <option value="90d">Last 90 Days</option>
+                                    <option value="180d">Last 6 Months</option>
+                                    <option value="all">Entire Dataset</option>
+                                    <option value="custom">Custom Range...</option>
+                                </select>
+                                <template x-if="timeScale === 'custom'">
+                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+                                        <input type="date" x-model="customStartDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                        <span style="color: #94a3b8;">to</span>
+                                        <input type="date" x-model="customEndDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                    </div>
+                                </template>
+                            </div>
+                        
+                            <!-- Pagination -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;" x-show="totalPages > 1">
+                                <button @click="prevPage()" :disabled="currentPage === 1"
+                                        style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
+                                        :style="currentPage === 1 ? 'opacity: 0.5;' : ''">
+                                    <i class="fa-solid fa-chevron-left"></i> Prev
+                                </button>
+                                <span style="font-size: 0.9rem; color: #475569;">
+                                    Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span>
+                                </span>
+                                <button @click="nextPage()" :disabled="currentPage === totalPages"
+                                        style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
+                                        :style="currentPage === totalPages ? 'opacity: 0.5;' : ''">
+                                    Next <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        
+                            <!-- Statistical summary -->
+                            <template x-if="filteredStats">
+                                <div style="padding: 12px 14px; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                                    
+                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Readings</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold; color: #334155;" x-text="getFilteredReadings().length"></div>
+                                    </div>
+                        
+                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Mean SRR</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold;"
+                                             :style="filteredStats.mean >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
+                                             x-text="filteredStats.mean.toFixed(1) + ' bpm'"></div>
+                                    </div>
+                        
+                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">
+                                            Upper Ref (mean + 1.96 SD)
+                                        </div>
+                                        <div style="font-size: 1.2rem; font-weight: bold;"
+                                             :style="filteredStats.upperCI >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
+                                             x-text="filteredStats.upperCI.toFixed(1) + ' bpm'"></div>
+                                    </div>
+                        
+                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Range</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold; color: #334155;"
+                                             x-text="Math.min(...getFilteredReadings().map(d => d.rate)) + '–' + Math.max(...getFilteredReadings().map(d => d.rate)) + ' bpm'"></div>
+                                    </div>
+                        
+                                </div>
+                            </template>
+                        
+                            <!-- Insufficient data notice -->
+                            <template x-if="!filteredStats && getFilteredReadings().length > 0">
+                                <div style="padding: 10px 14px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8; font-style: italic;">
+                                    <i class="fa-solid fa-circle-info" style="margin-right: 4px;"></i>
+                                    At least 2 readings required to calculate statistics.
+                                </div>
+                            </template>
+                        
                         </div>
                     </div>
             </div>

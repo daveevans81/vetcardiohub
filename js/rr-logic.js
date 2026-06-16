@@ -469,6 +469,12 @@ resetData() {
             }
         },
         
+        get filteredStats() {
+    const data = this.getFilteredReadings();
+    if (data.length < 2) return null;
+    return this.calculateStats(data);
+},
+        
         calculateStats(data) {
             if (!data || data.length === 0) return { mean: 0, upperCI: 0, lowerCI: 0 };
             
