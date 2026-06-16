@@ -428,7 +428,7 @@
                                 <select x-model="newMed.drugId" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                                     <option value="" disabled>Select Drug...</option>
                                     
-                                    <template x-for="opt in medicationOptions" :key="opt.label">
+                                    <template x-for="opt in medicationOptions" :key="opt.value">
                                         <option :value="opt.value" x-text="opt.label"></option>
                                     </template>
                                     

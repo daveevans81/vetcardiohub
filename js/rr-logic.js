@@ -130,7 +130,7 @@ get currentSpecies() {
             return labels[this.timeScale] || 'Filtered Range';
         },
         
-        // Flattens the formulary into an alphabetical list of "Brand (Generic)"
+// Creates an alphabetical list of "Generic (Brands)"
         get medicationOptions() {
             let options = [];
             for (const [id, drug] of Object.entries(this.formulary)) {
@@ -139,14 +139,13 @@ get currentSpecies() {
                     continue;
                 }
                 
-                // Add each brand name separately
-                if (drug.brands && drug.brands.length) {
-                    drug.brands.forEach(brand => {
-                        options.push({ value: id, label: `${brand} (${drug.generic})` });
-                    });
+                // Construct the label text
+                let labelText = drug.generic;
+                if (drug.brands && drug.brands.length > 0) {
+                    labelText += ` (${drug.brands.join(', ')})`;
                 }
-                // Add the generic option as well
-                options.push({ value: id, label: `${drug.generic} (Generic)` });
+                
+                options.push({ value: id, label: labelText });
             }
             
             // Sort alphabetically for easy finding
@@ -546,31 +545,105 @@ resetData() {
                     return dObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
                 });
 
+                // --- NEW MEDICATION OVERLAY LOGIC ---
+                const medDataPoints = [];
+                const medColors = [];
+                const medTooltips = [];
+
+                if (this.showMedications && this.medLedger) {
+                    const petMeds = this.medLedger.filter(m => m.petName === this.activePetName);
+                    
+                    dataToPlot.forEach((reading, index) => {
+                        const readingDateObj = this.parseDateSafe(reading.date);
+                        // Standardize to YYYY-MM-DD to safely cross-match with med.eventDate
+                        const readingDateStr = `${readingDateObj.getFullYear()}-${String(readingDateObj.getMonth() + 1).padStart(2, '0')}-${String(readingDateObj.getDate()).padStart(2, '0')}`;
+                        
+                        const medsOnThisDay = petMeds.filter(m => m.eventDate === readingDateStr);
+                        
+                        if (medsOnThisDay.length > 0) {
+                            // Create array of strings. Chart.js naturally maps array items to separate lines in the tooltip.
+                            const medDetails = medsOnThisDay.map(m => {
+                                const drugName = m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId);
+                                const doseText = m.doseMg ? `${m.doseMg}mg` : 'Dose unspec.';
+                                return `💊 ${m.action}: ${drugName} (${doseText})`;
+                            });
+                            
+                            // Color fallback based on the first med of the day, using formulary data
+                            const primaryMed = medsOnThisDay[0];
+                            const medColor = this.formulary[primaryMed.drugId]?.color || '#f59e0b';
+
+                            medDataPoints.push({ x: index, y: reading.rate });
+                            medColors.push(medColor);
+                            medTooltips.push(medDetails);
+                        }
+                    });
+                }
+
+                // Prepare Datasets
+                const datasets = [
+                    {
+                        label: `${this.activePetName}'s Respiratory Rate (bpm)`,
+                        data: dataToPlot.map(d => d.rate),
+                        borderColor: 'rgb(14, 165, 233)',
+                        backgroundColor: 'rgba(14, 165, 233, 0.08)',
+                        tension: 0.25,
+                        pointRadius: dataToPlot.length > 30 ? 2 : 5,
+                        fill: true,
+                        order: 2
+                    }
+                ];
+
+                // Append Medication scatter dataset if active
+                if (this.showMedications && medDataPoints.length > 0) {
+                    datasets.push({
+                        label: 'Medication Change',
+                        type: 'scatter',
+                        data: medDataPoints,
+                        backgroundColor: medColors,
+                        borderColor: '#ffffff', // Clean white border pops against the grid
+                        borderWidth: 2,
+                        pointStyle: 'triangle',
+                        rotation: 180, // Point downwards precisely at the RR data node
+                        radius: 10,
+                        hoverRadius: 13,
+                        order: 1, // Draw layered over the line
+                        medTooltips: medTooltips // Custom property injection for the tooltip callback
+                    });
+                }
+
                 this.chartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: formattedLabels,
-                        datasets: [{
-                            label: `${this.activePetName}'s Respiratory Rate (bpm)`,
-                            data: dataToPlot.map(d => d.rate),
-                            borderColor: 'rgb(14, 165, 233)',
-                            backgroundColor: 'rgba(14, 165, 233, 0.08)',
-                            tension: 0.25,
-                            pointRadius: dataToPlot.length > 30 ? 2 : 5,
-                            fill: true
-                        }]
+                        datasets: datasets
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',     // This is the magic key for stacked data tooltips
+                            intersect: false, 
+                        },
                         plugins: {
-					        annotation: { annotations: annotations },
-					        tooltip: { callbacks: { title: (context) => context[0].label } },
-					        zoom: {
-					            pan: { enabled: true, mode: 'x' },
-					            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-					        }
-					    },     
+                            annotation: { annotations: annotations },
+                            tooltip: { 
+                                callbacks: { 
+                                    title: (context) => context[0].label,
+                                    label: (context) => {
+                                        // Intercept the med dataset to return our custom multi-line string array
+                                        if (context.dataset.label === 'Medication Change') {
+                                            const index = context.dataIndex;
+                                            return context.dataset.medTooltips[index];
+                                        }
+                                        return `Rate: ${context.parsed.y} bpm`;
+                                    }
+                                } 
+                            },
+                            zoom: {
+                                pan: { enabled: true, mode: 'x' },
+                                zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                            }
+                        },     
                         scales: {
                             y: { beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } },
                             x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } }
@@ -578,8 +651,7 @@ resetData() {
                     }
                 });
             }, 50);
-        },        
-       
+        },
 
         // --- EXPORT FUNCTIONS ---
         
