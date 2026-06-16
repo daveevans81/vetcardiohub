@@ -828,12 +828,12 @@
                             </template>
                         </div>  
                     </div>              
-                </div>
-
-                <div x-show="hasAnyMedData()" id="medChartContainer" class="relative w-full" style="height: 384px;" x-cloak>
-                    <canvas x-ref="medChartCanvas"></canvas>
-                </div>
                 
+
+                    <div x-show="hasAnyMedData()" id="medChartContainer" class="relative w-full" style="height: 384px;" x-cloak>
+                        <canvas x-ref="medChartCanvas"></canvas>
+                    </div>
+                </div>
                 <div x-show="!hasAnyMedData()" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
                     <i class="fa-solid fa-pills text-3xl mb-2"></i>
                     <p>Log medications to generate a pharmacologic timeline.</p>
