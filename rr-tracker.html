@@ -34,6 +34,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     
     <script src="/js/glossary-data.js" defer></script>
     <script src="/js/glossary-logic.js" defer></script>
@@ -693,6 +694,10 @@
             
                 </div>
             </div>
+            
+                                <!-- ******************************** -->
+                                <!-- SRR GRAPH                        -->
+                                <!-- ******************************** -->  
 
 
             <div class="bg-white rounded-lg shadow-md p-6" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #d9c9f0; background: #fcfaff; border-radius: 4px; padding: 20px;">
@@ -748,6 +753,47 @@
                     <canvas x-ref="rrrChartCanvas"></canvas>
                 </div>
             </div>
+            
+                                <!-- ******************************** -->
+                                <!-- MEDICATION DISPLAY GRAPH         -->
+                                <!-- ******************************** -->  
+            
+            
+            <div class="bg-white rounded-lg shadow-md p-6" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #d9c9f0; background: #fcfaff; border-radius: 4px; padding: 20px;">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-slate-800" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-timeline text-emerald-600"></i>
+                        <span x-text="activePetName ? activePetName + '\'s Med Timeline' : 'Med Timeline'"></span>
+                    </h2>
+                    
+                    <div class="flex flex-wrap gap-3 items-center">
+                        <select x-model="medTimeScale" @change="renderMedChart()" class="border rounded p-2 text-sm bg-white cursor-pointer">
+                            <option value="thisWeek">This Week</option>
+                            <option value="lastWeek">Last Week</option>
+                            <option value="thisMonth">This Month</option>
+                            <option value="lastMonth">Last Month</option>
+                            <option value="60d">Last 60 Days</option>
+                            <option value="90d">Last 90 Days</option>
+                            <option value="180d">Last 6 Months</option>
+                            <option value="all">Entire Dataset</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div x-show="hasAnyMedData()" id="medChartContainer" class="relative w-full" style="height: 384px;" x-cloak>
+                    <canvas x-ref="medChartCanvas"></canvas>
+                </div>
+                
+                <div x-show="!hasAnyMedData()" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
+                    <i class="fa-solid fa-pills text-3xl mb-2"></i>
+                    <p>Log medications to generate a pharmacologic timeline.</p>
+                </div>
+            </div>
+            
+                                <!-- ******************************** -->
+                                <!-- EXPORT IMPORT OPTIONS SECTION    -->
+                                <!-- ******************************** -->  
+            
 
             <div class="summary-box" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
                 <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Data Management & Backups</h3>
@@ -797,6 +843,10 @@
             
                 </div>
             </div>
+            
+                                <!-- ******************************** -->
+                                <!-- NUDGE SAVE AS APP                -->
+                                <!-- ******************************** -->  
 
         
             <section id="install-nudge-static" class="install-footer-box" style="margin-top: 40px; text-align: left;">

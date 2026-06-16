@@ -46,6 +46,10 @@ newMed: {
     frequency: 'q12h'
 },
 
+        // Medication Chart State
+        medTimeScale: '180d', 
+        medChartInstance: null,
+
 init() {
             // Load Profiles
             const savedPets = localStorage.getItem('vch_rrPets');
@@ -79,6 +83,7 @@ init() {
             this.$watch('showMedications', () => this.renderChart());
             this.$watch('customStartDate', () => this.renderChart());
             this.$watch('customEndDate', () => this.renderChart());
+            this.$watch('activePetName', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
             
             this.$nextTick(() => { this.renderChart(); });
         },
@@ -257,6 +262,7 @@ addMedication() {
 
             this.medLedger.push(entry);
             localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+            this.renderMedChart();
 
             // Reset the form but keep the current date
             this.newMed = {
@@ -281,6 +287,7 @@ deleteMedication(id) {
     if(confirm("Delete this medication entry? This will remove it from the patient's historical chart.")) {
         this.medLedger = this.medLedger.filter(med => med.id !== id);
         localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+        this.renderMedChart();
     }
 },
 
@@ -710,6 +717,279 @@ renderChart() {
                     }
                 });
             }, 50);
+        },
+        
+         // --- MED CHART FUNCTIONS ---       
+        
+        
+        hasAnyMedData() {
+            if (!this.medLedger || !this.activePetName) return false;
+            return this.medLedger.some(m => m.petName === this.activePetName);
+        },
+
+        // Duplicate Date Range logic specifically for the Medication Chart
+        getMedDateRange() {
+            const now = new Date();
+            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            let startDate = null;
+            let endDate = endOfToday;
+
+            const dayOfWeek = startOfToday.getDay();
+            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+            switch (this.medTimeScale) {
+                case 'thisWeek':
+                    startDate = new Date(startOfToday);
+                    startDate.setDate(startDate.getDate() + daysToMonday);
+                    break;
+                case 'lastWeek':
+                    startDate = new Date(startOfToday);
+                    startDate.setDate(startDate.getDate() + daysToMonday - 7);
+                    endDate = new Date(startDate);
+                    endDate.setDate(endDate.getDate() + 6);
+                    endDate.setHours(23, 59, 59);
+                    break;
+                case 'thisMonth':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'lastMonth':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+                    break;
+                case '60d':
+                    startDate = new Date(startOfToday.getTime() - (60 * 24 * 60 * 60 * 1000));
+                    break;
+                case '90d':
+                    startDate = new Date(startOfToday.getTime() - (90 * 24 * 60 * 60 * 1000));
+                    break;
+                case '180d':
+                    startDate = new Date(startOfToday.getTime() - (180 * 24 * 60 * 60 * 1000));
+                    break;
+                case 'all':
+                default:
+                    // Determine the absolute oldest medication event and add a 14-day visual buffer
+                    const petMeds = this.medLedger.filter(m => m.petName === this.activePetName);
+                    if(petMeds.length > 0) {
+                         const earliest = petMeds.reduce((min, p) => new Date(p.eventDate) < new Date(min.eventDate) ? p : min, petMeds[0]);
+                         startDate = new Date(new Date(earliest.eventDate).getTime() - (14 * 24 * 60 * 60 * 1000));
+                    } else {
+                         startDate = new Date(0);
+                    }
+                    break;
+            }
+            return { startDate, endDate };
+        },
+
+        // Converts point-in-time entries into solid blocks of duration (Epochs)
+        generateMedEpochs() {
+            if (!this.medLedger || !this.activePetName) return [];
+            
+            // 1. Isolate the current pet and sort STRICTLY chronologically (oldest first)
+            const petMeds = this.medLedger
+                .filter(m => m.petName === this.activePetName)
+                .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+
+            const epochs = [];
+            const activeMeds = {}; // Tracks currently "open" medication blocks by drugId
+
+            petMeds.forEach(med => {
+                const eventTs = new Date(med.eventDate + 'T12:00:00').getTime(); // Force midday safety
+                const drugKey = med.drugId === 'other' ? med.customName : med.drugId;
+
+                if (med.action === 'Started' || med.action === 'Adjusted') {
+                    // If the drug was already running, close its previous dose block
+                    if (activeMeds[drugKey]) {
+                        activeMeds[drugKey].endTime = eventTs;
+                        epochs.push({...activeMeds[drugKey]});
+                    }
+                    
+                    // Open a new continuous block with the new dose
+                    activeMeds[drugKey] = {
+                        drugId: med.drugId,
+                        customName: med.customName,
+                        doseMg: med.doseMg,
+                        frequency: med.frequency,
+                        mgPerKg: med.mgPerKg,
+                        startTime: eventTs,
+                        endTime: null // Stays open-ended until stopped or adjusted
+                    };
+                } else if (med.action === 'Stopped') {
+                    // Close the block
+                    if (activeMeds[drugKey]) {
+                        activeMeds[drugKey].endTime = eventTs;
+                        epochs.push({...activeMeds[drugKey]});
+                        delete activeMeds[drugKey];
+                    }
+                }
+            });
+
+            // Close all remaining open blocks to "Today"
+            const nowTs = new Date().getTime();
+            Object.values(activeMeds).forEach(activeMed => {
+                activeMed.endTime = nowTs;
+                epochs.push(activeMed);
+            });
+
+            return epochs;
+        },
+
+        // The Dedicated Chart.js Renderer
+        renderMedChart() {
+            if (!this.$refs.medChartCanvas) return;
+
+            const epochs = this.generateMedEpochs();
+            if (epochs.length === 0) return;
+
+            const { startDate, endDate } = this.getMedDateRange();
+            
+            // Map unique drug names to populate the Y-axis categories
+            const uniqueDrugs = [...new Set(epochs.map(e => e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId)))];
+
+            const ctx = this.$refs.medChartCanvas.getContext('2d');
+            if (this.medChartInstance) {
+                this.medChartInstance.destroy();
+            }
+
+            // Map data. Chart.js floating bars use `x: [start, end]`
+            const chartData = epochs.map(e => {
+                const genericName = e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
+                return {
+                    x: [e.startTime, e.endTime],
+                    y: genericName,
+                    _rawEpoch: e // Hidden payload for tooltip & scriptable design evaluation
+                };
+            });
+
+            // Evaluate Min/Max Dose per drug to intelligently scale UI graphics
+            const doseRanges = {};
+            epochs.forEach(e => {
+                const key = e.drugId === 'other' ? e.customName : e.drugId;
+                if (!doseRanges[key]) {
+                    doseRanges[key] = { min: e.doseMg, max: e.doseMg };
+                } else {
+                    if (e.doseMg < doseRanges[key].min) doseRanges[key].min = e.doseMg;
+                    if (e.doseMg > doseRanges[key].max) doseRanges[key].max = e.doseMg;
+                }
+            });
+
+            // Helper to parse Hex to RGB for opacity injection
+            const hex2rgb = (hex) => {
+                const v = parseInt(hex.replace('#', ''), 16);
+                return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+            };
+
+            this.medChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    datasets: [{
+                        label: 'Pharmacologic Timeline',
+                        data: chartData,
+                        borderWidth: 2,
+                        borderSkipped: false, // Ensures borders draw completely around the block
+                        borderRadius: 4,
+                        
+                        // SCRIPTABLE: Map Dose dynamically to Bar Opacity
+                        backgroundColor: (ctx) => {
+                            if (!ctx.raw || !ctx.raw._rawEpoch) return '#cbd5e1';
+                            const e = ctx.raw._rawEpoch;
+                            const isDiuretic = ['furosemide', 'torasemide'].includes(e.drugId);
+                            const baseColor = this.formulary[e.drugId]?.color || '#64748b';
+                            const rgb = hex2rgb(baseColor);
+                            
+                            if (isDiuretic) {
+                                // Diuretics dictate thickness, so keep opacity solid but slightly muted
+                                return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.85)`;
+                            } else {
+                                // Other meds shift opacity
+                                const key = e.drugId === 'other' ? e.customName : e.drugId;
+                                const range = doseRanges[key];
+                                let opacity = 0.6; // Base default
+                                
+                                if (range.max > range.min) {
+                                    // Scale opacity between 30% and 90% based on dose
+                                    const ratio = (e.doseMg - range.min) / (range.max - range.min);
+                                    opacity = 0.3 + (0.6 * ratio);
+                                }
+                                return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
+                            }
+                        },
+                        
+                        borderColor: (ctx) => {
+                            if (!ctx.raw || !ctx.raw._rawEpoch) return '#94a3b8';
+                            return this.formulary[ctx.raw._rawEpoch.drugId]?.color || '#64748b';
+                        },
+                        
+                        // SCRIPTABLE: Map Dose dynamically to Bar Thickness (Diuretics only)
+                        barThickness: (ctx) => {
+                            if (!ctx.raw || !ctx.raw._rawEpoch) return 24;
+                            const e = ctx.raw._rawEpoch;
+                            const isDiuretic = ['furosemide', 'torasemide'].includes(e.drugId);
+                            
+                            if (isDiuretic) {
+                                const range = doseRanges[e.drugId];
+                                let thickness = 20; 
+                                if (range.max > range.min) {
+                                    // Scale between 12px (min dose) and 40px (max dose)
+                                    const ratio = (e.doseMg - range.min) / (range.max - range.min);
+                                    thickness = 12 + (28 * ratio);
+                                }
+                                return thickness;
+                            }
+                            return 24; // Standard thickness for non-diuretics
+                        }
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Flips Chart into Horizontal mode
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: (context) => {
+                                    const e = context[0].raw._rawEpoch;
+                                    return e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
+                                },
+                                label: (context) => {
+                                    const e = context.raw._rawEpoch;
+                                    const sDate = new Date(e.startTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                                    
+                                    // If the endTime matches Today's timestamp exactly, flag it as 'Present'
+                                    const todayTs = new Date().getTime();
+                                    const diff = Math.abs(e.endTime - todayTs);
+                                    const eDate = diff < 1000 ? 'Present' : new Date(e.endTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                                    
+                                    return [
+                                        `Dose: ${e.doseMg}mg ${e.frequency}`,
+                                        `Duration: ${sDate} to ${eDate}`
+                                    ];
+                                }
+                            }
+                        },
+                        zoom: {
+                            pan: { enabled: true, mode: 'x' },
+                            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { tooltipFormat: 'dd MMM yyyy' },
+                            min: startDate ? startDate.getTime() : undefined,
+                            max: endDate ? endDate.getTime() : undefined,
+                            grid: { color: '#e2e8f0' }
+                        },
+                        y: {
+                            type: 'category',
+                            labels: uniqueDrugs,
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
         },
 
         // --- EXPORT FUNCTIONS ---
