@@ -411,7 +411,7 @@
                                 <div>
                                     <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
                                     <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
-                                    <span x-show="log.comment"
+                                    <span x-show="log.comment && log.comment.trim().length > 0"
                                           @click.stop="toggleCommentDisplay(log.id)"
                                           :title="log.comment"
                                           style="color: #3b82f6; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;"
@@ -436,7 +436,7 @@
                                     </button>
                                 </div>
                                         <!-- Inline comment expansion -->
-                                <div x-show="expandedCommentId === log.id && log.comment"
+                                <div x-show="expandedCommentId === log.id && log.comment && log.comment.trim().length > 0"
                                      x-transition:enter="transition ease-out duration-150"
                                      x-transition:enter-start="opacity-0 -translate-y-1"
                                      x-transition:enter-end="opacity-100 translate-y-0"

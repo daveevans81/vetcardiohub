@@ -953,7 +953,12 @@ openCommentEditor(log) {
 saveComment() {
     const entry = this.history.find(log => log.id === this.editingCommentId);
     if (entry) {
-        entry.comment = this.commentDraft.trim();
+        const trimmed = this.commentDraft.trim();
+        if (trimmed) {
+            entry.comment = trimmed;
+        } else {
+            delete entry.comment; // Clean removal rather than storing ""
+        }
         localStorage.setItem('vch_rrHistory', JSON.stringify(this.history));
     }
     this.editingCommentId = null;
