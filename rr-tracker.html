@@ -407,39 +407,41 @@
                         </div>
                 
                         <template x-for="log in paginatedHistory" :key="log.id">
-                            <div class="history-item" :class="log.isEquivocal ? 'equivocal-flag' : ''">
-                                <div>
-                                    <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
-                                    <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
-                                    <span x-show="log.comment && log.comment.trim().length > 0"
-                                          @click.stop="toggleCommentDisplay(log.id)"
-                                          :title="log.comment"
-                                          :style="expandedCommentId === log.id
-                                              ? 'color: #1d4ed8; background: #eff6ff; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;'
-                                              : 'color: #3b82f6; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;'">
-                                        <i class="fa-solid fa-comment-dots"></i>
-                                    </span>
+                            <div>  <!-- neutral root wrapper -->
+                                <div class="history-item" :class="log.isEquivocal ? 'equivocal-flag' : ''">
+                                    <div>
+                                        <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
+                                        <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
+                                        <span x-show="log.comment && log.comment.trim().length > 0"
+                                              @click.stop="toggleCommentDisplay(log.id)"
+                                              :title="log.comment"
+                                              :style="expandedCommentId === log.id
+                                                  ? 'color: #1d4ed8; background: #eff6ff; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;'
+                                                  : 'color: #3b82f6; font-size: 0.85rem; cursor: pointer; line-height: 1; padding: 2px 4px; border-radius: 4px;'">
+                                            <i class="fa-solid fa-comment-dots"></i>
+                                        </span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">
+                                            <span x-text="log.rate"></span> bpm
+                                        </strong>
+                                        <button @click="openCommentEditor(log)"
+                                                style="background: none; border: none; color: #3b82f6; cursor: pointer; padding: 4px; opacity: 0.5;"
+                                                @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
+                                                :title="log.comment ? 'Edit note' : 'Add note'">
+                                            <i class="fa-solid" :class="log.comment ? 'fa-comment-dots' : 'fa-comment-medical'"></i>
+                                        </button>
+                                        <button @click="deleteReading(log.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; opacity: 0.5;" 
+                                                @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
+                                                title="Delete this reading">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">
-                                        <span x-text="log.rate"></span> bpm
-                                    </strong>
-                                    <button @click="openCommentEditor(log)"
-                                            style="background: none; border: none; color: #3b82f6; cursor: pointer; padding: 4px; opacity: 0.5;"
-                                            @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
-                                            :title="log.comment ? 'Edit note' : 'Add note'">
-                                        <i class="fa-solid" :class="log.comment ? 'fa-comment-dots' : 'fa-comment-medical'"></i>
-                                    </button>
-                                    <button @click="deleteReading(log.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; opacity: 0.5;" 
-                                            @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
-                                            title="Delete this reading">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                </div>
-                                        <!-- Inline comment expansion -->
+                        
+                                <!-- Expansion panel: show comment -->
                                 <div x-show="expandedCommentId === log.id && log.comment && log.comment.trim().length > 0"
                                      x-transition
-                                     :id="'comment-expand-' + log.id"
                                      style="background: #eff6ff; border: 1px solid #bfdbfe; border-top: none; border-radius: 0 0 6px 6px; padding: 10px 14px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
                                     <div style="display: flex; gap: 8px; align-items: flex-start;">
                                         <i class="fa-solid fa-comment-dots" style="color: #3b82f6; margin-top: 2px; font-size: 0.8rem; flex-shrink: 0;"></i>
