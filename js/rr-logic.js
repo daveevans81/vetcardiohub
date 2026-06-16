@@ -743,12 +743,20 @@ getMedDateRange() {
             const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
             // Safe fallback calculator for 'All Time' or 'Incomplete Custom Dates'
-            const getEarliestFallback = () => {
+ const getEarliestFallback = () => {
                 const petMeds = this.medLedger.filter(m => m.petName === this.activePetName);
                 if(petMeds.length > 0) {
-                     const earliest = petMeds.reduce((min, p) => new Date(p.eventDate) < new Date(min.eventDate) ? p : min, petMeds[0]);
-                     // Pad 14 days before the first med so it doesn't hug the Y-axis
-                     return new Date(new Date(earliest.eventDate).getTime() - (14 * 24 * 60 * 60 * 1000));
+                     // Use parseDateSafe to handle legacy UK/US dates, avoiding Invalid Date NaNs
+                     const earliest = petMeds.reduce((min, p) => 
+                         this.parseDateSafe(p.eventDate) < this.parseDateSafe(min.eventDate) ? p : min
+                     , petMeds[0]);
+                     
+                     const safeTimestamp = this.parseDateSafe(earliest.eventDate).getTime();
+                     
+                     // If it's a valid number, pad it by 14 days. Otherwise default to 0.
+                     if (!isNaN(safeTimestamp)) {
+                         return new Date(safeTimestamp - (14 * 24 * 60 * 60 * 1000));
+                     }
                 }
                 return new Date(0);
             };
