@@ -80,6 +80,31 @@ newMed: {
             return 'vch-' + Date.now().toString(36) + Math.random().toString(36).substr(2);
         },
         
+        saveToStorage(key, data) {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+        return true;
+    } catch (e) {
+        if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
+            alert(
+                '⚠️ Device storage is full.\n\n' +
+                'Your last save did NOT complete. Please export a Master Backup immediately, ' +
+                'then clear old browser data before continuing.'
+            );
+        } else {
+            console.error('VCH Storage Error:', key, e);
+        }
+        return false;
+    }
+},
+
+sanitiseCSV(val) {
+    const s = String(val == null ? '' : val);
+    // Prefix formula-injection characters to prevent spreadsheet execution
+    return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+},
+
+        
 init() {
     // 1. ROBUST DATA LOAD: Prevents the "filter of undefined" crash
     try {
@@ -111,6 +136,35 @@ init() {
     this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
     this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); });
     this.$watch('medTimeScale', () => { this.renderMedChart(); });
+    this.$watch('showManualSrr', (isVisible) => {
+        if (isVisible) {
+            // Pre-populate to current local datetime when panel opens
+            const now = new Date();
+            // toISOString() gives UTC — we need local time for datetime-local input
+            const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                .toISOString()
+                .slice(0, 16);
+            this.manualSrrDate = localIso;
+        }
+    });
+    
+    // UX-1: Warn user if they try to navigate away with unsaved form state open
+    this._unloadHandler = (e) => {
+        const formIsOpen = this.showPatientManager || 
+                           this.editingCommentId !== null || 
+                           this.showManualSrr ||
+                           this.isCounting;
+        if (formIsOpen) {
+            e.preventDefault();
+            e.returnValue = ''; // Required for Chrome; text ignored by modern browsers
+        }
+    };
+    window.addEventListener('beforeunload', this._unloadHandler);
+    
+    // Clean up if Alpine ever destroys this component
+    this.$el.addEventListener('alpine:destroy', () => {
+        window.removeEventListener('beforeunload', this._unloadHandler);
+    });
     
     this.$nextTick(() => { if (this.patients.length > 0) { this.renderChart(); this.renderMedChart(); } });
 },
@@ -143,31 +197,31 @@ init() {
         },
         
 savePatient() {
-            const cleanName = (this.editingPatient.name || '').trim();
-            if (!cleanName) return alert("Patient Name is clinically required.");
+    const cleanName = (this.editingPatient.name || '').trim();
+    if (!cleanName) return alert("Patient Name is clinically required.");
 
-            // Find if existing
-            const existingIndex = this.patients.findIndex(p => p.id === this.editingPatient.id);
-            
-            // Extract the weight before saving demographics
-            const currentWeightValue = parseFloat(this.editingPatient.weight);
-            delete this.editingPatient.weight; // We don't store weight directly on the patient object anymore
+    // Destructure weight OUT before spreading to the patients array.
+    // This avoids mutating editingPatient in place (which caused Alpine reactivity side-effects)
+    // and ensures the transient weight field never persists on the patient demographic object.
+    const { weight, ...patientData } = this.editingPatient;
+    const currentWeightValue = parseFloat(weight);
+    const patientIdToSave = patientData.id;
 
-            if (existingIndex > -1) {
-                this.patients[existingIndex] = { ...this.editingPatient };
-            } else {
-                this.patients.push({ ...this.editingPatient });
-            }
+    const existingIndex = this.patients.findIndex(p => p.id === patientIdToSave);
+    if (existingIndex > -1) {
+        this.patients[existingIndex] = { ...patientData };
+    } else {
+        this.patients.push({ ...patientData });
+    }
 
-            // Log weight if changed
-            if (!isNaN(currentWeightValue)) {
-                this.logWeight(this.editingPatient.id, currentWeightValue);
-            }
+    if (!isNaN(currentWeightValue) && currentWeightValue > 0) {
+        this.logWeight(patientIdToSave, currentWeightValue);
+    }
 
-            localStorage.setItem('vch_patients', JSON.stringify(this.patients));
-            this.activePatientId = this.editingPatient.id;
-            this.closePatientManager();
-        },
+    this.saveToStorage('vch_patients', this.patients);
+    this.activePatientId = patientIdToSave;
+    this.closePatientManager();
+},
         
         logWeight(patientId, value) {
             // Only add a new log entry if the weight actually changed today
@@ -179,7 +233,7 @@ savePatient() {
             } else {
                 this.weightLog.push({ id: this.generateId(), patientId, date: new Date().toISOString(), weightValue: value });
             }
-            localStorage.setItem('vch_weightLog', JSON.stringify(this.weightLog));
+            this.saveToStorage('vch_weightLog', this.weightLog);
         },
         
         // --- DATA MERGING ALGORITHM ---
@@ -196,10 +250,10 @@ savePatient() {
             this.patients = this.patients.filter(p => p.id !== sourceId);
 
             // Save state
-            localStorage.setItem('vch_weightLog', JSON.stringify(this.weightLog));
-            localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
-            localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
-            localStorage.setItem('vch_patients', JSON.stringify(this.patients));
+            this.saveToStorage('vch_weightLog', this.weightLog);
+            this.saveToStorage('vch_srrHistory', this.srrHistory);
+            this.saveToStorage('vch_medLedger', this.medLedger);
+            this.saveToStorage('vch_patients', this.patients);
 
             this.activePatientId = targetId;
             alert("Patient records successfully merged.");
@@ -302,6 +356,28 @@ calculatedMgPerKg() {
     const weightInKg = profile.weightUnit === 'lbs' ? latestWeight / 2.2046 : latestWeight;
     return (dose / weightInKg).toFixed(2);
 },
+// Returns the most recent weight log entry at or before a given date
+getWeightAtDate(patientId, dateStr) {
+    const targetDate = new Date(dateStr);
+    if (isNaN(targetDate.getTime())) return null;
+
+    const sorted = this.weightLog
+        .filter(w => w.patientId === patientId && new Date(w.date) <= targetDate)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    return sorted.length > 0 ? sorted[0].weightValue : null;
+},
+
+// Computes mg/kg using the weight closest to the med's event date
+computeHistoricMgPerKg(doseMg, patientId, eventDateStr) {
+    if (!doseMg || doseMg <= 0) return null;
+    const weightAtEntry = this.getWeightAtDate(patientId, eventDateStr + 'T23:59:59');
+    if (!weightAtEntry || weightAtEntry <= 0) return null;
+    const profile = this.patients.find(p => p.id === patientId);
+    const weightKg = profile?.weightUnit === 'lbs' ? weightAtEntry / 2.2046 : weightAtEntry;
+    return (doseMg / weightKg).toFixed(2);
+},
+
 
 parseDateSafe(dateStr) {
             // 1. Try standard parsing (Works perfectly for our new ISO strings)
@@ -357,22 +433,11 @@ startCount() {
 addMedication() {
     if (!this.activePatientId) return alert("Clinical Entry Error: No patient selected.");
     if (!this.newMed.drugId) return alert("Clinical Entry Error: Please select a medication.");
-    if (!this.newMed.isStopped && !this.newMed.doseMg) return alert("Clinical Entry Error: Please specify the dose.");
-
-    // Infer action: Stopped > check history for prior entry > Started vs Adjusted
-    let action;
-    if (this.newMed.isStopped) {
-        action = 'Stopped';
-    } else {
-        const priorEntry = this.medLedger.some(m =>
-            m.patientId === this.activePatientId &&
-            m.drugId === this.newMed.drugId &&
-            m.action !== 'Stopped'
-        );
-        action = priorEntry ? 'Adjusted' : 'Started';
+    
+    // Explicit null/empty check that works regardless of type
+    if (!this.newMed.isStopped && (this.newMed.doseMg === '' || this.newMed.doseMg === null || this.newMed.doseMg === undefined)) {
+        return alert("Clinical Entry Error: Please specify the dose.");
     }
-
-    const isMajor = ['Started', 'Stopped'].includes(action);
 
     const entry = {
         id: this.generateId(),
@@ -380,15 +445,14 @@ addMedication() {
         eventDate: this.newMed.eventDate,
         drugId: this.newMed.drugId,
         customName: this.newMed.drugId === 'other' ? this.newMed.customName : null,
-        action: action,
+        isStopped: this.newMed.isStopped,                                    // raw intent stored
         doseMg: this.newMed.isStopped ? null : parseFloat(this.newMed.doseMg),
         frequency: this.newMed.isStopped ? null : this.newMed.frequency,
         mgPerKg: this.newMed.isStopped ? null : this.calculatedMgPerKg(),
-        isMajorChange: isMajor
     };
 
     this.medLedger.push(entry);
-    localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+    this.saveToStorage('vch_medLedger', this.medLedger);
     this.renderMedChart();
 
     this.newMed = {
@@ -401,7 +465,38 @@ addMedication() {
     };
 },
 
+getComputedAction(entry) {
+    if (entry.isStopped) return 'Stopped';
 
+    // Get all non-stopped entries for this drug+patient, sorted oldest first
+    const priorEntries = this.medLedger
+        .filter(m =>
+            m.patientId === entry.patientId &&
+            m.drugId === entry.drugId &&
+            !m.isStopped &&
+            new Date(m.eventDate) < new Date(entry.eventDate)
+        );
+
+    // Was there a 'Stopped' entry between the last dose entry and this one?
+    const lastStop = this.medLedger
+        .filter(m =>
+            m.patientId === entry.patientId &&
+            m.drugId === entry.drugId &&
+            m.isStopped &&
+            new Date(m.eventDate) <= new Date(entry.eventDate)
+        )
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate))[0];
+
+    const lastDoseBefore = priorEntries
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate))[0];
+
+    // If the most recent stop happened AFTER the most recent prior dose, this is a fresh start
+    if (lastStop && (!lastDoseBefore || new Date(lastStop.eventDate) > new Date(lastDoseBefore.eventDate))) {
+        return 'Started';
+    }
+
+    return priorEntries.length === 0 ? 'Started' : 'Adjusted';
+},
 
         
 // Sort ledger chronologically (newest first) to avoid Alpine array freezing
@@ -409,13 +504,32 @@ sortedMedLedger() {
     if (!this.activePatientId) return [];
     return this.medLedger
         .filter(med => med.patientId === this.activePatientId)
-        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate))
+        .map(med => {
+            const action = this.getComputedAction(med);
+            // Compute mg/kg from the weight log at time of the med event
+            const dynamicMgPerKg = (!med.isStopped && med.doseMg)
+                ? this.computeHistoricMgPerKg(med.doseMg, med.patientId, med.eventDate)
+                : null;
+            // Flag if weight has changed enough to alter the dose band
+            const storedVal = parseFloat(med.mgPerKg);
+            const dynamicVal = parseFloat(dynamicMgPerKg);
+            const weightChanged = !isNaN(storedVal) && !isNaN(dynamicVal) && 
+                                  Math.abs(dynamicVal - storedVal) >= 0.05;
+            return {
+                ...med,
+                action,
+                isMajorChange: action !== 'Adjusted',
+                dynamicMgPerKg,
+                weightChanged
+            };
+        });
 },
 
 deleteMedication(id) {
     if(confirm("Delete this medication entry? This will remove it from the patient's historical chart.")) {
         this.medLedger = this.medLedger.filter(med => med.id !== id);
-        localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
+        this.saveToStorage('vch_medLedger', this.medLedger);
         this.renderMedChart();
     }
 },
@@ -435,7 +549,7 @@ deleteMedication(id) {
             // Determine equivocal status based on patient species
             const isEquivocal = profile.species === 'cat' 
                 ? (rate >= 30 && rate < 40) 
-                : (rate >= 25 && rate < 35);
+                : (rate >= 30 && rate < 40);
 
             const newLog = {
                 id: this.generateId(),
@@ -449,7 +563,7 @@ deleteMedication(id) {
             };
 
             this.srrHistory.unshift(newLog); // Newest first
-            localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
+            this.saveToStorage('vch_srrHistory', this.srrHistory);
 
             this.finalRate = null;
             this.tapCount = 0;
@@ -479,7 +593,7 @@ deleteMedication(id) {
             if (species === 'dog' && rate >= 30 && rate < 40) {
                 return { status: 'equivocal', title: 'Equivocal (Borderline)', text: 'This rate is borderline high. Please recount in 2-4 hours while the dog is in deep sleep.' };
             }
-            if (species === 'cat' && rate >= 35 && rate < 40) {
+            if (species === 'cat' && rate >= 30 && rate < 40) {
                 return { status: 'equivocal', title: 'Equivocal (Borderline)', text: 'Cats can occasionally rest at this rate, but it is borderline. Recount in 2 hours.' };
             }
             return { status: 'normal', title: 'Normal Range', text: 'Resting respiratory rate is within normal expected limits.' };
@@ -555,19 +669,24 @@ deleteMedication(id) {
         },
         
         // --- PAGINATION GETTERS ---
-        get paginatedHistory() {
-            // We reverse the filtered readings back to Newest-First for the list view
-            const listData = [...this.getFilteredReadings()].reverse(); 
-            const start = (this.currentPage - 1) * this.itemsPerPage;
-            return listData.slice(start, start + this.itemsPerPage);
-        },
+// paginatedHistory getter
+// Data flow explanation:
+//   srrHistory is stored newest-first (unshift on save).
+//   getFilteredReadings() re-sorts oldest-first for Chart.js (ascending time axis).
+//   We reverse() here to restore newest-first for the human-readable log list.
+//   currentPage resets to 1 on both activePatientId and timeScale changes (see watchers in init()).
+get paginatedHistory() {
+    const listData = [...this.getFilteredReadings()].reverse(); // oldest→newest reversed back to newest→oldest
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    return listData.slice(start, start + this.itemsPerPage);
+},
 
-        get totalPages() {
-            return Math.ceil(this.getFilteredReadings().length / this.itemsPerPage) || 1;
-        },
+get totalPages() {
+    return Math.ceil(this.getFilteredReadings().length / this.itemsPerPage) || 1;
+},
 
-        nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
-        prevPage() { if (this.currentPage > 1) this.currentPage--; },
+nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
+prevPage() { if (this.currentPage > 1) this.currentPage--; },
         
 // ---  FILTER (Respects Pet Selection) ---
 getFilteredReadings() {
@@ -668,7 +787,7 @@ renderChart() {
         const canvas = this.$refs.rrrChartCanvas;
         
         // GATEKEEPER: Stop Chart.js from crashing if canvas is display: none
-        if (!canvas || canvas.offsetParent === null) return; 
+        if (!canvas || (canvas.offsetParent === null && !this.isChartExpanded)) return;
 
         const rawSrrData = this.getFilteredReadings() || [];
         const ctx = canvas.getContext('2d');
@@ -800,7 +919,7 @@ renderChart() {
 
                 const datasets = [
                     {
-                        label: `${this.activePatientId}'s Respiratory Rate (bpm)`,
+                        label: `${this.activePatientProfile?.name ?? 'Patient'}'s Respiratory Rate (bpm)`,
                         data: srrDataPoints,
                         borderColor: 'rgb(14, 165, 233)',
                         backgroundColor: 'rgba(14, 165, 233, 0.08)',
@@ -996,7 +1115,8 @@ generateMedEpochs() {
                 const eventTs = new Date(med.eventDate + 'T12:00:00').getTime(); // Force midday safety
                 const drugKey = med.drugId === 'other' ? med.customName : med.drugId;
 
-                if (med.action === 'Started' || med.action === 'Adjusted') {
+                const computedAction = this.getComputedAction(med);
+                if (computedAction === 'Started' || computedAction === 'Adjusted') {
                     // If the drug was already running, close its previous dose block
                     if (activeMeds[drugKey]) {
                         activeMeds[drugKey].endTime = eventTs;
@@ -1013,7 +1133,7 @@ generateMedEpochs() {
                         startTime: eventTs,
                         endTime: null // Stays open-ended until stopped or adjusted
                     };
-                } else if (med.action === 'Stopped') {
+                } else if (computedAction === 'Stopped') {
                     // Close the block
                     if (activeMeds[drugKey]) {
                         activeMeds[drugKey].endTime = eventTs;
@@ -1286,8 +1406,8 @@ importCSV(event) {
 
         if (importedCount > 0) {
             // FIX: Save using the new relational local storage keys
-            localStorage.setItem('vch_patients', JSON.stringify(this.patients));
-            localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
+            this.saveToStorage('vch_patients', this.patients);
+            this.saveToStorage('vch_srrHistory', this.srrHistory);
             
             // Switch UI to the newly imported pet's UUID
             if (lastImportedPatientId) {
@@ -1307,170 +1427,260 @@ importCSV(event) {
 },
 
         
-        importCardalisEmail() {
+ importCardalisEmail() {
     const text = this.cardalisEmailText;
-    if (!text || !text.trim()) return alert("Please paste the Cardalis email content first.");
+    if (!text || !text.trim()) 
+        return alert("Please paste the Cardalis email content first.");
 
     // --- 1. EXTRACT PET NAME ---
-    const nameMatch = text.match(/breathing\s+rate\s+for\s+([A-Za-z0-9 _'\-]+?)(?:\s*More|\s*\n|\s*$)/i);
-    const patientId = nameMatch ? nameMatch[1].trim() : null;
+    // Format: "breathing rate for Bella More details..." or "breathing rate for Bella\n"
+    const nameMatch = text.match(
+        /breathing\s+rate\s+for\s+([A-Za-z0-9 _'\-]+?)(?:\s*More|\s*\n|\s*$)/i
+    );
+    const petName = nameMatch ? nameMatch[1].trim() : null;
 
-    if (!patientId) {
-        return alert("Could not identify a pet name from the email.\n\nExpected format: 'breathing rate for [Name]'");
+    if (!petName) {
+        return alert(
+            "Could not identify a pet name from the email.\n\n" +
+            "Expected format: 'breathing rate for [Name]'\n\n" +
+            "Check that you have pasted the full email body."
+        );
     }
 
-    // --- 2. AUTO-CREATE PET PROFILE if not already registered ---
-let existingPet = this.patients.find(p => p.name.toLowerCase() === petName.toLowerCase());
+    // --- 2. RESOLVE OR AUTO-CREATE PET PROFILE ---
+    let existingPet = this.patients.find(
+        p => p.name.toLowerCase() === petName.toLowerCase()
+    );
     if (!existingPet) {
-        existingPet = { 
-            id: this.generateId(), // MUST HAVE THIS
-            name: petName, 
-            species: 'dog', 
-            age: null, 
-            weight: null, 
-            weightUnit: 'kg' 
+        existingPet = {
+            id: this.generateId(),
+            name: petName,
+            species: 'dog',       // Default — owner can edit profile afterwards
+            age: null,
+            weight: null,
+            weightUnit: 'kg',
+            customSrrCutoff: 30
         };
         this.patients.push(existingPet);
-        localStorage.setItem('vch_patients', JSON.stringify(this.patients)); // NEW KEY
+        this.saveToStorage('vch_patients', this.patients);
     }
 
-    const resolvedSpecies = existingPet.species;
-    const resolvedPatientId = existingPet.id; // Grab the UUID for the log
+    const resolvedSpecies   = existingPet.species;
+    const resolvedPatientId = existingPet.id;
 
+    // --- 3. PARSE ENTRY BLOCKS ---
+    // Each block in Cardalis email format:
+    //   BreathCount: 24
+    //   Date & Time: 2025-08-26 19:01:08
+    //   Breathing Effort: N/A          (optional)
+    //   Exercise Abilty: N/A           (typo in Cardalis app — handle both spellings)
+    //   Alertness: N/A                 (optional)
+    //   Comments: some note here       (optional)
+    //
+    // Strategy: capture the two mandatory fields, then optionally consume
+    // the four clinical fields that follow before the next BreathCount.
 
-    // --- 3. EXTRACT ALL BREATHCOUNT + DATE-TIME PAIRS ---
-    // Uses a lazy wildcard between the two fields to handle any intervening whitespace
-    const entryRegex = /BreathCount:\s*(\d+)[\s\S]*?Date\s*&\s*Time:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})/gi;
-    
+    const entryRegex = new RegExp(
+        'BreathCount:\\s*(\\d+)' +                              // [1] rate
+        '[\\s\\S]*?' +
+        'Date\\s*&\\s*Time:\\s*(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2})' + // [2] datetime
+        '(?:[\\s\\S]*?Breathing\\s*Effort:\\s*([^\\n]*))?'  +  // [3] effort (optional)
+        '(?:[\\s\\S]*?Exercise\\s*Abilit?y:\\s*([^\\n]*))?'  + // [4] exercise (optional, handles typo)
+        '(?:[\\s\\S]*?Alertness:\\s*([^\\n]*))?'             +  // [5] alertness (optional)
+        '(?:[\\s\\S]*?Comments?:\\s*([^\\n]*))?',               // [6] comment (optional)
+        'gi'
+    );
+
     let match;
-    let importedCount = 0;
+    let importedCount    = 0;
     let skippedDuplicates = 0;
+    let skippedInvalid   = 0;
 
     while ((match = entryRegex.exec(text)) !== null) {
-        const rate = parseInt(match[1], 10);
+        const rate        = parseInt(match[1], 10);
         const dateTimeRaw = match[2].trim();
 
-        // Force ISO parse by replacing the space separator
+        // Sanitise optional clinical fields — discard N/A and whitespace-only values
+        const isUsable = (s) => s && s.trim() && s.trim().toUpperCase() !== 'N/A';
+        const effort   = isUsable(match[3]) ? match[3].trim() : null;
+        const exercise = isUsable(match[4]) ? match[4].trim() : null;
+        const alertness = isUsable(match[5]) ? match[5].trim() : null;
+        const rawNote  = isUsable(match[6]) ? match[6].trim() : null;
+
+        // Parse the datetime (space separator → ISO T separator)
         const dateObj = new Date(dateTimeRaw.replace(' ', 'T'));
 
-        if (isNaN(dateObj.getTime()) || isNaN(rate) || rate <= 0) continue;
-
-        // --- 4. DUPLICATE DETECTION ---
-        // Flag if an entry for this pet exists within a 60-second window of this timestamp
-        const isDuplicate = this.srrHistory.some(h =>
-            h.patientId === patientId &&
-            Math.abs(new Date(h.date).getTime() - dateObj.getTime()) < 60000
-        );
-
-        if (isDuplicate) {
-            skippedDuplicates++;
+        if (isNaN(dateObj.getTime()) || isNaN(rate) || rate <= 0 || rate > 120) {
+            skippedInvalid++;
             continue;
         }
 
-        // --- 5. MAP TO VCH HISTORY FORMAT ---
-        const isEquivocal = resolvedSpecies === 'cat'
-            ? (rate >= 30 && rate < 40)
-            : (rate >= 25 && rate < 35);
+        // --- 4. DUPLICATE DETECTION (60-second window) ---
+        const isDuplicate = this.srrHistory.some(h =>
+            h.patientId === resolvedPatientId &&
+            Math.abs(new Date(h.date).getTime() - dateObj.getTime()) < 60000
+        );
+        if (isDuplicate) { skippedDuplicates++; continue; }
 
- this.srrHistory.push({
-            id: dateObj.getTime() + importedCount,   
-            date: dateObj.toISOString(),
-            time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            rate: rate,
-            patientId: resolvedPatientId, // MUST BE THE UUID, NOT THE NAME
-            species: resolvedSpecies,
-            comment: 'Imported from Cardalis app',
-            isEquivocal: isEquivocal
+        // --- 5. BUILD COMPOSITE COMMENT ---
+        // Assembles clinical fields into a readable note string.
+        // Only non-N/A values are included. Falls back to a plain import note.
+        const clinicalParts = [];
+        if (effort)    clinicalParts.push(`Effort: ${effort}`);
+        if (exercise)  clinicalParts.push(`Exercise: ${exercise}`);
+        if (alertness) clinicalParts.push(`Alertness: ${alertness}`);
+        if (rawNote)   clinicalParts.push(rawNote);
+
+        const compositeComment = clinicalParts.length > 0
+            ? clinicalParts.join(' | ')
+            : 'Imported from Cardalis app';
+
+        // --- 6. EQUIVOCAL STATUS (consistent with clinicalInterpretation getter) ---
+        const isEquivocal = rate >= 30 && rate < 40;
+
+        // --- 7. PUSH TO HISTORY ---
+        this.srrHistory.push({
+            id:          this.generateId(),    // Always a UUID — never timestamp integer
+            date:        dateObj.toISOString(),
+            time:        dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            rate,
+            patientId:   resolvedPatientId,    // Always the UUID — never the name string
+            isEquivocal,
+            comment:     compositeComment,
+            isManual:    false
         });
 
         importedCount++;
     }
 
-    // --- 6. COMMIT & REFRESH ---
+    // --- 8. COMMIT & REFRESH ---
     if (importedCount === 0) {
-        const msg = skippedDuplicates > 0
-            ? `No new readings imported — ${skippedDuplicates} duplicate(s) already exist in the log.`
-            : "No valid readings found. Please check the email format matches Cardalis export output.";
-        return alert(msg);
+        const detail = skippedDuplicates > 0
+            ? `${skippedDuplicates} duplicate(s) were already in the log.`
+            : skippedInvalid > 0
+                ? `${skippedInvalid} entry/entries had invalid data.`
+                : "No BreathCount / Date & Time pairs found. Check the email format.";
+        return alert(`No new readings imported.\n\n${detail}`);
     }
 
-localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory)); // NEW KEY
-    this.activePatientId = resolvedPatientId;
+    this.saveToStorage('vch_srrHistory', this.srrHistory);
+    this.activePatientId   = resolvedPatientId;
     this.cardalisEmailText = '';
     this.showCardalisImport = false;
-    this.currentPage = 1;
+    this.currentPage       = 1;
 
     this.$nextTick(() => { this.renderChart(); });
 
-    const dupNote = skippedDuplicates > 0 ? ` (${skippedDuplicates} duplicate(s) skipped)` : '';
-    alert(`Successfully imported ${importedCount} reading(s) for ${patientId}${dupNote}.`);
+    const dupNote     = skippedDuplicates > 0 ? `, ${skippedDuplicates} duplicate(s) skipped` : '';
+    const invalidNote = skippedInvalid > 0    ? `, ${skippedInvalid} invalid entry/entries ignored` : '';
+    alert(`Successfully imported ${importedCount} reading(s) for ${petName}${dupNote}${invalidNote}.`);
 },
+
         
         // --- MEDICATION CSV MANAGEMENT ---
-        exportMedicationsCSV() {
-            if (!this.medLedger || this.medLedger.length === 0) return alert("No medication data to export.");
+exportMedicationsCSV() {
+    if (!this.medLedger || this.medLedger.length === 0) 
+        return alert("No medication data to export.");
 
-            const headers = "Date,PetName,Action,Drug,CustomName,Dose(mg),Frequency,mg/kg\n";
-            const rows = this.medLedger.map(med => {
-                const drugName = med.drugId === 'other' ? 'Other' : (this.formulary[med.drugId]?.generic || med.drugId);
-                return `${med.eventDate},"${med.patientId}",${med.action},"${drugName}","${med.customName || ''}",${med.doseMg},${med.frequency},${med.mgPerKg || ''}`;
-            }).join("\n");
+    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped\n";
+    
+    const rows = this.medLedger.map(med => {
+        const patient = this.patients.find(p => p.id === med.patientId);
+        const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+        const genericName = med.drugId === 'other'
+            ? 'Other'
+            : (this.formulary[med.drugId]?.generic || med.drugId);
 
-            const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + rows);
-            const link = document.createElement("a");
-            link.setAttribute("href", csvContent);
-            link.setAttribute("download", `VCH_Medications_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        },
+        return [
+            med.eventDate,
+            `"${patientName}"`,
+            med.drugId || 'other',
+            `"${this.sanitiseCSV(genericName)}"`,
+            `"${this.sanitiseCSV(med.customName || '')}"`,
+            med.doseMg != null ? med.doseMg : '',
+            med.frequency || '',
+            med.mgPerKg != null ? med.mgPerKg : '',
+            med.isStopped ? 'true' : 'false'
+        ].join(',');
+    }).join("\n");
 
-        importMedicationsCSV(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + rows);
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `VCH_Medications_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+},
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const text = e.target.result;
-                    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-                    if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+      importMedicationsCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-                    let importedCount = 0;
-                    for (let i = 1; i < lines.length; i++) {
-                        const regex = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
-                        const parts = lines[i].match(regex);
-                        
-                        if (parts && parts.length >= 7) {
-                            const entry = {
-                                id: Date.now() + i, // Unique ID
-                                eventDate: parts[0].replace(/"/g, ''),
-                                patientId: parts[1].replace(/"/g, ''),
-                                action: parts[2].replace(/"/g, ''),
-                                drugId: 'other', // Safest fallback for imported raw text
-                                customName: parts[3].replace(/"/g, ''),
-                                doseMg: parseFloat(parts[5].replace(/"/g, '')),
-                                frequency: parts[6].replace(/"/g, ''),
-                                mgPerKg: parts[7] ? parseFloat(parts[7].replace(/"/g, '')) : null,
-                                isMajorChange: ['Started', 'Stopped'].includes(parts[2].replace(/"/g, ''))
-                            };
-                            
-                            if (!isNaN(entry.doseMg)) {
-                                this.medLedger.push(entry);
-                                importedCount++;
-                            }
-                        }
-                    }
-                    localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
-                    alert(`Imported ${importedCount} medication records.`);
-                } catch (err) {
-                    console.error(err);
-                    alert("Failed to parse Medication CSV.");
-                }
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        },
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const text = e.target.result;
+            const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+
+            // Strips surrounding quotes and un-escapes doubled quotes
+            const clean = (s) => (s || '').replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+
+            let importedCount = 0;
+            let skipped = 0;
+
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].match(/(".*?"|[^",]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g);
+                if (!parts || parts.length < 7) { skipped++; continue; }
+
+                const eventDate   = clean(parts[0]);
+                const patientName = clean(parts[1]);
+                const drugId      = clean(parts[2]) || 'other';
+                // parts[3] = GenericName (display only, not stored)
+                const customName  = clean(parts[4]);
+                const doseMg      = parseFloat(clean(parts[5]));
+                const frequency   = clean(parts[6]);
+                const mgPerKg     = parts[7] ? parseFloat(clean(parts[7])) : null;
+                const isStopped   = parts[8] ? clean(parts[8]).toLowerCase() === 'true' : false;
+
+                // Resolve patient by name — do not auto-create for medication imports
+                const patient = this.patients.find(
+                    p => p.name.toLowerCase() === patientName.toLowerCase()
+                );
+                if (!patient) { skipped++; continue; }
+
+                // Validate: active entries must have a parseable dose
+                if (!isStopped && isNaN(doseMg)) { skipped++; continue; }
+
+                this.medLedger.push({
+                    id: this.generateId(),
+                    eventDate,
+                    patientId:  patient.id,
+                    drugId,
+                    customName: customName || '',
+                    doseMg:     isStopped ? null : doseMg,
+                    frequency:  isStopped ? null : (frequency || 'q12h'),
+                    mgPerKg:    isStopped ? null : (isNaN(mgPerKg) ? null : mgPerKg),
+                    isStopped
+                });
+                importedCount++;
+            }
+
+            this.saveToStorage('vch_medLedger', this.medLedger);
+            this.renderMedChart();
+
+            const note = skipped > 0 ? ` (${skipped} row(s) skipped — patient not found or invalid data)` : '';
+            alert(`Imported ${importedCount} medication record(s)${note}.`);
+
+        } catch (err) {
+            console.error(err);
+            alert("Failed to parse Medication CSV. Check the file format.");
+        }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
 
         // --- FULL SYSTEM MASTER BACKUP (JSON) ---
 exportCompleteBackup() {
@@ -1501,17 +1711,21 @@ exportCompleteBackup() {
             const data = JSON.parse(e.target.result);
             
             // Check for the NEW keys matching your export
-            if (data.vch_patients && data.vch_srrHistory && data.vch_medLedger) {
+            if (
+    Array.isArray(data.vch_patients) &&
+    Array.isArray(data.vch_srrHistory) &&
+    Array.isArray(data.vch_medLedger)
+) {
                 if (confirm("This will replace all current data with the backup file. Proceed?")) {
                     this.patients = data.vch_patients;
                     this.srrHistory = data.vch_srrHistory;
                     this.medLedger = data.vch_medLedger;
                     this.weightLog = data.vch_weightLog || [];
 
-                    localStorage.setItem('vch_patients', JSON.stringify(this.patients));
-                    localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
-                    localStorage.setItem('vch_medLedger', JSON.stringify(this.medLedger));
-                    localStorage.setItem('vch_weightLog', JSON.stringify(this.weightLog));
+                    this.saveToStorage('vch_patients', this.patients);
+                    this.saveToStorage('vch_srrHistory', this.srrHistory);
+                    this.saveToStorage('vch_medLedger', this.medLedger);
+                    this.saveToStorage('vch_weightLog', this.weightLog);
 
                     // FIX: Set to ID, not name
                     if (this.patients.length > 0) this.activePatientId = this.patients[0].id; 
@@ -1520,7 +1734,11 @@ exportCompleteBackup() {
                     alert("Master Backup successfully restored!");
                 }
             } else {
-                alert("Invalid backup file. Missing required VCH datasets.");
+                alert(
+                    "Invalid backup file.\n\n" +
+                    "Expected keys: vch_patients, vch_srrHistory, vch_medLedger (all arrays).\n" +
+                    "This file may be corrupt or from an incompatible version."
+                );
             }
         } catch (err) {
             console.error(err);
@@ -1537,7 +1755,7 @@ exportCompleteBackup() {
 deleteReading(id) {
     if (confirm("Delete this reading? This cannot be undone.")) {
         this.srrHistory = this.srrHistory.filter(log => log.id !== id);
-        localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
+        this.saveToStorage('vch_srrHistory', this.srrHistory);
         this.currentPage = 1;
         this.$nextTick(() => { this.renderChart(); });
     }
@@ -1559,7 +1777,7 @@ saveComment() {
         if (trimmed) entry.comment = trimmed;
         else delete entry.comment;
         
-        localStorage.setItem('vch_srrHistory', JSON.stringify(this.srrHistory));
+        this.saveToStorage('vch_srrHistory', this.srrHistory);
     }
     this.editingCommentId = null;
     this.commentDraft = '';

@@ -198,10 +198,10 @@
     
                                 <!-- ******************************** -->
                                 <!-- UNDER CONSTRUCTION BANNER        -->
-                                <!-- ******************************** --> 
+                                <!-- ********************************  
                 <div class="under-construction-banner" style="background: #1e293b; border-radius: 8px; padding: 2.5rem 2rem; text-align: center; overflow: hidden;">
             
-                  <!-- top stripe -->
+                  
                   <div style="display: flex; height: 8px; margin-bottom: 2rem; border-radius: 4px; overflow: hidden;">
                     <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
                     <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
@@ -222,7 +222,7 @@
                     <span style="color: #94a3b8; font-size: 0.875rem;">⏱ Coming soon</span>
                   </div>
                 
-                  <!-- bottom stripe -->
+                  
                   <div style="display: flex; height: 8px; margin-top: 2rem; border-radius: 4px; overflow: hidden;">
                     <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
                     <div style="flex:1; background:#f59e0b;"></div><div style="flex:1; background:#1e293b;"></div>
@@ -232,7 +232,7 @@
                   </div>
                 
                 </div>
-
+-->
 
 
 
@@ -279,7 +279,7 @@
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <i class="fa-solid fa-dog" x-show="activePatientProfile?.species === 'dog'" style="font-size: 1.5rem; color: #64748b;"></i>
                             <i class="fa-solid fa-cat" x-show="activePatientProfile?.species === 'cat'" style="font-size: 1.5rem; color: #64748b;"></i>
-                            <select x-model="activePatientId" style="font-size: 1.2rem; font-weight: bold; border: none; background: transparent; cursor: pointer; outline: none; color: #1e293b;">
+                            <select x-model="activePatientId" :disabled="isCounting" style="font-size: 1.2rem; font-weight: bold; border: none; background: transparent; cursor: pointer; outline: none; color: #1e293b;">
                                 <template x-for="patient in patients" :key="patient.id">
                                     <option :value="patient.id" x-text="`${patient.name} ${patient.ownerName ? '('+patient.ownerName+')' : ''}`"></option>
                                 </template>
@@ -567,7 +567,7 @@
                                              x-text="filteredStats.upperCI.toFixed(1) + ' bpm'"></div>
                                     </div>
                         
-                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;" x-show="getFilteredReadings().length >= 2">
                                         <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Range</div>
                                         <div style="font-size: 1.2rem; font-weight: bold; color: #334155;"
                                              x-text="Math.min(...getFilteredReadings().map(d => d.rate)) + '–' + Math.max(...getFilteredReadings().map(d => d.rate)) + ' bpm'"></div>
@@ -711,8 +711,15 @@
                                             <span x-text="med.drugId === 'other' ? med.customName : (formulary[med.drugId]?.generic || med.drugId)"></span>
                                         </td>
                                         <td style="padding: 10px 15px; color: #64748b;">
-                                            <span x-text="med.doseMg + 'mg ' + med.frequency"></span> 
-                                            <span x-show="med.mgPerKg" style="font-size: 0.8rem; color: #94a3b8;">(<span x-text="med.mgPerKg"></span> mg/kg)</span>
+                                            <span x-show="!med.isStopped" x-text="med.doseMg + 'mg ' + med.frequency"></span>
+                                            <span x-show="med.isStopped" style="color: #94a3b8; font-style: italic;">Discontinued</span>
+                                            <span x-show="med.dynamicMgPerKg && !med.isStopped" 
+                                                  style="font-size: 0.8rem; color: #94a3b8;">
+                                                (<span x-text="med.dynamicMgPerKg"></span> mg/kg
+                                                <span x-show="med.weightChanged"
+                                                      title="Patient weight has changed since this entry — mg/kg has been recalculated from weight log"
+                                                      style="color: #f59e0b; font-size: 0.8rem; cursor: help;">⚠</span>)
+                                            </span>
                                         </td>
                                         <td style="padding: 10px 15px; text-align: right;">
                                             <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
