@@ -211,6 +211,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://vetcardiohub.com/health-tracker</loc>
+    <lastmod>2026-06-18</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://vetcardiohub.com/learning</loc>
     <lastmod>2026-06-05</lastmod>
     <priority>0.8</priority>
@@ -253,11 +258,6 @@
   <url>
     <loc>https://vetcardiohub.com/resources</loc>
     <lastmod>2026-05-04</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://vetcardiohub.com/rr-tracker</loc>
-    <lastmod>2026-06-17</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
