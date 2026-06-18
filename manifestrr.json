@@ -1,6 +1,6 @@
 {
   "short_name": "Health Tracker",
-  "name": "VetCardioHub Health Tracker",
+  "name": "VetCardioHub Cardiac Health Tracker",
   "icons": [
     {
       "src": "/apple-touch-icon.png",
@@ -21,7 +21,7 @@
       "purpose": "maskable"
     }
   ],
-  "start_url": "/rr-tracker.html",
+  "start_url": "/health-tracker.html",
   "background_color": "#ffffff",
   "display": "standalone",
   "theme_color": "#2563eb"

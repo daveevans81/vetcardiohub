@@ -1119,6 +1119,10 @@
                     <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: calc(100vh - 180px); max-height: calc(100vh - 180px);' : 'height: 384px;'" x-cloak>
                         <canvas x-ref="rrrChartCanvas"></canvas>
                     </div>
+                    <button type="button" @click="Chart.getChart($refs.rrrChartCanvas)?.resetZoom()" 
+                            class="btn-nudge-static" style="background: #64748b;">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reset Zoom
+                    </button>
                 </div>
             </div>
             

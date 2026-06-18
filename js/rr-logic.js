@@ -1217,11 +1217,34 @@ renderChart() {
                                 } 
                             },
                             zoom: {
-                                pan: { enabled: true, mode: 'x' },
-                                zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-                            }
-                        },     
-                        scales: {
+
+                                pan: {
+                                    enabled: true,
+                                    mode: 'x',
+                                    // Prevent panning beyond the range of your data
+                                    onPanRejected: ({ chart }) => {
+                                        console.warn('Pan boundary reached');
+                                    }
+                                },
+                                zoom: {
+                                    wheel: { enabled: true },
+                                    pinch: { enabled: true },
+                                    mode: 'x',
+                                    // Define hard limits
+                                    limits: {
+                                        x: {
+                                            min: 'original', // Keeps the graph anchored to your initial dataset range
+                                            max: 'original',
+                                            minRange: 1000 * 60 * 60 * 24 * 7 // Prevents zooming in tighter than 1 week
+                                        },
+                                        y: {
+                                            min: 0,
+                                            max: 100 // Respiratory rates over 100 are rarely clinically relevant
+                                        }
+                                    }
+                                }
+                            }                        
+                            scales: {
                             y: { beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } },
                             x: this.srrUseRelationalTime 
                                 ? {
