@@ -781,20 +781,57 @@
                             <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Date of Diagnosis/Scan</label>
                             <input type="date" x-model="newDiagnosis.date" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                         </div>
-                        <div>
-                            <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">ACVIM Stage</label>
-                            <select x-model="newDiagnosis.acvimStage" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                <option value="N/A">N/A / Pending</option>
-                                <option value="A">Stage A (At Risk)</option>
-                                <option value="B1">Stage B1 (Pre-clinical, No Remodeling)</option>
-                                <option value="B2">Stage B2 (Pre-clinical, Remodeling)</option>
-                                <option value="C">Stage C (Past/Current CHF)</option>
-                                <option value="D">Stage D (Refractory CHF)</option>
+                    <!-- Primary Cardiac -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Primary Cardiac Diagnosis</label>
+                            <select x-model="primaryCardiacDiagnosis" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                <option value="">Select Diagnosis...</option>
+                                <option value="MMVD (Myxomatous Mitral Valve Disease)">MMVD</option>
+                                <option value="HCM (Hypertrophic Cardiomyopathy)">HCM</option>
+                                <option value="DCM (Dilated Cardiomyopathy)">DCM</option>
+                                <option value="Pulmonary Hypertension">Pulmonary Hypertension</option>
+                                <option value="Arrhythmogenic Right Ventricular Cardiomyopathy">ARVC</option>
+                                <option value="Congenital Defect">Congenital Defect (PDA, SAS, PS)</option>
                             </select>
                         </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Primary Diagnosis</label>
-                            <input type="text" x-model="newDiagnosis.diagnosis" placeholder="e.g., Myxomatous Mitral Valve Disease (MMVD)" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                    
+                        <!-- Dynamic ACVIM Staging -->
+                        <div x-show="isStagingApplicable()" x-transition style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Disease Stage (Update as needed)</label>
+                            <p style="font-size: 0.85rem; color: #64748b; margin-top: 0; margin-bottom: 10px;">
+                                <em>Note: Formal ACVIM staging primarily applies to MMVD and Feline HCM. DCM staging is loosely adapted.</em>
+                            </p>
+                            <select x-model="acvimStage" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                <option value="">Unstaged</option>
+                                <option value="Stage A">Stage A (At Risk)</option>
+                                <option value="Stage B1">Stage B1 (Subclinical, No Remodeling)</option>
+                                <option value="Stage B2">Stage B2 (Subclinical, Cardiomegaly)</option>
+                                <option value="Stage C">Stage C (Current/Past Heart Failure)</option>
+                                <option value="Stage D">Stage D (Refractory Heart Failure)</option>
+                            </select>
+                        </div>
+                    
+                        <!-- Concurrent Conditions -->
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                        <div>
+                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Concurrent Non-Cardiac Diagnoses</label>
+                            
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <input type="text" x-model="newConcurrentDiagnosis" @keydown.enter.prevent="addConcurrentDiagnosis()" placeholder="e.g., Chronic Kidney Disease, Osteoarthritis..." style="flex-grow: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                <button @click="addConcurrentDiagnosis()" style="padding: 10px 15px; background: #005f73; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    <i class="fa-solid fa-plus"></i> Add
+                                </button>
+                            </div>
+                    
+                            <!-- Tag list for concurrent issues -->
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <template x-for="(diagnosis, index) in concurrentDiagnoses" :key="index">
+                                    <span style="background: #e2e8f0; color: #334155; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                                        <span x-text="diagnosis"></span>
+                                        <i class="fa-solid fa-xmark" @click="removeConcurrentDiagnosis(index)" style="cursor: pointer; color: #ef4444;"></i>
+                                    </span>
+                                </template>
+                            </div>
                         </div>
                         <div style="grid-column: 1 / -1;">
                             <button @click="saveDiagnosis()" type="button" style="width: 100%; padding: 8px; background: #0284c7; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
@@ -845,12 +882,24 @@
                             <input type="time" x-model="newSyncope.time" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                         </div>
                         <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Event Type</label>
-                            <select x-model="newSyncope.type" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                <option>Syncope (Faint)</option>
-                                <option>Collapse (Weakness)</option>
-                                <option>Seizure</option>
+                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">What happened?</label>
+                            <select x-model="newSyncope.type" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                <option value="Unknown">Unknown Event (Collapse/Episode)</option>
+                                <option value="Syncope">Suspected Syncope (Fainting)</option>
+                                <option value="Seizure">Suspected Seizure</option>
+                                <option value="Weakness">Hindlimb Weakness / Paresis</option>
+                                <option value="Other">Other (Custom)</option>
                             </select>
+                        </div>
+                        
+                        <div x-show="newSyncope.type === 'Other'" x-collapse>
+                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Describe Event Type</label>
+                            <input type="text" x-model="customEventType" placeholder="e.g., Vestibular episode, choking..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;">
+                        </div>
+                        
+                        <div>
+                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Notes & Triggers</label>
+                            <textarea x-model="newSyncope.notes" rows="3" placeholder="Did this happen during exercise? Was there coughing prior?" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; resize: vertical;"></textarea>
                         </div>
                         <div>
                             <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Est. Duration</label>

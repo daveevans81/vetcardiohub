@@ -40,12 +40,45 @@ document.addEventListener('alpine:init', () => {
         diagnosisLog: [],
         syncopeLog: [],
         
+        // --- SYNCOPE / EVENT LOGGING ---
+selectedEventType: 'Unknown', // Defaults to Unknown
+customEventType: '',
+eventDate: '',
+eventDuration: '',
+eventNotes: '',
+eventTimeline: [],
+
+        // --- DIAGNOSIS & STAGING ---
+primaryCardiacDiagnosis: '',
+acvimStage: '', // Easily mutable without changing the primary diagnosis
+concurrentDiagnoses: [], // Array to hold non-cardiac issues
+newConcurrentDiagnosis: '', // v-model for the input field
+        
         newDiagnosis: {
             date: new Date().toISOString().split('T')[0],
             diagnosis: '',
             acvimStage: 'N/A',
             notes: ''
         },
+        
+        // Computed property to determine if staging is clinically relevant
+isStagingApplicable() {
+    if (!this.primaryCardiacDiagnosis) return false;
+    const diag = this.primaryCardiacDiagnosis.toLowerCase();
+    return diag.includes('mmvd') || diag.includes('mitral') || diag.includes('degenerative')|| diag.includes('DMVD')|| 
+           diag.includes('hcm') || diag.includes('dcm');
+},
+
+addConcurrentDiagnosis() {
+    if (this.newConcurrentDiagnosis.trim() !== '') {
+        this.concurrentDiagnoses.push(this.newConcurrentDiagnosis.trim());
+        this.newConcurrentDiagnosis = '';
+    }
+},
+
+removeConcurrentDiagnosis(index) {
+    this.concurrentDiagnoses.splice(index, 1);
+},
 
         newSyncope: {
             date: new Date().toISOString().split('T')[0],
@@ -406,25 +439,43 @@ get hasAnyDataForActivePet() {
             }
         },
 
-        saveSyncope() {
-            if (!this.activePatientId) return alert("Select a patient first.");
-            
-            this.syncopeLog.push({
-                id: this.generateId(),
-                patientId: this.activePatientId,
-                ...this.newSyncope
-            });
+saveSyncope() {
+    if (!this.activePatientId) return alert("Select a patient first.");
+    
+    // 1. Resolve the actual event type
+    let finalEventType = this.newSyncope.type;
+    
+    // If they selected 'Other', we use whatever they typed in the custom box
+    if (this.newSyncope.type === 'Other') {
+        if (this.customEventType.trim() === '') {
+            return alert("Please describe the custom event before saving.");
+        }
+        finalEventType = this.customEventType.trim();
+    }
+    
+    // 2. Save the data exactly as you had it, but use the resolved type
+    this.syncopeLog.push({
+        id: this.generateId(),
+        patientId: this.activePatientId,
+        ...this.newSyncope,
+        type: finalEventType // Override the type with our resolved value
+    });
 
-            this.saveToStorage('vch_syncopeLog', this.syncopeLog);
-            
-            // Reset form to defaults
-            this.newSyncope = {
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-                type: 'Syncope', duration: '', loc: 'Full', muscleTone: 'Flaccid',
-                activityBefore: '', mmColour: '', hr: null, rr: null, notes: ''
-            };
-        },
+    this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+    
+    // 3. Reset form to defaults 
+    // (Note: Changed default 'type' to 'Unknown' per your previous request)
+    this.customEventType = ''; // clear the custom input
+    this.newSyncope = {
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+        type: 'Unknown', // Defaulting to Unknown now
+        duration: '', loc: 'Full', muscleTone: 'Flaccid',
+        activityBefore: '', mmColour: '', hr: null, rr: null, notes: ''
+    };
+},
+
+
 
         deleteSyncope(id) {
             if (confirm("Delete this event from the log?")) {
