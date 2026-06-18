@@ -1114,8 +1114,7 @@ renderChart() {
                     
                     
                     labels.push(this.srrUseRelationalTime ? ev.timestamp : label);
-                    
-                    labels.push(label);
+
 
                     if (ev.type === 'srr') {
                         srrDataPoints.push(ev.data.rate);
