@@ -1246,20 +1246,26 @@ renderChart() {
                                     pinch: { enabled: true },
                                     mode: 'x',
                                     // Define hard limits
+
+                            
                                     limits: {
                                         x: {
-                                            min: 'original', // Keeps the graph anchored to your initial dataset range
+                                            min: 'original',
                                             max: 'original',
-                                            minRange: 1000 * 60 * 60 * 24 * 7 // Prevents zooming in tighter than 1 week
+                                            minRange: 1000 * 60 * 60 * 24 * 7
                                         },
                                         y: {
                                             min: 0,
-                                            max: 100 // Respiratory rates over 100 are rarely clinically relevant
+                                            max: 100
                                         }
                                     }
                                 }
-                            }                        
-                            scales: {
+                            }
+                        },           
+                        scales: {
+                            
+                                                   
+                            
                             y: { beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } },
                             x: this.srrUseRelationalTime 
                                 ? {
