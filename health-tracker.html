@@ -485,6 +485,33 @@
                 </div>
             </div>
             
+            
+            <div x-show="finalRate !== null && !isCounting" x-cloak>
+                <div class="summary-box">
+                    <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
+                    
+                    <template x-if="clinicalInterpretation">
+                        <div :class="'status-' + clinicalInterpretation.status" style="margin: 20px 0; text-align: left;">
+                            <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid" :class="clinicalInterpretation.status === 'danger' ? 'fa-triangle-exclamation' : (clinicalInterpretation.status === 'equivocal' ? 'fa-circle-exclamation' : 'fa-circle-check')"></i>
+                                <span x-text="clinicalInterpretation.title"></span>
+                            </h3>
+                            <p x-text="clinicalInterpretation.text" style="line-height: 1.5; margin-bottom: 0;"></p>
+                            
+                            <template x-if="clinicalInterpretation.status === 'equivocal'">
+                                <button @click="openGlossary('equivocal_rrr')" style="margin-top: 12px; font-size: 0.85rem; background: rgba(255,255,255,0.5); border: 1px solid #f59e0b; color: #b45309; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                                    Why recount? <i class="fa-solid fa-book-medical" style="margin-left: 4px;"></i>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+            
+                    <button @click="startCount()" style="padding: 14px 28px; background: #16325F; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; width: 100%; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                        <i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Count Again
+                    </button>
+                </div>
+            </div>
+            
                                 <!-- ******************************** -->
                                 <!-- SRR LOG history                  -->
                                 <!-- ******************************** -->

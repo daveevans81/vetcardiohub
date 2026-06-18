@@ -832,21 +832,36 @@ deleteMedication(id) {
         },
         
         
-		get clinicalInterpretation() {
+get clinicalInterpretation() {
             if (this.finalRate === null || isNaN(this.finalRate)) return null;
-            let rate = this.finalRate;
-            const species = this.currentSpecies; // FIXED: Pull dynamically from active patient context
+            
+            const rate = this.finalRate;
+            const profile = this.activePatientProfile;
+            const petName = profile?.name || 'the pet';
+            
+            // Dynamic Cutoff Engine
+            const cutoff = profile?.customSrrCutoff ? parseInt(profile.customSrrCutoff) : 30;
+            const dangerZone = cutoff + 10;
 
-            if (rate >= 40) {
-                return { status: 'danger', title: 'Action Required', text: 'Resting rate is significantly elevated. Contact your veterinary surgeon.' };
+            if (rate >= dangerZone) {
+                return { 
+                    status: 'danger', 
+                    title: 'Action Required', 
+                    text: `Resting rate is significantly elevated above the target cutoff of ${cutoff}. Contact your veterinary surgeon.` 
+                };
             }
-            if (species === 'dog' && rate >= 30 && rate < 40) {
-                return { status: 'equivocal', title: 'Equivocal (Borderline)', text: 'This rate is borderline high. Please recount in 2-4 hours while the dog is in deep sleep.' };
+            if (rate >= cutoff && rate < dangerZone) {
+                return { 
+                    status: 'equivocal', 
+                    title: 'Equivocal (Borderline)', 
+                    text: `This rate is borderline high (Target is < ${cutoff}). Please recount in 2-4 hours while ${petName} is in deep sleep.` 
+                };
             }
-            if (species === 'cat' && rate >= 30 && rate < 40) {
-                return { status: 'equivocal', title: 'Equivocal (Borderline)', text: 'Cats can occasionally rest at this rate, but it is borderline. Recount in 2 hours.' };
-            }
-            return { status: 'normal', title: 'Normal Range', text: 'Resting respiratory rate is within normal expected limits.' };
+            return { 
+                status: 'normal', 
+                title: 'Normal Range', 
+                text: `Resting respiratory rate is within normal expected limits (< ${cutoff} bpm).` 
+            };
         },
         
         // Unified Date Range Calculator
