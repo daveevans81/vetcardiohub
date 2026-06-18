@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="/manifestrr.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="VCH Resp Tracker">
+    <meta name="apple-mobile-web-app-title" content="VCH Health Tracker">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
@@ -17,19 +17,17 @@
     
     <link rel="stylesheet" href="styles.css">
 
-    <title>Resting Respiratory Rate Tracker for Dogs & Cats | VetCardioHub</title>
-    <meta name="description" content="Free interactive respiratory rate counter to track breathing rates and monitor for congestive heart failure for pets. Clinically designed to track sleeping breathing rates for early detection of congestive heart failure.">
-    <meta name="keywords" content="Sleeping respiratory rate, SRR, respiratory tracker, CHF, Congestive heart failure dog, Congestive heart failure cat, VetCardioHub">
+    <title>Veterinary Cardiac Health Tracker | VetCardioHub</title>
+    <meta name="description" content="Free interactive clinical health tracker for dogs and cats. Monitor sleeping respiratory rates (SRR) for congestive heart failure, log medication changes, and track seizure/syncope events.">
+    <meta name="keywords" content="Medication log, seizure diary, syncope diary, Sleeping respiratory rate, SRR counter, congestive heart failure dog, congestive heart failure cat, veterinary cardiology tracker, VetCardioHub">
     
-    <meta property="og:title" content="Respiratory Rate Tracker | VetCardioHub">
-    <meta property="og:description" content="Free interactive respiratory rate counter to track breathing rates and monitor for congestive heart failure for pets.">
+    <meta property="og:title" content="Veterinary Cardiac Health Tracker | VetCardioHub">
+    <meta property="og:description" content="Free interactive health tracker. Monitor respiratory rates for congestive heart failure, map medication changes, and maintain a clinical syncope diary for your pet.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://vetcardiohub.com/rr-tracker.html">
+    <meta property="og:url" content="https://vetcardiohub.com/health-tracker.html">
     <meta name="mobile-web-app-capable" content="yes">
-
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
@@ -47,9 +45,9 @@
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "VetCardioHub Resting Respiratory Rate Tracker",
-      "description": "A clinical web application designed for pet owners and veterinarians to measure, track, and interpret sleeping respiratory rates in dogs and cats at risk of congestive heart failure.",
-      "url": "https://vetcardiohub.com/rr-tracker",
+      "name": "VetCardioHub Cardiac Health Tracker",
+      "description": "A comprehensive clinical web application designed for pet owners and veterinarians to measure sleeping respiratory rates (SRR), chart medication changes, track ACVIM staging, and log syncopal events in cardiac patients.",
+      "url": "https://vetcardiohub.com/health-tracker",
       "applicationCategory": "HealthApplication",
       "operatingSystem": "Any",
       "isAccessibleForFree": "true"
@@ -189,9 +187,26 @@
 <div class="content">
 
         
-    <header class="hero card">
-        <h1>Resting Respiratory Rate</h1>
-        <p>Counting and Tracking Tool</p>
+    <header class="hero card" style="padding: 30px 20px; text-align: center; background: linear-gradient(135deg, #16325F, #005f73); color: white; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+        <h1 style="margin: 0 0 10px 0; font-size: 2.2rem; color: #ffffff;">Veterinary Cardiac Tracker</h1>
+        <p style="margin: 0 0 25px 0; font-size: 1.05rem; opacity: 0.9; line-height: 1.5; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Comprehensive home monitoring for congestive heart failure, arrhythmias, and pharmaceutical management.
+        </p>
+        
+        <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px);">
+                <i class="fa-solid fa-lungs" style="color: #7dd3fc; font-size: 1.1rem;"></i> SRR Counter
+            </div>
+            <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px);">
+                <i class="fa-solid fa-pills" style="color: #6ee7b7; font-size: 1.1rem;"></i> Med Timeline
+            </div>
+            <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px);">
+                <i class="fa-solid fa-bolt" style="color: #fca5a5; font-size: 1.1rem;"></i> Syncope Log
+            </div>
+            <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px);">
+                <i class="fa-solid fa-stethoscope" style="color: #fcd34d; font-size: 1.1rem;"></i> ACVIM Staging
+            </div>
+        </div>
     </header>
     
     
@@ -288,8 +303,12 @@
                         <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">
                             <span x-text="computedAgeText"></span> | 
                             <span x-text="activePatientProfile?.breed || 'Mixed'"></span> | 
-                            <span x-text="activePatientProfile?.sex || 'Unknown'"></span> |
                             <span x-text="latestWeightText"></span>
+                            <template x-if="currentClinicalStatus && currentClinicalStatus.acvimStage !== 'N/A'">
+                                <span style="font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">
+                                    Stage <span x-text="currentClinicalStatus.acvimStage"></span>
+                                </span>
+                            </template>
                         </div>
                     </div>
                     
@@ -740,6 +759,179 @@
                 </div>
             </div>
             
+                                <!-- ******************************** -->
+                                <!-- DIAGNOSIS SECTION            -->
+                                <!-- ******************************** -->
+            <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
+    
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                <button @click="showDiagnosisLog = !showDiagnosisLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F;">
+                    <h3 style="margin: 0;"><i class="fa-solid fa-stethoscope" style="margin-right: 8px; color: #0284c7;"></i> Diagnosis & ACVIM Staging</h3> 
+                    <i class="fa-solid" :class="showDiagnosisLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                </button>
+            </div>
+        
+            <div x-show="showDiagnosisLog" x-transition>
+                
+                <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #c8d6eb; margin-bottom: 20px; text-align: left;">
+                    <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Diagnosis Update</h4>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Date of Diagnosis/Scan</label>
+                            <input type="date" x-model="newDiagnosis.date" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">ACVIM Stage</label>
+                            <select x-model="newDiagnosis.acvimStage" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                <option value="N/A">N/A / Pending</option>
+                                <option value="A">Stage A (At Risk)</option>
+                                <option value="B1">Stage B1 (Pre-clinical, No Remodeling)</option>
+                                <option value="B2">Stage B2 (Pre-clinical, Remodeling)</option>
+                                <option value="C">Stage C (Past/Current CHF)</option>
+                                <option value="D">Stage D (Refractory CHF)</option>
+                            </select>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Primary Diagnosis</label>
+                            <input type="text" x-model="newDiagnosis.diagnosis" placeholder="e.g., Myxomatous Mitral Valve Disease (MMVD)" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <button @click="saveDiagnosis()" type="button" style="width: 100%; padding: 8px; background: #0284c7; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                <i class="fa-solid fa-plus"></i> Save Clinical Status
+                            </button>
+                        </div>
+                    </div>
+                </div>
+        
+                <template x-for="diag in sortedDiagnosisLog()" :key="diag.id">
+                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 8px; text-align: left; position: relative;">
+                        <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 4px;" x-text="new Date(diag.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></div>
+                        <div style="font-weight: bold; color: #1e293b; font-size: 1.05rem;" x-text="diag.diagnosis"></div>
+                        <div x-show="diag.acvimStage !== 'N/A'" style="color: #0284c7; font-size: 0.9rem; margin-top: 4px;">ACVIM Stage <strong x-text="diag.acvimStage"></strong></div>
+                        <button @click="deleteDiagnosis(diag.id)" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                </template>
+                <div x-show="sortedDiagnosisLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No diagnostic history recorded.</div>
+            </div>
+        </div>
+
+
+                                <!-- ******************************** -->
+                                <!-- SYNCOPE SECTION                  -->
+                                <!-- ******************************** -->
+                                
+          <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #fca5a5; border-radius: 4px; background: #fef2f2; margin-top: 15px; padding: 20px;" x-cloak>
+    
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                <button @click="showSyncopeLog = !showSyncopeLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fecaca; border: 1px solid #f87171; border-radius: 6px; cursor: pointer; font-weight: bold; color: #7f1d1d;">
+                    <h3 style="margin: 0;"><i class="fa-solid fa-bolt" style="margin-right: 8px;"></i> Collapse / Syncope Log</h3> 
+                    <i class="fa-solid" :class="showSyncopeLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                </button>
+            </div>
+        
+            <div x-show="showSyncopeLog" x-transition>
+                
+                <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #fca5a5; margin-bottom: 20px; text-align: left;">
+                    <h4 style="margin-top: 0; color: #7f1d1d; font-size: 0.95rem; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">Log Event Details</h4>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Date</label>
+                            <input type="date" x-model="newSyncope.date" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Time</label>
+                            <input type="time" x-model="newSyncope.time" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Event Type</label>
+                            <select x-model="newSyncope.type" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                <option>Syncope (Faint)</option>
+                                <option>Collapse (Weakness)</option>
+                                <option>Seizure</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Est. Duration</label>
+                            <input type="text" x-model="newSyncope.duration" placeholder="e.g. 30 secs" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Consciousness</label>
+                            <select x-model="newSyncope.loc" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                <option>Full Loss</option>
+                                <option>Partial / Dazed</option>
+                                <option>Maintained</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Muscle Tone</label>
+                            <select x-model="newSyncope.muscleTone" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                <option>Flaccid (Limp)</option>
+                                <option>Stiff / Rigid</option>
+                                <option>Jerking / Twitching</option>
+                                <option>Normal / Variable</option>
+                            </select>
+                        </div>
+                        
+                        <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 5px;">
+                             <div>
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">MM Colour</label>
+                                <input type="text" x-model="newSyncope.mmColour" placeholder="Pale, Blue, Pink" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                             <div>
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">HR (bpm)</label>
+                                <input type="number" x-model="newSyncope.hr" placeholder="120" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                             <div>
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">RR (bpm)</label>
+                                <input type="number" x-model="newSyncope.rr" placeholder="30" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                        </div>
+        
+                        <div style="grid-column: 1 / -1;">
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Activity at Time of Event</label>
+                            <input type="text" x-model="newSyncope.activityBefore" placeholder="e.g., Playing in garden, waking up, excited by doorbell" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Clinical Notes</label>
+                            <textarea x-model="newSyncope.notes" rows="2" placeholder="Urination/defecation? Recovery time?" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+                        </div>
+        
+                        <div style="grid-column: 1 / -1;">
+                            <button @click="saveSyncope()" type="button" style="width: 100%; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                <i class="fa-solid fa-plus"></i> Save Event
+                            </button>
+                        </div>
+                    </div>
+                </div>
+        
+                <template x-for="event in sortedSyncopeLog()" :key="event.id">
+                    <div style="background: white; border: 1px solid #fca5a5; border-left: 4px solid #ef4444; border-radius: 6px; padding: 12px; margin-bottom: 8px; text-align: left; position: relative;">
+                        <div style="font-size: 0.8rem; color: #ef4444; font-weight: bold; margin-bottom: 4px;">
+                            <i class="fa-regular fa-clock"></i> <span x-text="new Date(event.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' ' + event.time"></span>
+                        </div>
+                        <div style="font-weight: bold; color: #1e293b; font-size: 1.05rem;" x-text="event.type + (event.duration ? ' (' + event.duration + ')' : '')"></div>
+                        <div style="font-size: 0.85rem; color: #475569; margin-top: 6px; line-height: 1.4;">
+                            <strong>LOC:</strong> <span x-text="event.loc"></span> | 
+                            <strong>Tone:</strong> <span x-text="event.muscleTone"></span><br>
+                            <template x-if="event.activityBefore"><span><strong>Activity:</strong> <span x-text="event.activityBefore"></span><br></span></template>
+                            <template x-if="event.mmColour || event.hr || event.rr">
+                                <span style="color: #0284c7;">
+                                    <span x-show="event.mmColour"><strong>MM:</strong> <span x-text="event.mmColour"></span> </span>
+                                    <span x-show="event.hr"><strong>HR:</strong> <span x-text="event.hr"></span> </span>
+                                    <span x-show="event.rr"><strong>RR:</strong> <span x-text="event.rr"></span> </span><br>
+                                </span>
+                            </template>
+                            <template x-if="event.notes"><span style="font-style: italic; color: #64748b;">"<span x-text="event.notes"></span>"</span></template>
+                        </div>
+                        <button @click="deleteSyncope(event.id)" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                </template>
+                <div x-show="sortedSyncopeLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No collapse or syncope events recorded.</div>
+            </div>
+        </div>                      
+
                                 <!-- ******************************** -->
                                 <!-- SRR CHART and Analytics          -->
                                 <!-- ******************************** -->

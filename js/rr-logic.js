@@ -32,6 +32,34 @@ document.addEventListener('alpine:init', () => {
         finalRate: null,
         timerInterval: null,
 
+
+
+        // --- Syncope and Diagnosis objects ---
+        showDiagnosisLog: false,
+        showSyncopeLog: false,
+        diagnosisLog: [],
+        syncopeLog: [],
+        
+        newDiagnosis: {
+            date: new Date().toISOString().split('T')[0],
+            diagnosis: '',
+            acvimStage: 'N/A',
+            notes: ''
+        },
+
+        newSyncope: {
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+            type: 'Syncope', // Syncope, Collapse, Seizure
+            duration: '',
+            loc: 'Full', // Full, Partial, None
+            muscleTone: 'Flaccid', // Flaccid, Stiff, Jerking, Normal
+            activityBefore: '',
+            mmColour: '',
+            hr: null,
+            rr: null,
+            notes: ''
+        },
         
         // --- PAGINATION STATE ---
         currentPage: 1,
@@ -108,14 +136,16 @@ sanitiseCSV(val) {
 init() {
     // 1. ROBUST DATA LOAD: Prevents the "filter of undefined" crash
     try {
-        this.patients = JSON.parse(localStorage.getItem('vch_patients')) || [];
-        this.weightLog = JSON.parse(localStorage.getItem('vch_weightLog')) || [];
-        this.srrHistory = JSON.parse(localStorage.getItem('vch_srrHistory')) || [];
-        this.medLedger = JSON.parse(localStorage.getItem('vch_medLedger')) || [];
-    } catch(e) {
-        // Fallback if localStorage was severely corrupted during development
-        this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
-    }
+                this.patients = JSON.parse(localStorage.getItem('vch_patients')) || [];
+                this.weightLog = JSON.parse(localStorage.getItem('vch_weightLog')) || [];
+                this.srrHistory = JSON.parse(localStorage.getItem('vch_srrHistory')) || [];
+                this.medLedger = JSON.parse(localStorage.getItem('vch_medLedger')) || [];
+                this.diagnosisLog = JSON.parse(localStorage.getItem('vch_diagnosisLog')) || [];
+                this.syncopeLog = JSON.parse(localStorage.getItem('vch_syncopeLog')) || [];
+            } catch(e) {
+                this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
+                this.diagnosisLog = []; this.syncopeLog = [];
+            }
 
     // Set initial active patient safely
     if (this.patients.length > 0) {
@@ -245,6 +275,9 @@ savePatient() {
             this.weightLog = this.weightLog.map(w => w.patientId === sourceId ? { ...w, patientId: targetId } : w);
             this.srrHistory = this.srrHistory.map(s => s.patientId === sourceId ? { ...s, patientId: targetId } : s);
             this.medLedger = this.medLedger.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
+            this.diagnosisLog = this.diagnosisLog.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
+            this.syncopeLog = this.syncopeLog.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
+
 
             // Delete Source Patient
             this.patients = this.patients.filter(p => p.id !== sourceId);
@@ -253,7 +286,10 @@ savePatient() {
             this.saveToStorage('vch_weightLog', this.weightLog);
             this.saveToStorage('vch_srrHistory', this.srrHistory);
             this.saveToStorage('vch_medLedger', this.medLedger);
+            this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+            this.saveToStorage('vch_syncopeLog', this.syncopeLog);
             this.saveToStorage('vch_patients', this.patients);
+            
 
             this.activePatientId = targetId;
             alert("Patient records successfully merged.");
@@ -313,6 +349,88 @@ get hasAnyDataForActivePet() {
                 'custom': 'Custom Range'
             };
             return labels[this.timeScale] || 'Filtered Range';
+        },
+        // Getters dor diagnosis and syncope logic
+        
+        get currentClinicalStatus() {
+            if (!this.activePatientId) return null;
+            const history = this.diagnosisLog
+                .filter(d => d.patientId === this.activePatientId)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            return history.length > 0 ? history[0] : null;
+        },
+
+        sortedDiagnosisLog() {
+            if (!this.activePatientId) return [];
+            return this.diagnosisLog
+                .filter(d => d.patientId === this.activePatientId)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+        },
+
+        sortedSyncopeLog() {
+            if (!this.activePatientId) return [];
+            return this.syncopeLog
+                .filter(s => s.patientId === this.activePatientId)
+                .sort((a, b) => {
+                    const dateA = new Date(`${a.date}T${a.time || '00:00:00'}`);
+                    const dateB = new Date(`${b.date}T${b.time || '00:00:00'}`);
+                    return dateB - dateA;
+                });
+        },
+        
+        //Methods for syncope and Diagnosis data
+        
+        saveDiagnosis() {
+            if (!this.activePatientId) return alert("Select a patient first.");
+            if (!this.newDiagnosis.diagnosis.trim()) return alert("Diagnosis description is required.");
+
+            this.diagnosisLog.push({
+                id: this.generateId(),
+                patientId: this.activePatientId,
+                ...this.newDiagnosis
+            });
+
+            this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+            
+            // Reset form
+            this.newDiagnosis = {
+                date: new Date().toISOString().split('T')[0],
+                diagnosis: '', acvimStage: 'N/A', notes: ''
+            };
+        },
+
+        deleteDiagnosis(id) {
+            if (confirm("Delete this diagnostic entry?")) {
+                this.diagnosisLog = this.diagnosisLog.filter(d => d.id !== id);
+                this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+            }
+        },
+
+        saveSyncope() {
+            if (!this.activePatientId) return alert("Select a patient first.");
+            
+            this.syncopeLog.push({
+                id: this.generateId(),
+                patientId: this.activePatientId,
+                ...this.newSyncope
+            });
+
+            this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+            
+            // Reset form to defaults
+            this.newSyncope = {
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+                type: 'Syncope', duration: '', loc: 'Full', muscleTone: 'Flaccid',
+                activityBefore: '', mmColour: '', hr: null, rr: null, notes: ''
+            };
+        },
+
+        deleteSyncope(id) {
+            if (confirm("Delete this event from the log?")) {
+                this.syncopeLog = this.syncopeLog.filter(s => s.id !== id);
+                this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+            }
         },
         
 // Creates an alphabetical list of "Generic (Brands)"
@@ -721,23 +839,18 @@ getFilteredMedications() {
         // --- DATA MANAGEMENT ---
         
 resetData() {
-    if (window.confirm("CRITICAL WARNING: This action permanently clears ALL local patient profiles, logs, and tracking history. Proceed?")) {
-        this.srrHistory = [];
-        this.patients = [];
-        this.medLedger = [];
-        this.weightLog = [];
-        this.activePatientId = null;
-        
-        localStorage.removeItem('vch_patients');
-        localStorage.removeItem('vch_srrHistory');
-        localStorage.removeItem('vch_medLedger');
-        localStorage.removeItem('vch_weightLog');
-        
-        if (this.chartInstance) this.chartInstance.destroy();
-        if (this.medChartInstance) this.medChartInstance.destroy();
-        alert("Database completely flushed.");
-    }
-},
+            if (window.confirm("CRITICAL WARNING: This action permanently clears ALL local data. Proceed?")) {
+                this.srrHistory = []; this.patients = []; this.medLedger = []; 
+                this.weightLog = []; this.diagnosisLog = []; this.syncopeLog = [];
+                this.activePatientId = null;
+                
+                ['vch_patients', 'vch_srrHistory', 'vch_medLedger', 'vch_weightLog', 'vch_diagnosisLog', 'vch_syncopeLog'].forEach(key => localStorage.removeItem(key));
+                
+                if (this.chartInstance) this.chartInstance.destroy();
+                if (this.medChartInstance) this.medChartInstance.destroy();
+                alert("Database completely flushed.");
+            }
+        },
         
         get filteredStats() {
     const data = this.getFilteredReadings();
@@ -1684,13 +1797,15 @@ exportMedicationsCSV() {
 
         // --- FULL SYSTEM MASTER BACKUP (JSON) ---
 exportCompleteBackup() {
-    const backupData = {
-        vch_patients: this.patients,
-        vch_weightLog: this.weightLog,
-        vch_srrHistory: this.srrHistory,
-        vch_medLedger: this.medLedger,
-        exportDate: new Date().toISOString()
-    };
+const backupData = {
+                vch_patients: this.patients,
+                vch_weightLog: this.weightLog,
+                vch_srrHistory: this.srrHistory,
+                vch_medLedger: this.medLedger,
+                vch_diagnosisLog: this.diagnosisLog,
+                vch_syncopeLog: this.syncopeLog,
+                exportDate: new Date().toISOString()
+            };
 
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
     const link = document.createElement("a");
@@ -1720,14 +1835,17 @@ exportCompleteBackup() {
                     this.patients = data.vch_patients;
                     this.srrHistory = data.vch_srrHistory;
                     this.medLedger = data.vch_medLedger;
+                    this.diagnosisLog = data.vch_diagnosisLog;
+                    this.syncopeLog = data.vch_syncopeLog;
                     this.weightLog = data.vch_weightLog || [];
 
                     this.saveToStorage('vch_patients', this.patients);
                     this.saveToStorage('vch_srrHistory', this.srrHistory);
                     this.saveToStorage('vch_medLedger', this.medLedger);
+                    this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+                    this.saveToStorage('vch_syncopeLog', this.syncopeLog);
                     this.saveToStorage('vch_weightLog', this.weightLog);
 
-                    // FIX: Set to ID, not name
                     if (this.patients.length > 0) this.activePatientId = this.patients[0].id; 
                     this.currentPage = 1;
                     this.$nextTick(() => { this.renderChart(); this.renderMedChart(); });
