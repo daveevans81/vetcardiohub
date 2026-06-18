@@ -133,6 +133,10 @@ newMed: {
         medCustomStartDate: '',
         medCustomEndDate: '',
         medChartRenderTimeout: null,
+        
+        // State for the Merge UI
+        showMergeTools: false,
+        mergeTargetId: '',
 
 
 // Generate robust UUID (Fallback for older browsers just in case)
@@ -233,6 +237,81 @@ init() {
 },
         
         // --- PET MANAGEMENT ---
+        // Determines if we are editing an existing record or creating a new one
+        get isEditingExistingPatient() {
+            if (!this.editingPatient?.id) return false;
+            return this.patients.some(p => p.id === this.editingPatient.id);
+        },
+        
+        // Safely executes the existing merge logic from the UI
+        executeMerge() {
+            if (!this.mergeTargetId) {
+                return alert("Validation Error: Please select a Master Profile to merge into.");
+            }
+            if (this.mergeTargetId === this.editingPatient.id) {
+                return alert("Logic Error: Cannot merge a patient into itself.");
+            }
+            
+            // Call your existing robust merge function
+            this.mergePatients(this.mergeTargetId, this.editingPatient.id);
+            
+            // Clean up UI state
+            this.showMergeTools = false;
+            this.mergeTargetId = '';
+            this.closePatientManager();
+        },
+
+        // Cascading relational delete
+        deletePatient(patientId) {
+            const profile = this.patients.find(p => p.id === patientId);
+            if (!profile) return;
+
+            const warning = `CRITICAL WARNING: You are about to permanently delete ${profile.name} and ALL associated clinical records.\n\n` +
+                            `This will wipe their:\n` +
+                            `- Respiratory Rate Logs\n` +
+                            `- Medication History\n` +
+                            `- Weight Logs\n` +
+                            `- Diagnostic & Syncope Events\n\n` +
+                            `This cannot be undone. Type 'DELETE' to confirm.`;
+
+            const confirmation = prompt(warning);
+            if (confirmation !== 'DELETE') {
+                return alert("Deletion cancelled.");
+            }
+
+            // 1. Cascade delete across all relational arrays
+            this.patients = this.patients.filter(p => p.id !== patientId);
+            this.srrHistory = this.srrHistory.filter(s => s.patientId !== patientId);
+            this.medLedger = this.medLedger.filter(m => m.patientId !== patientId);
+            this.weightLog = this.weightLog.filter(w => w.patientId !== patientId);
+            this.diagnosisLog = this.diagnosisLog.filter(d => d.patientId !== patientId);
+            this.syncopeLog = this.syncopeLog.filter(s => s.patientId !== patientId);
+
+            // 2. Persist the flushed arrays to local storage
+            this.saveToStorage('vch_patients', this.patients);
+            this.saveToStorage('vch_srrHistory', this.srrHistory);
+            this.saveToStorage('vch_medLedger', this.medLedger);
+            this.saveToStorage('vch_weightLog', this.weightLog);
+            this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+            this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+
+            // 3. Reset application state
+            if (this.patients.length > 0) {
+                this.activePatientId = this.patients[0].id;
+            } else {
+                this.activePatientId = null;
+                // Leave them in the creation screen if database is empty
+                this.editingPatient = { id: this.generateId(), name: '', species: 'dog', weightUnit: 'kg', customSrrCutoff: 30 };
+            }
+
+            this.closePatientManager();
+            
+            // Force a re-render of the canvas layers to drop the deleted data
+            this.$nextTick(() => { 
+                this.renderChart(); 
+                this.renderMedChart(); 
+            });
+        },
         
         get activePatientProfile() {
             if (!this.activePatientId) return null;

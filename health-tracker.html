@@ -260,7 +260,7 @@
                                 <!-- ******************************** -->
                                 
                                 
-                                <div x-show="editingCommentId !== null" x-cloak
+            <div x-show="editingCommentId !== null" x-cloak
                  style="position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10100; display: flex; align-items: center; justify-content: center; padding: 20px;"
                  @click.self="cancelComment()">
                 <div style="background: white; border-radius: 10px; padding: 24px; width: 100%; max-width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
@@ -392,6 +392,46 @@
                 
                 <button @click="savePatient()" class="btn-nudge-static" style="background: #0f766e; width: 100%; max-width: 300px;">Save Profile</button>
                 <button x-show="patients.length > 0" @click="closePatientManager()" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
+                <div class="danger-zone" x-show="isEditingExistingPatient" style="margin-top: 30px; padding: 15px; border: 1px solid #fca5a5; background: #fef2f2; border-radius: 8px;">
+    
+                    <h4 style="color: #ef4444; margin-top: 0; margin-bottom: 15px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Advanced Data Management
+                    </h4>
+                
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" @click.prevent="deletePatient(editingPatient.id)" style="background: white; color: #ef4444; border: 1px solid #ef4444; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                            <i class="fa-solid fa-trash-can"></i> Delete Profile
+                        </button>
+                
+                        <button type="button" @click.prevent="showMergeTools = !showMergeTools" style="background: white; color: #d97706; border: 1px solid #d97706; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                            <i class="fa-solid fa-code-merge"></i> Merge Duplicate
+                        </button>
+                    </div>
+                
+                    <div x-show="showMergeTools" x-collapse x-cloak style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #fca5a5;">
+                        <label style="display: block; font-size: 0.85rem; color: #7f1d1d; margin-bottom: 8px;">
+                            Transfer all clinical logs from <strong x-text="editingPatient.name"></strong> into:
+                        </label>
+                        
+                        <div style="display: flex; gap: 10px; align-items: stretch;">
+                            <select x-model="mergeTargetId" style="flex: 1; padding: 8px; border: 1px solid #fca5a5; border-radius: 4px; background: white; outline: none;">
+                                <option value="">-- Select Target Master Profile --</option>
+                                <template x-for="p in patients" :key="p.id">
+                                    <option x-show="p.id !== editingPatient.id" :value="p.id" x-text="`${p.name} ${p.ownerName ? '('+p.ownerName+')' : ''}`"></option>
+                                </template>
+                            </select>
+                            
+                            <button type="button" @click.prevent="executeMerge()" style="background: #ef4444; color: white; border: none; padding: 0 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">
+                                Execute Merge
+                            </button>
+                        </div>
+                        
+                        <p style="font-size: 0.75rem; color: #991b1b; margin-top: 10px; line-height: 1.4;">
+                            <i class="fa-solid fa-circle-info"></i> <strong>Note:</strong> This action will migrate all historical weight, medication, and respiratory data to the target profile, then automatically delete this duplicate.
+                        </p>
+                    </div>
+                
+                </div>
             </div>
                 
                                 <!-- ******************************** -->
