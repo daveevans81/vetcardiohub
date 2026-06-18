@@ -1278,16 +1278,24 @@
                             <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)</h4>
                             <p style="margin: 0; font-size: 0.75rem; color: #64748b;">Backups everything: Patients, Breathing, and Medications.</p>
                         </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button @click="exportCompleteBackup()" class="btn-nudge-static" style="background: #334155; font-size: 0.85rem; padding: 8px 12px;">Download Backup</button>
-                            <label class="btn-nudge-static" style="background: #475569; font-size: 0.85rem; padding: 8px 12px; cursor: pointer; text-align: center;">
+                        <div style="display: flex !important; flex-wrap: wrap !important; gap: 10px !important;">
+                            <button @click="exportCompleteBackup()" class="btn-nudge-static"
+                                    style="background: #334155; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
+                                Download Backup
+                            </button>
+                            <label class="btn-nudge-static"
+                                   style="background: #475569; font-size: 0.85rem; padding: 8px 12px; cursor: pointer; text-align: center; flex: 0 0 auto !important; width: auto !important;">
                                 Restore Backup
                                 <input type="file" accept=".json" @change="importCompleteBackup" style="display: none;">
                             </label>
-                            <button @click="resetData()" class="btn-nudge-static" style="background: #ef4444; font-size: 0.85rem; padding: 8px 12px; margin-left: 10px;">
+                            <button @click="resetData()" class="btn-nudge-static"
+                                    style="background: #ef4444; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
                                 <i class="fa-solid fa-trash-can"></i> Erase All
                             </button>
-                            <button @click="exportPDF()" class="btn-nudge-static"><i class="fa-solid fa-print"></i> PDF/Print</button>
+                            <button @click="exportPDF()" class="btn-nudge-static"
+                                    style="flex: 0 0 auto !important; width: auto !important;">
+                                <i class="fa-solid fa-print"></i> PDF/Print
+                            </button>
                         </div>
                     </div>
             
