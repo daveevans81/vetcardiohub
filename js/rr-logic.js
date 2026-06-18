@@ -11,6 +11,7 @@ document.addEventListener('alpine:init', () => {
         showLog: true,
         showMedGraph: true,
         showAnalytics: true,
+        srrUseRelationalTime: false,
         
         patients: [],    // Array of patient demographic objects
         weightLog: [],   // Array of weight entries over time
@@ -203,6 +204,7 @@ init() {
     this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
     this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); });
     this.$watch('medTimeScale', () => { this.renderMedChart(); });
+    this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
     this.$watch('showManualSrr', (isVisible) => {
         if (isVisible) {
             // Pre-populate to current local datetime when panel opens
@@ -1110,6 +1112,9 @@ renderChart() {
                     else if (combinedEvents.length <= 60) label = dObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
                     else label = dObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
                     
+                    
+                    labels.push(this.srrUseRelationalTime ? ev.timestamp : label);
+                    
                     labels.push(label);
 
                     if (ev.type === 'srr') {
@@ -1220,7 +1225,17 @@ renderChart() {
                         },     
                         scales: {
                             y: { beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } },
-                            x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } }
+                            x: this.srrUseRelationalTime 
+                                ? {
+                                    type: 'time',
+                                    time: { tooltipFormat: 'dd MMM yyyy HH:mm' }, // Standardizes the hover text
+                                    ticks: { maxRotation: 0 },
+                                    grid: { color: '#e2e8f0' }
+                                  }
+                                : {
+                                    type: 'category', // Your original 1-by-1 spacing
+                                    ticks: { maxTicksLimit: 10, maxRotation: 0 }
+                                  }
                         }
                     }
                 });
