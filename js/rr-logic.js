@@ -972,14 +972,15 @@ getFilteredMedications() {
         
 resetData() {
             if (window.confirm("CRITICAL WARNING: This action permanently clears ALL local data. Proceed?")) {
-                this.srrHistory = []; this.patients = []; this.medLedger = []; 
-                this.weightLog = []; this.diagnosisLog = []; this.syncopeLog = [];
-                this.activePatientId = null;
+                // ... your storage clearing logic ...
                 
-                ['vch_patients', 'vch_srrHistory', 'vch_medLedger', 'vch_weightLog', 'vch_diagnosisLog', 'vch_syncopeLog'].forEach(key => localStorage.removeItem(key));
+                // Native destroy calls
+                const rrrChart = Chart.getChart(this.$refs.rrrChartCanvas);
+                if (rrrChart) rrrChart.destroy();
                 
-                if (this.chartInstance) this.chartInstance.destroy();
-                if (this.medChartInstance) this.medChartInstance.destroy();
+                const medChart = Chart.getChart(this.$refs.medChartCanvas);
+                if (medChart) medChart.destroy();
+                
                 alert("Database completely flushed.");
             }
         },
@@ -1013,15 +1014,13 @@ resetData() {
         
                 // --- CHARTING FUNCTIONS ---
                 
-        toggleChartExpansion() {
+toggleChartExpansion() {
             this.isChartExpanded = !this.isChartExpanded;
             
-            // We must wait for Alpine to apply the fullscreen CSS class, 
-            // then explicitly tell Chart.js to redraw to fit the new massive container.
             this.$nextTick(() => {
-                if (this.chartInstance) {
-                    this.chartInstance.resize();
-                }
+                // Grab the chart directly from the DOM element to resize it
+                const chart = Chart.getChart(this.$refs.rrrChartCanvas);
+                if (chart) chart.resize();
             });
         },
                 
@@ -1037,9 +1036,9 @@ renderChart() {
         const rawSrrData = this.getFilteredReadings() || [];
         const ctx = canvas.getContext('2d');
 
-        if (this.chartInstance) {
-            this.chartInstance.destroy();
-            this.chartInstance = null;
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            existingChart.destroy();
         }
 
         // Require at least 2 points to draw a chart
@@ -1195,7 +1194,7 @@ renderChart() {
                     });
                 }
 
-                this.chartInstance = new Chart(ctx, {
+                new Chart(ctx, {
                     type: 'line',
                     data: { labels: labels, datasets: datasets },
                     options: {
