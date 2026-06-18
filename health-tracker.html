@@ -321,19 +321,28 @@
                         </button>
                     </div>
                 </div>
+            </div>
             
                                 <!-- ******************************** -->
                                 <!-- SRR BOX - count and manual       -->
                                 <!-- ******************************** -->
                                 
-                                
+             <div class="summary-box">
+                <h2>Resting Respiratory Rate Tracker</h2>
+                <p>Ensure your pet is fully resting or sleeping. 
+                   <a href="#" @click.prevent="openGlossary('rrr_guidelines')" style="color: #1e40af;">
+                     <i class="fa-solid fa-circle-question"></i> How to count
+                   </a>
+                </p>               
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                
                     <button @click="startCount()" class="btn-massive-tap" style="min-height: 80px; background: #0f766e; color: white; border-radius: 8px; border: none; cursor: pointer;">
                         <i class="fa-solid fa-stopwatch"></i> Count SRR Now
                     </button>
                     <button @click="showManualSrr = true" class="btn-massive-tap" style="min-height: 80px; background: #e2e8f0; color: #334155; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer;">
                         <i class="fa-solid fa-keyboard"></i> Manual Entry
                     </button>
+                    
                 </div>
             </div>
             
