@@ -858,8 +858,8 @@
                                 <!-- SYNCOPE SECTION                  -->
                                 <!-- ******************************** -->
                                 
-          <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #fca5a5; border-radius: 4px; background: #fef2f2; margin-top: 15px; padding: 20px;" x-cloak>
-    
+        <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #fca5a5; border-radius: 4px; background: #fef2f2; margin-top: 15px; padding: 20px;" x-cloak>
+            
             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                 <button @click="showSyncopeLog = !showSyncopeLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fecaca; border: 1px solid #f87171; border-radius: 6px; cursor: pointer; font-weight: bold; color: #7f1d1d;">
                     <h3 style="margin: 0;"><i class="fa-solid fa-bolt" style="margin-right: 8px;"></i> Collapse / Syncope Log</h3> 
@@ -897,10 +897,8 @@
                             <input type="text" x-model="customEventType" placeholder="e.g., Vestibular episode, choking..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;">
                         </div>
                         
-                        <div>
-                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Notes & Triggers</label>
-                            <textarea x-model="newSyncope.notes" rows="3" placeholder="Did this happen during exercise? Was there coughing prior?" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; resize: vertical;"></textarea>
-                        </div>
+                        <!-- Removed the duplicate narrow notes section from here -->
+        
                         <div>
                             <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Est. Duration</label>
                             <input type="text" x-model="newSyncope.duration" placeholder="e.g. 30 secs" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
@@ -942,9 +940,11 @@
                             <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Activity at Time of Event</label>
                             <input type="text" x-model="newSyncope.activityBefore" placeholder="e.g., Playing in garden, waking up, excited by doorbell" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                         </div>
+                        
+                        <!-- Consolidated Notes Section (Full Width) -->
                         <div style="grid-column: 1 / -1;">
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Clinical Notes</label>
-                            <textarea x-model="newSyncope.notes" rows="2" placeholder="Urination/defecation? Recovery time?" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Clinical Notes & Triggers</label>
+                            <textarea x-model="newSyncope.notes" rows="3" placeholder="Did this happen during exercise? Coughing prior? Urination/defecation? Recovery time?" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
                         </div>
         
                         <div style="grid-column: 1 / -1;">
@@ -979,7 +979,8 @@
                 </template>
                 <div x-show="sortedSyncopeLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No collapse or syncope events recorded.</div>
             </div>
-        </div>                      
+        </div>
+
 
                                 <!-- ******************************** -->
                                 <!-- SRR CHART and Analytics          -->
