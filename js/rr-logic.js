@@ -32,6 +32,7 @@ document.addEventListener('alpine:init', () => {
         tapCount: 0,
         finalRate: null,
         timerInterval: null,
+        hasSavedCurrentCount: false,
 
 // --- SYMPTOM TRACKING STATE ---
         showSymptomLog: false,
@@ -805,17 +806,18 @@ parseDateSafe(dateStr) {
         },
         
 startCount() {
-    if (!this.activePatientId) return alert("Please establish or select a patient profile first.");
-    this.isCounting = true;
-    this.tapCount = 0;
-    this.timeLeft = 30;
-    this.finalRate = null;
+            if (!this.activePatientId) return alert("Please establish or select a patient profile first.");
+            this.isCounting = true;
+            this.tapCount = 0;
+            this.timeLeft = 30;
+            this.finalRate = null;
+            this.hasSavedCurrentCount = false; // Reset the save state
 
-    this.timerInterval = setInterval(() => {
-        this.timeLeft--;
-        if (this.timeLeft <= 0) this.finishCount();
-    }, 1000);
-},
+            this.timerInterval = setInterval(() => {
+                this.timeLeft--;
+                if (this.timeLeft <= 0) this.finishCount();
+            }, 1000);
+        },
         
         
         registerTap() {
@@ -828,11 +830,28 @@ startCount() {
             }
         },
 
-        finishCount() {
+finishCount() {
             clearInterval(this.timerInterval);
             this.isCounting = false;
             this.finalRate = this.tapCount * 2; // Extrapolate 30s to 60s
-            this.saveToHistory();
+            
+        },
+        
+        nudgeToSymptom() {
+            this.showSymptomLog = true;
+            this.closeResult();
+            // Smoothly scroll down to the symptoms panel
+            this.$nextTick(() => {
+                const el = document.getElementById('symptomSection');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        },
+        
+        closeResult() {
+            // Manually closes the results panel and returns to the start screen
+            this.finalRate = null;
+            this.tapCount = 0;
+            this.hasSavedCurrentCount = false;
         },
         
         // Save function for the Ledger
@@ -942,7 +961,7 @@ deleteMedication(id) {
 
 // --- SRR RECORDING (MANUAL & AUTOMATIC) ---
         
-        saveToHistory(manualRate = null, manualDate = null) {
+saveToHistory(manualRate = null, manualDate = null) {
             if (!this.activePatientId) return alert("Select a patient profile first.");
 
             const profile = this.activePatientProfile;
@@ -950,9 +969,8 @@ deleteMedication(id) {
             const rate = isManual ? manualRate : this.finalRate;
             
             let dateObj = manualDate ? new Date(manualDate) : new Date();
-            if (isNaN(dateObj.getTime())) dateObj = new Date(); // Fallback
+            if (isNaN(dateObj.getTime())) dateObj = new Date();
 
-            // Determine equivocal status based on patient species
             const isEquivocal = profile.species === 'cat' 
                 ? (rate >= 30 && rate < 40) 
                 : (rate >= 30 && rate < 40);
@@ -968,14 +986,18 @@ deleteMedication(id) {
                 comment: isManual ? 'Manually recorded' : ''
             };
 
-            this.srrHistory.unshift(newLog); // Newest first
+            this.srrHistory.unshift(newLog); 
             this.saveToStorage('vch_srrHistory', this.srrHistory);
 
-            this.finalRate = null;
-            this.tapCount = 0;
             this.currentPage = 1;
-            
             this.$nextTick(() => { this.renderChart(); });
+
+            // If it's a live count, we change the UI state to show the nudges instead of closing
+            if (!isManual) {
+                this.hasSavedCurrentCount = true; 
+            } else {
+                this.closeResult(); // Manual modal can close itself normally
+            }
         },
         
         saveManualSrr() {
