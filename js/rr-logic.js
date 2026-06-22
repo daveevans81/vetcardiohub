@@ -1321,460 +1321,6 @@ renderChart() {
         const ctx = canvas.getContext('2d');
 
         const existingChart = Chart.getChart(canvas);
-        if (existingChart) {
-            existingChart.destroy();
-        }
-
-        // Require at least 2 points to draw a chart
-        if (rawSrrData.length < 2) return;
-
-        const safeTimestamp = (dateStr) => {
-            if (!dateStr) return new Date().getTime();
-            if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                return new Date(`${dateStr}T12:00:00`).getTime(); 
-            }
-            return this.parseDateSafe(dateStr).getTime();
-        };
-
-        const combinedEvents = [];
-        const { startDate, endDate } = this.getDateRange();
-
-        // 1. Scoop & Aggregate SRR Data (Daily Mean)
-        const srrByDate = {};
-        rawSrrData.forEach(r => {
-            const dStr = r.date; // Groups purely by YYYY-MM-DD
-            if (!srrByDate[dStr]) srrByDate[dStr] = [];
-            srrByDate[dStr].push(r.rate);
-        });
-
-        Object.keys(srrByDate).forEach(dStr => {
-            const rates = srrByDate[dStr];
-            const meanRate = rates.reduce((sum, val) => sum + val, 0) / rates.length;
-            const roundedMean = Math.round(meanRate * 10) / 10;
-            
-            combinedEvents.push({ 
-                type: 'srr', 
-                timestamp: safeTimestamp(dStr), 
-                data: { rate: roundedMean, readingCount: rates.length, date: dStr } 
-            });
-        });
-
-        // 2. Scoop Medication Data
-        const safeMedLedger = Array.isArray(this.medLedger) ? this.medLedger : [];
-        if (this.showMedications && safeMedLedger.length > 0) {
-            const petMeds = safeMedLedger.filter(m => m.patientId === this.activePatientId);
-            const medsByDate = {};
-            petMeds.forEach(m => {
-                const ts = safeTimestamp(m.eventDate);
-                if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) {
-                    const dStr = new Date(ts).toISOString().split('T')[0]; 
-                    if (!medsByDate[dStr]) medsByDate[dStr] = [];
-                    medsByDate[dStr].push(m);
-                }
-            });
-            Object.keys(medsByDate).forEach(dStr => {
-                combinedEvents.push({ 
-                    type: 'med', 
-                    timestamp: new Date(`${dStr}T12:00:00`).getTime(), 
-                    data: medsByDate[dStr] 
-                });
-            });
-        }
-
-        // 3. Scoop Symptom Data (Coughs & Activity)
-        if (this.showCoughOverlay && Array.isArray(this.coughLog)) {
-            this.coughLog.filter(c => c.patientId === this.activePatientId).forEach(c => {
-                const ts = safeTimestamp(c.date);
-                if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) {
-                    combinedEvents.push({ type: 'cough', timestamp: ts, data: c });
-                }
-            });
-        }
-        
-        if (this.showActivityOverlay && Array.isArray(this.activityLog)) {
-            this.activityLog.filter(a => a.patientId === this.activePatientId).forEach(a => {
-                const ts = safeTimestamp(a.date);
-                if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) {
-                    combinedEvents.push({ type: 'activity', timestamp: ts, data: a });
-                }
-            });
-        }
-
-        // 4. Sort chronologically
-        combinedEvents.sort((a, b) => a.timestamp - b.timestamp);
-
-        // --- 5. EXTRACT CHART DATASETS ---
-        const labels = [];
-        const srrDataPoints = [], srrTooltips = [], medDataPoints = [], medColors = [], medTooltips = [];
-        const coughDataPoints = [], coughColors = [], coughTooltips = [];
-        const activityDataPoints = [], activityTooltips = [];
-
-        let lastSrrRate = null; 
-        const srrValuesForStats = []; 
-
-        combinedEvents.forEach(ev => {
-            const dObj = new Date(ev.timestamp);
-            let label = '';
-            
-            if (combinedEvents.length <= 14) label = dObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
-            else if (combinedEvents.length <= 60) label = dObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-            else label = dObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
-            
-            labels.push(this.srrUseRelationalTime ? ev.timestamp : label);
-
-            // Initialize empty states for this tick
-            let srrVal = null, medVal = null, mCol = 'transparent', mTip = [];
-            let coughVal = null, cCol = 'transparent', cTip = '';
-            let actVal = null, aTip = '';
-
-            if (ev.type === 'srr') {
-                srrVal = ev.data.rate;
-                srrValuesForStats.push(ev.data);
-                lastSrrRate = ev.data.rate;
-                
-                const suffix = ev.data.readingCount > 1 ? ` (Mean of ${ev.data.readingCount})` : '';
-                sTip = `Rate: ${srrVal} bpm${suffix}`;
-            } 
-            else if (ev.type === 'med') {
-                medVal = lastSrrRate !== null ? lastSrrRate : 30; 
-                mCol = this.formulary[ev.data[0].drugId]?.color || '#f59e0b';
-                mTip = ev.data.map(m => `💊 ${m.action}: ${m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId)} (${m.doseMg ? m.doseMg+'mg' : '?'})`);
-            }
-            else if (ev.type === 'cough') {
-                const c = ev.data;
-                let cpd = parseFloat(c.frequencyCount);
-                if (!isNaN(cpd)) {
-                    if (c.frequencyPeriod === 'hour') cpd *= 24;
-                    if (c.frequencyPeriod === 'week') cpd /= 7;
-                    coughVal = Math.round(cpd * 10) / 10;
-                } else { 
-                    coughVal = 1; 
-                } 
-                
-                if (c.severity === 'Severe') cCol = 'rgba(239, 68, 68, 0.85)';
-                else if (c.severity === 'Moderate') cCol = 'rgba(245, 158, 11, 0.85)';
-                else cCol = 'rgba(253, 224, 71, 0.85)';
-                
-                cTip = `Cough (${c.severity}): ${isNaN(parseFloat(c.frequencyCount)) ? 'Freq Unknown' : c.frequencyCount+'x/'+c.frequencyPeriod} - ${c.description}`;
-            }
-            else if (ev.type === 'activity') {
-                const a = ev.data;
-                if (this.activityPlotType === 'durationMins' && a.durationMins) {
-                    actVal = parseFloat(a.durationMins);
-                } else if (this.activityPlotType === 'distance' && a.distance) {
-                    const parsed = parseFloat(a.distance.replace(/[^\d.]/g, ''));
-                    if (!isNaN(parsed)) actVal = parsed;
-                }
-                if (actVal !== null) {
-                    aTip = `Activity (${a.status}): ${this.activityPlotType === 'durationMins' ? a.durationMins+'m' : a.distance}`;
-                }
-            }
-
-            srrDataPoints.push(srrVal);
-            medDataPoints.push(medVal); medColors.push(mCol); medTooltips.push(mTip);
-            coughDataPoints.push(coughVal); coughColors.push(cCol); coughTooltips.push(cTip);
-            activityDataPoints.push(actVal); activityTooltips.push(aTip);
-        });
-
-        const stats = this.calculateStats(srrValuesForStats);
-        
-        // Construct standard clinical annotations
-        let annotations = {
-            thresholdLine: {
-                type: 'line', yMin: 30, yMax: 30, scaleID: 'y',
-                borderColor: 'rgb(220, 38, 38)', borderWidth: 2, borderDash: [5, 5],
-                label: { display: true, content: 'Cutoff (30)', position: 'end', backgroundColor: 'rgba(220,38,38,0.8)', color: '#fff' }
-            },
-            meanLine: {
-                type: 'line', yMin: stats.mean, yMax: stats.mean, scaleID: 'y',
-                borderColor: 'rgb(59, 130, 246)', borderWidth: 1.5,
-                label: { display: true, content: `Mean: ${stats.mean.toFixed(1)}`, position: 'start' }
-            }
-        };
-
-        if (srrValuesForStats.length >= 2 && stats.upperCI !== stats.lowerCI) {
-            annotations.upperCILine = { type: 'line', yMin: stats.upperCI, yMax: stats.upperCI, scaleID: 'y', borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3] };
-            annotations.lowerCILine = { type: 'line', yMin: stats.lowerCI, yMax: stats.lowerCI, scaleID: 'y', borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3] };
-        }
-
-        const datasets = [
-            {
-                label: `${this.activePatientProfile?.name ?? 'Patient'}'s Respiratory Rate (bpm)`,
-                data: srrDataPoints,
-                srrTooltips: srrTooltips,
-                borderColor: 'rgb(14, 165, 233)', backgroundColor: 'rgba(14, 165, 233, 0.08)',
-                tension: 0.25, pointRadius: combinedEvents.length > 30 ? 2 : 5,
-                spanGaps: true, fill: true, order: 3, yAxisID: 'y'
-            }
-        ];
-
-        if (this.showMedications && medDataPoints.some(d => d !== null)) {
-            datasets.push({
-                label: 'Medication Change', type: 'line', showLine: false,
-                data: medDataPoints, backgroundColor: medColors, borderColor: '#ffffff', 
-                borderWidth: 2, pointStyle: 'triangle', rotation: 180, radius: 10, 
-                hoverRadius: 13, order: 1, medTooltips: medTooltips, yAxisID: 'y'
-            });
-        }
-
-        if (this.showCoughOverlay && coughDataPoints.some(d => d !== null)) {
-            datasets.push({ 
-                label: 'Cough Frequency', type: 'bar', data: coughDataPoints, 
-                backgroundColor: coughColors, borderRadius: 4, barThickness: 12, 
-                order: 4, yAxisID: 'yCough', coughTooltips: coughTooltips 
-            });
-        }
-
-        if (this.showActivityOverlay && activityDataPoints.some(d => d !== null)) {
-            datasets.push({ 
-                label: 'Activity', type: 'line', data: activityDataPoints, 
-                borderColor: '#10b981', backgroundColor: '#10b981', pointBackgroundColor: '#ffffff', 
-                pointBorderWidth: 2, tension: 0.3, spanGaps: true, 
-                order: 2, yAxisID: 'yActivity', activityTooltips: activityTooltips 
-            });
-        }
-
-        // Dynamically build multi-axis scaling
-        const scalesObj = {
-            x: this.srrUseRelationalTime 
-                ? { type: 'time', time: { tooltipFormat: 'dd MMM yyyy HH:mm' }, ticks: { maxRotation: 0 }, grid: { color: '#e2e8f0' } } 
-                : { type: 'category', ticks: { maxTicksLimit: 10, maxRotation: 0 } },
-            y: { type: 'linear', display: true, position: 'left', beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } }
-        };
-
-        if (this.showCoughOverlay) {
-            scalesObj.yCough = { type: 'linear', display: true, position: 'right', beginAtZero: true, title: { display: true, text: 'Coughs / Day' }, grid: { drawOnChartArea: false } };
-        }
-        if (this.showActivityOverlay) {
-            scalesObj.yActivity = { type: 'linear', display: true, position: 'right', beginAtZero: true, title: { display: true, text: this.activityPlotType === 'durationMins' ? 'Activity (Mins)' : 'Activity (Dist)' }, grid: { drawOnChartArea: false } };
-        }
-
-        new Chart(ctx, {
-            type: 'line',
-            data: { labels: labels, datasets: datasets },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false }, 
-                plugins: {
-                    annotation: { annotations: annotations },
-                    tooltip: { 
-                        callbacks: { 
-                            title: (context) => context[0].label,
-                            label: (context) => {
-                                if (context.dataset.label === 'Medication Change') return context.dataset.medTooltips[context.dataIndex];
-                                if (context.dataset.label === 'Cough Frequency') return context.dataset.coughTooltips[context.dataIndex];
-                                if (context.dataset.label === 'Activity') return context.dataset.activityTooltips[context.dataIndex];
-                                if (context.raw === null) return null;
-                                return context.dataset.srrTooltips ? context.dataset.srrTooltips[context.dataIndex] : `Rate: ${context.parsed.y} bpm`;
-                            }
-                        } 
-                    },
-                    zoom: {
-                        pan: {
-                            enabled: true, mode: 'x',
-                            onPanRejected: ({ chart }) => { console.warn('Pan boundary reached'); }
-                        },
-                        zoom: {
-                            wheel: { enabled: true },
-                            pinch: { enabled: true },
-                            mode: 'x',
-                            limits: {
-                                x: { min: 'original', max: 'original', minRange: 1000 * 60 * 60 * 24 * 7 },
-                                y: { min: 0, max: 100 }
-                            }
-                        }
-                    }
-                },            
-                scales: scalesObj
-            }
-        });
-    }, 50);
-},
-        
-         // --- MED CHART FUNCTIONS ---       
-        
-        
-hasAnyMedData() {
-    if (!Array.isArray(this.medLedger) || !this.activePatientId) return false;
-    return this.medLedger.some(m => m.patientId === this.activePatientId);
-},
-        
-        
-// Validates custom date ranges strictly to protect Chart.js
-            validateCustomDates(startRaw, endRaw) {
-                // 1. Must not be null or empty
-                if (!startRaw || !endRaw) return false;
-
-                const startTimestamp = this.parseDateSafe(startRaw).getTime();
-                const endTimestamp = this.parseDateSafe(endRaw).getTime();
-
-                // 2. Must resolve to valid numbers (not NaN)
-                if (isNaN(startTimestamp) || isNaN(endTimestamp)) return false;
-
-                // 3. Start date must be before or equal to the end date
-                if (startTimestamp > endTimestamp) return false;
-
-                return true;
-            },
-            
-            
-        // Duplicate Date Range logic specifically for the Medication Chart
-getMedDateRange() {
-            const now = new Date();
-            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            
-            let startDate = null;
-            let endDate = endOfToday;
-
-            const dayOfWeek = startOfToday.getDay();
-            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-
-            // Safe fallback calculator for 'All Time' or 'Incomplete Custom Dates'
-            
- const getEarliestFallback = () => {
-                const petMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
-                if(petMeds.length > 0) {
-                     // Use parseDateSafe to handle legacy UK/US dates, avoiding Invalid Date NaNs
-                     const earliest = petMeds.reduce((min, p) => 
-                         this.parseDateSafe(p.eventDate) < this.parseDateSafe(min.eventDate) ? p : min
-                     , petMeds[0]);
-                     
-                     const safeTimestamp = this.parseDateSafe(earliest.eventDate).getTime();
-                     
-                     // If it's a valid number, pad it by 14 days. Otherwise default to 0.
-                     if (!isNaN(safeTimestamp)) {
-                         return new Date(safeTimestamp - (14 * 24 * 60 * 60 * 1000));
-                     }
-                }
-                return new Date(0);
-            };
-
-            switch (this.medTimeScale) {
-                case 'thisWeek':
-                    startDate = new Date(startOfToday);
-                    startDate.setDate(startDate.getDate() + daysToMonday);
-                    break;
-                case 'lastWeek':
-                    startDate = new Date(startOfToday);
-                    startDate.setDate(startDate.getDate() + daysToMonday - 7);
-                    endDate = new Date(startDate);
-                    endDate.setDate(endDate.getDate() + 6);
-                    endDate.setHours(23, 59, 59);
-                    break;
-                case 'thisMonth':
-                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                    break;
-                case 'lastMonth':
-                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-                    break;
-                case '60d':
-                    startDate = new Date(startOfToday.getTime() - (60 * 24 * 60 * 60 * 1000));
-                    break;
-                case '90d':
-                    startDate = new Date(startOfToday.getTime() - (90 * 24 * 60 * 60 * 1000));
-                    break;
-                case '180d':
-                    startDate = new Date(startOfToday.getTime() - (180 * 24 * 60 * 60 * 1000));
-                    break;
-                case 'custom':
-                    // Check if both fields contain data
-                    if (this.medCustomStartDate && this.medCustomEndDate) {
-                        // Force strict midnight/end-of-day boundaries to negate UK/US timezone drifting
-                        const s = new Date(this.medCustomStartDate + 'T00:00:00');
-                        const e = new Date(this.medCustomEndDate + 'T23:59:59');
-                        
-                        // Verify they are valid dates AND logically ordered
-                        if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && s <= e) {
-                            startDate = s;
-                            endDate = e;
-                        } else {
-                            startDate = getEarliestFallback(); // Safe fallback if dates are reversed
-                        }
-                    } else {
-                        startDate = getEarliestFallback(); // Safe fallback while they are typing
-                    }
-                    break;
-                case 'all':
-                default:
-                    startDate = getEarliestFallback();
-                    break;
-            }
-            return { startDate, endDate };
-        },
-        
-        
-        
-        
-        // Converts point-in-time entries into solid blocks of duration (Epochs)
-generateMedEpochs() {
-    // Force array check
-    if (!Array.isArray(this.medLedger) || !this.activePatientId) return [];
-    
-    const petMeds = this.medLedger
-        .filter(m => m.patientId === this.activePatientId)
-        .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
-            const epochs = [];
-            const activeMeds = {}; // Tracks currently "open" medication blocks by drugId
-
-            petMeds.forEach(med => {
-                const eventTs = new Date(med.eventDate + 'T12:00:00').getTime(); // Force midday safety
-                const drugKey = med.drugId === 'other' ? med.customName : med.drugId;
-
-                const computedAction = this.getComputedAction(med);
-                if (computedAction === 'Started' || computedAction === 'Adjusted') {
-                    // If the drug was already running, close its previous dose block
-                    if (activeMeds[drugKey]) {
-                        activeMeds[drugKey].endTime = eventTs;
-                        epochs.push({...activeMeds[drugKey]});
-                    }
-                    
-                    // Open a new continuous block with the new dose
-                    activeMeds[drugKey] = {
-                        drugId: med.drugId,
-                        customName: med.customName,
-                        doseMg: med.doseMg,
-                        frequency: med.frequency,
-                        mgPerKg: med.mgPerKg,
-                        startTime: eventTs,
-                        endTime: null // Stays open-ended until stopped or adjusted
-                    };
-                } else if (computedAction === 'Stopped') {
-                    // Close the block
-                    if (activeMeds[drugKey]) {
-                        activeMeds[drugKey].endTime = eventTs;
-                        epochs.push({...activeMeds[drugKey]});
-                        delete activeMeds[drugKey];
-                    }
-                }
-            });
-
-            // Close all remaining open blocks to "Today"
-            const nowTs = new Date().getTime();
-            Object.values(activeMeds).forEach(activeMed => {
-                activeMed.endTime = nowTs;
-                epochs.push(activeMed);
-            });
-
-            return epochs;
-        },
-
-        // The Dedicated Chart.js Renderer
-renderChart() {
-    if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
-
-    this.chartRenderTimeout = setTimeout(() => {
-        const canvas = this.$refs.rrrChartCanvas;
-        
-        // GATEKEEPER: Stop Chart.js from crashing if canvas is display: none
-        if (!canvas || (canvas.offsetParent === null && !this.isChartExpanded)) return;
-
-        const rawSrrData = this.getFilteredReadings() || [];
-        const ctx = canvas.getContext('2d');
-
-        const existingChart = Chart.getChart(canvas);
         if (existingChart) existingChart.destroy();
 
         if (rawSrrData.length < 2) return;
@@ -2012,6 +1558,323 @@ renderChart() {
                     }
                 },            
                 scales: scalesObj
+            }
+        });
+    }, 50);
+},
+        
+         // --- MED CHART FUNCTIONS ---       
+        
+        
+hasAnyMedData() {
+    if (!Array.isArray(this.medLedger) || !this.activePatientId) return false;
+    return this.medLedger.some(m => m.patientId === this.activePatientId);
+},
+        
+        
+// Validates custom date ranges strictly to protect Chart.js
+            validateCustomDates(startRaw, endRaw) {
+                // 1. Must not be null or empty
+                if (!startRaw || !endRaw) return false;
+
+                const startTimestamp = this.parseDateSafe(startRaw).getTime();
+                const endTimestamp = this.parseDateSafe(endRaw).getTime();
+
+                // 2. Must resolve to valid numbers (not NaN)
+                if (isNaN(startTimestamp) || isNaN(endTimestamp)) return false;
+
+                // 3. Start date must be before or equal to the end date
+                if (startTimestamp > endTimestamp) return false;
+
+                return true;
+            },
+            
+            
+        // Duplicate Date Range logic specifically for the Medication Chart
+getMedDateRange() {
+            const now = new Date();
+            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            let startDate = null;
+            let endDate = endOfToday;
+
+            const dayOfWeek = startOfToday.getDay();
+            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+            // Safe fallback calculator for 'All Time' or 'Incomplete Custom Dates'
+            
+ const getEarliestFallback = () => {
+                const petMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
+                if(petMeds.length > 0) {
+                     // Use parseDateSafe to handle legacy UK/US dates, avoiding Invalid Date NaNs
+                     const earliest = petMeds.reduce((min, p) => 
+                         this.parseDateSafe(p.eventDate) < this.parseDateSafe(min.eventDate) ? p : min
+                     , petMeds[0]);
+                     
+                     const safeTimestamp = this.parseDateSafe(earliest.eventDate).getTime();
+                     
+                     // If it's a valid number, pad it by 14 days. Otherwise default to 0.
+                     if (!isNaN(safeTimestamp)) {
+                         return new Date(safeTimestamp - (14 * 24 * 60 * 60 * 1000));
+                     }
+                }
+                return new Date(0);
+            };
+
+            switch (this.medTimeScale) {
+                case 'thisWeek':
+                    startDate = new Date(startOfToday);
+                    startDate.setDate(startDate.getDate() + daysToMonday);
+                    break;
+                case 'lastWeek':
+                    startDate = new Date(startOfToday);
+                    startDate.setDate(startDate.getDate() + daysToMonday - 7);
+                    endDate = new Date(startDate);
+                    endDate.setDate(endDate.getDate() + 6);
+                    endDate.setHours(23, 59, 59);
+                    break;
+                case 'thisMonth':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'lastMonth':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+                    break;
+                case '60d':
+                    startDate = new Date(startOfToday.getTime() - (60 * 24 * 60 * 60 * 1000));
+                    break;
+                case '90d':
+                    startDate = new Date(startOfToday.getTime() - (90 * 24 * 60 * 60 * 1000));
+                    break;
+                case '180d':
+                    startDate = new Date(startOfToday.getTime() - (180 * 24 * 60 * 60 * 1000));
+                    break;
+                case 'custom':
+                    // Check if both fields contain data
+                    if (this.medCustomStartDate && this.medCustomEndDate) {
+                        // Force strict midnight/end-of-day boundaries to negate UK/US timezone drifting
+                        const s = new Date(this.medCustomStartDate + 'T00:00:00');
+                        const e = new Date(this.medCustomEndDate + 'T23:59:59');
+                        
+                        // Verify they are valid dates AND logically ordered
+                        if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && s <= e) {
+                            startDate = s;
+                            endDate = e;
+                        } else {
+                            startDate = getEarliestFallback(); // Safe fallback if dates are reversed
+                        }
+                    } else {
+                        startDate = getEarliestFallback(); // Safe fallback while they are typing
+                    }
+                    break;
+                case 'all':
+                default:
+                    startDate = getEarliestFallback();
+                    break;
+            }
+            return { startDate, endDate };
+        },
+        
+        
+        
+        
+        // Converts point-in-time entries into solid blocks of duration (Epochs)
+generateMedEpochs() {
+    // Force array check
+    if (!Array.isArray(this.medLedger) || !this.activePatientId) return [];
+    
+    const petMeds = this.medLedger
+        .filter(m => m.patientId === this.activePatientId)
+        .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+            const epochs = [];
+            const activeMeds = {}; // Tracks currently "open" medication blocks by drugId
+
+            petMeds.forEach(med => {
+                const eventTs = new Date(med.eventDate + 'T12:00:00').getTime(); // Force midday safety
+                const drugKey = med.drugId === 'other' ? med.customName : med.drugId;
+
+                const computedAction = this.getComputedAction(med);
+                if (computedAction === 'Started' || computedAction === 'Adjusted') {
+                    // If the drug was already running, close its previous dose block
+                    if (activeMeds[drugKey]) {
+                        activeMeds[drugKey].endTime = eventTs;
+                        epochs.push({...activeMeds[drugKey]});
+                    }
+                    
+                    // Open a new continuous block with the new dose
+                    activeMeds[drugKey] = {
+                        drugId: med.drugId,
+                        customName: med.customName,
+                        doseMg: med.doseMg,
+                        frequency: med.frequency,
+                        mgPerKg: med.mgPerKg,
+                        startTime: eventTs,
+                        endTime: null // Stays open-ended until stopped or adjusted
+                    };
+                } else if (computedAction === 'Stopped') {
+                    // Close the block
+                    if (activeMeds[drugKey]) {
+                        activeMeds[drugKey].endTime = eventTs;
+                        epochs.push({...activeMeds[drugKey]});
+                        delete activeMeds[drugKey];
+                    }
+                }
+            });
+
+            // Close all remaining open blocks to "Today"
+            const nowTs = new Date().getTime();
+            Object.values(activeMeds).forEach(activeMed => {
+                activeMed.endTime = nowTs;
+                epochs.push(activeMed);
+            });
+
+            return epochs;
+        },
+
+
+
+
+        // The Dedicated Chart.js Renderer
+renderMedChart() {
+    if (this.medChartRenderTimeout) clearTimeout(this.medChartRenderTimeout);
+
+    this.medChartRenderTimeout = setTimeout(() => {
+        const canvas = this.$refs.medChartCanvas;
+        
+        // GATEKEEPER: Stop Chart.js from crashing if canvas is display: none
+        if (!canvas || canvas.offsetParent === null) return;
+
+        if (this.medTimeScale === 'custom') {
+            if (!this.validateCustomDates(this.medCustomStartDate, this.medCustomEndDate)) {
+                return; 
+            }
+        }
+
+        const epochs = this.generateMedEpochs();
+        if (epochs.length === 0) return;
+
+        const { startDate, endDate } = this.getMedDateRange();
+        const uniqueDrugs = [...new Set(epochs.map(e => e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId)))];
+
+        const ctx = this.$refs.medChartCanvas.getContext('2d');
+        if (this.medChartInstance) {
+            this.medChartInstance.destroy();
+        }
+
+        // Evaluate Min/Max Dose across the pet's ENTIRE lifetime history
+        const doseRanges = {};
+        const allPetMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
+        allPetMeds.forEach(m => {
+            const key = m.drugId === 'other' ? m.customName : m.drugId;
+            if (!doseRanges[key]) {
+                doseRanges[key] = { min: m.doseMg, max: m.doseMg };
+            } else {
+                if (m.doseMg < doseRanges[key].min) doseRanges[key].min = m.doseMg;
+                if (m.doseMg > doseRanges[key].max) doseRanges[key].max = m.doseMg;
+            }
+        });
+
+        const hex2rgb = (hex) => {
+            const v = parseInt(hex.replace('#', ''), 16);
+            return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+        };
+
+        // Create ONE Dataset per Epoch to force unique bar thicknesses
+        const dynamicDatasets = epochs.map((e, index) => {
+            const genericName = e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
+            const isDiuretic = ['furosemide', 'torasemide'].includes(e.drugId);
+            const baseColor = this.formulary[e.drugId]?.color || '#64748b';
+            const rgb = hex2rgb(baseColor);
+            
+            const key = e.drugId === 'other' ? e.customName : e.drugId;
+            const range = doseRanges[key];
+            
+            let opacity = 0.5;
+            let calculatedThickness = 24; // Base baseline
+
+            if (isDiuretic) {
+                opacity = 0.85; // Solid visibility for diuretics
+                if (range && range.max > range.min) {
+                    const ratio = (e.doseMg - range.min) / (range.max - range.min);
+                    calculatedThickness = 12 + (28 * ratio); // Scales perfectly from 12px to 40px
+                }
+            } else {
+                if (range && range.max > range.min) {
+                    const ratio = (e.doseMg - range.min) / (range.max - range.min);
+                    opacity = 0.3 + (0.7 * ratio); // Scales 30% to 100% solid based on dose
+                }
+            }
+
+            return {
+                label: `Epoch_${index}`, // Internal tracker
+                data: [{
+                    x: [e.startTime, e.endTime],
+                    y: genericName,
+                    _rawEpoch: e 
+                }],
+                backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`,
+                borderColor: baseColor,
+                borderWidth: 2,
+                borderSkipped: false,
+                borderRadius: 4,
+                barThickness: calculatedThickness // Now explicitly applied to this specific block!
+            };
+        });
+
+        this.medChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                datasets: dynamicDatasets
+            },
+            options: {
+                indexAxis: 'y', 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (context) => {
+                                const e = context[0].raw._rawEpoch;
+                                return e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
+                            },
+                            label: (context) => {
+                                const e = context.raw._rawEpoch;
+                                const sDate = new Date(e.startTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                                const todayTs = new Date().getTime();
+                                const diff = Math.abs(e.endTime - todayTs);
+                                const eDate = diff < 1000 ? 'Present' : new Date(e.endTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                                
+                                return [
+                                    `Dose: ${e.doseMg}mg ${e.frequency}`,
+                                    `Duration: ${sDate} to ${eDate}`
+                                ];
+                            }
+                        }
+                    }
+                },
+                zoom: {
+                    pan: { enabled: true, mode: 'x' },
+                    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        stacked: false,
+                        time: { tooltipFormat: 'dd MMM yyyy' },
+                        //  Explicitly check for valid numbers to prevent Uncaught Type Errors
+                        min: (startDate && !isNaN(startDate.getTime())) ? startDate.getTime() : undefined,
+                        max: (endDate && !isNaN(endDate.getTime())) ? endDate.getTime() : undefined,
+                        grid: { color: '#e2e8f0' }
+                    },
+                    y: {
+                        type: 'category',
+                        stacked: true, 
+                        labels: uniqueDrugs,
+                        grid: { display: false }
+                    }
+                }
             }
         });
     }, 50);
