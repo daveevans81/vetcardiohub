@@ -1314,7 +1314,7 @@
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #059669; margin: 0;">
                                     <input type="checkbox" x-model="showActivityOverlay" style="margin: 0; padding: 0;"> <i class="fa-solid fa-person-running"></i> Activity
                                 </label>
-                                <select x-show="showActivityOverlay" x-model="activityPlotType" x-transition style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1; color: #059669; outline: none; background: white;">
+                                <select x-show="showActivityOverlay" x-model="activityPlotType" @change="renderChart()" x-transition style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1; color: #059669; outline: none; background: white;">
                                     <option value="durationMins">Mins</option>
                                     <option value="distance">Distance</option>
                                 </select>

@@ -236,6 +236,7 @@ init() {
     this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
     this.$watch('showCoughOverlay', () => { this.renderChart(); });
     this.$watch('showActivityOverlay', () => { this.renderChart(); });
+    this.$watch('showMedications', () => { this.renderChart(); });
     this.$watch('activityPlotType', () => { this.renderChart(); });
     this.$watch('showManualSrr', (isVisible) => {
         if (isVisible) {
@@ -1267,9 +1268,24 @@ renderChart() {
         const combinedEvents = [];
         const { startDate, endDate } = this.getDateRange();
 
-        // 1. Scoop SRR Data
+        // 1. Scoop & Aggregate SRR Data (Daily Mean)
+        const srrByDate = {};
         rawSrrData.forEach(r => {
-            combinedEvents.push({ type: 'srr', timestamp: safeTimestamp(r.date), data: r });
+            const dStr = r.date; // Groups purely by YYYY-MM-DD
+            if (!srrByDate[dStr]) srrByDate[dStr] = [];
+            srrByDate[dStr].push(r.rate);
+        });
+
+        Object.keys(srrByDate).forEach(dStr => {
+            const rates = srrByDate[dStr];
+            const meanRate = rates.reduce((sum, val) => sum + val, 0) / rates.length;
+            const roundedMean = Math.round(meanRate * 10) / 10;
+            
+            combinedEvents.push({ 
+                type: 'srr', 
+                timestamp: safeTimestamp(dStr), 
+                data: { rate: roundedMean, readingCount: rates.length, date: dStr } 
+            });
         });
 
         // 2. Scoop Medication Data
@@ -1318,7 +1334,7 @@ renderChart() {
 
         // --- 5. EXTRACT CHART DATASETS ---
         const labels = [];
-        const srrDataPoints = [], medDataPoints = [], medColors = [], medTooltips = [];
+        const srrDataPoints = [], srrTooltips = [], medDataPoints = [], medColors = [], medTooltips = [];
         const coughDataPoints = [], coughColors = [], coughTooltips = [];
         const activityDataPoints = [], activityTooltips = [];
 
@@ -1344,6 +1360,9 @@ renderChart() {
                 srrVal = ev.data.rate;
                 srrValuesForStats.push(ev.data);
                 lastSrrRate = ev.data.rate;
+                
+                const suffix = ev.data.readingCount > 1 ? ` (Mean of ${ev.data.readingCount})` : '';
+                sTip = `Rate: ${srrVal} bpm${suffix}`;
             } 
             else if (ev.type === 'med') {
                 medVal = lastSrrRate !== null ? lastSrrRate : 30; 
@@ -1358,7 +1377,7 @@ renderChart() {
                     if (c.frequencyPeriod === 'week') cpd /= 7;
                     coughVal = Math.round(cpd * 10) / 10;
                 } else { 
-                    coughVal = 1; // Nominal visible bar if no frequency was provided
+                    coughVal = 1; 
                 } 
                 
                 if (c.severity === 'Severe') cCol = 'rgba(239, 68, 68, 0.85)';
@@ -1411,6 +1430,7 @@ renderChart() {
             {
                 label: `${this.activePatientProfile?.name ?? 'Patient'}'s Respiratory Rate (bpm)`,
                 data: srrDataPoints,
+                srrTooltips: srrTooltips,
                 borderColor: 'rgb(14, 165, 233)', backgroundColor: 'rgba(14, 165, 233, 0.08)',
                 tension: 0.25, pointRadius: combinedEvents.length > 30 ? 2 : 5,
                 spanGaps: true, fill: true, order: 3, yAxisID: 'y'
@@ -1475,7 +1495,7 @@ renderChart() {
                                 if (context.dataset.label === 'Cough Frequency') return context.dataset.coughTooltips[context.dataIndex];
                                 if (context.dataset.label === 'Activity') return context.dataset.activityTooltips[context.dataIndex];
                                 if (context.raw === null) return null;
-                                return `Rate: ${context.parsed.y} bpm`;
+                                return context.dataset.srrTooltips ? context.dataset.srrTooltips[context.dataIndex] : `Rate: ${context.parsed.y} bpm`;
                             }
                         } 
                     },
