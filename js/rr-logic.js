@@ -33,7 +33,26 @@ document.addEventListener('alpine:init', () => {
         finalRate: null,
         timerInterval: null,
 
+// --- SYMPTOM TRACKING STATE ---
+        showSymptomLog: false,
+        coughLog: [],
+        activityLog: [],
+        
+        newCough: {
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+            severity: 'Mild', // Mild, Moderate, Severe
+            type: 'Harsh/Dry', // Harsh/Dry, Moist/Productive, Honking
+            context: 'Resting/Night', // Resting/Night, Excitement, Exercise, Post-Drinking
+            notes: ''
+        },
 
+        newActivity: {
+            date: new Date().toISOString().split('T')[0],
+            status: 'Normal', // Normal, Reduced, Lethargic, Hyper
+            durationMins: '', // Optional quantitative metric
+            notes: ''
+        },
 
         // --- Syncope and Diagnosis objects ---
         showDiagnosisLog: false,
@@ -180,9 +199,11 @@ init() {
                 this.medLedger = JSON.parse(localStorage.getItem('vch_medLedger')) || [];
                 this.diagnosisLog = JSON.parse(localStorage.getItem('vch_diagnosisLog')) || [];
                 this.syncopeLog = JSON.parse(localStorage.getItem('vch_syncopeLog')) || [];
+                this.coughLog = JSON.parse(localStorage.getItem('vch_coughLog')) || [];       
+            this.activityLog = JSON.parse(localStorage.getItem('vch_activityLog')) || [];
             } catch(e) {
                 this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
-                this.diagnosisLog = []; this.syncopeLog = [];
+                this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = [];  this.activityLog = [];
             }
 
     // Set initial active patient safely
@@ -288,6 +309,10 @@ init() {
             this.weightLog = this.weightLog.filter(w => w.patientId !== patientId);
             this.diagnosisLog = this.diagnosisLog.filter(d => d.patientId !== patientId);
             this.syncopeLog = this.syncopeLog.filter(s => s.patientId !== patientId);
+            this.coughLog = this.coughLog.filter(s => s.patientId !== patientId);
+            this.activityLog = this.activityLog.filter(s => s.patientId !== patientId);
+                                    
+            this.coughLog = [];  this.activityLog = [];
 
             // 2. Persist the flushed arrays to local storage
             this.saveToStorage('vch_patients', this.patients);
@@ -296,6 +321,8 @@ init() {
             this.saveToStorage('vch_weightLog', this.weightLog);
             this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
             this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+            this.saveToStorage('vch_coughLog', this.coughLog);
+            this.saveToStorage('vch_activityLog', this.activityLog);
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -391,6 +418,8 @@ savePatient() {
             this.medLedger = this.medLedger.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
             this.diagnosisLog = this.diagnosisLog.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
             this.syncopeLog = this.syncopeLog.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
+            this.coughLog = this.coughLog.map(c => c.patientId === sourceId ? { ...c, patientId: targetId } : c);
+            this.activityLog = this.activityLog.map(c => c.patientId === sourceId ? { ...c, patientId: targetId } : c);
 
 
             // Delete Source Patient
@@ -402,6 +431,8 @@ savePatient() {
             this.saveToStorage('vch_medLedger', this.medLedger);
             this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
             this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+            this.saveToStorage('vch_coughLog', this.coughLog);
+            this.saveToStorage('vch_activityLog', this.activityLog);
             this.saveToStorage('vch_patients', this.patients);
             
 
@@ -562,6 +593,70 @@ saveSyncope() {
             if (confirm("Delete this event from the log?")) {
                 this.syncopeLog = this.syncopeLog.filter(s => s.id !== id);
                 this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+            }
+        },
+        
+        
+        // --- COUGH LOGIC ---
+        get sortedCoughLog() {
+            if (!this.activePatientId) return [];
+            return this.coughLog
+                .filter(c => c.patientId === this.activePatientId)
+                .sort((a, b) => new Date(`${b.date}T${b.time || '00:00:00'}`) - new Date(`${a.date}T${a.time || '00:00:00'}`));
+        },
+
+        saveCough() {
+            if (!this.activePatientId) return alert("Select a patient first.");
+            this.coughLog.push({
+                id: this.generateId(),
+                patientId: this.activePatientId,
+                ...this.newCough
+            });
+            this.saveToStorage('vch_coughLog', this.coughLog);
+            
+            // Reset form
+            this.newCough = {
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+                severity: 'Mild', type: 'Harsh/Dry', context: 'Resting/Night', notes: ''
+            };
+        },
+
+        deleteCough(id) {
+            if (confirm("Delete this cough record?")) {
+                this.coughLog = this.coughLog.filter(c => c.id !== id);
+                this.saveToStorage('vch_coughLog', this.coughLog);
+            }
+        },
+
+        // --- ACTIVITY LOGIC ---
+        get sortedActivityLog() {
+            if (!this.activePatientId) return [];
+            return this.activityLog
+                .filter(a => a.patientId === this.activePatientId)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+        },
+
+        saveActivity() {
+            if (!this.activePatientId) return alert("Select a patient first.");
+            this.activityLog.push({
+                id: this.generateId(),
+                patientId: this.activePatientId,
+                ...this.newActivity
+            });
+            this.saveToStorage('vch_activityLog', this.activityLog);
+            
+            // Reset form
+            this.newActivity = {
+                date: new Date().toISOString().split('T')[0],
+                status: 'Normal', durationMins: '', notes: ''
+            };
+        },
+
+        deleteActivity(id) {
+            if (confirm("Delete this activity record?")) {
+                this.activityLog = this.activityLog.filter(a => a.id !== id);
+                this.saveToStorage('vch_activityLog', this.activityLog);
             }
         },
         
@@ -1991,6 +2086,8 @@ const backupData = {
                 vch_medLedger: this.medLedger,
                 vch_diagnosisLog: this.diagnosisLog,
                 vch_syncopeLog: this.syncopeLog,
+                vch_coughLog: this.coughLog,
+                vch_activityLog: this.activityLog,
                 exportDate: new Date().toISOString()
             };
 
@@ -2024,6 +2121,8 @@ const backupData = {
                     this.medLedger = data.vch_medLedger;
                     this.diagnosisLog = data.vch_diagnosisLog;
                     this.syncopeLog = data.vch_syncopeLog;
+                    this.coughLog = data.vch_coughLog;
+                    this.activityLog = data.vch_activityLog;
                     this.weightLog = data.vch_weightLog || [];
 
                     this.saveToStorage('vch_patients', this.patients);
@@ -2031,7 +2130,10 @@ const backupData = {
                     this.saveToStorage('vch_medLedger', this.medLedger);
                     this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
                     this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+                    this.saveToStorage('vch_coughLog', this.coughLog);
+                    this.saveToStorage('vch_activityLog', this.activityLog);
                     this.saveToStorage('vch_weightLog', this.weightLog);
+                    
 
                     if (this.patients.length > 0) this.activePatientId = this.patients[0].id; 
                     this.currentPage = 1;

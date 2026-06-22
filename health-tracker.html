@@ -683,6 +683,96 @@
             </div>
             
                                 <!-- ******************************** -->
+                                <!-- Symptom and Activity History     -->
+                                <!-- ******************************** -->
+            
+            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+    
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                    <button @click="showSymptomLog = !showSymptomLog" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F; transition: background 0.15s ease;" @mouseenter="$el.style.background='#dde6f3'" @mouseleave="$el.style.background='#e8eef7'">
+                        <h3 style="margin: 0;"><i class="fa-solid fa-heart-pulse text-rose-500"></i> Quality of Life & Symptoms</h3> 
+                        <i class="fa-solid" :class="showSymptomLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                    </button>
+                </div>
+            
+                <div x-show="showSymptomLog" x-transition style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    
+                    <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
+                        <h4 style="margin-top: 0; color: #334155; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px;"><i class="fa-solid fa-head-side-cough"></i> Cough Monitor</h4>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="date" x-model="newCough.date" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                            <input type="time" x-model="newCough.time" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <select x-model="newCough.severity" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="Mild">Mild</option>
+                                <option value="Moderate">Moderate</option>
+                                <option value="Severe">Severe</option>
+                            </select>
+                            <select x-model="newCough.context" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="Resting/Night">Resting/Night</option>
+                                <option value="Excitement">Excitement</option>
+                                <option value="Exercise">Exercise</option>
+                                <option value="Post-Drinking">Post-Drinking</option>
+                            </select>
+                        </div>
+                        
+                        <input type="text" x-model="newCough.notes" placeholder="Notes (e.g., sound, duration)" style="width: 100%; padding: 6px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                        
+                        <button @click="saveCough()" style="width: 100%; padding: 8px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Log Cough</button>
+                        
+                        <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                            <template x-for="c in sortedCoughLog" :key="c.id">
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 8px; margin-bottom: 5px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                                    <div>
+                                        <strong x-text="`${c.date} ${c.time}`"></strong> - <span style="color: #ef4444;" x-text="c.severity"></span><br>
+                                        <span style="color: #64748b;" x-text="`${c.context} | ${c.notes}`"></span>
+                                    </div>
+                                    <button @click="deleteCough(c.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.6;"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+            
+                    <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
+                        <h4 style="margin-top: 0; color: #334155; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px;"><i class="fa-solid fa-person-running"></i> Activity Monitor</h4>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="date" x-model="newActivity.date" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                            <select x-model="newActivity.status" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="Normal">Normal</option>
+                                <option value="Reduced">Reduced</option>
+                                <option value="Lethargic">Lethargic</option>
+                                <option value="Hyper">Hyper</option>
+                            </select>
+                        </div>
+                        
+                        <input type="number" x-model="newActivity.durationMins" placeholder="Active Duration (mins) - Optional" style="width: 100%; padding: 6px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                        <input type="text" x-model="newActivity.notes" placeholder="Notes (e.g., stopped early on walk)" style="width: 100%; padding: 6px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                        
+                        <button @click="saveActivity()" style="width: 100%; padding: 8px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Log Activity</button>
+            
+                        <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                            <template x-for="a in sortedActivityLog" :key="a.id">
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 8px; margin-bottom: 5px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                                    <div>
+                                        <strong x-text="a.date"></strong> - 
+                                        <span :style="a.status === 'Lethargic' ? 'color: #ef4444;' : 'color: #3b82f6;'" x-text="a.status"></span>
+                                        <span x-show="a.durationMins" x-text="` (${a.durationMins} mins)`"></span><br>
+                                        <span style="color: #64748b;" x-text="a.notes"></span>
+                                    </div>
+                                    <button @click="deleteActivity(a.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.6;"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+            
+                </div>
+            </div>
+            
+                                <!-- ******************************** -->
                                 <!-- Medication History               -->
                                 <!-- ******************************** -->
             
