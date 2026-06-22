@@ -40,17 +40,19 @@ document.addEventListener('alpine:init', () => {
         
         newCough: {
             date: new Date().toISOString().split('T')[0],
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-            severity: 'Mild', // Mild, Moderate, Severe
-            type: 'Harsh/Dry', // Harsh/Dry, Moist/Productive, Honking
-            context: 'Resting/Night', // Resting/Night, Excitement, Exercise, Post-Drinking
+            frequencyCount: '',
+            frequencyPeriod: 'day', // hour, day, week
+            severity: 'Mild', 
+            description: 'chesty/productive', // chesty/productive, goose honking, reverse sneezing, expiratory reflex (gag)
+            context: 'Resting/Night', 
             notes: ''
         },
 
         newActivity: {
             date: new Date().toISOString().split('T')[0],
-            status: 'Normal', // Normal, Reduced, Lethargic, Hyper
-            durationMins: '', // Optional quantitative metric
+            status: 'Normal', 
+            durationMins: '', 
+            distance: '', // e.g., "2 miles", "3 km"
             notes: ''
         },
 
@@ -597,39 +599,70 @@ saveSyncope() {
         },
         
         
-        // --- COUGH LOGIC ---
+ // --- COUGH LOGIC (DAILY SUMMARY) ---
         get sortedCoughLog() {
             if (!this.activePatientId) return [];
             return this.coughLog
                 .filter(c => c.patientId === this.activePatientId)
-                .sort((a, b) => new Date(`${b.date}T${b.time || '00:00:00'}`) - new Date(`${a.date}T${a.time || '00:00:00'}`));
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+        },
+
+        hasCoughForDate() {
+            return this.coughLog.some(c => c.patientId === this.activePatientId && c.date === this.newCough.date);
+        },
+
+        loadCoughForDate() {
+            const existing = this.coughLog.find(c => c.patientId === this.activePatientId && c.date === this.newCough.date);
+            if (existing) {
+                this.newCough = { ...existing };
+            } else {
+                // Reset fields but keep the user's selected date
+                this.newCough = {
+                    date: this.newCough.date,
+                    frequencyCount: '', frequencyPeriod: 'day',
+                    severity: 'Mild', description: 'chesty/productive', context: 'Resting/Night', notes: ''
+                };
+            }
         },
 
         saveCough() {
             if (!this.activePatientId) return alert("Select a patient first.");
-            this.coughLog.push({
-                id: this.generateId(),
-                patientId: this.activePatientId,
-                ...this.newCough
-            });
+            
+            const existingIndex = this.coughLog.findIndex(c => c.patientId === this.activePatientId && c.date === this.newCough.date);
+            
+            if (existingIndex > -1) {
+                // UPDATE: Overwrite the existing daily summary
+                this.coughLog[existingIndex] = { ...this.coughLog[existingIndex], ...this.newCough };
+            } else {
+                // INSERT: Create new daily summary
+                this.coughLog.push({
+                    id: this.generateId(),
+                    patientId: this.activePatientId,
+                    ...this.newCough
+                });
+            }
+            
             this.saveToStorage('vch_coughLog', this.coughLog);
             
-            // Reset form
-            this.newCough = {
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-                severity: 'Mild', type: 'Harsh/Dry', context: 'Resting/Night', notes: ''
-            };
-        },
-
-        deleteCough(id) {
-            if (confirm("Delete this cough record?")) {
-                this.coughLog = this.coughLog.filter(c => c.id !== id);
-                this.saveToStorage('vch_coughLog', this.coughLog);
+            // Visual feedback
+            const btn = document.getElementById('btnSaveCough');
+            if(btn) {
+                const orig = btn.innerText;
+                btn.innerText = "Saved!";
+                btn.style.backgroundColor = "#10b981";
+                setTimeout(() => { btn.innerText = orig; btn.style.backgroundColor = "#16325F"; }, 1500);
             }
         },
 
-        // --- ACTIVITY LOGIC ---
+        deleteCough(id) {
+            if (confirm("Delete this daily cough summary?")) {
+                this.coughLog = this.coughLog.filter(c => c.id !== id);
+                this.saveToStorage('vch_coughLog', this.coughLog);
+                this.loadCoughForDate(); // Refresh form state
+            }
+        },
+
+        // --- ACTIVITY LOGIC (DAILY SUMMARY) ---
         get sortedActivityLog() {
             if (!this.activePatientId) return [];
             return this.activityLog
@@ -637,29 +670,57 @@ saveSyncope() {
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
         },
 
+        hasActivityForDate() {
+            return this.activityLog.some(a => a.patientId === this.activePatientId && a.date === this.newActivity.date);
+        },
+
+        loadActivityForDate() {
+            const existing = this.activityLog.find(a => a.patientId === this.activePatientId && a.date === this.newActivity.date);
+            if (existing) {
+                this.newActivity = { ...existing };
+            } else {
+                this.newActivity = {
+                    date: this.newActivity.date,
+                    status: 'Normal', durationMins: '', distance: '', notes: ''
+                };
+            }
+        },
+
         saveActivity() {
             if (!this.activePatientId) return alert("Select a patient first.");
-            this.activityLog.push({
-                id: this.generateId(),
-                patientId: this.activePatientId,
-                ...this.newActivity
-            });
+            
+            const existingIndex = this.activityLog.findIndex(a => a.patientId === this.activePatientId && a.date === this.newActivity.date);
+            
+            if (existingIndex > -1) {
+                this.activityLog[existingIndex] = { ...this.activityLog[existingIndex], ...this.newActivity };
+            } else {
+                this.activityLog.push({
+                    id: this.generateId(),
+                    patientId: this.activePatientId,
+                    ...this.newActivity
+                });
+            }
+            
             this.saveToStorage('vch_activityLog', this.activityLog);
             
-            // Reset form
-            this.newActivity = {
-                date: new Date().toISOString().split('T')[0],
-                status: 'Normal', durationMins: '', notes: ''
-            };
+            const btn = document.getElementById('btnSaveActivity');
+            if(btn) {
+                const orig = btn.innerText;
+                btn.innerText = "Saved!";
+                btn.style.backgroundColor = "#10b981";
+                setTimeout(() => { btn.innerText = orig; btn.style.backgroundColor = "#16325F"; }, 1500);
+            }
         },
 
         deleteActivity(id) {
-            if (confirm("Delete this activity record?")) {
+            if (confirm("Delete this daily activity summary?")) {
                 this.activityLog = this.activityLog.filter(a => a.id !== id);
                 this.saveToStorage('vch_activityLog', this.activityLog);
+                this.loadActivityForDate(); // Refresh form state
             }
         },
         
+                
 // Creates an alphabetical list of "Generic (Brands)"
         get medicationOptions() {
             let options = [];
