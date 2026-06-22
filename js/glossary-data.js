@@ -71,6 +71,60 @@ const VET_GLOSSARY_DB = {
         textClinical: "An equivocal RRR (typically 30-40 bpm) represents a diagnostic grey zone. Elevations in this range may be physiological artifacts caused by REM sleep, thermoregulation, anxiety, or primary respiratory disease, rather than pathological cardiogenic pulmonary edema. Standard clinical protocol requires reassessing the SRR after 2-4 hours of acclimatization to establish a true baseline before initiating or adjusting diuretic therapy."
     },
     
+    cough_types: {
+        title: "Understanding Your Dog's Cough",
+        group: "Symptoms",
+        category: "Monitoring",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Dogs cough for many different reasons, and distinguishing the exact sound is incredibly helpful for your vet. In dogs with heart murmurs, a cough is often caused by a massively enlarged heart physically pressing upwards and squashing the main windpipe (airway compression). Less commonly, it can be a sign of fluid building up in the lungs (heart failure). However, many older dogs have concurrent airway diseases like chronic bronchitis or a collapsing trachea. Because the treatments for 'heart coughs' and 'lung/airway coughs' are completely different, capturing a video of the cough on your phone and noting the specific sound, triggers, and frequency is the best way to help your cardiology team."
+    },
+
+    "chesty/productive": {
+        title: "Chesty / Productive Cough",
+        group: "Symptoms",
+        category: "Monitoring",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "A chesty or productive cough sounds 'wet', bubbly, or gurgling, as if the dog has phlegm stuck in their chest. You may hear them cough something up into the back of their throat and immediately swallow it. In a dog with heart disease, a newly developing wet cough—especially if accompanied by an increased resting breathing rate (>30 bpm)—is a major red flag for pulmonary oedema (fluid in the lungs). It can also indicate pneumonia or a severe respiratory infection. This type of cough should always prompt a veterinary check."
+    },
+
+    "goose honking": {
+        title: "Goose Honking Cough",
+        group: "Symptoms",
+        category: "Monitoring",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "This cough sounds exactly like a goose honking. It is the classic hallmark of 'Tracheal Collapse', a condition where the cartilage rings of the windpipe weaken and flatten. It is extremely common in small breeds (like Yorkies, Pomeranians, and Chihuahuas). It is typically triggered by excitement, pulling on a collar, drinking water, or picking the dog up under the chest. While it sounds alarming, a goose honk is an airway mechanical issue, not a sign of heart failure—though older small dogs frequently suffer from both conditions at the same time."
+    },
+
+    "reverse sneezing": {
+        title: "Reverse Sneezing",
+        group: "Symptoms",
+        category: "Monitoring",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Despite how scary it looks, reverse sneezing is entirely harmless and is not actually a cough. The dog will stand still, extend their neck, and take rapid, incredibly forceful inhalations through their nose, making a loud snorting, honking, or gagging sound. It is caused by a mild spasm or irritation of the soft palate at the back of the throat (from dust, allergies, or excitement). It has absolutely no relation to heart disease or lung failure. Episodes usually stop on their own, but gently stroking the dog's throat or briefly covering their nostrils to make them swallow can help clear the spasm."
+    },
+
+    "expiratory reflex (gag)": {
+        title: "Terminal Retch / Gagging",
+        group: "Symptoms",
+        category: "Monitoring",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "This typically starts as a harsh, dry cough that ends with a sudden, forceful gagging or retching sound (the 'terminal retch'). The dog may even bring up a small spot of white foam or saliva. Owners frequently mistake this for vomiting or choking on something stuck in their throat. In reality, it is a respiratory reflex designed to clear mucus from the vocal cords. It is very common in dogs with chronic airway inflammation (bronchitis) or when a massively enlarged heart is irritating the main airways."
+    },
+
+    "dry/harsh": {
+        title: "Dry / Harsh Cough",
+        group: "Symptoms",
+        category: "Monitoring",
+        audience: ["vet", "owner"],
+        difficulty: 2,
+        textOwner: "A dry, harsh, or hacking cough sounds sharp and has no 'wet' or fluid-like noise behind it. It often sounds like the dog is trying to clear their throat. In cardiac patients, this is very frequently caused by the left atrium of the heart expanding like a balloon and physically pushing up against the main bronchi (the tubes leading into the lungs), irritating the nerve endings there. It is usually worse at night, first thing in the morning, or immediately after periods of exercise."
+    },
+    
     // ==========================================
     // GROUP: ACVIM MMVD STAGING
     // ==========================================
