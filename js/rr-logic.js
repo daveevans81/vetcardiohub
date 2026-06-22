@@ -38,6 +38,8 @@ document.addEventListener('alpine:init', () => {
         showSymptomLog: false,
         coughLog: [],
         activityLog: [],
+        showCoughForm: false,     
+        showActivityForm: false,
         
         newCough: {
             date: new Date().toISOString().split('T')[0],
@@ -625,34 +627,30 @@ saveSyncope() {
                 };
             }
         },
+        
+        openCoughForm(dateStr = null) {
+            this.showCoughForm = true;
+            this.newCough.date = dateStr || new Date().toISOString().split('T')[0];
+            this.loadCoughForDate();
+        },
 
-        saveCough() {
+        closeCoughForm() {
+            this.showCoughForm = false;
+        },
+
+saveCough() {
             if (!this.activePatientId) return alert("Select a patient first.");
             
             const existingIndex = this.coughLog.findIndex(c => c.patientId === this.activePatientId && c.date === this.newCough.date);
             
             if (existingIndex > -1) {
-                // UPDATE: Overwrite the existing daily summary
                 this.coughLog[existingIndex] = { ...this.coughLog[existingIndex], ...this.newCough };
             } else {
-                // INSERT: Create new daily summary
-                this.coughLog.push({
-                    id: this.generateId(),
-                    patientId: this.activePatientId,
-                    ...this.newCough
-                });
+                this.coughLog.push({ id: this.generateId(), patientId: this.activePatientId, ...this.newCough });
             }
             
             this.saveToStorage('vch_coughLog', this.coughLog);
-            
-            // Visual feedback
-            const btn = document.getElementById('btnSaveCough');
-            if(btn) {
-                const orig = btn.innerText;
-                btn.innerText = "Saved!";
-                btn.style.backgroundColor = "#10b981";
-                setTimeout(() => { btn.innerText = orig; btn.style.backgroundColor = "#16325F"; }, 1500);
-            }
+            this.closeCoughForm(); // Hide the form after saving
         },
 
         deleteCough(id) {
@@ -687,6 +685,17 @@ saveSyncope() {
             }
         },
 
+// --- ACTIVITY LOGIC ---
+        openActivityForm(dateStr = null) {
+            this.showActivityForm = true;
+            this.newActivity.date = dateStr || new Date().toISOString().split('T')[0];
+            this.loadActivityForDate();
+        },
+
+        closeActivityForm() {
+            this.showActivityForm = false;
+        },
+
         saveActivity() {
             if (!this.activePatientId) return alert("Select a patient first.");
             
@@ -695,22 +704,11 @@ saveSyncope() {
             if (existingIndex > -1) {
                 this.activityLog[existingIndex] = { ...this.activityLog[existingIndex], ...this.newActivity };
             } else {
-                this.activityLog.push({
-                    id: this.generateId(),
-                    patientId: this.activePatientId,
-                    ...this.newActivity
-                });
+                this.activityLog.push({ id: this.generateId(), patientId: this.activePatientId, ...this.newActivity });
             }
             
             this.saveToStorage('vch_activityLog', this.activityLog);
-            
-            const btn = document.getElementById('btnSaveActivity');
-            if(btn) {
-                const orig = btn.innerText;
-                btn.innerText = "Saved!";
-                btn.style.backgroundColor = "#10b981";
-                setTimeout(() => { btn.innerText = orig; btn.style.backgroundColor = "#16325F"; }, 1500);
-            }
+            this.closeActivityForm(); // Hide the form after saving
         },
 
         deleteActivity(id) {
@@ -846,10 +844,16 @@ finishCount() {
             
         },
         
-        nudgeToSymptom() {
+nudgeToSymptom(type) {
             this.showSymptomLog = true;
             this.closeResult();
-            // Smoothly scroll down to the symptoms panel
+            
+            if (type === 'cough') {
+                this.openCoughForm();
+            } else if (type === 'activity') {
+                this.openActivityForm();
+            }
+            
             this.$nextTick(() => {
                 const el = document.getElementById('symptomSection');
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
