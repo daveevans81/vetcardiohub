@@ -458,103 +458,391 @@
                 
                 <h3 style="text-align: center; margin-top: 15px;">Count: <span x-text="tapCount"></span></h3>
             </div>
-        
-            <div x-show="finalRate !== null && !isCounting" x-cloak>
-                <div class="summary-box">
-                    <h1><span x-text="finalRate"></span> breaths/min</h1>
-                    
-                    <template x-if="clinicalInterpretation">
-                        <div :class="'status-' + clinicalInterpretation.status" style="margin-bottom: 20px; text-align: left;">
-                            <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
-                                <i class="fa-solid" :class="clinicalInterpretation.status === 'danger' ? 'fa-triangle-exclamation' : 'fa-info-circle'"></i>
-                                <span x-text="clinicalInterpretation.title"></span>
-                            </h3>
-                            <p x-text="clinicalInterpretation.text"></p>
-                            
-                            <template x-if="clinicalInterpretation.status === 'equivocal'">
-                                <button @click="openGlossary('equivocal_rrr')" style="margin-top: 10px; font-size: 0.8rem; background: transparent; border: 1px solid #f59e0b; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                                    Why recount? <i class="fa-solid fa-book-medical"></i>
+            
+            
+            <div x-show="!isCounting">
+                <!-- 3. Results & Clinical Interpretation Screen -->
+                <div x-show="finalRate !== null && !isCounting" x-cloak>
+                    <div class="summary-box" style="border: 1px solid #cbd5e1;">
+                        <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
+                        
+                        <template x-if="clinicalInterpretation">
+                            <div :class="'status-' + clinicalInterpretation.status" style="margin: 20px 0; text-align: left;">
+                                <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid" :class="clinicalInterpretation.status === 'danger' ? 'fa-triangle-exclamation' : (clinicalInterpretation.status === 'equivocal' ? 'fa-circle-exclamation' : 'fa-circle-check')"></i>
+                                    <span x-text="clinicalInterpretation.title"></span>
+                                </h3>
+                                <p x-text="clinicalInterpretation.text" style="line-height: 1.5; margin-bottom: 0;"></p>
+                                
+                                <template x-if="clinicalInterpretation.status === 'equivocal'">
+                                    <button @click="openGlossary('equivocal_rrr')" style="margin-top: 12px; font-size: 0.85rem; background: rgba(255,255,255,0.5); border: 1px solid #f59e0b; color: #b45309; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                                        Why recount? <i class="fa-solid fa-book-medical" style="margin-left: 4px;"></i>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                
+                        <!-- UNSAVED STATE: Save or Discard -->
+                        <div x-show="!hasSavedCurrentCount">
+                            <div style="display: flex; gap: 10px; flex-direction: column;">
+                                <button @click="saveToHistory()" style="padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; width: 100%; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                                    <i class="fa-solid fa-floppy-disk" style="margin-right: 6px;"></i> Save Reading
                                 </button>
-                            </template>
-                        </div>
-                    </template>
-        
-                    <button @click="startCount()" style="padding: 12px 24px; background: #16325F; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1rem;">
-                        <i class="fa-solid fa-rotate-right"></i> Count Again
-                    </button>
-                </div>
-            </div>
-            
-            
-            <!-- 3. Results & Clinical Interpretation Screen -->
-            <div x-show="finalRate !== null && !isCounting" x-cloak>
-                <div class="summary-box" style="border: 1px solid #cbd5e1;">
-                    <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
-                    
-                    <template x-if="clinicalInterpretation">
-                        <div :class="'status-' + clinicalInterpretation.status" style="margin: 20px 0; text-align: left;">
-                            <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
-                                <i class="fa-solid" :class="clinicalInterpretation.status === 'danger' ? 'fa-triangle-exclamation' : (clinicalInterpretation.status === 'equivocal' ? 'fa-circle-exclamation' : 'fa-circle-check')"></i>
-                                <span x-text="clinicalInterpretation.title"></span>
-                            </h3>
-                            <p x-text="clinicalInterpretation.text" style="line-height: 1.5; margin-bottom: 0;"></p>
-                            
-                            <template x-if="clinicalInterpretation.status === 'equivocal'">
-                                <button @click="openGlossary('equivocal_rrr')" style="margin-top: 12px; font-size: 0.85rem; background: rgba(255,255,255,0.5); border: 1px solid #f59e0b; color: #b45309; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 500;">
-                                    Why recount? <i class="fa-solid fa-book-medical" style="margin-left: 4px;"></i>
-                                </button>
-                            </template>
-                        </div>
-                    </template>
-            
-                    <!-- UNSAVED STATE: Save or Discard -->
-                    <div x-show="!hasSavedCurrentCount">
-                        <div style="display: flex; gap: 10px; flex-direction: column;">
-                            <button @click="saveToHistory()" style="padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; width: 100%; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                                <i class="fa-solid fa-floppy-disk" style="margin-right: 6px;"></i> Save Reading
-                            </button>
-                            <button @click="closeResult(); startCount()" style="padding: 12px 24px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-size: 1rem; width: 100%; font-weight: 500;">
-                                <i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Discard & Recount
-                            </button>
-                        </div>
-                    </div>
-            
-                    <!-- SAVED STATE: Nudge to Symptoms -->
-                    <div x-show="hasSavedCurrentCount" x-transition>
-                        <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px;">
-                            <p style="color: #10b981; font-weight: bold; margin-top: 0; margin-bottom: 10px; font-size: 1.1rem;">
-                                <i class="fa-solid fa-check-circle"></i> Reading saved!
-                            </p>
-                            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
-                                Would you like to update today's symptom summaries while you're here?
-                            </p>
-                            
-                            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                                <button @click="nudgeToSymptom()" style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
-                                    <i class="fa-solid fa-head-side-cough text-rose-500"></i> Log Cough
-                                </button>
-                                <button @click="nudgeToSymptom()" style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
-                                    <i class="fa-solid fa-person-running text-blue-500"></i> Log Activity
+                                <button @click="closeResult(); startCount()" style="padding: 12px 24px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-size: 1rem; width: 100%; font-weight: 500;">
+                                    <i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Discard & Recount
                                 </button>
                             </div>
-            
-                            <button @click="closeResult()" style="width: 100%; padding: 10px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                                Done for now
+                        </div>
+                
+                        <!-- SAVED STATE: Nudge to Symptoms -->
+                        <div x-show="hasSavedCurrentCount" x-transition>
+                            <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px;">
+                                <p style="color: #10b981; font-weight: bold; margin-top: 0; margin-bottom: 10px; font-size: 1.1rem;">
+                                    <i class="fa-solid fa-check-circle"></i> Reading saved!
+                                </p>
+                                <p style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
+                                    Would you like to update today's symptom summaries while you're here?
+                                </p>
+                                
+                                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                    <button @click="nudgeToSymptom()" style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
+                                        <i class="fa-solid fa-head-side-cough text-rose-500"></i> Log Cough
+                                    </button>
+                                    <button @click="nudgeToSymptom()" style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
+                                        <i class="fa-solid fa-person-running text-blue-500"></i> Log Activity
+                                    </button>
+                                </div>
+                
+                                <button @click="closeResult()" style="width: 100%; padding: 10px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                    Done for now
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                                    <!-- ******************************** -->
+                                    <!-- SRR LOG history                  -->
+                                    <!-- ******************************** -->
+                
+                 <div class="paginatedHistory" x-show="patients.length > 0"  style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
+                    
+                       <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                            <button @click="showLog = !showLog" type="button" style="
+                                width: 100%;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                padding: 12px 16px;
+                                background: #e8eef7;
+                                border: 1px solid #c8d6eb;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-weight: bold;
+                                color: #16325F;
+                                transition: background 0.15s ease;
+                            " @mouseenter="$el.style.background='#dde6f3'"
+                               @mouseleave="$el.style.background='#e8eef7'">
+       
+                            <h3 style="margin: 0;"><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Logbook</h3> <i class="fa-solid" :class="showLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                             </button>
                         </div>
-                    </div>
+                        <div x-show="showLog">
+                            <div x-show="paginatedHistory.length === 0" style="text-align: center; padding: 25px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; color: #64748b; font-size: 0.9rem;">
+                                <i class="fa-solid fa-calendar-xmark" style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5;"></i><br>
+                                No readings recorded during this specific time period.<br>
+                                <strong>Adjust the Analytics date range below to see older logs.</strong>
+                            </div>
                     
+                            <template x-for="log in paginatedHistory" :key="log.id">
+                                <div>  <div class="history-item" :class="log.isEquivocal ? 'equivocal-flag' : ''">
+                                        <div>
+                                            <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
+                                            <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
+                                            <template x-if="log.comment && log.comment.trim().length">
+                                                <span
+                                                    @click.stop="toggleCommentDisplay(log.id)"
+                                                    :title="log.comment"
+                                                    :style="expandedCommentId === log.id
+                                                        ? 'color:#1d4ed8; background:#eff6ff; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'
+                                                        : 'color:#3b82f6; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'">
+                                            
+                                                    <i class="fa-solid fa-comment-dots"></i>
+                                                </span>
+                                            </template>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">
+                                                <span x-text="log.rate"></span> bpm
+                                            </strong>
+                                            <button @click="openCommentEditor(log)"
+                                                    style="background: none; border: none; color: #3b82f6; cursor: pointer; padding: 4px; opacity: 0.5;"
+                                                    @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
+                                                    :title="log.comment ? 'Edit note' : 'Add note'">
+                                                <i class="fa-solid" :class="log.comment ? 'fa-comment-dots' : 'fa-comment-medical'"></i>
+                                            </button>
+                                            <button @click="deleteReading(log.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; opacity: 0.5;" 
+                                                    @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
+                                                    title="Delete this reading">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                            
+                                    <div x-show="expandedCommentId === log.id && log.comment && log.comment.trim().length > 0"
+                                         x-transition
+                                         style="background: #eff6ff; border: 1px solid #bfdbfe; border-top: none; border-radius: 0 0 6px 6px; padding: 10px 14px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                                        <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                            <i class="fa-solid fa-comment-dots" style="color: #3b82f6; margin-top: 2px; font-size: 0.8rem; flex-shrink: 0;"></i>
+                                            <span style="font-size: 0.85rem; color: #1e40af; line-height: 1.5;" x-text="log.comment"></span>
+                                        </div>
+                                        <button @click="openCommentEditor(log)"
+                                                style="background: none; border: 1px solid #bfdbfe; border-radius: 4px; color: #3b82f6; cursor: pointer; padding: 3px 8px; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">
+                                            Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                    
+                            <div style="margin-top: 15px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; overflow: hidden;">
+    
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap;">
+                                    <span style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+                                        <i class="fa-solid fa-filter" style="opacity: 0.6;"></i>
+                                        <strong>Date range:</strong>
+                                    </span>
+                                    <select x-model="timeScale" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; color: #334155; cursor: pointer;">
+                                        <option value="thisWeek">This Week</option>
+                                        <option value="lastWeek">Last Week</option>
+                                        <option value="thisMonth">This Month</option>
+                                        <option value="lastMonth">Last Month</option>
+                                        <option value="60d">Last 60 Days</option>
+                                        <option value="90d">Last 90 Days</option>
+                                        <option value="180d">Last 6 Months</option>
+                                        <option value="all">Entire Dataset</option>
+                                        <option value="custom">Custom Range...</option>
+                                    </select>
+                                    <template x-if="timeScale === 'custom'">
+                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+                                            <input type="date" x-model="customStartDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                            <span style="color: #94a3b8;">to</span>
+                                            <input type="date" x-model="customEndDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                        </div>
+                                    </template>
+                                </div>
+                            
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;" x-show="totalPages > 1">
+                                    <button @click="prevPage()" :disabled="currentPage === 1"
+                                            style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
+                                            :style="currentPage === 1 ? 'opacity: 0.5;' : ''">
+                                        <i class="fa-solid fa-chevron-left"></i> Prev
+                                    </button>
+                                    <span style="font-size: 0.9rem; color: #475569;">
+                                        Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span>
+                                    </span>
+                                    <button @click="nextPage()" :disabled="currentPage === totalPages"
+                                            style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
+                                            :style="currentPage === totalPages ? 'opacity: 0.5;' : ''">
+                                        Next <i class="fa-solid fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            
+                                <template x-if="filteredStats">
+                                    <div style="padding: 12px 14px; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                                        
+                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Readings</div>
+                                            <div style="font-size: 1.2rem; font-weight: bold; color: #334155;" x-text="getFilteredReadings().length"></div>
+                                        </div>
+                            
+                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Mean SRR</div>
+                                            <div style="font-size: 1.2rem; font-weight: bold;"
+                                                 :style="filteredStats.mean >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
+                                                 x-text="filteredStats.mean.toFixed(1) + ' bpm'"></div>
+                                        </div>
+                            
+                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">
+                                                Upper Ref (mean+2SD)
+                                            </div>
+                                            <div style="font-size: 1.2rem; font-weight: bold;"
+                                                 :style="filteredStats.upperCI >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
+                                                 x-text="filteredStats.upperCI.toFixed(1) + ' bpm'"></div>
+                                        </div>
+                            
+                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;" x-show="getFilteredReadings().length >= 2">
+                                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Range</div>
+                                            <div style="font-size: 1.2rem; font-weight: bold; color: #334155;"
+                                                 x-text="Math.min(...getFilteredReadings().map(d => d.rate)) + '–' + Math.max(...getFilteredReadings().map(d => d.rate)) + ' bpm'"></div>
+                                        </div>
+                            
+                                    </div>
+                                </template>
+                            
+                                <template x-if="!filteredStats && getFilteredReadings().length > 0">
+                                    <div style="padding: 10px 14px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8; font-style: italic;">
+                                        <i class="fa-solid fa-circle-info" style="margin-right: 4px;"></i>
+                                        At least 2 readings required to calculate statistics.
+                                    </div>
+                                </template>
+                            
+                            </div>
+                        </div>
                 </div>
-            </div>
-            
-                                <!-- ******************************** -->
-                                <!-- SRR LOG history                  -->
-                                <!-- ******************************** -->
-            
-             <div class="paginatedHistory" x-show="patients.length > 0"  style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
                 
-                   <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                        <button @click="showLog = !showLog" type="button" style="
+                <!-- ******************************** -->
+                <!-- QUALITY OF LIFE & SYMPTOMS       -->
+                <!-- ******************************** -->
+                <div id="symptomSection" class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                        <button @click="showSymptomLog = !showSymptomLog" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F; transition: background 0.15s ease;" @mouseenter="$el.style.background='#dde6f3'" @mouseleave="$el.style.background='#e8eef7'">
+                            <h3 style="margin: 0;"><i class="fa-solid fa-heart-pulse text-rose-500"></i> Quality of Life (Daily Summaries)</h3> 
+                            <i class="fa-solid" :class="showSymptomLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+                
+                    <div x-show="showSymptomLog" x-transition style="display: grid; grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr); gap: 20px; align-items: start;">
+                        
+                        <!-- COUGH MONITOR (DAILY) -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px;">
+                                <h4 style="margin: 0; color: #334155;"><i class="fa-solid fa-head-side-cough"></i> Cough Summary</h4>
+                                <input type="date" x-model="newCough.date" @change="loadCoughForDate()" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+                            </div>
+                            
+                            <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">Approximate Frequency:</label>
+                            <div style="display: flex; gap: 5px; margin-bottom: 12px;">
+                                <input type="number" x-model="newCough.frequencyCount" placeholder="#" style="width: 60px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: center;">
+                                <span style="display: flex; align-items: center; color: #64748b; font-size: 0.9rem;">times per</span>
+                                <select x-model="newCough.frequencyPeriod" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                    <option value="hour">Hour</option>
+                                    <option value="day">Day</option>
+                                    <option value="week">Week</option>
+                                </select>
+                            </div>
+                
+                            <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                Description:
+                                <a href="#" @click.prevent="openGlossary('cough_types')" style="color: #3b82f6; text-decoration: none;"><i class="fa-solid fa-circle-question"></i> Sound Guide</a>
+                            </label>
+                            <select x-model="newCough.description" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px;">
+                                <option value="chesty/productive">Chesty / Productive</option>
+                                <option value="goose honking">Goose Honking</option>
+                                <option value="reverse sneezing">Reverse Sneezing</option>
+                                <option value="expiratory reflex (gag)">Terminal Retch / Gagging</option>
+                                <option value="dry/harsh">Dry / Harsh</option>
+                            </select>
+                            
+                            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Severity:</label>
+                                    <select x-model="newCough.severity" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                        <option value="Mild">Mild</option>
+                                        <option value="Moderate">Moderate</option>
+                                        <option value="Severe">Severe</option>
+                                    </select>
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Main Trigger:</label>
+                                    <select x-model="newCough.context" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                        <option value="Resting/Night">Resting/Night</option>
+                                        <option value="Excitement">Excitement</option>
+                                        <option value="Exercise">Exercise</option>
+                                        <option value="Post-Drinking">Post-Drinking</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <input type="text" x-model="newCough.notes" placeholder="Additional notes..." style="width: 100%; padding: 6px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                            
+                            <button id="btnSaveCough" @click="saveCough()" style="width: 100%; padding: 10px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
+                                <i class="fa-solid" :class="hasCoughForDate() ? 'fa-arrows-rotate' : 'fa-plus'"></i> 
+                                <span x-text="hasCoughForDate() ? 'Update Daily Summary' : 'Save Daily Summary'"></span>
+                            </button>
+                            
+                            <!-- Cough History Mini-List -->
+                            <div style="margin-top: 15px; max-height: 150px; overflow-y: auto; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+                                <template x-for="c in sortedCoughLog" :key="c.id">
+                                    <div style="background: white; border: 1px solid #e2e8f0; padding: 8px; margin-bottom: 5px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                                        <div>
+                                            <strong x-text="c.date"></strong> - 
+                                            <span :style="c.severity === 'Severe' ? 'color: #ef4444; font-weight: bold;' : 'color: #d97706;'" x-text="c.severity"></span><br>
+                                            <span style="color: #475569;" x-text="`${c.frequencyCount}x / ${c.frequencyPeriod}`"></span>
+                                            <span x-show="c.frequencyCount" style="color: #cbd5e1;"> | </span>
+                                            <span style="color: #64748b; font-style: italic;" x-text="c.description"></span>
+                                        </div>
+                                        <button @click="deleteCough(c.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                
+                        <!-- ACTIVITY MONITOR (DAILY) -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px;">
+                                <h4 style="margin: 0; color: #334155;"><i class="fa-solid fa-person-running"></i> Activity Summary</h4>
+                                <input type="date" x-model="newActivity.date" @change="loadActivityForDate()" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+                            </div>
+                            
+                            <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">Energy Level / Status:</label>
+                            <select x-model="newActivity.status" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px;">
+                                <option value="Normal">Normal</option>
+                                <option value="Reduced">Reduced (Tiring easier)</option>
+                                <option value="Lethargic">Lethargic / Refusing walks</option>
+                                <option value="Hyper">Hyper / Restless</option>
+                            </select>
+                            
+                            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Duration (mins):</label>
+                                    <input type="number" x-model="newActivity.durationMins" placeholder="e.g. 45" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Distance:</label>
+                                    <input type="text" x-model="newActivity.distance" placeholder="e.g. 2 miles" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                            </div>
+                            
+                            <input type="text" x-model="newActivity.notes" placeholder="Notes (e.g., sat down 3 times on walk)" style="width: 100%; padding: 6px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                            
+                            <button id="btnSaveActivity" @click="saveActivity()" style="width: 100%; padding: 10px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
+                                <i class="fa-solid" :class="hasActivityForDate() ? 'fa-arrows-rotate' : 'fa-plus'"></i> 
+                                <span x-text="hasActivityForDate() ? 'Update Daily Summary' : 'Save Daily Summary'"></span>
+                            </button>
+                
+                            <!-- Activity History Mini-List -->
+                            <div style="margin-top: 15px; max-height: 150px; overflow-y: auto; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+                                <template x-for="a in sortedActivityLog" :key="a.id">
+                                    <div style="background: white; border: 1px solid #e2e8f0; padding: 8px; margin-bottom: 5px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                                        <div>
+                                            <strong x-text="a.date"></strong> - 
+                                            <span :style="['Reduced', 'Lethargic'].includes(a.status) ? 'color: #ef4444; font-weight: bold;' : 'color: #3b82f6;'" x-text="a.status"></span><br>
+                                            <span style="color: #475569;" x-show="a.durationMins || a.distance">
+                                                <span x-show="a.durationMins" x-text="`${a.durationMins}m`"></span>
+                                                <span x-show="a.durationMins && a.distance" style="color: #cbd5e1;"> | </span>
+                                                <span x-show="a.distance" x-text="a.distance"></span>
+                                            </span>
+                                        </div>
+                                        <button @click="deleteActivity(a.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                
+                    </div>
+                </div>
+                
+                                    <!-- ******************************** -->
+                                    <!-- Medication History               -->
+                                    <!-- ******************************** -->
+                
+                <div class="medicationHistory" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                        <button @click="showMedLog = !showMedLog" type="button" style="
                             width: 100%;
                             display: flex;
                             justify-content: space-between;
@@ -569,800 +857,396 @@
                             transition: background 0.15s ease;
                         " @mouseenter="$el.style.background='#dde6f3'"
                            @mouseleave="$el.style.background='#e8eef7'">
-   
-                        <h3 style="margin: 0;"><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Logbook</h3> <i class="fa-solid" :class="showLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            
+                            <h3 style="margin: 0;"><i class="fa-solid fa-pills" style="margin-right: 8px;"></i> Pharmacologic Ledger</h3> 
+                            <i class="fa-solid" :class="showMedLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </button>
                     </div>
-                    <div x-show="showLog">
-                        <div x-show="paginatedHistory.length === 0" style="text-align: center; padding: 25px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; color: #64748b; font-size: 0.9rem;">
-                            <i class="fa-solid fa-calendar-xmark" style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5;"></i><br>
-                            No readings recorded during this specific time period.<br>
-                            <strong>Adjust the Analytics date range below to see older logs.</strong>
+                
+                    <div x-show="showMedLog" x-transition>
+                        
+                        <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #c8d6eb; margin-bottom: 20px;">
+                            <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Medication Change</h4>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end;">
+                                
+                                <div>
+                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Event Date</label>
+                                    <input type="date" x-model="newMed.eventDate" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                </div>
+                
+                                <div>
+                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Medication</label>
+                                    <select x-model="newMed.drugId" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                        <option value="" disabled>Select Drug...</option>
+                                        
+                                        <template x-for="opt in medicationOptions" :key="opt.value">
+                                            <option :value="opt.value" x-text="opt.label"></option>
+                                        </template>
+                                        
+                                    </select>
+                                </div>
+                
+                                <div x-show="newMed.drugId === 'other'" x-cloak>
+                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Custom Name</label>
+                                    <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                </div>
+                
+                                <div style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
+                                    <input type="checkbox" 
+                                           id="stoppedCheck" 
+                                           x-model="newMed.isStopped"
+                                           style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
+                                    <label for="stoppedCheck" 
+                                           style="font-size: 0.85rem; font-weight: bold; color: #ef4444; cursor: pointer; user-select: none;">
+                                        Stopped
+                                    </label>
+                                </div>
+                                
+                                <!-- DOSE — greyed out when Stopped -->
+                                <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Dose (mg)</label>
+                                    <input type="number" step="0.1" 
+                                           x-model="newMed.doseMg" 
+                                           :disabled="newMed.isStopped"
+                                           placeholder="e.g., 20" 
+                                           style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                </div>
+                                
+                                <!-- FREQUENCY — greyed out when Stopped -->
+                                <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Frequency</label>
+                                    <select x-model="newMed.frequency" 
+                                            :disabled="newMed.isStopped"
+                                            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                        <option value="q24h">q24h (SID)</option>
+                                        <option value="q12h">q12h (BID)</option>
+                                        <option value="q8h">q8h (TID)</option>
+                                        <option value="PRN">PRN (As Needed)</option>
+                                    </select>
+                                </div>            
+                                <div>
+                                    <button @click="addMedication()" type="button" style="width: 100%; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                        <i class="fa-solid fa-plus"></i> Save Entry
+                                    </button>
+                                </div>
+                            </div>
+                
+                            <div x-show="calculatedMgPerKg() !== null" x-transition style="margin-top: 10px; font-size: 0.85rem; color: #059669; font-weight: bold; background: #d1fae5; padding: 6px 12px; border-radius: 4px; display: inline-block;">
+                                Calculated Dosage: <span x-text="calculatedMgPerKg()"></span> mg/kg
+                            </div>
                         </div>
                 
-                        <template x-for="log in paginatedHistory" :key="log.id">
-                            <div>  <div class="history-item" :class="log.isEquivocal ? 'equivocal-flag' : ''">
-                                    <div>
-                                        <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
-                                        <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
-                                        <template x-if="log.comment && log.comment.trim().length">
-                                            <span
-                                                @click.stop="toggleCommentDisplay(log.id)"
-                                                :title="log.comment"
-                                                :style="expandedCommentId === log.id
-                                                    ? 'color:#1d4ed8; background:#eff6ff; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'
-                                                    : 'color:#3b82f6; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'">
-                                        
-                                                <i class="fa-solid fa-comment-dots"></i>
+                        <div style="background: #ffffff; border-radius: 6px; border: 1px solid #c8d6eb; overflow: hidden;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
+                                <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
+                                    <tr>
+                                        <th style="padding: 10px 15px;">Date</th>
+                                        <th style="padding: 10px 15px;">Action</th>
+                                        <th style="padding: 10px 15px;">Medication</th>
+                                        <th style="padding: 10px 15px;">Regimen</th>
+                                        <th style="padding: 10px 15px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="med in sortedMedLedger()" :key="med.id">
+                                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                                            <td style="padding: 10px 15px; font-weight: bold; color: #334155;" x-text="med.eventDate"></td>
+                                            <td style="padding: 10px 15px;">
+                                                <span :style="med.isMajorChange ? 'color: #ef4444; font-weight: bold;' : 'color: #f59e0b; font-weight: bold;'" x-text="med.action"></span>
+                                            </td>
+                                            <td style="padding: 10px 15px;">
+                                                <span x-text="med.drugId === 'other' ? med.customName : (formulary[med.drugId]?.generic || med.drugId)"></span>
+                                            </td>
+                                            <td style="padding: 10px 15px; color: #64748b;">
+                                                <span x-show="!med.isStopped" x-text="med.doseMg + 'mg ' + med.frequency"></span>
+                                                <span x-show="med.isStopped" style="color: #94a3b8; font-style: italic;">Discontinued</span>
+                                                <span x-show="med.dynamicMgPerKg && !med.isStopped" 
+                                                      style="font-size: 0.8rem; color: #94a3b8;">
+                                                    (<span x-text="med.dynamicMgPerKg"></span> mg/kg
+                                                    <span x-show="med.weightChanged"
+                                                          title="Patient weight has changed since this entry — mg/kg has been recalculated from weight log"
+                                                          style="color: #f59e0b; font-size: 0.8rem; cursor: help;">⚠</span>)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 10px 15px; text-align: right;">
+                                                <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <tr x-show="medLedger.length === 0">
+                                        <td colspan="5" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
+                                            No pharmacologic history recorded for this patient.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                
+                    </div>
+                </div>
+                
+                                    <!-- ******************************** -->
+                                    <!-- DIAGNOSIS SECTION            -->
+                                    <!-- ******************************** -->
+                <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
+        
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                        <button @click="showDiagnosisLog = !showDiagnosisLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F;">
+                            <h3 style="margin: 0;"><i class="fa-solid fa-stethoscope" style="margin-right: 8px; color: #0284c7;"></i> Diagnosis & ACVIM Staging</h3> 
+                            <i class="fa-solid" :class="showDiagnosisLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+                
+                    <div x-show="showDiagnosisLog" x-transition>
+                        
+                        <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #c8d6eb; margin-bottom: 20px; text-align: left;">
+                            <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Diagnosis Update</h4>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                                <div>
+                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Date of Diagnosis/Scan</label>
+                                    <input type="date" x-model="newDiagnosis.date" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                            <!-- Primary Cardiac -->
+                                <div style="margin-bottom: 15px;">
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Primary Cardiac Diagnosis</label>
+                                    <select x-model="primaryCardiacDiagnosis" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                        <option value="">Select Diagnosis...</option>
+                                        <option value="MMVD (Myxomatous Mitral Valve Disease)">MMVD</option>
+                                        <option value="HCM (Hypertrophic Cardiomyopathy)">HCM</option>
+                                        <option value="DCM (Dilated Cardiomyopathy)">DCM</option>
+                                        <option value="Pulmonary Hypertension">Pulmonary Hypertension</option>
+                                        <option value="Arrhythmogenic Right Ventricular Cardiomyopathy">ARVC</option>
+                                        <option value="Congenital Defect">Congenital Defect (PDA, SAS, PS)</option>
+                                    </select>
+                                </div>
+                            
+                                <!-- Dynamic ACVIM Staging -->
+                                <div x-show="isStagingApplicable()" x-transition style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Disease Stage (Update as needed)</label>
+                                    <p style="font-size: 0.85rem; color: #64748b; margin-top: 0; margin-bottom: 10px;">
+                                        <em>Note: Formal ACVIM staging primarily applies to MMVD and Feline HCM. DCM staging is loosely adapted.</em>
+                                    </p>
+                                    <select x-model="acvimStage" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                        <option value="">Unstaged</option>
+                                        <option value="Stage A">Stage A (At Risk)</option>
+                                        <option value="Stage B1">Stage B1 (Subclinical, No Remodeling)</option>
+                                        <option value="Stage B2">Stage B2 (Subclinical, Cardiomegaly)</option>
+                                        <option value="Stage C">Stage C (Current/Past Heart Failure)</option>
+                                        <option value="Stage D">Stage D (Refractory Heart Failure)</option>
+                                    </select>
+                                </div>
+                            
+                                <!-- Concurrent Conditions -->
+                                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Concurrent Non-Cardiac Diagnoses</label>
+                                    
+                                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                        <input type="text" x-model="newConcurrentDiagnosis" @keydown.enter.prevent="addConcurrentDiagnosis()" placeholder="e.g., Chronic Kidney Disease, Osteoarthritis..." style="flex-grow: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                        <button @click="addConcurrentDiagnosis()" style="padding: 10px 15px; background: #005f73; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                            <i class="fa-solid fa-plus"></i> Add
+                                        </button>
+                                    </div>
+                            
+                                    <!-- Tag list for concurrent issues -->
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                        <template x-for="(diagnosis, index) in concurrentDiagnoses" :key="index">
+                                            <span style="background: #e2e8f0; color: #334155; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                                                <span x-text="diagnosis"></span>
+                                                <i class="fa-solid fa-xmark" @click="removeConcurrentDiagnosis(index)" style="cursor: pointer; color: #ef4444;"></i>
                                             </span>
                                         </template>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">
-                                            <span x-text="log.rate"></span> bpm
-                                        </strong>
-                                        <button @click="openCommentEditor(log)"
-                                                style="background: none; border: none; color: #3b82f6; cursor: pointer; padding: 4px; opacity: 0.5;"
-                                                @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
-                                                :title="log.comment ? 'Edit note' : 'Add note'">
-                                            <i class="fa-solid" :class="log.comment ? 'fa-comment-dots' : 'fa-comment-medical'"></i>
-                                        </button>
-                                        <button @click="deleteReading(log.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; opacity: 0.5;" 
-                                                @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
-                                                title="Delete this reading">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </div>
                                 </div>
-                        
-                                <div x-show="expandedCommentId === log.id && log.comment && log.comment.trim().length > 0"
-                                     x-transition
-                                     style="background: #eff6ff; border: 1px solid #bfdbfe; border-top: none; border-radius: 0 0 6px 6px; padding: 10px 14px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                        <i class="fa-solid fa-comment-dots" style="color: #3b82f6; margin-top: 2px; font-size: 0.8rem; flex-shrink: 0;"></i>
-                                        <span style="font-size: 0.85rem; color: #1e40af; line-height: 1.5;" x-text="log.comment"></span>
-                                    </div>
-                                    <button @click="openCommentEditor(log)"
-                                            style="background: none; border: 1px solid #bfdbfe; border-radius: 4px; color: #3b82f6; cursor: pointer; padding: 3px 8px; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">
-                                        Edit
+                                <div style="grid-column: 1 / -1;">
+                                    <button @click="saveDiagnosis()" type="button" style="width: 100%; padding: 8px; background: #0284c7; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                        <i class="fa-solid fa-plus"></i> Save Clinical Status
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                
+                        <template x-for="diag in sortedDiagnosisLog()" :key="diag.id">
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 8px; text-align: left; position: relative;">
+                                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 4px;" x-text="new Date(diag.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></div>
+                                <div style="font-weight: bold; color: #1e293b; font-size: 1.05rem;" x-text="diag.diagnosis"></div>
+                                <div x-show="diag.acvimStage !== 'N/A'" style="color: #0284c7; font-size: 0.9rem; margin-top: 4px;">ACVIM Stage <strong x-text="diag.acvimStage"></strong></div>
+                                <button @click="deleteDiagnosis(diag.id)" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </template>
-                
-                        <div style="margin-top: 15px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; overflow: hidden;">
-
-                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap;">
-                                <span style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
-                                    <i class="fa-solid fa-filter" style="opacity: 0.6;"></i>
-                                    <strong>Date range:</strong>
-                                </span>
-                                <select x-model="timeScale" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; color: #334155; cursor: pointer;">
-                                    <option value="thisWeek">This Week</option>
-                                    <option value="lastWeek">Last Week</option>
-                                    <option value="thisMonth">This Month</option>
-                                    <option value="lastMonth">Last Month</option>
-                                    <option value="60d">Last 60 Days</option>
-                                    <option value="90d">Last 90 Days</option>
-                                    <option value="180d">Last 6 Months</option>
-                                    <option value="all">Entire Dataset</option>
-                                    <option value="custom">Custom Range...</option>
-                                </select>
-                                <template x-if="timeScale === 'custom'">
-                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
-                                        <input type="date" x-model="customStartDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                                        <span style="color: #94a3b8;">to</span>
-                                        <input type="date" x-model="customEndDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                                    </div>
-                                </template>
-                            </div>
-                        
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;" x-show="totalPages > 1">
-                                <button @click="prevPage()" :disabled="currentPage === 1"
-                                        style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
-                                        :style="currentPage === 1 ? 'opacity: 0.5;' : ''">
-                                    <i class="fa-solid fa-chevron-left"></i> Prev
-                                </button>
-                                <span style="font-size: 0.9rem; color: #475569;">
-                                    Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span>
-                                </span>
-                                <button @click="nextPage()" :disabled="currentPage === totalPages"
-                                        style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
-                                        :style="currentPage === totalPages ? 'opacity: 0.5;' : ''">
-                                    Next <i class="fa-solid fa-chevron-right"></i>
-                                </button>
-                            </div>
-                        
-                            <template x-if="filteredStats">
-                                <div style="padding: 12px 14px; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
-                                    
-                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
-                                        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Readings</div>
-                                        <div style="font-size: 1.2rem; font-weight: bold; color: #334155;" x-text="getFilteredReadings().length"></div>
-                                    </div>
-                        
-                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
-                                        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Mean SRR</div>
-                                        <div style="font-size: 1.2rem; font-weight: bold;"
-                                             :style="filteredStats.mean >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
-                                             x-text="filteredStats.mean.toFixed(1) + ' bpm'"></div>
-                                    </div>
-                        
-                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
-                                        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">
-                                            Upper Ref (mean+2SD)
-                                        </div>
-                                        <div style="font-size: 1.2rem; font-weight: bold;"
-                                             :style="filteredStats.upperCI >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
-                                             x-text="filteredStats.upperCI.toFixed(1) + ' bpm'"></div>
-                                    </div>
-                        
-                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;" x-show="getFilteredReadings().length >= 2">
-                                        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Range</div>
-                                        <div style="font-size: 1.2rem; font-weight: bold; color: #334155;"
-                                             x-text="Math.min(...getFilteredReadings().map(d => d.rate)) + '–' + Math.max(...getFilteredReadings().map(d => d.rate)) + ' bpm'"></div>
-                                    </div>
-                        
-                                </div>
-                            </template>
-                        
-                            <template x-if="!filteredStats && getFilteredReadings().length > 0">
-                                <div style="padding: 10px 14px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8; font-style: italic;">
-                                    <i class="fa-solid fa-circle-info" style="margin-right: 4px;"></i>
-                                    At least 2 readings required to calculate statistics.
-                                </div>
-                            </template>
-                        
-                        </div>
+                        <div x-show="sortedDiagnosisLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No diagnostic history recorded.</div>
                     </div>
-            </div>
-            
-            <!-- ******************************** -->
-            <!-- QUALITY OF LIFE & SYMPTOMS       -->
-            <!-- ******************************** -->
-            <div id="symptomSection" class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
-                
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                    <button @click="showSymptomLog = !showSymptomLog" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F; transition: background 0.15s ease;" @mouseenter="$el.style.background='#dde6f3'" @mouseleave="$el.style.background='#e8eef7'">
-                        <h3 style="margin: 0;"><i class="fa-solid fa-heart-pulse text-rose-500"></i> Quality of Life (Daily Summaries)</h3> 
-                        <i class="fa-solid" :class="showSymptomLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                    </button>
                 </div>
-            
-                <div x-show="showSymptomLog" x-transition style="display: grid; grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr); gap: 20px; align-items: start;">
-                    
-                    <!-- COUGH MONITOR (DAILY) -->
-                    <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px;">
-                            <h4 style="margin: 0; color: #334155;"><i class="fa-solid fa-head-side-cough"></i> Cough Summary</h4>
-                            <input type="date" x-model="newCough.date" @change="loadCoughForDate()" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
-                        </div>
-                        
-                        <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">Approximate Frequency:</label>
-                        <div style="display: flex; gap: 5px; margin-bottom: 12px;">
-                            <input type="number" x-model="newCough.frequencyCount" placeholder="#" style="width: 60px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: center;">
-                            <span style="display: flex; align-items: center; color: #64748b; font-size: 0.9rem;">times per</span>
-                            <select x-model="newCough.frequencyPeriod" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                                <option value="hour">Hour</option>
-                                <option value="day">Day</option>
-                                <option value="week">Week</option>
-                            </select>
-                        </div>
-            
-                        <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            Description:
-                            <a href="#" @click.prevent="openGlossary('cough_types')" style="color: #3b82f6; text-decoration: none;"><i class="fa-solid fa-circle-question"></i> Sound Guide</a>
-                        </label>
-                        <select x-model="newCough.description" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px;">
-                            <option value="chesty/productive">Chesty / Productive</option>
-                            <option value="goose honking">Goose Honking</option>
-                            <option value="reverse sneezing">Reverse Sneezing</option>
-                            <option value="expiratory reflex (gag)">Terminal Retch / Gagging</option>
-                            <option value="dry/harsh">Dry / Harsh</option>
-                        </select>
-                        
-                        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                            <div style="flex: 1;">
-                                <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Severity:</label>
-                                <select x-model="newCough.severity" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                                    <option value="Mild">Mild</option>
-                                    <option value="Moderate">Moderate</option>
-                                    <option value="Severe">Severe</option>
-                                </select>
-                            </div>
-                            <div style="flex: 1;">
-                                <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Main Trigger:</label>
-                                <select x-model="newCough.context" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                                    <option value="Resting/Night">Resting/Night</option>
-                                    <option value="Excitement">Excitement</option>
-                                    <option value="Exercise">Exercise</option>
-                                    <option value="Post-Drinking">Post-Drinking</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <input type="text" x-model="newCough.notes" placeholder="Additional notes..." style="width: 100%; padding: 6px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                        
-                        <button id="btnSaveCough" @click="saveCough()" style="width: 100%; padding: 10px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
-                            <i class="fa-solid" :class="hasCoughForDate() ? 'fa-arrows-rotate' : 'fa-plus'"></i> 
-                            <span x-text="hasCoughForDate() ? 'Update Daily Summary' : 'Save Daily Summary'"></span>
-                        </button>
-                        
-                        <!-- Cough History Mini-List -->
-                        <div style="margin-top: 15px; max-height: 150px; overflow-y: auto; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
-                            <template x-for="c in sortedCoughLog" :key="c.id">
-                                <div style="background: white; border: 1px solid #e2e8f0; padding: 8px; margin-bottom: 5px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
-                                    <div>
-                                        <strong x-text="c.date"></strong> - 
-                                        <span :style="c.severity === 'Severe' ? 'color: #ef4444; font-weight: bold;' : 'color: #d97706;'" x-text="c.severity"></span><br>
-                                        <span style="color: #475569;" x-text="`${c.frequencyCount}x / ${c.frequencyPeriod}`"></span>
-                                        <span x-show="c.frequencyCount" style="color: #cbd5e1;"> | </span>
-                                        <span style="color: #64748b; font-style: italic;" x-text="c.description"></span>
-                                    </div>
-                                    <button @click="deleteCough(c.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-            
-                    <!-- ACTIVITY MONITOR (DAILY) -->
-                    <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px;">
-                            <h4 style="margin: 0; color: #334155;"><i class="fa-solid fa-person-running"></i> Activity Summary</h4>
-                            <input type="date" x-model="newActivity.date" @change="loadActivityForDate()" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
-                        </div>
-                        
-                        <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">Energy Level / Status:</label>
-                        <select x-model="newActivity.status" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px;">
-                            <option value="Normal">Normal</option>
-                            <option value="Reduced">Reduced (Tiring easier)</option>
-                            <option value="Lethargic">Lethargic / Refusing walks</option>
-                            <option value="Hyper">Hyper / Restless</option>
-                        </select>
-                        
-                        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                            <div style="flex: 1;">
-                                <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Duration (mins):</label>
-                                <input type="number" x-model="newActivity.durationMins" placeholder="e.g. 45" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                            <div style="flex: 1;">
-                                <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Distance:</label>
-                                <input type="text" x-model="newActivity.distance" placeholder="e.g. 2 miles" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                        </div>
-                        
-                        <input type="text" x-model="newActivity.notes" placeholder="Notes (e.g., sat down 3 times on walk)" style="width: 100%; padding: 6px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                        
-                        <button id="btnSaveActivity" @click="saveActivity()" style="width: 100%; padding: 10px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
-                            <i class="fa-solid" :class="hasActivityForDate() ? 'fa-arrows-rotate' : 'fa-plus'"></i> 
-                            <span x-text="hasActivityForDate() ? 'Update Daily Summary' : 'Save Daily Summary'"></span>
-                        </button>
-            
-                        <!-- Activity History Mini-List -->
-                        <div style="margin-top: 15px; max-height: 150px; overflow-y: auto; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
-                            <template x-for="a in sortedActivityLog" :key="a.id">
-                                <div style="background: white; border: 1px solid #e2e8f0; padding: 8px; margin-bottom: 5px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
-                                    <div>
-                                        <strong x-text="a.date"></strong> - 
-                                        <span :style="['Reduced', 'Lethargic'].includes(a.status) ? 'color: #ef4444; font-weight: bold;' : 'color: #3b82f6;'" x-text="a.status"></span><br>
-                                        <span style="color: #475569;" x-show="a.durationMins || a.distance">
-                                            <span x-show="a.durationMins" x-text="`${a.durationMins}m`"></span>
-                                            <span x-show="a.durationMins && a.distance" style="color: #cbd5e1;"> | </span>
-                                            <span x-show="a.distance" x-text="a.distance"></span>
-                                        </span>
-                                    </div>
-                                    <button @click="deleteActivity(a.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-            
-                </div>
-            </div>
-            
-                                <!-- ******************************** -->
-                                <!-- Medication History               -->
-                                <!-- ******************************** -->
-            
-            <div class="medicationHistory" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
-                
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                    <button @click="showMedLog = !showMedLog" type="button" style="
-                        width: 100%;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 12px 16px;
-                        background: #e8eef7;
-                        border: 1px solid #c8d6eb;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        font-weight: bold;
-                        color: #16325F;
-                        transition: background 0.15s ease;
-                    " @mouseenter="$el.style.background='#dde6f3'"
-                       @mouseleave="$el.style.background='#e8eef7'">
-                        
-                        <h3 style="margin: 0;"><i class="fa-solid fa-pills" style="margin-right: 8px;"></i> Pharmacologic Ledger</h3> 
-                        <i class="fa-solid" :class="showMedLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                    </button>
-                </div>
-            
-                <div x-show="showMedLog" x-transition>
-                    
-                    <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #c8d6eb; margin-bottom: 20px;">
-                        <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Medication Change</h4>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end;">
-                            
-                            <div>
-                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Event Date</label>
-                                <input type="date" x-model="newMed.eventDate" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                            </div>
-            
-                            <div>
-                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Medication</label>
-                                <select x-model="newMed.drugId" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                    <option value="" disabled>Select Drug...</option>
-                                    
-                                    <template x-for="opt in medicationOptions" :key="opt.value">
-                                        <option :value="opt.value" x-text="opt.label"></option>
-                                    </template>
-                                    
-                                </select>
-                            </div>
-            
-                            <div x-show="newMed.drugId === 'other'" x-cloak>
-                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Custom Name</label>
-                                <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                            </div>
-            
-                            <div style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
-                                <input type="checkbox" 
-                                       id="stoppedCheck" 
-                                       x-model="newMed.isStopped"
-                                       style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
-                                <label for="stoppedCheck" 
-                                       style="font-size: 0.85rem; font-weight: bold; color: #ef4444; cursor: pointer; user-select: none;">
-                                    Stopped
-                                </label>
-                            </div>
-                            
-                            <!-- DOSE — greyed out when Stopped -->
-                            <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Dose (mg)</label>
-                                <input type="number" step="0.1" 
-                                       x-model="newMed.doseMg" 
-                                       :disabled="newMed.isStopped"
-                                       placeholder="e.g., 20" 
-                                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                            </div>
-                            
-                            <!-- FREQUENCY — greyed out when Stopped -->
-                            <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Frequency</label>
-                                <select x-model="newMed.frequency" 
-                                        :disabled="newMed.isStopped"
-                                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                    <option value="q24h">q24h (SID)</option>
-                                    <option value="q12h">q12h (BID)</option>
-                                    <option value="q8h">q8h (TID)</option>
-                                    <option value="PRN">PRN (As Needed)</option>
-                                </select>
-                            </div>            
-                            <div>
-                                <button @click="addMedication()" type="button" style="width: 100%; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                                    <i class="fa-solid fa-plus"></i> Save Entry
-                                </button>
-                            </div>
-                        </div>
-            
-                        <div x-show="calculatedMgPerKg() !== null" x-transition style="margin-top: 10px; font-size: 0.85rem; color: #059669; font-weight: bold; background: #d1fae5; padding: 6px 12px; border-radius: 4px; display: inline-block;">
-                            Calculated Dosage: <span x-text="calculatedMgPerKg()"></span> mg/kg
-                        </div>
-                    </div>
-            
-                    <div style="background: #ffffff; border-radius: 6px; border: 1px solid #c8d6eb; overflow: hidden;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
-                            <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
-                                <tr>
-                                    <th style="padding: 10px 15px;">Date</th>
-                                    <th style="padding: 10px 15px;">Action</th>
-                                    <th style="padding: 10px 15px;">Medication</th>
-                                    <th style="padding: 10px 15px;">Regimen</th>
-                                    <th style="padding: 10px 15px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <template x-for="med in sortedMedLedger()" :key="med.id">
-                                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                                        <td style="padding: 10px 15px; font-weight: bold; color: #334155;" x-text="med.eventDate"></td>
-                                        <td style="padding: 10px 15px;">
-                                            <span :style="med.isMajorChange ? 'color: #ef4444; font-weight: bold;' : 'color: #f59e0b; font-weight: bold;'" x-text="med.action"></span>
-                                        </td>
-                                        <td style="padding: 10px 15px;">
-                                            <span x-text="med.drugId === 'other' ? med.customName : (formulary[med.drugId]?.generic || med.drugId)"></span>
-                                        </td>
-                                        <td style="padding: 10px 15px; color: #64748b;">
-                                            <span x-show="!med.isStopped" x-text="med.doseMg + 'mg ' + med.frequency"></span>
-                                            <span x-show="med.isStopped" style="color: #94a3b8; font-style: italic;">Discontinued</span>
-                                            <span x-show="med.dynamicMgPerKg && !med.isStopped" 
-                                                  style="font-size: 0.8rem; color: #94a3b8;">
-                                                (<span x-text="med.dynamicMgPerKg"></span> mg/kg
-                                                <span x-show="med.weightChanged"
-                                                      title="Patient weight has changed since this entry — mg/kg has been recalculated from weight log"
-                                                      style="color: #f59e0b; font-size: 0.8rem; cursor: help;">⚠</span>)
-                                            </span>
-                                        </td>
-                                        <td style="padding: 10px 15px; text-align: right;">
-                                            <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </template>
-                                <tr x-show="medLedger.length === 0">
-                                    <td colspan="5" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
-                                        No pharmacologic history recorded for this patient.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-            
-                </div>
-            </div>
-            
-                                <!-- ******************************** -->
-                                <!-- DIAGNOSIS SECTION            -->
-                                <!-- ******************************** -->
-            <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
     
+    
+                                    <!-- ******************************** -->
+                                    <!-- SYNCOPE SECTION                  -->
+                                    <!-- ******************************** -->
+                                    
+            <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
+                
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                    <button @click="showDiagnosisLog = !showDiagnosisLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F;">
-                        <h3 style="margin: 0;"><i class="fa-solid fa-stethoscope" style="margin-right: 8px; color: #0284c7;"></i> Diagnosis & ACVIM Staging</h3> 
-                        <i class="fa-solid" :class="showDiagnosisLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                    <button @click="showSyncopeLog = !showSyncopeLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F;">
+                        <h3 style="margin: 0;"><i class="fa-solid fa-bolt" style="margin-right: 8px;"></i> Collapse / Syncope Log</h3> 
+                        <i class="fa-solid" :class="showSyncopeLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                     </button>
                 </div>
             
-                <div x-show="showDiagnosisLog" x-transition>
+                <div x-show="showSyncopeLog" x-transition>
                     
-                    <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #c8d6eb; margin-bottom: 20px; text-align: left;">
-                        <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Diagnosis Update</h4>
+                    <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #fca5a5; margin-bottom: 20px; text-align: left;">
+                        <h4 style="margin-top: 0; color: #7f1d1d; font-size: 0.95rem; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">Log Event Details</h4>
                         
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
                             <div>
-                                <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Date of Diagnosis/Scan</label>
-                                <input type="date" x-model="newDiagnosis.date" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Date</label>
+                                <input type="date" x-model="newSyncope.date" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                             </div>
-                        <!-- Primary Cardiac -->
-                            <div style="margin-bottom: 15px;">
-                                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Primary Cardiac Diagnosis</label>
-                                <select x-model="primaryCardiacDiagnosis" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                    <option value="">Select Diagnosis...</option>
-                                    <option value="MMVD (Myxomatous Mitral Valve Disease)">MMVD</option>
-                                    <option value="HCM (Hypertrophic Cardiomyopathy)">HCM</option>
-                                    <option value="DCM (Dilated Cardiomyopathy)">DCM</option>
-                                    <option value="Pulmonary Hypertension">Pulmonary Hypertension</option>
-                                    <option value="Arrhythmogenic Right Ventricular Cardiomyopathy">ARVC</option>
-                                    <option value="Congenital Defect">Congenital Defect (PDA, SAS, PS)</option>
+                            <div>
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Time</label>
+                                <input type="time" x-model="newSyncope.time" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; margin-bottom: 5px;">What happened?</label>
+                                <select x-model="newSyncope.type" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                    <option value="Unknown">Unknown Event (Collapse/Episode)</option>
+                                    <option value="Syncope">Suspected Syncope (Fainting)</option>
+                                    <option value="Seizure">Suspected Seizure</option>
+                                    <option value="Weakness">Hindlimb Weakness / Paresis</option>
+                                    <option value="Other">Other (Custom)</option>
                                 </select>
                             </div>
-                        
-                            <!-- Dynamic ACVIM Staging -->
-                            <div x-show="isStagingApplicable()" x-transition style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 4px;">
-                                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Disease Stage (Update as needed)</label>
-                                <p style="font-size: 0.85rem; color: #64748b; margin-top: 0; margin-bottom: 10px;">
-                                    <em>Note: Formal ACVIM staging primarily applies to MMVD and Feline HCM. DCM staging is loosely adapted.</em>
-                                </p>
-                                <select x-model="acvimStage" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                    <option value="">Unstaged</option>
-                                    <option value="Stage A">Stage A (At Risk)</option>
-                                    <option value="Stage B1">Stage B1 (Subclinical, No Remodeling)</option>
-                                    <option value="Stage B2">Stage B2 (Subclinical, Cardiomegaly)</option>
-                                    <option value="Stage C">Stage C (Current/Past Heart Failure)</option>
-                                    <option value="Stage D">Stage D (Refractory Heart Failure)</option>
+                            
+                            <div x-show="newSyncope.type === 'Other'" x-collapse>
+                                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Describe Event Type</label>
+                                <input type="text" x-model="customEventType" placeholder="e.g., Vestibular episode, choking..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;">
+                            </div>
+                            
+                            <!-- Removed the duplicate narrow notes section from here -->
+            
+                            <div>
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Est. Duration</label>
+                                <input type="text" x-model="newSyncope.duration" placeholder="e.g. 30 secs" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Consciousness</label>
+                                <select x-model="newSyncope.loc" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                    <option>Full Loss</option>
+                                    <option>Partial / Dazed</option>
+                                    <option>Maintained</option>
                                 </select>
                             </div>
-                        
-                            <!-- Concurrent Conditions -->
-                            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                             <div>
-                                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Concurrent Non-Cardiac Diagnoses</label>
-                                
-                                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                    <input type="text" x-model="newConcurrentDiagnosis" @keydown.enter.prevent="addConcurrentDiagnosis()" placeholder="e.g., Chronic Kidney Disease, Osteoarthritis..." style="flex-grow: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                    <button @click="addConcurrentDiagnosis()" style="padding: 10px 15px; background: #005f73; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                        <i class="fa-solid fa-plus"></i> Add
-                                    </button>
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Muscle Tone</label>
+                                <select x-model="newSyncope.muscleTone" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                    <option>Flaccid (Limp)</option>
+                                    <option>Stiff / Rigid</option>
+                                    <option>Jerking / Twitching</option>
+                                    <option>Normal / Variable</option>
+                                </select>
+                            </div>
+                            
+                            <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 5px;">
+                                 <div>
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">MM Colour</label>
+                                    <input type="text" x-model="newSyncope.mmColour" placeholder="Pale, Blue, Pink" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                                 </div>
-                        
-                                <!-- Tag list for concurrent issues -->
-                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                    <template x-for="(diagnosis, index) in concurrentDiagnoses" :key="index">
-                                        <span style="background: #e2e8f0; color: #334155; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
-                                            <span x-text="diagnosis"></span>
-                                            <i class="fa-solid fa-xmark" @click="removeConcurrentDiagnosis(index)" style="cursor: pointer; color: #ef4444;"></i>
-                                        </span>
-                                    </template>
+                                 <div>
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">HR (bpm)</label>
+                                    <input type="number" x-model="newSyncope.hr" placeholder="120" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                                 <div>
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">RR (bpm)</label>
+                                    <input type="number" x-model="newSyncope.rr" placeholder="30" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                                 </div>
                             </div>
+            
                             <div style="grid-column: 1 / -1;">
-                                <button @click="saveDiagnosis()" type="button" style="width: 100%; padding: 8px; background: #0284c7; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                                    <i class="fa-solid fa-plus"></i> Save Clinical Status
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Activity at Time of Event</label>
+                                <input type="text" x-model="newSyncope.activityBefore" placeholder="e.g., Playing in garden, waking up, excited by doorbell" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            
+                            <!-- Consolidated Notes Section (Full Width) -->
+                            <div style="grid-column: 1 / -1;">
+                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Clinical Notes & Triggers</label>
+                                <textarea x-model="newSyncope.notes" rows="3" placeholder="Did this happen during exercise? Coughing prior? Urination/defecation? Recovery time?" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+                            </div>
+            
+                            <div style="grid-column: 1 / -1;">
+                                <button @click="saveSyncope()" type="button" style="width: 100%; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                    <i class="fa-solid fa-plus"></i> Save Event
                                 </button>
                             </div>
                         </div>
                     </div>
             
-                    <template x-for="diag in sortedDiagnosisLog()" :key="diag.id">
-                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 8px; text-align: left; position: relative;">
-                            <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 4px;" x-text="new Date(diag.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></div>
-                            <div style="font-weight: bold; color: #1e293b; font-size: 1.05rem;" x-text="diag.diagnosis"></div>
-                            <div x-show="diag.acvimStage !== 'N/A'" style="color: #0284c7; font-size: 0.9rem; margin-top: 4px;">ACVIM Stage <strong x-text="diag.acvimStage"></strong></div>
-                            <button @click="deleteDiagnosis(diag.id)" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash-can"></i></button>
+                    <template x-for="event in sortedSyncopeLog()" :key="event.id">
+                        <div style="background: white; border: 1px solid #fca5a5; border-left: 4px solid #ef4444; border-radius: 6px; padding: 12px; margin-bottom: 8px; text-align: left; position: relative;">
+                            <div style="font-size: 0.8rem; color: #ef4444; font-weight: bold; margin-bottom: 4px;">
+                                <i class="fa-regular fa-clock"></i> <span x-text="new Date(event.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' ' + event.time"></span>
+                            </div>
+                            <div style="font-weight: bold; color: #1e293b; font-size: 1.05rem;" x-text="event.type + (event.duration ? ' (' + event.duration + ')' : '')"></div>
+                            <div style="font-size: 0.85rem; color: #475569; margin-top: 6px; line-height: 1.4;">
+                                <strong>LOC:</strong> <span x-text="event.loc"></span> | 
+                                <strong>Tone:</strong> <span x-text="event.muscleTone"></span><br>
+                                <template x-if="event.activityBefore"><span><strong>Activity:</strong> <span x-text="event.activityBefore"></span><br></span></template>
+                                <template x-if="event.mmColour || event.hr || event.rr">
+                                    <span style="color: #0284c7;">
+                                        <span x-show="event.mmColour"><strong>MM:</strong> <span x-text="event.mmColour"></span> </span>
+                                        <span x-show="event.hr"><strong>HR:</strong> <span x-text="event.hr"></span> </span>
+                                        <span x-show="event.rr"><strong>RR:</strong> <span x-text="event.rr"></span> </span><br>
+                                    </span>
+                                </template>
+                                <template x-if="event.notes"><span style="font-style: italic; color: #64748b;">"<span x-text="event.notes"></span>"</span></template>
+                            </div>
+                            <button @click="deleteSyncope(event.id)" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </template>
-                    <div x-show="sortedDiagnosisLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No diagnostic history recorded.</div>
+                    <div x-show="sortedSyncopeLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No collapse or syncope events recorded.</div>
                 </div>
             </div>
-
-
-                                <!-- ******************************** -->
-                                <!-- SYNCOPE SECTION                  -->
-                                <!-- ******************************** -->
-                                
-        <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
-            
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                <button @click="showSyncopeLog = !showSyncopeLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F;">
-                    <h3 style="margin: 0;"><i class="fa-solid fa-bolt" style="margin-right: 8px;"></i> Collapse / Syncope Log</h3> 
-                    <i class="fa-solid" :class="showSyncopeLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                </button>
-            </div>
-        
-            <div x-show="showSyncopeLog" x-transition>
+    
+    
+                                    <!-- ******************************** -->
+                                    <!-- SRR CHART and Analytics          -->
+                                    <!-- ******************************** -->
                 
-                <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #fca5a5; margin-bottom: 20px; text-align: left;">
-                    <h4 style="margin-top: 0; color: #7f1d1d; font-size: 0.95rem; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">Log Event Details</h4>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Date</label>
-                            <input type="date" x-model="newSyncope.date" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Time</label>
-                            <input type="time" x-model="newSyncope.time" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-                        <div>
-                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">What happened?</label>
-                            <select x-model="newSyncope.type" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                <option value="Unknown">Unknown Event (Collapse/Episode)</option>
-                                <option value="Syncope">Suspected Syncope (Fainting)</option>
-                                <option value="Seizure">Suspected Seizure</option>
-                                <option value="Weakness">Hindlimb Weakness / Paresis</option>
-                                <option value="Other">Other (Custom)</option>
-                            </select>
-                        </div>
-                        
-                        <div x-show="newSyncope.type === 'Other'" x-collapse>
-                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Describe Event Type</label>
-                            <input type="text" x-model="customEventType" placeholder="e.g., Vestibular episode, choking..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;">
-                        </div>
-                        
-                        <!-- Removed the duplicate narrow notes section from here -->
-        
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Est. Duration</label>
-                            <input type="text" x-model="newSyncope.duration" placeholder="e.g. 30 secs" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Consciousness</label>
-                            <select x-model="newSyncope.loc" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                <option>Full Loss</option>
-                                <option>Partial / Dazed</option>
-                                <option>Maintained</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Muscle Tone</label>
-                            <select x-model="newSyncope.muscleTone" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                <option>Flaccid (Limp)</option>
-                                <option>Stiff / Rigid</option>
-                                <option>Jerking / Twitching</option>
-                                <option>Normal / Variable</option>
-                            </select>
-                        </div>
-                        
-                        <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 5px;">
-                             <div>
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">MM Colour</label>
-                                <input type="text" x-model="newSyncope.mmColour" placeholder="Pale, Blue, Pink" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                             <div>
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">HR (bpm)</label>
-                                <input type="number" x-model="newSyncope.hr" placeholder="120" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                             <div>
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">RR (bpm)</label>
-                                <input type="number" x-model="newSyncope.rr" placeholder="30" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                        </div>
-        
-                        <div style="grid-column: 1 / -1;">
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Activity at Time of Event</label>
-                            <input type="text" x-model="newSyncope.activityBefore" placeholder="e.g., Playing in garden, waking up, excited by doorbell" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-                        
-                        <!-- Consolidated Notes Section (Full Width) -->
-                        <div style="grid-column: 1 / -1;">
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Clinical Notes & Triggers</label>
-                            <textarea x-model="newSyncope.notes" rows="3" placeholder="Did this happen during exercise? Coughing prior? Urination/defecation? Recovery time?" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
-                        </div>
-        
-                        <div style="grid-column: 1 / -1;">
-                            <button @click="saveSyncope()" type="button" style="width: 100%; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                                <i class="fa-solid fa-plus"></i> Save Event
-                            </button>
-                        </div>
-                    </div>
-                </div>
-        
-                <template x-for="event in sortedSyncopeLog()" :key="event.id">
-                    <div style="background: white; border: 1px solid #fca5a5; border-left: 4px solid #ef4444; border-radius: 6px; padding: 12px; margin-bottom: 8px; text-align: left; position: relative;">
-                        <div style="font-size: 0.8rem; color: #ef4444; font-weight: bold; margin-bottom: 4px;">
-                            <i class="fa-regular fa-clock"></i> <span x-text="new Date(event.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' ' + event.time"></span>
-                        </div>
-                        <div style="font-weight: bold; color: #1e293b; font-size: 1.05rem;" x-text="event.type + (event.duration ? ' (' + event.duration + ')' : '')"></div>
-                        <div style="font-size: 0.85rem; color: #475569; margin-top: 6px; line-height: 1.4;">
-                            <strong>LOC:</strong> <span x-text="event.loc"></span> | 
-                            <strong>Tone:</strong> <span x-text="event.muscleTone"></span><br>
-                            <template x-if="event.activityBefore"><span><strong>Activity:</strong> <span x-text="event.activityBefore"></span><br></span></template>
-                            <template x-if="event.mmColour || event.hr || event.rr">
-                                <span style="color: #0284c7;">
-                                    <span x-show="event.mmColour"><strong>MM:</strong> <span x-text="event.mmColour"></span> </span>
-                                    <span x-show="event.hr"><strong>HR:</strong> <span x-text="event.hr"></span> </span>
-                                    <span x-show="event.rr"><strong>RR:</strong> <span x-text="event.rr"></span> </span><br>
-                                </span>
-                            </template>
-                            <template x-if="event.notes"><span style="font-style: italic; color: #64748b;">"<span x-text="event.notes"></span>"</span></template>
-                        </div>
-                        <button @click="deleteSyncope(event.id)" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                </template>
-                <div x-show="sortedSyncopeLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No collapse or syncope events recorded.</div>
-            </div>
-        </div>
-
-
-                                <!-- ******************************** -->
-                                <!-- SRR CHART and Analytics          -->
-                                <!-- ******************************** -->
-            
-            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                    <button @click="showAnalytics = !showAnalytics" type="button" style="
-                        width: 100%;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 12px 16px;
-                        background: #e8eef7;
-                        border: 1px solid #c8d6eb;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        font-weight: bold;
-                        color: #16325F;
-                        transition: background 0.15s ease;
-                    " @mouseenter="$el.style.background='#dde6f3'"
-                       @mouseleave="$el.style.background='#e8eef7'">
-                        
-                        <h3 style="margin: 0;"><i class="fa-solid fa-chart-line text-blue-500"></i>
-                            <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Analytics' : 'Analytics'"></span></h3> 
-                        <i class="fa-solid" :class="showAnalytics ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                    </button>
-                </div>
-            
-                <div x-show="showAnalytics" x-transition>
-                    <div class="flex justify-between items-center mb-4">            
-                       <div class="flex flex-wrap gap-3 items-center"
-             style="display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; align-items: center !important; gap: 0.75rem !important; width: 100% !important;">
-
-                        <select x-model="timeScale"
-                                class="border rounded p-2 text-sm bg-white cursor-pointer"
-                                style="flex: 0 0 auto !important; width: auto !important; display: inline-block !important;">
-                            <option value="thisWeek">This Week</option>
-                            <option value="lastWeek">Last Week</option>
-                            <option value="thisMonth">This Month</option>
-                            <option value="lastMonth">Last Month</option>
-                            <option value="60d">Last 60 Days</option>
-                            <option value="90d">Last 90 Days</option>
-                            <option value="180d">Last 6 Months</option>
-                            <option value="all">Entire Dataset</option>
-                            <option value="custom">Custom Range...</option>
-                        </select>
-                    
-                        <template x-if="timeScale === 'custom'">
-                            <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border"
-                                 style="flex: 0 0 auto !important; width: auto !important; display: flex !important;">
-                                <input type="date" x-model="customStartDate" class="text-sm p-1 border-none bg-transparent">
-                                <span class="text-slate-400">to</span>
-                                <input type="date" x-model="customEndDate" class="text-sm p-1 border-none bg-transparent">
-                            </div>
-                        </template>
-                    
-                        <label style="display: flex !important; flex: 0 0 auto !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; cursor: pointer !important; font-size: 0.875rem !important; color: var(--text-main) !important; width: auto !important; max-width: max-content !important; margin: 0 !important; padding: 0 !important; float: none !important; border: none !important; height: auto !important;">
-                            <input type="checkbox" x-model="showMedications"
-                                   style="width: 16px !important; height: 16px !important; margin: 0 !important; padding: 0 !important; flex-shrink: 0 !important; display: inline-block !important; transform: none !important;">
-                            <span style="display: inline-block !important; margin: 0 !important; padding: 0 !important; text-align: left !important; line-height: 1.2 !important; white-space: nowrap !important;">Overlay Meds</span>
-                        </label>
-                    
-                        <label style="display: flex !important; flex: 0 0 auto !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; cursor: pointer !important; font-size: 0.875rem !important; color: var(--text-main) !important; width: auto !important; max-width: max-content !important; margin: 0 !important; padding: 0 !important; float: none !important; border: none !important; height: auto !important;">
-                            <input type="checkbox" x-model="srrUseRelationalTime"
-                                   style="width: 16px !important; height: 16px !important; margin: 0 !important; padding: 0 !important; flex-shrink: 0 !important; display: inline-block !important; transform: none !important;">
-                            <span style="display: inline-block !important; margin: 0 !important; padding: 0 !important; text-align: left !important; line-height: 1.2 !important; white-space: nowrap !important;">Relational Time</span>
-                        </label>
-                    
-                        <button x-show="getFilteredReadings().length >= 2"
-                                @click="toggleChartExpansion()"
-                                class="btn-nudge-static"
-                                style="background: #1e293b !important; padding: 6px 10px !important; margin-left: auto !important; flex: 0 0 auto !important; width: auto !important; display: inline-flex !important; align-items: center !important;">
-                            <i class="fa-solid" :class="isChartExpanded ? 'fa-compress' : 'fa-expand'"></i>
-                            <span x-show="!isChartExpanded" style="margin-left: 5px;">Expand</span>
-                            <span x-show="isChartExpanded" style="margin-left: 5px;">Close</span>
+                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                        <button @click="showAnalytics = !showAnalytics" type="button" style="
+                            width: 100%;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 12px 16px;
+                            background: #e8eef7;
+                            border: 1px solid #c8d6eb;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-weight: bold;
+                            color: #16325F;
+                            transition: background 0.15s ease;
+                        " @mouseenter="$el.style.background='#dde6f3'"
+                           @mouseleave="$el.style.background='#e8eef7'">
+                            
+                            <h3 style="margin: 0;"><i class="fa-solid fa-chart-line text-blue-500"></i>
+                                <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Analytics' : 'Analytics'"></span></h3> 
+                            <i class="fa-solid" :class="showAnalytics ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </button>
-                    
-                       </div>
                     </div>
                 
-                    <div x-show="getFilteredReadings().length < 2" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
-                        <i class="fa-solid fa-chart-pie text-3xl mb-2"></i>
-                        <p>Log (or include in date range) at least 2 resting rates to generate trend analytics.</p>
-                    </div>
-                
-                    <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: calc(100vh - 180px); max-height: calc(100vh - 180px);' : 'height: 384px;'" x-cloak>
-                        <canvas x-ref="rrrChartCanvas"></canvas>
-                    </div>
-                    <button type="button" @click="Chart.getChart($refs.rrrChartCanvas)?.resetZoom()" 
-                            class="btn-nudge-static" style="background: #64748b;">
-                        <i class="fa-solid fa-arrows-rotate"></i> Reset Zoom
-                    </button>
-                </div>
-            </div>
-            
-                                <!-- ******************************** -->
-                                <!-- MED GRAPH                        -->
-                                <!-- ******************************** -->
-                                            
-            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                    <button @click="showMedGraph = !showMedGraph" type="button" style="
-                        width: 100%;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 12px 16px;
-                        background: #e8eef7;
-                        border: 1px solid #c8d6eb;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        font-weight: bold;
-                        color: #16325F;
-                        transition: background 0.15s ease;
-                    " @mouseenter="$el.style.background='#dde6f3'"
-                       @mouseleave="$el.style.background='#e8eef7'">
-                        
-                        <h3 style="margin: 0;"><i class="fa-solid fa-timeline text-emerald-600"></i>
-                        <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Med Timeline' : 'Med Timeline'"></span></h3> 
-                        <i class="fa-solid" :class="showMedGraph ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                    </button>
-                </div>
-            
-                <div x-show="showMedGraph" x-transition>
-                    <div class="flex justify-between items-center mb-4">         
-                        <div class="flex flex-wrap gap-3 items-center">
-                            <select x-model="medTimeScale" @change="renderMedChart()" class="border rounded p-2 text-sm bg-white cursor-pointer">
+                    <div x-show="showAnalytics" x-transition>
+                        <div class="flex justify-between items-center mb-4">            
+                           <div class="flex flex-wrap gap-3 items-center"
+                 style="display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; align-items: center !important; gap: 0.75rem !important; width: 100% !important;">
+    
+                            <select x-model="timeScale"
+                                    class="border rounded p-2 text-sm bg-white cursor-pointer"
+                                    style="flex: 0 0 auto !important; width: auto !important; display: inline-block !important;">
                                 <option value="thisWeek">This Week</option>
                                 <option value="lastWeek">Last Week</option>
                                 <option value="thisMonth">This Month</option>
@@ -1373,153 +1257,245 @@
                                 <option value="all">Entire Dataset</option>
                                 <option value="custom">Custom Range...</option>
                             </select>
-    
-                            <template x-if="medTimeScale === 'custom'">
-                                <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border">
-                                    <input type="date" x-model="medCustomStartDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                        
+                            <template x-if="timeScale === 'custom'">
+                                <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border"
+                                     style="flex: 0 0 auto !important; width: auto !important; display: flex !important;">
+                                    <input type="date" x-model="customStartDate" class="text-sm p-1 border-none bg-transparent">
                                     <span class="text-slate-400">to</span>
-                                    <input type="date" x-model="medCustomEndDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                                    <input type="date" x-model="customEndDate" class="text-sm p-1 border-none bg-transparent">
                                 </div>
                             </template>
-                        </div>  
-                    </div>              
-                
-
-                    <div x-show="hasAnyMedData()" id="medChartContainer" class="relative w-full" style="height: 384px;" x-cloak>
-                        <canvas x-ref="medChartCanvas"></canvas>
-                    </div>
-                </div>
-                <div x-show="!hasAnyMedData()" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
-                    <i class="fa-solid fa-pills text-3xl mb-2"></i>
-                    <p>Log medications to generate a pharmacologic timeline.</p>
-                </div>
-            </div>
-            
-            
-            
-                                <!-- ******************************** -->
-                                <!-- EXPORT IMPORT SECTION            -->
-                                <!-- ******************************** -->
-            
-            <div class="summary-box" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
-                <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Data Management & Backups</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">Your data is stored locally. Create backups before clearing your browser history.</p>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                    
-                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Respiratory Logs (CSV)</h4>
-                        <div style="display: flex; gap: 10px;">
-                            <button @click="exportCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
-                            <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
-                                Import
-                                <input type="file" accept=".csv" @change="importCSV" style="display: none;">
+                        
+                            <label style="display: flex !important; flex: 0 0 auto !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; cursor: pointer !important; font-size: 0.875rem !important; color: var(--text-main) !important; width: auto !important; max-width: max-content !important; margin: 0 !important; padding: 0 !important; float: none !important; border: none !important; height: auto !important;">
+                                <input type="checkbox" x-model="showMedications"
+                                       style="width: 16px !important; height: 16px !important; margin: 0 !important; padding: 0 !important; flex-shrink: 0 !important; display: inline-block !important; transform: none !important;">
+                                <span style="display: inline-block !important; margin: 0 !important; padding: 0 !important; text-align: left !important; line-height: 1.2 !important; white-space: nowrap !important;">Overlay Meds</span>
                             </label>
-                        </div>
-                    </div>
-            
-                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Medication Logs (CSV)</h4>
-                        <div style="display: flex; gap: 10px;">
-                            <button @click="exportMedicationsCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
-                            <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
-                                Import
-                                <input type="file" accept=".csv" @change="importMedicationsCSV" style="display: none;">
+                        
+                            <label style="display: flex !important; flex: 0 0 auto !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; cursor: pointer !important; font-size: 0.875rem !important; color: var(--text-main) !important; width: auto !important; max-width: max-content !important; margin: 0 !important; padding: 0 !important; float: none !important; border: none !important; height: auto !important;">
+                                <input type="checkbox" x-model="srrUseRelationalTime"
+                                       style="width: 16px !important; height: 16px !important; margin: 0 !important; padding: 0 !important; flex-shrink: 0 !important; display: inline-block !important; transform: none !important;">
+                                <span style="display: inline-block !important; margin: 0 !important; padding: 0 !important; text-align: left !important; line-height: 1.2 !important; white-space: nowrap !important;">Relational Time</span>
                             </label>
+                        
+                            <button x-show="getFilteredReadings().length >= 2"
+                                    @click="toggleChartExpansion()"
+                                    class="btn-nudge-static"
+                                    style="background: #1e293b !important; padding: 6px 10px !important; margin-left: auto !important; flex: 0 0 auto !important; width: auto !important; display: inline-flex !important; align-items: center !important;">
+                                <i class="fa-solid" :class="isChartExpanded ? 'fa-compress' : 'fa-expand'"></i>
+                                <span x-show="!isChartExpanded" style="margin-left: 5px;">Expand</span>
+                                <span x-show="isChartExpanded" style="margin-left: 5px;">Close</span>
+                            </button>
+                        
+                           </div>
                         </div>
-                    </div>
                     
+                        <div x-show="getFilteredReadings().length < 2" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
+                            <i class="fa-solid fa-chart-pie text-3xl mb-2"></i>
+                            <p>Log (or include in date range) at least 2 resting rates to generate trend analytics.</p>
+                        </div>
                     
-                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-envelope-open-text" style="color: #7c3aed;"></i>
-                            Cardalis App Email Import
-                        </h4>
-                        <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 10px;">
-                            Paste the body of a Cardalis export email to bulk-import readings.
-                        </p>
-                    
-                        <button @click="showCardalisImport = !showCardalisImport" 
-                                class="btn-nudge-static" 
-                                style="background: #7c3aed; font-size: 0.8rem; padding: 6px 12px; width: 100%;">
-                            <i class="fa-solid fa-paste"></i>
-                            <span x-text="showCardalisImport ? 'Cancel' : 'Paste & Import Email'"></span>
+                        <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: calc(100vh - 180px); max-height: calc(100vh - 180px);' : 'height: 384px;'" x-cloak>
+                            <canvas x-ref="rrrChartCanvas"></canvas>
+                        </div>
+                        <button type="button" @click="Chart.getChart($refs.rrrChartCanvas)?.resetZoom()" 
+                                class="btn-nudge-static" style="background: #64748b;">
+                            <i class="fa-solid fa-arrows-rotate"></i> Reset Zoom
                         </button>
+                    </div>
+                </div>
+                
+                                    <!-- ******************************** -->
+                                    <!-- MED GRAPH                        -->
+                                    <!-- ******************************** -->
+                                                
+                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                        <button @click="showMedGraph = !showMedGraph" type="button" style="
+                            width: 100%;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 12px 16px;
+                            background: #e8eef7;
+                            border: 1px solid #c8d6eb;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-weight: bold;
+                            color: #16325F;
+                            transition: background 0.15s ease;
+                        " @mouseenter="$el.style.background='#dde6f3'"
+                           @mouseleave="$el.style.background='#e8eef7'">
+                            
+                            <h3 style="margin: 0;"><i class="fa-solid fa-timeline text-emerald-600"></i>
+                            <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Med Timeline' : 'Med Timeline'"></span></h3> 
+                            <i class="fa-solid" :class="showMedGraph ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+                
+                    <div x-show="showMedGraph" x-transition>
+                        <div class="flex justify-between items-center mb-4">         
+                            <div class="flex flex-wrap gap-3 items-center">
+                                <select x-model="medTimeScale" @change="renderMedChart()" class="border rounded p-2 text-sm bg-white cursor-pointer">
+                                    <option value="thisWeek">This Week</option>
+                                    <option value="lastWeek">Last Week</option>
+                                    <option value="thisMonth">This Month</option>
+                                    <option value="lastMonth">Last Month</option>
+                                    <option value="60d">Last 60 Days</option>
+                                    <option value="90d">Last 90 Days</option>
+                                    <option value="180d">Last 6 Months</option>
+                                    <option value="all">Entire Dataset</option>
+                                    <option value="custom">Custom Range...</option>
+                                </select>
+        
+                                <template x-if="medTimeScale === 'custom'">
+                                    <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border">
+                                        <input type="date" x-model="medCustomStartDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                                        <span class="text-slate-400">to</span>
+                                        <input type="date" x-model="medCustomEndDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                                    </div>
+                                </template>
+                            </div>  
+                        </div>              
                     
-                        <div x-show="showCardalisImport" x-transition style="margin-top: 12px;">
-                            <textarea 
-                                x-model="cardalisEmailText"
-                                rows="8"
-                                placeholder="In the Cardalis App, go to 'Breathing Rate Graph' > 'Email' to generate an export dataset email. You may need to add a 'vet email' in under settings, this could be your own for ease.
-                                
-                                Paste the full Cardalis export email here...
+    
+                        <div x-show="hasAnyMedData()" id="medChartContainer" class="relative w-full" style="height: 384px;" x-cloak>
+                            <canvas x-ref="medChartCanvas"></canvas>
+                        </div>
+                    </div>
+                    <div x-show="!hasAnyMedData()" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
+                        <i class="fa-solid fa-pills text-3xl mb-2"></i>
+                        <p>Log medications to generate a pharmacologic timeline.</p>
+                    </div>
+                </div>
+                
+                
+                
+                                    <!-- ******************************** -->
+                                    <!-- EXPORT IMPORT SECTION            -->
+                                    <!-- ******************************** -->
+                
+                <div class="summary-box" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
+                    <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Data Management & Backups</h3>
+                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">Your data is stored locally. Create backups before clearing your browser history.</p>
                     
-                    Example:
-                    Dear Vet:Please find attached breathing rate for Bella
-                    BreathCount: 26
-                    Date & Time: 2025-12-21 11:54:38
-                    ..."
-                                style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; 
-                                       font-size: 0.8rem; font-family: monospace; resize: vertical; 
-                                       box-sizing: border-box; color: #334155; line-height: 1.5;">
-                            </textarea>
-                            <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">
-                                <button @click="cardalisEmailText = ''" 
-                                        style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; 
-                                               background: white; cursor: pointer; font-size: 0.8rem; color: #475569;">
-                                    Clear
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Respiratory Logs (CSV)</h4>
+                            <div style="display: flex; gap: 10px;">
+                                <button @click="exportCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                                <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                    Import
+                                    <input type="file" accept=".csv" @change="importCSV" style="display: none;">
+                                </label>
+                            </div>
+                        </div>
+                
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Medication Logs (CSV)</h4>
+                            <div style="display: flex; gap: 10px;">
+                                <button @click="exportMedicationsCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                                <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                    Import
+                                    <input type="file" accept=".csv" @change="importMedicationsCSV" style="display: none;">
+                                </label>
+                            </div>
+                        </div>
+                        
+                        
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-envelope-open-text" style="color: #7c3aed;"></i>
+                                Cardalis App Email Import
+                            </h4>
+                            <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 10px;">
+                                Paste the body of a Cardalis export email to bulk-import readings.
+                            </p>
+                        
+                            <button @click="showCardalisImport = !showCardalisImport" 
+                                    class="btn-nudge-static" 
+                                    style="background: #7c3aed; font-size: 0.8rem; padding: 6px 12px; width: 100%;">
+                                <i class="fa-solid fa-paste"></i>
+                                <span x-text="showCardalisImport ? 'Cancel' : 'Paste & Import Email'"></span>
+                            </button>
+                        
+                            <div x-show="showCardalisImport" x-transition style="margin-top: 12px;">
+                                <textarea 
+                                    x-model="cardalisEmailText"
+                                    rows="8"
+                                    placeholder="In the Cardalis App, go to 'Breathing Rate Graph' > 'Email' to generate an export dataset email. You may need to add a 'vet email' in under settings, this could be your own for ease.
+                                    
+                                    Paste the full Cardalis export email here...
+                        
+                        Example:
+                        Dear Vet:Please find attached breathing rate for Bella
+                        BreathCount: 26
+                        Date & Time: 2025-12-21 11:54:38
+                        ..."
+                                    style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                           font-size: 0.8rem; font-family: monospace; resize: vertical; 
+                                           box-sizing: border-box; color: #334155; line-height: 1.5;">
+                                </textarea>
+                                <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">
+                                    <button @click="cardalisEmailText = ''" 
+                                            style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                                   background: white; cursor: pointer; font-size: 0.8rem; color: #475569;">
+                                        Clear
+                                    </button>
+                                    <button @click="importCardalisEmail()" 
+                                            class="btn-nudge-static"
+                                            style="background: #7c3aed; font-size: 0.8rem; padding: 6px 14px;">
+                                        <i class="fa-solid fa-file-import"></i> Import Readings
+                                    </button>
+                                </div>
+                                <p style="font-size: 0.72rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                    Pet name is read from the email header. A new profile is created automatically if needed. 
+                                    Duplicate readings (within 60 seconds of an existing entry) are skipped silently.
+                                </p>
+                            </div>
+                        </div>
+                        <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)</h4>
+                                <p style="margin: 0; font-size: 0.75rem; color: #64748b;">Backups everything: Patients, Breathing, and Medications.</p>
+                            </div>
+                            <div style="display: flex !important; flex-wrap: wrap !important; gap: 10px !important;">
+                                <button @click="exportCompleteBackup()" class="btn-nudge-static"
+                                        style="background: #334155; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
+                                    Download Backup
                                 </button>
-                                <button @click="importCardalisEmail()" 
-                                        class="btn-nudge-static"
-                                        style="background: #7c3aed; font-size: 0.8rem; padding: 6px 14px;">
-                                    <i class="fa-solid fa-file-import"></i> Import Readings
+                                <label class="btn-nudge-static"
+                                       style="background: #475569; font-size: 0.85rem; padding: 8px 12px; cursor: pointer; text-align: center; flex: 0 0 auto !important; width: auto !important;">
+                                    Restore Backup
+                                    <input type="file" accept=".json" @change="importCompleteBackup" style="display: none;">
+                                </label>
+                                <button @click="resetData()" class="btn-nudge-static"
+                                        style="background: #ef4444; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
+                                    <i class="fa-solid fa-trash-can"></i> Erase All
+                                </button>
+                                <button @click="exportPDF()" class="btn-nudge-static"
+                                        style="flex: 0 0 auto !important; width: auto !important;">
+                                    <i class="fa-solid fa-print"></i> PDF/Print
                                 </button>
                             </div>
-                            <p style="font-size: 0.72rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
-                                <i class="fa-solid fa-circle-info"></i>
-                                Pet name is read from the email header. A new profile is created automatically if needed. 
-                                Duplicate readings (within 60 seconds of an existing entry) are skipped silently.
-                            </p>
                         </div>
+                
                     </div>
-                    <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <div>
-                            <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)</h4>
-                            <p style="margin: 0; font-size: 0.75rem; color: #64748b;">Backups everything: Patients, Breathing, and Medications.</p>
-                        </div>
-                        <div style="display: flex !important; flex-wrap: wrap !important; gap: 10px !important;">
-                            <button @click="exportCompleteBackup()" class="btn-nudge-static"
-                                    style="background: #334155; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
-                                Download Backup
-                            </button>
-                            <label class="btn-nudge-static"
-                                   style="background: #475569; font-size: 0.85rem; padding: 8px 12px; cursor: pointer; text-align: center; flex: 0 0 auto !important; width: auto !important;">
-                                Restore Backup
-                                <input type="file" accept=".json" @change="importCompleteBackup" style="display: none;">
-                            </label>
-                            <button @click="resetData()" class="btn-nudge-static"
-                                    style="background: #ef4444; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
-                                <i class="fa-solid fa-trash-can"></i> Erase All
-                            </button>
-                            <button @click="exportPDF()" class="btn-nudge-static"
-                                    style="flex: 0 0 auto !important; width: auto !important;">
-                                <i class="fa-solid fa-print"></i> PDF/Print
-                            </button>
-                        </div>
+                </div>
+                
+                <section id="install-nudge-static" class="install-footer-box" style="margin-top: 40px; text-align: left;">
+                    <div class="nudge-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                    <div class="nudge-text">
+                        <h4>Save as a Pet App</h4>
+                        <p>Add this tracker to your home screen for instant, offline access.</p>
                     </div>
+                    <button onclick="showInstructions()" class="btn-nudge-static">How-To</button>
             
-                </div>
-            </div>
-            
-            <section id="install-nudge-static" class="install-footer-box" style="margin-top: 40px; text-align: left;">
-                <div class="nudge-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
-                <div class="nudge-text">
-                    <h4>Save as a Pet App</h4>
-                    <p>Add this tracker to your home screen for instant, offline access.</p>
-                </div>
-                <button onclick="showInstructions()" class="btn-nudge-static">How-To</button>
-        
-            </section>
+                </section>
+            </div> <!-- CLOSE COUNTING HIDER -->
          </main>
          
          
