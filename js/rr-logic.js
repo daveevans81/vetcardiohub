@@ -158,10 +158,10 @@ newMed: {
 },
 
         // Medication Chart State
-        medTimeScale: '180d', 
+      //  medTimeScale: '180d', 
         medChartInstance: null,
-        medCustomStartDate: '',
-        medCustomEndDate: '',
+     //   medCustomStartDate: '',
+      //  medCustomEndDate: '',
         medChartRenderTimeout: null,
         
         // State for the Merge UI
@@ -234,8 +234,7 @@ init() {
 
     // Existing watchers
     this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
-    this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); });
-    this.$watch('medTimeScale', () => { this.renderMedChart(); });
+    this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
     this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
     this.$watch('showCoughOverlay', () => { this.renderChart(); });
     this.$watch('showActivityOverlay', () => { this.renderChart(); });
@@ -1592,90 +1591,84 @@ hasAnyMedData() {
             
         // Duplicate Date Range logic specifically for the Medication Chart
 getMedDateRange() {
-            const now = new Date();
-            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            
-            let startDate = null;
-            let endDate = endOfToday;
+    const now = new Date();
+    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    let startDate = null;
+    let endDate = endOfToday;
 
-            const dayOfWeek = startOfToday.getDay();
-            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const dayOfWeek = startOfToday.getDay();
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
-            // Safe fallback calculator for 'All Time' or 'Incomplete Custom Dates'
-            
- const getEarliestFallback = () => {
-                const petMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
-                if(petMeds.length > 0) {
-                     // Use parseDateSafe to handle legacy UK/US dates, avoiding Invalid Date NaNs
-                     const earliest = petMeds.reduce((min, p) => 
-                         this.parseDateSafe(p.eventDate) < this.parseDateSafe(min.eventDate) ? p : min
-                     , petMeds[0]);
-                     
-                     const safeTimestamp = this.parseDateSafe(earliest.eventDate).getTime();
-                     
-                     // If it's a valid number, pad it by 14 days. Otherwise default to 0.
-                     if (!isNaN(safeTimestamp)) {
-                         return new Date(safeTimestamp - (14 * 24 * 60 * 60 * 1000));
-                     }
+    const getEarliestFallback = () => {
+        const petMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
+        if(petMeds.length > 0) {
+             const earliest = petMeds.reduce((min, p) => 
+                 this.parseDateSafe(p.eventDate) < this.parseDateSafe(min.eventDate) ? p : min
+             , petMeds[0]);
+             
+             const safeTimestamp = this.parseDateSafe(earliest.eventDate).getTime();
+             
+             if (!isNaN(safeTimestamp)) {
+                 return new Date(safeTimestamp - (14 * 24 * 60 * 60 * 1000));
+             }
+        }
+        return new Date(0);
+    };
+
+    // Use global timeScale here
+    switch (this.timeScale) {
+        case 'thisWeek':
+            startDate = new Date(startOfToday);
+            startDate.setDate(startDate.getDate() + daysToMonday);
+            break;
+        case 'lastWeek':
+            startDate = new Date(startOfToday);
+            startDate.setDate(startDate.getDate() + daysToMonday - 7);
+            endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 6);
+            endDate.setHours(23, 59, 59);
+            break;
+        case 'thisMonth':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            break;
+        case 'lastMonth':
+            startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+            break;
+        case '60d':
+            startDate = new Date(startOfToday.getTime() - (60 * 24 * 60 * 60 * 1000));
+            break;
+        case '90d':
+            startDate = new Date(startOfToday.getTime() - (90 * 24 * 60 * 60 * 1000));
+            break;
+        case '180d':
+            startDate = new Date(startOfToday.getTime() - (180 * 24 * 60 * 60 * 1000));
+            break;
+        case 'custom':
+            // Route through global custom start/end dates
+            if (this.customStartDate && this.customEndDate) {
+                const s = new Date(this.customStartDate + 'T00:00:00');
+                const e = new Date(this.customEndDate + 'T23:59:59');
+                
+                if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && s <= e) {
+                    startDate = s;
+                    endDate = e;
+                } else {
+                    startDate = getEarliestFallback(); 
                 }
-                return new Date(0);
-            };
-
-            switch (this.medTimeScale) {
-                case 'thisWeek':
-                    startDate = new Date(startOfToday);
-                    startDate.setDate(startDate.getDate() + daysToMonday);
-                    break;
-                case 'lastWeek':
-                    startDate = new Date(startOfToday);
-                    startDate.setDate(startDate.getDate() + daysToMonday - 7);
-                    endDate = new Date(startDate);
-                    endDate.setDate(endDate.getDate() + 6);
-                    endDate.setHours(23, 59, 59);
-                    break;
-                case 'thisMonth':
-                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                    break;
-                case 'lastMonth':
-                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-                    break;
-                case '60d':
-                    startDate = new Date(startOfToday.getTime() - (60 * 24 * 60 * 60 * 1000));
-                    break;
-                case '90d':
-                    startDate = new Date(startOfToday.getTime() - (90 * 24 * 60 * 60 * 1000));
-                    break;
-                case '180d':
-                    startDate = new Date(startOfToday.getTime() - (180 * 24 * 60 * 60 * 1000));
-                    break;
-                case 'custom':
-                    // Check if both fields contain data
-                    if (this.medCustomStartDate && this.medCustomEndDate) {
-                        // Force strict midnight/end-of-day boundaries to negate UK/US timezone drifting
-                        const s = new Date(this.medCustomStartDate + 'T00:00:00');
-                        const e = new Date(this.medCustomEndDate + 'T23:59:59');
-                        
-                        // Verify they are valid dates AND logically ordered
-                        if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && s <= e) {
-                            startDate = s;
-                            endDate = e;
-                        } else {
-                            startDate = getEarliestFallback(); // Safe fallback if dates are reversed
-                        }
-                    } else {
-                        startDate = getEarliestFallback(); // Safe fallback while they are typing
-                    }
-                    break;
-                case 'all':
-                default:
-                    startDate = getEarliestFallback();
-                    break;
+            } else {
+                startDate = getEarliestFallback(); 
             }
-            return { startDate, endDate };
-        },
-        
+            break;
+        case 'all':
+        default:
+            startDate = getEarliestFallback();
+            break;
+    }
+    return { startDate, endDate };
+},        
         
         
         
@@ -1745,8 +1738,8 @@ renderMedChart() {
         // GATEKEEPER: Stop Chart.js from crashing if canvas is display: none
         if (!canvas || canvas.offsetParent === null) return;
 
-        if (this.medTimeScale === 'custom') {
-            if (!this.validateCustomDates(this.medCustomStartDate, this.medCustomEndDate)) {
+        if (this.timeScale === 'custom') {
+            if (!this.validateCustomDates(this.customStartDate, this.customEndDate)) {
                 return; 
             }
         }
@@ -2382,56 +2375,63 @@ cancelComment() {
 },
 
 // --- EXPORT ENGINE ---
-        generatePDF() {
-            if (!this.activePatientId) return alert("Select a patient first.");
-            
-            // Initialize jsPDF
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const profile = this.activePatientProfile;
-            const timeline = this.compiledTimeline;
-
-            // 1. Header
-            doc.setFontSize(20);
-            doc.text(`${profile.name}'s Clinical Report`, 14, 20);
-            doc.setFontSize(11);
-            doc.setTextColor(100);
-            doc.text(`Generated: ${new Date().toLocaleDateString()} | Timescale: ${this.timeScale.toUpperCase()}`, 14, 28);
-            doc.text(`Species: ${profile.species} | Breed: ${profile.breed || 'N/A'} | Age: ${this.computedAgeText}`, 14, 34);
-
-            // 2. Embed the Chart
-            const canvas = this.$refs.rrrChartCanvas;
-            if (canvas) {
-                // Ensure chart background is white, not transparent, for the PDF
-                const chartImgData = canvas.toDataURL("image/jpeg", 1.0);
-                doc.addImage(chartImgData, 'JPEG', 14, 45, 180, 80); // x, y, width, height
-            }
-
-            // 3. Generate the Data Table
-            const tableBody = timeline.map(ev => [
-                ev.displayDate,
-                ev.type,
-                ev.summary,
-                ev.notes
-            ]);
-
-            doc.autoTable({
-                startY: 135,
-                head: [['Date', 'Category', 'Summary', 'Clinical Notes']],
-                body: tableBody,
-                theme: 'striped',
-                headStyles: { fillColor: [22, 50, 95] }, // Matches your #16325F theme
-                columnStyles: {
-                    0: { cellWidth: 30 },
-                    1: { cellWidth: 25 },
-                    2: { cellWidth: 45 },
-                    3: { cellWidth: 'auto' }
-                },
-                styles: { fontSize: 9 }
-            });
-
-            doc.save(`${profile.name}_Cardio_Report.pdf`);
-        },
+    generatePDF() {
+        if (!this.activePatientId) return alert("Select a patient first.");
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const profile = this.activePatientProfile;
+        const timeline = this.compiledTimeline;
+    
+        // 1. Header
+        doc.setFontSize(20);
+        doc.text(`${profile.name}'s Clinical Report`, 14, 20);
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Generated: ${new Date().toLocaleDateString()} | Timescale: ${this.timeScale.toUpperCase()}`, 14, 28);
+        doc.text(`Species: ${profile.species} | Breed: ${profile.breed || 'N/A'} | Age: ${this.computedAgeText}`, 14, 34);
+    
+        // 2. Embed the Respiratory Chart
+        const rrrCanvas = this.$refs.rrrChartCanvas;
+        if (rrrCanvas) {
+            const rrrImgData = rrrCanvas.toDataURL("image/jpeg", 1.0);
+            doc.addImage(rrrImgData, 'JPEG', 14, 45, 180, 70); 
+        }
+    
+        // 3. Embed the Medication Chart (Only if data exists and is visible)
+        const medCanvas = this.$refs.medChartCanvas;
+        if (this.hasAnyMedData() && medCanvas) {
+            const medImgData = medCanvas.toDataURL("image/jpeg", 1.0);
+            // Position it below the first chart
+            doc.addImage(medImgData, 'JPEG', 14, 120, 180, 50); 
+        }
+    
+        // 4. Generate the Data Table
+        // Adjust startY so the table doesn't overlap the new chart
+        const tableBody = timeline.map(ev => [
+            ev.displayDate,
+            ev.type,
+            ev.summary,
+            ev.notes
+        ]);
+    
+        doc.autoTable({
+            startY: 175, // Moved down to accommodate both charts
+            head: [['Date', 'Category', 'Summary', 'Clinical Notes']],
+            body: tableBody,
+            theme: 'striped',
+            headStyles: { fillColor: [22, 50, 95] },
+            columnStyles: {
+                0: { cellWidth: 30 },
+                1: { cellWidth: 25 },
+                2: { cellWidth: 45 },
+                3: { cellWidth: 'auto' }
+            },
+            styles: { fontSize: 9 }
+        });
+    
+        doc.save(`${profile.name}_Cardio_Report.pdf`);
+    },
 
         generateCSV() {
             if (!this.activePatientId) return;

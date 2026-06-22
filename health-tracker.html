@@ -1384,7 +1384,7 @@
                     <div x-show="showMedGraph" x-transition>
                         <div class="flex justify-between items-center mb-4">         
                             <div class="flex flex-wrap gap-3 items-center">
-                                <select x-model="medTimeScale" @change="renderMedChart()" class="border rounded p-2 text-sm bg-white cursor-pointer">
+                                <select x-model="timeScale" @change="renderMedChart()" class="border rounded p-2 text-sm bg-white cursor-pointer">
                                     <option value="thisWeek">This Week</option>
                                     <option value="lastWeek">Last Week</option>
                                     <option value="thisMonth">This Month</option>
@@ -1396,11 +1396,11 @@
                                     <option value="custom">Custom Range...</option>
                                 </select>
         
-                                <template x-if="medTimeScale === 'custom'">
+                                <template x-if="timeScale === 'custom'">
                                     <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border">
-                                        <input type="date" x-model="medCustomStartDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                                        <input type="date" x-model="customStartDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
                                         <span class="text-slate-400">to</span>
-                                        <input type="date" x-model="medCustomEndDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
+                                        <input type="date" x-model="customEndDate" @change="renderMedChart()" class="text-sm p-1 border-none bg-transparent">
                                     </div>
                                 </template>
                             </div>  
