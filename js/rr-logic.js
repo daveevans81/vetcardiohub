@@ -40,6 +40,9 @@ document.addEventListener('alpine:init', () => {
         activityLog: [],
         showCoughForm: false,     
         showActivityForm: false,
+        showCoughOverlay: false,      
+        showActivityOverlay: false,    
+        activityPlotType: 'durationMins',
         
         newCough: {
             date: new Date().toISOString().split('T')[0],
@@ -231,6 +234,9 @@ init() {
     this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); });
     this.$watch('medTimeScale', () => { this.renderMedChart(); });
     this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
+    this.$watch('showCoughOverlay', () => { this.renderChart(); });
+    this.$watch('showActivityOverlay', () => { this.renderChart(); });
+    this.$watch('activityPlotType', () => { this.renderChart(); });
     this.$watch('showManualSrr', (isVisible) => {
         if (isVisible) {
             // Pre-populate to current local datetime when panel opens
@@ -1259,221 +1265,241 @@ renderChart() {
         };
 
         const combinedEvents = [];
+        const { startDate, endDate } = this.getDateRange();
 
+        // 1. Scoop SRR Data
         rawSrrData.forEach(r => {
             combinedEvents.push({ type: 'srr', timestamp: safeTimestamp(r.date), data: r });
         });
 
-        // Ensure medLedger is an array before filtering
+        // 2. Scoop Medication Data
         const safeMedLedger = Array.isArray(this.medLedger) ? this.medLedger : [];
-        
         if (this.showMedications && safeMedLedger.length > 0) {
             const petMeds = safeMedLedger.filter(m => m.patientId === this.activePatientId);
-
-             
-                    const { startDate, endDate } = this.getDateRange();
-                    
-                    // Group meds by exact date to prevent stacking overlaps
-                    const medsByDate = {};
-                    petMeds.forEach(m => {
-                        const ts = safeTimestamp(m.eventDate);
-                        // Filter dynamically by the currently active chart date range
-                        if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) {
-                            const dStr = new Date(ts).toISOString().split('T')[0]; 
-                            if (!medsByDate[dStr]) medsByDate[dStr] = [];
-                            medsByDate[dStr].push(m);
-                        }
-                    });
-
-                    // Add the grouped meds to the timeline bucket
-                    Object.keys(medsByDate).forEach(dStr => {
-                        combinedEvents.push({ 
-                            type: 'med', 
-                            timestamp: new Date(`${dStr}T12:00:00`).getTime(), 
-                            data: medsByDate[dStr] 
-                        });
-                    });
+            const medsByDate = {};
+            petMeds.forEach(m => {
+                const ts = safeTimestamp(m.eventDate);
+                if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) {
+                    const dStr = new Date(ts).toISOString().split('T')[0]; 
+                    if (!medsByDate[dStr]) medsByDate[dStr] = [];
+                    medsByDate[dStr].push(m);
                 }
-
-                // Sort the entire mixed bucket chronologically
-                combinedEvents.sort((a, b) => a.timestamp - b.timestamp);
-
-                // --- 3. EXTRACT CHART DATASETS ---
-                const labels = [];
-                const srrDataPoints = [];
-                const medDataPoints = [];
-                const medColors = [];
-                const medTooltips = [];
-
-                let lastSrrRate = null; // Used to pin the med arrow close to the breathing line
-                const srrValuesForStats = []; 
-
-                combinedEvents.forEach(ev => {
-                    const dObj = new Date(ev.timestamp);
-                    let label = '';
-                    
-                    // Scale X-Axis labelling based on dataset density
-                    if (combinedEvents.length <= 14) label = dObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
-                    else if (combinedEvents.length <= 60) label = dObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-                    else label = dObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
-                    
-                    
-                    labels.push(this.srrUseRelationalTime ? ev.timestamp : label);
-
-
-                    if (ev.type === 'srr') {
-                        srrDataPoints.push(ev.data.rate);
-                        srrValuesForStats.push(ev.data);
-                        lastSrrRate = ev.data.rate;
-                        
-                        medDataPoints.push(null); // Blank for med layer
-                        medColors.push('transparent');
-                        medTooltips.push([]);
-                    } else if (ev.type === 'med') {
-                        srrDataPoints.push(null); // Chart.js bridges this gap automatically via spanGaps
-                        
-                        // Position the arrow dynamically at the most recent SRR rate, or default to 30
-                        medDataPoints.push(lastSrrRate !== null ? lastSrrRate : 30); 
-                        
-                        const primaryMed = ev.data[0]; // Drives the triangle color
-                        medColors.push(this.formulary[primaryMed.drugId]?.color || '#f59e0b');
-
-                        // Build a multi-line tooltip string if multiple meds were changed today
-                        const medDetails = ev.data.map(m => {
-                            const drugName = m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId);
-                            const doseText = m.doseMg ? `${m.doseMg}mg` : 'Dose unspec.';
-                            return `💊 ${m.action}: ${drugName} (${doseText})`;
-                        });
-                        medTooltips.push(medDetails);
-                    }
+            });
+            Object.keys(medsByDate).forEach(dStr => {
+                combinedEvents.push({ 
+                    type: 'med', 
+                    timestamp: new Date(`${dStr}T12:00:00`).getTime(), 
+                    data: medsByDate[dStr] 
                 });
+            });
+        }
 
-                const stats = this.calculateStats(srrValuesForStats);
+        // 3. Scoop Symptom Data (Coughs & Activity)
+        if (this.showCoughOverlay && Array.isArray(this.coughLog)) {
+            this.coughLog.filter(c => c.patientId === this.activePatientId).forEach(c => {
+                const ts = safeTimestamp(c.date);
+                if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) {
+                    combinedEvents.push({ type: 'cough', timestamp: ts, data: c });
+                }
+            });
+        }
+        
+        if (this.showActivityOverlay && Array.isArray(this.activityLog)) {
+            this.activityLog.filter(a => a.patientId === this.activePatientId).forEach(a => {
+                const ts = safeTimestamp(a.date);
+                if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) {
+                    combinedEvents.push({ type: 'activity', timestamp: ts, data: a });
+                }
+            });
+        }
+
+        // 4. Sort chronologically
+        combinedEvents.sort((a, b) => a.timestamp - b.timestamp);
+
+        // --- 5. EXTRACT CHART DATASETS ---
+        const labels = [];
+        const srrDataPoints = [], medDataPoints = [], medColors = [], medTooltips = [];
+        const coughDataPoints = [], coughColors = [], coughTooltips = [];
+        const activityDataPoints = [], activityTooltips = [];
+
+        let lastSrrRate = null; 
+        const srrValuesForStats = []; 
+
+        combinedEvents.forEach(ev => {
+            const dObj = new Date(ev.timestamp);
+            let label = '';
+            
+            if (combinedEvents.length <= 14) label = dObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
+            else if (combinedEvents.length <= 60) label = dObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+            else label = dObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+            
+            labels.push(this.srrUseRelationalTime ? ev.timestamp : label);
+
+            // Initialize empty states for this tick
+            let srrVal = null, medVal = null, mCol = 'transparent', mTip = [];
+            let coughVal = null, cCol = 'transparent', cTip = '';
+            let actVal = null, aTip = '';
+
+            if (ev.type === 'srr') {
+                srrVal = ev.data.rate;
+                srrValuesForStats.push(ev.data);
+                lastSrrRate = ev.data.rate;
+            } 
+            else if (ev.type === 'med') {
+                medVal = lastSrrRate !== null ? lastSrrRate : 30; 
+                mCol = this.formulary[ev.data[0].drugId]?.color || '#f59e0b';
+                mTip = ev.data.map(m => `💊 ${m.action}: ${m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId)} (${m.doseMg ? m.doseMg+'mg' : '?'})`);
+            }
+            else if (ev.type === 'cough') {
+                const c = ev.data;
+                let cpd = parseFloat(c.frequencyCount);
+                if (!isNaN(cpd)) {
+                    if (c.frequencyPeriod === 'hour') cpd *= 24;
+                    if (c.frequencyPeriod === 'week') cpd /= 7;
+                    coughVal = Math.round(cpd * 10) / 10;
+                } else { 
+                    coughVal = 1; // Nominal visible bar if no frequency was provided
+                } 
                 
-                // Construct standard clinical annotations
-                let annotations = {
-                    thresholdLine: {
-                        type: 'line', yMin: 30, yMax: 30,
-                        borderColor: 'rgb(220, 38, 38)', borderWidth: 2, borderDash: [5, 5],
-                        label: { display: true, content: 'Cutoff (30)', position: 'end', backgroundColor: 'rgba(220,38,38,0.8)', color: '#fff' }
-                    },
-                    meanLine: {
-                        type: 'line', yMin: stats.mean, yMax: stats.mean,
-                        borderColor: 'rgb(59, 130, 246)', borderWidth: 1.5,
-                        label: { display: true, content: `Mean: ${stats.mean.toFixed(1)}`, position: 'start' }
-                    }
-                };
-
-                if (srrValuesForStats.length >= 2 && stats.upperCI !== stats.lowerCI) {
-                    annotations.upperCILine = { type: 'line', yMin: stats.upperCI, yMax: stats.upperCI, borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3] };
-                    annotations.lowerCILine = { type: 'line', yMin: stats.lowerCI, yMax: stats.lowerCI, borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3] };
+                if (c.severity === 'Severe') cCol = 'rgba(239, 68, 68, 0.85)';
+                else if (c.severity === 'Moderate') cCol = 'rgba(245, 158, 11, 0.85)';
+                else cCol = 'rgba(253, 224, 71, 0.85)';
+                
+                cTip = `Cough (${c.severity}): ${isNaN(parseFloat(c.frequencyCount)) ? 'Freq Unknown' : c.frequencyCount+'x/'+c.frequencyPeriod} - ${c.description}`;
+            }
+            else if (ev.type === 'activity') {
+                const a = ev.data;
+                if (this.activityPlotType === 'durationMins' && a.durationMins) {
+                    actVal = parseFloat(a.durationMins);
+                } else if (this.activityPlotType === 'distance' && a.distance) {
+                    const parsed = parseFloat(a.distance.replace(/[^\d.]/g, ''));
+                    if (!isNaN(parsed)) actVal = parsed;
                 }
-
-                const datasets = [
-                    {
-                        label: `${this.activePatientProfile?.name ?? 'Patient'}'s Respiratory Rate (bpm)`,
-                        data: srrDataPoints,
-                        borderColor: 'rgb(14, 165, 233)',
-                        backgroundColor: 'rgba(14, 165, 233, 0.08)',
-                        tension: 0.25,
-                        pointRadius: combinedEvents.length > 30 ? 2 : 5,
-                        spanGaps: true, // CRITICAL: Connects the blue line securely through empty medication nodes
-                        fill: true,
-                        order: 2
-                    }
-                ];
-
-                if (this.showMedications && medDataPoints.some(d => d !== null)) {
-                    datasets.push({
-                        label: 'Medication Change',
-                        type: 'scatter',
-                        data: medDataPoints,
-                        backgroundColor: medColors,
-                        borderColor: '#ffffff', 
-                        borderWidth: 2,
-                        pointStyle: 'triangle',
-                        rotation: 180, // Points downwards at the node
-                        radius: 10,
-                        hoverRadius: 13,
-                        order: 1, 
-                        medTooltips: medTooltips 
-                    });
+                if (actVal !== null) {
+                    aTip = `Activity (${a.status}): ${this.activityPlotType === 'durationMins' ? a.durationMins+'m' : a.distance}`;
                 }
+            }
 
-                new Chart(ctx, {
-                    type: 'line',
-                    data: { labels: labels, datasets: datasets },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false }, // Allows stacked tooltips
-                        plugins: {
-                            annotation: { annotations: annotations },
-                            tooltip: { 
-                                callbacks: { 
-                                    title: (context) => context[0].label,
-                                    label: (context) => {
-                                        if (context.dataset.label === 'Medication Change') {
-                                            return context.dataset.medTooltips[context.dataIndex];
-                                        }
-                                        // Ignore drawing a tooltip for the blue line if the line is just spanning a gap
-                                        if (context.raw === null) return null;
-                                        return `Rate: ${context.parsed.y} bpm`;
-                                    }
-                                } 
-                            },
-                            zoom: {
+            srrDataPoints.push(srrVal);
+            medDataPoints.push(medVal); medColors.push(mCol); medTooltips.push(mTip);
+            coughDataPoints.push(coughVal); coughColors.push(cCol); coughTooltips.push(cTip);
+            activityDataPoints.push(actVal); activityTooltips.push(aTip);
+        });
 
-                                pan: {
-                                    enabled: true,
-                                    mode: 'x',
-                                    // Prevent panning beyond the range of your data
-                                    onPanRejected: ({ chart }) => {
-                                        console.warn('Pan boundary reached');
-                                    }
-                                },
-                                zoom: {
-                                    wheel: { enabled: true },
-                                    pinch: { enabled: true },
-                                    mode: 'x',
-                                    // Define hard limits
+        const stats = this.calculateStats(srrValuesForStats);
+        
+        // Construct standard clinical annotations
+        let annotations = {
+            thresholdLine: {
+                type: 'line', yMin: 30, yMax: 30, scaleID: 'y',
+                borderColor: 'rgb(220, 38, 38)', borderWidth: 2, borderDash: [5, 5],
+                label: { display: true, content: 'Cutoff (30)', position: 'end', backgroundColor: 'rgba(220,38,38,0.8)', color: '#fff' }
+            },
+            meanLine: {
+                type: 'line', yMin: stats.mean, yMax: stats.mean, scaleID: 'y',
+                borderColor: 'rgb(59, 130, 246)', borderWidth: 1.5,
+                label: { display: true, content: `Mean: ${stats.mean.toFixed(1)}`, position: 'start' }
+            }
+        };
 
-                            
-                                    limits: {
-                                        x: {
-                                            min: 'original',
-                                            max: 'original',
-                                            minRange: 1000 * 60 * 60 * 24 * 7
-                                        },
-                                        y: {
-                                            min: 0,
-                                            max: 100
-                                        }
-                                    }
-                                }
+        if (srrValuesForStats.length >= 2 && stats.upperCI !== stats.lowerCI) {
+            annotations.upperCILine = { type: 'line', yMin: stats.upperCI, yMax: stats.upperCI, scaleID: 'y', borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3] };
+            annotations.lowerCILine = { type: 'line', yMin: stats.lowerCI, yMax: stats.lowerCI, scaleID: 'y', borderColor: 'rgba(59, 130, 246, 0.4)', borderWidth: 1, borderDash: [3, 3] };
+        }
+
+        const datasets = [
+            {
+                label: `${this.activePatientProfile?.name ?? 'Patient'}'s Respiratory Rate (bpm)`,
+                data: srrDataPoints,
+                borderColor: 'rgb(14, 165, 233)', backgroundColor: 'rgba(14, 165, 233, 0.08)',
+                tension: 0.25, pointRadius: combinedEvents.length > 30 ? 2 : 5,
+                spanGaps: true, fill: true, order: 3, yAxisID: 'y'
+            }
+        ];
+
+        if (this.showMedications && medDataPoints.some(d => d !== null)) {
+            datasets.push({
+                label: 'Medication Change', type: 'line', showLine: false,
+                data: medDataPoints, backgroundColor: medColors, borderColor: '#ffffff', 
+                borderWidth: 2, pointStyle: 'triangle', rotation: 180, radius: 10, 
+                hoverRadius: 13, order: 1, medTooltips: medTooltips, yAxisID: 'y'
+            });
+        }
+
+        if (this.showCoughOverlay && coughDataPoints.some(d => d !== null)) {
+            datasets.push({ 
+                label: 'Cough Frequency', type: 'bar', data: coughDataPoints, 
+                backgroundColor: coughColors, borderRadius: 4, barThickness: 12, 
+                order: 4, yAxisID: 'yCough', coughTooltips: coughTooltips 
+            });
+        }
+
+        if (this.showActivityOverlay && activityDataPoints.some(d => d !== null)) {
+            datasets.push({ 
+                label: 'Activity', type: 'line', data: activityDataPoints, 
+                borderColor: '#10b981', backgroundColor: '#10b981', pointBackgroundColor: '#ffffff', 
+                pointBorderWidth: 2, tension: 0.3, spanGaps: true, 
+                order: 2, yAxisID: 'yActivity', activityTooltips: activityTooltips 
+            });
+        }
+
+        // Dynamically build multi-axis scaling
+        const scalesObj = {
+            x: this.srrUseRelationalTime 
+                ? { type: 'time', time: { tooltipFormat: 'dd MMM yyyy HH:mm' }, ticks: { maxRotation: 0 }, grid: { color: '#e2e8f0' } } 
+                : { type: 'category', ticks: { maxTicksLimit: 10, maxRotation: 0 } },
+            y: { type: 'linear', display: true, position: 'left', beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } }
+        };
+
+        if (this.showCoughOverlay) {
+            scalesObj.yCough = { type: 'linear', display: true, position: 'right', beginAtZero: true, title: { display: true, text: 'Coughs / Day' }, grid: { drawOnChartArea: false } };
+        }
+        if (this.showActivityOverlay) {
+            scalesObj.yActivity = { type: 'linear', display: true, position: 'right', beginAtZero: true, title: { display: true, text: this.activityPlotType === 'durationMins' ? 'Activity (Mins)' : 'Activity (Dist)' }, grid: { drawOnChartArea: false } };
+        }
+
+        new Chart(ctx, {
+            type: 'line',
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false }, 
+                plugins: {
+                    annotation: { annotations: annotations },
+                    tooltip: { 
+                        callbacks: { 
+                            title: (context) => context[0].label,
+                            label: (context) => {
+                                if (context.dataset.label === 'Medication Change') return context.dataset.medTooltips[context.dataIndex];
+                                if (context.dataset.label === 'Cough Frequency') return context.dataset.coughTooltips[context.dataIndex];
+                                if (context.dataset.label === 'Activity') return context.dataset.activityTooltips[context.dataIndex];
+                                if (context.raw === null) return null;
+                                return `Rate: ${context.parsed.y} bpm`;
                             }
-                        },           
-                        scales: {
-                            
-                                                   
-                            
-                            y: { beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } },
-                            x: this.srrUseRelationalTime 
-                                ? {
-                                    type: 'time',
-                                    time: { tooltipFormat: 'dd MMM yyyy HH:mm' }, // Standardizes the hover text
-                                    ticks: { maxRotation: 0 },
-                                    grid: { color: '#e2e8f0' }
-                                  }
-                                : {
-                                    type: 'category', // Your original 1-by-1 spacing
-                                    ticks: { maxTicksLimit: 10, maxRotation: 0 }
-                                  }
+                        } 
+                    },
+                    zoom: {
+                        pan: {
+                            enabled: true, mode: 'x',
+                            onPanRejected: ({ chart }) => { console.warn('Pan boundary reached'); }
+                        },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'x',
+                            limits: {
+                                x: { min: 'original', max: 'original', minRange: 1000 * 60 * 60 * 24 * 7 },
+                                y: { min: 0, max: 100 }
+                            }
                         }
                     }
-                });
-            }, 50);
-        },
+                },            
+                scales: scalesObj
+            }
+        });
+    }, 50);
+},
         
          // --- MED CHART FUNCTIONS ---       
         

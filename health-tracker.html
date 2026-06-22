@@ -1263,98 +1263,85 @@
                                     <!-- ******************************** -->
                                     <!-- SRR CHART and Analytics          -->
                                     <!-- ******************************** -->
-                
-                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                        <button @click="showAnalytics = !showAnalytics" type="button" style="
-                            width: 100%;
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            padding: 12px 16px;
-                            background: #e8eef7;
-                            border: 1px solid #c8d6eb;
-                            border-radius: 6px;
-                            cursor: pointer;
-                            font-weight: bold;
-                            color: #16325F;
-                            transition: background 0.15s ease;
-                        " @mouseenter="$el.style.background='#dde6f3'"
-                           @mouseleave="$el.style.background='#e8eef7'">
-                            
-                            <h3 style="margin: 0;"><i class="fa-solid fa-chart-line text-blue-500"></i>
-                                <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Analytics' : 'Analytics'"></span></h3> 
-                            <i class="fa-solid" :class="showAnalytics ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                        </button>
-                    </div>
-                
-                    <div x-show="showAnalytics" x-transition>
-                        <div class="flex justify-between items-center mb-4">            
-                           <div class="flex flex-wrap gap-3 items-center"
-                 style="display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; align-items: center !important; gap: 0.75rem !important; width: 100% !important;">
-    
-                            <select x-model="timeScale"
-                                    class="border rounded p-2 text-sm bg-white cursor-pointer"
-                                    style="flex: 0 0 auto !important; width: auto !important; display: inline-block !important;">
-                                <option value="thisWeek">This Week</option>
-                                <option value="lastWeek">Last Week</option>
-                                <option value="thisMonth">This Month</option>
-                                <option value="lastMonth">Last Month</option>
-                                <option value="60d">Last 60 Days</option>
-                                <option value="90d">Last 90 Days</option>
-                                <option value="180d">Last 6 Months</option>
-                                <option value="all">Entire Dataset</option>
-                                <option value="custom">Custom Range...</option>
-                            </select>
-                        
-                            <template x-if="timeScale === 'custom'">
-                                <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border"
-                                     style="flex: 0 0 auto !important; width: auto !important; display: flex !important;">
-                                    <input type="date" x-model="customStartDate" class="text-sm p-1 border-none bg-transparent">
-                                    <span class="text-slate-400">to</span>
-                                    <input type="date" x-model="customEndDate" class="text-sm p-1 border-none bg-transparent">
-                                </div>
-                            </template>
-                        
-                            <label style="display: flex !important; flex: 0 0 auto !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; cursor: pointer !important; font-size: 0.875rem !important; color: var(--text-main) !important; width: auto !important; max-width: max-content !important; margin: 0 !important; padding: 0 !important; float: none !important; border: none !important; height: auto !important;">
-                                <input type="checkbox" x-model="showMedications"
-                                       style="width: 16px !important; height: 16px !important; margin: 0 !important; padding: 0 !important; flex-shrink: 0 !important; display: inline-block !important; transform: none !important;">
-                                <span style="display: inline-block !important; margin: 0 !important; padding: 0 !important; text-align: left !important; line-height: 1.2 !important; white-space: nowrap !important;">Overlay Meds</span>
-                            </label>
-                        
-                            <label style="display: flex !important; flex: 0 0 auto !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; cursor: pointer !important; font-size: 0.875rem !important; color: var(--text-main) !important; width: auto !important; max-width: max-content !important; margin: 0 !important; padding: 0 !important; float: none !important; border: none !important; height: auto !important;">
-                                <input type="checkbox" x-model="srrUseRelationalTime"
-                                       style="width: 16px !important; height: 16px !important; margin: 0 !important; padding: 0 !important; flex-shrink: 0 !important; display: inline-block !important; transform: none !important;">
-                                <span style="display: inline-block !important; margin: 0 !important; padding: 0 !important; text-align: left !important; line-height: 1.2 !important; white-space: nowrap !important;">Relational Time</span>
-                            </label>
-                        
-                            <button x-show="getFilteredReadings().length >= 2"
-                                    @click="toggleChartExpansion()"
-                                    class="btn-nudge-static"
-                                    style="background: #1e293b !important; padding: 6px 10px !important; margin-left: auto !important; flex: 0 0 auto !important; width: auto !important; display: inline-flex !important; align-items: center !important;">
-                                <i class="fa-solid" :class="isChartExpanded ? 'fa-compress' : 'fa-expand'"></i>
-                                <span x-show="!isChartExpanded" style="margin-left: 5px;">Expand</span>
-                                <span x-show="isChartExpanded" style="margin-left: 5px;">Close</span>
-                            </button>
-                        
-                           </div>
-                        </div>
-                    
-                        <div x-show="getFilteredReadings().length < 2" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
-                            <i class="fa-solid fa-chart-pie text-3xl mb-2"></i>
-                            <p>Log (or include in date range) at least 2 resting rates to generate trend analytics.</p>
-                        </div>
-                    
-                        <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: calc(100vh - 180px); max-height: calc(100vh - 180px);' : 'height: 384px;'" x-cloak>
-                            <canvas x-ref="rrrChartCanvas"></canvas>
-                        </div>
-                        <button type="button" @click="Chart.getChart($refs.rrrChartCanvas)?.resetZoom()" 
-                                class="btn-nudge-static" style="background: #64748b;">
-                            <i class="fa-solid fa-arrows-rotate"></i> Reset Zoom
-                        </button>
-                    </div>
+            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                    <button @click="showAnalytics = !showAnalytics" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F; transition: background 0.15s ease;" @mouseenter="$el.style.background='#dde6f3'" @mouseleave="$el.style.background='#e8eef7'">
+                        <h3 style="margin: 0;">
+                            <i class="fa-solid fa-chart-line text-blue-500"></i>
+                            <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Analytics' : 'Analytics'"></span>
+                        </h3> 
+                        <i class="fa-solid" :class="showAnalytics ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                    </button>
                 </div>
-                
+            
+                <div x-show="showAnalytics" x-transition>
+                    <div class="flex flex-wrap gap-3 items-center mb-4" style="display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; align-items: center !important; gap: 0.75rem !important; width: 100% !important;">
+                        
+                        <select x-model="timeScale" class="border rounded p-2 text-sm bg-white cursor-pointer" style="flex: 0 0 auto !important; width: auto !important; display: inline-block !important;">
+                            <option value="thisWeek">This Week</option>
+                            <option value="lastWeek">Last Week</option>
+                            <option value="thisMonth">This Month</option>
+                            <option value="lastMonth">Last Month</option>
+                            <option value="60d">Last 60 Days</option>
+                            <option value="90d">Last 90 Days</option>
+                            <option value="180d">Last 6 Months</option>
+                            <option value="all">Entire Dataset</option>
+                            <option value="custom">Custom Range...</option>
+                        </select>
+            
+                        <template x-if="timeScale === 'custom'">
+                            <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded border" style="flex: 0 0 auto !important; width: auto !important; display: flex !important;">
+                                <input type="date" x-model="customStartDate" class="text-sm p-1 border-none bg-transparent">
+                                <span class="text-slate-400">to</span>
+                                <input type="date" x-model="customEndDate" class="text-sm p-1 border-none bg-transparent">
+                            </div>
+                        </template>
+            
+                        <div style="display: flex; gap: 12px; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; flex-wrap: wrap; align-items: center;">
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #475569; margin: 0;">
+                                <input type="checkbox" x-model="showMedications" style="margin: 0; padding: 0;"> <span>💊 Meds</span>
+                            </label>
+                            
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #475569; border-left: 1px solid #cbd5e1; padding-left: 12px; margin: 0;">
+                                <input type="checkbox" x-model="srrUseRelationalTime" style="margin: 0; padding: 0;"> <i class="fa-solid fa-ruler-horizontal"></i> True Time
+                            </label>
+            
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #b45309; border-left: 1px solid #cbd5e1; padding-left: 12px; margin: 0;">
+                                <input type="checkbox" x-model="showCoughOverlay" style="margin: 0; padding: 0;"> <i class="fa-solid fa-head-side-cough"></i> Cough
+                            </label>
+            
+                            <div style="display: flex; align-items: center; gap: 6px; border-left: 1px solid #cbd5e1; padding-left: 12px;">
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #059669; margin: 0;">
+                                    <input type="checkbox" x-model="showActivityOverlay" style="margin: 0; padding: 0;"> <i class="fa-solid fa-person-running"></i> Activity
+                                </label>
+                                <select x-show="showActivityOverlay" x-model="activityPlotType" x-transition style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1; color: #059669; outline: none; background: white;">
+                                    <option value="durationMins">Mins</option>
+                                    <option value="distance">Distance</option>
+                                </select>
+                            </div>
+                        </div>
+            
+                        <button x-show="getFilteredReadings().length >= 2" @click="toggleChartExpansion()" class="btn-nudge-static" style="background: #1e293b !important; padding: 6px 10px !important; margin-left: auto !important; flex: 0 0 auto !important; width: auto !important; display: inline-flex !important; align-items: center !important;">
+                            <i class="fa-solid" :class="isChartExpanded ? 'fa-compress' : 'fa-expand'"></i>
+                            <span x-show="!isChartExpanded" style="margin-left: 5px;">Expand</span>
+                            <span x-show="isChartExpanded" style="margin-left: 5px;">Close</span>
+                        </button>
+                    </div>
+            
+                    <div x-show="getFilteredReadings().length < 2" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
+                        <i class="fa-solid fa-chart-pie text-3xl mb-2"></i>
+                        <p>Log (or include in date range) at least 2 resting rates to generate trend analytics.</p>
+                    </div>
+            
+                    <div x-show="getFilteredReadings().length >= 2" id="rrrChart" class="relative w-full" :style="isChartExpanded ? 'height: calc(100vh - 180px); max-height: calc(100vh - 180px);' : 'height: 384px;'" x-cloak>
+                        <canvas x-ref="rrrChartCanvas"></canvas>
+                    </div>
+                    
+                    <button type="button" x-show="getFilteredReadings().length >= 2" @click="Chart.getChart($refs.rrrChartCanvas)?.resetZoom()" class="btn-nudge-static" style="background: #64748b; margin-top: 10px;">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reset Zoom
+                    </button>
+                </div>
+            </div>                
                                     <!-- ******************************** -->
                                     <!-- MED GRAPH                        -->
                                     <!-- ******************************** -->
