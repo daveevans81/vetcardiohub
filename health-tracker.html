@@ -349,15 +349,16 @@
                                 <!-- ******************************** -->
                                 <!-- SRR BOX -           manual       -->
                                 <!-- ******************************** -->
-            
-            <div x-show="showManualSrr" class="summary-box" style="border: 2px solid #3b82f6; background: #eff6ff;" x-transition>
-                <h3 style="margin-top: 0; color: #1e40af;"><i class="fa-solid fa-pen-to-square"></i> Manual SRR Entry</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
-                    <label>Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" style="width: 100%; padding: 8px;"></label>
-                    <label>Date / Time: <input type="datetime-local" x-model="manualSrrDate" style="width: 100%; padding: 8px;"></label>
+            <div x-show="!isCounting">
+                <div x-show="showManualSrr" class="summary-box" style="border: 2px solid #3b82f6; background: #eff6ff;" x-transition>
+                    <h3 style="margin-top: 0; color: #1e40af;"><i class="fa-solid fa-pen-to-square"></i> Manual SRR Entry</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
+                        <label>Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" style="width: 100%; padding: 8px;"></label>
+                        <label>Date / Time: <input type="datetime-local" x-model="manualSrrDate" style="width: 100%; padding: 8px;"></label>
+                    </div>
+                    <button @click="saveManualSrr()" class="btn-nudge-static" style="background: #3b82f6; width: 100%; max-width: 300px;">Save Reading</button>
+                    <button @click="showManualSrr = false" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
                 </div>
-                <button @click="saveManualSrr()" class="btn-nudge-static" style="background: #3b82f6; width: 100%; max-width: 300px;">Save Reading</button>
-                <button @click="showManualSrr = false" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
             </div>
             
             <div x-show="showPatientManager" class="summary-box" style="border: 2px solid #005f73; background: #f0fdfa;" x-transition>
