@@ -721,6 +721,15 @@ saveSyncope() {
             }
         },
         
+        editCough(dateStr) {
+            this.newCough.date = dateStr;
+            this.loadCoughForDate();
+        },
+
+        editActivity(dateStr) {
+            this.newActivity.date = dateStr;
+            this.loadActivityForDate();
+        },
                 
 // Creates an alphabetical list of "Generic (Brands)"
         get medicationOptions() {

@@ -294,7 +294,9 @@
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <i class="fa-solid fa-dog" x-show="activePatientProfile?.species === 'dog'" style="font-size: 1.5rem; color: #64748b;"></i>
                             <i class="fa-solid fa-cat" x-show="activePatientProfile?.species === 'cat'" style="font-size: 1.5rem; color: #64748b;"></i>
-                            <select x-model="activePatientId" :disabled="isCounting" style="font-size: 1.2rem; font-weight: bold; border: none; background: transparent; cursor: pointer; outline: none; color: #1e293b;">
+                            
+                            <!-- Locks during the count to prevent data corruption -->
+                            <select x-model="activePatientId" :disabled="isCounting" style="font-size: 1.2rem; font-weight: bold; border: none; background: transparent; outline: none; color: #1e293b;" :style="isCounting ? 'cursor: not-allowed; opacity: 0.8;' : 'cursor: pointer;'">
                                 <template x-for="patient in patients" :key="patient.id">
                                     <option :value="patient.id" x-text="`${patient.name} ${patient.ownerName ? '('+patient.ownerName+')' : ''}`"></option>
                                 </template>
@@ -312,7 +314,8 @@
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 5px;">
+                    <!-- Hides during the count to remove distractions -->
+                    <div style="display: flex; gap: 5px;" x-show="!isCounting" x-transition>
                         <button @click="openPatientManager(false, activePatientId)" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" title="Edit Active Profile">
                             <i class="fa-solid fa-pen"></i>
                         </button>
@@ -322,12 +325,11 @@
                     </div>
                 </div>
             </div>
-            
                                 <!-- ******************************** -->
                                 <!-- SRR BOX - count and manual       -->
                                 <!-- ******************************** -->
                                 
-             <div class="summary-box">
+            <div x-show="!isCounting" class="summary-box">
                 <h2>Resting Respiratory Rate Tracker</h2>
                 <p>Ensure your pet is fully resting or sleeping. 
                    <a href="#" @click.prevent="openGlossary('rrr_guidelines')" style="color: #1e40af;">
@@ -349,17 +351,17 @@
                                 <!-- ******************************** -->
                                 <!-- SRR BOX -           manual       -->
                                 <!-- ******************************** -->
-            <div x-show="!isCounting">
-                <div x-show="showManualSrr" class="summary-box" style="border: 2px solid #3b82f6; background: #eff6ff;" x-transition>
-                    <h3 style="margin-top: 0; color: #1e40af;"><i class="fa-solid fa-pen-to-square"></i> Manual SRR Entry</h3>
-                    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
-                        <label>Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" style="width: 100%; padding: 8px;"></label>
-                        <label>Date / Time: <input type="datetime-local" x-model="manualSrrDate" style="width: 100%; padding: 8px;"></label>
-                    </div>
-                    <button @click="saveManualSrr()" class="btn-nudge-static" style="background: #3b82f6; width: 100%; max-width: 300px;">Save Reading</button>
-                    <button @click="showManualSrr = false" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
+  
+            <div x-show="showManualSrr" class="summary-box" style="border: 2px solid #3b82f6; background: #eff6ff;" x-transition>
+                <h3 style="margin-top: 0; color: #1e40af;"><i class="fa-solid fa-pen-to-square"></i> Manual SRR Entry</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
+                    <label>Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" style="width: 100%; padding: 8px;"></label>
+                    <label>Date / Time: <input type="datetime-local" x-model="manualSrrDate" style="width: 100%; padding: 8px;"></label>
                 </div>
+                <button @click="saveManualSrr()" class="btn-nudge-static" style="background: #3b82f6; width: 100%; max-width: 300px;">Save Reading</button>
+                <button @click="showManualSrr = false" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
             </div>
+
             
             <div x-show="showPatientManager" class="summary-box" style="border: 2px solid #005f73; background: #f0fdfa;" x-transition>
                 <h3 style="margin-top: 0; color: #0f766e;"><i class="fa-solid fa-file-medical"></i> Patient Profile</h3>
@@ -775,7 +777,10 @@
                                             <span x-show="c.frequencyCount" style="color: #cbd5e1;"> | </span>
                                             <span style="color: #64748b; font-style: italic;" x-text="c.description"></span>
                                         </div>
-                                        <button @click="deleteCough(c.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash"></i></button>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <button @click="editCough(c.date)" style="background: none; border: none; color: #3b82f6; cursor: pointer; opacity: 0.6; padding: 4px;" title="Edit Entry"><i class="fa-solid fa-pen"></i></button>
+                                            <button @click="deleteCough(c.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.6; padding: 4px;" title="Delete Entry"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
                                     </div>
                                 </template>
                             </div>
@@ -827,7 +832,10 @@
                                                 <span x-show="a.distance" x-text="a.distance"></span>
                                             </span>
                                         </div>
-                                        <button @click="deleteActivity(a.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash"></i></button>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <button @click="editActivity(a.date)" style="background: none; border: none; color: #3b82f6; cursor: pointer; opacity: 0.6; padding: 4px;" title="Edit Entry"><i class="fa-solid fa-pen"></i></button>
+                                            <button @click="deleteActivity(a.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.6; padding: 4px;" title="Delete Entry"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
                                     </div>
                                 </template>
                             </div>
