@@ -1241,6 +1241,72 @@ toggleChartExpansion() {
                 if (chart) chart.resize();
             });
         },
+        
+        get compiledTimeline() {
+            if (!this.activePatientId) return [];
+            
+            const combinedEvents = [];
+            const { startDate, endDate } = this.getDateRange();
+            
+            const safeTimestamp = (dateStr) => {
+                if (!dateStr) return new Date().getTime();
+                if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return new Date(`${dateStr}T12:00:00`).getTime(); 
+                return this.parseDateSafe(dateStr).getTime();
+            };
+
+            const isWithinRange = (ts) => !startDate || (ts >= startDate.getTime() && ts <= endDate.getTime());
+
+            // 1. SRR Data (We use the raw data here so the vet sees exact times, not daily means)
+            this.getFilteredReadings().forEach(r => {
+                if (isWithinRange(safeTimestamp(r.date))) {
+                    combinedEvents.push({ type: 'SRR', dateObj: new Date(r.date), displayDate: new Date(r.date).toLocaleString(), summary: `${r.rate} bpm`, notes: r.comment || '' });
+                }
+            });
+
+            // 2. Meds
+            if (this.showMedications && Array.isArray(this.medLedger)) {
+                this.medLedger.filter(m => m.patientId === this.activePatientId).forEach(m => {
+                    if (isWithinRange(safeTimestamp(m.eventDate))) {
+                        const drugName = m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId);
+                        combinedEvents.push({ type: 'Medication', dateObj: new Date(m.eventDate), displayDate: new Date(m.eventDate).toLocaleDateString(), summary: `${m.action.toUpperCase()}: ${drugName} (${m.doseMg ? m.doseMg+'mg' : '?'})`, notes: m.notes || '' });
+                    }
+                });
+            }
+
+            // 3. Cough
+            if (this.showCoughOverlay && Array.isArray(this.coughLog)) {
+                this.coughLog.filter(c => c.patientId === this.activePatientId).forEach(c => {
+                    if (isWithinRange(safeTimestamp(c.date))) {
+                        combinedEvents.push({ type: 'Cough', dateObj: new Date(c.date), displayDate: new Date(c.date).toLocaleDateString(), summary: `${c.severity} - ${c.frequencyCount}x/${c.frequencyPeriod}`, notes: `${c.description}. ${c.notes || ''}` });
+                    }
+                });
+            }
+
+            // 4. Activity
+            if (this.showActivityOverlay && Array.isArray(this.activityLog)) {
+                this.activityLog.filter(a => a.patientId === this.activePatientId).forEach(a => {
+                    if (isWithinRange(safeTimestamp(a.date))) {
+                        let metric = a.durationMins ? `${a.durationMins}m` : (a.distance || '');
+                        combinedEvents.push({ type: 'Activity', dateObj: new Date(a.date), displayDate: new Date(a.date).toLocaleDateString(), summary: `${a.status} ${metric ? '('+metric+')' : ''}`, notes: a.notes || '' });
+                    }
+                });
+            }
+
+            // 5. Syncope & Diagnosis
+            if (this.showSyncopeOverlay && Array.isArray(this.syncopeLog)) {
+                this.syncopeLog.filter(s => s.patientId === this.activePatientId).forEach(s => {
+                    if (isWithinRange(safeTimestamp(s.date))) combinedEvents.push({ type: 'Syncope', dateObj: new Date(s.date), displayDate: new Date(s.date).toLocaleString(), summary: `Collapse Episode`, notes: s.notes || s.context || '' });
+                });
+            }
+            if (this.showDiagnosisOverlay && Array.isArray(this.diagnosisLog)) {
+                this.diagnosisLog.filter(d => d.patientId === this.activePatientId).forEach(d => {
+                    if (isWithinRange(safeTimestamp(d.date))) combinedEvents.push({ type: 'Diagnosis', dateObj: new Date(d.date), displayDate: new Date(d.date).toLocaleDateString(), summary: d.diagnosis || d.stage || 'Update', notes: d.notes || '' });
+                });
+            }
+
+            // Sort chronologically (newest first for the table)
+            return combinedEvents.sort((a, b) => b.dateObj - a.dateObj);
+        },
                 
 renderChart() {
     if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
@@ -2451,6 +2517,103 @@ cancelComment() {
     this.editingCommentId = null;
     this.commentDraft = '';
 },
+
+// --- EXPORT ENGINE ---
+        generatePDF() {
+            if (!this.activePatientId) return alert("Select a patient first.");
+            
+            // Initialize jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const profile = this.activePatientProfile;
+            const timeline = this.compiledTimeline;
+
+            // 1. Header
+            doc.setFontSize(20);
+            doc.text(`${profile.name}'s Clinical Report`, 14, 20);
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            doc.text(`Generated: ${new Date().toLocaleDateString()} | Timescale: ${this.timeScale.toUpperCase()}`, 14, 28);
+            doc.text(`Species: ${profile.species} | Breed: ${profile.breed || 'N/A'} | Age: ${this.computedAgeText}`, 14, 34);
+
+            // 2. Embed the Chart
+            const canvas = this.$refs.rrrChartCanvas;
+            if (canvas) {
+                // Ensure chart background is white, not transparent, for the PDF
+                const chartImgData = canvas.toDataURL("image/jpeg", 1.0);
+                doc.addImage(chartImgData, 'JPEG', 14, 45, 180, 80); // x, y, width, height
+            }
+
+            // 3. Generate the Data Table
+            const tableBody = timeline.map(ev => [
+                ev.displayDate,
+                ev.type,
+                ev.summary,
+                ev.notes
+            ]);
+
+            doc.autoTable({
+                startY: 135,
+                head: [['Date', 'Category', 'Summary', 'Clinical Notes']],
+                body: tableBody,
+                theme: 'striped',
+                headStyles: { fillColor: [22, 50, 95] }, // Matches your #16325F theme
+                columnStyles: {
+                    0: { cellWidth: 30 },
+                    1: { cellWidth: 25 },
+                    2: { cellWidth: 45 },
+                    3: { cellWidth: 'auto' }
+                },
+                styles: { fontSize: 9 }
+            });
+
+            doc.save(`${profile.name}_Cardio_Report.pdf`);
+        },
+
+        generateCSV() {
+            if (!this.activePatientId) return;
+            const timeline = this.compiledTimeline;
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Date,Category,Summary,Notes\n";
+            
+            timeline.forEach(ev => {
+                // Escape commas and quotes for safe CSV output
+                const safeNotes = ev.notes ? `"${ev.notes.replace(/"/g, '""')}"` : "";
+                const safeSummary = ev.summary ? `"${ev.summary.replace(/"/g, '""')}"` : "";
+                csvContent += `${ev.displayDate},${ev.type},${safeSummary},${safeNotes}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${this.activePatientProfile.name}_Report.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        copyToClipboard() {
+            if (!this.activePatientId) return;
+            const timeline = this.compiledTimeline;
+            
+            let textOutput = `CLINICAL REPORT: ${this.activePatientProfile.name}\n`;
+            textOutput += `Generated: ${new Date().toLocaleDateString()}\n`;
+            textOutput += `-------------------------------------------\n\n`;
+
+            timeline.forEach(ev => {
+                textOutput += `[${ev.displayDate}] ${ev.type.toUpperCase()}: ${ev.summary}\n`;
+                if (ev.notes) textOutput += `   Notes: ${ev.notes}\n`;
+                textOutput += `\n`;
+            });
+
+            navigator.clipboard.writeText(textOutput).then(() => {
+                alert("Clinical timeline copied to clipboard!");
+            }).catch(err => {
+                console.error("Could not copy text: ", err);
+                alert("Failed to copy to clipboard.");
+            });
+        },
         
         exportPDF() {
             // Web-native PDF generation using the browser's print dialog.

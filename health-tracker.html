@@ -33,6 +33,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <script src="/js/glossary-data.js" defer></script>
     <script src="/js/glossary-logic.js" defer></script>
@@ -1412,6 +1414,32 @@
                     <div x-show="!hasAnyMedData()" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
                         <i class="fa-solid fa-pills text-3xl mb-2"></i>
                         <p>Log medications to generate a pharmacologic timeline.</p>
+                    </div>
+                </div>
+                
+                                    <!-- ******************************** -->
+                                    <!-- EXPORT VET SECTION            -->
+                                    <!-- ******************************** -->
+                
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    
+                    <div style="font-size: 0.85rem; color: #64748b;">
+                        <i class="fa-solid fa-circle-info" style="color: #3b82f6;"></i> 
+                        The export will include the chart and data for the <strong>Date Range</strong> and <strong>Overlays</strong> currently selected above.
+                    </div>
+                
+                    <div style="display: flex; gap: 10px;">
+                        <button @click="copyToClipboard()" style="padding: 8px 16px; background: white; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s;" @mouseenter="$el.style.background='#f8fafc'" @mouseleave="$el.style.background='white'">
+                            <i class="fa-solid fa-copy"></i> Copy Text
+                        </button>
+                        
+                        <button @click="generateCSV()" style="padding: 8px 16px; background: white; color: #10b981; border: 1px solid #10b981; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s;" @mouseenter="$el.style.background='#ecfdf5'" @mouseleave="$el.style.background='white'">
+                            <i class="fa-solid fa-file-csv"></i> .CSV
+                        </button>
+                
+                        <button @click="generatePDF()" style="padding: 8px 16px; background: #16325F; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="fa-solid fa-file-pdf text-red-400"></i> Generate PDF
+                        </button>
                     </div>
                 </div>
                 
