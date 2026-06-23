@@ -1649,16 +1649,47 @@ acvimPht: {
 },
 
 acvimMmvd: {
-    audience: ["vet"], 
+
     title: "ACVIM Guidelines: MMVD (EPIC Criteria)",
-    category: "Guidelines",
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
     difficulty: 2,
-    description: "The global staging system (Stages A through D) for classifying canine myxomatous mitral valve disease (MMVD) and dictating pharmaceutical management, heavily reliant on the findings of the EPIC trial.",
+    description: "The global staging system (Stages A through D) for classifying canine myxomatous mitral valve disease (MMVD) and dictating pharmaceutical management, heavily reliant on the findings of the EPIC trial. B1 patients have no cardiac remodelling. B2 patients have cardiac remodelling evident on echo. Stage C patients have current or previous congestive heart failure (CHF), while stage D represents end stage refractory heart failure.",
     view: "Right Parasternal Short Axis",
-    group: "echo", 
     method: "To classify a preclinical patient as Stage B2 (warranting the initiation of pimobendan), there must be a murmur ≥3/6 and echocardiographic cardiomegaly defined strictly as an LA:Ao ≥ 1.6 AND an LVIDdn ≥ 1.7.",
     reference: "Keene et al. (2019)",
-    pmid: "30974015"
+    pmid: "30974015",
+    imgPlaceholder: "/images/acvim_stages.png"
+},
+
+acvimHcm: {
+
+    title: "ACVIM Guidelines: HCM",
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+    difficulty: 2,
+    description: "The global staging system (Stages A through D) for classifying feline cardiomyopathy. B1 patients have no atrial remodelling but may have LV hypertrophy. B2 patients have atrial remodelling evident on echo. Stage C patients have current or previous congestive heart failure (CHF), while stage D represents end stage refractory heart failure.",
+    view: "Right Parasternal Short Axis",
+    method: "B1 cats are at low risk of CHF and aortic thromboembolism (ATE), while B2 cats are at high risk for both of these. It differs from MMVD classification. To classify a preclinical patient as Stage B2 (warranting the initiation of anti-thrombotics like clopidogrel and careful monitoring for CHF), the main factor is left atrial enlargement. But in addition LA and LV systolic function, the level of LV hypertrophy and LAA flow are all significant.",
+    reference: "Fuentes et al. (2020)",
+    pmid: "32243654",
+    imgPlaceholder: "/images/acvim_stages_hcm.png"
+},
+
+acvimDcm: {
+ 
+    title: "ACVIM Staging: DCM ",
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+    difficulty: 2,
+    description: "The global staging system (Stages A through D) for classifying canine dilated cardiomyopathy. ACVIM guidelines are not yet published, so there is no universally agreed method, but typically follow the method described by Gerhard Wess: Stage B is split into B1 (arrhythmogenic phase with normal cardiac structure but documented ventricular premature complexes [VPCs] or atrial fibrillation) and B2 (structural phase showing echocardiographic left ventricular dilation or systolic dysfunction with or without concurrent arrhythmias). Stage C patients have current or previous congestive heart failure (CHF), while stage D represents end stage refractory heart failure.",
+    method: "Stage B1 is diagnosed by having a normal echo, but electrical abnormalities seen on holter monitoring. To classify a preclinical patient as Stage B2 (warranting the initiation of pimobendan), echocardiographic cardiomegaly must be defined strictly using breed-specific reference intervals or allometric scaling studies, typically requiring an increased left ventricular internal diameter in diastole normalized to body weight (LVIDdn) alongside an increased left ventricular internal diameter in systole normalized to body weight (LVIDsn), or ideally via volume based techniques such as end-diastolic and systolic volume indicies and reduced ejection fraction."
+    reference: "Wess (2022)",
+    pmid: "34732313",
+    imgPlaceholder: "/images/acvim_stages_dcm.png"
 }
 
 };
