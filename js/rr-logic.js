@@ -803,16 +803,32 @@ isCurrentStage(stageId) {
 get acvimChartHtml() {
     if (!this.activePathway) return '';
 
+    const diseasePrefix = this.primaryCardiacDiagnosis ? this.primaryCardiacDiagnosis.split(' ')[0] : 'Disease';
+
+    // --- AUTO-GENERATE GLOSSARY ENTRIES ---
+    this.activePathway.stages.forEach(stage => {
+        const key = `acvim_${diseasePrefix}_${stage.id}`;
+        if (!this.glossaryDatabase[key]) {
+            this.glossaryDatabase[key] = {
+                title: `${diseasePrefix} - Stage ${stage.id}`,
+                category: "ACVIM Staging",
+                difficulty: 2,
+                group: "Cardiology",
+                description: `Clinical classification for ${diseasePrefix} Stage ${stage.id}. ${stage.subtitle ? 'Key indicator: ' + stage.subtitle + '.' : ''}`,
+                textOwner: `Your pet's heart condition is classified as Stage ${stage.id}. ${stage.subtitle ? 'This generally means ' + stage.subtitle.toLowerCase() + '.' : ''} Monitoring resting breathing rates is critical at this stage to detect subtle changes.`,
+            };
+        }
+    });
+
     // ── Layout constants ───────────────────────────────────────────────
     const W       = 960;
     const STAGES  = this.activePathway.stages;
-    const N       = STAGES.length;                          // always 5
+    const N       = STAGES.length;                          
     const PAD     = 72;
-    const SPACING = (W - PAD * 2) / (N - 1);               // 204 for N=5
-    const CY      = 90;                                     // circle centre Y
-    const R       = 46;                                     // circle radius
+    const SPACING = (W - PAD * 2) / (N - 1);               
+    const CY      = 90;                                     
+    const R       = 46;                                     
 
-    // Stage id → centre X
     const POS = {};
     STAGES.forEach((s, i) => { POS[s.id] = Math.round(PAD + i * SPACING); });
 
@@ -820,10 +836,8 @@ get acvimChartHtml() {
     const lastX  = POS[STAGES[N - 1].id];
     const arrowTip = lastX + R + 20;
 
-    // Normalise "Stage B2" → "B2" (safety net for any stored values)
     const norm = id => (id || '').replace(/^Stage\s+/i, '');
 
-    // Subtitle word-wrap: splits at the space nearest the midpoint
     const splitSub = (sub) => {
         if (!sub || sub.length <= 14) return [sub || ''];
         const words = sub.split(' ');
@@ -839,14 +853,14 @@ get acvimChartHtml() {
 
     let html = '';
 
-    // ── 1. Connector arrow ─────────────────────────────────────────────
+    // 1. Connector arrow
     html += `
         <line x1="${firstX}" y1="${CY}" x2="${arrowTip - 4}" y2="${CY}"
               stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
         <polygon points="${arrowTip - 4},${CY - 11} ${arrowTip + 10},${CY} ${arrowTip - 4},${CY + 11}"
               fill="#cbd5e1"/>`;
 
-    // ── 2. Stage circles ───────────────────────────────────────────────
+    // 2. Stage circles with Info Icons
     const FILL = { Normal:'#65a30d', B1:'#84cc16', B2:'#ca8a04', C:'#d97706', D:'#dc2626' };
 
     STAGES.forEach(stage => {
@@ -856,8 +870,7 @@ get acvimChartHtml() {
         const lines   = splitSub(stage.subtitle);
         const hasSub  = lines.some(l => l);
 
-        // Text Y positions inside circle
-        const labelY  = hasSub ? CY - 7 : CY + 8;   // baseline of main label
+        const labelY  = hasSub ? CY - 7 : CY + 8;   
         let subHtml   = '';
 
         if (hasSub) {
@@ -881,76 +894,13 @@ get acvimChartHtml() {
                 <text x="${x}" y="${labelY}" text-anchor="middle"
                       fill="white" font-size="22" font-weight="bold">${stage.label}</text>
                 ${subHtml}
+                
+                <g style="cursor:pointer;" @click="openGlossary('acvim_${diseasePrefix}_${stage.id}')">
+                    <circle cx="${x + 32}" cy="${labelY - 14}" r="9" fill="#f8fafc" stroke="${fill}" stroke-width="1.5"/>
+                    <text x="${x + 32}" y="${labelY - 10}" text-anchor="middle" font-size="11" fill="${fill}" font-weight="bold" font-family="sans-serif">i</text>
+                </g>
             </g>`;
     });
-
-    // ── 3. Transition markers (one per diagnosis log entry) ────────────
-    // stageProgression already normalised by the getter
-    const progression = this.stageProgression;
-
-    const stageCounts = {};
-    progression.forEach(t => { stageCounts[t.stage] = (stageCounts[t.stage] || 0) + 1; });
-
-    const MSEP  = 19;    // px gap between sibling markers on same stage
-    const drawn = {};
-    let latestMX = null;
-
-    progression.forEach(t => {
-        const baseX = POS[t.stage];
-        if (baseX === undefined) return;          // unrecognised stage, skip silently
-
-        if (drawn[t.stage] === undefined) drawn[t.stage] = 0;
-        const count = stageCounts[t.stage];
-        const i     = drawn[t.stage]++;
-        // Centre the group of sibling markers on the stage circle
-        const mx    = baseX - ((count - 1) * MSEP) / 2 + i * MSEP;
-        latestMX    = mx;
-
-        const dateStr = t.date
-            ? new Date(t.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'2-digit' })
-            : '';
-
-        html += `
-            <g>
-                <line x1="${mx}" y1="${CY + R + 2}" x2="${mx}" y2="${CY + R + 26}"
-                      stroke="#2563eb" stroke-width="2"/>
-                <circle cx="${mx}" cy="${CY + R + 3}" r="4" fill="#2563eb"/>
-                ${dateStr ? `<text x="${mx}" y="${CY + R + 41}" text-anchor="middle"
-                    font-size="10" fill="#475569">${dateStr}</text>` : ''}
-            </g>`;
-    });
-
-    // ── 4. NOW pointer (above the most recent marker's stage) ──────────
-    if (latestMX !== null) {
-        const tipY = CY - R - 6;
-        html += `
-            <polygon points="${latestMX - 16},${tipY - 20} ${latestMX + 16},${tipY - 20} ${latestMX},${tipY}"
-                fill="#2563eb"/>
-            <text x="${latestMX}" y="${tipY - 7}" text-anchor="middle"
-                font-size="10" fill="white" font-weight="bold">NOW</text>`;
-    }
-
-    // ── 5. Treatment bands ─────────────────────────────────────────────
-    const BAND_Y0  = CY + R + 53;    // clears the date labels (CY+R+41)
-    const BAND_H   = 20;
-    const BAND_GAP = 6;
-
-    (this.activePathway.treatmentBands || []).forEach((band, idx) => {
-        const startX = POS[norm(band.startStage)];
-        if (startX === undefined) return;
-        const y     = BAND_Y0 + idx * (BAND_H + BAND_GAP);
-        const bandW = arrowTip + 10 - (startX - R);
-        html += `
-            <g>
-                <rect x="${startX - R}" y="${y}" width="${bandW}" height="${BAND_H}"
-                      rx="10" fill="#dbeafe" stroke="#93c5fd"/>
-                <text x="${startX - R + 12}" y="${y + 14}"
-                      font-size="10" fill="#1e3a8a" font-weight="bold">${band.label}</text>
-            </g>`;
-    });
-
-    return html;
-},
 
 // --- SYNCOPE / EVENT LOGIC ---
 openSyncopeForm(logEntry = null) {
@@ -2838,38 +2788,37 @@ async generatePDF() {
 
     let currentY = 45; // Document flow cursor
 
-    // ── 2. Embed ACVIM Staging Chart (SVG to Canvas) ────────────────────
+    // ── 2. Embed ACVIM Staging Chart (SVG to Canvas via Base64) ──────────
     if (this.activePathway) {
         try {
             const svgElement = document.getElementById('acvim-svg-export');
             if (svgElement) {
-                // Serialize SVG to string
-                const svgData = new XMLSerializer().serializeToString(svgElement);
-                const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(svgBlob);
+                // Clone to mutate attributes without affecting UI
+                const clonedSvg = svgElement.cloneNode(true);
+                clonedSvg.setAttribute('width', '960');
+                clonedSvg.setAttribute('height', '272');
+                
+                // Serialize and Base64 Encode
+                const svgData = new XMLSerializer().serializeToString(clonedSvg);
+                const svgURI = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svgData)));
 
-                // Load into an Image object
                 const img = new Image();
                 await new Promise((resolve, reject) => {
                     img.onload = resolve;
                     img.onerror = reject;
-                    img.src = url;
+                    img.src = svgURI;
                 });
 
-                // Draw to a temporary canvas to get a JPEG
                 const canvas = document.createElement('canvas');
-                canvas.width = 960; // Matches viewBox W
-                canvas.height = 272; // Matches viewBox H
+                canvas.width = 960; 
+                canvas.height = 272; 
                 const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ffffff'; // Ensure white background
+                ctx.fillStyle = '#ffffff'; 
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, 960, 272);
 
                 const acvimImgData = canvas.toDataURL('image/jpeg', 1.0);
-                
-                // Calculate correct aspect ratio
-                const acvimRatio = canvas.height / canvas.width;
-                const acvimPdfHeight = 180 * acvimRatio;
+                const acvimPdfHeight = 180 * (canvas.height / canvas.width);
 
                 doc.setFontSize(12);
                 doc.setTextColor(20, 20, 20);
@@ -2877,14 +2826,13 @@ async generatePDF() {
                 currentY += 6;
 
                 doc.addImage(acvimImgData, 'JPEG', 14, currentY, 180, acvimPdfHeight);
-                currentY += acvimPdfHeight + 15; // Move cursor down
-                URL.revokeObjectURL(url);
+                currentY += acvimPdfHeight + 15; 
             }
         } catch (err) {
             console.error("Failed to render ACVIM staging chart to PDF:", err);
         }
     }
-
+    
     // ── 3. Embed Respiratory Chart (Fixed Aspect Ratio) ─────────────────
     const rrrCanvas = this.$refs.rrrChartCanvas;
     if (rrrCanvas) {

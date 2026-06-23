@@ -3733,14 +3733,17 @@ input {
 /* ACVIM Chart Fullscreen Modal */
 .expanded-acvim-modal {
     position: fixed;
-    top: 5%;
-    left: 5%;
-    width: 90%;
-    height: 90%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95%;
+    max-width: 1200px;
+    max-height: 90vh; /* Adapts to content height */
+    height: auto;
     z-index: 9999;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     background: #ffffff !important;
-    overflow: hidden; /* Inner div handles scrolling */
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
 }
