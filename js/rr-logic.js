@@ -831,11 +831,13 @@ saveSyncope() {
         return;
     }
 
-const entryToSave = {
+
+    const entryToSave = {
     id: this.editingSyncopeId || crypto.randomUUID(),
-    patientId: this.activePatientId, // Binds event to the current patient
+    patientId: this.activePatientId, // CRITICAL : Binds event to the current patient
     date: this.newSyncope.date,
-    time: this.newSyncope.time,
+    time: this.newSyncope.time, 
+    };
 
     if (this.editingSyncopeId) {
         const index = this.syncopeLog.findIndex(s => s.id === this.editingSyncopeId);
