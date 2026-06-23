@@ -728,17 +728,20 @@ get isStagingApplicable() {
 
 
 get stageProgression() {
-            const history = this.diagnosisLog
-                .filter(d => d.patientId === this.activePatientId && 
-                             d.acvimStage && d.acvimStage !== 'N/A' && 
-                             d.diagnosis !== 'Concurrent Conditions Only')
-                .sort((a,b) => new Date(a.date) - new Date(b.date)); // chronological for chart lines
-            
-            return history.map(entry => ({
-                stage: entry.acvimStage,
-                date: entry.date
-            }));
-        },
+    return this.diagnosisLog
+        .filter(d =>
+            d.patientId === this.activePatientId &&
+            d.acvimStage &&
+            d.acvimStage !== 'N/A' &&
+            d.acvimStage !== 'Unstaged / N/A' &&
+            d.diagnosis !== 'Concurrent Conditions Only'
+        )
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .map(entry => ({
+            stage: entry.acvimStage.replace(/^Stage\s+/i, ''), // "Stage B2" → "B2"
+            date: entry.date
+        }));
+},
 
 
 stageX(stageId) {
@@ -799,107 +802,155 @@ isCurrentStage(stageId) {
 
 get acvimChartHtml() {
     if (!this.activePathway) return '';
+
+    // ── Layout constants ───────────────────────────────────────────────
+    const W       = 960;
+    const STAGES  = this.activePathway.stages;
+    const N       = STAGES.length;                          // always 5
+    const PAD     = 72;
+    const SPACING = (W - PAD * 2) / (N - 1);               // 204 for N=5
+    const CY      = 90;                                     // circle centre Y
+    const R       = 46;                                     // circle radius
+
+    // Stage id → centre X
+    const POS = {};
+    STAGES.forEach((s, i) => { POS[s.id] = Math.round(PAD + i * SPACING); });
+
+    const firstX = POS[STAGES[0].id];
+    const lastX  = POS[STAGES[N - 1].id];
+    const arrowTip = lastX + R + 20;
+
+    // Normalise "Stage B2" → "B2" (safety net for any stored values)
+    const norm = id => (id || '').replace(/^Stage\s+/i, '');
+
+    // Subtitle word-wrap: splits at the space nearest the midpoint
+    const splitSub = (sub) => {
+        if (!sub || sub.length <= 14) return [sub || ''];
+        const words = sub.split(' ');
+        const mid = sub.length / 2;
+        let run = 0, at = 1;
+        for (let i = 0; i < words.length - 1; i++) {
+            run += words[i].length + 1;
+            at = i + 1;
+            if (run >= mid) break;
+        }
+        return [words.slice(0, at).join(' '), words.slice(at).join(' ')];
+    };
+
     let html = '';
 
-    // 1. CONNECTING ARROW
+    // ── 1. Connector arrow ─────────────────────────────────────────────
     html += `
-        <line x1="110" y1="90" x2="890" y2="90" stroke="#cbd5e1" stroke-width="10" stroke-linecap="round"/>
-        <polygon points="890,75 930,90 890,105" fill="#cbd5e1"/>
-    `;
+        <line x1="${firstX}" y1="${CY}" x2="${arrowTip - 4}" y2="${CY}"
+              stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+        <polygon points="${arrowTip - 4},${CY - 11} ${arrowTip + 10},${CY} ${arrowTip - 4},${CY + 11}"
+              fill="#cbd5e1"/>`;
 
-    // 2. STAGE CIRCLES
-    this.activePathway.stages.forEach(stage => {
-        const x = this.stageX(stage.id);
-        const isCurrent = this.isCurrentStage(stage.id);
+    // ── 2. Stage circles ───────────────────────────────────────────────
+    const FILL = { Normal:'#65a30d', B1:'#84cc16', B2:'#ca8a04', C:'#d97706', D:'#dc2626' };
 
-        let fill = '#dc2626';
-        if (stage.id === 'Normal') fill = '#65a30d';
-        else if (stage.id === 'B1')  fill = '#84cc16';
-        else if (stage.id === 'B2')  fill = '#ca8a04';
-        else if (stage.id === 'C')   fill = '#d97706';
+    STAGES.forEach(stage => {
+        const x       = POS[stage.id];
+        const current = this.isCurrentStage(stage.id);
+        const fill    = FILL[stage.id] || '#64748b';
+        const lines   = splitSub(stage.subtitle);
+        const hasSub  = lines.some(l => l);
 
-        html += `
-            <g>
-                <circle cx="${x}" cy="90" r="60"
-                    fill="${fill}"
-                    stroke="${isCurrent ? '#2563eb' : 'white'}"
-                    stroke-width="${isCurrent ? 8 : 2}"/>
-                <text x="${x}" y="82" text-anchor="middle" fill="white" font-size="30" font-weight="bold">${stage.label}</text>
-                <text x="${x}" y="108" text-anchor="middle" fill="white" font-size="13">${stage.subtitle || ''}</text>
-            </g>
-        `;
-    });
+        // Text Y positions inside circle
+        const labelY  = hasSub ? CY - 7 : CY + 8;   // baseline of main label
+        let subHtml   = '';
 
-    // 3. TRANSITION MARKERS — multiple per stage, offset rightward
-    //    First pass: count how many markers land on each stage so we can center the group
-    const stageCounts = {};
-    this.stageProgression.forEach(t => {
-        stageCounts[t.stage] = (stageCounts[t.stage] || 0) + 1;
-    });
-
-    // Second pass: draw markers, tracking per-stage index
-    const MARKER_SPACING = 20;
-    const stageIndex = {};   // how many we've drawn so far per stage
-    let latestMarkerX = null;
-
-    this.stageProgression.forEach(transition => {
-        const baseX = this.stageX(transition.stage);
-        if (stageIndex[transition.stage] === undefined) stageIndex[transition.stage] = 0;
-
-        const count   = stageCounts[transition.stage];
-        const i       = stageIndex[transition.stage];
-        // Center the group around baseX
-        const groupW  = (count - 1) * MARKER_SPACING;
-        const mx      = baseX - groupW / 2 + i * MARKER_SPACING;
-
-        stageIndex[transition.stage]++;
-        latestMarkerX = mx;   // last one drawn = most recent
-
-        if (transition.date) {
-            // Short date for space — "12 Jan 24"
-            const dateStr = new Date(transition.date).toLocaleDateString('en-GB', {
-                day: 'numeric', month: 'short', year: '2-digit'
-            });
-            html += `
-                <g>
-                    <line x1="${mx}" y1="152" x2="${mx}" y2="178" stroke="#2563eb" stroke-width="2"/>
-                    <circle cx="${mx}" cy="152" r="5" fill="#2563eb"/>
-                    <text x="${mx}" y="194" text-anchor="middle" font-size="11" fill="#475569">${dateStr}</text>
-                </g>
-            `;
+        if (hasSub) {
+            if (lines.length === 1) {
+                subHtml = `<text x="${x}" y="${CY + 14}" text-anchor="middle"
+                    fill="rgba(255,255,255,0.88)" font-size="8.5">${lines[0]}</text>`;
+            } else {
+                subHtml = `<text text-anchor="middle" fill="rgba(255,255,255,0.88)" font-size="8">
+                    <tspan x="${x}" y="${CY + 7}">${lines[0]}</tspan>
+                    <tspan x="${x}" dy="11">${lines[1]}</tspan>
+                </text>`;
+            }
         }
-    });
 
-    // 4. "NOW" ARROW — points at the most recent marker
-    if (latestMarkerX !== null) {
         html += `
             <g>
-                <polygon points="${latestMarkerX - 22},8 ${latestMarkerX + 22},8 ${latestMarkerX},33" fill="#2563eb"/>
-                <text x="${latestMarkerX}" y="22" text-anchor="middle" font-size="11" fill="white" font-weight="bold">NOW</text>
-            </g>
-        `;
+                <circle cx="${x}" cy="${CY}" r="${R}"
+                    fill="${fill}"
+                    stroke="${current ? '#2563eb' : 'white'}"
+                    stroke-width="${current ? 6 : 2}"/>
+                <text x="${x}" y="${labelY}" text-anchor="middle"
+                      fill="white" font-size="22" font-weight="bold">${stage.label}</text>
+                ${subHtml}
+            </g>`;
+    });
+
+    // ── 3. Transition markers (one per diagnosis log entry) ────────────
+    // stageProgression already normalised by the getter
+    const progression = this.stageProgression;
+
+    const stageCounts = {};
+    progression.forEach(t => { stageCounts[t.stage] = (stageCounts[t.stage] || 0) + 1; });
+
+    const MSEP  = 19;    // px gap between sibling markers on same stage
+    const drawn = {};
+    let latestMX = null;
+
+    progression.forEach(t => {
+        const baseX = POS[t.stage];
+        if (baseX === undefined) return;          // unrecognised stage, skip silently
+
+        if (drawn[t.stage] === undefined) drawn[t.stage] = 0;
+        const count = stageCounts[t.stage];
+        const i     = drawn[t.stage]++;
+        // Centre the group of sibling markers on the stage circle
+        const mx    = baseX - ((count - 1) * MSEP) / 2 + i * MSEP;
+        latestMX    = mx;
+
+        const dateStr = t.date
+            ? new Date(t.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'2-digit' })
+            : '';
+
+        html += `
+            <g>
+                <line x1="${mx}" y1="${CY + R + 2}" x2="${mx}" y2="${CY + R + 26}"
+                      stroke="#2563eb" stroke-width="2"/>
+                <circle cx="${mx}" cy="${CY + R + 3}" r="4" fill="#2563eb"/>
+                ${dateStr ? `<text x="${mx}" y="${CY + R + 41}" text-anchor="middle"
+                    font-size="10" fill="#475569">${dateStr}</text>` : ''}
+            </g>`;
+    });
+
+    // ── 4. NOW pointer (above the most recent marker's stage) ──────────
+    if (latestMX !== null) {
+        const tipY = CY - R - 6;
+        html += `
+            <polygon points="${latestMX - 16},${tipY - 20} ${latestMX + 16},${tipY - 20} ${latestMX},${tipY}"
+                fill="#2563eb"/>
+            <text x="${latestMX}" y="${tipY - 7}" text-anchor="middle"
+                font-size="10" fill="white" font-weight="bold">NOW</text>`;
     }
 
-    // 5. TREATMENT BANDS — stacked below date labels
-    const BAND_Y_START = 208;
-    const BAND_HEIGHT  = 22;
-    const BAND_GAP     = 8;
+    // ── 5. Treatment bands ─────────────────────────────────────────────
+    const BAND_Y0  = CY + R + 53;    // clears the date labels (CY+R+41)
+    const BAND_H   = 20;
+    const BAND_GAP = 6;
+
     (this.activePathway.treatmentBands || []).forEach((band, idx) => {
-        const startX = this.stageX(band.startStage);
-        const y      = BAND_Y_START + idx * (BAND_HEIGHT + BAND_GAP);
-        const width  = 940 - startX;
+        const startX = POS[norm(band.startStage)];
+        if (startX === undefined) return;
+        const y     = BAND_Y0 + idx * (BAND_H + BAND_GAP);
+        const bandW = arrowTip + 10 - (startX - R);
         html += `
             <g>
-                <rect x="${startX}" y="${y}" width="${width}" height="${BAND_HEIGHT}"
-                    rx="11" fill="#dbeafe" stroke="#93c5fd"/>
-                <text x="${startX + 14}" y="${y + 15}" font-size="11" fill="#1e3a8a" font-weight="bold">${band.label}</text>
-            </g>
-        `;
+                <rect x="${startX - R}" y="${y}" width="${bandW}" height="${BAND_H}"
+                      rx="10" fill="#dbeafe" stroke="#93c5fd"/>
+                <text x="${startX - R + 12}" y="${y + 14}"
+                      font-size="10" fill="#1e3a8a" font-weight="bold">${band.label}</text>
+            </g>`;
     });
 
     return html;
 },
-
 
 // --- SYNCOPE / EVENT LOGIC ---
 openSyncopeForm(logEntry = null) {

@@ -1510,24 +1510,14 @@
                 <!-- ACVIM DISEASE PROGRESSION TIMELINE           -->
                 <!-- ******************************************** -->
                 
-                <div
-                    x-show="activePathway"
-                    class="summary-box"
-                    style="overflow-x:auto;"
-                >
-                
-                    <h2 style="margin-bottom:20px;">
+                <div x-show="activePathway" class="summary-box" style="overflow-x: auto;">
+                    <h2 style="margin-bottom: 16px;">
                         <i class="fa-solid fa-route"></i>
-                        Disease Progression
+                        <span x-text="(primaryCardiacDiagnosis ? primaryCardiacDiagnosis.split(' ')[0] : 'Disease') + ' Disease Progression'"></span>
                     </h2>
-                
-                    <svg
-                        viewBox="0 0 1000 290"
-                        style="width:100%; min-width:900px; height:auto;"
-                        x-html="acvimChartHtml"
-                    >
+                    <svg viewBox="0 0 960 272" style="width: 100%; height: auto; display: block;"
+                         x-html="acvimChartHtml">
                     </svg>
-                
                 </div>
                 
                                     <!-- ******************************** -->
