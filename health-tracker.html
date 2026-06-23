@@ -1042,118 +1042,150 @@
                                     <!-- ******************************** -->
                                     <!-- DIAGNOSIS SECTION            -->
                                     <!-- ******************************** -->
-                <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                        <button @click="showDiagnosisLog = !showDiagnosisLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F;">
-                            <h3 style="margin: 0;"><i class="fa-solid fa-stethoscope" style="margin-right: 8px; color: #0284c7;"></i> Diagnosis & ACVIM Staging</h3> 
-                            <i class="fa-solid" :class="showDiagnosisLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                <div x-show="showDiagnosisLog" x-transition>
+                                        
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" x-show="!showDiagnosisForm">
+                        <span style="color: #475569; font-size: 0.9rem; font-style: italic;">Clinical history & staging</span>
+                        <button @click="openDiagnosisForm()" type="button" style="padding: 6px 12px; background: #e2e8f0; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
+                            <i class="fa-solid fa-plus"></i> Add Update
                         </button>
                     </div>
                 
-                    <div x-show="showDiagnosisLog" x-transition>
+                    <div x-show="showDiagnosisForm" x-transition style="background: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #c8d6eb; margin-bottom: 20px; text-align: left; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <h4 style="margin-top: 0; color: #16325F; font-size: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                            <i class="fa-solid fa-heart-pulse" style="color: #ef4444; margin-right: 5px;"></i> Primary Cardiac Status
+                        </h4>
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" x-show="!showDiagnosisForm">
-                            <span style="color: #475569; font-size: 0.9rem; font-style: italic;">Clinical history & staging</span>
-                            <button @click="openDiagnosisForm()" type="button" style="padding: 6px 12px; background: #e2e8f0; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
-                                <i class="fa-solid fa-plus"></i> Add Update
-                            </button>
-                        </div>
-
-                        <div x-show="showDiagnosisForm" x-transition style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #c8d6eb; margin-bottom: 20px; text-align: left;">
-                            <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Diagnosis Update</h4>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-                                <div>
-                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Date of Diagnosis/Scan</label>
-                                    <input type="date" x-model="newDiagnosis.date" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                </div>
-                            <div style="margin-bottom: 15px;">
-                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Primary Cardiac Diagnosis</label>
-                                    <select x-model="newDiagnosis.diagnosis" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                        <option value="">Select Diagnosis...</option>
-                                        <option value="MMVD">MMVD (Myxomatous Mitral Valve Disease)</option>
-                                        <option value="HCM">HCM (Hypertrophic Cardiomyopathy)</option>
-                                        <option value="DCM">DCM (Dilated Cardiomyopathy)</option>
-                                        <option value="Pulmonary Hypertension">Pulmonary Hypertension</option>
-                                        <option value="ARVC">Arrhythmogenic Right Ventricular Cardiomyopathy</option>
-                                        <option value="Congenital Defect">Congenital Defect (PDA, SAS, PS)</option>
-                                    </select>
-                                </div>
-                            
-                                <div style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 4px;">
-                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Disease Stage (Update as needed)</label>
-                                    <p style="font-size: 0.85rem; color: #64748b; margin-top: 0; margin-bottom: 10px;">
-                                        <em>Note: Formal ACVIM staging primarily applies to MMVD and Feline HCM. DCM staging is loosely adapted.</em>
-                                    </p>
-                                    <select x-model="newDiagnosis.acvimStage" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                        <option value="N/A">Unstaged / N/A</option>
-                                        <option value="Stage A">Stage A (At Risk)</option>
-                                        <option value="Stage B1">Stage B1 (Subclinical, No Remodeling)</option>
-                                        <option value="Stage B2">Stage B2 (Subclinical, Cardiomegaly)</option>
-                                        <option value="Stage C">Stage C (Current/Past Heart Failure)</option>
-                                        <option value="Stage D">Stage D (Refractory Heart Failure)</option>
-                                    </select>
-                                </div>
-                            
-                                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0; width: 100%;">
-                                <div style="grid-column: 1 / -1;">
-                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Concurrent Non-Cardiac Diagnoses</label>
-                                    
-                                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                        <input type="text" x-model="newConcurrentDiagnosis" @keydown.enter.prevent="addConcurrentDiagnosis()" placeholder="e.g., Chronic Kidney Disease, Osteoarthritis..." style="flex-grow: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                        <button @click="addConcurrentDiagnosis()" type="button" style="padding: 10px 15px; background: #005f73; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                            <i class="fa-solid fa-plus"></i> Add
-                                        </button>
-                                    </div>
-                            
-                                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                        <template x-for="(diagnosis, index) in newDiagnosis.concurrentDiagnoses" :key="index">
-                                            <span style="background: #e2e8f0; color: #334155; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
-                                                <span x-text="diagnosis"></span>
-                                                <i class="fa-solid fa-xmark" @click="removeConcurrentDiagnosis(index)" style="cursor: pointer; color: #ef4444;"></i>
-                                            </span>
-                                        </template>
-                                    </div>
-                                </div>
-                                <div style="grid-column: 1 / -1;">
-                                    <label style="font-weight: bold; display: block; margin-bottom: 5px; margin-top: 10px;">Clinical Notes</label>
-                                    <textarea x-model="newDiagnosis.notes" placeholder="Any additional notes..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; resize: vertical;"></textarea>
-                                </div>
-
-                                <div style="grid-column: 1 / -1; display: flex; gap: 10px; margin-top: 10px;">
-                                    <button @click="saveDiagnosis()" type="button" style="flex: 1; padding: 10px; background: #0284c7; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                                        <i class="fa-solid fa-check"></i> Save Clinical Status
-                                    </button>
-                                    <button @click="showDiagnosisForm = false" type="button" style="padding: 10px 15px; background: #e2e8f0; color: #334155; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                                        Cancel
-                                    </button>
-                                </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Date of Diagnosis/Scan</label>
+                                <input type="date" x-model="newDiagnosis.date" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; box-sizing: border-box; background: #f8fafc;">
+                            </div>
+                
+                            <div>
+                                <label style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Primary Cardiac Diagnosis</label>
+                                <select x-model="newDiagnosis.diagnosis" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                                    <option value="">Select Diagnosis...</option>
+                                    <option value="MMVD">MMVD (Myxomatous Mitral Valve Disease)</option>
+                                    <option value="HCM">HCM (Hypertrophic Cardiomyopathy)</option>
+                                    <option value="DCM">DCM (Dilated Cardiomyopathy)</option>
+                                    <option value="Pulmonary Hypertension">Pulmonary Hypertension</option>
+                                    <option value="ARVC">Arrhythmogenic Right Ventricular Cardiomyopathy</option>
+                                    <option value="Congenital Defect">Congenital Defect (PDA, SAS, PS...)</option>
+                                    <option value="Murmur - no diagnosis">Murmur - pending echocardiogram</option>
+                                    <option value="Other">Other...</option>
+                                </select>
                             </div>
                         </div>
                 
-                        <div x-show="!showDiagnosisForm">
-                            <template x-for="diag in sortedDiagnosisLog()" :key="diag.id">
-                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 8px; text-align: left; position: relative;">
-                                    <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 4px;" x-text="new Date(diag.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></div>
-                                    <div style="font-weight: bold; color: #1e293b; font-size: 1.05rem;" x-text="diag.diagnosis"></div>
-                                    <div x-show="diag.acvimStage !== 'N/A' && diag.acvimStage !== ''" style="color: #0284c7; font-size: 0.9rem; margin-top: 4px;">ACVIM Stage <strong x-text="diag.acvimStage"></strong></div>
-                                    
-                                    <div x-show="diag.concurrentDiagnoses && diag.concurrentDiagnoses.length > 0" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px;">
-                                        <template x-for="cDiag in diag.concurrentDiagnoses">
-                                            <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; border: 1px solid #cbd5e1;" x-text="cDiag"></span>
-                                        </template>
-                                    </div>
-                                    
-                                    <div x-show="diag.notes" style="font-size: 0.85em; color: #64748b; margin-top: 10px; font-style: italic;" x-text="'Notes: ' + diag.notes"></div>
-                                    
-                                    <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 10px;">
-                                        <button @click="openDiagnosisForm(diag)" style="background: none; border: none; color: #64748b; cursor: pointer; opacity: 0.7;"><i class="fa-solid fa-pen"></i></button>
-                                        <button @click="deleteDiagnosis(diag.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash-can"></i></button>
+                        <div x-show="newDiagnosis.diagnosis === 'Congenital Defect' || newDiagnosis.diagnosis === 'Other'" x-transition style="margin-bottom: 15px;">
+                            <label style="font-size: 0.85rem; font-weight: bold; color: #0284c7; display: block; margin-bottom: 5px;">Specify Details</label>
+                            <input type="text" x-model="newDiagnosis.customDiagnosis" placeholder="e.g. Subaortic Stenosis, Tricuspid Dysplasia" style="width: 100%; padding: 10px; border: 1px solid #7dd3fc; border-radius: 5px; box-sizing: border-box; background: #f0f9ff;">
+                        </div>
+                
+                        <div x-show="newDiagnosis.diagnosis === 'Murmur - no diagnosis'" x-transition style="margin-bottom: 15px; padding: 15px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                            <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #b45309;">Track Murmur Grade (Levine Scale)</label>
+                            <select x-model="newDiagnosis.murmurGrade" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #fcd34d;">
+                                <option value="N/A">Not Graded / Unknown</option>
+                                <option value="1/6">Grade I/VI (Very soft, requires quiet room)</option>
+                                <option value="2/6">Grade II/VI (Soft, localized)</option>
+                                <option value="3/6">Grade III/VI (Moderate intensity, easy to hear)</option>
+                                <option value="4/6">Grade IV/VI (Loud, radiating, no palpable thrill)</option>
+                                <option value="5/6">Grade V/VI (Very loud, palpable thrill)</option>
+                                <option value="6/6">Grade VI/VI (Heard with stethoscope barely touching)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 4px;" x-show="newDiagnosis.diagnosis !== 'Murmur - no diagnosis'">
+                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Disease Stage</label>
+                            <p style="font-size: 0.8rem; color: #64748b; margin-top: 0; margin-bottom: 10px;">
+                                <em>Formal ACVIM staging primarily applies to MMVD and Feline HCM.</em>
+                            </p>
+                            <select x-model="newDiagnosis.acvimStage" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1;">
+                                <option value="N/A">Unstaged / N/A</option>
+                                <option value="Stage A">Stage A (At Risk)</option>
+                                <option value="Stage B1">Stage B1 (Subclinical, No Remodeling)</option>
+                                <option value="Stage B2">Stage B2 (Subclinical, Cardiomegaly)</option>
+                                <option value="Stage C">Stage C (Current/Past Heart Failure)</option>
+                                <option value="Stage D">Stage D (Refractory Heart Failure)</option>
+                            </select>
+                        </div>
+                        
+                        <h4 style="margin-top: 25px; color: #16325F; font-size: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                            <i class="fa-solid fa-notes-medical" style="color: #0d9488; margin-right: 5px;"></i> Concurrent Conditions
+                        </h4>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Non-Cardiac Diagnoses</label>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <input type="text" x-model="newConcurrentDiagnosis" @keydown.enter.prevent="addConcurrentDiagnosis()" placeholder="e.g., Chronic Kidney Disease, Osteoarthritis..." style="flex-grow: 1; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                                <button @click="addConcurrentDiagnosis()" type="button" style="padding: 10px 15px; background: #005f73; color: white; border: none; border-radius: 5px; cursor: pointer; transition: background 0.2s;">
+                                    <i class="fa-solid fa-plus"></i> Add
+                                </button>
+                            </div>
+                
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px;">
+                                <template x-for="(diagnosis, index) in newDiagnosis.concurrentDiagnoses" :key="index">
+                                    <span style="background: #e2e8f0; color: #334155; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                                        <span x-text="diagnosis"></span>
+                                        <i class="fa-solid fa-xmark" @click="removeConcurrentDiagnosis(index)" style="cursor: pointer; color: #ef4444;"></i>
+                                    </span>
+                                </template>
+                                <span x-show="newDiagnosis.concurrentDiagnoses.length === 0" style="color: #94a3b8; font-size: 0.85rem; font-style: italic; display: flex; align-items: center;">No secondary conditions listed</span>
+                            </div>
+                        </div>
+                
+                        <div>
+                            <label style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Clinical Notes</label>
+                            <textarea x-model="newDiagnosis.notes" placeholder="Any additional veterinary notes or owner instructions..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; box-sizing: border-box; resize: vertical; min-height: 80px; background: #f8fafc;"></textarea>
+                        </div>
+                
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button @click="saveDiagnosis()" type="button" style="flex: 1; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+                                <i class="fa-solid fa-check"></i> Save Clinical Status
+                            </button>
+                            <button @click="showDiagnosisForm = false" type="button" style="padding: 12px 20px; background: #e2e8f0; color: #334155; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div x-show="!showDiagnosisForm">
+                        <template x-for="diag in sortedDiagnosisLog()" :key="diag.id">
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; text-align: left; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                                <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 6px; font-weight: bold;" x-text="new Date(diag.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></div>
+                                
+                                <div style="display: flex; align-items: baseline; gap: 8px;">
+                                    <div style="font-weight: bold; color: #1e293b; font-size: 1.1rem;" x-text="diag.diagnosis"></div>
+                                    <div x-show="(diag.diagnosis === 'Congenital Defect' || diag.diagnosis === 'Other') && diag.customDiagnosis" style="color: #0284c7; font-size: 0.95rem; font-style: italic;">
+                                        — <span x-text="diag.customDiagnosis"></span>
                                     </div>
                                 </div>
-                            </template>
-                            <div x-show="sortedDiagnosisLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No diagnostic history recorded.</div>
+                
+                                <div x-show="diag.diagnosis === 'Murmur - no diagnosis' && diag.murmurGrade && diag.murmurGrade !== 'N/A'" style="color: #b45309; font-size: 0.9rem; margin-top: 6px; font-weight: 500;">
+                                    <i class="fa-solid fa-stethoscope"></i> Intensity: <span x-text="diag.murmurGrade"></span>
+                                </div>
+                
+                                <div x-show="diag.acvimStage !== 'N/A' && diag.acvimStage !== '' && diag.diagnosis !== 'Murmur - no diagnosis'" style="color: #0284c7; font-size: 0.9rem; margin-top: 6px; font-weight: 500;">
+                                    <i class="fa-solid fa-chart-line"></i> ACVIM <span x-text="diag.acvimStage"></span>
+                                </div>
+                                
+                                <div x-show="diag.concurrentDiagnoses && diag.concurrentDiagnoses.length > 0" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px;">
+                                    <template x-for="cDiag in diag.concurrentDiagnoses">
+                                        <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; border: 1px solid #cbd5e1;" x-text="cDiag"></span>
+                                    </template>
+                                </div>
+                                
+                                <div x-show="diag.notes" style="font-size: 0.85rem; color: #475569; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-style: italic;" x-text="diag.notes"></div>
+                                
+                                <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 12px;">
+                                    <button @click="openDiagnosisForm(diag)" style="background: none; border: none; color: #64748b; cursor: pointer; transition: color 0.2s;"><i class="fa-solid fa-pen"></i></button>
+                                    <button @click="deleteDiagnosis(diag.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                        </template>
+                        <div x-show="sortedDiagnosisLog().length === 0" style="padding: 30px 20px; text-align: center; color: #94a3b8; font-style: italic; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                            No clinical history recorded.<br>Click "Add Update" to log a baseline diagnosis.
                         </div>
                     </div>
                 </div>

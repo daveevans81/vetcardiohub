@@ -89,12 +89,15 @@ acvimStage: '', // Easily mutable without changing the primary diagnosis
 concurrentDiagnoses: [], // Array to hold non-cardiac issues
 newConcurrentDiagnosis: '', // v-model for the input field
         
-        newDiagnosis: {
-            date: new Date().toISOString().split('T')[0],
-            diagnosis: '',
-            acvimStage: 'N/A',
-            notes: ''
-        },
+newDiagnosis: {
+    date: new Date().toISOString().split('T')[0],
+    diagnosis: '',
+    customDiagnosis: '', //  field for Other/Congenital
+    murmurGrade: 'N/A',  //  field for Murmur Tracker
+    acvimStage: 'N/A',
+    concurrentDiagnoses: [],
+    notes: ''
+},
         
 
 
@@ -537,10 +540,12 @@ saveDiagnosis() {
 
     const entryToSave = {
         id: this.editingDiagnosisId || crypto.randomUUID(),
+        patientId: this.activePatientId, // CRITICAL BUG FIX
         date: this.newDiagnosis.date,
         diagnosis: this.newDiagnosis.diagnosis,
+        customDiagnosis: this.newDiagnosis.customDiagnosis, // Save the new field
+        murmurGrade: this.newDiagnosis.murmurGrade,         // Save the new field
         acvimStage: this.newDiagnosis.acvimStage,
-        // MUST explicitly save the concurrent array into the log object
         concurrentDiagnoses: [...(this.newDiagnosis.concurrentDiagnoses || [])],
         notes: this.newDiagnosis.notes,
         timestamp: Date.now()
@@ -553,10 +558,8 @@ saveDiagnosis() {
         this.diagnosisLog.push(entryToSave);
     }
 
-    // Sort descending by date
     this.diagnosisLog.sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    // Update active primary diagnosis and stage for the patient header
     if (this.diagnosisLog.length > 0) {
         this.primaryCardiacDiagnosis = this.diagnosisLog[0].diagnosis;
         this.acvimStage = this.diagnosisLog[0].acvimStage;
@@ -566,31 +569,28 @@ saveDiagnosis() {
     this.showDiagnosisForm = false;
 },
 
-
 // --- DIAGNOSIS LOGIC ---
 openDiagnosisForm(logEntry = null) {
     if (logEntry) {
-        // Editing an existing entry
         this.newDiagnosis = { ...logEntry };
-        // Ensure concurrent array exists
         this.newDiagnosis.concurrentDiagnoses = logEntry.concurrentDiagnoses ? [...logEntry.concurrentDiagnoses] : [];
         this.editingDiagnosisId = logEntry.id;
     } else {
-        // Adding a new entry. Auto-fill everything from the most recent log!
         const recentEntry = this.diagnosisLog.length > 0 ? this.diagnosisLog[0] : null;
         
         this.newDiagnosis = {
             id: null,
             date: new Date().toISOString().split('T')[0],
             diagnosis: recentEntry ? recentEntry.diagnosis : '', 
+            customDiagnosis: recentEntry ? (recentEntry.customDiagnosis || '') : '',
+            murmurGrade: recentEntry ? (recentEntry.murmurGrade || 'N/A') : 'N/A',
             acvimStage: recentEntry ? recentEntry.acvimStage : 'N/A',
-            // Carry forward existing secondary conditions
             concurrentDiagnoses: recentEntry && recentEntry.concurrentDiagnoses ? [...recentEntry.concurrentDiagnoses] : [],
             notes: ''
         };
         this.editingDiagnosisId = null;
     }
-    this.newConcurrentDiagnosis = ''; // Clear the text input box
+    this.newConcurrentDiagnosis = ''; 
     this.showDiagnosisForm = true;
 },
 
