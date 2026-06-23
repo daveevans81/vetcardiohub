@@ -41,7 +41,8 @@ document.addEventListener('alpine:init', () => {
         showCoughForm: false,     
         showActivityForm: false,
         showCoughOverlay: false,      
-        showActivityOverlay: false,    
+        showActivityOverlay: false,  
+        showImportExport: false,  
         activityPlotType: 'durationMins',
         
         newCough: {
