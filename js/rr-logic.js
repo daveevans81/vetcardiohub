@@ -131,6 +131,10 @@ showCardiacForm: false,
 cardalisEmailText: '',
 showCardalisImport: false,
 
+// Heart2Heart Import State
+heart2HeartText: '',
+showHeart2HeartImport: false,
+
         // --- CHART & CONTROLS ---
         timeScale: '180d', // Default to 6 months
         customStartDate: '',
@@ -2441,7 +2445,114 @@ importCSV(event) {
     reader.readAsText(file);
 },
 
+       importHeart2HeartData() {
+    const text = this.heart2HeartText;
+    if (!text || !text.trim()) {
+        return alert("Please paste the Heart2Heart PDF data first.");
+    }
+    
+    if (!this.activePatientId) {
+        return alert("Clinical Import Error: No patient selected. Please select a patient profile first to import this data into.");
+    }
+
+    // Split text by newlines and drop empty lines
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    
+    let importedCount = 0;
+    let skippedDuplicates = 0;
+    let skippedInvalid = 0;
+
+    // Regex Strategy: 
+    // [1] Date: 1-2 digits, 3 letters, 4 digits (e.g., 19 Jun 2026)
+    // [2] Time: 2 digits, colon, 2 digits (e.g., 18:55)
+    // [3] Rate: 1+ digits
+    // [4] Notes: Any remaining characters (optional)
+    // We use [\s,]+ to aggressively forgive weird PDF copy-paste spacing or missing commas.
+    const regex = /^(\d{1,2}\s+[a-zA-Z]{3}\s+\d{4})[\s,]+(\d{2}:\d{2})\s+(\d+)(?:\s+(.*))?$/i;
+
+    lines.forEach(line => {
+        // Skip the table headers if the user copied them
+        if (line.toLowerCase().includes('date') && line.toLowerCase().includes('bpm')) return;
+
+        const match = line.match(regex);
+        if (!match) {
+            skippedInvalid++;
+            return;
+        }
+
+        const dateStrRaw = match[1]; // e.g., "19 Jun 2026"
+        const timeStr = match[2];    // e.g., "18:55"
+        const rate = parseInt(match[3], 10);
         
+        // Use the parsed comment, or a default note if blank
+        const comment = match[4] ? match[4].trim() : 'Imported from Heart2Heart PDF';
+
+        // Native JS can reliably parse "DD MMM YYYY HH:MM"
+        const dateObj = new Date(`${dateStrRaw} ${timeStr}`);
+        
+        // Validation check
+        if (isNaN(dateObj.getTime()) || isNaN(rate) || rate <= 0 || rate > 150) {
+            skippedInvalid++;
+            return;
+        }
+
+        // --- DUPLICATE DETECTION (60-second window) ---
+        const isDuplicate = this.srrHistory.some(h =>
+            h.patientId === this.activePatientId &&
+            Math.abs(new Date(h.date).getTime() - dateObj.getTime()) < 60000
+        );
+
+        if (isDuplicate) {
+            skippedDuplicates++;
+            return;
+        }
+
+        // Apply fallback clinical logic for Equivocal rates 
+        const isEquivocal = rate >= 30 && rate < 40;
+
+        // --- PUSH TO HISTORY ---
+        this.srrHistory.push({
+            id: this.generateId(),
+            date: dateObj.toISOString(),
+            time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            rate: rate,
+            patientId: this.activePatientId,
+            isEquivocal: isEquivocal,
+            comment: comment,
+            isManual: false
+        });
+
+        importedCount++;
+    });
+
+    // --- COMMIT & REFRESH ---
+    if (importedCount === 0) {
+        const detail = skippedDuplicates > 0
+            ? `${skippedDuplicates} duplicate(s) were already in the log.`
+            : skippedInvalid > 0
+                ? `${skippedInvalid} lines had unrecognized formats.`
+                : "No valid Heart2Heart data found.";
+        return alert(`No new readings imported.\n\n${detail}`);
+    }
+
+    // Ensure array order is maintained
+    this.srrHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+    this.saveToStorage('vch_srrHistory', this.srrHistory);
+    
+    // UI Reset
+    this.heart2HeartText = '';
+    this.showHeart2HeartImport = false;
+    this.currentPage = 1;
+    this.$nextTick(() => { this.renderChart(); });
+
+    const petName = this.activePatientProfile?.name || 'this patient';
+    const dupNote = skippedDuplicates > 0 ? `, ${skippedDuplicates} duplicate(s) skipped` : '';
+    const invalidNote = skippedInvalid > 0 ? `, ${skippedInvalid} invalid line(s) ignored` : '';
+    
+    alert(`Successfully imported ${importedCount} reading(s) for ${petName}${dupNote}${invalidNote}.`);
+},
+
+ 
  importCardalisEmail() {
     const text = this.cardalisEmailText;
     if (!text || !text.trim()) 

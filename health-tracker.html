@@ -1654,6 +1654,57 @@
                                 </p>
                             </div>
                         </div>
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 15px;">
+                            <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-heart-pulse" style="color: #e11d48;"></i>
+                                Heart2Heart App Import
+                            </h4>
+                            <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 10px;">
+                                Paste text copied directly from a Heart2Heart PDF export table to import to the <strong>active patient</strong>.
+                            </p>
+                        
+                            <button @click="showHeart2HeartImport = !showHeart2HeartImport" 
+                                    class="btn-nudge-static" 
+                                    style="background: #e11d48; font-size: 0.8rem; padding: 6px 12px; width: 100%;">
+                                <i class="fa-solid fa-paste"></i>
+                                <span x-text="showHeart2HeartImport ? 'Cancel' : 'Paste & Import Data'"></span>
+                            </button>
+                        
+                            <div x-show="showHeart2HeartImport" x-transition style="margin-top: 12px;">
+                                <textarea 
+                                    x-model="heart2HeartText"
+                                    rows="8"
+                                    placeholder="Ensure you have the correct patient selected in VetCardioHub first!
+                                    
+                        Open your Heart2Heart PDF, highlight the table, copy it, and paste it here.
+                        
+                        Example:
+                        Date BPM Comments
+                        19 Jun 2026, 18:55 36
+                        20 Jun 2026, 09:29 44
+                        23 Jun 2026, 18:48 26 test comment"
+                                    style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                           font-size: 0.8rem; font-family: monospace; resize: vertical; 
+                                           box-sizing: border-box; color: #334155; line-height: 1.5;">
+                                </textarea>
+                                <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">
+                                    <button @click="heart2HeartText = ''" 
+                                            style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                                   background: white; cursor: pointer; font-size: 0.8rem; color: #475569;">
+                                        Clear
+                                    </button>
+                                    <button @click="importHeart2HeartData()" 
+                                            class="btn-nudge-static"
+                                            style="background: #e11d48; font-size: 0.8rem; padding: 6px 14px;">
+                                        <i class="fa-solid fa-file-import"></i> Import Readings
+                                    </button>
+                                </div>
+                                <p style="font-size: 0.72rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
+                                    <i class="fa-solid fa-triangle-exclamation" style="color: #fbbf24;"></i>
+                                    <strong>Warning:</strong> Heart2Heart exports do not contain the pet's name. The data will be imported into the currently active profile in the app header.
+                                </p>
+                            </div>
+                        </div>
                         <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                             <div>
                                 <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)</h4>
