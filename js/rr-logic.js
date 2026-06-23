@@ -588,6 +588,12 @@ removeConcurrentDiagnosis(index) {
     const history = this.diagnosisLog
         .filter(d => d.patientId === this.activePatientId && d.acvimStage && d.acvimStage !== 'N/A')
         .sort((a,b) => new Date(a.date) - new Date(b.date));
+    return history.map(entry => ({
+        stage: entry.acvimStage,
+        date: entry.date
+    }));
+},
+
 
 stageX(stageId) {
     if (!this.activePathway) return 0;
