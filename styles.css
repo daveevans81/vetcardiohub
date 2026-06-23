@@ -10,6 +10,9 @@ main a {
  color: #d9534f;
 }
 
+html, body {
+    overflow-x: hidden;
+}
 
 
 /* 1. KEYFRAMES  */
