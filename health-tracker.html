@@ -1510,7 +1510,7 @@
                 <!-- ACVIM DISEASE PROGRESSION TIMELINE           -->
                 <!-- ******************************************** -->
                 
-                <div x-show="activePathway" class="summary-box" style="overflow-x: auto;">
+                <div x-show="activePathway" class="summary-box" style="overflow-x: auto; transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak">
                     <h2 style="margin-bottom: 16px;">
                         <i class="fa-solid fa-route"></i>
                         <span x-text="(primaryCardiacDiagnosis ? primaryCardiacDiagnosis.split(' ')[0] : 'Disease') + ' Disease Progression'"></span>
