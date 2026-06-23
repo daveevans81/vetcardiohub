@@ -2808,6 +2808,346 @@ exportMedicationsCSV() {
     reader.readAsText(file);
 },
 
+// ==========================================
+// --- COUGH LOG CSV EXPORT / IMPORT ---
+// ==========================================
+
+exportCoughCSV() {
+    if (!this.coughLog || this.coughLog.length === 0) 
+        return alert("No cough data to export.");
+
+    const headers = "Date,PatientName,Severity,FrequencyCount,FrequencyPeriod,Description,Context,Notes\n";
+    
+    const rows = this.coughLog.map(c => {
+        const patient = this.patients.find(p => p.id === c.patientId);
+        const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+
+        return [
+            c.date,
+            `"${patientName}"`,
+            `"${this.sanitiseCSV(c.severity || '')}"`,
+            `"${this.sanitiseCSV(c.frequencyCount || '')}"`,
+            `"${this.sanitiseCSV(c.frequencyPeriod || '')}"`,
+            `"${this.sanitiseCSV(c.description || '')}"`,
+            `"${this.sanitiseCSV(c.context || '')}"`,
+            `"${this.sanitiseCSV(c.notes || '')}"`
+        ].join(',');
+    }).join("\n");
+
+    const BOM = '\uFEFF';
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `VCH_CoughLog_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+},
+
+importCoughCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const lines = e.target.result.split("\n").map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+
+            const clean = (s) => (s || '').replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+            let importedCount = 0;
+            let skipped = 0;
+
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].match(/(".*?"|[^",]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g);
+                if (!parts || parts.length < 8) { skipped++; continue; }
+
+                const patientName = clean(parts[1]);
+                const patient = this.patients.find(p => p.name.toLowerCase() === patientName.toLowerCase());
+                if (!patient) { skipped++; continue; }
+
+                this.coughLog.push({
+                    id: this.generateId(),
+                    patientId: patient.id,
+                    date: clean(parts[0]),
+                    severity: clean(parts[2]),
+                    frequencyCount: clean(parts[3]),
+                    frequencyPeriod: clean(parts[4]) || 'day',
+                    description: clean(parts[5]),
+                    context: clean(parts[6]),
+                    notes: clean(parts[7])
+                });
+                importedCount++;
+            }
+
+            this.saveToStorage('vch_coughLog', this.coughLog);
+            if(this.activePatientId) this.loadCoughForDate();
+            this.$nextTick(() => { this.renderChart(); });
+
+            alert(`Imported ${importedCount} cough record(s). ${skipped > 0 ? `(${skipped} skipped)` : ''}`);
+        } catch (err) {
+            alert("Failed to parse Cough CSV. Check the file format.");
+        }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
+
+// ==========================================
+// --- ACTIVITY LOG CSV EXPORT / IMPORT ---
+// ==========================================
+
+exportActivityCSV() {
+    if (!this.activityLog || this.activityLog.length === 0) return alert("No activity data to export.");
+
+    const headers = "Date,PatientName,Status,DurationMins,Distance,Notes\n";
+    const rows = this.activityLog.map(a => {
+        const patient = this.patients.find(p => p.id === a.patientId);
+        const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+        return [
+            a.date,
+            `"${patientName}"`,
+            `"${this.sanitiseCSV(a.status || '')}"`,
+            `"${this.sanitiseCSV(a.durationMins || '')}"`,
+            `"${this.sanitiseCSV(a.distance || '')}"`,
+            `"${this.sanitiseCSV(a.notes || '')}"`
+        ].join(',');
+    }).join("\n");
+
+    const BOM = '\uFEFF';
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `VCH_ActivityLog_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+},
+
+importActivityCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const lines = e.target.result.split("\n").map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+
+            const clean = (s) => (s || '').replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+            let importedCount = 0, skipped = 0;
+
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].match(/(".*?"|[^",]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g);
+                if (!parts || parts.length < 6) { skipped++; continue; }
+
+                const patientName = clean(parts[1]);
+                const patient = this.patients.find(p => p.name.toLowerCase() === patientName.toLowerCase());
+                if (!patient) { skipped++; continue; }
+
+                this.activityLog.push({
+                    id: this.generateId(),
+                    patientId: patient.id,
+                    date: clean(parts[0]),
+                    status: clean(parts[2]),
+                    durationMins: clean(parts[3]),
+                    distance: clean(parts[4]),
+                    notes: clean(parts[5])
+                });
+                importedCount++;
+            }
+
+            this.saveToStorage('vch_activityLog', this.activityLog);
+            if(this.activePatientId) this.loadActivityForDate();
+            this.$nextTick(() => { this.renderChart(); });
+            alert(`Imported ${importedCount} activity record(s). ${skipped > 0 ? `(${skipped} skipped)` : ''}`);
+        } catch (err) { alert("Failed to parse Activity CSV."); }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
+
+// ==========================================
+// --- SYNCOPE LOG CSV EXPORT / IMPORT ---
+// ==========================================
+
+exportSyncopeCSV() {
+    if (!this.syncopeLog || this.syncopeLog.length === 0) return alert("No syncope data to export.");
+
+    const headers = "Date,Time,PatientName,Type,Duration,LOC,MuscleTone,ActivityBefore,MMColour,HR,RR,Notes\n";
+    const rows = this.syncopeLog.map(s => {
+        const patient = this.patients.find(p => p.id === s.patientId);
+        const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+        return [
+            s.date,
+            s.time || '',
+            `"${patientName}"`,
+            `"${this.sanitiseCSV(s.type || '')}"`,
+            `"${this.sanitiseCSV(s.duration || '')}"`,
+            `"${this.sanitiseCSV(s.loc || '')}"`,
+            `"${this.sanitiseCSV(s.muscleTone || '')}"`,
+            `"${this.sanitiseCSV(s.activityBefore || '')}"`,
+            `"${this.sanitiseCSV(s.mmColour || '')}"`,
+            s.hr || '',
+            s.rr || '',
+            `"${this.sanitiseCSV(s.notes || '')}"`
+        ].join(',');
+    }).join("\n");
+
+    const BOM = '\uFEFF';
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `VCH_SyncopeLog_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+},
+
+importSyncopeCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const lines = e.target.result.split("\n").map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+
+            const clean = (s) => (s || '').replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+            let importedCount = 0, skipped = 0;
+
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].match(/(".*?"|[^",]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g);
+                if (!parts || parts.length < 12) { skipped++; continue; }
+
+                const patientName = clean(parts[2]);
+                const patient = this.patients.find(p => p.name.toLowerCase() === patientName.toLowerCase());
+                if (!patient) { skipped++; continue; }
+
+                this.syncopeLog.push({
+                    id: this.generateId(),
+                    patientId: patient.id,
+                    date: clean(parts[0]),
+                    time: clean(parts[1]),
+                    type: clean(parts[3]),
+                    duration: clean(parts[4]),
+                    loc: clean(parts[5]),
+                    muscleTone: clean(parts[6]),
+                    activityBefore: clean(parts[7]),
+                    mmColour: clean(parts[8]),
+                    hr: clean(parts[9]) ? parseInt(clean(parts[9])) : null,
+                    rr: clean(parts[10]) ? parseInt(clean(parts[10])) : null,
+                    notes: clean(parts[11])
+                });
+                importedCount++;
+            }
+            
+            this.syncopeLog.sort((a, b) => new Date(b.date) - new Date(a.date));
+            this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+            this.$nextTick(() => { this.renderChart(); });
+            alert(`Imported ${importedCount} syncope record(s). ${skipped > 0 ? `(${skipped} skipped)` : ''}`);
+        } catch (err) { alert("Failed to parse Syncope CSV."); }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
+
+// ==========================================
+// --- DIAGNOSIS LOG CSV EXPORT / IMPORT ---
+// ==========================================
+
+exportDiagnosisCSV() {
+    if (!this.diagnosisLog || this.diagnosisLog.length === 0) return alert("No diagnosis data to export.");
+
+    const headers = "Date,PatientName,Diagnosis,CustomDiagnosis,MurmurGrade,ACVIMStage,ConcurrentDiagnoses,Notes\n";
+    const rows = this.diagnosisLog.map(d => {
+        const patient = this.patients.find(p => p.id === d.patientId);
+        const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+        // Join concurrent array with a semicolon so it stays in one CSV column
+        const concurrentStr = (d.concurrentDiagnoses || []).join(';');
+
+        return [
+            d.date,
+            `"${patientName}"`,
+            `"${this.sanitiseCSV(d.diagnosis || '')}"`,
+            `"${this.sanitiseCSV(d.customDiagnosis || '')}"`,
+            `"${this.sanitiseCSV(d.murmurGrade || '')}"`,
+            `"${this.sanitiseCSV(d.acvimStage || '')}"`,
+            `"${this.sanitiseCSV(concurrentStr)}"`,
+            `"${this.sanitiseCSV(d.notes || '')}"`
+        ].join(',');
+    }).join("\n");
+
+    const BOM = '\uFEFF';
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `VCH_DiagnosisLog_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+},
+
+importDiagnosisCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const lines = e.target.result.split("\n").map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+
+            const clean = (s) => (s || '').replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+            let importedCount = 0, skipped = 0;
+
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].match(/(".*?"|[^",]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g);
+                if (!parts || parts.length < 8) { skipped++; continue; }
+
+                const patientName = clean(parts[1]);
+                const patient = this.patients.find(p => p.name.toLowerCase() === patientName.toLowerCase());
+                if (!patient) { skipped++; continue; }
+
+                const rawConcurrent = clean(parts[6]);
+                const parsedConcurrent = rawConcurrent ? rawConcurrent.split(';').map(s => s.trim()).filter(Boolean) : [];
+
+                this.diagnosisLog.push({
+                    id: this.generateId(),
+                    patientId: patient.id,
+                    date: clean(parts[0]),
+                    diagnosis: clean(parts[2]),
+                    customDiagnosis: clean(parts[3]),
+                    murmurGrade: clean(parts[4]),
+                    acvimStage: clean(parts[5]),
+                    concurrentDiagnoses: parsedConcurrent,
+                    notes: clean(parts[7]),
+                    timestamp: Date.now() // required for diagnosis sorting/logic
+                });
+                importedCount++;
+            }
+
+            this.diagnosisLog.sort((a, b) => new Date(b.date) - new Date(a.date));
+            this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+            
+            // Update active state variables if viewing the patient
+            if (this.diagnosisLog.length > 0 && this.activePatientId) {
+                 const recent = this.currentClinicalStatus;
+                 if (recent) {
+                     this.primaryCardiacDiagnosis = recent.diagnosis;
+                     this.acvimStage = recent.acvimStage;
+                 }
+            }
+
+            this.$nextTick(() => { this.renderChart(); });
+            alert(`Imported ${importedCount} diagnosis record(s). ${skipped > 0 ? `(${skipped} skipped)` : ''}`);
+        } catch (err) { alert("Failed to parse Diagnosis CSV."); }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
+
         // --- FULL SYSTEM MASTER BACKUP (JSON) ---
 exportCompleteBackup() {
 const backupData = {

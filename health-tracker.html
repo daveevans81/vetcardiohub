@@ -1601,6 +1601,61 @@
                             </div>
                         </div>
                         
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                            <div>
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Cough Logs (CSV)</h4>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">Export or import daily cough frequency and severity summaries.</p>
+                            </div>
+                            <div style="display: flex; gap: 10px; margin-top: auto;">
+                                <button @click="exportCoughCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                                <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                    Import
+                                    <input type="file" accept=".csv" @change="importCoughCSV" style="display: none;">
+                                </label>
+                            </div>
+                        </div>
+                    
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                            <div>
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Activity Logs (CSV)</h4>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">Export or import daily activity levels and walking distances.</p>
+                            </div>
+                            <div style="display: flex; gap: 10px; margin-top: auto;">
+                                <button @click="exportActivityCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                                <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                    Import
+                                    <input type="file" accept=".csv" @change="importActivityCSV" style="display: none;">
+                                </label>
+                            </div>
+                        </div>
+                    
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                            <div>
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Syncope / Collapse (CSV)</h4>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">Export or import records of fainting or seizure episodes.</p>
+                            </div>
+                            <div style="display: flex; gap: 10px; margin-top: auto;">
+                                <button @click="exportSyncopeCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                                <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                    Import
+                                    <input type="file" accept=".csv" @change="importSyncopeCSV" style="display: none;">
+                                </label>
+                            </div>
+                        </div>
+                    
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                            <div>
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Diagnosis & Staging (CSV)</h4>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">Export or import clinical staging and concurrent conditions.</p>
+                            </div>
+                            <div style="display: flex; gap: 10px; margin-top: auto;">
+                                <button @click="exportDiagnosisCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                                <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                    Import
+                                    <input type="file" accept=".csv" @change="importDiagnosisCSV" style="display: none;">
+                                </label>
+                            </div>
+                        </div>
                         
                         <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
                             <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
@@ -1654,7 +1709,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 15px;">
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
                             <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
                                 <i class="fa-solid fa-heart-pulse" style="color: #e11d48;"></i>
                                 Heart2Heart App Import
