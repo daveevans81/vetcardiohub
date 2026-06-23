@@ -1,3 +1,104 @@
+const ACVIM_PATHWAYS = {
+
+    MMVD: {
+        treatmentBands: [
+        {
+            label: "Vetmedin Helpful",
+            startStage: "B2"
+        },
+        {
+            label: "Diuretics Helpful",
+            startStage: "C"
+        }
+        ],
+        stages: [
+            {
+                id: "Normal",
+                label: "Normal",
+                subtitle: ""
+            },
+            {
+                id: "B1",
+                label: "B1",
+                subtitle: "Heart murmur"
+            },
+            {
+                id: "B2",
+                label: "B2",
+                subtitle: "Heart murmur + remodelling"
+            },
+            {
+                id: "C",
+                label: "C",
+                subtitle: "CHF present"
+            },
+            {
+                id: "D",
+                label: "D",
+                subtitle: "Refractory CHF"
+            }
+        ]
+    },
+
+    HCM: {
+        stages: [
+            {
+                id: "Normal",
+                label: "Normal"
+            },
+            {
+                id: "B1",
+                label: "B1",
+                subtitle: "Normal LA"
+            },
+            {
+                id: "B2",
+                label: "B2",
+                subtitle: "LA enlargement"
+            },
+            {
+                id: "C",
+                label: "C",
+                subtitle: "CHF / ATE"
+            },
+            {
+                id: "D",
+                label: "D",
+                subtitle: "Refractory disease"
+            }
+        ]
+    },
+
+    DCM: {
+        stages: [
+            {
+                id: "Normal",
+                label: "Normal"
+            },
+            {
+                id: "B1",
+                label: "B1",
+                subtitle: "Arrhythmia only"
+            },
+            {
+                id: "B2",
+                label: "B2",
+                subtitle: "Structural changes"
+            },
+            {
+                id: "C",
+                label: "C",
+                subtitle: "CHF"
+            },
+            {
+                id: "D",
+                label: "D",
+                subtitle: "Refractory CHF"
+            }
+        ]
+    }
+};
+
 const VET_GLOSSARY_DB = {
     
     // ==========================================

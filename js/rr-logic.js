@@ -91,24 +91,7 @@ newConcurrentDiagnosis: '', // v-model for the input field
             notes: ''
         },
         
-        // Computed property to determine if staging is clinically relevant
-isStagingApplicable() {
-    if (!this.primaryCardiacDiagnosis) return false;
-    const diag = this.primaryCardiacDiagnosis.toLowerCase();
-    return diag.includes('mmvd') || diag.includes('mitral') || diag.includes('degenerative')|| diag.includes('DMVD')|| 
-           diag.includes('hcm') || diag.includes('dcm');
-},
 
-addConcurrentDiagnosis() {
-    if (this.newConcurrentDiagnosis.trim() !== '') {
-        this.concurrentDiagnoses.push(this.newConcurrentDiagnosis.trim());
-        this.newConcurrentDiagnosis = '';
-    }
-},
-
-removeConcurrentDiagnosis(index) {
-    this.concurrentDiagnoses.splice(index, 1);
-},
 
         newSyncope: {
             date: new Date().toISOString().split('T')[0],
@@ -566,6 +549,118 @@ get hasAnyDataForActivePet() {
                 this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
             }
         },
+        
+        //ACVIM Staging Logic
+        
+                // Computed property to determine if staging is clinically relevant
+isStagingApplicable() {
+    if (!this.primaryCardiacDiagnosis) return false;
+    const diag = this.primaryCardiacDiagnosis.toLowerCase();
+    return diag.includes('mmvd') || diag.includes('mitral') || diag.includes('degenerative')|| diag.includes('DMVD')|| 
+           diag.includes('hcm') || diag.includes('dcm');
+},
+
+get currentDiagnosis() {
+
+    const entries = this.diagnosisLog
+        .filter(d => d.petName === this.selectedPet?.name)
+        .sort((a,b) =>
+            new Date(b.date) - new Date(a.date)
+        );
+
+    return entries.length
+        ? entries[0].diagnosis
+        : null;
+},
+
+addConcurrentDiagnosis() {
+    if (this.newConcurrentDiagnosis.trim() !== '') {
+        this.concurrentDiagnoses.push(this.newConcurrentDiagnosis.trim());
+        this.newConcurrentDiagnosis = '';
+    }
+},
+
+removeConcurrentDiagnosis(index) {
+    this.concurrentDiagnoses.splice(index, 1);
+},
+        get stageProgression() {
+
+    const history = this.diagnosisLog
+        .filter(d => d.patientId === this.activePatientId)
+        .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    return history.map(entry => ({
+        stage: entry.acvimStage,
+        date: entry.date
+    }));
+},
+
+stageX(stageId) {
+
+    if (!this.activePathway) return 0;
+
+    const idx = this.activePathway.stages.findIndex(
+        s => s.id === stageId
+    );
+
+    return 110 + (idx * 190);
+},
+
+get activePathway() {
+
+    const diagnosis = this.primaryCardiacDiagnosis;
+
+    if (!diagnosis) return null;
+
+    if (diagnosis.startsWith('MMVD')) {
+        return ACVIM_PATHWAYS.MMVD;
+    }
+
+    if (diagnosis.startsWith('HCM')) {
+        return ACVIM_PATHWAYS.HCM;
+    }
+
+    if (diagnosis.startsWith('DCM')) {
+        return ACVIM_PATHWAYS.DCM;
+    }
+
+    return null;
+},
+
+get currentStage() {
+
+    const history = this.stageProgression;
+
+    if (!history.length) return null;
+
+    return history[history.length - 1];
+},
+
+get stageMarkers() {
+
+    const pathway = ACVIM_PATHWAYS[this.primaryCardiacDiagnosis];
+
+    if (!pathway) return [];
+
+    return this.stageProgression.map(entry => {
+
+        const stageIndex =
+            pathway.stages.findIndex(
+                s => s.id === entry.stage
+            );
+
+        return {
+            stage: entry.stage,
+            date: entry.date,
+            position: stageIndex
+        };
+    });
+},
+
+isCurrentStage(stageId) {
+
+    return this.currentStage?.stage === stageId;
+},
 
 saveSyncope() {
     if (!this.activePatientId) return alert("Select a patient first.");
@@ -1499,7 +1594,22 @@ renderChart() {
         ];
 
         if (this.showMedications && medDataPoints.some(d => d !== null)) datasets.push({ label: 'Medication Change', type: 'line', showLine: false, data: medDataPoints, backgroundColor: medColors, borderColor: '#ffffff', borderWidth: 2, pointStyle: 'triangle', rotation: 180, radius: 10, hoverRadius: 13, order: 3, medTooltips: medTooltips, yAxisID: 'y' });
-        if (this.showSyncopeOverlay && syncDataPoints.some(d => d !== null)) datasets.push({ label: 'Syncope Event', type: 'line', showLine: false, data: syncDataPoints, backgroundColor: '#ef4444', borderColor: '#ffffff', borderWidth: 2, pointStyle: 'star', radius: 12, hoverRadius: 15, order: 1, syncTooltips: syncTooltips, yAxisID: 'y' });
+        if (this.showSyncopeOverlay && syncDataPoints.some(d => d !== null)) datasets.push({
+    label: 'Syncope Event',
+    type: 'line',
+    showLine: false,
+    data: syncDataPoints,
+    backgroundColor: '#ef4444',
+    borderColor: '#b91c1c',
+    borderWidth: 2,
+    pointStyle: 'triangle',
+    rotation: 0,          // points upwards
+    radius: 12,
+    hoverRadius: 15,
+    order: 1,
+    syncTooltips: syncTooltips,
+    yAxisID: 'y'
+});
         if (this.showDiagnosisOverlay && diagDataPoints.some(d => d !== null)) datasets.push({ label: 'Diagnosis / Stage', type: 'line', showLine: false, data: diagDataPoints, backgroundColor: '#9333ea', borderColor: '#ffffff', borderWidth: 2, pointStyle: 'rectRot', radius: 10, hoverRadius: 13, order: 2, diagTooltips: diagTooltips, yAxisID: 'y' });
         if (this.showCoughOverlay && coughDataPoints.some(d => d !== null)) datasets.push({ label: 'Cough Frequency', type: 'bar', data: coughDataPoints, backgroundColor: coughColors, borderRadius: 4, barThickness: 12, order: 6, yAxisID: 'yCough', coughTooltips: coughTooltips });
         if (this.showActivityOverlay && activityDataPoints.some(d => d !== null)) datasets.push({ label: 'Activity', type: 'line', data: activityDataPoints, borderColor: '#10b981', backgroundColor: '#10b981', pointBackgroundColor: '#ffffff', pointBorderWidth: 2, tension: 0.3, spanGaps: true, order: 4, yAxisID: 'yActivity', activityTooltips: activityTooltips });
@@ -2375,6 +2485,25 @@ cancelComment() {
 },
 
 // --- EXPORT ENGINE ---
+
+getCanvasWithWhiteBackground(canvas) {
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = canvas.width;
+    exportCanvas.height = canvas.height;
+
+    const ctx = exportCanvas.getContext('2d');
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+    // Draw original chart on top
+    ctx.drawImage(canvas, 0, 0);
+
+    return exportCanvas.toDataURL('image/jpeg', 1.0);
+},
+
+
     generatePDF() {
         if (!this.activePatientId) return alert("Select a patient first.");
         
@@ -2394,14 +2523,14 @@ cancelComment() {
         // 2. Embed the Respiratory Chart
         const rrrCanvas = this.$refs.rrrChartCanvas;
         if (rrrCanvas) {
-            const rrrImgData = rrrCanvas.toDataURL("image/jpeg", 1.0);
+            const rrrImgData = this.getCanvasWithWhiteBackground(rrrCanvas);
             doc.addImage(rrrImgData, 'JPEG', 14, 45, 180, 70); 
         }
     
         // 3. Embed the Medication Chart (Only if data exists and is visible)
         const medCanvas = this.$refs.medChartCanvas;
         if (this.hasAnyMedData() && medCanvas) {
-            const medImgData = medCanvas.toDataURL("image/jpeg", 1.0);
+            const medImgData = this.getCanvasWithWhiteBackground(medCanvas);
             // Position it below the first chart
             doc.addImage(medImgData, 'JPEG', 14, 120, 180, 50); 
         }

@@ -4,7 +4,7 @@
     <script src="/js/global-head.js" defer></script>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="/manifestrr.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="VCH Health Tracker">
@@ -710,7 +710,7 @@
                         </button>
                     </div>
                 
-                    <div x-show="showSymptomLog" x-transition style="display: grid; grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr); gap: 20px; align-items: start;">
+                    <div x-show="showSymptomLog" x-transition style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 20px; align-items: start;">
                         
                         <!-- ============================== -->
                         <!-- COUGH MONITOR MODULE           -->
@@ -1415,6 +1415,223 @@
                         <i class="fa-solid fa-pills text-3xl mb-2"></i>
                         <p>Log medications to generate a pharmacologic timeline.</p>
                     </div>
+                </div>
+                
+                <!-- ******************************************** -->
+                <!-- ACVIM DISEASE PROGRESSION TIMELINE           -->
+                <!-- ******************************************** -->
+                
+                <div
+                    x-show="activePathway"
+                    class="summary-box"
+                    style="overflow-x:auto;"
+                >
+                
+                    <h2 style="margin-bottom:20px;">
+                        <i class="fa-solid fa-route"></i>
+                        Disease Progression
+                    </h2>
+                
+                    <svg
+                        viewBox="0 0 1000 260"
+                        style="width:100%; min-width:900px; height:auto;"
+                    >
+                
+                        <!-- CONNECTING ARROW -->
+                        <line
+                            x1="110"
+                            y1="90"
+                            x2="890"
+                            y2="90"
+                            stroke="#cbd5e1"
+                            stroke-width="10"
+                            stroke-linecap="round"
+                        />
+                
+                        <polygon
+                            points="890,75 930,90 890,105"
+                            fill="#cbd5e1"
+                        />
+                
+                        <!-- STAGES -->
+                        <template
+                            x-for="stage in activePathway.stages"
+                            :key="stage.id"
+                        >
+                            <g>
+                        
+                                <circle
+                                    :cx="stageX(stage.id)"
+                                    cy="90"
+                                    r="60"
+                        
+                                    :fill="
+                                        stage.id==='Normal' ? '#65a30d' :
+                                        stage.id==='B1' ? '#84cc16' :
+                                        stage.id==='B2' ? '#ca8a04' :
+                                        stage.id==='C' ? '#d97706' :
+                                        '#dc2626'
+                                    "
+                        
+                                    :stroke="
+                                        isCurrentStage(stage.id)
+                                            ? '#2563eb'
+                                            : 'white'
+                                    "
+                        
+                                    :stroke-width="
+                                        isCurrentStage(stage.id)
+                                            ? 8
+                                            : 2
+                                    "
+                                />
+                        
+                                <text
+                                    :x="stageX(stage.id)"
+                                    y="80"
+                                    text-anchor="middle"
+                                    fill="white"
+                                    font-size="32"
+                                    font-weight="bold"
+                                    x-text="stage.label"
+                                ></text>
+                        
+                                <text
+                                    :x="stageX(stage.id)"
+                                    y="110"
+                                    text-anchor="middle"
+                                    fill="white"
+                                    font-size="14"
+                                >
+                                    <tspan
+                                        x-text="stage.subtitle || ''"
+                                    ></tspan>
+                                </text>
+                        
+                            </g>
+                        </template>
+                
+                        <!-- ===================================== -->
+                        <!-- TRANSITION DATE MARKERS -->
+                        <!-- ===================================== -->
+                
+                        <template
+                            x-for="transition in stageProgression"
+                            :key="transition.date + transition.stage"
+                        >
+                            <g>
+                        
+                                <line
+                                    :x1="stageX(transition.stage)"
+                                    y1="150"
+                                    :x2="stageX(transition.stage)"
+                                    y2="175"
+                                    stroke="#2563eb"
+                                    stroke-width="3"
+                                />
+                        
+                                <circle
+                                    :cx="stageX(transition.stage)"
+                                    cy="150"
+                                    r="6"
+                                    fill="#2563eb"
+                                />
+                        
+                                <text
+                                    :x="stageX(transition.stage)"
+                                    y="195"
+                                    text-anchor="middle"
+                                    font-size="12"
+                                    fill="#475569"
+                                    x-text="
+                                        new Date(
+                                            transition.date
+                                        ).toLocaleDateString()
+                                    "
+                                ></text>
+                        
+                            </g>
+                        </template>
+                
+                        <!-- ===================================== -->
+                        <!-- CURRENT STAGE INDICATOR -->
+                        <!-- ===================================== -->
+                
+                        <template x-if="currentStage">
+                        
+                            <g>
+                        
+                                <polygon
+                                    :points="
+                                        stageX(currentStage.stage) + ',10 ' +
+                                        (stageX(currentStage.stage)-15) + ',40 ' +
+                                        (stageX(currentStage.stage)+15) + ',40'
+                                    "
+                                    fill="#2563eb"
+                                />
+                        
+                                <text
+                                    :x="stageX(currentStage.stage)"
+                                    y="25"
+                                    text-anchor="middle"
+                                    font-size="12"
+                                    fill="white"
+                                    font-weight="bold"
+                                >
+                                    CURRENT
+                                </text>
+                        
+                            </g>
+                        
+                        </template>
+                
+                        <!-- ===================================== -->
+                        <!-- TREATMENT BANDS -->
+                        <!-- ===================================== -->
+                
+                        <template
+                            x-for="band in activePathway.treatmentBands || []"
+                            :key="band.label"
+                        >
+                        
+                            <g>
+                        
+                                <rect
+                                    :x="stageX(band.startStage)"
+                                    :y="
+                                        band.label.includes('Vetmedin')
+                                            ? 215
+                                            : 245
+                                    "
+                                    :width="
+                                        930 - stageX(band.startStage)
+                                    "
+                                    height="24"
+                                    rx="12"
+                                    fill="#dbeafe"
+                                    stroke="#93c5fd"
+                                />
+                        
+                                <text
+                                    :x="
+                                        stageX(band.startStage) + 20
+                                    "
+                                    :y="
+                                        band.label.includes('Vetmedin')
+                                            ? 231
+                                            : 261
+                                    "
+                                    font-size="12"
+                                    fill="#1e3a8a"
+                                    font-weight="bold"
+                                    x-text="band.label"
+                                ></text>
+                        
+                            </g>
+                        
+                        </template>                
+                    </svg>
+                
                 </div>
                 
                                     <!-- ******************************** -->
