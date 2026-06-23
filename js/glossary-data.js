@@ -259,7 +259,7 @@ const VET_GLOSSARY_DB = {
     // ==========================================
     // GROUP: ACVIM MMVD STAGING
     // ==========================================
-    acvimStageA: {
+    acvim_MMVD_A: {
         title: "ACVIM Stage A (MMVD)",
         group: "Guidelines",
         category: "Staging",
@@ -270,7 +270,7 @@ const VET_GLOSSARY_DB = {
         pmid: "30974015",
         article: "/blog-posts/post7.html"
     },
-    acvimStageB1: {
+    acvim_MMVD_B1: {
         title: "ACVIM Stage B1 (MMVD)",
         group: "Guidelines",
         category: "Staging",
@@ -281,7 +281,7 @@ const VET_GLOSSARY_DB = {
         pmid: "30974015",
         article: "/blog-posts/post7.html"
     },
-    acvimStageB2: {
+    acvim_MMVD_B2: {
         title: "ACVIM Stage B2 (MMVD)",
         group: "Guidelines",
         category: "Staging",
@@ -292,7 +292,7 @@ const VET_GLOSSARY_DB = {
         pmid: "30974015",
         article: "/blog-posts/post7.html"
     },
-    acvimStageC: {
+    acvim_MMVD_C: {
         title: "ACVIM Stage C (MMVD)",
         group: "Guidelines",
         category: "Staging",
@@ -303,7 +303,7 @@ const VET_GLOSSARY_DB = {
         pmid: "30974015",
         article: "/blog-posts/post7.html"
     },
-    acvimStageD: {
+    acvim_MMVD_D: {
         title: "ACVIM Stage D (MMVD)",
         group: "Guidelines",
         category: "Staging",
@@ -314,6 +314,108 @@ const VET_GLOSSARY_DB = {
         pmid: "30974015",
         article: "/blog-posts/post7.html"
     },
+    
+    
+    // ==========================================
+    // GROUP: ACVIM HCM STAGING
+    // ==========================================
+    
+    
+    "acvim_HCM_A": {
+        title: "Feline CM - Stage A",
+        difficulty: 1,
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        description: "Cats with a known genetic predisposition to hypertrophic cardiomyopathy (e.g., Ragdoll, Maine Coon, Sphynx, Persian) but no current echocardiographic evidence of structural heart disease. Or possibly a sibling or parent with the disease. As genetic screening advances this group is likely to expand but at the moment it's not very clinically relevant.",
+        textOwner: "Your cat belongs to a breed—such as a Ragdoll or Maine Coon—that is known to carry a higher risk for heart muscle disease. Currently, their heart looks completely normal on an ultrasound scan, but we recommend regular screening as they grow."
+    },
+    "acvim_HCM_B1": {
+        title: "Feline CM - Stage B1",
+        difficulty: 1,
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        description: "Subclinical cardiomyopathy with normal or mildly enlarged left atrium. Patients have a low short-term risk for developing congestive heart failure (CHF) or arterial thromboembolism (ATE).",
+        textOwner: "Your cat has some thickening of the heart muscle, but the heart chambers are not significantly stretched. The current risk of fluid build-up or blood clots is low, and usually, no medication is needed at this stage."
+    },
+    "acvim_HCM_B2": {
+        title: "Feline CM - Stage B2",
+        difficulty: 1,
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        description: "Subclinical cardiomyopathy with moderate to severe left atrial enlargement. Patient is at higher risk for CHF or ATE. Clopidogrel and/or other antithrombotic therapy is typically indicated.",
+        textOwner: "The thickening of your cat's heart muscle has caused the top chamber of the heart to stretch significantly. While they aren't showing outward symptoms yet, they are at a higher risk for fluid build-up or blood clots, and we will likely start preventative medications."
+    },
+    "acvim_HCM_C": {
+        title: "Feline CM - Stage C",
+        difficulty: 1,
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        description: "Patients with current or past clinical signs of congestive heart failure (CHF) or arterial thromboembolism (ATE) secondary to cardiomyopathy. Requires active pharmacological management.",
+        textOwner: "Your cat has developed symptoms of heart disease, which may include fluid in or around the lungs, or a blood clot. They will need daily medications to help their heart pump effectively, prevent fluid build-up, and reduce the risk of future clots."
+    },
+    "acvim_HCM_D": {
+        title: "Feline CM - Stage D",
+        difficulty: 1,
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        description: "Refractory congestive heart failure requiring advanced, specialized, and often escalating therapies (e.g., torasemide, higher dose pimobendan, dual diuretic therapy) to manage clinical signs.",
+        textOwner: "Your cat's heart condition is advanced and becoming resistant to standard treatments. We will need to continuously adjust and likely increase their medication protocol to keep them as comfortable as possible and maintain their quality of life."
+    },
+    
+    
+    "acvim_DCM_A": {
+        title: "Canine DCM - Stage A",
+        difficulty: 1,
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        description: "No ACVIM consensus yet for DCM, but currently adapted from MMVD guidelines: Dogs with a known genetic predisposition to dilated cardiomyopathy (e.g., Doberman Pinscher, Great Dane, Irish Wolfhound) but no current structural or electrical abnormalities. Annual echocardiographic and Holter screening is indicated from adulthood. Consult breed society or cardiologists about the best age to start exactly.",
+        textOwner: "Your dog is a breed known to have a higher risk of developing heart muscle weakness (Dilated Cardiomyopathy). Their heart is currently normal in size, function, and rhythm, but annual screening is highly recommended to catch any early changes."
+    },
+    "acvim_DCM_B1": {
+        title: "Canine DCM - Stage B1",
+        difficulty: 1,
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        description: "No ACVIM consensus yet for DCM, but currently adapted from MMVD guidelines: Occult or preclinical 'arrhythmogenic' DCM with no structural changes. The patient is asymptomatic with a normal heart structurally, but arrhythmias/electrical abnormalities are detectable (e.g., VPCs on Holter monitor). Preclinical therapy (e.g., antiarrhythmics) may be initiated to delay progression.",
+        textOwner: "Your dog has an 'occult' or hidden stage of heart disease. While their heart muscle still looks normal on an ultrasound, we are detecting abnormal electrical rhythms (extra heartbeats). They act completely normal, but we may need to monitor them closely or start medication to stabilize the rhythm."
+    },
+    "acvim_DCM_B2": {
+        title: "Canine DCM - Stage B",
+        category: "ACVIM Staging",
+        difficulty: 3,
+        group: "Cardiology",
+        description: "Occult or preclinical DCM with structural abnormalities. The patient is asymptomatic but demonstrates morphological changes on echocardiography (e.g., increased LVIDs, reduced fractional shortening/ejection fraction), with or without concurrent arrhythmias. Preclinical therapy (e.g., pimobendan) is indicated to delay the onset of heart failure.",
+        textOwner: "Your dog is in a preclinical stage of heart disease. They look completely normal and active on the outside, but their ultrasound shows early signs of heart muscle weakness and stretching. Starting heart support medication now has been proven to significantly delay the onset of outward symptoms."
+    },
+    "acvim_DCM_C": {
+        title: "Canine DCM - Stage C",
+        difficulty: 1,
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        description: "No ACVIM consensus yet for DCM, but currently adapted from MMVD guidelines: Overt DCM. Patients with past or current clinical signs of congestive heart failure (CHF) (e.g., pulmonary edema, ascites) or significant clinical signs related to arrhythmias (e.g., syncope). Requires standard quadruple therapy and potentially targeted antiarrhythmic management.",
+        textOwner: "Your dog has overt heart disease and has developed signs of heart failure, such as fluid in the lungs or abdomen, or fainting spells. They require a combination of medications to clear the fluid, support the heart muscle, and potentially control abnormal heart rhythms."
+    },
+    "acvim_DCM_D": {
+        title: "Canine DCM - Stage D",
+        difficulty: 1,
+        group: "Guidelines",
+        category: "Staging",
+        audience: ["vet", "owner"],
+        description: "No ACVIM consensus yet for DCM, but currently adapted from MMVD guidelines: Refractory overt DCM. End-stage clinical signs of heart failure or life-threatening arrhythmias that are poorly responsive to standard heart failure therapy. Requires specialized rescue protocols and intensive management.",
+        textOwner: "Your dog's heart condition has reached an advanced stage and is no longer responding well to standard doses of medication. We are now relying on advanced drug combinations to manage their symptoms and prioritize their comfort and quality of life."
+    },
+    
+    
+    
+    
 
     // ==========================================
     // GROUP: PHARMACOLOGY & THERAPY
