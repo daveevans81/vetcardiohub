@@ -583,26 +583,20 @@ addConcurrentDiagnosis() {
 removeConcurrentDiagnosis(index) {
     this.concurrentDiagnoses.splice(index, 1);
 },
-        get stageProgression() {
 
+        get stageProgression() {
     const history = this.diagnosisLog
-        .filter(d => d.patientId === this.activePatientId)
+        .filter(d => d.patientId === this.activePatientId && d.acvimStage && d.acvimStage !== 'N/A')
         .sort((a,b) => new Date(a.date) - new Date(b.date));
 
-    return history.map(entry => ({
-        stage: entry.acvimStage,
-        date: entry.date
-    }));
-},
-
 stageX(stageId) {
-
     if (!this.activePathway) return 0;
-
     const idx = this.activePathway.stages.findIndex(
         s => s.id === stageId
     );
-
+    
+    // Prevent off-screen rendering if stage is ever invalid
+    if (idx === -1) return -1000;
     return 110 + (idx * 190);
 },
 
@@ -637,9 +631,7 @@ get currentStage() {
 },
 
 get stageMarkers() {
-
-    const pathway = ACVIM_PATHWAYS[this.primaryCardiacDiagnosis];
-
+    const pathway = this.activePathway;
     if (!pathway) return [];
 
     return this.stageProgression.map(entry => {
