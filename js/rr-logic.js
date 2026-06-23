@@ -560,7 +560,7 @@ saveDiagnosis() {
         this.acvimStage = this.diagnosisLog[0].acvimStage;
     }
 
-    this.saveData();
+    this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);;
     this.showDiagnosisForm = false;
 },
 
@@ -589,7 +589,7 @@ openDiagnosisForm(logEntry = null) {
 deleteDiagnosis(id) {
     if (confirm("Are you sure you want to delete this diagnosis entry?")) {
         this.diagnosisLog = this.diagnosisLog.filter(d => d.id !== id);
-        this.saveData();
+        this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);;
     }
 },
         
@@ -823,7 +823,7 @@ saveSyncope() {
     }
 
     this.syncopeLog.sort((a, b) => new Date(b.date) - new Date(a.date));
-    this.saveData();
+    this.saveToStorage('vch_syncopeLog', this.syncopeLog);
     this.showSyncopeForm = false;
 },
 
@@ -832,7 +832,7 @@ saveSyncope() {
 deleteSyncope(id) {
     if (confirm("Are you sure you want to delete this event?")) {
         this.syncopeLog = this.syncopeLog.filter(s => s.id !== id);
-        this.saveData();
+        this.saveToStorage('vch_syncopeLog', this.syncopeLog);
     }
 },
         
