@@ -902,6 +902,71 @@ get acvimChartHtml() {
             </g>`;
     });
 
+    // 3. Transition markers
+    const progression = this.stageProgression;
+    const stageCounts = {};
+    progression.forEach(t => { stageCounts[t.stage] = (stageCounts[t.stage] || 0) + 1; });
+
+    const MSEP  = 19;    
+    const drawn = {};
+    let latestMX = null;
+
+    progression.forEach(t => {
+        const baseX = POS[t.stage];
+        if (baseX === undefined) return;          
+
+        if (drawn[t.stage] === undefined) drawn[t.stage] = 0;
+        const count = stageCounts[t.stage];
+        const i     = drawn[t.stage]++;
+        const mx    = baseX - ((count - 1) * MSEP) / 2 + i * MSEP;
+        latestMX    = mx;
+
+        const dateStr = t.date
+            ? new Date(t.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'2-digit' })
+            : '';
+
+        html += `
+            <g>
+                <line x1="${mx}" y1="${CY + R + 2}" x2="${mx}" y2="${CY + R + 26}"
+                      stroke="#2563eb" stroke-width="2"/>
+                <circle cx="${mx}" cy="${CY + R + 3}" r="4" fill="#2563eb"/>
+                ${dateStr ? `<text x="${mx}" y="${CY + R + 41}" text-anchor="middle"
+                    font-size="10" fill="#475569">${dateStr}</text>` : ''}
+            </g>`;
+    });
+
+    // 4. NOW pointer (LARGER AND WIDER)
+    if (latestMX !== null) {
+        const tipY = CY - R - 6;
+        html += `
+            <polygon points="${latestMX - 22},${tipY - 26} ${latestMX + 22},${tipY - 26} ${latestMX},${tipY}"
+                fill="#2563eb"/>
+            <text x="${latestMX}" y="${tipY - 8}" text-anchor="middle"
+                font-size="11" fill="white" font-weight="bold">NOW</text>`;
+    }
+
+    // 5. Treatment bands
+    const BAND_Y0  = CY + R + 53;    
+    const BAND_H   = 20;
+    const BAND_GAP = 6;
+
+    (this.activePathway.treatmentBands || []).forEach((band, idx) => {
+        const startX = POS[norm(band.startStage)];
+        if (startX === undefined) return;
+        const y     = BAND_Y0 + idx * (BAND_H + BAND_GAP);
+        const bandW = arrowTip + 10 - (startX - R);
+        html += `
+            <g>
+                <rect x="${startX - R}" y="${y}" width="${bandW}" height="${BAND_H}"
+                      rx="10" fill="#dbeafe" stroke="#93c5fd"/>
+                <text x="${startX - R + 12}" y="${y + 14}"
+                      font-size="10" fill="#1e3a8a" font-weight="bold">${band.label}</text>
+            </g>`;
+    });
+
+    return html;
+},
+
 // --- SYNCOPE / EVENT LOGIC ---
 openSyncopeForm(logEntry = null) {
     if (logEntry) {
