@@ -656,8 +656,83 @@ get stageMarkers() {
 },
 
 isCurrentStage(stageId) {
-
     return this.currentStage?.stage === stageId;
+},
+
+
+//GENERATE ACVIM CHART AS SVG and inj HTML back
+
+get acvimChartHtml() {
+    if (!this.activePathway) return '';
+    let html = '';
+    // 1. CONNECTING ARROW
+    html += `
+        <line x1="110" y1="90" x2="890" y2="90" stroke="#cbd5e1" stroke-width="10" stroke-linecap="round" />
+        <polygon points="890,75 930,90 890,105" fill="#cbd5e1" />
+    `;
+    // 2. STAGES
+    this.activePathway.stages.forEach(stage => {
+        const x = this.stageX(stage.id);
+        const isCurrent = this.isCurrentStage(stage.id);
+        
+        let fill = '#dc2626'; // default
+        if(stage.id === 'Normal') fill = '#65a30d';
+        else if(stage.id === 'B1') fill = '#84cc16';
+        else if(stage.id === 'B2') fill = '#ca8a04';
+        else if(stage.id === 'C') fill = '#d97706';
+        
+        const stroke = isCurrent ? '#2563eb' : 'white';
+        const strokeWidth = isCurrent ? 8 : 2;
+        html += `
+            <g>
+                <circle cx="${x}" cy="90" r="60" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />
+                <text x="${x}" y="80" text-anchor="middle" fill="white" font-size="32" font-weight="bold">${stage.label}</text>
+                <text x="${x}" y="110" text-anchor="middle" fill="white" font-size="14">
+                    <tspan>${stage.subtitle || ''}</tspan>
+                </text>
+            </g>
+        `;
+    });
+    // 3. TRANSITION DATE MARKERS
+    this.stageProgression.forEach(transition => {
+        const x = this.stageX(transition.stage);
+        // Avoid "Invalid Date" errors
+        if(transition.date) {
+            const dateStr = new Date(transition.date).toLocaleDateString();
+            html += `
+                <g>
+                    <line x1="${x}" y1="150" x2="${x}" y2="175" stroke="#2563eb" stroke-width="3" />
+                    <circle cx="${x}" cy="150" r="6" fill="#2563eb" />
+                    <text x="${x}" y="195" text-anchor="middle" font-size="12" fill="#475569">${dateStr}</text>
+                </g>
+            `;
+        }
+    });
+    // 4. CURRENT STAGE INDICATOR
+    const current = this.currentStage;
+    if (current) {
+        const cx = this.stageX(current.stage);
+        html += `
+            <g>
+                <polygon points="${cx-30},10 ${cx+30},10 ${cx},35" fill="#2563eb" />
+                <text x="${cx}" y="23" text-anchor="middle" font-size="11" fill="white" font-weight="bold">CURRENT</text>
+            </g>
+        `;
+    }
+    // 5. TREATMENT BANDS
+    const bands = this.activePathway.treatmentBands || [];
+    bands.forEach(band => {
+        const startX = this.stageX(band.startStage);
+        const yBase = band.label.includes('Vetmedin') ? 215 : 245;
+        const width = 930 - startX;
+        html += `
+            <g>
+                <rect x="${startX}" y="${yBase}" width="${width}" height="24" rx="12" fill="#dbeafe" stroke="#93c5fd" />
+                <text x="${startX + 20}" y="${yBase + 16}" font-size="12" fill="#1e3a8a" font-weight="bold">${band.label}</text>
+            </g>
+        `;
+    });
+    return html;
 },
 
 saveSyncope() {
