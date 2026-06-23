@@ -820,14 +820,14 @@ get acvimChartHtml() {
         }
     });
 
-    // ── Layout constants ───────────────────────────────────────────────
-    const W       = 960;
+    // ── Layout constants (NEW COMPACT, OVERLAPPING MATH) ──────────────
+    const W       = 600;  // Reduced total canvas width
     const STAGES  = this.activePathway.stages;
     const N       = STAGES.length;                          
-    const PAD     = 72;
-    const SPACING = (W - PAD * 2) / (N - 1);               
-    const CY      = 90;                                     
-    const R       = 46;                                     
+    const PAD     = 70;
+    const SPACING = 100;  // Tightly packed (less than 2*R forces overlap)
+    const CY      = 100;  // Y-center of circles
+    const R       = 60;   // Increased radius for bigger circles
 
     const POS = {};
     STAGES.forEach((s, i) => { POS[s.id] = Math.round(PAD + i * SPACING); });
@@ -853,14 +853,14 @@ get acvimChartHtml() {
 
     let html = '';
 
-    // 1. Connector arrow
+    // 1. Connector arrow (Thicker to match larger circles)
     html += `
         <line x1="${firstX}" y1="${CY}" x2="${arrowTip - 4}" y2="${CY}"
-              stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
-        <polygon points="${arrowTip - 4},${CY - 11} ${arrowTip + 10},${CY} ${arrowTip - 4},${CY + 11}"
+              stroke="#cbd5e1" stroke-width="12" stroke-linecap="round"/>
+        <polygon points="${arrowTip - 4},${CY - 14} ${arrowTip + 12},${CY} ${arrowTip - 4},${CY + 14}"
               fill="#cbd5e1"/>`;
 
-    // 2. Stage circles with Info Icons
+    // 2. Stage circles
     const FILL = { Normal:'#65a30d', B1:'#84cc16', B2:'#ca8a04', C:'#d97706', D:'#dc2626' };
 
     STAGES.forEach(stage => {
@@ -870,17 +870,17 @@ get acvimChartHtml() {
         const lines   = splitSub(stage.subtitle);
         const hasSub  = lines.some(l => l);
 
-        const labelY  = hasSub ? CY - 7 : CY + 8;   
+        const labelY  = hasSub ? CY - 10 : CY + 10;   
         let subHtml   = '';
 
         if (hasSub) {
             if (lines.length === 1) {
-                subHtml = `<text x="${x}" y="${CY + 14}" text-anchor="middle"
-                    fill="rgba(255,255,255,0.88)" font-size="8.5">${lines[0]}</text>`;
+                subHtml = `<text x="${x}" y="${CY + 16}" text-anchor="middle"
+                    fill="rgba(255,255,255,0.95)" font-size="10.5">${lines[0]}</text>`;
             } else {
-                subHtml = `<text text-anchor="middle" fill="rgba(255,255,255,0.88)" font-size="8">
-                    <tspan x="${x}" y="${CY + 7}">${lines[0]}</tspan>
-                    <tspan x="${x}" dy="11">${lines[1]}</tspan>
+                subHtml = `<text text-anchor="middle" fill="rgba(255,255,255,0.95)" font-size="10">
+                    <tspan x="${x}" y="${CY + 10}">${lines[0]}</tspan>
+                    <tspan x="${x}" dy="14">${lines[1]}</tspan>
                 </text>`;
             }
         }
@@ -889,15 +889,15 @@ get acvimChartHtml() {
             <g>
                 <circle cx="${x}" cy="${CY}" r="${R}"
                     fill="${fill}"
-                    stroke="${current ? '#2563eb' : 'white'}"
-                    stroke-width="${current ? 6 : 2}"/>
+                    stroke="${current ? '#1e3a8a' : '#ffffff'}"
+                    stroke-width="${current ? 6 : 3}"/>
                 <text x="${x}" y="${labelY}" text-anchor="middle"
-                      fill="white" font-size="22" font-weight="bold">${stage.label}</text>
+                      fill="white" font-size="28" font-weight="bold">${stage.label}</text>
                 ${subHtml}
                 
                 <g style="cursor:pointer;" @click="openGlossary('acvim_${diseasePrefix}_${stage.id}')">
-                    <circle cx="${x + 32}" cy="${labelY - 14}" r="9" fill="#f8fafc" stroke="${fill}" stroke-width="1.5"/>
-                    <text x="${x + 32}" y="${labelY - 10}" text-anchor="middle" font-size="11" fill="${fill}" font-weight="bold" font-family="sans-serif">i</text>
+                    <circle cx="${x + 40}" cy="${CY - 30}" r="11" fill="#f8fafc" stroke="${fill}" stroke-width="2"/>
+                    <text x="${x + 40}" y="${CY - 26}" text-anchor="middle" font-size="12" fill="${fill}" font-weight="bold" font-family="sans-serif">i</text>
                 </g>
             </g>`;
     });
@@ -927,27 +927,27 @@ get acvimChartHtml() {
 
         html += `
             <g>
-                <line x1="${mx}" y1="${CY + R + 2}" x2="${mx}" y2="${CY + R + 26}"
-                      stroke="#2563eb" stroke-width="2"/>
-                <circle cx="${mx}" cy="${CY + R + 3}" r="4" fill="#2563eb"/>
-                ${dateStr ? `<text x="${mx}" y="${CY + R + 41}" text-anchor="middle"
-                    font-size="10" fill="#475569">${dateStr}</text>` : ''}
+                <line x1="${mx}" y1="${CY + R + 4}" x2="${mx}" y2="${CY + R + 26}"
+                      stroke="#2563eb" stroke-width="2.5"/>
+                <circle cx="${mx}" cy="${CY + R + 4}" r="5" fill="#2563eb"/>
+                ${dateStr ? `<text x="${mx}" y="${CY + R + 42}" text-anchor="middle"
+                    font-size="11" fill="#475569" font-weight="bold">${dateStr}</text>` : ''}
             </g>`;
     });
 
-    // 4. NOW pointer (LARGER AND WIDER)
+    // 4. NOW pointer (Floating above the big circles)
     if (latestMX !== null) {
-        const tipY = CY - R - 6;
+        const tipY = CY - R - 8;
         html += `
-            <polygon points="${latestMX - 22},${tipY - 26} ${latestMX + 22},${tipY - 26} ${latestMX},${tipY}"
+            <polygon points="${latestMX - 24},${tipY - 26} ${latestMX + 24},${tipY - 26} ${latestMX},${tipY}"
                 fill="#2563eb"/>
             <text x="${latestMX}" y="${tipY - 8}" text-anchor="middle"
-                font-size="11" fill="white" font-weight="bold">NOW</text>`;
+                font-size="12" fill="white" font-weight="bold">NOW</text>`;
     }
 
-    // 5. Treatment bands
-    const BAND_Y0  = CY + R + 53;    
-    const BAND_H   = 20;
+    // 5. Treatment bands (Shifted down below the new timeline markers)
+    const BAND_Y0  = CY + R + 55;    
+    const BAND_H   = 22;
     const BAND_GAP = 6;
 
     (this.activePathway.treatmentBands || []).forEach((band, idx) => {
@@ -958,9 +958,9 @@ get acvimChartHtml() {
         html += `
             <g>
                 <rect x="${startX - R}" y="${y}" width="${bandW}" height="${BAND_H}"
-                      rx="10" fill="#dbeafe" stroke="#93c5fd"/>
-                <text x="${startX - R + 12}" y="${y + 14}"
-                      font-size="10" fill="#1e3a8a" font-weight="bold">${band.label}</text>
+                      rx="11" fill="#dbeafe" stroke="#93c5fd"/>
+                <text x="${startX - R + 14}" y="${y + 15}"
+                      font-size="11" fill="#1e3a8a" font-weight="bold">${band.label}</text>
             </g>`;
     });
 
@@ -2859,9 +2859,11 @@ async generatePDF() {
             const svgElement = document.getElementById('acvim-svg-export');
             if (svgElement) {
                 // Clone to mutate attributes without affecting UI
+               // Clone to mutate attributes without affecting UI
                 const clonedSvg = svgElement.cloneNode(true);
-                clonedSvg.setAttribute('width', '960');
-                clonedSvg.setAttribute('height', '272');
+                // Update these limits to match the new compact layout
+                clonedSvg.setAttribute('width', '600');
+                clonedSvg.setAttribute('height', '320');
                 
                 // Serialize and Base64 Encode
                 const svgData = new XMLSerializer().serializeToString(clonedSvg);
@@ -2875,12 +2877,13 @@ async generatePDF() {
                 });
 
                 const canvas = document.createElement('canvas');
-                canvas.width = 960; 
-                canvas.height = 272; 
+                // Update canvas dimensions to match
+                canvas.width = 600; 
+                canvas.height = 320; 
                 const ctx = canvas.getContext('2d');
                 ctx.fillStyle = '#ffffff'; 
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, 960, 272);
+                ctx.drawImage(img, 0, 0, 600, 320);
 
                 const acvimImgData = canvas.toDataURL('image/jpeg', 1.0);
                 const acvimPdfHeight = 180 * (canvas.height / canvas.width);
