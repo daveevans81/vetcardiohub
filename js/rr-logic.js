@@ -71,6 +71,7 @@ document.addEventListener('alpine:init', () => {
         syncopeLog: [],
         showDiagnosisForm: false,
         showSyncopeForm: false,
+        newConcurrentDiagnosis: '',
         editingDiagnosisId: null, // Tracks if we are editing an existing diagnosis log
         editingSyncopeId: null, // Tracks if we are editing an existing syncope log
         
@@ -529,9 +530,8 @@ get hasAnyDataForActivePet() {
         //Methods for syncope and Diagnosis data
         
 saveDiagnosis() {
-    // 1. Fix for the bug: Ensure we are checking the exact v-model property
     if (!this.newDiagnosis.diagnosis || this.newDiagnosis.diagnosis.trim() === '') {
-        alert("Diagnosis description is required.");
+        alert("Primary Cardiac Diagnosis is required.");
         return;
     }
 
@@ -540,6 +540,8 @@ saveDiagnosis() {
         date: this.newDiagnosis.date,
         diagnosis: this.newDiagnosis.diagnosis,
         acvimStage: this.newDiagnosis.acvimStage,
+        // MUST explicitly save the concurrent array into the log object
+        concurrentDiagnoses: [...(this.newDiagnosis.concurrentDiagnoses || [])],
         notes: this.newDiagnosis.notes,
         timestamp: Date.now()
     };
@@ -560,7 +562,7 @@ saveDiagnosis() {
         this.acvimStage = this.diagnosisLog[0].acvimStage;
     }
 
-    this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);;
+    this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
     this.showDiagnosisForm = false;
 },
 
@@ -570,26 +572,46 @@ openDiagnosisForm(logEntry = null) {
     if (logEntry) {
         // Editing an existing entry
         this.newDiagnosis = { ...logEntry };
+        // Ensure concurrent array exists
+        this.newDiagnosis.concurrentDiagnoses = logEntry.concurrentDiagnoses ? [...logEntry.concurrentDiagnoses] : [];
         this.editingDiagnosisId = logEntry.id;
     } else {
-        // Adding a new entry. Auto-fill the diagnosis from the most recent log if it exists.
-        const recentDiag = this.diagnosisLog.length > 0 ? this.diagnosisLog[0].diagnosis : '';
+        // Adding a new entry. Auto-fill everything from the most recent log!
+        const recentEntry = this.diagnosisLog.length > 0 ? this.diagnosisLog[0] : null;
+        
         this.newDiagnosis = {
             id: null,
             date: new Date().toISOString().split('T')[0],
-            diagnosis: recentDiag, // Maintains consistency 
-            acvimStage: 'N/A',
+            diagnosis: recentEntry ? recentEntry.diagnosis : '', 
+            acvimStage: recentEntry ? recentEntry.acvimStage : 'N/A',
+            // Carry forward existing secondary conditions
+            concurrentDiagnoses: recentEntry && recentEntry.concurrentDiagnoses ? [...recentEntry.concurrentDiagnoses] : [],
             notes: ''
         };
         this.editingDiagnosisId = null;
     }
+    this.newConcurrentDiagnosis = ''; // Clear the text input box
     this.showDiagnosisForm = true;
+},
+
+addConcurrentDiagnosis() {
+    if (this.newConcurrentDiagnosis && this.newConcurrentDiagnosis.trim() !== '') {
+        if (!this.newDiagnosis.concurrentDiagnoses) this.newDiagnosis.concurrentDiagnoses = [];
+        this.newDiagnosis.concurrentDiagnoses.push(this.newConcurrentDiagnosis.trim());
+        this.newConcurrentDiagnosis = ''; // Clear input after adding
+    }
+},
+
+removeConcurrentDiagnosis(index) {
+    if (this.newDiagnosis.concurrentDiagnoses) {
+        this.newDiagnosis.concurrentDiagnoses.splice(index, 1);
+    }
 },
 
 deleteDiagnosis(id) {
     if (confirm("Are you sure you want to delete this diagnosis entry?")) {
         this.diagnosisLog = this.diagnosisLog.filter(d => d.id !== id);
-        this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);;
+        this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
     }
 },
         
