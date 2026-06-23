@@ -1,77 +1,55 @@
-/* ==========================================================================
-   VETCARDIOHUB — STYLES.CSS
-   Key changes vs previous version:
-   ① html+body overflow-x:hidden kills lateral shift at source
-   ② box-sizing:border-box globally — padding never blows out widths
-   ③ .content wider (1100px) + stripped of double-padding on mobile
-   ④ .rr-dashboard is now a 2-col grid on desktop (main + FAQ aside)
-   ⑤ Symptom grid fixed: minmax(300px,1fr) → clamp-safe auto-fit
-   ⑥ safe-area-inset padding for iPhone notch/home bar in standalone mode
-   ⑦ !important wars on export buttons resolved cleanly
-   ========================================================================== */
-
-/* ==========================================================================
-   0. GLOBAL RESET — must come first
-   ========================================================================== */
-
-*, *::before, *::after {
-    box-sizing: border-box;
-}
-
-html {
-    overflow-x: hidden;          /* ① KILLS lateral shift at root */
-}
-
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     text-align: center;
     background-color: #f4f4f4;
-    overflow-x: hidden;          /* Belt AND braces */
-    /* Prevents rubber-band scroll from revealing overflow on iOS */
-    -webkit-overflow-scrolling: touch;
 }
 
 main a {
-    color: #d9534f;
+ color: #d9534f;
 }
 
 
-/* ==========================================================================
-   1. KEYFRAMES
-   ========================================================================== */
+
+/* 1. KEYFRAMES  */
+
 
 @keyframes gradientShift {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
 
 
-/* ==========================================================================
-   2. BANNER
-   ========================================================================== */
+/* 2. BANNER CONTAINER (.banner)  */
+
 
 .banner {
-    position: relative;
+
+    /* --- LAYER & POSITIONING FIXES --- */
+    position: relative;      
+ /*   min-height: 120px;          Ensure minimum height for the banner */
     max-height: 160px;
+    /* --- FLEX LAYOUT (Mobile Default: Stacked) --- */
     display: flex;
     flex-direction: row;
-    text-align: left;
-    padding: 0.5rem 0.5rem;
+        text-align: left;
+        padding: 0.5rem 0.5rem;    /* Mobile Default: Stacked */
     justify-content: center;
     background-size: 200% 100%;
     align-items: center;
-    gap: 20px;
+    gap: 20px;                 /* Space between logo and title */
     color: white;
     text-align: center;
-    background-image: linear-gradient(135deg, #16325F, #005f73);
-    animation: gradientShift 15s ease-in-out infinite;
+    background-image: linear-gradient(135deg, #16325F, #005f73); 
+    animation: gradientShift 15s ease-in-out infinite; 
     background-repeat: repeat-x;
     z-index: 20;
     margin-bottom: -15px;
 }
+
+
 
 .banner-logo {
     width: clamp(10px, 10vw, 80px);
@@ -79,20 +57,25 @@ main a {
 }
 
 .header-logo-section {
-    position: absolute;
-    z-index: 100;
-    top: 8px;
-    left: 15px;
+    position: absolute; 
+    z-index: 100;      /* Ensure it floats above the background image/gradient */
+    top: 8px;         /* Vertical distance from the top edge */
+    left: 15px;        /* Horizontal distance from the left edge */
     display: flex;
-    align-items: center;
-    gap: 2px;
+    align-items: center; /* Vertically aligns the logo and text */
+    gap: 2px;           /* Adds space between the logo and the title */
 }
 
+/* Image of pets in background */
 .banner-image {
     height: 100%;
     width: auto;
-    position: center;
+    position: center;  Keep relative positioning for stacking context 
     z-index: 20;
+/*     position: absolute;     */
+/*     top: 0;                 */
+/*     left: 50%; Start at 50% */
+/*    transform: translateX(-50%);  */
 }
 
 .banner-title {
@@ -102,256 +85,224 @@ main a {
     transform: translateY(-3px);
 }
 
+
 @media (min-width: 768px) {
     .banner {
-        flex-direction: row;
+        flex-direction: row; /* Desktop: side-by-side */
         text-align: center;
-        padding: 1.5rem 2rem;
+ /*       min-height: 100px; */
+ /*       max-height: 160px;  */
+        padding: 1.5rem 2rem; 
     }
+
     .banner-logo {
-        margin: 0 1rem 0 0;
+        margin: 0 1rem 0 0; /* Add separation on desktop */
     }
+
     .banner-title {
-        font-size: clamp(0.7rem, 6vw, 2.0rem);
-        transform: translateY(-10px);
+    font-size: clamp(0.7rem, 6vw, 2.0rem);  
+    transform: translateY(-10px);
     }
 }
 
-
-/* ==========================================================================
-   3. PAGE CONTENT CONTAINER
-   ========================================================================== */
 
 .content {
-    padding: 20px;               /* ③ was 30px — combined with rr-dashboard's own padding this was 50px */
-    max-width: 1100px;           /* ③ was 900px — wider to accommodate FAQ sidebar on desktop */
-    margin: 20px auto;
+    padding: 30px; /* Adds more padding inside the content area */
+    max-width: 900px; /* Expands the width for larger screens */
+    margin: 20px auto; /* Centers content and adds top/bottom margin */
     background: #fafafa;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    width: 100%;                 /* ensures it never bleeds */
-}
-
-@media (max-width: 768px) {
-    .content {
-        padding: 12px;           /* tighter on mobile */
-        margin: 8px auto;
-        border-radius: 0;        /* edge-to-edge on phone feels more native */
-        max-width: 100%;
-        box-shadow: none;        /* shadows on edge-to-edge look odd */
-    }
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Slightly softer shadow for depth */
+    border-radius: 10px; /* Adds rounded corners for a smoother appearance */
 }
 
 
-/* ==========================================================================
-   4. RR DASHBOARD — 2-column layout on desktop, single column on mobile
-   ========================================================================== */
-
-.rr-dashboard {
-    display: grid;
-    grid-template-columns: 1fr 300px;   /* ④ main track + FAQ sidebar */
-    grid-template-rows: auto;
-    gap: 24px;
-    align-items: start;
-    padding: 0;                          /* ③ padding now lives on .content only */
-    max-width: none;                     /* ③ remove old 600px cap */
-    margin: 0;
-}
-
-/* main takes col 1, aside takes col 2, glossary spans underneath */
-.rr-dashboard > main {
-    grid-column: 1;
-    grid-row: 1;
-    min-width: 0;                        /* critical: prevents grid blowout */
-}
-
-.rr-dashboard > aside {
-    grid-column: 2;
-    grid-row: 1;
-    position: sticky;
-    top: 16px;                           /* sticks while user scrolls main */
-    min-width: 0;
-}
-
-.rr-dashboard > #glossary-container {
-    grid-column: 1 / -1;
-}
-
-@media (max-width: 860px) {
-    .rr-dashboard {
-        grid-template-columns: 1fr;      /* single column on tablet/mobile */
-    }
-
-    .rr-dashboard > main,
-    .rr-dashboard > aside {
-        grid-column: 1;
-        position: static;                /* unstick aside on mobile */
-    }
-
-    /* On mobile, aside (FAQ) drops below main */
-    .rr-dashboard > aside {
-        grid-row: 2;
-    }
-}
-
-/* Ensure all direct children of main can't overflow their track */
-.rr-dashboard > main > * {
-    max-width: 100%;
-    min-width: 0;
-}
 
 
-/* ==========================================================================
-   5. NAVIGATION
-   ========================================================================== */
 
+/* NAVIGATION BAR */
 .nav {
     background-color: #0a9396;
-    padding: 0px 0;
+    padding: 0px 0; /* Adds more padding for a cleaner look */
     padding-top: 8px;
     display: flex;
-    justify-content: center;
+    justify-content: center; /* Centers nav items */
 }
 
 .nav a {
     color: white;
     text-decoration: none;
-    margin: 0 20px;
+    margin: 0 20px; /* Increases space between links */
     font-size: 18px;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease; /* Smooth hover transition */
 }
 
+
+
+/* Navigation Links and Buttons */
 .nav a, .nav .dropbtn {
     display: inline-block;
     text-decoration: none;
-    padding: 10px 15px;
+    padding: 10px 15px; /* Added padding for better clickability */
+
 }
 
 .nav a:hover, .dropdown:hover .dropbtn {
     text-decoration: underline;
-    color: #94d2bd;
+    color: #94d2bd; 
 }
 
+/* Dropdown Container */
 .dropdown {
     position: relative;
     display: inline-block;
 }
 
+/* Dropdown Content (Hidden by default) */
 .dropdown-content {
     display: none;
     position: absolute;
     background-color: #0a9396;
-    min-width: 160px;
+    min-width: 160px; /* Made slightly wider for text */
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     z-index: 10;
 }
 
+/* Links inside the dropdown */
 .dropdown-content a {
     display: block;
-    padding: 5px 10px;
+    padding: 5px 10px; /* Standardized padding */
     color: white;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 14px; /* Slightly larger for readability */
     background: #0a9396;
     text-align: left;
 }
 
+/* Hover effects inside dropdown */
 .dropdown-content a:hover {
-    background-color: #077b7e;
+    background-color: #077b7e; /* Slightly darker background on hover looks nice */
     color: #94d2bd;
     text-decoration: none;
 }
 
+/* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {
     display: block;
 }
 
+/* Add Positioning Context for Tooltips on simple links */
 .nav-item {
     position: relative;
-    display: inline-block;
+    display: inline-block; /* Keeps them horizontal */
+    /* Add any padding or margin needed to space them correctly */
 }
 
+/* Ensure the link inside the nav-item is also displayed correctly */
 .nav-item a {
-    display: block;
-    padding: 10px 5px;
+    display: block; /* Allows the link to fill the nav-item div */
+    padding: 10px 5px; /* Adjust as necessary to match your dropdown buttons */
 }
 
+/* Hide the pseudo-element by default */
 [data-title]::after {
-    content: attr(data-title);
+    content: attr(data-title); /* Pulls content from the data-title attribute */
     visibility: hidden;
     opacity: 0;
-    transition: opacity 0.3s, visibility 0s 0.3s;
+    transition: opacity 0.3s, visibility 0s 0.3s; /* Smooth transition */
+    
+    /* Styling and Positioning */
     position: absolute;
-    bottom: 0%;
+    bottom: 0%; /* Positions the tooltip above the button */
     left: 50%;
     transform: translateX(-50%);
-    z-index: 200;
+    z-index: 200; /* Ensure it stays above other elements */
+
+    /* Custom Look */
     background-color: #333;
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
-    white-space: nowrap;
+    white-space: nowrap; /* Keeps text on one line */
     font-size: 12px;
 }
 
+/* Show the pseudo-element on hover */
 [data-title]:hover::after {
     visibility: visible;
     opacity: 1;
     transition: opacity 0.3s;
 }
 
-
-/* ==========================================================================
-   6. HAMBURGER / MOBILE NAV
-   ========================================================================== */
+/* Hamburger Menu code */
+/* ================================================= */
+/* 1. DESKTOP / BASE STYLES (Default State) */
+/* These rules apply to all screens, but will be overridden for mobile */
+/* ================================================= */
 
 .header-container {
-    position: relative;
-    display: flex;
-    align-items: center;
+    position: relative; /* This anchors the absolutely positioned menu panel */
+    display: flex;      /* Optional: Helps align the toggle button and logo */
+    align-items: center; 
     background-color: #0a9396;
-    width: 100%;
-    text-align: center;
-    margin-top: -15px;
+    width: 100%; /* Ensure it spans the full width of the screen */
+    text-align: center; /* This helps center the child items */
+     margin-top: -15px; /* Adjust this negative value to control the overlap amount */
     padding-top: 5px;
     padding-bottom: 0px;
-    z-index: 5;
+    z-index: 5; /* Give it a low z-index */
 }
 
 .nav-links-container {
-    display: block;
+    /* DEFAULT: Always visible on desktop */
+    display: block; 
     width: auto;
-    margin: 0 auto;
-    max-width: 1200px;
+margin: 0 auto;
+max-width: 1200px;
 }
 
 .nav .nav-item,
 .nav .dropdown {
-    display: inline-block;
+    /* DEFAULT: Keep items horizontal */
+    display: inline-block; 
 }
 
 .menu-toggle {
-    display: none;
+    /* DEFAULT: Hide the hamburger button on desktop */
+    display: none; 
 }
 
+
+/* ================================================= */
+/* 2. MOBILE OVERRIDE (max-width: 768px) */
+/* These rules ONLY apply when the screen is small */
+/* ================================================= */
+
 @media (max-width: 768px) {
+    
+    /* Show the Hamburger Button */
     .menu-toggle {
-        display: block;
-        background-color: #0a9396;
-        color: white;
-        font-size: 2rem;
-        padding: 15px 10px;
-        min-height: 38px;
+        display: block; 
+/* --- COLOR FIX --- */
+        background-color: #0a9396; /* Set the background color */
+        color: white;              /* Set the text (hamburger symbol) color */
+        
+        font-size: 2rem; /* Make the symbol itself larger */
+        padding: 15px 10px; /* Increase the hit area padding */
+        min-height: 38px; /* Ensure it meets recommended tap target size */
+        
         background: transparent;
         border: none;
         cursor: pointer;
+        
+        /* Align button to the right */
         margin-left: auto;
     }
 
+    /* Stack the Navigation Links vertically and hide them by default */
     .nav-links-container {
-        display: none;
+        display: none; /* HIDE the full menu on load */
         position: absolute;
-        top: 100%;
+        top: 100%; 
         left: 0;
         background-color: #f4f4f9;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -359,555 +310,64 @@ main a {
         width: 100%;
         min-height: auto;
     }
-
+    
+    /* Show the menu when the 'is-open' class is toggled by Alpine */
     .nav-links-container.is-open {
         display: block;
     }
-
+    
+    /* Make all main links vertical (stacked) */
     .nav .nav-item,
     .nav .dropdown {
-        display: block;
+        display: block; /* Changes them to full-width blocks */
         border-bottom: 1px solid #eee;
     }
-
+    
+    /* Make dropdowns open vertically (fixes mobile tapping) */
     .dropdown-content {
-        position: static;
-        box-shadow: none;
+        position: static; /* Removes absolute positioning */
+        box-shadow: none; 
         min-width: 100%;
     }
-
-    [data-title]::after {
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
+ 
+    /*Change tooltips locations*/
+   [data-title]::after {
+    content: attr(data-title); /* Pulls content from the data-title attribute */
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0s 0.3s; /* Smooth transition */
+    /* Styling and Positioning */
+    position: absolute;
+    bottom: 100%; /* Positions the tooltip above the button */
+    left: 50%;
+    transform: translateX(-50%);
     }
 }
 
+/* MEDIA FIXES FOR SMALL SCREENS */
 @media (max-width: 768px) {
     .banner {
-        height: 70px;
+        height: 70px; Adjusts banner height for mobile 
     }
-
-    .banner-image {
-        height: 100px;
-        width: auto;
-    }
-
-    .nav {
-        flex-direction: column;
-    }
-
-    .nav a {
-        font-size: 16px;
-    }
-}
-
-
-/* ==========================================================================
-   7. RRR TRACKER SPECIFIC
-   ========================================================================== */
-
-/* The massive tap button */
-.btn-massive-tap {
-    width: 100%;
-    min-height: 250px;
-    background: linear-gradient(135deg, #16325F, #005f73);
-    color: white;
-    border: none;
-    border-radius: 16px;
-    font-size: 2rem;
-    font-weight: bold;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-    cursor: pointer;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;   /* prevents 300ms tap delay on iOS */
-}
-
-.btn-massive-tap:active {
-    transform: scale(0.96);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-    background: linear-gradient(135deg, #0f254a, #004b5c);
-}
-
-.btn-massive-tap i {
-    font-size: 4rem;
-    opacity: 0.8;
-}
-
-/* Timer */
-.timer-pulse {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #d9534f;
-    text-align: center;
-    margin: 10px 0;
-    font-variant-numeric: tabular-nums;
-}
-
-/* Clinical status boxes */
-.status-equivocal { border-left: 5px solid #f59e0b; background: #fffbeb; padding: 15px; border-radius: 6px; }
-.status-danger    { border-left: 5px solid #ef4444; background: #fef2f2; padding: 15px; border-radius: 6px; }
-.status-normal    { border-left: 5px solid #10b981; background: #ecfdf5; padding: 15px; border-radius: 6px; }
-
-/* History list */
-.history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 12px;
-    background: #ffffff;
-    border: 1px solid #dde4ef;
-    border-radius: 4px;
-    margin-bottom: 3px;
-}
-
-.history-item:nth-child(even) {
-    background: #e8eef7;
-}
-
-.history-item.equivocal-flag {
-    border-color: #fcd34d;
-    background: #fffdf6;
-}
-
-/* Chart expansion overlay */
-.chart-fullscreen-overlay {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #f8fafc;
-    z-index: 10050;
-    padding: 16px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.chart-fullscreen-overlay .relative {
-    flex-grow: 1;
-    height: 100% !important;
-}
-
-
-/* ==========================================================================
-   8. SUMMARY BOXES & SECTION PANELS
-   ========================================================================== */
-
-.summary-box {
-    background-color: #f8fafc;
-    padding: 15px;              /* was 10px but 15px feels less cramped */
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-    text-align: center;
-    margin-bottom: 16px;
-}
-
-/* ⑤ SYMPTOM SECTION GRID — the previous minmax(300px,1fr) pair
-   forced a minimum 620px width, blowing out on iPhone 390px screens.
-   clamp-safe auto-fit solves this without any JS. */
-#symptomSection > div[x-show] {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-    gap: 20px;
-    align-items: start;
-}
-
-
-/* ==========================================================================
-   9. MEDICATION HISTORY
-   ========================================================================== */
-
-.medicationHistory {
-    border: 1px solid #adc1ed;
-    border-radius: 4px;
-    background: #fcfdff;
-    margin-top: 15px;
-    padding: 20px;
-}
-
-/* Medication table — scrollable on mobile */
-.medicationHistory table {
-    min-width: 0;
-    width: 100%;
-}
-
-@media (max-width: 640px) {
-    .medicationHistory > div[x-show] > div:last-child {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-}
-
-/* Med chart container */
-#medChartContainer {
-    position: relative;
-    width: 100%;
-    height: 384px;
-}
-
-
-/* ==========================================================================
-   10. DATA MANAGEMENT & EXPORT BUTTONS
-   ========================================================================== */
-
-/* ⑦ Resolve the !important wars — use a clean, scoped rule */
-.data-management-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-}
-
-.data-management-actions .btn-nudge-static {
-    flex: 0 0 auto;
+    
+.banner-image {
+    height: 100px; /* Slight overflow */
     width: auto;
 }
 
-/* Backup grid panel */
-.backup-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-}
-
-
-/* ==========================================================================
-   11. SHARED BUTTON STYLES
-   ========================================================================== */
-
-.btn-nudge-static {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: white;
-    cursor: pointer;
-    line-height: 1;
-    box-sizing: border-box;
-    vertical-align: middle;
-    touch-action: manipulation;
-    background: #1e293b;
-}
-
-.btn-nudge-static:hover {
-    background: #334155;
-}
-
-label.btn-nudge-static {
-    margin-bottom: 0;
-}
-
-button.btn-nudge-static {
-    padding: 8px 14px;
-    appearance: none;
-    -webkit-appearance: none;
-}
-
-/* Install nudge */
-.install-footer-box {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 20px;
-    margin: 40px 0;
-}
-
-.nudge-icon {
-    font-size: 24px;
-    color: #2563eb;
-    background: #eff6ff;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    flex-shrink: 0;
-}
-
-.nudge-text {
-    flex-grow: 1;
-}
-
-.nudge-text h4 {
-    margin: 0 0 4px 0;
-    font-size: 16px;
-    color: #1e293b;
-}
-
-.nudge-text p {
-    margin: 0;
-    font-size: 13px;
-    color: #64748b;
-    line-height: 1.4;
-}
-
-@media all and (display-mode: standalone) {
-    #install-nudge-static {
-        display: none;
+    .nav {
+        flex-direction: column; /* Stacks nav items vertically on smaller screens */
+ /*       padding: 5px;   */
     }
-}
-
-
-/* ==========================================================================
-   12. PAGINATED HISTORY & ANALYTICS SECTIONS
-   ========================================================================== */
-
-.paginatedHistory {
-    border: 1px solid #adc1ed;
-    border-radius: 4px;
-    background: #fcfdff;
-    margin-top: 30px;
-    padding: 20px;
-}
-
-
-/* ==========================================================================
-   13. iOS / STANDALONE WEB APP MODE
-   ========================================================================== */
-
-/* ⑥ Safe area insets — handles notch, Dynamic Island, and home bar */
-@media all and (display-mode: standalone) {
-
-    /* Sticky nav bar respects status bar */
-    .header-container {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background: #ffffff;
-        border-bottom: 1px solid #e2e8f0;
-        padding-top: env(safe-area-inset-top, 10px);
+    
+    .nav a {
+/*        margin: 10px 0;  Adds vertical spacing for nav items */
+        font-size: 16px;
     }
-
-    /* Bottom of page clears home bar */
-    body {
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    /* Left/right safe areas (landscape mode) */
+    
     .content {
-        padding-left: max(12px, env(safe-area-inset-left));
-        padding-right: max(12px, env(safe-area-inset-right));
-    }
-
-    /* Hide website chrome */
-    .banner,
-    footer,
-    #install-nudge-static,
-    header.hero.card {
-        display: none !important;
-    }
-
-    /* Clean nav for app mode */
-    .menu-toggle {
-        display: block !important;
-        padding: 15px;
-        font-size: 24px;
-        background: transparent;
-        border: none;
-        color: #1e293b;
-    }
-
-    .nav-links-container:not(.is-open) {
-        display: none !important;
-    }
-
-    .nav-links-container.is-open {
-        display: block !important;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        background: white;
-        border-bottom: 2px solid #2563eb;
-        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
-        z-index: 999;
-    }
-
-    /* Remove the desktop content container styling in app mode —
-       the OS chrome + safe areas take its place */
-    .content {
-        box-shadow: none;
-        border-radius: 0;
-        margin: 0 auto;
-        background: #f4f4f4;
-    }
-
-    /* FAQ sidebar in standalone: keep below main (single column) 
-       to respect the focused app-like experience */
-    .rr-dashboard {
-        grid-template-columns: 1fr;
-    }
-
-    .rr-dashboard > aside {
-        grid-column: 1;
-        grid-row: 2;
-        position: static;
-    }
-}
-
-
-/* ==========================================================================
-   14. INPUTS — prevent iOS zoom (font-size < 16px triggers it)
-   ========================================================================== */
-
-@media screen and (max-width: 768px) {
-    input, select, textarea {
-        font-size: 16px !important;
-    }
-}
-
-
-/* ==========================================================================
-   15. APP-ONLY BRANDING
-   ========================================================================== */
-
-@media (min-width: 1025px) {
-    #app-only-branding,
-    .app-branding {
-        display: none !important;
-    }
-}
-
-@media (max-width: 1024px) {
-    #app-only-branding {
-        display: none !important;
-    }
-}
-
-@media all and (display-mode: standalone) {
-    #app-only-branding {
-        display: block !important;
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        color: #94a3b8;
-        margin-bottom: 20px;
-        letter-spacing: 1.5px;
-        text-align: center;
-        width: 100%;
-    }
-
-    #install-nudge-static {
-        display: none !important;
-    }
-}
-
-
-/* ==========================================================================
-   16. MISC GLOBAL UTILITIES 
-   ========================================================================== */
-
-.echo-calc-container {
-    -webkit-overflow-scrolling: touch;
-}
-
-* { -webkit-tap-highlight-color: transparent; }
-
-main {
-    user-select: none;
-    -webkit-user-select: none;
-    min-height: 0;
-}
-
-input {
-    user-select: auto;
-    -webkit-user-select: auto;
-}
-
-[x-cloak] { display: none !important; }
-
-
-/* ==========================================================================
-   17. PRINT
-   ========================================================================== */
-
-@media print {
-    *, *::before, *::after {
-        box-sizing: border-box !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    #site-header, #site-footer, .hero, .summary-box, .btn-massive-tap,
-    .install-footer-box, .under-construction-banner {
-        display: none !important;
-    }
-
-    .rr-dashboard, main {
-        min-height: 0 !important;
-        padding-top: 0 !important;
-    }
-
-    [x-cloak], [style*="display: none"] {
-        display: none !important;
-    }
-
-    @page {
-        size: auto;
-        margin: 1.5cm !important;
-    }
-
-    body, html {
-        background: white !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100% !important;
-        overflow-x: visible !important;   /* allow print to lay out naturally */
-    }
-
-    .paginatedHistory, #rrrChart {
-        display: block !important;
-        visibility: visible !important;
-        width: 100% !important;
-        padding: 0 15px !important;
-        border: none !important;
-        margin-bottom: 30px !important;
-        page-break-inside: avoid;
-    }
-
-    .paginatedHistory::before {
-        content: "VETCARDIOHUB SRR TRACKER";
-        display: block;
-        font-size: 10px;
-        letter-spacing: 2px;
-        color: #94a3b8;
-        margin-bottom: 10px;
-    }
-
-    .abnormal, [style*="color: #dc2626"] {
-        color: #dc2626 !important;
-        font-weight: bold !important;
-    }
-
-    .normal, [style*="color: #16a34a"] {
-        color: #16a34a !important;
-    }
-
-    h1, h2, h3, [style*="color: #1e40af"], [style*="color: #16325F"] {
-        color: #16325F !important;
-    }
-
-    /* In print, collapse the grid to single column */
-    .rr-dashboard {
-        display: block !important;
+        padding: 15px; /* Less padding on mobile */
+        max-width: 100%; /* Ensures content fits within the screen */
     }
 }
 
@@ -4190,3 +3650,129 @@ input {
 .btn-export:hover { background: #1e293b; }
 
 
+/* RRR Tracker Specific Styles */
+.rr-dashboard {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: left;
+}
+
+/* The Massive Tap Target */
+.btn-massive-tap {
+    width: 100%;
+    min-height: 250px;
+    background: linear-gradient(135deg, #16325F, #005f73);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    user-select: none; /* Prevent text selection on rapid tapping */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-massive-tap:active {
+    transform: scale(0.96);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #0f254a, #004b5c);
+}
+
+.btn-massive-tap i {
+    font-size: 4rem;
+    opacity: 0.8;
+}
+
+/* Visual Timer Pulse */
+.timer-pulse {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #d9534f;
+    text-align: center;
+    margin: 10px 0;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Clinical Status Boxes */
+.status-equivocal { border-left: 5px solid #f59e0b; background: #fffbeb; padding: 15px; border-radius: 6px; }
+.status-danger { border-left: 5px solid #ef4444; background: #fef2f2; padding: 15px; border-radius: 6px; }
+.status-normal { border-left: 5px solid #10b981; background: #ecfdf5; padding: 15px; border-radius: 6px; }
+
+/* History List */
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: #ffffff;
+    border: 1px solid #dde4ef;
+    border-radius: 4px;
+    margin-bottom: 3px;
+}
+
+.history-item:nth-child(even) {
+    background: #e8eef7;
+}
+
+.history-item.equivocal-flag {
+    border-color: #fcd34d;
+    background: #fffdf6;
+}
+
+/* Chart Expansion Overlay */
+.chart-fullscreen-overlay {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #f8fafc;
+    z-index: 10050;
+    padding: 16px;
+    box-sizing: border-box;  /* ADD: ensures padding doesn't push past 100vw/100vh */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.btn-nudge-static {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+    box-sizing: border-box;
+    vertical-align: middle; /* add this */
+}
+
+label.btn-nudge-static {
+    margin-bottom: 0;
+}
+
+button.btn-nudge-static {
+    padding: 8px 14px; /* same as the class — forces override of UA stylesheet */
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+[x-cloak] { display: none !important; }
+
+/* Ensure the canvas container expands when in fullscreen */
+.chart-fullscreen-overlay .relative {
+    flex-grow: 1;
+    height: 100% !important;
+}
