@@ -114,10 +114,11 @@
 <div x-data="{ zoomedImg: null }" 
      @image-zoom.window="zoomedImg = $event.detail"
      x-show="zoomedImg"
+     x-cloak
      x-transition.opacity.duration.300ms
      class="zoom-overlay" 
      @click="zoomedImg = null"
-     style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10050; display: flex; align-items: center; justify-content: center; padding: 20px;">
+     style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10050; display: flex; align-items: center; justify-content: center; padding: 20px;">
     
     <img :src="zoomedImg" 
          class="zoomed-img" 
