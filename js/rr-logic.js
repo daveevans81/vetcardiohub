@@ -2834,184 +2834,639 @@ getCanvasWithWhiteBackground(canvas) {
     return exportCanvas.toDataURL('image/jpeg', 1.0);
 },
 
-
+// ── SVG HELPERS (private, not exposed to Alpine template) ─────────────────────
+ 
+// Strips Alpine event/bind attributes that contain characters illegal in XML,
+// preventing XMLSerializer from producing a broken or empty data URI.
+_sanitiseSvgClone(svgElement) {
+    const clone = svgElement.cloneNode(true);
+    const bad = /^(@|x-on:|x-bind:|:|x-)/i;
+ 
+    // Clean root element
+    [...clone.attributes].forEach(attr => {
+        if (bad.test(attr.name)) clone.removeAttribute(attr.name);
+    });
+    // Remove Alpine-bound :style and replace with a plain static value
+    clone.removeAttribute(':style');
+    clone.setAttribute('style', 'display:block;');
+ 
+    // Clean every descendant
+    clone.querySelectorAll('*').forEach(el => {
+        [...el.attributes].forEach(attr => {
+            if (bad.test(attr.name)) el.removeAttribute(attr.name);
+        });
+    });
+ 
+    return clone;
+},
+ 
+// Renders a sanitised SVG clone to a JPEG data-URL via an offscreen canvas.
+// Uses Blob + createObjectURL — works with non-Latin characters unlike btoa.
+async _svgToJpegDataUrl(svgElement, width, height) {
+    const clone = this._sanitiseSvgClone(svgElement);
+    clone.setAttribute('width', String(width));
+    clone.setAttribute('height', String(height));
+ 
+    const svgData = new XMLSerializer().serializeToString(clone);
+    const blob    = new Blob([svgData], { type: 'image/svg+xml' });
+    const url     = URL.createObjectURL(blob);
+ 
+    try {
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = url;
+        });
+ 
+        const canvas = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+ 
+        return canvas.toDataURL('image/jpeg', 1.0);
+    } finally {
+        URL.revokeObjectURL(url);
+    }
+},
+ 
+ 
+// ── generatePDF ───────────────────────────────────────────────────────────────
 async generatePDF() {
     if (!this.activePatientId) return alert("Select a patient first.");
-    
+ 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const doc     = new jsPDF();
     const profile = this.activePatientProfile;
-    const timeline = this.compiledTimeline;
-
-    // ── 1. Document Header ──────────────────────────────────────────────
+    const { startDate, endDate } = this.getDateRange();
+ 
+    const inRange = (dateStr) => {
+        if (!startDate) return true;
+        const d = this.parseDateSafe(dateStr);
+        return d >= startDate && d <= endDate;
+    };
+ 
+    // ── 1. Header ─────────────────────────────────────────────────────────
     doc.setFontSize(20);
-    doc.text(`${profile.name}'s Clinical Report`, 14, 20);
-    doc.setFontSize(11);
+    doc.setTextColor(22, 50, 95);
+    doc.text(`${profile.name} — Clinical Report`, 14, 20);
+ 
+    doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text(`Generated: ${new Date().toLocaleDateString()} | Timescale: ${this.timeScale.toUpperCase()}`, 14, 28);
-    doc.text(`Species: ${profile.species} | Breed: ${profile.breed || 'N/A'} | Age: ${this.computedAgeText}`, 14, 34);
-
-    let currentY = 45; // Document flow cursor
-
-    // ── 2. Embed ACVIM Staging Chart (SVG to Canvas via Base64) ──────────
+    doc.text(`Generated: ${new Date().toLocaleDateString('en-GB')}  |  Period: ${this.timeScaleLabel}`, 14, 28);
+    doc.text(
+        `Species: ${profile.species}  |  Breed: ${profile.breed || 'N/A'}  |  Age: ${this.computedAgeText}  |  Owner: ${profile.ownerName || 'N/A'}`,
+        14, 34
+    );
+ 
+    doc.setDrawColor(200);
+    doc.line(14, 37, 196, 37);
+ 
+    let Y = 45; // Flowing Y cursor
+ 
+    // Utility: section header with auto page-break
+    const sectionHeader = (title, r, g, b) => {
+        if (Y > 262) { doc.addPage(); Y = 20; }
+        doc.setFontSize(12);
+        doc.setTextColor(r ?? 22, g ?? 50, b ?? 95);
+        doc.text(title, 14, Y);
+        doc.setTextColor(20, 20, 20);
+        Y += 4;
+    };
+ 
+    // Utility: embed a chart canvas image with auto page-break
+    const embedCanvas = (canvas, title) => {
+        if (!canvas) return;
+        const imgData   = this.getCanvasWithWhiteBackground(canvas);
+        const ratio     = canvas.height / canvas.width;
+        const pdfH      = Math.round(180 * ratio);
+        if (Y + pdfH > 280) { doc.addPage(); Y = 20; }
+        sectionHeader(title);
+        doc.addImage(imgData, 'JPEG', 14, Y, 180, pdfH);
+        Y += pdfH + 14;
+    };
+ 
+    // ── 2. ACVIM Staging Chart ────────────────────────────────────────────
     if (this.activePathway) {
         try {
-            const svgElement = document.getElementById('acvim-svg-export');
-            if (svgElement) {
-                // Clone to mutate attributes without affecting UI
-               // Clone to mutate attributes without affecting UI
-                const clonedSvg = svgElement.cloneNode(true);
-                // Update these limits to match the new compact layout
-                clonedSvg.setAttribute('width', '600');
-                clonedSvg.setAttribute('height', '320');
-                
-                // Serialize and Base64 Encode
-                const svgData = new XMLSerializer().serializeToString(clonedSvg);
-                const svgURI = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svgData)));
-
-                const img = new Image();
-                await new Promise((resolve, reject) => {
-                    img.onload = resolve;
-                    img.onerror = reject;
-                    img.src = svgURI;
-                });
-
-                const canvas = document.createElement('canvas');
-                // Update canvas dimensions to match
-                canvas.width = 600; 
-                canvas.height = 320; 
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ffffff'; 
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, 600, 320);
-
-                const acvimImgData = canvas.toDataURL('image/jpeg', 1.0);
-                const acvimPdfHeight = 180 * (canvas.height / canvas.width);
-
-                doc.setFontSize(12);
-                doc.setTextColor(20, 20, 20);
-                doc.text("Disease Progression & ACVIM Staging", 14, currentY);
-                currentY += 6;
-
-                doc.addImage(acvimImgData, 'JPEG', 14, currentY, 180, acvimPdfHeight);
-                currentY += acvimPdfHeight + 15; 
+            const svgEl = document.getElementById('acvim-svg-export');
+            if (svgEl) {
+                const SVG_W = 600, SVG_H = 320;
+                const PDF_W = 180, PDF_H = Math.round(PDF_W * SVG_H / SVG_W);
+ 
+                const imgData = await this._svgToJpegDataUrl(svgEl, SVG_W, SVG_H);
+ 
+                if (Y + PDF_H > 280) { doc.addPage(); Y = 20; }
+                sectionHeader('Disease Progression & ACVIM Staging', 109, 40, 217);
+                doc.addImage(imgData, 'JPEG', 14, Y, PDF_W, PDF_H);
+                Y += PDF_H + 14;
             }
         } catch (err) {
-            console.error("Failed to render ACVIM staging chart to PDF:", err);
+            console.error('VCH PDF: ACVIM SVG render failed —', err);
         }
     }
-    
-    // ── 3. Embed Respiratory Chart (Fixed Aspect Ratio) ─────────────────
-    const rrrCanvas = this.$refs.rrrChartCanvas;
-    if (rrrCanvas) {
-        const rrrImgData = this.getCanvasWithWhiteBackground(rrrCanvas);
-        
-        // FIX: Calculate true aspect ratio to prevent Y-axis squashing
-        const rrrRatio = rrrCanvas.height / rrrCanvas.width;
-        const rrrPdfHeight = 180 * rrrRatio; 
-
-        // Auto-page break if it won't fit
-        if (currentY + rrrPdfHeight > 280) { doc.addPage(); currentY = 20; }
-
-        doc.setFontSize(12);
-        doc.text("Sleeping Respiratory Rate (SRR)", 14, currentY);
-        currentY += 6;
-        doc.addImage(rrrImgData, 'JPEG', 14, currentY, 180, rrrPdfHeight);
-        currentY += rrrPdfHeight + 15;
+ 
+    // ── 3. SRR Chart ──────────────────────────────────────────────────────
+    embedCanvas(this.$refs.rrrChartCanvas, 'Sleeping Respiratory Rate (SRR) Chart');
+ 
+    // ── 4. Medication Timeline Chart ──────────────────────────────────────
+    if (this.hasAnyMedData()) {
+        embedCanvas(this.$refs.medChartCanvas, 'Medication Timeline');
     }
-
-    // ── 4. Embed Medication Chart (Fixed Aspect Ratio) ──────────────────
-    const medCanvas = this.$refs.medChartCanvas;
-    if (this.hasAnyMedData() && medCanvas) {
-        const medImgData = this.getCanvasWithWhiteBackground(medCanvas);
-        
-        // FIX: Calculate true aspect ratio
-        const medRatio = medCanvas.height / medCanvas.width;
-        const medPdfHeight = 180 * medRatio;
-
-        // Auto-page break if it won't fit
-        if (currentY + medPdfHeight > 280) { doc.addPage(); currentY = 20; }
-
-        doc.setFontSize(12);
-        doc.text("Medication Adjustments", 14, currentY);
-        currentY += 6;
-        doc.addImage(medImgData, 'JPEG', 14, currentY, 180, medPdfHeight);
-        currentY += medPdfHeight + 15;
+ 
+    // ── 5. SRR Log Table ──────────────────────────────────────────────────
+    const srrData = this.getFilteredReadings().slice().reverse(); // newest first
+    if (srrData.length > 0) {
+        if (Y > 240) { doc.addPage(); Y = 20; }
+        sectionHeader('Sleeping Respiratory Rate Log', 14, 116, 144);
+        doc.autoTable({
+            startY: Y,
+            head: [['Date', 'Time', 'Rate (bpm)', 'Manual', 'Clinical Notes']],
+            body: srrData.map(r => [
+                new Date(r.date).toLocaleDateString('en-GB'),
+                r.time || new Date(r.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                r.rate,
+                r.isManual ? 'Yes' : 'No',
+                r.comment || '—'
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [14, 116, 144] },
+            columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 20 }, 2: { cellWidth: 24 }, 3: { cellWidth: 18 }, 4: { cellWidth: 'auto' } },
+            styles: { fontSize: 8 }
+        });
+        Y = doc.lastAutoTable.finalY + 12;
     }
-
-    // ── 5. Generate the Data Table ──────────────────────────────────────
-    // Auto-page break before table if space is tight
-    if (currentY > 240) { doc.addPage(); currentY = 20; }
-
-    const tableBody = timeline.map(ev => [
-        ev.displayDate,
-        ev.type,
-        ev.summary,
-        ev.notes || '-'
-    ]);
-
-    doc.autoTable({
-        startY: currentY,
-        head: [['Date', 'Category', 'Summary', 'Clinical Notes']],
-        body: tableBody,
-        theme: 'striped',
-        headStyles: { fillColor: [22, 50, 95] },
-        columnStyles: {
-            0: { cellWidth: 28 },
-            1: { cellWidth: 25 },
-            2: { cellWidth: 45 },
-            3: { cellWidth: 'auto' }
-        },
-        styles: { fontSize: 9 }
-    });
-
-    doc.save(`${profile.name.replace(/\s+/g, '_')}_Clinical_Report.pdf`);
+ 
+    // ── 6. Medication Log Table ───────────────────────────────────────────
+    const medData = this.medLedger
+        .filter(m => m.patientId === this.activePatientId && inRange(m.eventDate))
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+ 
+    if (medData.length > 0) {
+        if (Y > 240) { doc.addPage(); Y = 20; }
+        sectionHeader('Medication Log', 146, 64, 14);
+        doc.autoTable({
+            startY: Y,
+            head: [['Date', 'Drug', 'Action', 'Dose (mg)', 'Frequency', 'mg/kg']],
+            body: medData.map(m => {
+                const action  = this.getComputedAction(m);
+                const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+                const mgPerKg = (!m.isStopped && m.doseMg)
+                    ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate)
+                    : null;
+                return [
+                    m.eventDate,
+                    name,
+                    action,
+                    m.doseMg != null ? `${m.doseMg} mg` : '—',
+                    m.frequency || '—',
+                    mgPerKg ? `${mgPerKg} mg/kg` : '—'
+                ];
+            }),
+            theme: 'striped',
+            headStyles: { fillColor: [146, 64, 14] },
+            columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 38 }, 2: { cellWidth: 22 }, 3: { cellWidth: 22 }, 4: { cellWidth: 22 }, 5: { cellWidth: 'auto' } },
+            styles: { fontSize: 8 }
+        });
+        Y = doc.lastAutoTable.finalY + 12;
+    }
+ 
+    // ── 7. Diagnosis & Staging Log ────────────────────────────────────────
+    const diagData = this.diagnosisLog
+        .filter(d => d.patientId === this.activePatientId && inRange(d.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (diagData.length > 0) {
+        if (Y > 240) { doc.addPage(); Y = 20; }
+        sectionHeader('Diagnosis & Staging Log', 109, 40, 217);
+        doc.autoTable({
+            startY: Y,
+            head: [['Date', 'Diagnosis', 'ACVIM Stage', 'Murmur Grade', 'Concurrent Conditions', 'Notes']],
+            body: diagData.map(d => [
+                d.date,
+                d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '—'),
+                d.acvimStage || '—',
+                d.murmurGrade || '—',
+                (d.concurrentDiagnoses || []).join(', ') || '—',
+                d.notes || '—'
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [109, 40, 217] },
+            columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 32 }, 2: { cellWidth: 20 }, 3: { cellWidth: 20 }, 4: { cellWidth: 34 }, 5: { cellWidth: 'auto' } },
+            styles: { fontSize: 8 }
+        });
+        Y = doc.lastAutoTable.finalY + 12;
+    }
+ 
+    // ── 8. Syncope / Collapse Log ─────────────────────────────────────────
+    const syncData = this.syncopeLog
+        .filter(s => s.patientId === this.activePatientId && inRange(s.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (syncData.length > 0) {
+        if (Y > 240) { doc.addPage(); Y = 20; }
+        sectionHeader('Syncope / Collapse Events', 185, 28, 28);
+        doc.autoTable({
+            startY: Y,
+            head: [['Date', 'Time', 'Type', 'Duration', 'LOC', 'Muscle Tone', 'Activity Before', 'Notes']],
+            body: syncData.map(s => [
+                s.date,
+                s.time || '—',
+                s.type || '—',
+                s.duration || '—',
+                s.loc || '—',
+                s.muscleTone || '—',
+                s.activityBefore || '—',
+                s.notes || '—'
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [185, 28, 28] },
+            columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 14 }, 2: { cellWidth: 20 }, 3: { cellWidth: 18 }, 4: { cellWidth: 12 }, 5: { cellWidth: 20 }, 6: { cellWidth: 22 }, 7: { cellWidth: 'auto' } },
+            styles: { fontSize: 8 }
+        });
+        Y = doc.lastAutoTable.finalY + 12;
+    }
+ 
+    // ── 9. Cough Log ──────────────────────────────────────────────────────
+    const coughData = this.coughLog
+        .filter(c => c.patientId === this.activePatientId && inRange(c.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (coughData.length > 0) {
+        if (Y > 240) { doc.addPage(); Y = 20; }
+        sectionHeader('Cough Log', 161, 98, 7);
+        doc.autoTable({
+            startY: Y,
+            head: [['Date', 'Severity', 'Frequency', 'Period', 'Description', 'Context', 'Notes']],
+            body: coughData.map(c => [
+                c.date,
+                c.severity || '—',
+                c.frequencyCount || '—',
+                c.frequencyPeriod || '—',
+                c.description || '—',
+                c.context || '—',
+                c.notes || '—'
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [161, 98, 7] },
+            columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 18 }, 2: { cellWidth: 16 }, 3: { cellWidth: 14 }, 4: { cellWidth: 30 }, 5: { cellWidth: 24 }, 6: { cellWidth: 'auto' } },
+            styles: { fontSize: 8 }
+        });
+        Y = doc.lastAutoTable.finalY + 12;
+    }
+ 
+    // ── 10. Activity Log ──────────────────────────────────────────────────
+    const actData = this.activityLog
+        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (actData.length > 0) {
+        if (Y > 240) { doc.addPage(); Y = 20; }
+        sectionHeader('Activity Log', 5, 150, 105);
+        doc.autoTable({
+            startY: Y,
+            head: [['Date', 'Status', 'Duration (mins)', 'Distance', 'Notes']],
+            body: actData.map(a => [
+                a.date,
+                a.status || '—',
+                a.durationMins || '—',
+                a.distance || '—',
+                a.notes || '—'
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [5, 150, 105] },
+            columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 26 }, 2: { cellWidth: 28 }, 3: { cellWidth: 26 }, 4: { cellWidth: 'auto' } },
+            styles: { fontSize: 8 }
+        });
+    }
+ 
+    doc.save(`${profile.name.replace(/\s+/g, '_')}_Clinical_Report_${new Date().toISOString().split('T')[0]}.pdf`);
 },
 
-        generateCSV() {
-            if (!this.activePatientId) return;
-            const timeline = this.compiledTimeline;
-            
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Date,Category,Summary,Notes\n";
-            
-            timeline.forEach(ev => {
-                // Escape commas and quotes for safe CSV output
-                const safeNotes = ev.notes ? `"${ev.notes.replace(/"/g, '""')}"` : "";
-                const safeSummary = ev.summary ? `"${ev.summary.replace(/"/g, '""')}"` : "";
-                csvContent += `${ev.displayDate},${ev.type},${safeSummary},${safeNotes}\n`;
-            });
 
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `${this.activePatientProfile.name}_Report.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        },
+// ── generateCSV ───────────────────────────────────────────────────────────────
+// Single file with clearly labelled sections. UTF-8 BOM prefix ensures
+// Excel opens it without mojibake on Windows.
+generateCSV() {
+    if (!this.activePatientId) return;
+    const profile = this.activePatientProfile;
+    const { startDate, endDate } = this.getDateRange();
+ 
+    const inRange = (dateStr) => {
+        if (!startDate) return true;
+        const d = this.parseDateSafe(dateStr);
+        return d >= startDate && d <= endDate;
+    };
+ 
+    // Wraps a value in quotes and escapes internal quotes
+    const q = (v) => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+ 
+    let csv = '';
+ 
+    // Report metadata preamble (not a data row — purely informational)
+    csv += `${q('VetCardioHub Clinical Report')},${q(profile.name)}\n`;
+    csv += `${q('Generated')},${q(new Date().toLocaleDateString('en-GB'))}\n`;
+    csv += `${q('Period')},${q(this.timeScaleLabel)}\n`;
+    csv += `${q('Species')},${q(profile.species)}  ${q('Breed')},${q(profile.breed || '')}  ${q('Owner')},${q(profile.ownerName || '')}\n`;
+    csv += '\n';
+ 
+    // ── SRR Log ───────────────────────────────────────────────────────────
+    const srrData = this.getFilteredReadings().slice().reverse();
+    if (srrData.length > 0) {
+        csv += 'SRR LOG\n';
+        csv += 'Date,Time,Rate (bpm),Manual,Clinical Notes\n';
+        srrData.forEach(r => {
+            csv += [
+                q(new Date(r.date).toLocaleDateString('en-GB')),
+                q(r.time || ''),
+                r.rate,
+                r.isManual ? 'Yes' : 'No',
+                q(r.comment || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+ 
+    // ── Medication Log ────────────────────────────────────────────────────
+    const medData = this.medLedger
+        .filter(m => m.patientId === this.activePatientId && inRange(m.eventDate))
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+ 
+    if (medData.length > 0) {
+        csv += 'MEDICATION LOG\n';
+        csv += 'Date,Drug,Action,Dose (mg),Frequency,mg/kg\n';
+        medData.forEach(m => {
+            const action  = this.getComputedAction(m);
+            const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+            const mgPerKg = (!m.isStopped && m.doseMg)
+                ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate)
+                : '';
+            csv += [
+                q(m.eventDate),
+                q(name),
+                q(action),
+                m.doseMg != null ? m.doseMg : '',
+                q(m.frequency || ''),
+                mgPerKg || ''
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+ 
+    // ── Diagnosis & Staging Log ───────────────────────────────────────────
+    const diagData = this.diagnosisLog
+        .filter(d => d.patientId === this.activePatientId && inRange(d.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (diagData.length > 0) {
+        csv += 'DIAGNOSIS & STAGING LOG\n';
+        csv += 'Date,Diagnosis,ACVIM Stage,Murmur Grade,Concurrent Conditions,Notes\n';
+        diagData.forEach(d => {
+            csv += [
+                q(d.date),
+                q(d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '')),
+                q(d.acvimStage || ''),
+                q(d.murmurGrade || ''),
+                q((d.concurrentDiagnoses || []).join('; ')),
+                q(d.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+ 
+    // ── Syncope / Collapse Log ────────────────────────────────────────────
+    const syncData = this.syncopeLog
+        .filter(s => s.patientId === this.activePatientId && inRange(s.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (syncData.length > 0) {
+        csv += 'SYNCOPE / COLLAPSE LOG\n';
+        csv += 'Date,Time,Type,Duration,LOC,Muscle Tone,Activity Before,Notes\n';
+        syncData.forEach(s => {
+            csv += [
+                q(s.date),
+                q(s.time || ''),
+                q(s.type || ''),
+                q(s.duration || ''),
+                q(s.loc || ''),
+                q(s.muscleTone || ''),
+                q(s.activityBefore || ''),
+                q(s.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+ 
+    // ── Cough Log ─────────────────────────────────────────────────────────
+    const coughData = this.coughLog
+        .filter(c => c.patientId === this.activePatientId && inRange(c.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (coughData.length > 0) {
+        csv += 'COUGH LOG\n';
+        csv += 'Date,Severity,Frequency Count,Period,Description,Context,Notes\n';
+        coughData.forEach(c => {
+            csv += [
+                q(c.date),
+                q(c.severity || ''),
+                c.frequencyCount || '',
+                q(c.frequencyPeriod || ''),
+                q(c.description || ''),
+                q(c.context || ''),
+                q(c.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+ 
+    // ── Activity Log ──────────────────────────────────────────────────────
+    const actData = this.activityLog
+        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (actData.length > 0) {
+        csv += 'ACTIVITY LOG\n';
+        csv += 'Date,Status,Duration (mins),Distance,Notes\n';
+        actData.forEach(a => {
+            csv += [
+                q(a.date),
+                q(a.status || ''),
+                a.durationMins || '',
+                q(a.distance || ''),
+                q(a.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+ 
+    if (!csv.trim()) return alert("No data to export for this patient in the selected date range.");
+ 
+    const BOM  = '\uFEFF'; // UTF-8 BOM — Excel on Windows needs this to open without encoding errors
+    const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href     = url;
+    link.download = `${profile.name.replace(/\s+/g, '_')}_Report_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+},
 
-        copyToClipboard() {
-            if (!this.activePatientId) return;
-            const timeline = this.compiledTimeline;
-            
-            let textOutput = `CLINICAL REPORT: ${this.activePatientProfile.name}\n`;
-            textOutput += `Generated: ${new Date().toLocaleDateString()}\n`;
-            textOutput += `-------------------------------------------\n\n`;
 
-            timeline.forEach(ev => {
-                textOutput += `[${ev.displayDate}] ${ev.type.toUpperCase()}: ${ev.summary}\n`;
-                if (ev.notes) textOutput += `   Notes: ${ev.notes}\n`;
-                textOutput += `\n`;
-            });
-
-            navigator.clipboard.writeText(textOutput).then(() => {
-                alert("Clinical timeline copied to clipboard!");
-            }).catch(err => {
-                console.error("Could not copy text: ", err);
-                alert("Failed to copy to clipboard.");
-            });
-        },
+ 
+// ── copyToClipboard ───────────────────────────────────────────────────────────
+copyToClipboard() {
+    if (!this.activePatientId) return;
+    const profile = this.activePatientProfile;
+    const { startDate, endDate } = this.getDateRange();
+ 
+    const inRange = (dateStr) => {
+        if (!startDate) return true;
+        const d = this.parseDateSafe(dateStr);
+        return d >= startDate && d <= endDate;
+    };
+ 
+    const rule   = (char = '─') => char.repeat(58);
+    const nl     = '\n';
+    const indent = '   ';
+ 
+    let out = '';
+ 
+    // Report header
+    out += `VETCARDIOHUB CLINICAL REPORT — ${profile.name.toUpperCase()}${nl}`;
+    out += `Generated : ${new Date().toLocaleDateString('en-GB')}${nl}`;
+    out += `Period    : ${this.timeScaleLabel}${nl}`;
+    out += `Species   : ${profile.species}  |  Breed: ${profile.breed || 'N/A'}  |  Age: ${this.computedAgeText}${nl}`;
+    out += `Owner     : ${profile.ownerName || 'N/A'}${nl}`;
+    out += rule('═') + nl + nl;
+ 
+    // ── SRR Log ───────────────────────────────────────────────────────────
+    const srrData = this.getFilteredReadings().slice().reverse();
+    if (srrData.length > 0) {
+        out += `SLEEPING RESPIRATORY RATE LOG (${srrData.length} reading${srrData.length !== 1 ? 's' : ''})${nl}`;
+        out += rule() + nl;
+        srrData.forEach(r => {
+            const dateStr = new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            const time    = r.time || new Date(r.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            out += `${dateStr}  ${time}  |  ${r.rate} bpm${r.isManual ? '  [manual]' : ''}`;
+            if (r.comment) out += `${nl}${indent}${r.comment}`;
+            out += nl;
+        });
+        out += nl;
+    }
+ 
+    // ── Medication Log ────────────────────────────────────────────────────
+    const medData = this.medLedger
+        .filter(m => m.patientId === this.activePatientId && inRange(m.eventDate))
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+ 
+    if (medData.length > 0) {
+        out += `MEDICATION LOG (${medData.length} entr${medData.length !== 1 ? 'ies' : 'y'})${nl}`;
+        out += rule() + nl;
+        medData.forEach(m => {
+            const action  = this.getComputedAction(m);
+            const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+            const mgPerKg = (!m.isStopped && m.doseMg)
+                ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate)
+                : null;
+            out += `${m.eventDate}  |  ${action.toUpperCase()}: ${name}`;
+            if (!m.isStopped && m.doseMg) out += `  ${m.doseMg}mg ${m.frequency || ''}`;
+            if (mgPerKg) out += `  (${mgPerKg} mg/kg)`;
+            out += nl;
+        });
+        out += nl;
+    }
+ 
+    // ── Diagnosis & Staging Log ───────────────────────────────────────────
+    const diagData = this.diagnosisLog
+        .filter(d => d.patientId === this.activePatientId && inRange(d.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (diagData.length > 0) {
+        out += `DIAGNOSIS & STAGING LOG (${diagData.length} entr${diagData.length !== 1 ? 'ies' : 'y'})${nl}`;
+        out += rule() + nl;
+        diagData.forEach(d => {
+            const name = d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || 'Unknown');
+            out += `${d.date}  |  ${name}`;
+            if (d.acvimStage  && d.acvimStage  !== 'N/A') out += `  |  Stage: ${d.acvimStage}`;
+            if (d.murmurGrade && d.murmurGrade !== 'N/A') out += `  |  Murmur: ${d.murmurGrade}`;
+            if (d.concurrentDiagnoses?.length) out += `${nl}${indent}Concurrent: ${d.concurrentDiagnoses.join(', ')}`;
+            if (d.notes) out += `${nl}${indent}Notes: ${d.notes}`;
+            out += nl;
+        });
+        out += nl;
+    }
+ 
+    // ── Syncope / Collapse Log ────────────────────────────────────────────
+    const syncData = this.syncopeLog
+        .filter(s => s.patientId === this.activePatientId && inRange(s.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (syncData.length > 0) {
+        out += `SYNCOPE / COLLAPSE EVENTS (${syncData.length} event${syncData.length !== 1 ? 's' : ''})${nl}`;
+        out += rule() + nl;
+        syncData.forEach(s => {
+            out += `${s.date} ${s.time || ''}  |  ${s.type || 'Episode'}`;
+            if (s.duration)    out += `  |  Duration: ${s.duration}`;
+            if (s.loc)         out += `  |  LOC: ${s.loc}`;
+            if (s.muscleTone)  out += `  |  Tone: ${s.muscleTone}`;
+            if (s.activityBefore) out += `${nl}${indent}Before: ${s.activityBefore}`;
+            if (s.notes)          out += `${nl}${indent}Notes: ${s.notes}`;
+            out += nl;
+        });
+        out += nl;
+    }
+ 
+    // ── Cough Log ─────────────────────────────────────────────────────────
+    const coughData = this.coughLog
+        .filter(c => c.patientId === this.activePatientId && inRange(c.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (coughData.length > 0) {
+        out += `COUGH LOG (${coughData.length} entr${coughData.length !== 1 ? 'ies' : 'y'})${nl}`;
+        out += rule() + nl;
+        coughData.forEach(c => {
+            out += `${c.date}  |  ${c.severity || ''}`;
+            if (c.frequencyCount) out += `  |  ${c.frequencyCount}x/${c.frequencyPeriod}`;
+            if (c.description)    out += `  |  ${c.description}`;
+            if (c.context)        out += `  |  ${c.context}`;
+            if (c.notes)          out += `${nl}${indent}Notes: ${c.notes}`;
+            out += nl;
+        });
+        out += nl;
+    }
+ 
+    // ── Activity Log ──────────────────────────────────────────────────────
+    const actData = this.activityLog
+        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+ 
+    if (actData.length > 0) {
+        out += `ACTIVITY LOG (${actData.length} entr${actData.length !== 1 ? 'ies' : 'y'})${nl}`;
+        out += rule() + nl;
+        actData.forEach(a => {
+            out += `${a.date}  |  ${a.status || ''}`;
+            if (a.durationMins) out += `  |  ${a.durationMins}m`;
+            if (a.distance)     out += `  |  ${a.distance}`;
+            if (a.notes)        out += `${nl}${indent}Notes: ${a.notes}`;
+            out += nl;
+        });
+        out += nl;
+    }
+ 
+    if (out.trim() === '') return alert("No data to copy for this patient in the selected date range.");
+ 
+    navigator.clipboard.writeText(out)
+        .then(() => alert("Clinical report copied to clipboard."))
+        .catch(err => {
+            console.error("VCH clipboard error:", err);
+            alert("Failed to copy to clipboard — check browser permissions.");
+        });
+},
         
         exportPDF() {
             // Web-native PDF generation using the browser's print dialog.
