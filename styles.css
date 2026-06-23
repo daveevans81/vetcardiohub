@@ -3730,6 +3730,21 @@ input {
     background: #fffdf6;
 }
 
+/* ACVIM Chart Fullscreen Modal */
+.expanded-acvim-modal {
+    position: fixed;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    z-index: 9999;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    background: #ffffff !important;
+    overflow: hidden; /* Inner div handles scrolling */
+    display: flex;
+    flex-direction: column;
+}
+
 /* Chart Expansion Overlay */
 .chart-fullscreen-overlay {
     position: fixed !important;

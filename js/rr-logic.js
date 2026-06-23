@@ -2820,63 +2820,137 @@ getCanvasWithWhiteBackground(canvas) {
 },
 
 
-    generatePDF() {
-        if (!this.activePatientId) return alert("Select a patient first.");
+async generatePDF() {
+    if (!this.activePatientId) return alert("Select a patient first.");
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const profile = this.activePatientProfile;
+    const timeline = this.compiledTimeline;
+
+    // ── 1. Document Header ──────────────────────────────────────────────
+    doc.setFontSize(20);
+    doc.text(`${profile.name}'s Clinical Report`, 14, 20);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleDateString()} | Timescale: ${this.timeScale.toUpperCase()}`, 14, 28);
+    doc.text(`Species: ${profile.species} | Breed: ${profile.breed || 'N/A'} | Age: ${this.computedAgeText}`, 14, 34);
+
+    let currentY = 45; // Document flow cursor
+
+    // ── 2. Embed ACVIM Staging Chart (SVG to Canvas) ────────────────────
+    if (this.activePathway) {
+        try {
+            const svgElement = document.getElementById('acvim-svg-export');
+            if (svgElement) {
+                // Serialize SVG to string
+                const svgData = new XMLSerializer().serializeToString(svgElement);
+                const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(svgBlob);
+
+                // Load into an Image object
+                const img = new Image();
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = url;
+                });
+
+                // Draw to a temporary canvas to get a JPEG
+                const canvas = document.createElement('canvas');
+                canvas.width = 960; // Matches viewBox W
+                canvas.height = 272; // Matches viewBox H
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff'; // Ensure white background
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, 960, 272);
+
+                const acvimImgData = canvas.toDataURL('image/jpeg', 1.0);
+                
+                // Calculate correct aspect ratio
+                const acvimRatio = canvas.height / canvas.width;
+                const acvimPdfHeight = 180 * acvimRatio;
+
+                doc.setFontSize(12);
+                doc.setTextColor(20, 20, 20);
+                doc.text("Disease Progression & ACVIM Staging", 14, currentY);
+                currentY += 6;
+
+                doc.addImage(acvimImgData, 'JPEG', 14, currentY, 180, acvimPdfHeight);
+                currentY += acvimPdfHeight + 15; // Move cursor down
+                URL.revokeObjectURL(url);
+            }
+        } catch (err) {
+            console.error("Failed to render ACVIM staging chart to PDF:", err);
+        }
+    }
+
+    // ── 3. Embed Respiratory Chart (Fixed Aspect Ratio) ─────────────────
+    const rrrCanvas = this.$refs.rrrChartCanvas;
+    if (rrrCanvas) {
+        const rrrImgData = this.getCanvasWithWhiteBackground(rrrCanvas);
         
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const profile = this.activePatientProfile;
-        const timeline = this.compiledTimeline;
-    
-        // 1. Header
-        doc.setFontSize(20);
-        doc.text(`${profile.name}'s Clinical Report`, 14, 20);
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Generated: ${new Date().toLocaleDateString()} | Timescale: ${this.timeScale.toUpperCase()}`, 14, 28);
-        doc.text(`Species: ${profile.species} | Breed: ${profile.breed || 'N/A'} | Age: ${this.computedAgeText}`, 14, 34);
-    
-        // 2. Embed the Respiratory Chart
-        const rrrCanvas = this.$refs.rrrChartCanvas;
-        if (rrrCanvas) {
-            const rrrImgData = this.getCanvasWithWhiteBackground(rrrCanvas);
-            doc.addImage(rrrImgData, 'JPEG', 14, 45, 180, 70); 
-        }
-    
-        // 3. Embed the Medication Chart (Only if data exists and is visible)
-        const medCanvas = this.$refs.medChartCanvas;
-        if (this.hasAnyMedData() && medCanvas) {
-            const medImgData = this.getCanvasWithWhiteBackground(medCanvas);
-            // Position it below the first chart
-            doc.addImage(medImgData, 'JPEG', 14, 120, 180, 50); 
-        }
-    
-        // 4. Generate the Data Table
-        // Adjust startY so the table doesn't overlap the new chart
-        const tableBody = timeline.map(ev => [
-            ev.displayDate,
-            ev.type,
-            ev.summary,
-            ev.notes
-        ]);
-    
-        doc.autoTable({
-            startY: 175, // Moved down to accommodate both charts
-            head: [['Date', 'Category', 'Summary', 'Clinical Notes']],
-            body: tableBody,
-            theme: 'striped',
-            headStyles: { fillColor: [22, 50, 95] },
-            columnStyles: {
-                0: { cellWidth: 30 },
-                1: { cellWidth: 25 },
-                2: { cellWidth: 45 },
-                3: { cellWidth: 'auto' }
-            },
-            styles: { fontSize: 9 }
-        });
-    
-        doc.save(`${profile.name}_Cardio_Report.pdf`);
-    },
+        // FIX: Calculate true aspect ratio to prevent Y-axis squashing
+        const rrrRatio = rrrCanvas.height / rrrCanvas.width;
+        const rrrPdfHeight = 180 * rrrRatio; 
+
+        // Auto-page break if it won't fit
+        if (currentY + rrrPdfHeight > 280) { doc.addPage(); currentY = 20; }
+
+        doc.setFontSize(12);
+        doc.text("Sleeping Respiratory Rate (SRR)", 14, currentY);
+        currentY += 6;
+        doc.addImage(rrrImgData, 'JPEG', 14, currentY, 180, rrrPdfHeight);
+        currentY += rrrPdfHeight + 15;
+    }
+
+    // ── 4. Embed Medication Chart (Fixed Aspect Ratio) ──────────────────
+    const medCanvas = this.$refs.medChartCanvas;
+    if (this.hasAnyMedData() && medCanvas) {
+        const medImgData = this.getCanvasWithWhiteBackground(medCanvas);
+        
+        // FIX: Calculate true aspect ratio
+        const medRatio = medCanvas.height / medCanvas.width;
+        const medPdfHeight = 180 * medRatio;
+
+        // Auto-page break if it won't fit
+        if (currentY + medPdfHeight > 280) { doc.addPage(); currentY = 20; }
+
+        doc.setFontSize(12);
+        doc.text("Medication Adjustments", 14, currentY);
+        currentY += 6;
+        doc.addImage(medImgData, 'JPEG', 14, currentY, 180, medPdfHeight);
+        currentY += medPdfHeight + 15;
+    }
+
+    // ── 5. Generate the Data Table ──────────────────────────────────────
+    // Auto-page break before table if space is tight
+    if (currentY > 240) { doc.addPage(); currentY = 20; }
+
+    const tableBody = timeline.map(ev => [
+        ev.displayDate,
+        ev.type,
+        ev.summary,
+        ev.notes || '-'
+    ]);
+
+    doc.autoTable({
+        startY: currentY,
+        head: [['Date', 'Category', 'Summary', 'Clinical Notes']],
+        body: tableBody,
+        theme: 'striped',
+        headStyles: { fillColor: [22, 50, 95] },
+        columnStyles: {
+            0: { cellWidth: 28 },
+            1: { cellWidth: 25 },
+            2: { cellWidth: 45 },
+            3: { cellWidth: 'auto' }
+        },
+        styles: { fontSize: 9 }
+    });
+
+    doc.save(`${profile.name.replace(/\s+/g, '_')}_Clinical_Report.pdf`);
+},
 
         generateCSV() {
             if (!this.activePatientId) return;
