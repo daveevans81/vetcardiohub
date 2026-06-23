@@ -69,6 +69,10 @@ document.addEventListener('alpine:init', () => {
         showDiagnosisOverlay: true,
         diagnosisLog: [],
         syncopeLog: [],
+        showDiagnosisForm: false,
+        showSyncopeForm: false,
+        editingDiagnosisId: null, // Tracks if we are editing an existing diagnosis log
+        editingSyncopeId: null, // Tracks if we are editing an existing syncope log
         
         // --- SYNCOPE / EVENT LOGGING ---
 selectedEventType: 'Unknown', // Defaults to Unknown
@@ -524,31 +528,70 @@ get hasAnyDataForActivePet() {
         
         //Methods for syncope and Diagnosis data
         
-        saveDiagnosis() {
-            if (!this.activePatientId) return alert("Select a patient first.");
-            if (!this.newDiagnosis.diagnosis.trim()) return alert("Diagnosis description is required.");
+saveDiagnosis() {
+    // 1. Fix for the bug: Ensure we are checking the exact v-model property
+    if (!this.newDiagnosis.diagnosis || this.newDiagnosis.diagnosis.trim() === '') {
+        alert("Diagnosis description is required.");
+        return;
+    }
 
-            this.diagnosisLog.push({
-                id: this.generateId(),
-                patientId: this.activePatientId,
-                ...this.newDiagnosis
-            });
+    const entryToSave = {
+        id: this.editingDiagnosisId || crypto.randomUUID(),
+        date: this.newDiagnosis.date,
+        diagnosis: this.newDiagnosis.diagnosis,
+        acvimStage: this.newDiagnosis.acvimStage,
+        notes: this.newDiagnosis.notes,
+        timestamp: Date.now()
+    };
 
-            this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
-            
-            // Reset form
-            this.newDiagnosis = {
-                date: new Date().toISOString().split('T')[0],
-                diagnosis: '', acvimStage: 'N/A', notes: ''
-            };
-        },
+    if (this.editingDiagnosisId) {
+        const index = this.diagnosisLog.findIndex(d => d.id === this.editingDiagnosisId);
+        if (index !== -1) this.diagnosisLog[index] = entryToSave;
+    } else {
+        this.diagnosisLog.push(entryToSave);
+    }
 
-        deleteDiagnosis(id) {
-            if (confirm("Delete this diagnostic entry?")) {
-                this.diagnosisLog = this.diagnosisLog.filter(d => d.id !== id);
-                this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
-            }
-        },
+    // Sort descending by date
+    this.diagnosisLog.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // Update active primary diagnosis and stage for the patient header
+    if (this.diagnosisLog.length > 0) {
+        this.primaryCardiacDiagnosis = this.diagnosisLog[0].diagnosis;
+        this.acvimStage = this.diagnosisLog[0].acvimStage;
+    }
+
+    this.saveData();
+    this.showDiagnosisForm = false;
+},
+
+
+// --- DIAGNOSIS LOGIC ---
+openDiagnosisForm(logEntry = null) {
+    if (logEntry) {
+        // Editing an existing entry
+        this.newDiagnosis = { ...logEntry };
+        this.editingDiagnosisId = logEntry.id;
+    } else {
+        // Adding a new entry. Auto-fill the diagnosis from the most recent log if it exists.
+        const recentDiag = this.diagnosisLog.length > 0 ? this.diagnosisLog[0].diagnosis : '';
+        this.newDiagnosis = {
+            id: null,
+            date: new Date().toISOString().split('T')[0],
+            diagnosis: recentDiag, // Maintains consistency 
+            acvimStage: 'N/A',
+            notes: ''
+        };
+        this.editingDiagnosisId = null;
+    }
+    this.showDiagnosisForm = true;
+},
+
+deleteDiagnosis(id) {
+    if (confirm("Are you sure you want to delete this diagnosis entry?")) {
+        this.diagnosisLog = this.diagnosisLog.filter(d => d.id !== id);
+        this.saveData();
+    }
+},
         
         //ACVIM Staging Logic
         
@@ -735,50 +778,63 @@ get acvimChartHtml() {
     return html;
 },
 
-saveSyncope() {
-    if (!this.activePatientId) return alert("Select a patient first.");
-    
-    // 1. Resolve the actual event type
-    let finalEventType = this.newSyncope.type;
-    
-    // If they selected 'Other', we use whatever they typed in the custom box
-    if (this.newSyncope.type === 'Other') {
-        if (this.customEventType.trim() === '') {
-            return alert("Please describe the custom event before saving.");
-        }
-        finalEventType = this.customEventType.trim();
+// --- SYNCOPE / EVENT LOGIC ---
+openSyncopeForm(logEntry = null) {
+    if (logEntry) {
+        this.newSyncope = { ...logEntry };
+        this.editingSyncopeId = logEntry.id;
+    } else {
+        this.newSyncope = {
+            id: null,
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+            type: 'Syncope', 
+            duration: '',
+            loc: 'Full',
+            muscleTone: 'Flaccid',
+            activityBefore: '',
+            mmColour: '',
+            hr: null,
+            rr: null,
+            notes: ''
+        };
+        this.editingSyncopeId = null;
     }
-    
-    // 2. Save the data exactly as you had it, but use the resolved type
-    this.syncopeLog.push({
-        id: this.generateId(),
-        patientId: this.activePatientId,
-        ...this.newSyncope,
-        type: finalEventType // Override the type with our resolved value
-    });
+    this.showSyncopeForm = true;
+},
 
-    this.saveToStorage('vch_syncopeLog', this.syncopeLog);
-    
-    // 3. Reset form to defaults 
-    // (Note: Changed default 'type' to 'Unknown' per your previous request)
-    this.customEventType = ''; // clear the custom input
-    this.newSyncope = {
-        date: new Date().toISOString().split('T')[0],
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-        type: 'Unknown', // Defaulting to Unknown now
-        duration: '', loc: 'Full', muscleTone: 'Flaccid',
-        activityBefore: '', mmColour: '', hr: null, rr: null, notes: ''
+saveSyncope() {
+    if (!this.newSyncope.date) {
+        alert("Event date is required.");
+        return;
+    }
+
+    const entryToSave = {
+        id: this.editingSyncopeId || crypto.randomUUID(),
+        ...this.newSyncope,
+        timestamp: Date.now()
     };
+
+    if (this.editingSyncopeId) {
+        const index = this.syncopeLog.findIndex(s => s.id === this.editingSyncopeId);
+        if (index !== -1) this.syncopeLog[index] = entryToSave;
+    } else {
+        this.syncopeLog.push(entryToSave);
+    }
+
+    this.syncopeLog.sort((a, b) => new Date(b.date) - new Date(a.date));
+    this.saveData();
+    this.showSyncopeForm = false;
 },
 
 
 
-        deleteSyncope(id) {
-            if (confirm("Delete this event from the log?")) {
-                this.syncopeLog = this.syncopeLog.filter(s => s.id !== id);
-                this.saveToStorage('vch_syncopeLog', this.syncopeLog);
-            }
-        },
+deleteSyncope(id) {
+    if (confirm("Are you sure you want to delete this event?")) {
+        this.syncopeLog = this.syncopeLog.filter(s => s.id !== id);
+        this.saveData();
+    }
+},
         
         
  // --- COUGH LOGIC (DAILY SUMMARY) ---
