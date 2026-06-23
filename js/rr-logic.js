@@ -89,15 +89,20 @@ acvimStage: '', // Easily mutable without changing the primary diagnosis
 concurrentDiagnoses: [], // Array to hold non-cardiac issues
 newConcurrentDiagnosis: '', // v-model for the input field
         
-newDiagnosis: {
-    date: new Date().toISOString().split('T')[0],
-    diagnosis: '',
-    customDiagnosis: '', //  field for Other/Congenital
-    murmurGrade: 'N/A',  //  field for Murmur Tracker
-    acvimStage: 'N/A',
-    concurrentDiagnoses: [],
-    notes: ''
-},
+showCardiacForm: false,
+        showConcurrentForm: false,
+        newConcurrentDiagnosis: '',
+        editingDiagnosisId: null,
+
+        newDiagnosis: {
+            date: new Date().toISOString().split('T')[0],
+            diagnosis: '',
+            customDiagnosis: '', 
+            murmurGrade: 'N/A',  
+            acvimStage: 'N/A',
+            concurrentDiagnoses: [],
+            notes: ''
+        },
         
 
 
@@ -512,7 +517,7 @@ get hasAnyDataForActivePet() {
             return history.length > 0 ? history[0] : null;
         },
 
-        sortedDiagnosisLog() {
+sortedDiagnosisLog() {
             if (!this.activePatientId) return [];
             return this.diagnosisLog
                 .filter(d => d.patientId === this.activePatientId)
@@ -531,7 +536,45 @@ get hasAnyDataForActivePet() {
         },
         
         //Methods for syncope and Diagnosis data
+saveCardiacDiagnosis() {
+            if (!this.newDiagnosis.diagnosis) return alert("Primary Cardiac Diagnosis is required.");
+            this._saveDiagnosisLogEntry();
+            this.showCardiacForm = false;
+        },
         
+        saveConcurrentDiagnosis() {
+            if (this.newDiagnosis.concurrentDiagnoses.length === 0 && !this.newDiagnosis.notes) {
+                return alert("Please add at least one condition or clinical note.");
+            }
+            this.newDiagnosis.diagnosis = 'Concurrent Conditions Only';
+            this._saveDiagnosisLogEntry();
+            this.showConcurrentForm = false;
+        },
+        
+        _saveDiagnosisLogEntry() {
+            const entryToSave = {
+                id: this.editingDiagnosisId || crypto.randomUUID(),
+                patientId: this.activePatientId, 
+                date: this.newDiagnosis.date,
+                diagnosis: this.newDiagnosis.diagnosis,
+                customDiagnosis: this.newDiagnosis.customDiagnosis, 
+                murmurGrade: this.newDiagnosis.murmurGrade,         
+                acvimStage: this.newDiagnosis.acvimStage,
+                concurrentDiagnoses: [...(this.newDiagnosis.concurrentDiagnoses || [])],
+                notes: this.newDiagnosis.notes,
+                timestamp: Date.now()
+            };
+
+            if (this.editingDiagnosisId) {
+                const index = this.diagnosisLog.findIndex(d => d.id === this.editingDiagnosisId);
+                if (index !== -1) this.diagnosisLog[index] = entryToSave;
+            } else {
+                this.diagnosisLog.push(entryToSave);
+            }
+
+            this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+        },
+                
 saveDiagnosis() {
     if (!this.newDiagnosis.diagnosis || this.newDiagnosis.diagnosis.trim() === '') {
         alert("Primary Cardiac Diagnosis is required.");
@@ -570,6 +613,56 @@ saveDiagnosis() {
 },
 
 // --- DIAGNOSIS LOGIC ---
+
+openCardiacForm(logEntry = null) {
+            if (logEntry) {
+                this.newDiagnosis = { ...logEntry, concurrentDiagnoses: [...(logEntry.concurrentDiagnoses || [])] };
+                this.editingDiagnosisId = logEntry.id;
+            } else {
+                // Auto-load previous state for the ACTIVE patient
+                const recent = this.currentClinicalStatus;
+                this.newDiagnosis = {
+                    id: null,
+                    date: new Date().toISOString().split('T')[0],
+                    diagnosis: recent ? recent.diagnosis : '', 
+                    customDiagnosis: recent ? (recent.customDiagnosis || '') : '',
+                    murmurGrade: recent ? (recent.murmurGrade || 'N/A') : 'N/A',
+                    acvimStage: recent ? recent.acvimStage : 'N/A',
+                    concurrentDiagnoses: [],
+                    notes: ''
+                };
+                this.editingDiagnosisId = null;
+            }
+            this.showCardiacForm = true;
+            this.showConcurrentForm = false;
+        },
+
+        openConcurrentForm(logEntry = null) {
+            if (logEntry) {
+                this.newDiagnosis = { ...logEntry, concurrentDiagnoses: [...(logEntry.concurrentDiagnoses || [])] };
+                this.editingDiagnosisId = logEntry.id;
+            } else {
+                // Carry over recent concurrent conditions
+                const history = this.sortedDiagnosisLog();
+                const recentConc = history.find(d => d.concurrentDiagnoses && d.concurrentDiagnoses.length > 0);
+                
+                this.newDiagnosis = {
+                    id: null,
+                    date: new Date().toISOString().split('T')[0],
+                    diagnosis: 'Concurrent Conditions Only',
+                    customDiagnosis: '',
+                    murmurGrade: 'N/A',
+                    acvimStage: 'N/A',
+                    concurrentDiagnoses: recentConc ? [...recentConc.concurrentDiagnoses] : [],
+                    notes: ''
+                };
+                this.editingDiagnosisId = null;
+            }
+            this.newConcurrentDiagnosis = ''; 
+            this.showConcurrentForm = true;
+            this.showCardiacForm = false;
+        },
+        
 openDiagnosisForm(logEntry = null) {
     if (logEntry) {
         this.newDiagnosis = { ...logEntry };
@@ -594,49 +687,47 @@ openDiagnosisForm(logEntry = null) {
     this.showDiagnosisForm = true;
 },
 
+get currentClinicalStatus() {
+            if (!this.activePatientId) return null;
+            const history = this.sortedDiagnosisLog();
+            // Get the most recent primary cardiac diagnosis (ignoring concurrent-only logs)
+            return history.find(d => d.diagnosis && d.diagnosis !== 'Concurrent Conditions Only') || null;
+        },
+        
+get primaryCardiacDiagnosis() {
+            return this.currentClinicalStatus?.diagnosis || '';
+        },
+
 addConcurrentDiagnosis() {
-    if (this.newConcurrentDiagnosis && this.newConcurrentDiagnosis.trim() !== '') {
-        if (!this.newDiagnosis.concurrentDiagnoses) this.newDiagnosis.concurrentDiagnoses = [];
-        this.newDiagnosis.concurrentDiagnoses.push(this.newConcurrentDiagnosis.trim());
-        this.newConcurrentDiagnosis = ''; // Clear input after adding
-    }
-},
+            if (this.newConcurrentDiagnosis && this.newConcurrentDiagnosis.trim() !== '') {
+                if (!this.newDiagnosis.concurrentDiagnoses) this.newDiagnosis.concurrentDiagnoses = [];
+                this.newDiagnosis.concurrentDiagnoses.push(this.newConcurrentDiagnosis.trim());
+                this.newConcurrentDiagnosis = ''; 
+            }
+        },
 
 removeConcurrentDiagnosis(index) {
-    if (this.newDiagnosis.concurrentDiagnoses) {
-        this.newDiagnosis.concurrentDiagnoses.splice(index, 1);
-    }
-},
+            if (this.newDiagnosis.concurrentDiagnoses) {
+                this.newDiagnosis.concurrentDiagnoses.splice(index, 1);
+            }
+        },
 
 deleteDiagnosis(id) {
-    if (confirm("Are you sure you want to delete this diagnosis entry?")) {
-        this.diagnosisLog = this.diagnosisLog.filter(d => d.id !== id);
-        this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
-    }
-},
+            if (confirm("Are you sure you want to delete this diagnosis entry?")) {
+                this.diagnosisLog = this.diagnosisLog.filter(d => d.id !== id);
+                this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+            }
+        },
         
         //ACVIM Staging Logic
         
                 // Computed property to determine if staging is clinically relevant
-isStagingApplicable() {
-    if (!this.primaryCardiacDiagnosis) return false;
-    const diag = this.primaryCardiacDiagnosis.toLowerCase();
-    return diag.includes('mmvd') || diag.includes('mitral') || diag.includes('degenerative')|| diag.includes('DMVD')|| 
-           diag.includes('hcm') || diag.includes('dcm');
-},
+get isStagingApplicable() {
+            const diag = this.newDiagnosis.diagnosis?.toLowerCase() || '';
+            return diag.includes('mmvd') || diag.includes('mitral') || diag.includes('hcm') || diag.includes('dcm');
+        },
 
-get currentDiagnosis() {
 
-    const entries = this.diagnosisLog
-        .filter(d => d.petName === this.selectedPet?.name)
-        .sort((a,b) =>
-            new Date(b.date) - new Date(a.date)
-        );
-
-    return entries.length
-        ? entries[0].diagnosis
-        : null;
-},
 
 addConcurrentDiagnosis() {
     if (this.newConcurrentDiagnosis.trim() !== '') {
@@ -649,15 +740,18 @@ removeConcurrentDiagnosis(index) {
     this.concurrentDiagnoses.splice(index, 1);
 },
 
-        get stageProgression() {
-    const history = this.diagnosisLog
-        .filter(d => d.patientId === this.activePatientId && d.acvimStage && d.acvimStage !== 'N/A')
-        .sort((a,b) => new Date(a.date) - new Date(b.date));
-    return history.map(entry => ({
-        stage: entry.acvimStage,
-        date: entry.date
-    }));
-},
+get stageProgression() {
+            const history = this.diagnosisLog
+                .filter(d => d.patientId === this.activePatientId && 
+                             d.acvimStage && d.acvimStage !== 'N/A' && 
+                             d.diagnosis !== 'Concurrent Conditions Only')
+                .sort((a,b) => new Date(a.date) - new Date(b.date)); // chronological for chart lines
+            
+            return history.map(entry => ({
+                stage: entry.acvimStage,
+                date: entry.date
+            }));
+        },
 
 
 stageX(stageId) {
@@ -672,25 +766,14 @@ stageX(stageId) {
 },
 
 get activePathway() {
-
-    const diagnosis = this.primaryCardiacDiagnosis;
-
-    if (!diagnosis) return null;
-
-    if (diagnosis.startsWith('MMVD')) {
-        return ACVIM_PATHWAYS.MMVD;
-    }
-
-    if (diagnosis.startsWith('HCM')) {
-        return ACVIM_PATHWAYS.HCM;
-    }
-
-    if (diagnosis.startsWith('DCM')) {
-        return ACVIM_PATHWAYS.DCM;
-    }
-
-    return null;
-},
+            // This is now purely reactive and driven by the currentClinicalStatus getter!
+            const diagnosis = this.primaryCardiacDiagnosis;
+            if (!diagnosis) return null;
+            if (diagnosis.startsWith('MMVD')) return ACVIM_PATHWAYS.MMVD;
+            if (diagnosis.startsWith('HCM')) return ACVIM_PATHWAYS.HCM;
+            if (diagnosis.startsWith('DCM')) return ACVIM_PATHWAYS.DCM;
+            return null;
+        },
 
 get currentStage() {
 
@@ -831,13 +914,18 @@ saveSyncope() {
         return;
     }
 
-
+    // Spread the newSyncope object to include ALL bound fields from the HTML form
     const entryToSave = {
-    id: this.editingSyncopeId || crypto.randomUUID(),
-    patientId: this.activePatientId, // CRITICAL : Binds event to the current patient
-    date: this.newSyncope.date,
-    time: this.newSyncope.time, 
+        ...this.newSyncope, 
+        id: this.editingSyncopeId || crypto.randomUUID(),
+        patientId: this.activePatientId // CRITICAL: Binds event to the current patient
     };
+
+    // If type is "Other", we should ideally capture the custom text
+    // Assuming you bound custom text to 'customEventType' in your HTML
+    if (entryToSave.type === 'Other' && this.customEventType) {
+        entryToSave.type = this.customEventType; 
+    }
 
     if (this.editingSyncopeId) {
         const index = this.syncopeLog.findIndex(s => s.id === this.editingSyncopeId);
@@ -846,9 +934,15 @@ saveSyncope() {
         this.syncopeLog.push(entryToSave);
     }
 
+    // Sort descending by date (most recent first)
     this.syncopeLog.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // Save to localStorage
     this.saveToStorage('vch_syncopeLog', this.syncopeLog);
+    
+    // Close the form and optionally reset state
     this.showSyncopeForm = false;
+    this.customEventType = ''; // Reset custom type if used
 },
 
 
