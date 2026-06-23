@@ -1138,22 +1138,13 @@
                 
                             <div style="margin-bottom: 15px;">
                                 <label style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Non-Cardiac Diagnoses</label>
-                                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                    <input type="text" x-model="newConcurrentDiagnosis" @keydown.enter.prevent="addConcurrentDiagnosis()" placeholder="e.g., Chronic Kidney Disease, Osteoarthritis..." style="flex-grow: 1; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; background: #f8fafc;">
-                                    <button @click="addConcurrentDiagnosis()" type="button" style="padding: 10px 15px; background: #005f73; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                        <i class="fa-solid fa-plus"></i> Add
-                                    </button>
-                                </div>
-                
-                                <div style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px;">
-                                    <template x-for="(diagnosis, index) in newDiagnosis.concurrentDiagnoses" :key="index">
-                                        <span style="background: #e2e8f0; color: #334155; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
-                                            <span x-text="diagnosis"></span>
-                                            <i class="fa-solid fa-xmark" @click="removeConcurrentDiagnosis(index)" style="cursor: pointer; color: #ef4444;"></i>
-                                        </span>
-                                    </template>
-                                    <span x-show="newDiagnosis.concurrentDiagnoses.length === 0" style="color: #94a3b8; font-size: 0.85rem; font-style: italic; display: flex; align-items: center;">No secondary conditions added</span>
-                                </div>
+                                <textarea
+                                    x-model="newConcurrentDiagnosis"
+                                    placeholder="One condition per line, e.g.:&#10;Chronic Kidney Disease&#10;Osteoarthritis&#10;Hypothyroidism"
+                                    style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; background: #f8fafc; box-sizing: border-box; resize: vertical; min-height: 90px; font-family: inherit;"
+                                ></textarea>
+                                <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">Enter each condition on a new line.</div>
+                            
                             </div>
                 
                             <div>
@@ -1531,7 +1522,7 @@
                     </h2>
                 
                     <svg
-                        viewBox="0 0 1000 260"
+                        viewBox="0 0 1000 290"
                         style="width:100%; min-width:900px; height:auto;"
                         x-html="acvimChartHtml"
                     >

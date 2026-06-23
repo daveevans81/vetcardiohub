@@ -3,7 +3,7 @@ const ACVIM_PATHWAYS = {
     MMVD: {
         treatmentBands: [
         {
-            label: "Vetmedin Helpful",
+            label: "Pimobendan Helpful",
             startStage: "B2"
         },
         {
@@ -41,6 +41,16 @@ const ACVIM_PATHWAYS = {
     },
 
     HCM: {
+         treatmentBands: [
+        {
+            label: "Clopidogrel Helpful",
+            startStage: "B2"
+        },
+        {
+            label: "Diuretics Helpful",
+            startStage: "C"
+        }
+        ],
         stages: [
             {
                 id: "Normal",
@@ -70,6 +80,20 @@ const ACVIM_PATHWAYS = {
     },
 
     DCM: {
+            treatmentBands: [
+                    {
+            label: "Anti-arrhythmics may be Helpful",
+            startStage: "B1"
+        },
+        {
+            label: "Pimobendan Helpful",
+            startStage: "B2"
+        },
+        {
+            label: "Diuretics Helpful",
+            startStage: "C"
+        }
+        ],
         stages: [
             {
                 id: "Normal",

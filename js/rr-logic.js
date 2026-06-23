@@ -542,14 +542,22 @@ saveCardiacDiagnosis() {
             this.showCardiacForm = false;
         },
         
-        saveConcurrentDiagnosis() {
-            if (this.newDiagnosis.concurrentDiagnoses.length === 0 && !this.newDiagnosis.notes) {
-                return alert("Please add at least one condition or clinical note.");
-            }
-            this.newDiagnosis.diagnosis = 'Concurrent Conditions Only';
-            this._saveDiagnosisLogEntry();
-            this.showConcurrentForm = false;
-        },
+saveConcurrentDiagnosis() {
+    // Parse textarea: split on newlines, trim, drop blanks
+    const lines = (this.newConcurrentDiagnosis || '')
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean);
+
+    if (lines.length === 0 && !this.newDiagnosis.notes) {
+        return alert("Please add at least one condition or a clinical note.");
+    }
+
+    this.newDiagnosis.concurrentDiagnoses = lines;
+    this.newDiagnosis.diagnosis = 'Concurrent Conditions Only';
+    this._saveDiagnosisLogEntry();
+    this.showConcurrentForm = false;
+},
         
         _saveDiagnosisLogEntry() {
             const entryToSave = {
@@ -637,31 +645,32 @@ openCardiacForm(logEntry = null) {
             this.showConcurrentForm = false;
         },
 
-        openConcurrentForm(logEntry = null) {
-            if (logEntry) {
-                this.newDiagnosis = { ...logEntry, concurrentDiagnoses: [...(logEntry.concurrentDiagnoses || [])] };
-                this.editingDiagnosisId = logEntry.id;
-            } else {
-                // Carry over recent concurrent conditions
-                const history = this.sortedDiagnosisLog();
-                const recentConc = history.find(d => d.concurrentDiagnoses && d.concurrentDiagnoses.length > 0);
-                
-                this.newDiagnosis = {
-                    id: null,
-                    date: new Date().toISOString().split('T')[0],
-                    diagnosis: 'Concurrent Conditions Only',
-                    customDiagnosis: '',
-                    murmurGrade: 'N/A',
-                    acvimStage: 'N/A',
-                    concurrentDiagnoses: recentConc ? [...recentConc.concurrentDiagnoses] : [],
-                    notes: ''
-                };
-                this.editingDiagnosisId = null;
-            }
-            this.newConcurrentDiagnosis = ''; 
-            this.showConcurrentForm = true;
-            this.showCardiacForm = false;
-        },
+openConcurrentForm(logEntry = null) {
+    if (logEntry) {
+        this.newDiagnosis = { ...logEntry, concurrentDiagnoses: [...(logEntry.concurrentDiagnoses || [])] };
+        this.editingDiagnosisId = logEntry.id;
+        // Rehydrate textarea from saved array
+        this.newConcurrentDiagnosis = (logEntry.concurrentDiagnoses || []).join('\n');
+    } else {
+        const history = this.sortedDiagnosisLog();
+        const recentConc = history.find(d => d.concurrentDiagnoses && d.concurrentDiagnoses.length > 0);
+        this.newDiagnosis = {
+            id: null,
+            date: new Date().toISOString().split('T')[0],
+            diagnosis: 'Concurrent Conditions Only',
+            customDiagnosis: '',
+            murmurGrade: 'N/A',
+            acvimStage: 'N/A',
+            concurrentDiagnoses: recentConc ? [...recentConc.concurrentDiagnoses] : [],
+            notes: ''
+        };
+        this.editingDiagnosisId = null;
+        // Pre-populate textarea with recent conditions so vet can amend, not retype
+        this.newConcurrentDiagnosis = recentConc ? recentConc.concurrentDiagnoses.join('\n') : '';
+    }
+    this.showConcurrentForm = true;
+    this.showCardiacForm = false;
+},
         
 openDiagnosisForm(logEntry = null) {
     if (logEntry) {
@@ -698,20 +707,6 @@ get primaryCardiacDiagnosis() {
             return this.currentClinicalStatus?.diagnosis || '';
         },
 
-addConcurrentDiagnosis() {
-            if (this.newConcurrentDiagnosis && this.newConcurrentDiagnosis.trim() !== '') {
-                if (!this.newDiagnosis.concurrentDiagnoses) this.newDiagnosis.concurrentDiagnoses = [];
-                this.newDiagnosis.concurrentDiagnoses.push(this.newConcurrentDiagnosis.trim());
-                this.newConcurrentDiagnosis = ''; 
-            }
-        },
-
-removeConcurrentDiagnosis(index) {
-            if (this.newDiagnosis.concurrentDiagnoses) {
-                this.newDiagnosis.concurrentDiagnoses.splice(index, 1);
-            }
-        },
-
 deleteDiagnosis(id) {
             if (confirm("Are you sure you want to delete this diagnosis entry?")) {
                 this.diagnosisLog = this.diagnosisLog.filter(d => d.id !== id);
@@ -729,16 +724,8 @@ get isStagingApplicable() {
 
 
 
-addConcurrentDiagnosis() {
-    if (this.newConcurrentDiagnosis.trim() !== '') {
-        this.concurrentDiagnoses.push(this.newConcurrentDiagnosis.trim());
-        this.newConcurrentDiagnosis = '';
-    }
-},
 
-removeConcurrentDiagnosis(index) {
-    this.concurrentDiagnoses.splice(index, 1);
-},
+
 
 get stageProgression() {
             const history = this.diagnosisLog
@@ -813,75 +800,106 @@ isCurrentStage(stageId) {
 get acvimChartHtml() {
     if (!this.activePathway) return '';
     let html = '';
+
     // 1. CONNECTING ARROW
     html += `
-        <line x1="110" y1="90" x2="890" y2="90" stroke="#cbd5e1" stroke-width="10" stroke-linecap="round" />
-        <polygon points="890,75 930,90 890,105" fill="#cbd5e1" />
+        <line x1="110" y1="90" x2="890" y2="90" stroke="#cbd5e1" stroke-width="10" stroke-linecap="round"/>
+        <polygon points="890,75 930,90 890,105" fill="#cbd5e1"/>
     `;
-    // 2. STAGES
+
+    // 2. STAGE CIRCLES
     this.activePathway.stages.forEach(stage => {
         const x = this.stageX(stage.id);
         const isCurrent = this.isCurrentStage(stage.id);
-        
-        let fill = '#dc2626'; // default
-        if(stage.id === 'Normal') fill = '#65a30d';
-        else if(stage.id === 'B1') fill = '#84cc16';
-        else if(stage.id === 'B2') fill = '#ca8a04';
-        else if(stage.id === 'C') fill = '#d97706';
-        
-        const stroke = isCurrent ? '#2563eb' : 'white';
-        const strokeWidth = isCurrent ? 8 : 2;
+
+        let fill = '#dc2626';
+        if (stage.id === 'Normal') fill = '#65a30d';
+        else if (stage.id === 'B1')  fill = '#84cc16';
+        else if (stage.id === 'B2')  fill = '#ca8a04';
+        else if (stage.id === 'C')   fill = '#d97706';
+
         html += `
             <g>
-                <circle cx="${x}" cy="90" r="60" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />
-                <text x="${x}" y="80" text-anchor="middle" fill="white" font-size="32" font-weight="bold">${stage.label}</text>
-                <text x="${x}" y="110" text-anchor="middle" fill="white" font-size="14">
-                    <tspan>${stage.subtitle || ''}</tspan>
-                </text>
+                <circle cx="${x}" cy="90" r="60"
+                    fill="${fill}"
+                    stroke="${isCurrent ? '#2563eb' : 'white'}"
+                    stroke-width="${isCurrent ? 8 : 2}"/>
+                <text x="${x}" y="82" text-anchor="middle" fill="white" font-size="30" font-weight="bold">${stage.label}</text>
+                <text x="${x}" y="108" text-anchor="middle" fill="white" font-size="13">${stage.subtitle || ''}</text>
             </g>
         `;
     });
-    // 3. TRANSITION DATE MARKERS
+
+    // 3. TRANSITION MARKERS — multiple per stage, offset rightward
+    //    First pass: count how many markers land on each stage so we can center the group
+    const stageCounts = {};
+    this.stageProgression.forEach(t => {
+        stageCounts[t.stage] = (stageCounts[t.stage] || 0) + 1;
+    });
+
+    // Second pass: draw markers, tracking per-stage index
+    const MARKER_SPACING = 20;
+    const stageIndex = {};   // how many we've drawn so far per stage
+    let latestMarkerX = null;
+
     this.stageProgression.forEach(transition => {
-        const x = this.stageX(transition.stage);
-        // Avoid "Invalid Date" errors
-        if(transition.date) {
-            const dateStr = new Date(transition.date).toLocaleDateString();
+        const baseX = this.stageX(transition.stage);
+        if (stageIndex[transition.stage] === undefined) stageIndex[transition.stage] = 0;
+
+        const count   = stageCounts[transition.stage];
+        const i       = stageIndex[transition.stage];
+        // Center the group around baseX
+        const groupW  = (count - 1) * MARKER_SPACING;
+        const mx      = baseX - groupW / 2 + i * MARKER_SPACING;
+
+        stageIndex[transition.stage]++;
+        latestMarkerX = mx;   // last one drawn = most recent
+
+        if (transition.date) {
+            // Short date for space — "12 Jan 24"
+            const dateStr = new Date(transition.date).toLocaleDateString('en-GB', {
+                day: 'numeric', month: 'short', year: '2-digit'
+            });
             html += `
                 <g>
-                    <line x1="${x}" y1="150" x2="${x}" y2="175" stroke="#2563eb" stroke-width="3" />
-                    <circle cx="${x}" cy="150" r="6" fill="#2563eb" />
-                    <text x="${x}" y="195" text-anchor="middle" font-size="12" fill="#475569">${dateStr}</text>
+                    <line x1="${mx}" y1="152" x2="${mx}" y2="178" stroke="#2563eb" stroke-width="2"/>
+                    <circle cx="${mx}" cy="152" r="5" fill="#2563eb"/>
+                    <text x="${mx}" y="194" text-anchor="middle" font-size="11" fill="#475569">${dateStr}</text>
                 </g>
             `;
         }
     });
-    // 4. CURRENT STAGE INDICATOR
-    const current = this.currentStage;
-    if (current) {
-        const cx = this.stageX(current.stage);
+
+    // 4. "NOW" ARROW — points at the most recent marker
+    if (latestMarkerX !== null) {
         html += `
             <g>
-                <polygon points="${cx-30},10 ${cx+30},10 ${cx},35" fill="#2563eb" />
-                <text x="${cx}" y="23" text-anchor="middle" font-size="11" fill="white" font-weight="bold">CURRENT</text>
+                <polygon points="${latestMarkerX - 22},8 ${latestMarkerX + 22},8 ${latestMarkerX},33" fill="#2563eb"/>
+                <text x="${latestMarkerX}" y="22" text-anchor="middle" font-size="11" fill="white" font-weight="bold">NOW</text>
             </g>
         `;
     }
-    // 5. TREATMENT BANDS
-    const bands = this.activePathway.treatmentBands || [];
-    bands.forEach(band => {
+
+    // 5. TREATMENT BANDS — stacked below date labels
+    const BAND_Y_START = 208;
+    const BAND_HEIGHT  = 22;
+    const BAND_GAP     = 8;
+    (this.activePathway.treatmentBands || []).forEach((band, idx) => {
         const startX = this.stageX(band.startStage);
-        const yBase = band.label.includes('Vetmedin') ? 215 : 245;
-        const width = 930 - startX;
+        const y      = BAND_Y_START + idx * (BAND_HEIGHT + BAND_GAP);
+        const width  = 940 - startX;
         html += `
             <g>
-                <rect x="${startX}" y="${yBase}" width="${width}" height="24" rx="12" fill="#dbeafe" stroke="#93c5fd" />
-                <text x="${startX + 20}" y="${yBase + 16}" font-size="12" fill="#1e3a8a" font-weight="bold">${band.label}</text>
+                <rect x="${startX}" y="${y}" width="${width}" height="${BAND_HEIGHT}"
+                    rx="11" fill="#dbeafe" stroke="#93c5fd"/>
+                <text x="${startX + 14}" y="${y + 15}" font-size="11" fill="#1e3a8a" font-weight="bold">${band.label}</text>
             </g>
         `;
     });
+
     return html;
 },
+
 
 // --- SYNCOPE / EVENT LOGIC ---
 openSyncopeForm(logEntry = null) {
