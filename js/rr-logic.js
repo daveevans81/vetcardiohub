@@ -305,55 +305,69 @@ init() {
 // Initialization method for new patients
 startNewPatientOnboarding() {
     this.editingPatient = {
-        id: crypto.randomUUID(), // Assuming UUIDs
-        name: '', species: 'canine', breed: '', sex: '', dob: '', weight: '',
+        id: crypto.randomUUID(),
+        name: '', species: 'dog', breed: '', sex: '', dob: '', weight: '',
         modules: { ...this.defaultModules }
     };
-    this.onboardingData = { vetSeen: null, murmurGrade: '', diagnosis: '', acvimStage: '' };
-    this.isExistingPatientEdit = false;
     
-    // If no patients exist, show Step 0, else skip to Step 1
+    // Initialize your ACTUAL diagnosis tracker object for the onboarding wizard
+    this.newDiagnosis = {
+        id: crypto.randomUUID(),
+        patientId: this.editingPatient.id,
+        date: new Date().toISOString().split('T')[0],
+        diagnosis: '',
+        customDiagnosis: '',
+        murmurGrade: 'N/A',
+        acvimStage: 'N/A',
+        concurrentDiagnoses: [],
+        notes: 'Initial Baseline via Onboarding'
+    };
+    
+    this.onboardingData = { hasCardiacIssue: 'no' }; 
+    this.isExistingPatientEdit = false;
     this.onboardingStep = this.patients.length === 0 ? 0 : 1; 
     this.showOnboarding = true;
 },
 
-// The Logic Engine (Stage 3)
 generateModuleRecommendations() {
     // Reset to baseline
     let recs = { srr: false, medications: false, coughActivity: false, syncopeLog: false, acvimStaging: false };
-    const data = this.onboardingData;
-
-    if (data.vetSeen === 'diagnosed') {
+    
+    if (this.onboardingData.hasCardiacIssue === 'yes') {
         recs.srr = true;
         recs.acvimStaging = true;
         
-        // If they specify Stage B2, C, or D (treatment stages)
-        if (['B2', 'C', 'D'].includes(data.acvimStage)) {
+        // If they specify Stage B2, C, or D in the actual diagnosis object
+        if (['Stage B2', 'Stage C', 'Stage D'].includes(this.newDiagnosis.acvimStage)) {
             recs.medications = true;
             recs.coughActivity = true;
         }
-    } else if (data.vetSeen === 'murmur') {
-        recs.srr = true;
-        // Vet Visit log is handled by acvimStaging / diagnosis module
-        recs.acvimStaging = true; 
-    } else if (data.vetSeen === 'other') {
+    } else {
         // e.g., general wellness or collapse history
-        recs.activityLog = true;
+        recs.coughActivity = true;
         recs.syncopeLog = true;
     }
 
-    // Apply recommendations to the pending patient object
     this.editingPatient.modules = { ...recs };
     this.onboardingStep = 3;
 },
 
 saveOnboardedPatient() {
-    // Save to your main patients array
+    // 1. Save the patient profile
     this.patients.push(this.editingPatient);
     this.activePatientId = this.editingPatient.id;
+    
+    // 2. If they logged a cardiac issue, save it to the official diagnosis log!
+    if (this.onboardingData.hasCardiacIssue === 'yes' && this.newDiagnosis.diagnosis !== '') {
+        // Assuming you have an array called diagnosisLog in your state
+        if (!this.diagnosisLog) this.diagnosisLog = []; 
+        this.diagnosisLog.push({...this.newDiagnosis});
+    }
+
     this.showOnboarding = false;
-    this.saveData(); // Assuming you have a localStorage persistence method
+    // this.saveData(); // Call your localStorage save method
 },
+
         
         // --- PET MANAGEMENT ---
         // Determines if we are editing an existing record or creating a new one
@@ -702,6 +716,18 @@ saveDiagnosis() {
 
     this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
     this.showDiagnosisForm = false;
+    this.checkProgressionTrigger(newEntry.acvimStage);
+},
+
+checkProgressionTrigger(newStage) {
+    if (!this.activePatientProfile) return;
+    
+    const currentModules = this.activePatientProfile.modules;
+    
+    // If they progress to C or D, but don't have medication or quality of life logs turned on
+    if (['C', 'D'].includes(newStage) && (!currentModules.medications || !currentModules.coughActivity)) {
+        this.showProgressionBanner = true;
+    }
 },
 
 // --- DIAGNOSIS LOGIC ---

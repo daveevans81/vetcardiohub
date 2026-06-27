@@ -293,94 +293,76 @@
                                 <!-- ON BOARDING                      -->
                                 <!-- ******************************** -->
             
-            <div x-show="showOnboarding" class="modal-overlay" style="display: none;">
-                <div class="modal-content">
-                    
-                    <div x-show="onboardingStep === 0">
-                        <h2>Welcome to VetCardioHub Tracker</h2>
-                        <p>This clinical tracking tool works best when it is tailored to your pet's specific cardiac health needs. Let's set up a profile to generate a personalised monitoring dashboard.</p>
-                        <button @click="onboardingStep = 1" class="btn-primary">Set up my first patient</button>
+            <div x-show="onboardingStep === 1">
+                <h2>Patient Demographics</h2>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left; margin-bottom: 20px;">
+                    <label>Pet's Name*: <input type="text" x-model="editingPatient.name" style="width: 100%; padding: 8px;"></label>
+                    <div style="display: flex; gap: 10px;">
+                        <label style="flex: 1;">Species: 
+                            <select x-model="editingPatient.species" style="width: 100%; padding: 8px;">
+                                <option value="dog">Canine</option>
+                                <option value="cat">Feline</option>
+                            </select>
+                        </label>
+                        <label style="flex: 1;">Current Weight: 
+                            <input type="number" step="0.1" x-model="editingPatient.weight" style="width: 100%; padding: 8px;" placeholder="kg">
+                        </label>
                     </div>
-            
-                    <div x-show="onboardingStep === 1">
-                        <h2>Patient Demographics</h2>
-                        <button @click="onboardingStep = 2" class="btn-primary">Continue to Clinical History</button>
-                    </div>
-            
-                    <div x-show="onboardingStep === 2">
-                        <h2>Clinical History</h2>
-                        <p>Has <span x-text="editingPatient.name"></span> been seen by a veterinary surgeon regarding their heart?</p>
-                        
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" x-model="onboardingData.vetSeen" value="diagnosed">
-                                Yes, they have a diagnosed cardiac condition
-                            </label>
-                            <label>
-                                <input type="radio" x-model="onboardingData.vetSeen" value="murmur">
-                                Yes, a heart murmur was detected but no definitive diagnosis yet
-                            </label>
-                            <label>
-                                <input type="radio" x-model="onboardingData.vetSeen" value="other">
-                                No / Tracking non-cardiac events (e.g., general syncope)
-                            </label>
-                        </div>
-            
-                        <div x-show="onboardingData.vetSeen === 'diagnosed'" class="sub-form">
-                            <label>Primary Diagnosis (if known):
-                                <select x-model="onboardingData.diagnosis">
-                                    <option value="MMVD">Myxomatous Mitral Valve Disease (MMVD)</option>
-                                    <option value="HCM">Feline Hypertrophic Cardiomyopathy (HCM)</option>
-                                    </select>
-                            </label>
-                            <label>ACVIM Stage (if known):
-                                <select x-model="onboardingData.acvimStage">
-                                    <option value="B1">Stage B1 (Asymptomatic, no remodelling)</option>
-                                    <option value="B2">Stage B2 (Asymptomatic, heart enlarged)</option>
-                                    <option value="C">Stage C (Active or prior heart failure)</option>
-                                </select>
-                            </label>
-                        </div>
-            
-                        <button @click="generateModuleRecommendations()" class="btn-primary">Generate Dashboard</button>
-                    </div>
-            
-                    <div x-show="onboardingStep === 3">
-                        <h2>Recommended Monitoring Plan</h2>
-                        <p>Based on the clinical history provided, we recommend the following tracking modules for <span x-text="editingPatient.name"></span>.</p>
-                        
-                        <div class="module-cards">
-                            <div class="module-card">
-                                <div class="card-info">
-                                    <h3><i class="fa-solid fa-lungs"></i> SRR Monitor</h3>
-                                    <p>The most important early warning sign for fluid accumulation (pulmonary oedema).</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" x-model="editingPatient.modules.srr">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            
-                            <div class="module-card">
-                                <div class="card-info">
-                                    <h3><i class="fa-solid fa-pills"></i> Medication Ledger</h3>
-                                    <p>Track dose adjustments and their therapeutic effect on breathing trends.</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" x-model="editingPatient.modules.medications">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-            
-                            </div>
-                        
-                        <p class="text-muted"><small>You can enable or disable these modules at any time from the patient settings menu.</small></p>
-                        <button @click="saveOnboardedPatient()" class="btn-success">Finalise Dashboard</button>
-                    </div>
-            
                 </div>
+                <button @click="onboardingStep = 2" class="btn-primary" :disabled="!editingPatient.name">Continue to Clinical History</button>
             </div>
             
+            <div x-show="onboardingStep === 2">
+                <h2>Clinical Baseline</h2>
+                <p>Does <span x-text="editingPatient.name || 'your pet'"></span> have a known cardiac condition or heart murmur?</p>
+                
+                <div class="radio-group" style="display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 20px;">
+                    <label style="cursor: pointer; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc;">
+                        <input type="radio" x-model="onboardingData.hasCardiacIssue" value="yes"> 
+                        Yes, logging a diagnosis or murmur
+                    </label>
+                    <label style="cursor: pointer; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc;">
+                        <input type="radio" x-model="onboardingData.hasCardiacIssue" value="no"> 
+                        No, tracking other symptoms (e.g. general syncope)
+                    </label>
+                </div>
+            
+                <div x-show="onboardingData.hasCardiacIssue === 'yes'" x-collapse style="background: #eff6ff; padding: 15px; border-radius: 8px; border: 1px solid #bfdbfe; text-align: left; margin-bottom: 20px;">
+                    
+                    <label style="font-size: 0.85rem; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 5px;">Primary Cardiac Diagnosis</label>
+                    <select x-model="newDiagnosis.diagnosis" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #93c5fd; border-radius: 4px;">
+                        <option value="">Select Diagnosis...</option>
+                        <option value="MMVD">MMVD (Myxomatous Mitral Valve Disease)</option>
+                        <option value="HCM">HCM (Hypertrophic Cardiomyopathy)</option>
+                        <option value="DCM">DCM (Dilated Cardiomyopathy)</option>
+                        <option value="Murmur - no diagnosis">Murmur - pending echocardiogram</option>
+                    </select>
+            
+                    <div x-show="newDiagnosis.diagnosis && newDiagnosis.diagnosis !== 'Murmur - no diagnosis'">
+                        <label style="font-size: 0.85rem; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 5px;">ACVIM Stage</label>
+                        <select x-model="newDiagnosis.acvimStage" style="width: 100%; padding: 8px; border: 1px solid #93c5fd; border-radius: 4px;">
+                            <option value="N/A">Unstaged / N/A</option>
+                            <option value="Stage A">Stage A (At Risk)</option>
+                            <option value="Stage B1">Stage B1 (Subclinical, No Remodeling)</option>
+                            <option value="Stage B2">Stage B2 (Subclinical, Cardiomegaly)</option>
+                            <option value="Stage C">Stage C (Current/Past Heart Failure)</option>
+                        </select>
+                    </div>
+            
+                    <div x-show="newDiagnosis.diagnosis === 'Murmur - no diagnosis'">
+                        <label style="font-size: 0.85rem; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 5px;">Murmur Grade</label>
+                        <select x-model="newDiagnosis.murmurGrade" style="width: 100%; padding: 8px; border: 1px solid #93c5fd; border-radius: 4px;">
+                            <option value="N/A">Not Graded / Unknown</option>
+                            <option value="1/6">Grade I/VI</option>
+                            <option value="2/6">Grade II/VI</option>
+                            <option value="3/6">Grade III/VI</option>
+                            <option value="4/6">Grade IV/VI</option>
+                        </select>
+                    </div>
+                </div>
+            
+                <button @click="generateModuleRecommendations()" class="btn-primary">Generate Dashboard</button>
+            </div>            
                                 <!-- ******************************** -->
                                 <!-- PATIENT MANAGEMENT               -->
                                 <!-- ******************************** -->
