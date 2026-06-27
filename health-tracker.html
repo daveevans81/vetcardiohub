@@ -298,126 +298,128 @@
                  style="position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;  background: rgba(0,0,0,0.7);">
                  
                  <!-- STEP 0: Welcome Screen -->
-                <div x-show="onboardingStep === 0" style="background: rgba(250,250,250,1.0);">
-                
-                  <!-- Logo bar -->
-                  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; justify-content: center;">
-                    <div style="width: 44px; height: 44px; background: #16325F; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                      <i class="fa-solid fa-heart-pulse" style="font-size: 1.2rem; color: white;"></i>
-                    </div>
-                    <div>
-                      <div style="font-size: 1rem; font-weight: bold; color: #1e293b; line-height: 1.2;">VetCardioHub</div>
-                      <div style="font-size: 0.75rem; color: #64748b;">Cardiac Health Tracker</div>
-                    </div>
-                  </div>
-                
-                  <!-- Headline -->
-                  <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="color: #16325F; margin: 0 0 8px; font-size: 1.3rem;">Home monitoring for cardiac patients</h2>
-                    <p style="font-size: 0.875rem; color: #64748b; line-height: 1.6; margin: 0;">
-                      Designed for owners of dogs and cats with heart disease — to track what matters,
-                      share it with your vet, and catch warning signs early.
-                    </p>
-                  </div>
-                
-                  <!-- Trust badges -->
-                  <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px;">
-                    <span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 3px 10px;">
-                      <i class="fa-solid fa-mobile-screen"></i> Works offline
-                    </span>
-                    <span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 3px 10px;">
-                      <i class="fa-solid fa-lock"></i> Data stays on your device
-                    </span>
-                    <span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 3px 10px;">
-                      <i class="fa-solid fa-heart"></i> Free to use
-                    </span>
-                    <span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 3px 10px;">
-                      <i class="fa-solid fa-stethoscope"></i> Vet-designed
-                    </span>
-                  </div>
-                
-                  <!-- Why it matters -->
-                  <div style="background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; font-size: 0.875rem; color: #334155; line-height: 1.6; text-align: left;">
-                    <p style="margin: 0 0 8px;">In heart disease, a rising sleeping respiratory rate is often the <strong>first sign of fluid building on the lungs</strong> — days before your pet appears unwell. Catching it early can be life-saving.</p>
-                    <p style="margin: 0;">This app helps you measure, record, and share that rate — alongside medications, symptoms, and clinical staging — all in one place.</p>
-                  </div>
-                
-                  <!-- Feature grid -->
-                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 20px;">
-                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                      <i class="fa-solid fa-lungs" style="color: #0f766e; font-size: 1.1rem;"></i>
-                      <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">SRR Monitor</p>
-                      <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">One-tap breathing counter with clinical interpretation</p>
-                    </div>
-                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                      <i class="fa-solid fa-pills" style="color: #3b82f6; font-size: 1.1rem;"></i>
-                      <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Medication Ledger</p>
-                      <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Track dose changes against breathing trends</p>
-                    </div>
-                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                      <i class="fa-solid fa-chart-line" style="color: #0284c7; font-size: 1.1rem;"></i>
-                      <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Trend Analytics</p>
-                      <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Charts, stats, and date filtering</p>
-                    </div>
-                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                      <i class="fa-solid fa-stethoscope" style="color: #7c3aed; font-size: 1.1rem;"></i>
-                      <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">ACVIM Staging</p>
-                      <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Log and visualise disease progression</p>
-                    </div>
-                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                      <i class="fa-solid fa-bolt" style="color: #d97706; font-size: 1.1rem;"></i>
-                      <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Syncope Diary</p>
-                      <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Record collapses with triggers and timing</p>
-                    </div>
-                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                      <i class="fa-solid fa-file-export" style="color: #475569; font-size: 1.1rem;"></i>
-                      <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Vet Export</p>
-                      <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">PDF, CSV, or clipboard for appointments</p>
-                    </div>
-                  </div>
-                
-                  <!-- Setup steps -->
-                  <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-bottom: 20px; text-align: left;">
-                    <p style="font-size: 0.8rem; font-weight: bold; color: #475569; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.04em;">Setup takes about 2 minutes</p>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                      <div style="display: flex; gap: 12px; align-items: flex-start;">
-                        <div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">1</div>
-                        <div style="font-size: 0.875rem; color: #334155;">
-                          <strong>Register your pet</strong><br>
-                          <span style="color: #64748b; font-size: 0.8rem;">Name, species, breed, date of birth, weight</span>
-                        </div>
-                      </div>
-                      <div style="display: flex; gap: 12px; align-items: flex-start;">
-                        <div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">2</div>
-                        <div style="font-size: 0.875rem; color: #334155;">
-                          <strong>Tell us about their cardiac history</strong><br>
-                          <span style="color: #64748b; font-size: 0.8rem;">Diagnosis, murmur grade, ACVIM stage if known</span>
-                        </div>
-                      </div>
-                      <div style="display: flex; gap: 12px; align-items: flex-start;">
-                        <div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">3</div>
-                        <div style="font-size: 0.875rem; color: #334155;">
-                          <strong>Choose what to track</strong><br>
-                          <span style="color: #64748b; font-size: 0.8rem;">We'll recommend the right modules for their condition</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                
-                  <!-- CTA -->
-                  <button @click="onboardingStep = 1" 
-                          style="width: 100%; padding: 15px; background: #16325F; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">
-                    <i class="fa-solid fa-paw" style="margin-right: 8px;"></i>
-                    Set up my first patient
-                  </button>
-                
-                  <p style="font-size: 0.75rem; color: #94a3b8; text-align: center; margin: 10px 0 0;">
-                    You can add multiple patients and change any settings later.
-                  </p>
-                
-                </div>
-                
+                                
                 <div class="onboarding-modal" style="background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 12px; max-height: 90vh; overflow-y: auto;">
+                
+                    <div x-show="onboardingStep === 0" style="background: rgba(250,250,250,1.0);">
+                    
+                      <!-- Logo bar -->
+                      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; justify-content: center;">
+                        <div style="width: 44px; height: 44px; background: #16325F; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                          <i class="fa-solid fa-heart-pulse" style="font-size: 1.2rem; color: white;"></i>
+                        </div>
+                        <div>
+                          <div style="font-size: 1rem; font-weight: bold; color: #1e293b; line-height: 1.2;">VetCardioHub</div>
+                          <div style="font-size: 0.75rem; color: #64748b;">Cardiac Health Tracker</div>
+                        </div>
+                      </div>
+                    
+                      <!-- Headline -->
+                      <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #16325F; margin: 0 0 8px; font-size: 1.3rem;">Home monitoring for cardiac patients</h2>
+                        <p style="font-size: 0.875rem; color: #64748b; line-height: 1.6; margin: 0;">
+                          Designed for owners of dogs and cats with heart disease — to track what matters,
+                          share it with your vet, and catch warning signs early.
+                        </p>
+                      </div>
+                    
+                      <!-- Trust badges -->
+                      <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px;">
+                        <span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 3px 10px;">
+                          <i class="fa-solid fa-mobile-screen"></i> Works offline
+                        </span>
+                        <span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 3px 10px;">
+                          <i class="fa-solid fa-lock"></i> Data stays on your device
+                        </span>
+                        <span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 3px 10px;">
+                          <i class="fa-solid fa-heart"></i> Free to use
+                        </span>
+                        <span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 3px 10px;">
+                          <i class="fa-solid fa-stethoscope"></i> Vet-designed
+                        </span>
+                      </div>
+                    
+                      <!-- Why it matters -->
+                      <div style="background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; font-size: 0.875rem; color: #334155; line-height: 1.6; text-align: left;">
+                        <p style="margin: 0 0 8px;">In heart disease, a rising sleeping respiratory rate is often the <strong>first sign of fluid building on the lungs</strong> — days before your pet appears unwell. Catching it early can be life-saving.</p>
+                        <p style="margin: 0;">This app helps you measure, record, and share that rate — alongside medications, symptoms, and clinical staging — all in one place.</p>
+                      </div>
+                    
+                      <!-- Feature grid -->
+                      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 20px;">
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                          <i class="fa-solid fa-lungs" style="color: #0f766e; font-size: 1.1rem;"></i>
+                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">SRR Monitor</p>
+                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">One-tap breathing counter with clinical interpretation</p>
+                        </div>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                          <i class="fa-solid fa-pills" style="color: #3b82f6; font-size: 1.1rem;"></i>
+                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Medication Ledger</p>
+                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Track dose changes against breathing trends</p>
+                        </div>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                          <i class="fa-solid fa-chart-line" style="color: #0284c7; font-size: 1.1rem;"></i>
+                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Trend Analytics</p>
+                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Charts, stats, and date filtering</p>
+                        </div>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                          <i class="fa-solid fa-stethoscope" style="color: #7c3aed; font-size: 1.1rem;"></i>
+                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">ACVIM Staging</p>
+                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Log and visualise disease progression</p>
+                        </div>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                          <i class="fa-solid fa-bolt" style="color: #d97706; font-size: 1.1rem;"></i>
+                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Syncope Diary</p>
+                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Record collapses with triggers and timing</p>
+                        </div>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                          <i class="fa-solid fa-file-export" style="color: #475569; font-size: 1.1rem;"></i>
+                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Vet Export</p>
+                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">PDF, CSV, or clipboard for appointments</p>
+                        </div>
+                      </div>
+                    
+                      <!-- Setup steps -->
+                      <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-bottom: 20px; text-align: left;">
+                        <p style="font-size: 0.8rem; font-weight: bold; color: #475569; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.04em;">Setup takes about 2 minutes</p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                          <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">1</div>
+                            <div style="font-size: 0.875rem; color: #334155;">
+                              <strong>Register your pet</strong><br>
+                              <span style="color: #64748b; font-size: 0.8rem;">Name, species, breed, date of birth, weight</span>
+                            </div>
+                          </div>
+                          <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">2</div>
+                            <div style="font-size: 0.875rem; color: #334155;">
+                              <strong>Tell us about their cardiac history</strong><br>
+                              <span style="color: #64748b; font-size: 0.8rem;">Diagnosis, murmur grade, ACVIM stage if known</span>
+                            </div>
+                          </div>
+                          <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">3</div>
+                            <div style="font-size: 0.875rem; color: #334155;">
+                              <strong>Choose what to track</strong><br>
+                              <span style="color: #64748b; font-size: 0.8rem;">We'll recommend the right modules for their condition</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    
+                      <!-- CTA -->
+                      <button @click="onboardingStep = 1" 
+                              style="width: 100%; padding: 15px; background: #16325F; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">
+                        <i class="fa-solid fa-paw" style="margin-right: 8px;"></i>
+                        Set up my first patient
+                      </button>
+                    
+                      <p style="font-size: 0.75rem; color: #94a3b8; text-align: center; margin: 10px 0 0;">
+                        You can add multiple patients and change any settings later.
+                      </p>
+                    
+                    </div>
+
         
                     <!-- Step 1: Basic Info -->
                     <div x-show="onboardingStep === 1">
