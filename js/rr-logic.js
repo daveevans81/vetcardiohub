@@ -9,10 +9,10 @@ onboardingStep: 0, // 0 = Welcome, 1 = Demographics, 2 = Clinical, 3 = Recommend
 isExistingPatientEdit: false, // Flag to bypass wizard when editing later
 
 onboardingData: {
-    vetSeen: null, // 'diagnosed', 'murmur', 'other'
+    hasCardiacIssue: '',
     murmurGrade: '',
     diagnosis: '',
-    acvimStage: '', // Useful for generating module recs
+    acvimStage: ''
 },
 
 // Default module template
@@ -25,6 +25,7 @@ defaultModules: {
     acvimStaging: false
 },
 
+showProgressionBanner: false,
 
 // --- CORE STATE ---
 
@@ -108,15 +109,13 @@ eventNotes: '',
 eventTimeline: [],
 
         // --- DIAGNOSIS & STAGING ---
-primaryCardiacDiagnosis: '',
+
 acvimStage: '', // Easily mutable without changing the primary diagnosis
 concurrentDiagnoses: [], // Array to hold non-cardiac issues
 newConcurrentDiagnosis: '', // v-model for the input field
         
 showCardiacForm: false,
         showConcurrentForm: false,
-        newConcurrentDiagnosis: '',
-        editingDiagnosisId: null,
 
         newDiagnosis: {
             date: new Date().toISOString().split('T')[0],
@@ -223,11 +222,6 @@ sanitiseCSV(val) {
     return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
 },
 
-// Computed Profile (Helper to easily access active modules)
-get activePatientProfile() {
-    return this.patients.find(p => p.id === this.activePatientId) || null;
-},
-
         
 init() {
     // 1. ROBUST DATA LOAD: Prevents the "filter of undefined" crash
@@ -250,7 +244,7 @@ init() {
     if (this.patients.length > 0) {
         this.activePatientId = this.patients[0].id;
     } else {
-        this.openPatientManager(true);
+        this.startNewPatientOnboarding();
     }
 
     // 2. ACCORDION WATCHERS: Forces Chart.js to redraw *only* after Alpine makes the canvas visible
@@ -342,11 +336,13 @@ generateModuleRecommendations() {
         // If they specify Stage B2, C, or D in the actual diagnosis object
         if (['Stage B2', 'Stage C', 'Stage D'].includes(this.newDiagnosis.acvimStage)) {
             recs.medications = true;
-            recs.coughActivity = true;
+            recs.coughLog = true;      // was coughActivity
+            recs.activityLog = true; 
         }
     } else {
         // e.g., general wellness or collapse history
-        recs.coughActivity = true;
+    recs.coughLog = true;      // was coughActivity
+    recs.activityLog = true; 
         recs.syncopeLog = true;
     }
 
@@ -355,19 +351,26 @@ generateModuleRecommendations() {
 },
 
 saveOnboardedPatient() {
-    // 1. Save the patient profile
-    this.patients.push(this.editingPatient);
-    this.activePatientId = this.editingPatient.id;
-    
-    // 2. If they logged a cardiac issue, save it to the official diagnosis log!
-    if (this.onboardingData.hasCardiacIssue === 'yes' && this.newDiagnosis.diagnosis !== '') {
-        // Assuming you have an array called diagnosisLog in your state
-        if (!this.diagnosisLog) this.diagnosisLog = []; 
-        this.diagnosisLog.push({...this.newDiagnosis});
+    const { weight, ...patientData } = this.editingPatient;
+    const patientIdToSave = patientData.id;
+
+    this.patients.push({ ...patientData });
+    this.activePatientId = patientIdToSave;
+
+    const weightValue = parseFloat(weight);
+    if (!isNaN(weightValue) && weightValue > 0) {
+        this.logWeight(patientIdToSave, weightValue);
     }
 
-    this.showOnboarding = false;
+    if (this.onboardingData.hasCardiacIssue === 'yes' && this.newDiagnosis.diagnosis) {
+        this.newDiagnosis.patientId = patientIdToSave; // ensure correct ID
+        this.diagnosisLog.push({ ...this.newDiagnosis, timestamp: Date.now() });
+        this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+    }
+
     this.saveToStorage('vch_patients', this.patients);
+    this.showOnboarding = false;
+    this.$nextTick(() => { this.renderChart(); this.renderMedChart(); });
 },
 
         
@@ -718,7 +721,7 @@ saveDiagnosis() {
 
     this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
     this.showDiagnosisForm = false;
-    this.checkProgressionTrigger(newEntry.acvimStage);
+    this.checkProgressionTrigger(entryToSave.acvimStage);
 },
 
 checkProgressionTrigger(newStage) {
