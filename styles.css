@@ -4055,3 +4055,118 @@ button.btn-nudge-static {
     flex-grow: 1;
     height: 100% !important;
 }
+
+/* ========================================================
+   Health Tracker UI Components
+   ======================================================== */
+
+/* Module Wrappers */
+.module-card {
+    margin-top: 20px;
+    background: #fcfdff;
+    border: 1px solid #adc1ed;
+    border-radius: 6px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.sub-module-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 15px;
+    background: #f8fafc;
+}
+
+/* Accordions */
+.btn-accordion {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #e8eef7;
+    border: 1px solid #c8d6eb;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #16325F;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.btn-accordion:hover, .btn-accordion[aria-expanded="true"] {
+    background: #dde6f3;
+    border-color: #b7c8e2;
+}
+.btn-accordion h3 { margin: 0; display: flex; align-items: center; gap: 8px; }
+
+/* Section Headers */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+.section-title { margin: 0; color: #334155; font-size: 1rem; }
+
+/* Data Entry Forms */
+.form-panel {
+    background: white;
+    border: 2px solid #94a3b8;
+    border-radius: 6px;
+    padding: 15px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+.form-panel-danger { border-color: #fca5a5; } /* Syncope forms */
+.form-panel-success { border-color: #bbf7d0; } /* Concurrent forms */
+
+.form-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+}
+.form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+}
+.form-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+
+/* Form Layout Grids */
+.grid-cols-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.grid-cols-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
+.flex-gap-10 { display: flex; gap: 10px; }
+
+/* Buttons */
+.btn-primary { background: #16325F; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; flex: 2; transition: opacity 0.2s;}
+.btn-primary:hover { opacity: 0.9; }
+.btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; flex: 1; }
+.btn-add { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+.btn-add-blue { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; }
+
+/* Diagnosis & Alert Blocks */
+.diagnosis-panel { background: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #c8d6eb; margin-bottom: 20px; text-align: left; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+.alert-warning { padding: 15px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px; margin-bottom: 15px; }
+.alert-info { padding: 15px; background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 4px; margin-bottom: 15px; }
+
+/* Lists and Tables */
+.log-entry { background: white; border: 1px solid #e2e8f0; padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: flex-start;}
+.log-entry-danger { border-color: #fca5a5; border-left: 4px solid #ef4444; }
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left; }
+.data-table thead { background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569; }
+.data-table th { padding: 10px 15px; }
+.data-table td { padding: 10px 15px; border-bottom: 1px solid #f1f5f9; }
+
+/* Text Utilities */
+.text-danger { color: #ef4444; }
+.text-warning { color: #d97706; }
+.text-info { color: #3b82f6; }
+.text-muted { color: #94a3b8; }
+.font-bold { font-weight: bold; }
