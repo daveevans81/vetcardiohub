@@ -293,76 +293,193 @@
                                 <!-- ON BOARDING                      -->
                                 <!-- ******************************** -->
             
+            <!-- STEP 1: Patient Demographics -->
             <div x-show="onboardingStep === 1">
-                <h2>Patient Demographics</h2>
-                <div style="display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left; margin-bottom: 20px;">
-                    <label>Pet's Name*: <input type="text" x-model="editingPatient.name" style="width: 100%; padding: 8px;"></label>
-                    <div style="display: flex; gap: 10px;">
-                        <label style="flex: 1;">Species: 
-                            <select x-model="editingPatient.species" style="width: 100%; padding: 8px;">
-                                <option value="dog">Canine</option>
-                                <option value="cat">Feline</option>
-                            </select>
-                        </label>
-                        <label style="flex: 1;">Current Weight: 
-                            <input type="number" step="0.1" x-model="editingPatient.weight" style="width: 100%; padding: 8px;" placeholder="kg">
-                        </label>
-                    </div>
+                <h2 style="color: #1e3a8a; margin-bottom: 15px;">Patient Demographics</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-bottom: 20px;">
+                    
+                    <!-- Name (Full Width) -->
+                    <label style="grid-column: span 2; font-weight: bold; font-size: 0.9rem;">Patient Name*: 
+                        <input type="text" x-model="editingPatient.name" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                    </label>
+                    
+                    <!-- Species -->
+                    <label style="font-weight: bold; font-size: 0.9rem;">Species: 
+                        <select x-model="editingPatient.species" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                            <option value="dog">Canine</option>
+                            <option value="cat">Feline</option>
+                        </select>
+                    </label>
+            
+                    <!-- Breed -->
+                    <label style="font-weight: bold; font-size: 0.9rem;">Breed: 
+                        <input type="text" x-model="editingPatient.breed" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                    </label>
+            
+                    <!-- Sex -->
+                    <label style="font-weight: bold; font-size: 0.9rem;">Sex: 
+                        <select x-model="editingPatient.sex" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                            <option value="">Select...</option>
+                            <option value="MN">Male Neutered</option>
+                            <option value="MI">Male Intact</option>
+                            <option value="FN">Female Neutered</option>
+                            <option value="FI">Female Intact</option>
+                        </select>
+                    </label>
+            
+                    <!-- DOB -->
+                    <label style="font-weight: bold; font-size: 0.9rem;">Date of Birth: 
+                        <input type="date" x-model="editingPatient.dob" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                    </label>
+            
+                    <!-- Weight (Full Width) -->
+                    <label style="grid-column: span 2; font-weight: bold; font-size: 0.9rem;">Current Weight (kg): 
+                        <input type="number" step="0.1" x-model="editingPatient.weight" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                    </label>
                 </div>
-                <button @click="onboardingStep = 2" class="btn-primary" :disabled="!editingPatient.name">Continue to Clinical History</button>
+            
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button @click="showOnboarding = false" style="padding: 10px 15px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer;">Cancel</button>
+                    <button @click="onboardingStep = 2" class="btn-primary" :disabled="!editingPatient.name" style="padding: 10px 15px; border-radius: 6px; background: #1e3a8a; color: white; border: none; cursor: pointer;">Continue to Clinical History <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
             </div>
             
-            <div x-show="onboardingStep === 2">
-                <h2>Clinical Baseline</h2>
-                <p>Does <span x-text="editingPatient.name || 'your pet'"></span> have a known cardiac condition or heart murmur?</p>
+            <!-- STEP 2: Clinical Baseline (Diagnosis) -->
+            <div x-show="onboardingStep === 2" x-cloak>
+                <h2 style="color: #1e3a8a; margin-bottom: 15px;">Clinical Baseline</h2>
+                <p style="margin-bottom: 15px;">Does <strong x-text="editingPatient.name || 'this patient'"></strong> have a known cardiac condition or heart murmur?</p>
                 
                 <div class="radio-group" style="display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 20px;">
-                    <label style="cursor: pointer; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc;">
+                    <label style="cursor: pointer; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; display: flex; align-items: center; gap: 10px;">
                         <input type="radio" x-model="onboardingData.hasCardiacIssue" value="yes"> 
-                        Yes, logging a diagnosis or murmur
+                        Yes, logging a specific diagnosis or murmur
                     </label>
-                    <label style="cursor: pointer; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc;">
+                    <label style="cursor: pointer; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; display: flex; align-items: center; gap: 10px;">
                         <input type="radio" x-model="onboardingData.hasCardiacIssue" value="no"> 
-                        No, tracking other symptoms (e.g. general syncope)
+                        No, tracking other symptoms (e.g., general syncope, wellness)
                     </label>
                 </div>
             
                 <div x-show="onboardingData.hasCardiacIssue === 'yes'" x-collapse style="background: #eff6ff; padding: 15px; border-radius: 8px; border: 1px solid #bfdbfe; text-align: left; margin-bottom: 20px;">
                     
                     <label style="font-size: 0.85rem; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 5px;">Primary Cardiac Diagnosis</label>
-                    <select x-model="newDiagnosis.diagnosis" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #93c5fd; border-radius: 4px;">
+                    <select x-model="newDiagnosis.diagnosis" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #93c5fd; background: white;">
                         <option value="">Select Diagnosis...</option>
                         <option value="MMVD">MMVD (Myxomatous Mitral Valve Disease)</option>
                         <option value="HCM">HCM (Hypertrophic Cardiomyopathy)</option>
                         <option value="DCM">DCM (Dilated Cardiomyopathy)</option>
+                        <option value="Pulmonary Hypertension">Pulmonary Hypertension</option>
+                        <option value="ARVC">Arrhythmogenic Right Ventricular Cardiomyopathy</option>
+                        <option value="Congenital Defect">Congenital Defect (PDA, SAS, PS...)</option>
                         <option value="Murmur - no diagnosis">Murmur - pending echocardiogram</option>
+                        <option value="Other">Other...</option>
                     </select>
             
-                    <div x-show="newDiagnosis.diagnosis && newDiagnosis.diagnosis !== 'Murmur - no diagnosis'">
+                    <div x-show="newDiagnosis.diagnosis === 'Congenital Defect' || newDiagnosis.diagnosis === 'Other'" x-transition style="margin-bottom: 15px;">
+                        <label style="font-size: 0.85rem; font-weight: bold; color: #0284c7; display: block; margin-bottom: 5px;">Specify Details</label>
+                        <input type="text" x-model="newDiagnosis.customDiagnosis" placeholder="e.g. Subaortic Stenosis, Tricuspid Dysplasia" style="width: 100%; padding: 10px; border: 1px solid #7dd3fc; border-radius: 5px; box-sizing: border-box; background: #f0f9ff;">
+                    </div>
+            
+                    <div x-show="newDiagnosis.diagnosis === 'Murmur - no diagnosis'" x-transition style="margin-bottom: 15px; padding: 15px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                        <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #b45309; font-size: 0.9rem;">Track Murmur Grade (Levine Scale)</label>
+                        <select x-model="newDiagnosis.murmurGrade" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #fcd34d; background: white;">
+                            <option value="N/A">Not Graded / Unknown</option>
+                            <option value="1/6">Grade I/VI (Very soft, requires quiet room)</option>
+                            <option value="2/6">Grade II/VI (Soft, localized)</option>
+                            <option value="3/6">Grade III/VI (Moderate intensity, easy to hear)</option>
+                            <option value="4/6">Grade IV/VI (Loud, radiating, no palpable thrill)</option>
+                            <option value="5/6">Grade V/VI (Very loud, palpable thrill)</option>
+                            <option value="6/6">Grade VI/VI (Heard with stethoscope barely touching)</option>
+                        </select>
+                    </div>
+            
+                    <div x-show="newDiagnosis.diagnosis && newDiagnosis.diagnosis !== 'Murmur - no diagnosis'" x-transition style="margin-bottom: 5px;">
                         <label style="font-size: 0.85rem; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 5px;">ACVIM Stage</label>
-                        <select x-model="newDiagnosis.acvimStage" style="width: 100%; padding: 8px; border: 1px solid #93c5fd; border-radius: 4px;">
+                        <select x-model="newDiagnosis.acvimStage" style="width: 100%; padding: 10px; border: 1px solid #93c5fd; border-radius: 5px; background: white;">
                             <option value="N/A">Unstaged / N/A</option>
                             <option value="Stage A">Stage A (At Risk)</option>
                             <option value="Stage B1">Stage B1 (Subclinical, No Remodeling)</option>
                             <option value="Stage B2">Stage B2 (Subclinical, Cardiomegaly)</option>
                             <option value="Stage C">Stage C (Current/Past Heart Failure)</option>
-                        </select>
-                    </div>
-            
-                    <div x-show="newDiagnosis.diagnosis === 'Murmur - no diagnosis'">
-                        <label style="font-size: 0.85rem; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 5px;">Murmur Grade</label>
-                        <select x-model="newDiagnosis.murmurGrade" style="width: 100%; padding: 8px; border: 1px solid #93c5fd; border-radius: 4px;">
-                            <option value="N/A">Not Graded / Unknown</option>
-                            <option value="1/6">Grade I/VI</option>
-                            <option value="2/6">Grade II/VI</option>
-                            <option value="3/6">Grade III/VI</option>
-                            <option value="4/6">Grade IV/VI</option>
+                            <option value="Stage D">Stage D (Refractory Heart Failure)</option>
                         </select>
                     </div>
                 </div>
             
-                <button @click="generateModuleRecommendations()" class="btn-primary">Generate Dashboard</button>
-            </div>            
+                <div style="display: flex; justify-content: space-between; gap: 10px;">
+                    <button @click="onboardingStep = 1" style="padding: 10px 15px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                    <button @click="generateModuleRecommendations()" class="btn-primary" style="padding: 10px 15px; border-radius: 6px; background: #1e3a8a; color: white; border: none; cursor: pointer;">Select Modules <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+            
+            <div x-show="onboardingStep === 3" x-cloak>
+                <h2 style="color: #1e3a8a; margin-bottom: 10px;">Recommended Modules</h2>
+                <p style="margin-bottom: 20px; font-size: 0.9rem; color: #475569;">Based on the clinical history, we have pre-selected the optimal tracking modules. You can adjust these below.</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; text-align: left;">
+                    
+                    <label style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;" :style="editingPatient.modules.srr ? 'border-color: #0f766e; box-shadow: 0 0 0 1px #0f766e;' : ''">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div style="width: 32px; text-align: center;"><i class="fa-solid fa-lungs" style="font-size: 1.4rem; color: #0f766e;"></i></div>
+                            <div>
+                                <strong style="display: block; color: #1e293b; font-size: 0.95rem;">SRR Monitor</strong>
+                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.2; display: block;">The earliest warning sign for fluid accumulation.</span>
+                            </div>
+                        </div>
+                        <input type="checkbox" x-model="editingPatient.modules.srr" style="width: 20px; height: 20px; cursor: pointer; accent-color: #0f766e;">
+                    </label>
+            
+                    <label style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;" :style="editingPatient.modules.medications ? 'border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6;' : ''">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div style="width: 32px; text-align: center;"><i class="fa-solid fa-pills" style="font-size: 1.4rem; color: #3b82f6;"></i></div>
+                            <div>
+                                <strong style="display: block; color: #1e293b; font-size: 0.95rem;">Medication Ledger</strong>
+                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.2; display: block;">Track dose adjustments and view effects on breathing.</span>
+                            </div>
+                        </div>
+                        <input type="checkbox" x-model="editingPatient.modules.medications" style="width: 20px; height: 20px; cursor: pointer; accent-color: #3b82f6;">
+                    </label>
+            
+                    <label style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;" :style="editingPatient.modules.coughActivity ? 'border-color: #f43f5e; box-shadow: 0 0 0 1px #f43f5e;' : ''">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div style="width: 32px; text-align: center;"><i class="fa-solid fa-heart-pulse" style="font-size: 1.4rem; color: #f43f5e;"></i></div>
+                            <div>
+                                <strong style="display: block; color: #1e293b; font-size: 0.95rem;">Quality of Life Log</strong>
+                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.2; display: block;">Daily summaries of coughing and exercise tolerance.</span>
+                            </div>
+                        </div>
+                        <input type="checkbox" x-model="editingPatient.modules.coughActivity" style="width: 20px; height: 20px; cursor: pointer; accent-color: #f43f5e;">
+                    </label>
+            
+                    <label style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;" :style="editingPatient.modules.acvimStaging ? 'border-color: #0284c7; box-shadow: 0 0 0 1px #0284c7;' : ''">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div style="width: 32px; text-align: center;"><i class="fa-solid fa-stethoscope" style="font-size: 1.4rem; color: #0284c7;"></i></div>
+                            <div>
+                                <strong style="display: block; color: #1e293b; font-size: 0.95rem;">Diagnosis Tracker</strong>
+                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.2; display: block;">Log sequential echocardiogram results and staging.</span>
+                            </div>
+                        </div>
+                        <input type="checkbox" x-model="editingPatient.modules.acvimStaging" style="width: 20px; height: 20px; cursor: pointer; accent-color: #0284c7;">
+                    </label>
+            
+                    <label style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;" :style="editingPatient.modules.syncopeLog ? 'border-color: #d97706; box-shadow: 0 0 0 1px #d97706;' : ''">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div style="width: 32px; text-align: center;"><i class="fa-solid fa-bolt" style="font-size: 1.4rem; color: #d97706;"></i></div>
+                            <div>
+                                <strong style="display: block; color: #1e293b; font-size: 0.95rem;">Syncope / Collapse Diary</strong>
+                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.2; display: block;">Record fainting episodes, triggers, and durations.</span>
+                            </div>
+                        </div>
+                        <input type="checkbox" x-model="editingPatient.modules.syncopeLog" style="width: 20px; height: 20px; cursor: pointer; accent-color: #d97706;">
+                    </label>
+            
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; gap: 10px;">
+                    <button @click="onboardingStep = 2" style="padding: 10px 15px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                    <button @click="saveOnboardedPatient()" class="btn-primary" style="padding: 10px 15px; border-radius: 6px; background: #16a34a; color: white; border: none; cursor: pointer; font-weight: bold;"><i class="fa-solid fa-check"></i> Finalise Dashboard</button>
+                </div>
+            </div>          
                                 <!-- ******************************** -->
                                 <!-- PATIENT MANAGEMENT               -->
                                 <!-- ******************************** -->
