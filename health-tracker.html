@@ -292,9 +292,18 @@
                                 <!-- ******************************** -->
                                 <!-- ON BOARDING                      -->
                                 <!-- ******************************** -->
+            <!-- The Overlay Wrapper -->
+            <div x-show="showOnboarding" 
+                 class="onboarding-overlay" 
+                 style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                
+                <div class="onboarding-modal" style="background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 12px; max-height: 90vh; overflow-y: auto;">
+        
+                    <!-- Step 1: Basic Info -->
+                    <div x-show="onboardingStep === 1">
+                        <h2>Patient Registration</h2>
+                        <!-- STEP 1: Patient Demographics -->
             
-            <!-- STEP 1: Patient Demographics -->
-            <div x-show="onboardingStep === 1">
                 <h2 style="color: #1e3a8a; margin-bottom: 15px;">Patient Demographics</h2>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-bottom: 20px;">
                     
@@ -302,6 +311,7 @@
                     <label style="grid-column: span 2; font-weight: bold; font-size: 0.9rem;">Patient Name*: 
                         <input type="text" x-model="editingPatient.name" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
                     </label>
+                    <label>Owner Surname: <input type="text" x-model="editingPatient.ownerName" style="width: 100%; padding: 8px;"></label>
                     
                     <!-- Species -->
                     <label style="font-weight: bold; font-size: 0.9rem;">Species: 
@@ -333,9 +343,15 @@
                     </label>
             
                     <!-- Weight (Full Width) -->
-                    <label style="grid-column: span 2; font-weight: bold; font-size: 0.9rem;">Current Weight (kg): 
-                        <input type="number" step="0.1" x-model="editingPatient.weight" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
-                    </label>
+                    <div style="display: flex; gap: 10px;">
+                        <label style="flex-grow: 1;">Current Weight: <input type="number" step="0.1" x-model="editingPatient.weight" style="width: 100%; padding: 8px;"></label>
+                        <label style="width: 80px;">Unit: 
+                            <select x-model="editingPatient.weightUnit" style="width: 100%; padding: 8px;">
+                                <option value="kg">kg</option>
+                                <option value="lbs">lbs</option>
+                            </select>
+                        </label>
+                    </div>
                 </div>
             
                 <div style="display: flex; justify-content: flex-end; gap: 10px;">
@@ -380,10 +396,11 @@
                         <input type="text" x-model="newDiagnosis.customDiagnosis" placeholder="e.g. Subaortic Stenosis, Tricuspid Dysplasia" style="width: 100%; padding: 10px; border: 1px solid #7dd3fc; border-radius: 5px; box-sizing: border-box; background: #f0f9ff;">
                     </div>
             
-                    <div x-show="newDiagnosis.diagnosis === 'Murmur - no diagnosis'" x-transition style="margin-bottom: 15px; padding: 15px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                    <div x-transition style="margin-bottom: 15px; padding: 15px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px;">
                         <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #b45309; font-size: 0.9rem;">Track Murmur Grade (Levine Scale)</label>
                         <select x-model="newDiagnosis.murmurGrade" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #fcd34d; background: white;">
                             <option value="N/A">Not Graded / Unknown</option>
+                            <option value="0/6">No Murmur</option>
                             <option value="1/6">Grade I/VI (Very soft, requires quiet room)</option>
                             <option value="2/6">Grade II/VI (Soft, localized)</option>
                             <option value="3/6">Grade III/VI (Moderate intensity, easy to hear)</option>
@@ -440,15 +457,25 @@
                         <input type="checkbox" x-model="editingPatient.modules.medications" style="width: 20px; height: 20px; cursor: pointer; accent-color: #3b82f6;">
                     </label>
             
-                    <label style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;" :style="editingPatient.modules.coughActivity ? 'border-color: #f43f5e; box-shadow: 0 0 0 1px #f43f5e;' : ''">
+                    <label style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;" :style="editingPatient.modules.coughLog ? 'border-color: #f43f5e; box-shadow: 0 0 0 1px #f43f5e;' : ''">
                         <div style="display: flex; gap: 15px; align-items: center;">
                             <div style="width: 32px; text-align: center;"><i class="fa-solid fa-heart-pulse" style="font-size: 1.4rem; color: #f43f5e;"></i></div>
                             <div>
-                                <strong style="display: block; color: #1e293b; font-size: 0.95rem;">Quality of Life Log</strong>
-                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.2; display: block;">Daily summaries of coughing and exercise tolerance.</span>
+                                <strong style="display: block; color: #1e293b; font-size: 0.95rem;">Coughing Log</strong>
+                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.2; display: block;">Daily summaries of coughing</span>
                             </div>
                         </div>
-                        <input type="checkbox" x-model="editingPatient.modules.coughActivity" style="width: 20px; height: 20px; cursor: pointer; accent-color: #f43f5e;">
+                        <input type="checkbox" x-model="editingPatient.modules.coughLog" style="width: 20px; height: 20px; cursor: pointer; accent-color: #f43f5e;">
+                    </label>
+                    <label style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;" :style="editingPatient.modules.activityLog ? 'border-color: #f43f5e; box-shadow: 0 0 0 1px #f43f5e;' : ''">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div style="width: 32px; text-align: center;"><i class="fa-solid fa-heart-pulse" style="font-size: 1.4rem; color: #f43f5e;"></i></div>
+                            <div>
+                                <strong style="display: block; color: #1e293b; font-size: 0.95rem;">Activity Log</strong>
+                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.2; display: block;">Daily summaries of activity and exercise tolerance</span>
+                            </div>
+                        </div>
+                        <input type="checkbox" x-model="editingPatient.modules.activityLog" style="width: 20px; height: 20px; cursor: pointer; accent-color: #f43f5e;">
                     </label>
             
                     <label style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;" :style="editingPatient.modules.acvimStaging ? 'border-color: #0284c7; box-shadow: 0 0 0 1px #0284c7;' : ''">
@@ -597,20 +624,23 @@
                         <h4 style="color: #0f766e; margin-top: 0; margin-bottom: 5px;"><i class="fa-solid fa-layer-group"></i> Active Tracking Modules</h4>
                         <p style="font-size: 0.75rem; color: #64748b; margin-top: 0; margin-bottom: 10px;">Toggle sections on or off for your dashboard.</p>
                         
-                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;">
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <div style="display: flex !important; flex-direction: column !important; gap: 8px; font-size: 0.9rem;">
+                            <label style="display: flex !important; align-items: left !important; gap: 8px; cursor: pointer;">
                                 <input type="checkbox" x-model="editingPatient.modules.srr"> SRR Monitor
                             </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <label style="display: flex !important; align-items: left !important; gap: 8px; cursor: pointer;">
                                 <input type="checkbox" x-model="editingPatient.modules.medications"> Medication Ledger
                             </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                <input type="checkbox" x-model="editingPatient.modules.coughActivity"> Cough & Activity Log
+                            <label style="display: flex !important; align-items: left !important; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" x-model="editingPatient.modules.coughLog"> Cough Log
                             </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <label style="display: flex !important; align-items: left !important; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" x-model="editingPatient.modules.activityLog"> Activity Log
+                            </label>
+                            <label style="display: flex !important; align-items: left !important; gap: 8px; cursor: pointer;">
                                 <input type="checkbox" x-model="editingPatient.modules.syncopeLog"> Syncope/Collapse Diary
                             </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <label style="display: flex !important; align-items: left !important; gap: 8px; cursor: pointer;">
                                 <input type="checkbox" x-model="editingPatient.modules.acvimStaging"> ACVIM Staging
                             </label>
                         </div>
@@ -1307,10 +1337,11 @@
                                 <input type="text" x-model="newDiagnosis.customDiagnosis" placeholder="e.g. Subaortic Stenosis, Tricuspid Dysplasia" style="width: 100%; padding: 10px; border: 1px solid #7dd3fc; border-radius: 5px; box-sizing: border-box; background: #f0f9ff;">
                             </div>
                 
-                            <div x-show="newDiagnosis.diagnosis === 'Murmur - no diagnosis'" x-transition style="margin-bottom: 15px; padding: 15px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                            <div x-transition style="margin-bottom: 15px; padding: 15px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px;">
                                 <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #b45309;">Track Murmur Grade (Levine Scale)</label>
                                 <select x-model="newDiagnosis.murmurGrade" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #fcd34d;">
                                     <option value="N/A">Not Graded / Unknown</option>
+                                    <option value="0/6">No Murmur</option>
                                     <option value="1/6">Grade I/VI (Very soft, requires quiet room)</option>
                                     <option value="2/6">Grade II/VI (Soft, localized)</option>
                                     <option value="3/6">Grade III/VI (Moderate intensity, easy to hear)</option>

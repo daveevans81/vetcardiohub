@@ -19,10 +19,12 @@ onboardingData: {
 defaultModules: {
     srr: true,
     medications: false,
-    coughActivity: false,
+    coughLog: false,
+    activityLog: false,
     syncopeLog: false,
     acvimStaging: false
 },
+
 
 // --- CORE STATE ---
 
@@ -306,7 +308,7 @@ init() {
 startNewPatientOnboarding() {
     this.editingPatient = {
         id: crypto.randomUUID(),
-        name: '', species: 'dog', breed: '', sex: '', dob: '', weight: '',
+        name: '', ownerName: '', species: 'dog', breed: '', sex: '', dob: '', weight: '', weightUnit: '',
         modules: { ...this.defaultModules }
     };
     
@@ -365,7 +367,7 @@ saveOnboardedPatient() {
     }
 
     this.showOnboarding = false;
-    // this.saveData(); // Call your localStorage save method
+    this.saveToStorage('vch_patients', this.patients);
 },
 
         
