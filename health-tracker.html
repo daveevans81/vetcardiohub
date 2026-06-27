@@ -278,6 +278,109 @@
                 </div>
             </div>
             
+            
+            <div x-show="showProgressionBanner" class="alert-banner clinical-alert">
+                <i class="fa-solid fa-stethoscope"></i>
+                <span>
+                    <strong>Condition Update Detected:</strong> <span x-text="activePatientProfile.name"></span>'s condition has progressed. Would you like to review and activate additional monitoring modules (e.g., Medication Tracking, Quality of Life)?
+                </span>
+                <button @click="openModuleSettings()" class="btn-sm">Review Modules</button>
+                <button @click="showProgressionBanner = false" class="btn-sm btn-ghost">Dismiss</button>
+            </div>
+
+
+                                <!-- ******************************** -->
+                                <!-- ON BOARDING                      -->
+                                <!-- ******************************** -->
+            
+            <div x-show="showOnboarding" class="modal-overlay" style="display: none;">
+                <div class="modal-content">
+                    
+                    <div x-show="onboardingStep === 0">
+                        <h2>Welcome to VetCardioHub Tracker</h2>
+                        <p>This clinical tracking tool works best when it is tailored to your pet's specific cardiac health needs. Let's set up a profile to generate a personalised monitoring dashboard.</p>
+                        <button @click="onboardingStep = 1" class="btn-primary">Set up my first patient</button>
+                    </div>
+            
+                    <div x-show="onboardingStep === 1">
+                        <h2>Patient Demographics</h2>
+                        <button @click="onboardingStep = 2" class="btn-primary">Continue to Clinical History</button>
+                    </div>
+            
+                    <div x-show="onboardingStep === 2">
+                        <h2>Clinical History</h2>
+                        <p>Has <span x-text="editingPatient.name"></span> been seen by a veterinary surgeon regarding their heart?</p>
+                        
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" x-model="onboardingData.vetSeen" value="diagnosed">
+                                Yes, they have a diagnosed cardiac condition
+                            </label>
+                            <label>
+                                <input type="radio" x-model="onboardingData.vetSeen" value="murmur">
+                                Yes, a heart murmur was detected but no definitive diagnosis yet
+                            </label>
+                            <label>
+                                <input type="radio" x-model="onboardingData.vetSeen" value="other">
+                                No / Tracking non-cardiac events (e.g., general syncope)
+                            </label>
+                        </div>
+            
+                        <div x-show="onboardingData.vetSeen === 'diagnosed'" class="sub-form">
+                            <label>Primary Diagnosis (if known):
+                                <select x-model="onboardingData.diagnosis">
+                                    <option value="MMVD">Myxomatous Mitral Valve Disease (MMVD)</option>
+                                    <option value="HCM">Feline Hypertrophic Cardiomyopathy (HCM)</option>
+                                    </select>
+                            </label>
+                            <label>ACVIM Stage (if known):
+                                <select x-model="onboardingData.acvimStage">
+                                    <option value="B1">Stage B1 (Asymptomatic, no remodelling)</option>
+                                    <option value="B2">Stage B2 (Asymptomatic, heart enlarged)</option>
+                                    <option value="C">Stage C (Active or prior heart failure)</option>
+                                </select>
+                            </label>
+                        </div>
+            
+                        <button @click="generateModuleRecommendations()" class="btn-primary">Generate Dashboard</button>
+                    </div>
+            
+                    <div x-show="onboardingStep === 3">
+                        <h2>Recommended Monitoring Plan</h2>
+                        <p>Based on the clinical history provided, we recommend the following tracking modules for <span x-text="editingPatient.name"></span>.</p>
+                        
+                        <div class="module-cards">
+                            <div class="module-card">
+                                <div class="card-info">
+                                    <h3><i class="fa-solid fa-lungs"></i> SRR Monitor</h3>
+                                    <p>The most important early warning sign for fluid accumulation (pulmonary oedema).</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" x-model="editingPatient.modules.srr">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="module-card">
+                                <div class="card-info">
+                                    <h3><i class="fa-solid fa-pills"></i> Medication Ledger</h3>
+                                    <p>Track dose adjustments and their therapeutic effect on breathing trends.</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" x-model="editingPatient.modules.medications">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+            
+                            </div>
+                        
+                        <p class="text-muted"><small>You can enable or disable these modules at any time from the patient settings menu.</small></p>
+                        <button @click="saveOnboardedPatient()" class="btn-success">Finalise Dashboard</button>
+                    </div>
+            
+                </div>
+            </div>
+            
                                 <!-- ******************************** -->
                                 <!-- PATIENT MANAGEMENT               -->
                                 <!-- ******************************** -->
@@ -289,7 +392,6 @@
                             <i class="fa-solid fa-dog" x-show="activePatientProfile?.species === 'dog'" style="font-size: 1.5rem; color: #64748b;"></i>
                             <i class="fa-solid fa-cat" x-show="activePatientProfile?.species === 'cat'" style="font-size: 1.5rem; color: #64748b;"></i>
                             
-                            <!-- Locks during the count to prevent data corruption -->
                             <select x-model="activePatientId" :disabled="isCounting" style="font-size: 1.2rem; font-weight: bold; border: none; background: transparent; outline: none; color: #1e293b;" :style="isCounting ? 'cursor: not-allowed; opacity: 0.8;' : 'cursor: pointer;'">
                                 <template x-for="patient in patients" :key="patient.id">
                                     <option :value="patient.id" x-text="`${patient.name} ${patient.ownerName ? '('+patient.ownerName+')' : ''}`"></option>
@@ -308,12 +410,11 @@
                         </div>
                     </div>
                     
-                    <!-- Hides during the count to remove distractions -->
                     <div style="display: flex; gap: 5px;" x-show="!isCounting" x-transition>
                         <button @click="openPatientManager(false, activePatientId)" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" title="Edit Active Profile">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <button @click="openPatientManager(true)" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" title="Add New Pet">
+                        <button @click="startNewPatientOnboarding()" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" title="Add New Pet">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -323,38 +424,36 @@
                                 <!-- SRR BOX - count and manual       -->
                                 <!-- ******************************** -->
                                 
-            <div x-show="!isCounting" class="summary-box">
-                <h2>Resting Respiratory Rate Tracker</h2>
-                <p>Ensure your pet is fully resting or sleeping. 
-                   <a href="#" @click.prevent="openGlossary('rrr_guidelines')" style="color: #1e40af;">
-                     <i class="fa-solid fa-circle-question"></i> How to count
-                   </a>
-                </p>               
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                
-                    <button @click="startCount()" class="btn-massive-tap" style="min-height: 80px; background: #0f766e; color: white; border-radius: 8px; border: none; cursor: pointer;">
-                        <i class="fa-solid fa-stopwatch"></i> Count SRR Now
-                    </button>
-                    <button @click="showManualSrr = true" class="btn-massive-tap" style="min-height: 80px; background: #e2e8f0; color: #334155; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer;">
-                        <i class="fa-solid fa-keyboard"></i> Manual Entry
-                    </button>
-                    
-                </div>
-            </div>
+            <template x-if="activePatientProfile?.modules?.srr">
+                <div>
+                    <div x-show="!isCounting" class="summary-box">
+                        <h2>Resting Respiratory Rate Tracker</h2>
+                        <p>Ensure your pet is fully resting or sleeping. 
+                           <a href="#" @click.prevent="openGlossary('rrr_guidelines')" style="color: #1e40af;">
+                             <i class="fa-solid fa-circle-question"></i> How to count
+                           </a>
+                        </p>               
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <button @click="startCount()" class="btn-massive-tap" style="min-height: 80px; background: #0f766e; color: white; border-radius: 8px; border: none; cursor: pointer;">
+                                <i class="fa-solid fa-stopwatch"></i> Count SRR Now
+                            </button>
+                            <button @click="showManualSrr = true" class="btn-massive-tap" style="min-height: 80px; background: #e2e8f0; color: #334155; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer;">
+                                <i class="fa-solid fa-keyboard"></i> Manual Entry
+                            </button>
+                        </div>
+                    </div>
             
-                                <!-- ******************************** -->
-                                <!-- SRR BOX -           manual       -->
-                                <!-- ******************************** -->
-  
-            <div x-show="showManualSrr" class="summary-box" style="border: 2px solid #3b82f6; background: #eff6ff;" x-transition>
-                <h3 style="margin-top: 0; color: #1e40af;"><i class="fa-solid fa-pen-to-square"></i> Manual SRR Entry</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
-                    <label>Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" style="width: 100%; padding: 8px;"></label>
-                    <label>Date / Time: <input type="datetime-local" x-model="manualSrrDate" style="width: 100%; padding: 8px;"></label>
+                    <div x-show="showManualSrr" class="summary-box" style="border: 2px solid #3b82f6; background: #eff6ff;" x-transition>
+                        <h3 style="margin-top: 0; color: #1e40af;"><i class="fa-solid fa-pen-to-square"></i> Manual SRR Entry</h3>
+                        <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
+                            <label>Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" style="width: 100%; padding: 8px;"></label>
+                            <label>Date / Time: <input type="datetime-local" x-model="manualSrrDate" style="width: 100%; padding: 8px;"></label>
+                        </div>
+                        <button @click="saveManualSrr()" class="btn-nudge-static" style="background: #3b82f6; width: 100%; max-width: 300px;">Save Reading</button>
+                        <button @click="showManualSrr = false" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
+                    </div>
                 </div>
-                <button @click="saveManualSrr()" class="btn-nudge-static" style="background: #3b82f6; width: 100%; max-width: 300px;">Save Reading</button>
-                <button @click="showManualSrr = false" style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
-            </div>
+            </template>
 
             
             <div x-show="showPatientManager" class="summary-box" style="border: 2px solid #005f73; background: #f0fdfa;" x-transition>
@@ -394,6 +493,29 @@
                     </div>
                     
                     <label>Custom Alarm Cutoff (bpm): <input type="number" x-model="editingPatient.customSrrCutoff" placeholder="Default: 30" style="width: 100%; padding: 8px;"></label>
+                    
+                    <div style="margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 15px;" x-show="isEditingExistingPatient && editingPatient.modules">
+                        <h4 style="color: #0f766e; margin-top: 0; margin-bottom: 5px;"><i class="fa-solid fa-layer-group"></i> Active Tracking Modules</h4>
+                        <p style="font-size: 0.75rem; color: #64748b; margin-top: 0; margin-bottom: 10px;">Toggle sections on or off for your dashboard.</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" x-model="editingPatient.modules.srr"> SRR Monitor
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" x-model="editingPatient.modules.medications"> Medication Ledger
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" x-model="editingPatient.modules.coughActivity"> Cough & Activity Log
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" x-model="editingPatient.modules.syncopeLog"> Syncope/Collapse Diary
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" x-model="editingPatient.modules.acvimStaging"> ACVIM Staging
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 
                 <button @click="savePatient()" class="btn-nudge-static" style="background: #0f766e; width: 100%; max-width: 300px;">Save Profile</button>

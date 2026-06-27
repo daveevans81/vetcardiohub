@@ -3,6 +3,27 @@ document.addEventListener('alpine:init', () => {
         // Absorb the Glossary Engine for tooltips 
         ...glossaryEngine, 
 
+// Onboarding State
+showOnboarding: false,
+onboardingStep: 0, // 0 = Welcome, 1 = Demographics, 2 = Clinical, 3 = Recommendations
+isExistingPatientEdit: false, // Flag to bypass wizard when editing later
+
+onboardingData: {
+    vetSeen: null, // 'diagnosed', 'murmur', 'other'
+    murmurGrade: '',
+    diagnosis: '',
+    acvimStage: '', // Useful for generating module recs
+},
+
+// Default module template
+defaultModules: {
+    srr: true,
+    medications: false,
+    coughActivity: false,
+    syncopeLog: false,
+    acvimStaging: false
+},
+
 // --- CORE STATE ---
 
 
@@ -200,6 +221,11 @@ sanitiseCSV(val) {
     return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
 },
 
+// Computed Profile (Helper to easily access active modules)
+get activePatientProfile() {
+    return this.patients.find(p => p.id === this.activePatientId) || null;
+},
+
         
 init() {
     // 1. ROBUST DATA LOAD: Prevents the "filter of undefined" crash
@@ -274,6 +300,59 @@ init() {
     });
     
     this.$nextTick(() => { if (this.patients.length > 0) { this.renderChart(); this.renderMedChart(); } });
+},
+
+// Initialization method for new patients
+startNewPatientOnboarding() {
+    this.editingPatient = {
+        id: crypto.randomUUID(), // Assuming UUIDs
+        name: '', species: 'canine', breed: '', sex: '', dob: '', weight: '',
+        modules: { ...this.defaultModules }
+    };
+    this.onboardingData = { vetSeen: null, murmurGrade: '', diagnosis: '', acvimStage: '' };
+    this.isExistingPatientEdit = false;
+    
+    // If no patients exist, show Step 0, else skip to Step 1
+    this.onboardingStep = this.patients.length === 0 ? 0 : 1; 
+    this.showOnboarding = true;
+},
+
+// The Logic Engine (Stage 3)
+generateModuleRecommendations() {
+    // Reset to baseline
+    let recs = { srr: false, medications: false, coughActivity: false, syncopeLog: false, acvimStaging: false };
+    const data = this.onboardingData;
+
+    if (data.vetSeen === 'diagnosed') {
+        recs.srr = true;
+        recs.acvimStaging = true;
+        
+        // If they specify Stage B2, C, or D (treatment stages)
+        if (['B2', 'C', 'D'].includes(data.acvimStage)) {
+            recs.medications = true;
+            recs.coughActivity = true;
+        }
+    } else if (data.vetSeen === 'murmur') {
+        recs.srr = true;
+        // Vet Visit log is handled by acvimStaging / diagnosis module
+        recs.acvimStaging = true; 
+    } else if (data.vetSeen === 'other') {
+        // e.g., general wellness or collapse history
+        recs.activityLog = true;
+        recs.syncopeLog = true;
+    }
+
+    // Apply recommendations to the pending patient object
+    this.editingPatient.modules = { ...recs };
+    this.onboardingStep = 3;
+},
+
+saveOnboardedPatient() {
+    // Save to your main patients array
+    this.patients.push(this.editingPatient);
+    this.activePatientId = this.editingPatient.id;
+    this.showOnboarding = false;
+    this.saveData(); // Assuming you have a localStorage persistence method
 },
         
         // --- PET MANAGEMENT ---
