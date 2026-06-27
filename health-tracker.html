@@ -832,251 +832,252 @@
                                 <!-- ******************************** -->
                                 <!-- SRR  count                       -->
                                 <!-- ******************************** -->
-            
-            <div x-show="isCounting" class="summary-box" style="border: 2px solid #16325F;" x-cloak>
-                <div class="timer-pulse" x-text="timeLeft + 's'"></div>
-                <p style="text-align: center; margin-bottom: 20px;">Time Remaining</p>
-                
-                <button @click="registerTap()" class="btn-massive-tap">
-                    <i class="fa-solid fa-lungs"></i>
-                    <span>TAP EACH BREATH</span>
-                </button>
-                
-                <h3 style="text-align: center; margin-top: 15px;">Count: <span x-text="tapCount"></span></h3>
-            </div>
-            
-            
-            <div x-show="!isCounting">
-                <!-- 3. Results & Clinical Interpretation Screen -->
-                <div x-show="finalRate !== null && !isCounting" x-cloak>
-                    <div class="summary-box" style="border: 1px solid #cbd5e1;">
-                        <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
-                        
-                        <template x-if="clinicalInterpretation">
-                            <div :class="'status-' + clinicalInterpretation.status" style="margin: 20px 0; text-align: left;">
-                                <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fa-solid" :class="clinicalInterpretation.status === 'danger' ? 'fa-triangle-exclamation' : (clinicalInterpretation.status === 'equivocal' ? 'fa-circle-exclamation' : 'fa-circle-check')"></i>
-                                    <span x-text="clinicalInterpretation.title"></span>
-                                </h3>
-                                <p x-text="clinicalInterpretation.text" style="line-height: 1.5; margin-bottom: 0;"></p>
-                                
-                                <template x-if="clinicalInterpretation.status === 'equivocal'">
-                                    <button @click="openGlossary('equivocal_rrr')" style="margin-top: 12px; font-size: 0.85rem; background: rgba(255,255,255,0.5); border: 1px solid #f59e0b; color: #b45309; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 500;">
-                                        Why recount? <i class="fa-solid fa-book-medical" style="margin-left: 4px;"></i>
-                                    </button>
-                                </template>
-                            </div>
-                        </template>
-                
-                        <!-- UNSAVED STATE: Save or Discard -->
-                        <div x-show="!hasSavedCurrentCount">
-                            <div style="display: flex; gap: 10px; flex-direction: column;">
-                                <button @click="saveToHistory()" style="padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; width: 100%; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                                    <i class="fa-solid fa-floppy-disk" style="margin-right: 6px;"></i> Save Reading
-                                </button>
-                                <button @click="closeResult(); startCount()" style="padding: 12px 24px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-size: 1rem; width: 100%; font-weight: 500;">
-                                    <i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Discard & Recount
-                                </button>
-                            </div>
-                        </div>
-                
-                        <!-- SAVED STATE: Nudge to Symptoms -->
-                        <div x-show="hasSavedCurrentCount" x-transition>
-                            <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px;">
-                                <p style="color: #10b981; font-weight: bold; margin-top: 0; margin-bottom: 10px; font-size: 1.1rem;">
-                                    <i class="fa-solid fa-check-circle"></i> Reading saved!
-                                </p>
-                                <p style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
-                                    Would you like to update today's symptom summaries while you're here?
-                                </p>
-                                
-                                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                                    <button @click="nudgeToSymptom('cough')" style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
-                                        <i class="fa-solid fa-head-side-cough text-rose-500"></i> Log Cough
-                                    </button>
-                                    <button @click="nudgeToSymptom('activity')" style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
-                                        <i class="fa-solid fa-person-running text-blue-500"></i> Log Activity
-                                    </button>
-                                </div>
-                
-                                <button @click="closeResult()" style="width: 100%; padding: 10px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                                    Done for now
-                                </button>
-                            </div>
-                        </div>
-                        
-                    </div>
+            <template x-if="activePatientProfile?.modules?.srr">
+                <div x-show="isCounting" class="summary-box" style="border: 2px solid #16325F;" x-cloak>
+                    <div class="timer-pulse" x-text="timeLeft + 's'"></div>
+                    <p style="text-align: center; margin-bottom: 20px;">Time Remaining</p>
+                    
+                    <button @click="registerTap()" class="btn-massive-tap">
+                        <i class="fa-solid fa-lungs"></i>
+                        <span>TAP EACH BREATH</span>
+                    </button>
+                    
+                    <h3 style="text-align: center; margin-top: 15px;">Count: <span x-text="tapCount"></span></h3>
                 </div>
                 
-                                    <!-- ******************************** -->
-                                    <!-- SRR LOG history                  -->
-                                    <!-- ******************************** -->
                 
-                 <div class="paginatedHistory" x-show="patients.length > 0"  style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
-                    
-                       <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                            <button @click="showLog = !showLog" type="button" style="
-                                width: 100%;
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                padding: 12px 16px;
-                                background: #e8eef7;
-                                border: 1px solid #c8d6eb;
-                                border-radius: 6px;
-                                cursor: pointer;
-                                font-weight: bold;
-                                color: #16325F;
-                                transition: background 0.15s ease;
-                            " @mouseenter="$el.style.background='#dde6f3'"
-                               @mouseleave="$el.style.background='#e8eef7'">
-       
-                            <h3 style="margin: 0;"><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Logbook</h3> <i class="fa-solid" :class="showLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                            </button>
-                        </div>
-                        <div x-show="showLog">
-                            <div x-show="paginatedHistory.length === 0" style="text-align: center; padding: 25px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; color: #64748b; font-size: 0.9rem;">
-                                <i class="fa-solid fa-calendar-xmark" style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5;"></i><br>
-                                No readings recorded during this specific time period.<br>
-                                <strong>Adjust the Analytics date range below to see older logs.</strong>
-                            </div>
-                    
-                            <template x-for="log in paginatedHistory" :key="log.id">
-                                <div>  <div class="history-item" :class="log.isEquivocal ? 'equivocal-flag' : ''">
-                                        <div>
-                                            <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
-                                            <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
-                                            <template x-if="log.comment && log.comment.trim().length">
-                                                <span
-                                                    @click.stop="toggleCommentDisplay(log.id)"
-                                                    :title="log.comment"
-                                                    :style="expandedCommentId === log.id
-                                                        ? 'color:#1d4ed8; background:#eff6ff; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'
-                                                        : 'color:#3b82f6; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'">
-                                            
-                                                    <i class="fa-solid fa-comment-dots"></i>
-                                                </span>
-                                            </template>
-                                        </div>
-                                        <div style="display: flex; align-items: center; gap: 10px;">
-                                            <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">
-                                                <span x-text="log.rate"></span> bpm
-                                            </strong>
-                                            <button @click="openCommentEditor(log)"
-                                                    style="background: none; border: none; color: #3b82f6; cursor: pointer; padding: 4px; opacity: 0.5;"
-                                                    @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
-                                                    :title="log.comment ? 'Edit note' : 'Add note'">
-                                                <i class="fa-solid" :class="log.comment ? 'fa-comment-dots' : 'fa-comment-medical'"></i>
-                                            </button>
-                                            <button @click="deleteReading(log.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; opacity: 0.5;" 
-                                                    @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
-                                                    title="Delete this reading">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                <div x-show="!isCounting">
+                    <!-- 3. Results & Clinical Interpretation Screen -->
+                    <div x-show="finalRate !== null && !isCounting" x-cloak>
+                        <div class="summary-box" style="border: 1px solid #cbd5e1;">
+                            <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
                             
-                                    <div x-show="expandedCommentId === log.id && log.comment && log.comment.trim().length > 0"
-                                         x-transition
-                                         style="background: #eff6ff; border: 1px solid #bfdbfe; border-top: none; border-radius: 0 0 6px 6px; padding: 10px 14px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                                        <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                            <i class="fa-solid fa-comment-dots" style="color: #3b82f6; margin-top: 2px; font-size: 0.8rem; flex-shrink: 0;"></i>
-                                            <span style="font-size: 0.85rem; color: #1e40af; line-height: 1.5;" x-text="log.comment"></span>
-                                        </div>
-                                        <button @click="openCommentEditor(log)"
-                                                style="background: none; border: 1px solid #bfdbfe; border-radius: 4px; color: #3b82f6; cursor: pointer; padding: 3px 8px; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">
-                                            Edit
+                            <template x-if="clinicalInterpretation">
+                                <div :class="'status-' + clinicalInterpretation.status" style="margin: 20px 0; text-align: left;">
+                                    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fa-solid" :class="clinicalInterpretation.status === 'danger' ? 'fa-triangle-exclamation' : (clinicalInterpretation.status === 'equivocal' ? 'fa-circle-exclamation' : 'fa-circle-check')"></i>
+                                        <span x-text="clinicalInterpretation.title"></span>
+                                    </h3>
+                                    <p x-text="clinicalInterpretation.text" style="line-height: 1.5; margin-bottom: 0;"></p>
+                                    
+                                    <template x-if="clinicalInterpretation.status === 'equivocal'">
+                                        <button @click="openGlossary('equivocal_rrr')" style="margin-top: 12px; font-size: 0.85rem; background: rgba(255,255,255,0.5); border: 1px solid #f59e0b; color: #b45309; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                                            Why recount? <i class="fa-solid fa-book-medical" style="margin-left: 4px;"></i>
                                         </button>
-                                    </div>
+                                    </template>
                                 </div>
                             </template>
                     
-                            <div style="margin-top: 15px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; overflow: hidden;">
-    
-                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap;">
-                                    <span style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
-                                        <i class="fa-solid fa-filter" style="opacity: 0.6;"></i>
-                                        <strong>Date range:</strong>
-                                    </span>
-                                    <select x-model="timeScale" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; color: #334155; cursor: pointer;">
-                                        <option value="thisWeek">This Week</option>
-                                        <option value="lastWeek">Last Week</option>
-                                        <option value="thisMonth">This Month</option>
-                                        <option value="lastMonth">Last Month</option>
-                                        <option value="60d">Last 60 Days</option>
-                                        <option value="90d">Last 90 Days</option>
-                                        <option value="180d">Last 6 Months</option>
-                                        <option value="all">Entire Dataset</option>
-                                        <option value="custom">Custom Range...</option>
-                                    </select>
-                                    <template x-if="timeScale === 'custom'">
-                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
-                                            <input type="date" x-model="customStartDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                                            <span style="color: #94a3b8;">to</span>
-                                            <input type="date" x-model="customEndDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                            <!-- UNSAVED STATE: Save or Discard -->
+                            <div x-show="!hasSavedCurrentCount">
+                                <div style="display: flex; gap: 10px; flex-direction: column;">
+                                    <button @click="saveToHistory()" style="padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; width: 100%; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                                        <i class="fa-solid fa-floppy-disk" style="margin-right: 6px;"></i> Save Reading
+                                    </button>
+                                    <button @click="closeResult(); startCount()" style="padding: 12px 24px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-size: 1rem; width: 100%; font-weight: 500;">
+                                        <i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Discard & Recount
+                                    </button>
+                                </div>
+                            </div>
+                    
+                            <!-- SAVED STATE: Nudge to Symptoms -->
+                            <div x-show="hasSavedCurrentCount" x-transition>
+                                <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px;">
+                                    <p style="color: #10b981; font-weight: bold; margin-top: 0; margin-bottom: 10px; font-size: 1.1rem;">
+                                        <i class="fa-solid fa-check-circle"></i> Reading saved!
+                                    </p>
+                                    <p style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
+                                        Would you like to update today's symptom summaries while you're here?
+                                    </p>
+                                    
+                                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                        <button @click="nudgeToSymptom('cough')" style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
+                                            <i class="fa-solid fa-head-side-cough text-rose-500"></i> Log Cough
+                                        </button>
+                                        <button @click="nudgeToSymptom('activity')" style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
+                                            <i class="fa-solid fa-person-running text-blue-500"></i> Log Activity
+                                        </button>
+                                    </div>
+                    
+                                    <button @click="closeResult()" style="width: 100%; padding: 10px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                        Done for now
+                                    </button>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                                        <!-- ******************************** -->
+                                        <!-- SRR LOG history                  -->
+                                        <!-- ******************************** -->
+                    
+                     <div class="paginatedHistory" x-show="patients.length > 0"  style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
+                        
+                           <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                                <button @click="showLog = !showLog" type="button" style="
+                                    width: 100%;
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                    padding: 12px 16px;
+                                    background: #e8eef7;
+                                    border: 1px solid #c8d6eb;
+                                    border-radius: 6px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                    color: #16325F;
+                                    transition: background 0.15s ease;
+                                " @mouseenter="$el.style.background='#dde6f3'"
+                                   @mouseleave="$el.style.background='#e8eef7'">
+           
+                                <h3 style="margin: 0;"><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Logbook</h3> <i class="fa-solid" :class="showLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                </button>
+                            </div>
+                            <div x-show="showLog">
+                                <div x-show="paginatedHistory.length === 0" style="text-align: center; padding: 25px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; color: #64748b; font-size: 0.9rem;">
+                                    <i class="fa-solid fa-calendar-xmark" style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5;"></i><br>
+                                    No readings recorded during this specific time period.<br>
+                                    <strong>Adjust the Analytics date range below to see older logs.</strong>
+                                </div>
+                        
+                                <template x-for="log in paginatedHistory" :key="log.id">
+                                    <div>  <div class="history-item" :class="log.isEquivocal ? 'equivocal-flag' : ''">
+                                            <div>
+                                                <strong x-text="new Date(log.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></strong> 
+                                                <span style="color: #64748b; font-size: 0.85rem; margin-left: 8px;" x-text="log.time"></span>
+                                                <template x-if="log.comment && log.comment.trim().length">
+                                                    <span
+                                                        @click.stop="toggleCommentDisplay(log.id)"
+                                                        :title="log.comment"
+                                                        :style="expandedCommentId === log.id
+                                                            ? 'color:#1d4ed8; background:#eff6ff; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'
+                                                            : 'color:#3b82f6; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'">
+                                                
+                                                        <i class="fa-solid fa-comment-dots"></i>
+                                                    </span>
+                                                </template>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <strong style="font-size: 1.1rem;" :style="log.rate >= 40 ? 'color: #ef4444;' : (log.isEquivocal ? 'color: #d97706;' : 'color: #10b981;')">
+                                                    <span x-text="log.rate"></span> bpm
+                                                </strong>
+                                                <button @click="openCommentEditor(log)"
+                                                        style="background: none; border: none; color: #3b82f6; cursor: pointer; padding: 4px; opacity: 0.5;"
+                                                        @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
+                                                        :title="log.comment ? 'Edit note' : 'Add note'">
+                                                    <i class="fa-solid" :class="log.comment ? 'fa-comment-dots' : 'fa-comment-medical'"></i>
+                                                </button>
+                                                <button @click="deleteReading(log.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; opacity: 0.5;" 
+                                                        @mouseenter="$el.style.opacity='1'" @mouseleave="$el.style.opacity='0.5'"
+                                                        title="Delete this reading">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                
+                                        <div x-show="expandedCommentId === log.id && log.comment && log.comment.trim().length > 0"
+                                             x-transition
+                                             style="background: #eff6ff; border: 1px solid #bfdbfe; border-top: none; border-radius: 0 0 6px 6px; padding: 10px 14px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                                            <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                                <i class="fa-solid fa-comment-dots" style="color: #3b82f6; margin-top: 2px; font-size: 0.8rem; flex-shrink: 0;"></i>
+                                                <span style="font-size: 0.85rem; color: #1e40af; line-height: 1.5;" x-text="log.comment"></span>
+                                            </div>
+                                            <button @click="openCommentEditor(log)"
+                                                    style="background: none; border: 1px solid #bfdbfe; border-radius: 4px; color: #3b82f6; cursor: pointer; padding: 3px 8px; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">
+                                                Edit
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                        
+                                <div style="margin-top: 15px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; overflow: hidden;">
+        
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap;">
+                                        <span style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+                                            <i class="fa-solid fa-filter" style="opacity: 0.6;"></i>
+                                            <strong>Date range:</strong>
+                                        </span>
+                                        <select x-model="timeScale" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; color: #334155; cursor: pointer;">
+                                            <option value="thisWeek">This Week</option>
+                                            <option value="lastWeek">Last Week</option>
+                                            <option value="thisMonth">This Month</option>
+                                            <option value="lastMonth">Last Month</option>
+                                            <option value="60d">Last 60 Days</option>
+                                            <option value="90d">Last 90 Days</option>
+                                            <option value="180d">Last 6 Months</option>
+                                            <option value="all">Entire Dataset</option>
+                                            <option value="custom">Custom Range...</option>
+                                        </select>
+                                        <template x-if="timeScale === 'custom'">
+                                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+                                                <input type="date" x-model="customStartDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                                <span style="color: #94a3b8;">to</span>
+                                                <input type="date" x-model="customEndDate" style="font-size: 0.8rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                            </div>
+                                        </template>
+                                    </div>
+                                
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;" x-show="totalPages > 1">
+                                        <button @click="prevPage()" :disabled="currentPage === 1"
+                                                style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
+                                                :style="currentPage === 1 ? 'opacity: 0.5;' : ''">
+                                            <i class="fa-solid fa-chevron-left"></i> Prev
+                                        </button>
+                                        <span style="font-size: 0.9rem; color: #475569;">
+                                            Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span>
+                                        </span>
+                                        <button @click="nextPage()" :disabled="currentPage === totalPages"
+                                                style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
+                                                :style="currentPage === totalPages ? 'opacity: 0.5;' : ''">
+                                            Next <i class="fa-solid fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                
+                                    <template x-if="filteredStats">
+                                        <div style="padding: 12px 14px; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                                            
+                                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                                <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Readings</div>
+                                                <div style="font-size: 1.2rem; font-weight: bold; color: #334155;" x-text="getFilteredReadings().length"></div>
+                                            </div>
+                                
+                                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                                <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Mean SRR</div>
+                                                <div style="font-size: 1.2rem; font-weight: bold;"
+                                                     :style="filteredStats.mean >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
+                                                     x-text="filteredStats.mean.toFixed(1) + ' bpm'"></div>
+                                            </div>
+                                
+                                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                                <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">
+                                                    Upper Ref (mean+2SD)
+                                                </div>
+                                                <div style="font-size: 1.2rem; font-weight: bold;"
+                                                     :style="filteredStats.upperCI >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
+                                                     x-text="filteredStats.upperCI.toFixed(1) + ' bpm'"></div>
+                                            </div>
+                                
+                                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;" x-show="getFilteredReadings().length >= 2">
+                                                <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Range</div>
+                                                <div style="font-size: 1.2rem; font-weight: bold; color: #334155;"
+                                                     x-text="Math.min(...getFilteredReadings().map(d => d.rate)) + '–' + Math.max(...getFilteredReadings().map(d => d.rate)) + ' bpm'"></div>
+                                            </div>
+                                
                                         </div>
                                     </template>
+                                
+                                    <template x-if="!filteredStats && getFilteredReadings().length > 0">
+                                        <div style="padding: 10px 14px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8; font-style: italic;">
+                                            <i class="fa-solid fa-circle-info" style="margin-right: 4px;"></i>
+                                            At least 2 readings required to calculate statistics.
+                                        </div>
+                                    </template>
+                                
                                 </div>
-                            
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;" x-show="totalPages > 1">
-                                    <button @click="prevPage()" :disabled="currentPage === 1"
-                                            style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
-                                            :style="currentPage === 1 ? 'opacity: 0.5;' : ''">
-                                        <i class="fa-solid fa-chevron-left"></i> Prev
-                                    </button>
-                                    <span style="font-size: 0.9rem; color: #475569;">
-                                        Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span>
-                                    </span>
-                                    <button @click="nextPage()" :disabled="currentPage === totalPages"
-                                            style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
-                                            :style="currentPage === totalPages ? 'opacity: 0.5;' : ''">
-                                        Next <i class="fa-solid fa-chevron-right"></i>
-                                    </button>
-                                </div>
-                            
-                                <template x-if="filteredStats">
-                                    <div style="padding: 12px 14px; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
-                                        
-                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
-                                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Readings</div>
-                                            <div style="font-size: 1.2rem; font-weight: bold; color: #334155;" x-text="getFilteredReadings().length"></div>
-                                        </div>
-                            
-                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
-                                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Mean SRR</div>
-                                            <div style="font-size: 1.2rem; font-weight: bold;"
-                                                 :style="filteredStats.mean >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
-                                                 x-text="filteredStats.mean.toFixed(1) + ' bpm'"></div>
-                                        </div>
-                            
-                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
-                                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">
-                                                Upper Ref (mean+2SD)
-                                            </div>
-                                            <div style="font-size: 1.2rem; font-weight: bold;"
-                                                 :style="filteredStats.upperCI >= 30 ? 'color: #ef4444;' : 'color: #10b981;'"
-                                                 x-text="filteredStats.upperCI.toFixed(1) + ' bpm'"></div>
-                                        </div>
-                            
-                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;" x-show="getFilteredReadings().length >= 2">
-                                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 4px;">Range</div>
-                                            <div style="font-size: 1.2rem; font-weight: bold; color: #334155;"
-                                                 x-text="Math.min(...getFilteredReadings().map(d => d.rate)) + '–' + Math.max(...getFilteredReadings().map(d => d.rate)) + ' bpm'"></div>
-                                        </div>
-                            
-                                    </div>
-                                </template>
-                            
-                                <template x-if="!filteredStats && getFilteredReadings().length > 0">
-                                    <div style="padding: 10px 14px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8; font-style: italic;">
-                                        <i class="fa-solid fa-circle-info" style="margin-right: 4px;"></i>
-                                        At least 2 readings required to calculate statistics.
-                                    </div>
-                                </template>
-                            
                             </div>
-                        </div>
-                </div>
+                    </div>
+                </template>
                 
                 <!-- ******************************** -->
                 <!-- QUALITY OF LIFE & SYMPTOMS       -->
@@ -1096,329 +1097,333 @@
                         <!-- ============================== -->
                         <!-- COUGH MONITOR MODULE           -->
                         <!-- ============================== -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 15px;">
-                                <h4 style="margin: 0; color: #334155;"><i class="fa-solid fa-head-side-cough"></i> Cough Log</h4>
-                                <button x-show="!showCoughForm" @click="openCoughForm()" style="background: #10b981; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">
-                                    <i class="fa-solid fa-plus"></i> Log Today
-                                </button>
-                            </div>
-                            
-                            <!-- COUGH DATA ENTRY FORM (Hidden by default) -->
-                            <div x-show="showCoughForm" x-transition style="background: white; border: 2px solid #94a3b8; border-radius: 6px; padding: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <strong style="color: #1e293b;">Data Entry</strong>
-                                    <input type="date" x-model="newCough.date" @change="loadCoughForDate()" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
-                                </div>
-                                
-                                <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">Approximate Frequency:</label>
-                                <div style="display: flex; gap: 5px; margin-bottom: 12px;">
-                                    <input type="number" x-model="newCough.frequencyCount" placeholder="#" style="width: 60px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: center;">
-                                    <span style="display: flex; align-items: center; color: #64748b; font-size: 0.9rem;">times per</span>
-                                    <select x-model="newCough.frequencyPeriod" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                                        <option value="hour">Hour</option>
-                                        <option value="day">Day</option>
-                                        <option value="week">Week</option>
-                                    </select>
-                                </div>
-                
-                                <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                    Description:
-                                    <a href="#" @click.prevent="openGlossary('cough_types')" style="color: #3b82f6; text-decoration: none;"><i class="fa-solid fa-circle-question"></i> Sound Guide</a>
-                                </label>
-                                <select x-model="newCough.description" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px;">
-                                    <option value="chesty/productive">Chesty / Productive</option>
-                                    <option value="goose honking">Goose Honking</option>
-                                    <option value="reverse sneezing">Reverse Sneezing</option>
-                                    <option value="expiratory reflex (gag)">Terminal Retch / Gagging</option>
-                                    <option value="dry/harsh">Dry / Harsh</option>
-                                </select>
-                                
-                                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                                    <div style="flex: 1;">
-                                        <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Severity:</label>
-                                        <select x-model="newCough.severity" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                                            <option value="Mild">Mild</option>
-                                            <option value="Moderate">Moderate</option>
-                                            <option value="Severe">Severe</option>
-                                        </select>
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Main Trigger:</label>
-                                        <select x-model="newCough.context" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                                            <option value="Resting/Night">Resting/Night</option>
-                                            <option value="Excitement">Excitement</option>
-                                            <option value="Exercise">Exercise</option>
-                                            <option value="Post-Drinking">Post-Drinking</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <input type="text" x-model="newCough.notes" placeholder="Additional notes..." style="width: 100%; padding: 6px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                                
-                                <div style="display: flex; gap: 10px;">
-                                    <button @click="closeCoughForm()" style="flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-weight: bold;">Cancel</button>
-                                    <button @click="saveCough()" style="flex: 2; padding: 10px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                        <i class="fa-solid" :class="hasCoughForDate() ? 'fa-arrows-rotate' : 'fa-check'"></i> 
-                                        <span x-text="hasCoughForDate() ? 'Update' : 'Save'"></span>
+                        <template x-if="activePatientProfile?.modules?.coughLog">
+                            <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 15px;">
+                                    <h4 style="margin: 0; color: #334155;"><i class="fa-solid fa-head-side-cough"></i> Cough Log</h4>
+                                    <button x-show="!showCoughForm" @click="openCoughForm()" style="background: #10b981; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">
+                                        <i class="fa-solid fa-plus"></i> Log Today
                                     </button>
                                 </div>
-                            </div>
-                            
-                            <!-- COUGH LIST VIEW (Visible when form is hidden) -->
-                            <div x-show="!showCoughForm">
-                                <div x-show="sortedCoughLog.length === 0" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px 0;">
-                                    No cough summaries logged.
-                                </div>
-                                <div style="max-height: 250px; overflow-y: auto;">
-                                    <template x-for="c in sortedCoughLog" :key="c.id">
-                                        <div style="background: white; border: 1px solid #e2e8f0; padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
-                                            <div>
-                                                <strong x-text="c.date" style="color: #1e293b;"></strong> - 
-                                                <span :style="c.severity === 'Severe' ? 'color: #ef4444; font-weight: bold;' : 'color: #d97706;'" x-text="c.severity"></span><br>
-                                                <span style="color: #475569;" x-text="`${c.frequencyCount}x / ${c.frequencyPeriod}`"></span>
-                                                <span x-show="c.frequencyCount" style="color: #cbd5e1;"> | </span>
-                                                <span style="color: #64748b; font-style: italic;" x-text="c.description"></span>
-                                            </div>
-                                            <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                                <button @click="openCoughForm(c.date)" style="background: none; border: none; color: #3b82f6; cursor: pointer; opacity: 0.7;" title="Edit Entry"><i class="fa-solid fa-pen"></i></button>
-                                                <button @click="deleteCough(c.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.7;" title="Delete Entry"><i class="fa-solid fa-trash"></i></button>
-                                            </div>
+                                
+                                <!-- COUGH DATA ENTRY FORM (Hidden by default) -->
+                                <div x-show="showCoughForm" x-transition style="background: white; border: 2px solid #94a3b8; border-radius: 6px; padding: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                        <strong style="color: #1e293b;">Data Entry</strong>
+                                        <input type="date" x-model="newCough.date" @change="loadCoughForDate()" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+                                    </div>
+                                    
+                                    <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">Approximate Frequency:</label>
+                                    <div style="display: flex; gap: 5px; margin-bottom: 12px;">
+                                        <input type="number" x-model="newCough.frequencyCount" placeholder="#" style="width: 60px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: center;">
+                                        <span style="display: flex; align-items: center; color: #64748b; font-size: 0.9rem;">times per</span>
+                                        <select x-model="newCough.frequencyPeriod" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                            <option value="hour">Hour</option>
+                                            <option value="day">Day</option>
+                                            <option value="week">Week</option>
+                                        </select>
+                                    </div>
+                    
+                                    <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                        Description:
+                                        <a href="#" @click.prevent="openGlossary('cough_types')" style="color: #3b82f6; text-decoration: none;"><i class="fa-solid fa-circle-question"></i> Sound Guide</a>
+                                    </label>
+                                    <select x-model="newCough.description" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px;">
+                                        <option value="chesty/productive">Chesty / Productive</option>
+                                        <option value="goose honking">Goose Honking</option>
+                                        <option value="reverse sneezing">Reverse Sneezing</option>
+                                        <option value="expiratory reflex (gag)">Terminal Retch / Gagging</option>
+                                        <option value="dry/harsh">Dry / Harsh</option>
+                                    </select>
+                                    
+                                    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                                        <div style="flex: 1;">
+                                            <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Severity:</label>
+                                            <select x-model="newCough.severity" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                                <option value="Mild">Mild</option>
+                                                <option value="Moderate">Moderate</option>
+                                                <option value="Severe">Severe</option>
+                                            </select>
                                         </div>
-                                    </template>
+                                        <div style="flex: 1;">
+                                            <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Main Trigger:</label>
+                                            <select x-model="newCough.context" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                                <option value="Resting/Night">Resting/Night</option>
+                                                <option value="Excitement">Excitement</option>
+                                                <option value="Exercise">Exercise</option>
+                                                <option value="Post-Drinking">Post-Drinking</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <input type="text" x-model="newCough.notes" placeholder="Additional notes..." style="width: 100%; padding: 6px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                                    
+                                    <div style="display: flex; gap: 10px;">
+                                        <button @click="closeCoughForm()" style="flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-weight: bold;">Cancel</button>
+                                        <button @click="saveCough()" style="flex: 2; padding: 10px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                            <i class="fa-solid" :class="hasCoughForDate() ? 'fa-arrows-rotate' : 'fa-check'"></i> 
+                                            <span x-text="hasCoughForDate() ? 'Update' : 'Save'"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- COUGH LIST VIEW (Visible when form is hidden) -->
+                                <div x-show="!showCoughForm">
+                                    <div x-show="sortedCoughLog.length === 0" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px 0;">
+                                        No cough summaries logged.
+                                    </div>
+                                    <div style="max-height: 250px; overflow-y: auto;">
+                                        <template x-for="c in sortedCoughLog" :key="c.id">
+                                            <div style="background: white; border: 1px solid #e2e8f0; padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                                                <div>
+                                                    <strong x-text="c.date" style="color: #1e293b;"></strong> - 
+                                                    <span :style="c.severity === 'Severe' ? 'color: #ef4444; font-weight: bold;' : 'color: #d97706;'" x-text="c.severity"></span><br>
+                                                    <span style="color: #475569;" x-text="`${c.frequencyCount}x / ${c.frequencyPeriod}`"></span>
+                                                    <span x-show="c.frequencyCount" style="color: #cbd5e1;"> | </span>
+                                                    <span style="color: #64748b; font-style: italic;" x-text="c.description"></span>
+                                                </div>
+                                                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                                    <button @click="openCoughForm(c.date)" style="background: none; border: none; color: #3b82f6; cursor: pointer; opacity: 0.7;" title="Edit Entry"><i class="fa-solid fa-pen"></i></button>
+                                                    <button @click="deleteCough(c.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.7;" title="Delete Entry"><i class="fa-solid fa-trash"></i></button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </template>
                 
                         <!-- ============================== -->
                         <!-- ACTIVITY MONITOR MODULE        -->
                         <!-- ============================== -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 15px;">
-                                <h4 style="margin: 0; color: #334155;"><i class="fa-solid fa-person-running"></i> Activity Log</h4>
-                                <button x-show="!showActivityForm" @click="openActivityForm()" style="background: #10b981; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">
-                                    <i class="fa-solid fa-plus"></i> Log Today
-                                </button>
-                            </div>
-                            
-                            <!-- ACTIVITY DATA ENTRY FORM (Hidden by default) -->
-                            <div x-show="showActivityForm" x-transition style="background: white; border: 2px solid #94a3b8; border-radius: 6px; padding: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <strong style="color: #1e293b;">Data Entry</strong>
-                                    <input type="date" x-model="newActivity.date" @change="loadActivityForDate()" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
-                                </div>
-                                
-                                <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">Energy Level / Status:</label>
-                                <select x-model="newActivity.status" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px;">
-                                    <option value="Normal">Normal</option>
-                                    <option value="Reduced">Reduced (Tiring easier)</option>
-                                    <option value="Lethargic">Lethargic / Refusing walks</option>
-                                    <option value="Hyper">Hyper / Restless</option>
-                                </select>
-                                
-                                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                                    <div style="flex: 1;">
-                                        <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Duration (mins):</label>
-                                        <input type="number" x-model="newActivity.durationMins" placeholder="e.g. 45" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Distance:</label>
-                                        <input type="text" x-model="newActivity.distance" placeholder="e.g. 2 miles" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                                    </div>
-                                </div>
-                                
-                                <input type="text" x-model="newActivity.notes" placeholder="Notes (e.g., sat down 3 times on walk)" style="width: 100%; padding: 6px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                                
-                                <div style="display: flex; gap: 10px;">
-                                    <button @click="closeActivityForm()" style="flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-weight: bold;">Cancel</button>
-                                    <button @click="saveActivity()" style="flex: 2; padding: 10px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                        <i class="fa-solid" :class="hasActivityForDate() ? 'fa-arrows-rotate' : 'fa-check'"></i> 
-                                        <span x-text="hasActivityForDate() ? 'Update' : 'Save'"></span>
+                        <template x-if="activePatientProfile?.modules?.activityLog">
+                            <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; background: #f8fafc;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 15px;">
+                                    <h4 style="margin: 0; color: #334155;"><i class="fa-solid fa-person-running"></i> Activity Log</h4>
+                                    <button x-show="!showActivityForm" @click="openActivityForm()" style="background: #10b981; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">
+                                        <i class="fa-solid fa-plus"></i> Log Today
                                     </button>
                                 </div>
-                            </div>
-                
-                            <!-- ACTIVITY LIST VIEW (Visible when form is hidden) -->
-                            <div x-show="!showActivityForm">
-                                <div x-show="sortedActivityLog.length === 0" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px 0;">
-                                    No activity summaries logged.
-                                </div>
-                                <div style="max-height: 250px; overflow-y: auto;">
-                                    <template x-for="a in sortedActivityLog" :key="a.id">
-                                        <div style="background: white; border: 1px solid #e2e8f0; padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
-                                            <div>
-                                                <strong x-text="a.date" style="color: #1e293b;"></strong> - 
-                                                <span :style="['Reduced', 'Lethargic'].includes(a.status) ? 'color: #ef4444; font-weight: bold;' : 'color: #3b82f6;'" x-text="a.status"></span><br>
-                                                <span style="color: #475569;" x-show="a.durationMins || a.distance">
-                                                    <span x-show="a.durationMins" x-text="`${a.durationMins}m`"></span>
-                                                    <span x-show="a.durationMins && a.distance" style="color: #cbd5e1;"> | </span>
-                                                    <span x-show="a.distance" x-text="a.distance"></span>
-                                                </span>
-                                            </div>
-                                            <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                                <button @click="openActivityForm(a.date)" style="background: none; border: none; color: #3b82f6; cursor: pointer; opacity: 0.7;" title="Edit Entry"><i class="fa-solid fa-pen"></i></button>
-                                                <button @click="deleteActivity(a.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.7;" title="Delete Entry"><i class="fa-solid fa-trash"></i></button>
-                                            </div>
+                                
+                                <!-- ACTIVITY DATA ENTRY FORM (Hidden by default) -->
+                                <div x-show="showActivityForm" x-transition style="background: white; border: 2px solid #94a3b8; border-radius: 6px; padding: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                        <strong style="color: #1e293b;">Data Entry</strong>
+                                        <input type="date" x-model="newActivity.date" @change="loadActivityForDate()" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+                                    </div>
+                                    
+                                    <label style="font-size: 0.8rem; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">Energy Level / Status:</label>
+                                    <select x-model="newActivity.status" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px;">
+                                        <option value="Normal">Normal</option>
+                                        <option value="Reduced">Reduced (Tiring easier)</option>
+                                        <option value="Lethargic">Lethargic / Refusing walks</option>
+                                        <option value="Hyper">Hyper / Restless</option>
+                                    </select>
+                                    
+                                    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                                        <div style="flex: 1;">
+                                            <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Duration (mins):</label>
+                                            <input type="number" x-model="newActivity.durationMins" placeholder="e.g. 45" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
                                         </div>
-                                    </template>
+                                        <div style="flex: 1;">
+                                            <label style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Distance:</label>
+                                            <input type="text" x-model="newActivity.distance" placeholder="e.g. 2 miles" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                                        </div>
+                                    </div>
+                                    
+                                    <input type="text" x-model="newActivity.notes" placeholder="Notes (e.g., sat down 3 times on walk)" style="width: 100%; padding: 6px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                                    
+                                    <div style="display: flex; gap: 10px;">
+                                        <button @click="closeActivityForm()" style="flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-weight: bold;">Cancel</button>
+                                        <button @click="saveActivity()" style="flex: 2; padding: 10px; background: #16325F; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                            <i class="fa-solid" :class="hasActivityForDate() ? 'fa-arrows-rotate' : 'fa-check'"></i> 
+                                            <span x-text="hasActivityForDate() ? 'Update' : 'Save'"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                    
+                                <!-- ACTIVITY LIST VIEW (Visible when form is hidden) -->
+                                <div x-show="!showActivityForm">
+                                    <div x-show="sortedActivityLog.length === 0" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px 0;">
+                                        No activity summaries logged.
+                                    </div>
+                                    <div style="max-height: 250px; overflow-y: auto;">
+                                        <template x-for="a in sortedActivityLog" :key="a.id">
+                                            <div style="background: white; border: 1px solid #e2e8f0; padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                                                <div>
+                                                    <strong x-text="a.date" style="color: #1e293b;"></strong> - 
+                                                    <span :style="['Reduced', 'Lethargic'].includes(a.status) ? 'color: #ef4444; font-weight: bold;' : 'color: #3b82f6;'" x-text="a.status"></span><br>
+                                                    <span style="color: #475569;" x-show="a.durationMins || a.distance">
+                                                        <span x-show="a.durationMins" x-text="`${a.durationMins}m`"></span>
+                                                        <span x-show="a.durationMins && a.distance" style="color: #cbd5e1;"> | </span>
+                                                        <span x-show="a.distance" x-text="a.distance"></span>
+                                                    </span>
+                                                </div>
+                                                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                                    <button @click="openActivityForm(a.date)" style="background: none; border: none; color: #3b82f6; cursor: pointer; opacity: 0.7;" title="Edit Entry"><i class="fa-solid fa-pen"></i></button>
+                                                    <button @click="deleteActivity(a.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.7;" title="Delete Entry"><i class="fa-solid fa-trash"></i></button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                
+                        </template>
                     </div>
                 </div>                
                                     <!-- ******************************** -->
                                     <!-- Medication History               -->
                                     <!-- ******************************** -->
-                
-                <div class="medicationHistory" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                        <button @click="showMedLog = !showMedLog" type="button" style="
-                            width: 100%;
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            padding: 12px 16px;
-                            background: #e8eef7;
-                            border: 1px solid #c8d6eb;
-                            border-radius: 6px;
-                            cursor: pointer;
-                            font-weight: bold;
-                            color: #16325F;
-                            transition: background 0.15s ease;
-                        " @mouseenter="$el.style.background='#dde6f3'"
-                           @mouseleave="$el.style.background='#e8eef7'">
-                            
-                            <h3 style="margin: 0;"><i class="fa-solid fa-pills" style="margin-right: 8px;"></i> Pharmacologic Ledger</h3> 
-                            <i class="fa-solid" :class="showMedLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                        </button>
-                    </div>
-                
-                    <div x-show="showMedLog" x-transition>
+                <template x-if="activePatientProfile?.modules?.medications"> 
+                    <div class="medicationHistory" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
                         
-                        <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #c8d6eb; margin-bottom: 20px;">
-                            <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Medication Change</h4>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                            <button @click="showMedLog = !showMedLog" type="button" style="
+                                width: 100%;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                padding: 12px 16px;
+                                background: #e8eef7;
+                                border: 1px solid #c8d6eb;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-weight: bold;
+                                color: #16325F;
+                                transition: background 0.15s ease;
+                            " @mouseenter="$el.style.background='#dde6f3'"
+                               @mouseleave="$el.style.background='#e8eef7'">
                                 
-                                <div>
-                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Event Date</label>
-                                    <input type="date" x-model="newMed.eventDate" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                </div>
-                
-                                <div>
-                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Medication</label>
-                                    <select x-model="newMed.drugId" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                        <option value="" disabled>Select Drug...</option>
-                                        
-                                        <template x-for="opt in medicationOptions" :key="opt.value">
-                                            <option :value="opt.value" x-text="opt.label"></option>
-                                        </template>
-                                        
-                                    </select>
-                                </div>
-                
-                                <div x-show="newMed.drugId === 'other'" x-cloak>
-                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Custom Name</label>
-                                    <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                </div>
-                
-                                <div style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
-                                    <input type="checkbox" 
-                                           id="stoppedCheck" 
-                                           x-model="newMed.isStopped"
-                                           style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
-                                    <label for="stoppedCheck" 
-                                           style="font-size: 0.85rem; font-weight: bold; color: #ef4444; cursor: pointer; user-select: none;">
-                                        Stopped
-                                    </label>
-                                </div>
-                                
-                                <!-- DOSE — greyed out when Stopped -->
-                                <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Dose (mg)</label>
-                                    <input type="number" step="0.1" 
-                                           x-model="newMed.doseMg" 
-                                           :disabled="newMed.isStopped"
-                                           placeholder="e.g., 20" 
-                                           style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                </div>
-                                
-                                <!-- FREQUENCY — greyed out when Stopped -->
-                                <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                    <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Frequency</label>
-                                    <select x-model="newMed.frequency" 
-                                            :disabled="newMed.isStopped"
-                                            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                        <option value="q24h">q24h (SID)</option>
-                                        <option value="q12h">q12h (BID)</option>
-                                        <option value="q8h">q8h (TID)</option>
-                                        <option value="PRN">PRN (As Needed)</option>
-                                    </select>
-                                </div>            
-                                <div>
-                                    <button @click="addMedication()" type="button" style="width: 100%; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                                        <i class="fa-solid fa-plus"></i> Save Entry
-                                    </button>
-                                </div>
-                            </div>
-                
-                            <div x-show="calculatedMgPerKg() !== null" x-transition style="margin-top: 10px; font-size: 0.85rem; color: #059669; font-weight: bold; background: #d1fae5; padding: 6px 12px; border-radius: 4px; display: inline-block;">
-                                Calculated Dosage: <span x-text="calculatedMgPerKg()"></span> mg/kg
-                            </div>
+                                <h3 style="margin: 0;"><i class="fa-solid fa-pills" style="margin-right: 8px;"></i> Pharmacologic Ledger</h3> 
+                                <i class="fa-solid" :class="showMedLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </button>
                         </div>
-                
-                        <div style="background: #ffffff; border-radius: 6px; border: 1px solid #c8d6eb; overflow: hidden;">
-                            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
-                                <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
-                                    <tr>
-                                        <th style="padding: 10px 15px;">Date</th>
-                                        <th style="padding: 10px 15px;">Action</th>
-                                        <th style="padding: 10px 15px;">Medication</th>
-                                        <th style="padding: 10px 15px;">Regimen</th>
-                                        <th style="padding: 10px 15px;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template x-for="med in sortedMedLedger()" :key="med.id">
-                                        <tr style="border-bottom: 1px solid #f1f5f9;">
-                                            <td style="padding: 10px 15px; font-weight: bold; color: #334155;" x-text="med.eventDate"></td>
-                                            <td style="padding: 10px 15px;">
-                                                <span :style="med.isMajorChange ? 'color: #ef4444; font-weight: bold;' : 'color: #f59e0b; font-weight: bold;'" x-text="med.action"></span>
-                                            </td>
-                                            <td style="padding: 10px 15px;">
-                                                <span x-text="med.drugId === 'other' ? med.customName : (formulary[med.drugId]?.generic || med.drugId)"></span>
-                                            </td>
-                                            <td style="padding: 10px 15px; color: #64748b;">
-                                                <span x-show="!med.isStopped" x-text="med.doseMg + 'mg ' + med.frequency"></span>
-                                                <span x-show="med.isStopped" style="color: #94a3b8; font-style: italic;">Discontinued</span>
-                                                <span x-show="med.dynamicMgPerKg && !med.isStopped" 
-                                                      style="font-size: 0.8rem; color: #94a3b8;">
-                                                    (<span x-text="med.dynamicMgPerKg"></span> mg/kg
-                                                    <span x-show="med.weightChanged"
-                                                          title="Patient weight has changed since this entry — mg/kg has been recalculated from weight log"
-                                                          style="color: #f59e0b; font-size: 0.8rem; cursor: help;">⚠</span>)
-                                                </span>
-                                            </td>
-                                            <td style="padding: 10px 15px; text-align: right;">
-                                                <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </button>
+                    
+                        <div x-show="showMedLog" x-transition>
+                            
+                            <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #c8d6eb; margin-bottom: 20px;">
+                                <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Medication Change</h4>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end;">
+                                    
+                                    <div>
+                                        <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Event Date</label>
+                                        <input type="date" x-model="newMed.eventDate" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                    </div>
+                    
+                                    <div>
+                                        <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Medication</label>
+                                        <select x-model="newMed.drugId" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                            <option value="" disabled>Select Drug...</option>
+                                            
+                                            <template x-for="opt in medicationOptions" :key="opt.value">
+                                                <option :value="opt.value" x-text="opt.label"></option>
+                                            </template>
+                                            
+                                        </select>
+                                    </div>
+                    
+                                    <div x-show="newMed.drugId === 'other'" x-cloak>
+                                        <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Custom Name</label>
+                                        <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                    </div>
+                    
+                                    <div style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
+                                        <input type="checkbox" 
+                                               id="stoppedCheck" 
+                                               x-model="newMed.isStopped"
+                                               style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
+                                        <label for="stoppedCheck" 
+                                               style="font-size: 0.85rem; font-weight: bold; color: #ef4444; cursor: pointer; user-select: none;">
+                                            Stopped
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- DOSE — greyed out when Stopped -->
+                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                        <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Dose (mg)</label>
+                                        <input type="number" step="0.1" 
+                                               x-model="newMed.doseMg" 
+                                               :disabled="newMed.isStopped"
+                                               placeholder="e.g., 20" 
+                                               style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                    </div>
+                                    
+                                    <!-- FREQUENCY — greyed out when Stopped -->
+                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                        <label style="font-size: 0.8rem; font-weight: bold; color: #475569;">Frequency</label>
+                                        <select x-model="newMed.frequency" 
+                                                :disabled="newMed.isStopped"
+                                                style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                            <option value="q24h">q24h (SID)</option>
+                                            <option value="q12h">q12h (BID)</option>
+                                            <option value="q8h">q8h (TID)</option>
+                                            <option value="PRN">PRN (As Needed)</option>
+                                        </select>
+                                    </div>            
+                                    <div>
+                                        <button @click="addMedication()" type="button" style="width: 100%; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                            <i class="fa-solid fa-plus"></i> Save Entry
+                                        </button>
+                                    </div>
+                                </div>
+                    
+                                <div x-show="calculatedMgPerKg() !== null" x-transition style="margin-top: 10px; font-size: 0.85rem; color: #059669; font-weight: bold; background: #d1fae5; padding: 6px 12px; border-radius: 4px; display: inline-block;">
+                                    Calculated Dosage: <span x-text="calculatedMgPerKg()"></span> mg/kg
+                                </div>
+                            </div>
+                    
+                            <div style="background: #ffffff; border-radius: 6px; border: 1px solid #c8d6eb; overflow: hidden;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
+                                    <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
+                                        <tr>
+                                            <th style="padding: 10px 15px;">Date</th>
+                                            <th style="padding: 10px 15px;">Action</th>
+                                            <th style="padding: 10px 15px;">Medication</th>
+                                            <th style="padding: 10px 15px;">Regimen</th>
+                                            <th style="padding: 10px 15px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="med in sortedMedLedger()" :key="med.id">
+                                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                                <td style="padding: 10px 15px; font-weight: bold; color: #334155;" x-text="med.eventDate"></td>
+                                                <td style="padding: 10px 15px;">
+                                                    <span :style="med.isMajorChange ? 'color: #ef4444; font-weight: bold;' : 'color: #f59e0b; font-weight: bold;'" x-text="med.action"></span>
+                                                </td>
+                                                <td style="padding: 10px 15px;">
+                                                    <span x-text="med.drugId === 'other' ? med.customName : (formulary[med.drugId]?.generic || med.drugId)"></span>
+                                                </td>
+                                                <td style="padding: 10px 15px; color: #64748b;">
+                                                    <span x-show="!med.isStopped" x-text="med.doseMg + 'mg ' + med.frequency"></span>
+                                                    <span x-show="med.isStopped" style="color: #94a3b8; font-style: italic;">Discontinued</span>
+                                                    <span x-show="med.dynamicMgPerKg && !med.isStopped" 
+                                                          style="font-size: 0.8rem; color: #94a3b8;">
+                                                        (<span x-text="med.dynamicMgPerKg"></span> mg/kg
+                                                        <span x-show="med.weightChanged"
+                                                              title="Patient weight has changed since this entry — mg/kg has been recalculated from weight log"
+                                                              style="color: #f59e0b; font-size: 0.8rem; cursor: help;">⚠</span>)
+                                                    </span>
+                                                </td>
+                                                <td style="padding: 10px 15px; text-align: right;">
+                                                    <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                        <tr x-show="medLedger.length === 0">
+                                            <td colspan="5" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
+                                                No pharmacologic history recorded for this patient.
                                             </td>
                                         </tr>
-                                    </template>
-                                    <tr x-show="medLedger.length === 0">
-                                        <td colspan="5" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
-                                            No pharmacologic history recorded for this patient.
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            </div>
+                    
                         </div>
-                
                     </div>
-                </div>
+                </template>
                 
                                     <!-- ******************************** -->
                                     <!-- DIAGNOSIS SECTION            -->
@@ -1604,142 +1609,144 @@
                                     <!-- ******************************** -->
                                     <!-- SYNCOPE SECTION                  -->
                                     <!-- ******************************** -->
-                                    
-            <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
-                
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                    <button @click="showSyncopeLog = !showSyncopeLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F;">
-                        <h3 style="margin: 0;"><i class="fa-solid fa-bolt" style="margin-right: 8px;"></i> Collapse / Syncope Log</h3> 
-                        <i class="fa-solid" :class="showSyncopeLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                    </button>
-                </div>
-            
-                <div x-show="showSyncopeLog" x-transition>
+            <template x-if="activePatientProfile?.modules?.syncopeLog">                        
+                <div class="summary-box" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 15px; padding: 20px;" x-cloak>
                     
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" x-show="!showSyncopeForm">
-                        <span style="color: #475569; font-size: 0.9rem; font-style: italic;">Record collapses, fainting, or seizures</span>
-                        <button @click="openSyncopeForm()" type="button" style="padding: 6px 12px; background: #e2e8f0; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
-                            <i class="fa-solid fa-plus"></i> Add Event
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                        <button @click="showSyncopeLog = !showSyncopeLog" type="button" class="btn-accordion" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F;">
+                            <h3 style="margin: 0;"><i class="fa-solid fa-bolt" style="margin-right: 8px;"></i> Collapse / Syncope Log</h3> 
+                            <i class="fa-solid" :class="showSyncopeLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </button>
                     </div>
-
-                    <div x-show="showSyncopeForm" x-transition style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #fca5a5; margin-bottom: 20px; text-align: left;">
-                        <h4 style="margin-top: 0; color: #7f1d1d; font-size: 0.95rem; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">Log Event Details</h4>
+                    
+                    
+                    <div x-show="showSyncopeLog" x-transition>
                         
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
-                            <div>
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Date</label>
-                                <input type="date" x-model="newSyncope.date" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                            <div>
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Time</label>
-                                <input type="time" x-model="newSyncope.time" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                            <div>
-                                <label style="font-weight: bold; display: block; margin-bottom: 5px;">What happened?</label>
-                                <select x-model="newSyncope.type" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                    <option value="Unknown">Unknown Event (Collapse/Episode)</option>
-                                    <option value="Syncope">Suspected Syncope (Fainting)</option>
-                                    <option value="Seizure">Suspected Seizure</option>
-                                    <option value="Weakness">Hindlimb Weakness / Paresis</option>
-                                    <option value="Other">Other (Custom)</option>
-                                </select>
-                            </div>
-                            
-                            <div x-show="newSyncope.type === 'Other'" x-collapse>
-                                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Describe Event Type</label>
-                                <input type="text" x-model="customEventType" placeholder="e.g., Vestibular episode, choking..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;">
-                            </div>
-            
-                            <div>
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Est. Duration</label>
-                                <input type="text" x-model="newSyncope.duration" placeholder="e.g. 30 secs" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                            <div>
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Consciousness</label>
-                                <select x-model="newSyncope.loc" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                    <option>Full Loss</option>
-                                    <option>Partial / Dazed</option>
-                                    <option>Maintained</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Muscle Tone</label>
-                                <select x-model="newSyncope.muscleTone" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                    <option>Flaccid (Limp)</option>
-                                    <option>Stiff / Rigid</option>
-                                    <option>Jerking / Twitching</option>
-                                    <option>Normal / Variable</option>
-                                </select>
-                            </div>
-                            
-                            <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 5px;">
-                                 <div>
-                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">MM Colour</label>
-                                    <input type="text" x-model="newSyncope.mmColour" placeholder="Pale, Blue, Pink" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                </div>
-                                 <div>
-                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">HR (bpm)</label>
-                                    <input type="number" x-model="newSyncope.hr" placeholder="120" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                </div>
-                                 <div>
-                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">RR (bpm)</label>
-                                    <input type="number" x-model="newSyncope.rr" placeholder="30" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                                </div>
-                            </div>
-            
-                            <div style="grid-column: 1 / -1;">
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Activity at Time of Event</label>
-                                <input type="text" x-model="newSyncope.activityBefore" placeholder="e.g., Playing in garden, waking up, excited by doorbell" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                            
-                            <div style="grid-column: 1 / -1;">
-                                <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Clinical Notes & Triggers</label>
-                                <textarea x-model="newSyncope.notes" rows="3" placeholder="Did this happen during exercise? Coughing prior? Urination/defecation? Recovery time?" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
-                            </div>
-            
-                            <div style="grid-column: 1 / -1; display: flex; gap: 10px;">
-                                <button @click="saveSyncope()" type="button" style="flex: 1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                                    <i class="fa-solid fa-check"></i> Save Event
-                                </button>
-                                <button @click="showSyncopeForm = false" type="button" style="padding: 8px 15px; background: #e2e8f0; color: #334155; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                                    Cancel
-                                </button>
-                            </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" x-show="!showSyncopeForm">
+                            <span style="color: #475569; font-size: 0.9rem; font-style: italic;">Record collapses, fainting, or seizures</span>
+                            <button @click="openSyncopeForm()" type="button" style="padding: 6px 12px; background: #e2e8f0; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
+                                <i class="fa-solid fa-plus"></i> Add Event
+                            </button>
                         </div>
-                    </div>
-            
-                    <div x-show="!showSyncopeForm">
-                        <template x-for="event in sortedSyncopeLog()" :key="event.id">
-                            <div style="background: white; border: 1px solid #fca5a5; border-left: 4px solid #ef4444; border-radius: 6px; padding: 12px; margin-bottom: 8px; text-align: left; position: relative;">
-                                <div style="font-size: 0.8rem; color: #ef4444; font-weight: bold; margin-bottom: 4px;">
-                                    <i class="fa-regular fa-clock"></i> <span x-text="new Date(event.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' ' + event.time"></span>
+    
+                        <div x-show="showSyncopeForm" x-transition style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #fca5a5; margin-bottom: 20px; text-align: left;">
+                            <h4 style="margin-top: 0; color: #7f1d1d; font-size: 0.95rem; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">Log Event Details</h4>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                                <div>
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Date</label>
+                                    <input type="date" x-model="newSyncope.date" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                                 </div>
-                                <div style="font-weight: bold; color: #1e293b; font-size: 1.05rem;" x-text="event.type + (event.duration ? ' (' + event.duration + ')' : '')"></div>
-                                <div style="font-size: 0.85rem; color: #475569; margin-top: 6px; line-height: 1.4;">
-                                    <strong>LOC:</strong> <span x-text="event.loc"></span> | 
-                                    <strong>Tone:</strong> <span x-text="event.muscleTone"></span><br>
-                                    <template x-if="event.activityBefore"><span><strong>Activity:</strong> <span x-text="event.activityBefore"></span><br></span></template>
-                                    <template x-if="event.mmColour || event.hr || event.rr">
-                                        <span style="color: #0284c7;">
-                                            <span x-show="event.mmColour"><strong>MM:</strong> <span x-text="event.mmColour"></span> </span>
-                                            <span x-show="event.hr"><strong>HR:</strong> <span x-text="event.hr"></span> </span>
-                                            <span x-show="event.rr"><strong>RR:</strong> <span x-text="event.rr"></span> </span><br>
-                                        </span>
-                                    </template>
-                                    <template x-if="event.notes"><span style="font-style: italic; color: #64748b;">"<span x-text="event.notes"></span>"</span></template>
+                                <div>
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Time</label>
+                                    <input type="time" x-model="newSyncope.time" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">What happened?</label>
+                                    <select x-model="newSyncope.type" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                        <option value="Unknown">Unknown Event (Collapse/Episode)</option>
+                                        <option value="Syncope">Suspected Syncope (Fainting)</option>
+                                        <option value="Seizure">Suspected Seizure</option>
+                                        <option value="Weakness">Hindlimb Weakness / Paresis</option>
+                                        <option value="Other">Other (Custom)</option>
+                                    </select>
                                 </div>
                                 
-                                <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 10px;">
-                                    <button @click="openSyncopeForm(event)" style="background: none; border: none; color: #64748b; cursor: pointer; opacity: 0.7;"><i class="fa-solid fa-pen"></i></button>
-                                    <button @click="deleteSyncope(event.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash-can"></i></button>
+                                <div x-show="newSyncope.type === 'Other'" x-collapse>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Describe Event Type</label>
+                                    <input type="text" x-model="customEventType" placeholder="e.g., Vestibular episode, choking..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;">
+                                </div>
+                
+                                <div>
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Est. Duration</label>
+                                    <input type="text" x-model="newSyncope.duration" placeholder="e.g. 30 secs" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Consciousness</label>
+                                    <select x-model="newSyncope.loc" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                        <option>Full Loss</option>
+                                        <option>Partial / Dazed</option>
+                                        <option>Maintained</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Muscle Tone</label>
+                                    <select x-model="newSyncope.muscleTone" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                        <option>Flaccid (Limp)</option>
+                                        <option>Stiff / Rigid</option>
+                                        <option>Jerking / Twitching</option>
+                                        <option>Normal / Variable</option>
+                                    </select>
+                                </div>
+                                
+                                <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 5px;">
+                                     <div>
+                                        <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">MM Colour</label>
+                                        <input type="text" x-model="newSyncope.mmColour" placeholder="Pale, Blue, Pink" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                    </div>
+                                     <div>
+                                        <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">HR (bpm)</label>
+                                        <input type="number" x-model="newSyncope.hr" placeholder="120" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                    </div>
+                                     <div>
+                                        <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">RR (bpm)</label>
+                                        <input type="number" x-model="newSyncope.rr" placeholder="30" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                    </div>
+                                </div>
+                
+                                <div style="grid-column: 1 / -1;">
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Activity at Time of Event</label>
+                                    <input type="text" x-model="newSyncope.activityBefore" placeholder="e.g., Playing in garden, waking up, excited by doorbell" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                                
+                                <div style="grid-column: 1 / -1;">
+                                    <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">Clinical Notes & Triggers</label>
+                                    <textarea x-model="newSyncope.notes" rows="3" placeholder="Did this happen during exercise? Coughing prior? Urination/defecation? Recovery time?" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+                                </div>
+                
+                                <div style="grid-column: 1 / -1; display: flex; gap: 10px;">
+                                    <button @click="saveSyncope()" type="button" style="flex: 1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                        <i class="fa-solid fa-check"></i> Save Event
+                                    </button>
+                                    <button @click="showSyncopeForm = false" type="button" style="padding: 8px 15px; background: #e2e8f0; color: #334155; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                        Cancel
+                                    </button>
                                 </div>
                             </div>
-                        </template>
-                        <div x-show="sortedSyncopeLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No collapse or syncope events recorded.</div>
+                        </div>
+                        
+                        <div x-show="!showSyncopeForm">
+                            <template x-for="event in sortedSyncopeLog()" :key="event.id">
+                                <div style="background: white; border: 1px solid #fca5a5; border-left: 4px solid #ef4444; border-radius: 6px; padding: 12px; margin-bottom: 8px; text-align: left; position: relative;">
+                                    <div style="font-size: 0.8rem; color: #ef4444; font-weight: bold; margin-bottom: 4px;">
+                                        <i class="fa-regular fa-clock"></i> <span x-text="new Date(event.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' ' + event.time"></span>
+                                    </div>
+                                    <div style="font-weight: bold; color: #1e293b; font-size: 1.05rem;" x-text="event.type + (event.duration ? ' (' + event.duration + ')' : '')"></div>
+                                    <div style="font-size: 0.85rem; color: #475569; margin-top: 6px; line-height: 1.4;">
+                                        <strong>LOC:</strong> <span x-text="event.loc"></span> | 
+                                        <strong>Tone:</strong> <span x-text="event.muscleTone"></span><br>
+                                        <template x-if="event.activityBefore"><span><strong>Activity:</strong> <span x-text="event.activityBefore"></span><br></span></template>
+                                        <template x-if="event.mmColour || event.hr || event.rr">
+                                            <span style="color: #0284c7;">
+                                                <span x-show="event.mmColour"><strong>MM:</strong> <span x-text="event.mmColour"></span> </span>
+                                                <span x-show="event.hr"><strong>HR:</strong> <span x-text="event.hr"></span> </span>
+                                                <span x-show="event.rr"><strong>RR:</strong> <span x-text="event.rr"></span> </span><br>
+                                            </span>
+                                        </template>
+                                        <template x-if="event.notes"><span style="font-style: italic; color: #64748b;">"<span x-text="event.notes"></span>"</span></template>
+                                    </div>
+                                    
+                                    <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 10px;">
+                                        <button @click="openSyncopeForm(event)" style="background: none; border: none; color: #64748b; cursor: pointer; opacity: 0.7;"><i class="fa-solid fa-pen"></i></button>
+                                        <button @click="deleteSyncope(event.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; opacity: 0.5;"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+                            </template>
+                            <div x-show="sortedSyncopeLog().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">No collapse or syncope events recorded.</div>
+                        </div>
                     </div>
-                </div>
-            </div>    
+                </div>    
+            </template>
     
                                     <!-- ******************************** -->
                                     <!-- SRR CHART and Analytics          -->
@@ -1835,7 +1842,7 @@
                                     <!-- ******************************** -->
                                     <!-- MED GRAPH                        -->
                                     <!-- ******************************** -->
-                                                
+            <template x-if="activePatientProfile?.modules?.medications">                                 
                 <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                         <button @click="showMedGraph = !showMedGraph" type="button" style="
@@ -1894,41 +1901,43 @@
                         <i class="fa-solid fa-pills text-3xl mb-2"></i>
                         <p>Log medications to generate a pharmacologic timeline.</p>
                     </div>
-                </div>
+                </template>
                 
                 <!-- ******************************************** -->
                 <!-- ACVIM DISEASE PROGRESSION TIMELINE           -->
                 <!-- ******************************************** -->
                 
-                <div x-show="activePathway" 
-                     x-cloak
-                     x-data="{ isExpanded: false }"
-                     class="summary-box" 
-                     :class="{ 'expanded-acvim-modal': isExpanded }"
-                     style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <h2 style="margin: 0; font-size: 1.25rem;">
-                            <i class="fa-solid fa-route" style="color: #2563eb;"></i>
-                            <span x-text="(primaryCardiacDiagnosis ? primaryCardiacDiagnosis.split(' ')[0] : 'Disease') + ' Disease Progression'"></span><i x-show="primaryCardiacDiagnosis === 'MMVD'" class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('acvimMmvd')"></i><i x-show="primaryCardiacDiagnosis === 'HCM'" class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('acvimHcm')"></i><i x-show="primaryCardiacDiagnosis === 'DCM'" class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('acvimDcm')"></i>
-                        </h2>
+                <template x-if="activePatientProfile?.modules?.acvimStage">
+                    <div x-show="activePathway" 
+                         x-cloak
+                         x-data="{ isExpanded: false }"
+                         class="summary-box" 
+                         :class="{ 'expanded-acvim-modal': isExpanded }"
+                         style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
                         
-                        <button @click="isExpanded = !isExpanded" 
-                                style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
-                            <i class="fa-solid" :class="isExpanded ? 'fa-compress' : 'fa-magnifying-glass-plus'"></i>
-                            <span x-text="isExpanded ? ' Close Fullscreen' : ' Expand Chart'"></span>
-                        </button>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h2 style="margin: 0; font-size: 1.25rem;">
+                                <i class="fa-solid fa-route" style="color: #2563eb;"></i>
+                                <span x-text="(primaryCardiacDiagnosis ? primaryCardiacDiagnosis.split(' ')[0] : 'Disease') + ' Disease Progression'"></span><i x-show="primaryCardiacDiagnosis === 'MMVD'" class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('acvimMmvd')"></i><i x-show="primaryCardiacDiagnosis === 'HCM'" class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('acvimHcm')"></i><i x-show="primaryCardiacDiagnosis === 'DCM'" class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('acvimDcm')"></i>
+                            </h2>
+                            
+                            <button @click="isExpanded = !isExpanded" 
+                                    style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
+                                <i class="fa-solid" :class="isExpanded ? 'fa-compress' : 'fa-magnifying-glass-plus'"></i>
+                                <span x-text="isExpanded ? ' Close Fullscreen' : ' Expand Chart'"></span>
+                            </button>
+                        </div>
+                    
+                        <div style="overflow-x: auto; width: 100%; border-radius: 4px;">
+                            <svg id="acvim-svg-export"
+                                 viewBox="0 0 600 320" 
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 :style="isExpanded ? 'min-width: 800px; width: 100%; height: auto; display: block;' : 'width: 100%; height: auto; display: block; max-width: 100%;'"
+                                 x-html="acvimChartHtml">
+                            </svg>
+                        </div>
                     </div>
-                
-                    <div style="overflow-x: auto; width: 100%; border-radius: 4px;">
-                        <svg id="acvim-svg-export"
-                             viewBox="0 0 600 320" 
-                             xmlns="http://www.w3.org/2000/svg"
-                             :style="isExpanded ? 'min-width: 800px; width: 100%; height: auto; display: block;' : 'width: 100%; height: auto; display: block; max-width: 100%;'"
-                             x-html="acvimChartHtml">
-                        </svg>
-                    </div>
-                </div>
+                </template>
                 
                                     <!-- ******************************** -->
                                     <!-- EXPORT VET SECTION            -->
