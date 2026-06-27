@@ -101,6 +101,10 @@
     
        
 <style type="text/css">
+
+  .w-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 20px; }
+  .w-feat { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px; }
+  
 @media print {
     /* 1. Global Reset - Ensures padding doesn't push width over 100% */
     * {
@@ -346,38 +350,48 @@
                       </div>
                     
                       <!-- Feature grid -->
-                      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 20px;">
-                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                          <i class="fa-solid fa-lungs" style="color: #0f766e; font-size: 1.1rem;"></i>
-                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">SRR Monitor</p>
-                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">One-tap breathing counter with clinical interpretation</p>
-                        </div>
-                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                          <i class="fa-solid fa-pills" style="color: #3b82f6; font-size: 1.1rem;"></i>
-                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Medication Ledger</p>
-                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Track dose changes against breathing trends</p>
-                        </div>
-                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                          <i class="fa-solid fa-chart-line" style="color: #0284c7; font-size: 1.1rem;"></i>
-                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Trend Analytics</p>
-                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Charts, stats, and date filtering</p>
-                        </div>
-                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                          <i class="fa-solid fa-stethoscope" style="color: #7c3aed; font-size: 1.1rem;"></i>
-                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">ACVIM Staging</p>
-                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Log and visualise disease progression</p>
-                        </div>
-                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                          <i class="fa-solid fa-bolt" style="color: #d97706; font-size: 1.1rem;"></i>
-                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Syncope Diary</p>
-                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">Record collapses with triggers and timing</p>
-                        </div>
-                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                          <i class="fa-solid fa-file-export" style="color: #475569; font-size: 1.1rem;"></i>
-                          <p style="font-weight: bold; font-size: 0.8rem; margin: 6px 0 3px; color: #1e293b;">Vet Export</p>
-                          <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">PDF, CSV, or clipboard for appointments</p>
-                        </div>
-                      </div>
+                        <div class="w-feature-grid">
+                            <div class="w-feat">
+                              <i class="ti ti-lungs" style="font-size:20px; color:#0f766e;" aria-hidden="true"></i>
+                              <p class="w-feat-title">SRR monitor</p>
+                              <p class="w-feat-desc">One-tap 30-second counter with instant clinical interpretation</p>
+                            </div>
+                            <div class="w-feat">
+                              <i class="ti ti-pill" style="font-size:20px; color:#3b82f6;" aria-hidden="true"></i>
+                              <p class="w-feat-title">Medication ledger</p>
+                              <p class="w-feat-desc">Track dose changes and see their effect on breathing trends</p>
+                            </div>
+                            <div class="w-feat">
+                              <i class="ti ti-chart-line" style="font-size:20px; color:#0284c7;" aria-hidden="true"></i>
+                              <p class="w-feat-title">Trend analytics</p>
+                              <p class="w-feat-desc">Charts with medication overlays, statistics, and date filtering</p>
+                            </div>
+                            <div class="w-feat">
+                              <i class="ti ti-stethoscope" style="font-size:20px; color:#7c3aed;" aria-hidden="true"></i>
+                              <p class="w-feat-title">ACVIM staging</p>
+                              <p class="w-feat-desc">Log and visualise disease progression over time</p>
+                            </div>
+                            <div class="w-feat">
+                              <i class="ti ti-bolt" style="font-size:20px; color:#d97706;" aria-hidden="true"></i>
+                              <p class="w-feat-title">Syncope diary</p>
+                              <p class="w-feat-desc">Record collapse events with timing, tone, and triggers</p>
+                            </div>
+                            <div class="w-feat">
+                              <i class="ti ti-file-export" style="font-size:20px; color:#475569;" aria-hidden="true"></i>
+                              <p class="w-feat-title">Vet export</p>
+                              <p class="w-feat-desc">PDF, CSV, or clipboard report for your next appointment</p>
+                            </div>
+                            <div class="w-feat">
+                              <i class="ti ti-wind" style="font-size:20px; color:#b45309;" aria-hidden="true"></i>
+                              <p class="w-feat-title">Cough log</p>
+                              <p class="w-feat-desc">Daily cough frequency, severity, and description summaries</p>
+                            </div>
+                            <div class="w-feat">
+                              <i class="ti ti-walk" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                              <p class="w-feat-title">Activity log</p>
+                              <p class="w-feat-desc">Track exercise tolerance and energy levels over time</p>
+                            </div>
+                          </div>
                     
                       <!-- Setup steps -->
                       <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-bottom: 20px; text-align: left;">
