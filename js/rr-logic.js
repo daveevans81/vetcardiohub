@@ -836,6 +836,152 @@ deleteDiagnosis(id) {
             }
         },
         
+        //AMurmur progression Logic
+        
+        get murmurProgression() {
+    return this.diagnosisLog
+        .filter(d =>
+            d.patientId === this.activePatientId &&
+            d.murmurGrade &&
+            d.murmurGrade !== 'N/A' &&
+            d.murmurGrade !== 'Not Graded / Unknown' &&
+            d.diagnosis !== 'Concurrent Conditions Only'
+        )
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .map(entry => {
+            // parseInt('3/6') → 3, parseInt('0/6') → 0 — JS stops at '/'
+            const gradeNum = parseInt(entry.murmurGrade);
+            return {
+                date: entry.date,
+                murmurGrade: entry.murmurGrade,
+                gradeNum: isNaN(gradeNum) ? null : gradeNum
+            };
+        })
+        .filter(e => e.gradeNum !== null && e.gradeNum >= 0 && e.gradeNum <= 6);
+},
+
+get murmurChartHtml() {
+    if (!this.murmurProgression || this.murmurProgression.length === 0) return '';
+
+    const MURMUR_STAGES = [
+        { id: '0', label: '0',   subtitle: 'No murmur' },
+        { id: '1', label: 'I',   subtitle: 'Very soft' },
+        { id: '2', label: 'II',  subtitle: 'Soft' },
+        { id: '3', label: 'III', subtitle: 'Moderate' },
+        { id: '4', label: 'IV',  subtitle: 'Loud' },
+        { id: '5', label: 'V',   subtitle: '+ Thrill' },
+        { id: '6', label: 'VI',  subtitle: 'No contact' },
+    ];
+
+    const MFILL = {
+        '0': '#16a34a',
+        '1': '#65a30d',
+        '2': '#84cc16',
+        '3': '#ca8a04',
+        '4': '#d97706',
+        '5': '#ea580c',
+        '6': '#dc2626',
+    };
+
+    // ── Layout constants ──────────────────────────────────────────────────
+    const PAD     = 55;
+    const SPACING = 85;
+    const CY      = 105;
+    const R       = 50;
+
+    const POS = {};
+    MURMUR_STAGES.forEach((s, i) => { POS[s.id] = Math.round(PAD + i * SPACING); });
+
+    const firstX   = POS['0'];
+    const lastX    = POS['6'];
+    const arrowTip = lastX + R + 20;
+
+    // Most recent recorded grade — drives the highlight ring
+    const lastEntry = this.murmurProgression[this.murmurProgression.length - 1];
+    const currentGradeNum = lastEntry ? lastEntry.gradeNum : null;
+
+    let html = '';
+
+    // ── 1. Connector arrow ────────────────────────────────────────────────
+    html += `
+        <line x1="${firstX}" y1="${CY}" x2="${arrowTip - 4}" y2="${CY}"
+              stroke="#cbd5e1" stroke-width="12" stroke-linecap="round"/>
+        <polygon points="${arrowTip - 4},${CY - 14} ${arrowTip + 12},${CY} ${arrowTip - 4},${CY + 14}"
+              fill="#cbd5e1"/>`;
+
+    // ── 2. Grade circles ──────────────────────────────────────────────────
+    MURMUR_STAGES.forEach(stage => {
+        const x       = POS[stage.id];
+        const current = currentGradeNum !== null && currentGradeNum === parseInt(stage.id);
+        const fill    = MFILL[stage.id] || '#64748b';
+
+        html += `
+            <g>
+                <circle cx="${x}" cy="${CY}" r="${R}"
+                    fill="${fill}"
+                    stroke="${current ? '#1e3a8a' : '#ffffff'}"
+                    stroke-width="${current ? 6 : 3}"/>
+                <text x="${x}" y="${CY - 8}" text-anchor="middle"
+                      fill="white" font-size="22" font-weight="bold"
+                      font-family="sans-serif">${stage.label}</text>
+                <text x="${x}" y="${CY + 14}" text-anchor="middle"
+                      fill="rgba(255,255,255,0.92)" font-size="9"
+                      font-family="sans-serif">${stage.subtitle}</text>
+            </g>`;
+    });
+
+    // ── 3. Date markers ───────────────────────────────────────────────────
+    // Group by grade so multiple visits to same grade spread horizontally
+    const gradeCounts = {};
+    this.murmurProgression.forEach(t => {
+        const k = String(t.gradeNum);
+        gradeCounts[k] = (gradeCounts[k] || 0) + 1;
+    });
+
+    const MSEP  = 18;
+    const drawn = {};
+    let latestMX = null;
+
+    this.murmurProgression.forEach(t => {
+        const k    = String(t.gradeNum);
+        const baseX = POS[k];
+        if (baseX === undefined) return;
+
+        if (drawn[k] === undefined) drawn[k] = 0;
+        const count = gradeCounts[k];
+        const i     = drawn[k]++;
+        const mx    = baseX - ((count - 1) * MSEP) / 2 + i * MSEP;
+        latestMX    = mx;
+
+        const dateStr = t.date
+            ? new Date(t.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })
+            : '';
+
+        html += `
+            <g>
+                <line x1="${mx}" y1="${CY + R + 4}" x2="${mx}" y2="${CY + R + 26}"
+                      stroke="#2563eb" stroke-width="2.5"/>
+                <circle cx="${mx}" cy="${CY + R + 4}" r="5" fill="#2563eb"/>
+                ${dateStr ? `<text x="${mx}" y="${CY + R + 42}" text-anchor="middle"
+                    font-size="11" fill="#475569" font-weight="bold"
+                    font-family="sans-serif">${dateStr}</text>` : ''}
+            </g>`;
+    });
+
+    // ── 4. NOW pointer ────────────────────────────────────────────────────
+    if (latestMX !== null) {
+        const tipY = CY - R - 8;
+        html += `
+            <polygon points="${latestMX - 24},${tipY - 26} ${latestMX + 24},${tipY - 26} ${latestMX},${tipY}"
+                fill="#2563eb"/>
+            <text x="${latestMX}" y="${tipY - 8}" text-anchor="middle"
+                font-size="12" fill="white" font-weight="bold"
+                font-family="sans-serif">NOW</text>`;
+    }
+
+    return html;
+},
+        
         //ACVIM Staging Logic
         
                 // Computed property to determine if staging is clinically relevant
@@ -3537,6 +3683,28 @@ async generatePDF() {
             }
         } catch (err) {
             console.error('VCH PDF: ACVIM SVG render failed —', err);
+        }
+    }
+
+    // ── 2b. Murmur Grade Chart ────────────────────────────────────────────
+    if (this.murmurProgression && this.murmurProgression.length > 0) {
+        try {
+            const murmurSvgEl = document.getElementById('murmur-svg-export');
+            if (murmurSvgEl) {
+                const SVG_W = 660, SVG_H = 215;
+                const PDF_W = 180, PDF_H = Math.round(PDF_W * SVG_H / SVG_W);
+
+                const imgData = await this._svgToJpegDataUrl(murmurSvgEl, SVG_W, SVG_H);
+
+                if (Y + PDF_H > 280) { doc.addPage(); Y = 20; }
+                sectionHeader('Murmur Grade Progression (Levine Scale)', 180, 83, 9);
+                doc.addImage(imgData, 'JPEG', 14, Y, PDF_W, PDF_H);
+                Y += PDF_H + 14;
+            } else {
+                console.warn('VCH PDF: murmur-svg-export element not found — is the murmur card visible?');
+            }
+        } catch (err) {
+            console.error('VCH PDF: Murmur SVG render failed —', err);
         }
     }
  
