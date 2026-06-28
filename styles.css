@@ -4280,42 +4280,48 @@ button.btn-nudge-static {
 button.btn-back,
 button.btn-cancel,
 .btn-secondary {
-    /* Background: Swapped from primary deep blue to a crisp slate neutral */
-    background-color: #f1f5f9 !important; 
-    
-    /* Text & Icon: High-contrast dark slate instead of white */
-    color: #475569 !important; 
-    
-    /* Subtle border to define the button boundaries against white modals */
-    border: 1px solid #cbd5e1 !important; 
-    
-    /* Layout & Typography matching your primary buttons */
-    padding: 10px 20px !important;
-    border-radius: 6px !important;
-    font-weight: 600 !important;
+    /* Layout & Alignment */
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 8px !important; /* Spacing for FontAwesome back arrows */
+    gap: 8px !important; /* Spacing for FontAwesome arrows/icons */
+    
+    /* Strict Sizing: Forces it to match the standard primary buttons */
+    height: 42px !important;    /* Match this value to your Next/Continue button height */
+    padding: 0 24px !important;  /* Horizontal padding */
+    min-width: 100px !important; /* Prevents text from squishing the button on mobile */
+    border-radius: 6px !important;
+    
+    /* Background & Text Colors */
+    background-color: #f1f5f9 !important; /* Cool slate neutral */
+    color: #475569 !important;            /* High-contrast dark slate text */
+    border: 1px solid #cbd5e1 !important; /* Clear bounding box */
+    
+    /* Typography */
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
     cursor: pointer !important;
-    transition: all 0.2s ease-in-out !important;
+    
+    /* Smooth transition for modern UI feel */
+    transition: all 0.15s ease-in-out !important;
 }
 
-/* Hover & Focus States */
+/* Hover & Focus State */
 button.btn-back:hover,
 button.btn-cancel:hover,
 .btn-secondary:hover {
-    background-color: #e2e8f0 !important; /* Smooth darkening on hover */
-    color: #1e293b !important;            /* Text darkens to near-black */
-    border-color: #94a3b8 !important;      /* Border sharpens */
+    background-color: #e2e8f0 !important; /* Darker slate background */
+    color: #1e293b !important;            /* Near-black text on hover */
+    border-color: #94a3b8 !important;      /* Crisper border outline */
 }
 
-/* Active/Tap State for responsive mobile feel */
+/* Tactical Click Response */
 button.btn-back:active,
 button.btn-cancel:active,
 .btn-secondary:active {
     background-color: #cbd5e1 !important;
-    transform: scale(0.98); /* Subtle tactical compression on press */
+    transform: scale(0.98) !important; /* Tactical compression shrink on tap */
 }
 
 .onboarding-group,
