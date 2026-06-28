@@ -4236,31 +4236,39 @@ button.btn-nudge-static {
    ======================================================== */
 
 .checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    font-size: 0.9rem;
-    align-items: flex-start; /* Forces the entire list to align to the left edge */
-    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: flex-start !important; 
+    justify-content: flex-start !important;
+    width: 100% !important;
+    text-align: left !important;
 }
 
 .checkbox-label {
-    display: flex;
-    align-items: center;       /* Centers the checkbox vertically with the text */
-    justify-content: flex-start; /* Forces content to the left */
-    gap: 10px;                 /* Consistent space between checkbox and text */
-    cursor: pointer;
-    user-select: none;         /* Prevents text from highlighting if clicked rapidly */
-    margin: 0;                 /* Overrides any rogue global margins */
-    color: #334155;
-    font-weight: 500;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    color: #334155 !important;
+    font-weight: 500 !important;
 }
 
-/* Ensure the checkbox itself doesn't shrink or stretch weirdly */
+/* Force the actual checkbox to behave */
 .checkbox-label input[type="checkbox"] {
-    margin: 0;
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0; 
-    cursor: pointer;
+    -webkit-appearance: checkbox !important;
+    -moz-appearance: checkbox !important;
+    appearance: checkbox !important; /* Overrides Tailwind's input resets */
+    display: inline-block !important;
+    margin: 0 !important;
+    margin-right: 10px !important; /* Fallback in case flex-gap is failing */
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    position: static !important; 
+    transform: none !important;
 }
