@@ -661,10 +661,10 @@
                     </div>
                     
                     <div style="display: flex; gap: 5px;" x-show="!isCounting" x-transition>
-                        <button @click="openPatientManager(false, activePatientId)" class="btn btn-outline" style="padding: 6px 10px;" title="Edit Active Profile">
+                        <button @click="openPatientManager(false, activePatientId)" class="btn btn-outline" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" title="Edit Active Profile">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <button @click="startNewPatientOnboarding()" class="btn btn-outline" style="padding: 6px 10px;" title="Add New Pet">
+                        <button @click="startNewPatientOnboarding()" class="btn btn-outline" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" title="Add New Pet">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -734,11 +734,11 @@
                     </h4>
                 
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button type="button" @click.prevent="deletePatient(editingPatient.id)" class="btn btn-danger-outline">
+                        <button type="button" @click.prevent="deletePatient(editingPatient.id)" style="background: white; color: #ef4444; border: 1px solid #ef4444; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" class="btn btn-danger-outline">
                             <i class="fa-solid fa-trash-can"></i> Delete Profile
                         </button>
                 
-                        <button type="button" @click.prevent="showMergeTools = !showMergeTools" class="btn btn-warning-outline">
+                        <button type="button" @click.prevent="showMergeTools = !showMergeTools" class="btn btn-warning-outline" style="background: white; color: #d97706; border: 1px solid #d97706; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
                             <i class="fa-solid fa-code-merge"></i> Merge Duplicate
                         </button>
                     </div>
