@@ -4277,24 +4277,45 @@ button.btn-nudge-static {
    Secondary Buttons (Cancel / Back) Fix
    ======================================================== */
 
-button.btn-cancel,
 button.btn-back,
+button.btn-cancel,
 .btn-secondary {
-    background-color: #f1f5f9 !important; /* Very light gray background */
-    color: #475569 !important; /* Dark slate text */
-    border: 1px solid #cbd5e1 !important; /* Distinct border */
-    padding: 8px 16px !important;
+    /* Background: Swapped from primary deep blue to a crisp slate neutral */
+    background-color: #f1f5f9 !important; 
+    
+    /* Text & Icon: High-contrast dark slate instead of white */
+    color: #475569 !important; 
+    
+    /* Subtle border to define the button boundaries against white modals */
+    border: 1px solid #cbd5e1 !important; 
+    
+    /* Layout & Typography matching your primary buttons */
+    padding: 10px 20px !important;
     border-radius: 6px !important;
     font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important; /* Spacing for FontAwesome back arrows */
     cursor: pointer !important;
     transition: all 0.2s ease-in-out !important;
 }
 
-button.btn-cancel:hover,
+/* Hover & Focus States */
 button.btn-back:hover,
+button.btn-cancel:hover,
 .btn-secondary:hover {
-    background-color: #e2e8f0 !important; /* Darkens slightly on hover */
-    color: #475569 !important; /* Text goes nearly black on hover */
+    background-color: #e2e8f0 !important; /* Smooth darkening on hover */
+    color: #1e293b !important;            /* Text darkens to near-black */
+    border-color: #94a3b8 !important;      /* Border sharpens */
+}
+
+/* Active/Tap State for responsive mobile feel */
+button.btn-back:active,
+button.btn-cancel:active,
+.btn-secondary:active {
+    background-color: #cbd5e1 !important;
+    transform: scale(0.98); /* Subtle tactical compression on press */
 }
 
 .onboarding-group,
