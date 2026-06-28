@@ -4170,3 +4170,63 @@ button.btn-nudge-static {
 .text-info { color: #3b82f6; }
 .text-muted { color: #94a3b8; }
 .font-bold { font-weight: bold; }
+
+/* ========================================================
+   Action Buttons (Patient Management & Data)
+   ======================================================== */
+
+/* Add Patient Button (Green) */
+.btn-action-add {
+    background-color: #10b981 !important; /* Emerald Green */
+    color: #ffffff !important;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.btn-action-add:hover { opacity: 0.9; }
+
+/* Edit Button (Blue) */
+.btn-action-edit {
+    background-color: #3b82f6 !important; /* Blue */
+    color: #ffffff !important;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.btn-action-edit:hover { opacity: 0.9; }
+
+/* Delete Button (Red) */
+.btn-action-delete {
+    background-color: #ef4444 !important; /* Red */
+    color: #ffffff !important;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.btn-action-delete:hover { opacity: 0.9; }
+
+/* Merge/Transfer Button (Purple/Indigo) */
+.btn-action-merge {
+    background-color: #6366f1 !important; /* Indigo */
+    color: #ffffff !important;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.btn-action-merge:hover { opacity: 0.9; }
+
+/* If you have small icon-only buttons on a white background, use these: */
+.icon-btn-edit { color: #3b82f6 !important; background: transparent !important; border: none; cursor: pointer; }
+.icon-btn-delete { color: #ef4444 !important; background: transparent !important; border: none; cursor: pointer; }
