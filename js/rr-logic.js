@@ -31,7 +31,7 @@ showProgressionBanner: false,
 
 
 
-    
+        showHeroHeader: true,
         showLog: true,
         showMedGraph: true,
         showAnalytics: true,
@@ -557,27 +557,36 @@ savePatient() {
         },
         
         openPatientManager(isNew = false, patientId = null) {
-            this.showPatientManager = true;
-            if (isNew || !patientId) {
-                this.editingPatient = {
-                    id: this.generateId(),
-                    name: '',
-                    ownerName: '',
-                    species: 'dog',
-                    breed: '',
-                    sex: 'MN',
-                    dob: '',
-                    weight: null,
-                    weightUnit: 'kg',
-                    customSrrCutoff: 30
-                };
-            } else {
-                const target = this.patients.find(p => p.id === patientId);
-                // Extract latest weight for the form
-                const weights = this.weightLog.filter(w => w.patientId === patientId).sort((a, b) => new Date(b.date) - new Date(a.date));
-                this.editingPatient = { ...target, weight: weights.length > 0 ? weights[0].weightValue : null };
-            }
-        },
+    this.showPatientManager = true;
+    if (isNew || !patientId) {
+        this.editingPatient = {
+            id: this.generateId(),
+            name: '',
+            ownerName: '',
+            species: 'dog',
+            breed: '',
+            sex: 'MN',
+            dob: '',
+            weight: null,
+            weightUnit: 'kg',
+            customSrrCutoff: 30,
+            modules: { ...this.defaultModules }
+        };
+    } else {
+        const target = this.patients.find(p => p.id === patientId);
+        const weights = this.weightLog
+            .filter(w => w.patientId === patientId)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        this.editingPatient = {
+            ...target,
+            weight: weights.length > 0 ? weights[0].weightValue : null,
+            // CRITICAL FIX: backfill modules for patients created before this feature
+            modules: target.modules
+                ? { ...this.defaultModules, ...target.modules }  // merge: defaults fill any new keys
+                : { ...this.defaultModules }
+        };
+    }
+},
         
         closePatientManager() {
             this.showPatientManager = false;
@@ -726,11 +735,9 @@ saveDiagnosis() {
 
 checkProgressionTrigger(newStage) {
     if (!this.activePatientProfile) return;
-    
-    const currentModules = this.activePatientProfile.modules;
-    
-    // If they progress to C or D, but don't have medication or quality of life logs turned on
-    if (['C', 'D'].includes(newStage) && (!currentModules.medications || !currentModules.coughActivity)) {
+    const currentModules = this.activePatientProfile.modules || {};
+    if (['C', 'D'].includes(newStage) &&
+        (!currentModules.medications || !currentModules.coughLog || !currentModules.activityLog)) {
         this.showProgressionBanner = true;
     }
 },
@@ -2506,13 +2513,14 @@ importCSV(event) {
                 
                 if (!existingPet) {
                     existingPet = { 
-                        id: this.generateId(), // CRITICAL: Generate the relational UUID
+                        id: this.generateId(),
                         name: csvPetName, 
                         species: species, 
                         age: null,
                         weight: null,
                         weightUnit: 'kg',
-                        customSrrCutoff: 30
+                        customSrrCutoff: 30,
+                        modules: { ...this.defaultModules }
                     };
                     this.patients.push(existingPet);
                 }
@@ -2692,11 +2700,12 @@ importCSV(event) {
         existingPet = {
             id: this.generateId(),
             name: petName,
-            species: 'dog',       // Default — owner can edit profile afterwards
+            species: 'dog',
             age: null,
             weight: null,
             weightUnit: 'kg',
-            customSrrCutoff: 30
+            customSrrCutoff: 30,
+            modules: { ...this.defaultModules }
         };
         this.patients.push(existingPet);
         this.saveToStorage('vch_patients', this.patients);

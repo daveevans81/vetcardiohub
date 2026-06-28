@@ -191,23 +191,31 @@
 
 <div class="content">
 
+    <div class="rr-dashboard" x-data="rrTracker">       
+        <header class="hero-header card" style="position: relative;">
+        <button 
+            @click="$store ? null : null; document.getElementById('hero-body').style.display = document.getElementById('hero-body').style.display === 'none' ? '' : 'none'; this.querySelector('i').classList.toggle('fa-chevron-down'); this.querySelector('i').classList.toggle('fa-chevron-up');"
+            style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;"
+            title="Collapse header">
+            <i class="fa-solid fa-chevron-up"></i>
+        </button>
+        <div id="hero-body">
+            <h1 class="hero-title">Veterinary Cardiac Tracker</h1>
+            <p class="hero-subtitle">
+                Comprehensive home monitoring platform for canine and feline cardiac patients, including
+                sleeping respiratory rate tracking, medication management, quality-of-life monitoring,
+                ACVIM staging, and syncope event logging.
+            </p>
         
-    <header class="hero-header card">
-        <h1 class="hero-title">Veterinary Cardiac Tracker</h1>
-        <p class="hero-subtitle">
-            Comprehensive home monitoring platform for canine and feline cardiac patients, including
-            sleeping respiratory rate tracking, medication management, quality-of-life monitoring,
-            ACVIM staging, and syncope event logging.
-        </p>
-    
-        <div class="hero-pills-container">
-            <div class="hero-pill"><i class="fa-solid fa-paw" style="color: #c4b5fd;"></i> Patient Profiles</div>
-            <div class="hero-pill"><i class="fa-solid fa-lungs" style="color: #7dd3fc;"></i> SRR Monitoring</div>
-            <div class="hero-pill"><i class="fa-solid fa-chart-line" style="color: #93c5fd;"></i> Analytics & Trends</div>
-            <div class="hero-pill"><i class="fa-solid fa-pills" style="color: #6ee7b7;"></i> Medication Ledger</div>
-            <div class="hero-pill"><i class="fa-solid fa-heart-pulse" style="color: #fca5a5;"></i> Quality of Life</div>
-            <div class="hero-pill"><i class="fa-solid fa-stethoscope" style="color: #fcd34d;"></i> ACVIM Staging</div>
-            <div class="hero-pill"><i class="fa-solid fa-bolt" style="color: #fdba74;"></i> Syncope Log</div>
+            <div class="hero-pills-container">
+                <div class="hero-pill"><i class="fa-solid fa-paw" style="color: #c4b5fd;"></i> Patient Profiles</div>
+                <div class="hero-pill"><i class="fa-solid fa-lungs" style="color: #7dd3fc;"></i> SRR Monitoring</div>
+                <div class="hero-pill"><i class="fa-solid fa-chart-line" style="color: #93c5fd;"></i> Analytics & Trends</div>
+                <div class="hero-pill"><i class="fa-solid fa-pills" style="color: #6ee7b7;"></i> Medication Ledger</div>
+                <div class="hero-pill"><i class="fa-solid fa-heart-pulse" style="color: #fca5a5;"></i> Quality of Life</div>
+                <div class="hero-pill"><i class="fa-solid fa-stethoscope" style="color: #fcd34d;"></i> ACVIM Staging</div>
+                <div class="hero-pill"><i class="fa-solid fa-bolt" style="color: #fdba74;"></i> Syncope Log</div>
+            </div>
         </div>
     </header>
     
@@ -215,8 +223,8 @@
 
 
 
- <div class="rr-dashboard" x-data="rrTracker">
-        <main>
+
+    <main>
         
                                 <!-- ******************************** -->
                                 <!-- COMMENT EDITOR                   -->
@@ -417,7 +425,7 @@
                         </div>
                     
                         <div class="flex-between" style="justify-content: flex-end; gap: 10px;">
-                            <button @click="showOnboarding = false" class="btn btn-outline">Cancel</button>
+                            <button @click="patients.length === 0 ? onboardingStep = 0 : showOnboarding = false" class="btn btn-outline">Cancel</button>
                             <button @click="onboardingStep = 2" class="btn btn-primary" :disabled="!editingPatient.name">Continue <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>
@@ -596,6 +604,57 @@
                             <template x-if="currentClinicalStatus && currentClinicalStatus.acvimStage !== 'N/A'">
                                 <span style="font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">
                                     Stage <span x-text="currentClinicalStatus.acvimStage"></span>
+                                </span>
+                            </template>
+                        </div>
+                        <!-- Module status pills -->
+                        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;" x-show="activePatientProfile?.modules">
+                            <template x-if="activePatientProfile?.modules">
+                                <span :style="activePatientProfile.modules.srr
+                                    ? 'background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; opacity:1;'
+                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
+                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-lungs"></i> SRR
+                                </span>
+                            </template>
+                            <template x-if="activePatientProfile?.modules">
+                                <span :style="activePatientProfile.modules.medications
+                                    ? 'background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe; opacity:1;'
+                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
+                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-pills"></i> Meds
+                                </span>
+                            </template>
+                            <template x-if="activePatientProfile?.modules">
+                                <span :style="activePatientProfile.modules.coughLog
+                                    ? 'background:#fff1f2; color:#be123c; border:1px solid #fecdd3; opacity:1;'
+                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
+                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-head-side-cough"></i> Cough
+                                </span>
+                            </template>
+                            <template x-if="activePatientProfile?.modules">
+                                <span :style="activePatientProfile.modules.activityLog
+                                    ? 'background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; opacity:1;'
+                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
+                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-person-running"></i> Activity
+                                </span>
+                            </template>
+                            <template x-if="activePatientProfile?.modules">
+                                <span :style="activePatientProfile.modules.acvimStaging
+                                    ? 'background:#ede9fe; color:#6d28d9; border:1px solid #ddd6fe; opacity:1;'
+                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
+                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-stethoscope"></i> Staging
+                                </span>
+                            </template>
+                            <template x-if="activePatientProfile?.modules">
+                                <span :style="activePatientProfile.modules.syncopeLog
+                                    ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; opacity:1;'
+                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
+                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-bolt"></i> Syncope
                                 </span>
                             </template>
                         </div>
@@ -1717,7 +1776,7 @@
                 <!-- ACVIM DISEASE PROGRESSION TIMELINE           -->
                 <!-- ******************************************** -->
                 
-                <template x-if="activePatientProfile?.modules?.acvimStage">
+                <template x-if="activePatientProfile?.modules?.acvimStaging">
                     <div x-show="activePathway" 
                          x-cloak
                          x-data="{ isExpanded: false }"
