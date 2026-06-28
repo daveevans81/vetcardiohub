@@ -440,7 +440,7 @@
                         </div>
                     
                         <div class="flex-between" style="justify-content: flex-end; gap: 10px;">
-                            <button @click="patients.length === 0 ? onboardingStep = 0 : showOnboarding = false" class="btn btn-cancel">Cancel</button>
+                            <button @click="patients.length === 0 ? onboardingStep = 0 : showOnboarding = false" class="btn btn-cancel" style="background-color: #f1f5f9 !important;">Cancel</button>
                             <button @click="onboardingStep = 2" class="btn btn-primary" :disabled="!editingPatient.name">Continue <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>
@@ -509,7 +509,7 @@
                         </div>
                         
                         <div class="flex-between">
-                            <button @click="onboardingStep = 1" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                            <button @click="onboardingStep = 1" class="btn btn-back" style="background-color: #f1f5f9 !important;"><i class="fa-solid fa-arrow-left"></i> Back</button>
                             <button @click="generateModuleRecommendations()" class="btn btn-primary">Select Modules <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>                    
@@ -589,7 +589,7 @@
                         </div>
                         
                         <div class="flex-between">
-                            <button @click="onboardingStep = 2" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                            <button @click="onboardingStep = 2" class="btn btn-back" style="background-color: #f1f5f9 !important;"><i class="fa-solid fa-arrow-left"></i> Back</button>
                             <button @click="saveOnboardedPatient()" class="btn btn-success"><i class="fa-solid fa-check"></i> Finalise Dashboard</button>
                         </div>
                     </div>     
@@ -1824,7 +1824,7 @@
                             </h2>
                             
                             <button @click="isExpanded = !isExpanded" 
-                                    class="chart-expand-btn">
+                                    style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
                                 <i class="fa-solid" :class="isExpanded ? 'fa-compress' : 'fa-magnifying-glass-plus'"></i>
                                 <span x-text="isExpanded ? ' Close Fullscreen' : ' Expand Chart'"></span>
                             </button>
@@ -1860,7 +1860,7 @@
                         </h2>
 
                         <button @click="murmurExpanded = !murmurExpanded"
-                                class="chart-expand-btn">
+                                style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
                             <i class="fa-solid" :class="murmurExpanded ? 'fa-compress' : 'fa-magnifying-glass-plus'"></i>
                             <span x-text="murmurExpanded ? ' Close Fullscreen' : ' Expand Chart'"></span>
                         </button>
