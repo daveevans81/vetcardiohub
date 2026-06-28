@@ -1472,8 +1472,9 @@
                                                     — <span x-text="diag.customDiagnosis"></span>
                                                 </div>
                                             </div>
-                                            <div x-show="diag.diagnosis === 'Murmur - no diagnosis' && diag.murmurGrade && diag.murmurGrade !== 'N/A'" style="color: #b45309; font-size: 0.9rem; margin-top: 6px; font-weight: 500;">
-                                                <i class="fa-solid fa-stethoscope"></i> Intensity: <span x-text="diag.murmurGrade"></span>
+                                            
+                                            <div x-show="diag.murmurGrade && diag.murmurGrade !== 'N/A'" style="color: #b45309; font-size: 0.9rem; margin-top: 6px; font-weight: 500;">
+                                                <i class="fa-solid fa-stethoscope"></i> Murmur <span x-text="diag.murmurGrade"></span>
                                             </div>
                                             <div x-show="diag.acvimStage !== 'N/A' && diag.acvimStage !== '' && diag.diagnosis !== 'Murmur - no diagnosis'" style="color: #0284c7; font-size: 0.9rem; margin-top: 6px; font-weight: 500;">
                                                 <i class="fa-solid fa-chart-line"></i> ACVIM <span x-text="diag.acvimStage"></span>
