@@ -4276,7 +4276,9 @@ button.btn-nudge-static {
 * ========================================================
    Secondary Buttons (Cancel / Back) Fix
    ======================================================== */
-
+.chart-expand-btn {
+    background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;
+}
 .btn-back,
 .btn-cancel,
 .btn-secondary {

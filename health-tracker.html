@@ -1813,9 +1813,9 @@
                     <div x-show="activePathway" 
                          x-cloak
                          x-data="{ isExpanded: false }"
-                         class="summary-box" 
+                         class="module-card summary-box" 
                          :class="{ 'expanded-acvim-modal': isExpanded }"
-                         style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
+                         >
                         
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                             <h2 style="margin: 0; font-size: 1.25rem;">
@@ -1824,7 +1824,7 @@
                             </h2>
                             
                             <button @click="isExpanded = !isExpanded" 
-                                    style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
+                                    class="chart-expand-btn">
                                 <i class="fa-solid" :class="isExpanded ? 'fa-compress' : 'fa-magnifying-glass-plus'"></i>
                                 <span x-text="isExpanded ? ' Close Fullscreen' : ' Expand Chart'"></span>
                             </button>
@@ -1860,7 +1860,7 @@
                         </h2>
 
                         <button @click="murmurExpanded = !murmurExpanded"
-                                style="background: #fef3c7; border: 1px solid #fcd34d; color: #92400e; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
+                                class="chart-expand-btn">
                             <i class="fa-solid" :class="murmurExpanded ? 'fa-compress' : 'fa-magnifying-glass-plus'"></i>
                             <span x-text="murmurExpanded ? ' Close Fullscreen' : ' Expand Chart'"></span>
                         </button>
