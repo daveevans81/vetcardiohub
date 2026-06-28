@@ -4281,14 +4281,22 @@ button.btn-back,
 button.btn-cancel,
 .btn-secondary {
     /* Layout & Alignment */
+        padding: 10px 15px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 500;
+    gap: 8px;
+    border: none;
+    transition: all 0.2s ease;
+    margin: 5px;
+    
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 8px !important; /* Spacing for FontAwesome arrows/icons */
     
     /* Strict Sizing: Forces it to match the standard primary buttons */
-    height: 42px !important;    /* Match this value to your Next/Continue button height */
-    padding: 0 24px !important;  /* Horizontal padding */
+    /* height: 42px !important;     Match this value to your Next/Continue button height */
     min-width: 100px !important; /* Prevents text from squishing the button on mobile */
     border-radius: 6px !important;
     
