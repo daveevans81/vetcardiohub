@@ -440,7 +440,7 @@
                         </div>
                     
                         <div class="flex-between" style="justify-content: flex-end; gap: 10px;">
-                            <button @click="patients.length === 0 ? onboardingStep = 0 : showOnboarding = false" class="btn btn-outline">Cancel</button>
+                            <button @click="patients.length === 0 ? onboardingStep = 0 : showOnboarding = false" class="btn btn-cancel">Cancel</button>
                             <button @click="onboardingStep = 2" class="btn btn-primary" :disabled="!editingPatient.name">Continue <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>
@@ -450,12 +450,12 @@
                         <h2 class="text-primary mb-15">Clinical Baseline</h2>
                         <p class="mb-15">Does <strong x-text="editingPatient.name || 'this patient'"></strong> have a known cardiac condition or heart murmur?</p>
                         
-                        <div class="radio-group" style="display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 20px;">
-                            <label class="radio-card"">
+                        <div class="onboarding-group" style="display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 20px;">
+                            <label class="onboarding-label">
                                 <input type="radio" x-model="onboardingData.hasCardiacIssue" value="yes"> 
                                 Yes, logging a specific diagnosis or murmur
                             </label>
-                            <label class="radio-card">
+                            <label class="onboarding-label">
                                 <input type="radio" x-model="onboardingData.hasCardiacIssue" value="no"> 
                                 No, tracking other symptoms (e.g., general syncope, wellness)
                             </label>
@@ -509,7 +509,7 @@
                         </div>
                         
                         <div class="flex-between">
-                            <button @click="onboardingStep = 1" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                            <button @click="onboardingStep = 1" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
                             <button @click="generateModuleRecommendations()" class="btn btn-primary">Select Modules <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>                    
@@ -589,7 +589,7 @@
                         </div>
                         
                         <div class="flex-between">
-                            <button @click="onboardingStep = 2" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                            <button @click="onboardingStep = 2" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
                             <button @click="saveOnboardedPatient()" class="btn btn-success"><i class="fa-solid fa-check"></i> Finalise Dashboard</button>
                         </div>
                     </div>     

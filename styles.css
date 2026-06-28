@@ -4272,3 +4272,62 @@ button.btn-nudge-static {
     position: static !important; 
     transform: none !important;
 }
+
+* ========================================================
+   Secondary Buttons (Cancel / Back) Fix
+   ======================================================== */
+
+button.btn-cancel,
+button.btn-back,
+.btn-secondary {
+    background-color: #f8fafc !important; /* Very light gray background */
+    color: #334155 !important; /* Dark slate text */
+    border: 1px solid #cbd5e1 !important; /* Distinct border */
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+button.btn-cancel:hover,
+button.btn-back:hover,
+.btn-secondary:hover {
+    background-color: #e2e8f0 !important; /* Darkens slightly on hover */
+    color: #0f172a !important; /* Text goes nearly black on hover */
+}
+
+.onboarding-group,
+.onboarding-options {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+}
+
+.onboarding-label {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    cursor: pointer !important;
+    color: #1e293b !important; /* Forces dark slate text for readability */
+    font-weight: 500 !important;
+    margin: 0 !important;
+    padding: 4px 0 !important;
+}
+
+/* Restores native rendering for both radios and checkboxes */
+.onboarding-label input[type="radio"],
+.onboarding-label input[type="checkbox"] {
+    -webkit-appearance: auto !important; 
+    -moz-appearance: auto !important;
+    appearance: auto !important; 
+    display: inline-block !important;
+    margin: 0 12px 0 0 !important; /* Explicit spacing between input and text */
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+    position: static !important;
+}
+
