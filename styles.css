@@ -4296,7 +4296,7 @@ button.btn-cancel,
     gap: 8px !important; /* Spacing for FontAwesome arrows/icons */
     
     /* Strict Sizing: Forces it to match the standard primary buttons */
-    /* height: 42px !important;     Match this value to your Next/Continue button height */
+     height: 50px !important;    /* Match this value to your Next/Continue button height */
     min-width: 100px !important; /* Prevents text from squishing the button on mobile */
     border-radius: 6px !important;
     
