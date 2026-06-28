@@ -4277,8 +4277,8 @@ button.btn-nudge-static {
    Secondary Buttons (Cancel / Back) Fix
    ======================================================== */
 
-button.btn-back,
-button.btn-cancel,
+.btn-back,
+.btn-cancel,
 .btn-secondary {
     /* Layout & Alignment */
         padding: 10px 15px;
