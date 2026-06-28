@@ -440,7 +440,7 @@
                         </div>
                     
                         <div class="flex-between" style="justify-content: flex-end; gap: 10px;">
-                            <button @click="patients.length === 0 ? onboardingStep = 0 : showOnboarding = false" class="btn btn-cancel">Cancel</button>
+                            <button @click="patients.length === 0 ? onboardingStep = 0 : showOnboarding = false" class="btn-cancel">Cancel</button>
                             <button @click="onboardingStep = 2" class="btn btn-primary" :disabled="!editingPatient.name">Continue <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>
@@ -509,7 +509,7 @@
                         </div>
                         
                         <div class="flex-between">
-                            <button @click="onboardingStep = 1" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                            <button @click="onboardingStep = 1" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
                             <button @click="generateModuleRecommendations()" class="btn btn-primary">Select Modules <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>                    
@@ -589,7 +589,7 @@
                         </div>
                         
                         <div class="flex-between">
-                            <button @click="onboardingStep = 2" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                            <button @click="onboardingStep = 2" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
                             <button @click="saveOnboardedPatient()" class="btn btn-success"><i class="fa-solid fa-check"></i> Finalise Dashboard</button>
                         </div>
                     </div>     
