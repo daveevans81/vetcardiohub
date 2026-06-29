@@ -1059,7 +1059,7 @@
                         
                         <div style="margin-bottom: 15px;">
                             <button @click="showSymptomLog = !showSymptomLog" :aria-expanded="showSymptomLog.toString()" type="button" class="btn-accordion">
-                                <h3><i class="fa-solid fa-heart-pulse text-rose-500"></i><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Quality of Life (Daily Summaries of Cough and Activity)</h3> 
+                                <h3><i class="fa-solid fa-heart-pulse text-rose-500"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Quality of Life (Daily Summaries of Cough and Activity)' : 'Quality of Life (Daily Summaries of Cough and Activity)'"></span></h3> 
                                 <i class="fa-solid" :class="showSymptomLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                             </button>
                         </div>
@@ -1238,7 +1238,7 @@
                         
                         <div style="margin-bottom: 15px;">
                             <button @click="showMedLog = !showMedLog" :aria-expanded="showMedLog.toString()" type="button" class="btn-accordion">
-                                <h3><i class="fa-solid fa-pills" style="margin-right: 8px;"></i><span style="margin-right: 0px; x-text="activePatientProfile?.name || 'Patient'"></span>'s Pharmacologic Ledger</h3> 
+                                <h3><i class="fa-solid fa-pills" style="margin-right: 8px;"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Pharmacologic Ledger' : 'Pharmacologic Ledger'"></span></h3> 
                                 <i class="fa-solid" :class="showMedLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                             </button>
                         </div>
@@ -1357,7 +1357,7 @@
                     
                     <div style="margin-bottom: 15px;">
                         <button @click="showDiagnosisLog = !showDiagnosisLog" :aria-expanded="showDiagnosisLog.toString()" type="button" class="btn-accordion">
-                            <h3><i class="fa-solid fa-stethoscope" style="margin-right: 8px; color: #0284c7;"></i><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Diagnosis & Clinical History</h3> 
+                            <h3><i class="fa-solid fa-stethoscope" style="margin-right: 8px; color: #0284c7;"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Diagnosis & Clinical History' : 'Diagnosis & Clinical History'"></span></h3> 
                             <i class="fa-solid" :class="showDiagnosisLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </button>
                     </div>
@@ -1530,7 +1530,7 @@
                     
                     <div style="margin-bottom: 15px;">
                         <button @click="showSyncopeLog = !showSyncopeLog" :aria-expanded="showSyncopeLog.toString()" type="button" class="btn-accordion">
-                            <h3><i class="fa-solid fa-bolt" style="margin-right: 8px;"></i> <span x-text="activePatientProfile?.name || 'Patient'"></span>'s Collapse / Syncope Log</h3> 
+                            <h3><i class="fa-solid fa-bolt" style="margin-right: 8px;"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Collapse / Syncope Log' : 'Collapse / Syncope Log'"></span></h3> 
                             <i class="fa-solid" :class="showSyncopeLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </button>
                     </div>
