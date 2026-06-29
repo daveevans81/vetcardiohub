@@ -192,28 +192,28 @@
 <div class="content">
 
     <div class="rr-dashboard" x-data="rrTracker">       
-        <header class="hero-header card" x-data="{ heroExpanded: true }" style="position: relative;">
+        <header class="hero-header card">
         
             <!-- Collapsed mini-title: always visible -->
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <span x-show="!heroExpanded"  style="font-size: 1rem; font-weight: 700; color: white; letter-spacing: 0.01em;">
+                    <span x-show="!showHeroHeader"  style="font-size: 1rem; font-weight: 700; color: white; letter-spacing: 0.01em;">
                         Veterinary Cardiac Tracker
                     </span>
-                    <span x-show="!heroExpanded" x-transition style="font-size: 0.8rem; color: rgba(255,255,255,0.65); margin-left: 10px;">
+                    <span x-show="!showHeroHeader" x-transition style="font-size: 0.8rem; color: rgba(255,255,255,0.65); margin-left: 10px;">
                         Home monitoring for cardiac patients
                     </span>
                 </div>
                 <button 
-                    @click="heroExpanded = !heroExpanded"
+                    @click="showHeroHeader = !showHeroHeader"
                     style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; flex-shrink: 0;"
-                    :title="heroExpanded ? 'Collapse header' : 'Expand header'">
-                    <i class="fa-solid" :class="heroExpanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                    :title="showHeroHeader ? 'Collapse header' : 'Expand header'">
+                    <i class="fa-solid" :class="showHeroHeader ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                 </button>
             </div>
         
             <!-- Collapsible body -->
-            <div x-show="heroExpanded" x-collapse>
+            <div x-show="showHeroHeader" x-collapse>
                 <h1 class="hero-title" style="margin-top: 16px;">Veterinary Cardiac Tracker</h1>
                 <p class="hero-subtitle">
                     Comprehensive home monitoring platform for canine and feline cardiac patients, including
@@ -945,10 +945,10 @@
                                                 <span class="text-sm text-muted" style="margin-left: 8px;" x-text="log.time"></span>
                                                 
                                                 <template x-if="log.comment && log.comment.trim().length">
-                                                    <span @click.stop="toggleCommentDisplay(log.id)" :title="log.comment" 
-                                                          style="font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;"
-                                                          :class="expandedCommentId === log.id ? 'text-primary' : 'text-primary'"
-                                                          :style="expandedCommentId === log.id ? 'background:#eff6ff;' : ''">
+                                                    <span @click.stop="toggleCommentDisplay(log.id)" :title="log.comment"
+                                                          :style="expandedCommentId === log.id
+                                                        ? 'color:#1d4ed8; background:#eff6ff; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'
+                                                        : 'color:#3b82f6; font-size:0.85rem; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px;'">
                                                         <i class="fa-solid fa-comment-dots"></i>
                                                     </span>
                                                 </template>
@@ -972,7 +972,7 @@
                                                 <i class="fa-solid fa-comment-dots" style="color: #3b82f6; margin-top: 2px; font-size: 0.8rem; flex-shrink: 0;"></i>
                                                 <span style="font-size: 0.85rem; color: #1e40af; line-height: 1.5;" x-text="log.comment"></span>
                                             </div>
-                                            <button @click="openCommentEditor(log)" class="btn btn-outline" style="padding: 3px 8px; font-size: 0.75rem; border-color: #bfdbfe; color: #3b82f6;">Edit</button>
+                                            <button @click="openCommentEditor(log)" class="btn btn-outline" sstyle="background: none; border: 1px solid #bfdbfe; border-radius: 4px; color: #3b82f6; cursor: pointer; padding: 3px 8px; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">Edit</button>
                                         </div>
                                     </div>
                                 </template>
