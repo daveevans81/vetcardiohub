@@ -231,6 +231,8 @@ showHeart2HeartImport: false,
         isChartExpanded: false,
         showCutoffLine: true,
 showMeanRef: true,
+
+weightChartRenderTimeout: null,
         
         // Medication Module State
  
@@ -326,10 +328,13 @@ init() {
     this.$watch('showMedGraph', (isVisible) => { 
         if (isVisible) this.$nextTick(() => { this.renderMedChart(); }); 
     });
+    this.$watch('showWeightLogPanel', (isVisible) => {
+    if (isVisible) this.$nextTick(() => { this.renderWeightChart(); });
+});
 
     // Existing watchers
-    this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
-    this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); });
+    this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); });
+    this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); });
     this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
     this.$watch('showCoughOverlay', () => { this.renderChart(); });
     this.$watch('showActivityOverlay', () => { this.renderChart(); });
@@ -369,7 +374,7 @@ init() {
         window.removeEventListener('beforeunload', this._unloadHandler);
     });
     
-    this.$nextTick(() => { if (this.patients.length > 0) { this.renderChart(); this.renderMedChart(); } });
+    this.$nextTick(() => { if (this.patients.length > 0) { this.renderChart(); this.renderMedChart(); this.renderWeightChart();} });
 },
 
 // Initialization method for new patients
@@ -1208,16 +1213,18 @@ saveWeightEntry() {
     this.showWeightForm = false;
     
     // Force a chart re-render as historical mg/kg calculations may have changed
-    this.$nextTick(() => { this.renderMedChart(); }); 
+    this.$nextTick(() => { this.renderMedChart(); this.renderWeightChart(); }); 
 },
 
 deleteWeightEntry(id) {
     if (confirm("Delete this weight and diet record?")) {
         this.weightLog = this.weightLog.filter(w => w.id !== id);
         this.saveToStorage('vch_weightLog', this.weightLog);
-        this.$nextTick(() => { this.renderMedChart(); });
+        this.$nextTick(() => { this.renderMedChart(); this.renderWeightChart();});
     }
 },
+
+
         
         
         
@@ -2943,6 +2950,73 @@ renderChart() {
         });
     }, 50);
 },
+
+renderWeightChart() {
+    if (this.weightChartRenderTimeout) clearTimeout(this.weightChartRenderTimeout);
+    this.weightChartRenderTimeout = setTimeout(() => {
+        const canvas = this.$refs.weightChartCanvas;
+        if (!canvas || canvas.offsetParent === null) return;
+
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) existingChart.destroy();
+
+        const data = this.weightLog
+            .filter(w => w.patientId === this.activePatientId)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        if (data.length < 2) return;
+
+        const unit = this.activePatientProfile?.weightUnit || 'kg';
+        const labels = data.map(w =>
+            new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })
+        );
+        const values = data.map(w => parseFloat(w.weightValue));
+
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: `Weight (${unit})`,
+                    data: values,
+                    borderColor: '#0f766e',
+                    backgroundColor: 'rgba(15, 118, 110, 0.08)',
+                    tension: 0.25,
+                    pointRadius: data.length > 30 ? 3 : 5,
+                    fill: true,
+                    spanGaps: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: (ctx) => {
+                                const e = data[ctx.dataIndex];
+                                const parts = [];
+                                if (e.appetite && e.appetite !== 'Normal') parts.push(`Appetite: ${e.appetite}`);
+                                if (e.foodBrand) parts.push(`Diet: ${e.foodBrand}`);
+                                if (e.portionSize) parts.push(e.portionSize);
+                                if (e.notes) parts.push(e.notes);
+                                return parts;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { maxRotation: 0, maxTicksLimit: 10 }, grid: { color: '#e2e8f0' } },
+                    y: {
+                        beginAtZero: false,
+                        title: { display: true, text: `Weight (${unit})` }
+                    }
+                }
+            }
+        });
+    }, 100);
+},
         
          // --- MED CHART FUNCTIONS ---       
         
@@ -3993,6 +4067,166 @@ importSyncopeCSV(event) {
 },
 
 // ==========================================
+// --- WEIGHT LOG CSV EXPORT / IMPORT ---
+// ==========================================
+
+exportWeightCSV() {
+    if (!this.weightLog || this.weightLog.length === 0) return alert("No weight data to export.");
+    const headers = "Date,PatientName,Weight,Unit,Appetite,FoodBrand,PortionSize,Supplements,Notes\n";
+    const rows = this.weightLog.map(w => {
+        const patient = this.patients.find(p => p.id === w.patientId);
+        const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+        const unit = patient?.weightUnit || 'kg';
+        return [
+            (w.date || '').split('T')[0],
+            `"${patientName}"`,
+            w.weightValue != null ? w.weightValue : '',
+            unit,
+            `"${this.sanitiseCSV(w.appetite || '')}"`,
+            `"${this.sanitiseCSV(w.foodBrand || '')}"`,
+            `"${this.sanitiseCSV(w.portionSize || '')}"`,
+            `"${this.sanitiseCSV(w.supplements || '')}"`,
+            `"${this.sanitiseCSV(w.notes || '')}"`
+        ].join(',');
+    }).join("\n");
+    const BOM = '\uFEFF';
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `VCH_WeightLog_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+},
+
+importWeightCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const lines = e.target.result.split("\n").map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+            const clean = (s) => (s || '').replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+            let importedCount = 0, skipped = 0;
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].match(/(".*?"|[^",]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g);
+                if (!parts || parts.length < 3) { skipped++; continue; }
+                const patientName = clean(parts[1]);
+                const patient = this.patients.find(p => p.name.toLowerCase() === patientName.toLowerCase());
+                if (!patient) { skipped++; continue; }
+                const weightValue = parseFloat(clean(parts[2]));
+                if (isNaN(weightValue) || weightValue <= 0) { skipped++; continue; }
+                this.weightLog.push({
+                    id: this.generateId(),
+                    patientId: patient.id,
+                    date: clean(parts[0]),
+                    weightValue,
+                    appetite: clean(parts[4]) || 'Normal',
+                    foodBrand: clean(parts[5]) || '',
+                    portionSize: clean(parts[6]) || '',
+                    supplements: clean(parts[7]) || '',
+                    notes: clean(parts[8]) || ''
+                });
+                importedCount++;
+            }
+            this.saveToStorage('vch_weightLog', this.weightLog);
+            this.$nextTick(() => { this.renderWeightChart(); this.renderMedChart(); });
+            const note = skipped > 0 ? ` (${skipped} skipped)` : '';
+            alert(`Imported ${importedCount} weight record(s)${note}.`);
+        } catch (err) { alert("Failed to parse Weight CSV. Check the file format."); }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
+
+// ==========================================
+// --- VACCINATION LOG CSV EXPORT / IMPORT ---
+// ==========================================
+
+exportVaccinationCSV() {
+    if (!this.vaccinationLog || this.vaccinationLog.length === 0) return alert("No vaccination data to export.");
+    const headers = "Date,PatientName,VaccineType,Components,BatchNumber,AdministeredBy,NextDueDate,Additionals,Notes\n";
+    const rows = this.vaccinationLog.map(v => {
+        const patient = this.patients.find(p => p.id === v.patientId);
+        const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+        const components = (v.components || []).join('; ');
+        const additionals = (v.additionals || []).map(a => `${a.label}:${a.nextDueDate || ''}`).join('; ');
+        return [
+            v.date,
+            `"${patientName}"`,
+            `"${this.sanitiseCSV(v.type || '')}"`,
+            `"${this.sanitiseCSV(components)}"`,
+            `"${this.sanitiseCSV(v.batchNumber || '')}"`,
+            `"${this.sanitiseCSV(v.administeredBy || '')}"`,
+            v.nextDueDate || '',
+            `"${this.sanitiseCSV(additionals)}"`,
+            `"${this.sanitiseCSV(v.notes || '')}"`
+        ].join(',');
+    }).join("\n");
+    const BOM = '\uFEFF';
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `VCH_VaccinationLog_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+},
+
+importVaccinationCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const lines = e.target.result.split("\n").map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+            const clean = (s) => (s || '').replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+            let importedCount = 0, skipped = 0;
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].match(/(".*?"|[^",]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g);
+                if (!parts || parts.length < 3) { skipped++; continue; }
+                const patientName = clean(parts[1]);
+                const patient = this.patients.find(p => p.name.toLowerCase() === patientName.toLowerCase());
+                if (!patient) { skipped++; continue; }
+                const date = clean(parts[0]);
+                if (!date) { skipped++; continue; }
+                const additionalsRaw = clean(parts[7]);
+                const additionals = additionalsRaw
+                    ? additionalsRaw.split(';').map(s => {
+                        const colonIdx = s.trim().indexOf(':');
+                        const label = colonIdx > -1 ? s.trim().slice(0, colonIdx).trim() : s.trim();
+                        const nextDueDate = colonIdx > -1 ? s.trim().slice(colonIdx + 1).trim() : '';
+                        return { id: this.generateId(), label, nextDueDate };
+                    }).filter(a => a.label)
+                    : [];
+                this.vaccinationLog.push({
+                    id: this.generateId(),
+                    patientId: patient.id,
+                    date,
+                    vaccineId: '',
+                    type: clean(parts[2]),
+                    isCombi: false,
+                    components: clean(parts[3]) ? clean(parts[3]).split(';').map(s => s.trim()).filter(Boolean) : [],
+                    additionals,
+                    batchNumber: clean(parts[4]) || '',
+                    administeredBy: clean(parts[5]) || '',
+                    nextDueDate: clean(parts[6]) || '',
+                    notes: clean(parts[8]) || ''
+                });
+                importedCount++;
+            }
+            this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
+            const note = skipped > 0 ? ` (${skipped} skipped)` : '';
+            alert(`Imported ${importedCount} vaccination record(s)${note}.`);
+        } catch (err) { alert("Failed to parse Vaccination CSV. Check the file format."); }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
+
+// ==========================================
 // --- DIAGNOSIS LOG CSV EXPORT / IMPORT ---
 // ==========================================
 
@@ -4286,6 +4520,50 @@ async _svgToJpegDataUrl(svgElement, width, height) {
     }
 },
  
+async shareReport() {
+    if (!this.activePatientId) return;
+    const profile = this.activePatientProfile;
+    const srrData = this.getFilteredReadings().slice(-5).reverse();
+
+    let text = `${profile.name}'s VetCardioHub Cardiac Summary (${this.timeScaleLabel})\n`;
+    text += `Species: ${profile.species}  |  Owner: ${profile.ownerName || 'N/A'}\n`;
+    text += `Current weight: ${this.latestWeightText}\n\n`;
+
+    if (srrData.length > 0) {
+        text += `Recent SRR Readings:\n`;
+        srrData.forEach(r => {
+            text += `• ${new Date(r.date).toLocaleDateString('en-GB')} — ${r.rate} bpm\n`;
+        });
+    }
+
+    const latestDiag = this.diagnosisLog
+        .filter(d => d.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    if (latestDiag) {
+        text += `\nClinical Status: ${latestDiag.diagnosis || ''}`;
+        if (latestDiag.acvimStage && latestDiag.acvimStage !== 'N/A') text += ` | ACVIM ${latestDiag.acvimStage}`;
+        text += '\n';
+    }
+
+    text += `\nTracked with VetCardioHub — vetcardiohub.com/health-tracker`;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: `${profile.name} — VetCardioHub Report`,
+                text,
+                url: 'https://vetcardiohub.com/health-tracker'
+            });
+        } catch (e) {
+            // User cancelled — no action needed
+        }
+    } else {
+        // Fallback: copy full clinical report to clipboard
+        this.copyToClipboard();
+        alert("Share sheet not available on this browser. Full report copied to clipboard instead.");
+    }
+},
+
  
 // ── generatePDF ───────────────────────────────────────────────────────────────
 async generatePDF() {
@@ -4558,6 +4836,63 @@ async generatePDF() {
         });
     }
  
+ // ── 11. Weight Chart + Weight Log ──────────────────────────────────────
+    const weightData = this.weightLog
+        .filter(w => w.patientId === this.activePatientId && inRange(w.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (weightData.length > 0) {
+        embedCanvas(this.$refs.weightChartCanvas, 'Weight Trend Chart');
+        if (Y > 240) { doc.addPage(); Y = 20; }
+        sectionHeader('Weight & Diet Log', 15, 118, 110);
+        const weightUnit = profile.weightUnit || 'kg';
+        doc.autoTable({
+            startY: Y,
+            head: [['Date', `Weight (${weightUnit})`, 'Appetite', 'Food / Diet', 'Portion', 'Supplements', 'Notes']],
+            body: weightData.map(w => [
+                (w.date || '').split('T')[0],
+                w.weightValue != null ? `${w.weightValue} ${weightUnit}` : '—',
+                w.appetite || '—',
+                w.foodBrand || '—',
+                w.portionSize || '—',
+                w.supplements || '—',
+                w.notes || '—'
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [15, 118, 110] },
+            columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 20 }, 2: { cellWidth: 18 }, 3: { cellWidth: 30 }, 4: { cellWidth: 22 }, 5: { cellWidth: 22 }, 6: { cellWidth: 'auto' } },
+            styles: { fontSize: 8 }
+        });
+        Y = doc.lastAutoTable.finalY + 12;
+    }
+
+    // ── 12. Vaccination Log ────────────────────────────────────────────────
+    const vaccData = this.vaccinationLog
+        .filter(v => v.patientId === this.activePatientId && inRange(v.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (vaccData.length > 0) {
+        if (Y > 240) { doc.addPage(); Y = 20; }
+        sectionHeader('Vaccination Log', 124, 58, 237);
+        doc.autoTable({
+            startY: Y,
+            head: [['Date', 'Vaccine', 'Batch No.', 'Administered By', 'Next Due', 'Notes']],
+            body: vaccData.map(v => [
+                v.date,
+                v.type || '—',
+                v.batchNumber || '—',
+                v.administeredBy || '—',
+                v.nextDueDate || '—',
+                v.notes || '—'
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [124, 58, 237] },
+            columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 38 }, 2: { cellWidth: 22 }, 3: { cellWidth: 32 }, 4: { cellWidth: 22 }, 5: { cellWidth: 'auto' } },
+            styles: { fontSize: 8 }
+        });
+        Y = doc.lastAutoTable.finalY + 12;
+    }
+
     doc.save(`${profile.name.replace(/\s+/g, '_')}_Clinical_Report_${new Date().toISOString().split('T')[0]}.pdf`);
 },
 
@@ -4716,6 +5051,54 @@ generateCSV() {
         });
         csv += '\n';
     }
+    
+    // ── Weight & Diet Log ─────────────────────────────────────────────────
+    const weightDataCSV = this.weightLog
+        .filter(w => w.patientId === this.activePatientId && inRange(w.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (weightDataCSV.length > 0) {
+        const wUnit = profile.weightUnit || 'kg';
+        csv += 'WEIGHT & DIET LOG\n';
+        csv += `Date,Weight (${wUnit}),Appetite,Food/Diet,Portion Size,Supplements,Notes\n`;
+        weightDataCSV.forEach(w => {
+            csv += [
+                q((w.date || '').split('T')[0]),
+                w.weightValue != null ? w.weightValue : '',
+                q(w.appetite || ''),
+                q(w.foodBrand || ''),
+                q(w.portionSize || ''),
+                q(w.supplements || ''),
+                q(w.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+
+    // ── Vaccination Log ───────────────────────────────────────────────────
+    const vaccDataCSV = this.vaccinationLog
+        .filter(v => v.patientId === this.activePatientId && inRange(v.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (vaccDataCSV.length > 0) {
+        csv += 'VACCINATION LOG\n';
+        csv += 'Date,Vaccine Type,Components,Batch No.,Administered By,Next Due Date,Additionals,Notes\n';
+        vaccDataCSV.forEach(v => {
+            const components = (v.components || []).join('; ');
+            const additionals = (v.additionals || []).map(a => `${a.label}:${a.nextDueDate || ''}`).join('; ');
+            csv += [
+                q(v.date),
+                q(v.type || ''),
+                q(components),
+                q(v.batchNumber || ''),
+                q(v.administeredBy || ''),
+                q(v.nextDueDate || ''),
+                q(additionals),
+                q(v.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
  
     if (!csv.trim()) return alert("No data to export for this patient in the selected date range.");
  
@@ -4868,6 +5251,46 @@ copyToClipboard() {
             if (a.durationMins) out += `  |  ${a.durationMins}m`;
             if (a.distance)     out += `  |  ${a.distance}`;
             if (a.notes)        out += `${nl}${indent}Notes: ${a.notes}`;
+            out += nl;
+        });
+        out += nl;
+    }
+    
+    // ── Weight & Diet Log ─────────────────────────────────────────────────
+    const weightDataTxt = this.weightLog
+        .filter(w => w.patientId === this.activePatientId && inRange(w.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (weightDataTxt.length > 0) {
+        const wUnit = profile.weightUnit || 'kg';
+        out += `WEIGHT & DIET LOG (${weightDataTxt.length} entr${weightDataTxt.length !== 1 ? 'ies' : 'y'})${nl}`;
+        out += rule() + nl;
+        weightDataTxt.forEach(w => {
+            out += `${(w.date || '').split('T')[0]}  |  ${w.weightValue} ${wUnit}  |  Appetite: ${w.appetite || '—'}`;
+            if (w.foodBrand) out += `  |  Diet: ${w.foodBrand}`;
+            if (w.portionSize) out += `  (${w.portionSize})`;
+            if (w.supplements) out += `${nl}${indent}Supplements: ${w.supplements}`;
+            if (w.notes) out += `${nl}${indent}Notes: ${w.notes}`;
+            out += nl;
+        });
+        out += nl;
+    }
+
+    // ── Vaccination Log ───────────────────────────────────────────────────
+    const vaccDataTxt = this.vaccinationLog
+        .filter(v => v.patientId === this.activePatientId && inRange(v.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (vaccDataTxt.length > 0) {
+        out += `VACCINATION LOG (${vaccDataTxt.length} entr${vaccDataTxt.length !== 1 ? 'ies' : 'y'})${nl}`;
+        out += rule() + nl;
+        vaccDataTxt.forEach(v => {
+            out += `${v.date}  |  ${v.type || 'Unknown vaccine'}`;
+            if (v.batchNumber) out += `  |  Batch: ${v.batchNumber}`;
+            if (v.administeredBy) out += `  |  By: ${v.administeredBy}`;
+            if (v.nextDueDate) out += `  |  Next due: ${v.nextDueDate}`;
+            if ((v.additionals || []).length > 0) out += `${nl}${indent}Additionals: ${v.additionals.map(a => `${a.label}${a.nextDueDate ? ' (due '+a.nextDueDate+')' : ''}`).join(', ')}`;
+            if (v.notes) out += `${nl}${indent}Notes: ${v.notes}`;
             out += nl;
         });
         out += nl;

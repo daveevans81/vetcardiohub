@@ -1675,6 +1675,15 @@
                                     })()"></span>
                                 </div>
                             </template>
+                            
+                            <!-- Weight Trend Chart -->
+                            <div x-show="sortedWeightLog.length >= 2"
+                                 style="margin-bottom: 14px; background: white; border-radius: 8px; border: 1px solid #d1fae5; padding: 14px;">
+                                <div style="font-size: 0.8rem; font-weight: 600; color: #0f766e; margin-bottom: 8px;">
+                                    <i class="fa-solid fa-chart-line"></i> Weight Trend
+                                </div>
+                                <canvas x-ref="weightChartCanvas" style="max-height: 200px;"></canvas>
+                            </div>
                 
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <span class="text-muted" style="font-size: 0.9rem; font-style: italic;">
@@ -2586,7 +2595,7 @@
                             The export will include the charts and data for the <strong>Date Range</strong> and <strong>Overlays</strong> currently selected above. Make sure you select the appropriate range to generate the most appropriate clinical picture.
                         </div>
                     
-                        <div style="display: flex; gap: 10px;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                             <button @click="copyToClipboard()" style="padding: 8px 16px; background: white; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s;" @mouseenter="$el.style.background='#f8fafc'" @mouseleave="$el.style.background='white'">
                                 <i class="fa-solid fa-copy"></i> Copy Text
                             </button>
@@ -2594,9 +2603,13 @@
                             <button @click="generateCSV()" style="padding: 8px 16px; background: white; color: #10b981; border: 1px solid #10b981; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s;" @mouseenter="$el.style.background='#ecfdf5'" @mouseleave="$el.style.background='white'">
                                 <i class="fa-solid fa-file-csv"></i> .CSV
                             </button>
-                    
+                        
                             <button @click="generatePDF()" style="padding: 8px 16px; background: #16325F; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                 <i class="fa-solid fa-file-pdf text-red-400"></i> Generate PDF
+                            </button>
+                        
+                            <button @click="shareReport()" style="padding: 8px 16px; background: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-share-nodes"></i> Share
                             </button>
                         </div>
                     </div>
@@ -2684,6 +2697,20 @@
                                         </label>
                                     </div>
                                 </div>
+                                
+                                <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                                    <div>
+                                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Weight & Diet Log (CSV)</h4>
+                                        <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">Export or import weight weigh-ins and dietary records.</p>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                                        <button @click="exportWeightCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                                        <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                            Import
+                                            <input type="file" accept=".csv" @change="importWeightCSV" style="display: none;">
+                                        </label>
+                                    </div>
+                                </div>
                             
                                 <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
                                     <div>
@@ -2695,6 +2722,20 @@
                                         <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
                                             Import
                                             <input type="file" accept=".csv" @change="importSyncopeCSV" style="display: none;">
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                                    <div>
+                                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Vaccination Log (CSV)</h4>
+                                        <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">Export or import vaccine records including batch numbers and due dates.</p>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                                        <button @click="exportVaccinationCSV()" class="btn-nudge-static" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 6px;">Export</button>
+                                        <label class="btn-nudge-static" style="background: #10b981; flex: 1; font-size: 0.8rem; padding: 6px; cursor: pointer; text-align: center;">
+                                            Import
+                                            <input type="file" accept=".csv" @change="importVaccinationCSV" style="display: none;">
                                         </label>
                                     </div>
                                 </div>
