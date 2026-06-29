@@ -566,20 +566,55 @@ savePatient() {
     const cleanName = (this.editingPatient.name || '').trim();
     if (!cleanName) return alert("Patient Name is clinically required.");
 
-    // Destructure weight OUT before spreading to the patients array.
-    // This avoids mutating editingPatient in place (which caused Alpine reactivity side-effects)
-    // and ensures the transient weight field never persists on the patient demographic object.
     const { weight, ...patientData } = this.editingPatient;
     const currentWeightValue = parseFloat(weight);
     const patientIdToSave = patientData.id;
+    const newUnit = patientData.weightUnit || 'kg';
 
+    // ── Unit-change conversion ──────────────────────────────────────────
+    // Capture the previous unit BEFORE overwriting the patient record.
     const existingIndex = this.patients.findIndex(p => p.id === patientIdToSave);
+    const previousUnit  = existingIndex > -1
+        ? (this.patients[existingIndex].weightUnit || 'kg')
+        : newUnit; // new patient — no prior entries, no conversion needed
+
+    if (previousUnit !== newUnit) {
+        // Confirm with the user — this is a destructive bulk conversion
+        const entryCount = this.weightLog.filter(w => w.patientId === patientIdToSave).length;
+        if (entryCount > 0) {
+            const direction = previousUnit === 'kg'
+                ? `kg → lbs (× 2.2046)`
+                : `lbs → kg (÷ 2.2046)`;
+            const ok = confirm(
+                `You have changed the weight unit from ${previousUnit} to ${newUnit}.\n\n` +
+                `${entryCount} existing weight log entr${entryCount !== 1 ? 'ies' : 'y'} will be converted (${direction}) to match.\n\n` +
+                `Proceed?`
+            );
+            if (!ok) {
+                // Roll the selector back — don't save
+                return;
+            }
+
+            const factor = previousUnit === 'kg' ? 2.2046 : (1 / 2.2046);
+            this.weightLog = this.weightLog.map(w => {
+                if (w.patientId !== patientIdToSave) return w;
+                return {
+                    ...w,
+                    weightValue: Math.round(parseFloat(w.weightValue) * factor * 1000) / 1000
+                };
+            });
+            this.saveToStorage('vch_weightLog', this.weightLog);
+        }
+    }
+
+    // ── Persist patient record ──────────────────────────────────────────
     if (existingIndex > -1) {
         this.patients[existingIndex] = { ...patientData };
     } else {
         this.patients.push({ ...patientData });
     }
 
+    // The weight field is always interpreted in the NEW unit — log as-is
     if (!isNaN(currentWeightValue) && currentWeightValue > 0) {
         this.logWeight(patientIdToSave, currentWeightValue);
     }
@@ -587,6 +622,12 @@ savePatient() {
     this.saveToStorage('vch_patients', this.patients);
     this.activePatientId = patientIdToSave;
     this.closePatientManager();
+
+    // Re-render both charts so axis label and mg/kg both reflect the new unit
+    this.$nextTick(() => {
+        this.renderWeightChart();
+        this.renderMedChart();
+    });
 },
         
 logWeight(patientId, value) {
