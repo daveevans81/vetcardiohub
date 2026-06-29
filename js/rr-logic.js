@@ -921,19 +921,24 @@ get murmurChartHtml() {
         const current = currentGradeNum !== null && currentGradeNum === parseInt(stage.id);
         const fill    = MFILL[stage.id] || '#64748b';
 
-        html += `
-            <g>
-                <circle cx="${x}" cy="${CY}" r="${R}"
-                    fill="${fill}"
-                    stroke="${current ? '#1e3a8a' : '#ffffff'}"
-                    stroke-width="${current ? 6 : 3}"/>
-                <text x="${x}" y="${CY - 8}" text-anchor="middle"
-                      fill="white" font-size="22" font-weight="bold"
-                      font-family="sans-serif">${stage.label}</text>
-                <text x="${x}" y="${CY + 14}" text-anchor="middle"
-                      fill="rgba(255,255,255,0.92)" font-size="9"
-                      font-family="sans-serif">${stage.subtitle}</text>
-            </g>`;
+    html += `
+        <g>
+            <circle cx="${x}" cy="${CY}" r="${R}"
+                fill="${fill}"
+                stroke="${current ? '#1e3a8a' : '#ffffff'}"
+                stroke-width="${current ? 6 : 3}"/>
+            <text x="${x}" y="${CY - 8}" text-anchor="middle"
+                  fill="white" font-size="22" font-weight="bold"
+                  font-family="sans-serif">${stage.label}</text>
+            <text x="${x}" y="${CY + 14}" text-anchor="middle"
+                  fill="rgba(255,255,255,0.92)" font-size="9"
+                  font-family="sans-serif">${stage.subtitle}</text>
+            <g style="cursor:pointer;" @click="openGlossary('murmurGrade_${stage.id}')">
+                <circle cx="${x + 33}" cy="${CY - 32}" r="10" fill="#f8fafc" stroke="${fill}" stroke-width="2"/>
+                <text x="${x + 33}" y="${CY - 28}" text-anchor="middle" font-size="11"
+                      fill="${fill}" font-weight="bold" font-family="sans-serif">i</text>
+            </g>
+        </g>`;
     });
 
     // ── 3. Date markers ───────────────────────────────────────────────────

@@ -174,8 +174,19 @@ const VET_GLOSSARY_DB = {
         pmid: "30974015" // Vets get the paper, owners ignore it
     },
 // ==========================================\n    
-    // GROUP: MONITORING & AT-HOME CARE
+    // GROUP: MONITORING & AT-HOME CARE - TRACKER GLOSSARY
     // ==========================================\n    
+    
+    trueTime: {
+        title: "True Time vs Separate Out SRR readings",
+        group: "Tracker",
+        category: "Home Care",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "Spreads the time axis out so it reflects real months going by, as opposed to showing each SRR reading individually next to each other. Displays on the chart an average of all readings if multiple readings taken on same day. Best to select 'True Time' if you want a real life overview of the breathing data as the months go by, and deselect it if you want to see each reading separately."
+    },
+    
+    
     rrr_guidelines: {
         title: "Resting Respiratory Rate (RRR) Guidelines",
         group: "Monitoring",
@@ -256,6 +267,74 @@ const VET_GLOSSARY_DB = {
         textOwner: "A dry, harsh, or hacking cough sounds sharp and has no 'wet' or fluid-like noise behind it. It often sounds like the dog is trying to clear their throat. In cardiac patients, this is very frequently caused by the left atrium of the heart expanding like a balloon and physically pushing up against the main bronchi (the tubes leading into the lungs), irritating the nerve endings there. It is usually worse at night, first thing in the morning, or immediately after periods of exercise.",
         article: "/blog-posts/post4.html"
     },
+    
+    // ==========================================
+    // GROUP: MURMUR STAGING
+    // ==========================================  
+    
+    murmurGrade_0: {
+    title: "Murmur Grade 0 (No Murmur)",
+    group: "Cardiology",
+    category: "Auscultation",
+    audience: ["vet", "owner"],
+    difficulty: 3,
+    textOwner: "No murmur was heard during this examination. This is a normal finding and means no abnormal turbulent blood flow was detected through the heart valves at this visit.",
+    textClinical: "No cardiac murmur auscultated. Normal heart sounds. Does not exclude subclinical structural disease — echocardiography required for definitive assessment in at-risk breeds.",
+},
+murmurGrade_1: {
+    title: "Murmur Grade I/VI",
+    group: "Cardiology",
+    category: "Auscultation",
+    audience: ["vet", "owner"],
+    difficulty: 3,
+    textOwner: "A very faint murmur was detected. It is so quiet it can only be heard in a very still room after listening carefully for a short time. Grade I murmurs are the softest possible and are often monitored rather than treated immediately.",
+    textClinical: "Barely audible murmur; heard only after careful auscultation in a quiet environment. Localised to a small area. No thrill. Significance depends on signalment, breed risk, and echocardiographic findings.",
+},
+murmurGrade_2: {
+    title: "Murmur Grade II/VI",
+    group: "Cardiology",
+    category: "Auscultation",
+    audience: ["vet", "owner"],
+    difficulty: 3,
+    textOwner: "A soft but easily heard murmur was found. Grade II murmurs are quiet but detectable immediately when a vet listens to the heart. Your vet will likely want to recheck this periodically. Large breed dogs are more likely to have concerning disease with a soft murmur (eg DCM).",
+    textClinical: "Soft murmur, immediately audible. No precordial thrill. Often represents early mitral valve disease in small-breed dogs. Echocardiography recommended to characterise and stage. Large breed dogs are more likely to have concerning disease with a soft murmur (eg DCM).",
+},
+murmurGrade_3: {
+    title: "Murmur Grade III/VI",
+    group: "Cardiology",
+    category: "Auscultation",
+    audience: ["vet", "owner"],
+    difficulty: 3,
+    textOwner: "A moderate murmur was heard - typically the same level of sound as the heart sounds. This is louder than a faint murmur and is a firm finding. Your vet will use additional tests - usually an ultrasound of the heart - to understand what is causing it and how significant it is.",
+    textClinical: "Moderate intensity murmur - typically the same level of sound as the heart sounds. No precordial thrill. The threshold at which echocardiographic assessment is strongly indicated to evaluate chamber dimensions and valve morphology. Correlates with haemodynamically significant regurgitation in many cases.",
+},
+murmurGrade_4: {
+    title: "Murmur Grade IV/VI",
+    group: "Cardiology",
+    category: "Auscultation",
+    audience: ["vet", "owner"],
+    difficulty: 3,
+    textOwner: "A loud murmur was detected during the examination - typically described as louder than the heart sounds or obscuring them. Echocardiography and monitoring are important at this stage.",
+    textClinical: "Loud murmur - typically described as louder than the heart sounds or obscuring them. Usually without a precordial thrill. If mitral valve disease suspected, likely consistent with significant regurgitant fraction. Echocardiographic evaluation and ACVIM staging are indicated. Resting SRR monitoring is clinically valuable.",
+},
+murmurGrade_5: {
+    title: "Murmur Grade V/VI",
+    group: "Cardiology",
+    category: "Auscultation",
+    audience: ["vet", "owner"],
+    difficulty: 3,
+textOwner: "A very loud murmur was found — loud enough that the vibration can be felt by placing a hand gently on the chest. This grade indicates significant heart valve disease and close monitoring of symptoms and breathing rate is important.",
+    textClinical: "Very loud murmur with a palpable precordial thrill. Audible with stethoscope lightly touching chest. Suggests severe regurgitation. Clinical staging, echocardiography, and symptomatic monitoring are all indicated.",
+},
+murmurGrade_6: {
+    title: "Murmur Grade VI/VI",
+    group: "Cardiology",
+    category: "Auscultation",
+    audience: ["vet", "owner"],
+    difficulty: 3,
+    textOwner: "The loudest possible murmur was recorded. At Grade VI, the murmur is so powerful it can be detected even when the stethoscope is held slightly off the chest. This indicates severe turbulent blood flow and requires close veterinary management.",
+    textClinical: "Maximum intensity murmur audible without direct chest contact. Precordial thrill always present. Indicates severe valvular insufficiency. Usually associated with significant haemodynamic burden — full clinical staging, echocardiography, and optimised medical management are essential. But some very loud musical murmurs can occur without severe regurgitant fractions due to resonance effects.",
+},
     
     // ==========================================
     // GROUP: ACVIM MMVD STAGING

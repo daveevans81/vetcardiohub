@@ -1699,15 +1699,17 @@
                                 <input type="date" x-model="customEndDate" class="text-sm p-1 border-none bg-transparent">
                             </div>
                         </template>
+                        
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #475569; border-left: 1px solid #cbd5e1; padding-left: 12px; margin: 0;">
+                                <input type="checkbox" x-model="srrUseRelationalTime" style="margin: 0; padding: 0;"> <i class="fa-solid fa-ruler-horizontal"></i> True Time<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('trueTime')"></i>
+                        </label>
             
                         <div style="display: flex; gap: 12px; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; flex-wrap: wrap; align-items: center;">
                             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #475569; margin: 0;">
                                 <input type="checkbox" x-model="showMedications" style="margin: 0; padding: 0;"> <span>💊 Meds</span>
                             </label>
                             
-                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #475569; border-left: 1px solid #cbd5e1; padding-left: 12px; margin: 0;">
-                                <input type="checkbox" x-model="srrUseRelationalTime" style="margin: 0; padding: 0;"> <i class="fa-solid fa-ruler-horizontal"></i> True Time
-                            </label>
+                            
             
                             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #9333ea; border-left: 1px solid #cbd5e1; padding-left: 12px; margin: 0;">
                                 <input type="checkbox" x-model="showDiagnosisOverlay" style="margin: 0; padding: 0;"> <i class="fa-solid fa-stethoscope"></i> Diagnosis
