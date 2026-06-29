@@ -758,7 +758,7 @@
                 </div>
                 
                 <button @click="savePatient()" class="btn btn-primary" style="background: #0f766e; width: 100%; max-width: 300px;">Save Profile</button>
-                <button x-show="patients.length > 0" @click="closePatientManager()" class="btn btn-outline" style="background: transparent; border: none; margin-top: 10px;">Cancel</button>
+                <button x-show="patients.length > 0" @click="closePatientManager()"  style="background: transparent; border: none; color: #64748b; margin-top: 10px; cursor: pointer;">Cancel</button>
                 
                 <div class="danger-zone" x-show="isEditingExistingPatient">
                     <h4 class="text-danger mt-0 mb-15 flex-center gap-10" style="justify-content: flex-start; font-size: 0.95rem;">
