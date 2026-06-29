@@ -1782,66 +1782,67 @@
                                     <!-- VACCINATION SECTION              -->
                                     <!-- ******************************** -->            
             <template x-if="activePatientProfile?.modules?.vaccinations"> 
-            <div x-show="showVaccinationForm" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
-                <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-                    <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
-                        <h3 class="font-bold text-lg" x-text="editingVaccineId ? 'Edit Vaccination' : 'Log Vaccination'"></h3>
-                        <button @click="showVaccinationForm = false" class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
-                    </div>
-                    <div class="p-5 space-y-4">
-                        
-                        <div class="bg-indigo-50 text-indigo-800 text-xs p-3 rounded border border-indigo-100">
-                            <strong>Note:</strong> Defaults to WSAVA core guidelines. Local veterinary recommendations and regional infectious disease pressures always supersede standard schedules.
+                <div x-show="showVaccinationForm" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
+                    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                        <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
+                            <h3 class="font-bold text-lg" x-text="editingVaccineId ? 'Edit Vaccination' : 'Log Vaccination'"></h3>
+                            <button @click="showVaccinationForm = false" class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
                         </div>
-            
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700">Date Administered</label>
-                                <input type="date" x-model="newVaccine.date" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                        <div class="p-5 space-y-4">
+                            
+                            <div class="bg-indigo-50 text-indigo-800 text-xs p-3 rounded border border-indigo-100">
+                                <strong>Note:</strong> Defaults to WSAVA core guidelines. Local veterinary recommendations and regional infectious disease pressures always supersede standard schedules.
                             </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700">Next Due Date</label>
-                                <input type="date" x-model="newVaccine.nextDueDate" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Date Administered</label>
+                                    <input type="date" x-model="newVaccine.date" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Next Due Date</label>
+                                    <input type="date" x-model="newVaccine.nextDueDate" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700">Vaccine Type</label>
-                            <select x-model="newVaccine.type" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
-                                <template x-for="vac in availableVaccines" :key="vac">
-                                    <option :value="vac" x-text="vac"></option>
-                                </template>
-                            </select>
-                        </div>
-            
-                        <div x-show="newVaccine.type === 'Other'" style="display: none;">
-                            <label class="block text-sm font-semibold text-gray-700">Specify Custom Vaccine</label>
-                            <input type="text" x-model="newVaccine.customType" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
-                        </div>
-            
-                        <div class="grid grid-cols-2 gap-4">
+                            
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700">Batch / Lot Number</label>
-                                <input type="text" x-model="newVaccine.batchNumber" placeholder="Optional" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                <label class="block text-sm font-semibold text-gray-700">Vaccine Type</label>
+                                <select x-model="newVaccine.type" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                    <template x-for="vac in availableVaccines" :key="vac">
+                                        <option :value="vac" x-text="vac"></option>
+                                    </template>
+                                </select>
                             </div>
+                
+                            <div x-show="newVaccine.type === 'Other'" style="display: none;">
+                                <label class="block text-sm font-semibold text-gray-700">Specify Custom Vaccine</label>
+                                <input type="text" x-model="newVaccine.customType" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                            </div>
+                
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Batch / Lot Number</label>
+                                    <input type="text" x-model="newVaccine.batchNumber" placeholder="Optional" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Administered By</label>
+                                    <input type="text" x-model="newVaccine.administeredBy" placeholder="Clinic/Vet Name" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                </div>
+                            </div>
+                
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700">Administered By</label>
-                                <input type="text" x-model="newVaccine.administeredBy" placeholder="Clinic/Vet Name" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                <label class="block text-sm font-semibold text-gray-700">Notes / Reactions</label>
+                                <textarea x-model="newVaccine.notes" rows="2" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200" placeholder="Mild lethargy post-injection, specific manufacturer..."></textarea>
                             </div>
-                        </div>
-            
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700">Notes / Reactions</label>
-                            <textarea x-model="newVaccine.notes" rows="2" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200" placeholder="Mild lethargy post-injection, specific manufacturer..."></textarea>
-                        </div>
-                        
-                        <div class="flex justify-end pt-2 gap-3">
-                            <button @click="showVaccinationForm = false" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium">Cancel</button>
-                            <button @click="saveVaccine()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium">Save Record</button>
+                            
+                            <div class="flex justify-end pt-2 gap-3">
+                                <button @click="showVaccinationForm = false" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium">Cancel</button>
+                                <button @click="saveVaccine()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium">Save Record</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </template>
     
                                     <!-- ******************************** -->
                                     <!-- SRR CHART and Analytics          -->

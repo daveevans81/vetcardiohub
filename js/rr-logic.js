@@ -375,7 +375,7 @@ startNewPatientOnboarding() {
 
 generateModuleRecommendations() {
     // Reset to baseline
-    let recs = { srr: false, medications: false, coughActivity: false, syncopeLog: false, acvimStaging: false };
+    let recs = { srr: false, medications: false, coughLog: false, activityLog: false, syncopeLog: false, acvimStaging: false, vaccinations: true, weightDiet: true };
     
     if (this.onboardingData.hasCardiacIssue === 'yes') {
         recs.srr = true;
@@ -384,14 +384,14 @@ generateModuleRecommendations() {
         // If they specify Stage B2, C, or D in the actual diagnosis object
         if (['Stage B2', 'Stage C', 'Stage D'].includes(this.newDiagnosis.acvimStage)) {
             recs.medications = true;
-            recs.coughLog = true;      // was coughActivity
+            recs.coughLog = true;      
             recs.activityLog = true; 
         }
     } else {
         // e.g., general wellness or collapse history
-    recs.coughLog = true;      // was coughActivity
+    recs.coughLog = true;     
     recs.activityLog = true; 
-        recs.syncopeLog = true;
+    recs.syncopeLog = true;
     }
 
     this.editingPatient.modules = { ...recs };
