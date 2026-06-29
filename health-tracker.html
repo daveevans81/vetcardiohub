@@ -953,12 +953,12 @@
                                             
                                             <div class="flex-between gap-10 mb-15">
                                                 <template x-if="activePatientProfile?.modules?.coughLog">
-                                                    <button @click="nudgeToSymptom('cough')" class="btn btn-outline w-full text-primary font-bold">
+                                                    <button @click="nudgeToSymptom('cough')"  style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
                                                         <i class="fa-solid fa-head-side-cough text-rose-500"></i> Log Cough
                                                     </button>
                                                 </template>
                                                 <template x-if="activePatientProfile?.modules?.activityLog">
-                                                    <button @click="nudgeToSymptom('activity')" class="btn btn-outline w-full text-primary font-bold">
+                                                    <button @click="nudgeToSymptom('activity')" style="flex: 1; padding: 10px; background: white; color: #16325F; border: 1px solid #94a3b8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">
                                                         <i class="fa-solid fa-person-running text-blue-500"></i> Log Activity
                                                     </button>
                                                 </template>
