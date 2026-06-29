@@ -111,7 +111,7 @@ html, body {
 
 .content {
     padding: 30px; /* Adds more padding inside the content area */
-    max-width: 1200px; /* Expands the width for larger screens */
+    max-width: 900px; /* Expands the width for larger screens */
     margin: 20px auto; /* Centers content and adds top/bottom margin */
     background: #fafafa;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Slightly softer shadow for depth */
@@ -648,9 +648,8 @@ table ul li::before {
 
 
 main {
-    flex: 1;
+    flex: 1; /* Pushes the footer down */
     min-height: 50vh;
-    min-width: 0;
 }
 
 footer {
