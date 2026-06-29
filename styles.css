@@ -3958,7 +3958,7 @@ input {
 .btn-srr-primary {
         border: none;
     border-radius: 16px;
-    font-size: 2rem;
+     font-size: 1.2rem;
     font-weight: bold;
     display: flex;
     flex-direction: column;
@@ -3987,7 +3987,7 @@ input {
 .btn-srr-secondary {
         border: none;
     border-radius: 16px;
-    font-size: 2rem;
+     font-size: 1.2rem;
     font-weight: bold;
     display: flex;
     flex-direction: column;
