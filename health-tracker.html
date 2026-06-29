@@ -1599,7 +1599,7 @@
                             <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
                                 <div class="bg-blue-600 px-4 py-3 flex justify-between items-center text-white">
                                     <h3 class="font-bold text-lg" x-text="editingWeightId ? 'Edit Diet & Weight' : 'Log Diet & Weight'"></h3>
-                                    <button @click="showWeightForm = false" class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
+                                    
                                 </div>
                                 <div class="p-5 space-y-4">
                                     <div class="grid grid-cols-2 gap-4">
@@ -1653,7 +1653,7 @@
                         </div>
                         
                         
-                        <div x-show="showWeightLogPanel" x-transition>
+                        <div x-show="showWeightLogPanel && !showWeightForm" x-transition>
                 
                             <!-- Trend summary bar (only shows with 2+ entries) -->
                             <template x-if="sortedWeightLog.length >= 2">
@@ -1919,7 +1919,7 @@
                         <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
                             <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
                                 <h3 class="font-bold text-lg" x-text="editingVaccineId ? 'Edit Vaccination' : 'Log Vaccination'"></h3>
-                                <button @click="showVaccinationForm = false" class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
+                                
                             </div>
                             <div class="p-5 space-y-4">
                                 
@@ -1976,7 +1976,7 @@
                         </div>
                     </div>
             
-                    <div x-show="showVaccinationLogPanel" x-transition>
+                    <div x-show="showVaccinationLogPanel && !showVaccinationForm" x-transition>
             
                         <!-- Alerts panel — only renders when there are actionable items -->
                         <template x-if="vaccineAlerts.length > 0">
