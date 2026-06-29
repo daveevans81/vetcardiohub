@@ -2015,6 +2015,21 @@
                                 <i class="fa-solid fa-plus"></i> Add Record
                             </button>
                         </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <template x-if="sortedVaccinationLog.some(v => v.nextDueDate)">
+                                <button @click="exportAllVaccineReminders()" type="button"
+                                        class="btn-secondary"
+                                        style="padding: 6px 12px; font-size: 0.85rem; color: #6366f1; border-color: #a5b4fc;"
+                                        title="Download all due dates as a single calendar file">
+                                    <i class="fa-regular fa-calendar-plus"></i> All to Calendar
+                                </button>
+                            </template>
+                            <button @click="openVaccineForm()" type="button" class="btn-secondary"
+                                    style="padding: 6px 12px; font-size: 0.85rem;">
+                                <i class="fa-solid fa-plus"></i> Add Record
+                            </button>
+                        </div>
+
             
                         <template x-for="vaccine in sortedVaccinationLog" :key="vaccine.id">
                             <div class="log-entry">
@@ -2070,12 +2085,21 @@
                                 </div>
             
                                 <div style="display: flex; gap: 10px; flex-shrink: 0; align-items: flex-start;">
+                                    <template x-if="vaccine.nextDueDate">
+                                        <button @click="addVaccineReminder(vaccine)"
+                                                style="background: none; border: none; color: #6366f1; cursor: pointer;"
+                                                title="Add to calendar">
+                                            <i class="fa-regular fa-calendar-plus"></i>
+                                        </button>
+                                    </template>
                                     <button @click="openVaccineForm(vaccine)"
-                                            style="background: none; border: none; color: #64748b; cursor: pointer;">
+                                            style="background: none; border: none; color: #64748b; cursor: pointer;"
+                                            title="Edit">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
                                     <button @click="deleteVaccine(vaccine.id)"
-                                            style="background: none; border: none; color: #ef4444; cursor: pointer;">
+                                            style="background: none; border: none; color: #ef4444; cursor: pointer;"
+                                            title="Delete">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </div>
