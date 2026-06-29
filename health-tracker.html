@@ -811,11 +811,11 @@
                                </a>
                             </p>               
                             <div class="grid-2col mb-15">
-                                <button @click="startCount()" class="btn-srr-primary">
+                                <button @click="startCount()" class="btn-srr-primary" style="min-height: 80px; background: #0f766e; color: white; border-radius: 8px; border: none; cursor: pointer;">
                                     <i class="fa-solid fa-stopwatch" style="font-size: 2rem;"></i> Count SRR Now
                                 </button>
                                 
-                                <button @click="showManualSrr = true" class="btn-srr-secondary">
+                                <button @click="showManualSrr = true" class="btn-srr-secondary" style="min-height: 80px; background: #e2e8f0; color: #334155; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer;">
                                     <i class="fa-solid fa-keyboard" style="font-size: 2rem;"></i> Manual Entry
                                 </button>
                             </div>
@@ -1004,13 +1004,17 @@
                                     </div>
                         
                                     <div class="flex-between" style="padding: 10px 12px;" x-show="totalPages > 1">
-                                        <button @click="prevPage()" :disabled="currentPage === 1" class="btn btn-outline" :style="currentPage === 1 ? 'opacity: 0.5;' : ''">
+                                        <button @click="prevPage()" :disabled="currentPage === 1"
+                                            style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
+                                            :style="currentPage === 1 ? 'opacity: 0.5;' : ''">
                                             <i class="fa-solid fa-chevron-left"></i> Prev
                                         </button>
                                         <span class="text-sm text-muted">
                                             Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span>
                                         </span>
-                                        <button @click="nextPage()" :disabled="currentPage === totalPages" class="btn btn-outline" :style="currentPage === totalPages ? 'opacity: 0.5;' : ''">
+                                        <button @click="nextPage()" :disabled="currentPage === totalPages"
+                                            style="padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; background: white;"
+                                            :style="currentPage === totalPages ? 'opacity: 0.5;' : ''">
                                             Next <i class="fa-solid fa-chevron-right"></i>
                                         </button>
                                     </div>
