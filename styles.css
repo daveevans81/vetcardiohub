@@ -3940,6 +3940,8 @@ input {
     transition: transform 0.1s ease, box-shadow 0.1s ease;
     user-select: none; /* Prevent text selection on rapid tapping */
     -webkit-tap-highlight-color: transparent;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
 }
 
 .btn-massive-tap:active {
@@ -3951,6 +3953,55 @@ input {
 .btn-massive-tap i {
     font-size: 4rem;
     opacity: 0.8;
+}
+
+/* Primary Button (Teal) */
+.btn-srr-primary {
+    background-color: #0f766e;
+    color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(15, 118, 110, 0.1);
+}
+
+.btn-srr-primary:hover {
+    background-color: #115e59; /* Deepens slightly */
+    transform: translateY(-2px) scale(1.02); /* "Inhale" lift */
+    box-shadow: 0 10px 20px -5px rgba(15, 118, 110, 0.4); /* Soft glowing aura */
+}
+
+---
+
+/* Secondary Button (Slate) */
+.btn-srr-secondary {
+    background-color: #e2e8f0;
+    color: #334155;
+    box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.05);
+}
+
+.btn-srr-secondary:hover {
+    background-color: #cbd5e1; /* Smooth darkening */
+    color: #0f172a;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 20px -5px rgba(51, 65, 85, 0.15);
+}
+
+---
+transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.btn-massive-tap i {
+    font-size: 2rem;
+    transition: transform 0.4s ease;
+}
+
+/* Bonus: Subtle icon movement on hover */
+.btn-massive-tap:hover i {
+    transform: scale(1.1); /* Icons grow just a tiny bit to feel alive */
+}
+
+/* Active state: Snaps back down when clicked */
+.btn-massive-tap:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Visual Timer Pulse */

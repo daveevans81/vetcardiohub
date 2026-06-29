@@ -804,18 +804,19 @@
             <template x-if="activePatientProfile?.modules?.srr">
                     <div>
                         <div x-show="!isCounting" class="summary-box">
-                            <h2>Resting Respiratory Rate Tracker</h2>
+                            <h2><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Sleeping Respiratory Rate Tracker</h2>
                             <p>Ensure your pet is fully resting or sleeping. 
                                <a href="#" @click.prevent="openGlossary('rrr_guidelines')" class="text-primary">
                                  <i class="fa-solid fa-circle-question"></i> How to count
                                </a>
                             </p>               
                             <div class="grid-2col mb-15">
-                                <button @click="startCount()" class="btn-massive-tap" style="min-height: 80px; background: #0f766e; font-size: 1.2rem;">
-                                    <i class="fa-solid fa-stopwatch" style="font-size: 2rem;"></i> Count SRR Now
+                                <button @click="startCount()" class="btn-massive-tap btn-srr-primary">
+                                    <i class="fa-solid fa-stopwatch"></i> Count SRR Now
                                 </button>
-                                <button @click="showManualSrr = true" class="btn-massive-tap" style="min-height: 80px; background: #e2e8f0; color: #334155; font-size: 1.2rem;">
-                                    <i class="fa-solid fa-keyboard" style="font-size: 2rem;"></i> Manual Entry
+                                
+                                <button @click="showManualSrr = true" class="btn-massive-tap btn-srr-secondary">
+                                    <i class="fa-solid fa-keyboard"></i> Manual Entry
                                 </button>
                             </div>
                         </div>
