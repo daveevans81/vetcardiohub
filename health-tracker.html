@@ -815,7 +815,7 @@
                                     <i class="fa-solid fa-stopwatch" style="font-size: 2rem;"></i> Count SRR Now
                                 </button>
                                 
-                                <button @click="showManualSrr = true" class="btn-srr-secondary" style="min-height: 80px; background: #e2e8f0; color: #334155; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer;">
+                                <button @click="showManualSrr = true" class="btn-srr-primary" style="min-height: 80px; background: #e2e8f0; color: #334155; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer;">
                                     <i class="fa-solid fa-keyboard" style="font-size: 2rem;"></i> Manual Entry
                                 </button>
                             </div>
@@ -1059,7 +1059,7 @@
                         
                         <div style="margin-bottom: 15px;">
                             <button @click="showSymptomLog = !showSymptomLog" :aria-expanded="showSymptomLog.toString()" type="button" class="btn-accordion">
-                                <h3><i class="fa-solid fa-heart-pulse text-rose-500"></i> <span x-text="activePatientProfile?.name || 'Patient'"></span>'s Quality of Life (Daily Summaries of Cough and Activity)</h3> 
+                                <h3><i class="fa-solid fa-heart-pulse text-rose-500"></i><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Quality of Life (Daily Summaries of Cough and Activity)</h3> 
                                 <i class="fa-solid" :class="showSymptomLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                             </button>
                         </div>
