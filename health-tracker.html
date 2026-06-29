@@ -1579,60 +1579,111 @@
                                     <!-- ******************************** -->
                                     <!-- WEIGHT  SECTION                  -->
                                     <!-- ******************************** -->                
-                <template x-if="activePatientProfile?.modules?.weightDiet"> 
-                    <div x-show="showWeightForm" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
-                        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-                            <div class="bg-blue-600 px-4 py-3 flex justify-between items-center text-white">
-                                <h3 class="font-bold text-lg" x-text="editingWeightId ? 'Edit Diet & Weight' : 'Log Diet & Weight'"></h3>
-                                <button @click="showWeightForm = false" class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
+                <template x-if="activePatientProfile?.modules?.weightDiet">
+                    <div class="module-card" x-show="patients.length > 0" x-cloak>
+                
+                        <div style="margin-bottom: 15px;">
+                            <button @click="showWeightLogPanel = !showWeightLogPanel"
+                                    :aria-expanded="showWeightLogPanel.toString()"
+                                    type="button" class="btn-accordion">
+                                <h3>
+                                    <i class="fa-solid fa-weight-scale"></i>
+                                    <span x-text="activePatientProfile?.name
+                                        ? activePatientProfile.name + '\'s Weight & Diet Log'
+                                        : 'Weight & Diet Log'"></span>
+                                </h3>
+                                <i class="fa-solid" :class="showWeightLogPanel ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </button>
+                        </div>
+                
+                        <div x-show="showWeightLogPanel" x-transition>
+                
+                            <!-- Trend summary bar (only shows with 2+ entries) -->
+                            <template x-if="sortedWeightLog.length >= 2">
+                                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;
+                                            padding: 10px 14px; margin-bottom: 14px; font-size: 0.85rem; color: #0369a1;">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                    <span x-text="(() => {
+                                        const log = sortedWeightLog;
+                                        const unit = activePatientProfile?.weightUnit || 'kg';
+                                        const latest  = parseFloat(log[0].weightValue);
+                                        const oldest  = parseFloat(log[log.length - 1].weightValue);
+                                        const diff    = (latest - oldest).toFixed(2);
+                                        const arrow   = diff > 0 ? '▲' : diff < 0 ? '▼' : '→';
+                                        const vals    = log.map(w => parseFloat(w.weightValue));
+                                        const mn = Math.min(...vals).toFixed(2);
+                                        const mx = Math.max(...vals).toFixed(2);
+                                        return `${arrow} ${Math.abs(diff)} ${unit} over ${log.length} weigh-ins  |  Latest: ${latest} ${unit}  |  Range: ${mn} – ${mx} ${unit}`;
+                                    })()"></span>
+                                </div>
+                            </template>
+                
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <span class="text-muted" style="font-size: 0.9rem; font-style: italic;">
+                                    Track weight trends, appetite changes, and dietary notes
+                                </span>
+                                <button @click="openWeightForm()" type="button" class="btn-secondary"
+                                        style="padding: 6px 12px; font-size: 0.85rem;">
+                                    <i class="fa-solid fa-plus"></i> Add Entry
+                                </button>
                             </div>
-                            <div class="p-5 space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700">Date</label>
-                                        <input type="date" x-model="newWeightEntry.date" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                
+                            <template x-for="entry in sortedWeightLog" :key="entry.id">
+                                <div class="log-entry">
+                                    <div style="width: 100%;">
+                                        <div style="font-size: 0.8rem; color: #3b82f6; font-weight: bold; margin-bottom: 4px;">
+                                            <i class="fa-regular fa-calendar"></i>
+                                            <span x-text="new Date(entry.date).toLocaleDateString(undefined,
+                                                { day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                        </div>
+                
+                                        <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+                                            <span style="font-weight: bold; color: #1e293b; font-size: 1.1rem;"
+                                                  x-text="entry.weightValue + ' ' + (activePatientProfile?.weightUnit || 'kg')"></span>
+                                            <span style="font-size: 0.82rem; background: #f1f5f9; color: #475569;
+                                                         border-radius: 999px; padding: 1px 8px;"
+                                                  x-text="entry.appetite"></span>
+                                        </div>
+                
+                                        <div style="font-size: 0.85rem; color: #475569; margin-top: 6px; line-height: 1.5;">
+                                            <template x-if="entry.foodBrand">
+                                                <span>
+                                                    <strong>Diet:</strong>
+                                                    <span x-text="entry.foodBrand"></span>
+                                                    <span x-show="entry.portionSize"
+                                                          x-text="' — ' + entry.portionSize"></span><br>
+                                                </span>
+                                            </template>
+                                            <template x-if="entry.supplements">
+                                                <span>
+                                                    <strong>Supplements:</strong>
+                                                    <span x-text="entry.supplements"></span><br>
+                                                </span>
+                                            </template>
+                                            <template x-if="entry.notes">
+                                                <span style="font-style: italic; color: #64748b;">
+                                                    "<span x-text="entry.notes"></span>"
+                                                </span>
+                                            </template>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700">Weight (<span x-text="activePatientProfile?.weightUnit || 'kg'"></span>)</label>
-                                        <input type="number" step="0.01" x-model="newWeightEntry.weightValue" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                
+                                    <div style="display: flex; gap: 10px; flex-shrink: 0; align-items: flex-start;">
+                                        <button @click="openWeightForm(entry)"
+                                                style="background: none; border: none; color: #64748b; cursor: pointer;">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button @click="deleteWeightEntry(entry.id)"
+                                                style="background: none; border: none; color: #ef4444; cursor: pointer;">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
                                     </div>
                                 </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700">Appetite</label>
-                                    <select x-model="newWeightEntry.appetite" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
-                                        <option value="Ravenous">Ravenous (Polyphagia)</option>
-                                        <option value="Normal">Normal</option>
-                                        <option value="Reduced">Reduced (Hyporexia)</option>
-                                        <option value="Anorexic">Anorexic (Not eating)</option>
-                                    </select>
-                                </div>
-                    
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700">Food Brand / Diet Type</label>
-                                        <input type="text" x-model="newWeightEntry.foodBrand" placeholder="e.g., Royal Canin Cardiac" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700">Portion Size</label>
-                                        <input type="text" x-model="newWeightEntry.portionSize" placeholder="e.g., 200g twice daily" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
-                                    </div>
-                                </div>
-                    
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700">Supplements</label>
-                                    <input type="text" x-model="newWeightEntry.supplements" placeholder="Omega-3, Taurine, etc." class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
-                                </div>
-                    
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700">Clinical Notes</label>
-                                    <textarea x-model="newWeightEntry.notes" rows="2" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200" placeholder="Changes in body condition score, muscle wasting..."></textarea>
-                                </div>
-                                
-                                <div class="flex justify-end pt-2 gap-3">
-                                    <button @click="showWeightForm = false" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium">Cancel</button>
-                                    <button @click="saveWeightEntry()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium">Save Record</button>
-                                </div>
+                            </template>
+                
+                            <div x-show="sortedWeightLog.length === 0"
+                                 style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
+                                No weight or diet entries recorded.
                             </div>
                         </div>
                     </div>
@@ -1781,69 +1832,145 @@
                                     <!-- ******************************** -->
                                     <!-- VACCINATION SECTION              -->
                                     <!-- ******************************** -->            
-            <template x-if="activePatientProfile?.modules?.vaccinations"> 
-                <div x-show="showVaccinationForm" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
-                    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-                        <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
-                            <h3 class="font-bold text-lg" x-text="editingVaccineId ? 'Edit Vaccination' : 'Log Vaccination'"></h3>
-                            <button @click="showVaccinationForm = false" class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
+            <template x-if="activePatientProfile?.modules?.vaccinations">
+                <div class="module-card" x-show="patients.length > 0" x-cloak>
+            
+                    <div style="margin-bottom: 15px;">
+                        <button @click="showVaccinationLogPanel = !showVaccinationLogPanel"
+                                :aria-expanded="showVaccinationLogPanel.toString()"
+                                type="button" class="btn-accordion">
+                            <h3>
+                                <i class="fa-solid fa-syringe"></i>
+                                <span x-text="activePatientProfile?.name
+                                    ? activePatientProfile.name + '\'s Vaccination Record'
+                                    : 'Vaccination Record'"></span>
+                                <!-- Alert badge on header — visible even when collapsed -->
+                                <template x-if="vaccineAlerts.length > 0">
+                                    <span style="display: inline-flex; align-items: center; background: #dc2626;
+                                                 color: white; border-radius: 999px; font-size: 0.7rem;
+                                                 padding: 2px 9px; margin-left: 10px; font-weight: bold; gap: 4px;">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                        <span x-text="vaccineAlerts.length + ' alert' + (vaccineAlerts.length !== 1 ? 's' : '')"></span>
+                                    </span>
+                                </template>
+                            </h3>
+                            <i class="fa-solid" :class="showVaccinationLogPanel ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+            
+                    <div x-show="showVaccinationLogPanel" x-transition>
+            
+                        <!-- Alerts panel — only renders when there are actionable items -->
+                        <template x-if="vaccineAlerts.length > 0">
+                            <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px;
+                                        padding: 12px 14px; margin-bottom: 14px;">
+                                <div style="font-weight: bold; color: #991b1b; font-size: 0.85rem; margin-bottom: 8px;">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Vaccination Reminders
+                                </div>
+                                <template x-for="(alert, idx) in vaccineAlerts" :key="alert.id">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;
+                                                padding: 6px 0; font-size: 0.85rem;"
+                                         :style="idx < vaccineAlerts.length - 1 ? 'border-bottom: 1px solid #fecaca;' : ''">
+                                        <span style="color: #1e293b; font-weight: 500;"
+                                              x-text="alert.type === 'Other' ? (alert.customType || 'Other') : alert.type"></span>
+                                        <span :style="`background: ${alert.vaccineStatus.bg};
+                                                       color: ${alert.vaccineStatus.color};
+                                                       border: 1px solid ${alert.vaccineStatus.border};
+                                                       border-radius: 999px; padding: 2px 10px;
+                                                       font-size: 0.75rem; font-weight: bold;`"
+                                              x-text="alert.vaccineStatus.label"></span>
+                                    </div>
+                                </template>
+                                <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 8px;">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                    Always defer to your vet's local disease pressure recommendations over WSAVA defaults
+                                </div>
+                            </div>
+                        </template>
+            
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <span class="text-muted" style="font-size: 0.9rem; font-style: italic;">
+                                Core and non-core vaccines — WSAVA guidelines as baseline
+                            </span>
+                            <button @click="openVaccineForm()" type="button" class="btn-secondary"
+                                    style="padding: 6px 12px; font-size: 0.85rem;">
+                                <i class="fa-solid fa-plus"></i> Add Record
+                            </button>
                         </div>
-                        <div class="p-5 space-y-4">
-                            
-                            <div class="bg-indigo-50 text-indigo-800 text-xs p-3 rounded border border-indigo-100">
-                                <strong>Note:</strong> Defaults to WSAVA core guidelines. Local veterinary recommendations and regional infectious disease pressures always supersede standard schedules.
-                            </div>
-                
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700">Date Administered</label>
-                                    <input type="date" x-model="newVaccine.date" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+            
+                        <template x-for="vaccine in sortedVaccinationLog" :key="vaccine.id">
+                            <div class="log-entry">
+                                <div style="width: 100%;">
+            
+                                    <!-- Date row with due-date badge -->
+                                    <div style="display: flex; justify-content: space-between;
+                                                align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+                                        <div style="font-size: 0.8rem; color: #6366f1; font-weight: bold;">
+                                            <i class="fa-regular fa-calendar-check"></i>
+                                            <span x-text="new Date(vaccine.date).toLocaleDateString(undefined,
+                                                { day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                        </div>
+                                        <template x-if="vaccine.nextDueDate && getVaccineStatus(vaccine.nextDueDate)">
+                                            <span :style="`background: ${getVaccineStatus(vaccine.nextDueDate).bg};
+                                                           color: ${getVaccineStatus(vaccine.nextDueDate).color};
+                                                           border: 1px solid ${getVaccineStatus(vaccine.nextDueDate).border};
+                                                           border-radius: 999px; padding: 1px 9px;
+                                                           font-size: 0.72rem; font-weight: bold;`"
+                                                  x-text="getVaccineStatus(vaccine.nextDueDate).label"></span>
+                                        </template>
+                                        <!-- No next-due date set -->
+                                        <template x-if="!vaccine.nextDueDate">
+                                            <span style="background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0;
+                                                         border-radius: 999px; padding: 1px 9px; font-size: 0.72rem;">
+                                                No due date set
+                                            </span>
+                                        </template>
+                                    </div>
+            
+                                    <div style="font-weight: bold; color: #1e293b; font-size: 1rem;"
+                                         x-text="vaccine.type === 'Other' ? (vaccine.customType || 'Other') : vaccine.type"></div>
+            
+                                    <div style="font-size: 0.85rem; color: #475569; margin-top: 5px; line-height: 1.5;">
+                                        <template x-if="vaccine.administeredBy">
+                                            <span>
+                                                <strong>Administered by:</strong>
+                                                <span x-text="vaccine.administeredBy"></span><br>
+                                            </span>
+                                        </template>
+                                        <template x-if="vaccine.batchNumber">
+                                            <span>
+                                                <strong>Batch:</strong>
+                                                <span x-text="vaccine.batchNumber"></span><br>
+                                            </span>
+                                        </template>
+                                        <template x-if="vaccine.notes">
+                                            <span style="font-style: italic; color: #64748b;">
+                                                "<span x-text="vaccine.notes"></span>"
+                                            </span>
+                                        </template>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700">Next Due Date</label>
-                                    <input type="date" x-model="newVaccine.nextDueDate" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+            
+                                <div style="display: flex; gap: 10px; flex-shrink: 0; align-items: flex-start;">
+                                    <button @click="openVaccineForm(vaccine)"
+                                            style="background: none; border: none; color: #64748b; cursor: pointer;">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button @click="deleteVaccine(vaccine.id)"
+                                            style="background: none; border: none; color: #ef4444; cursor: pointer;">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700">Vaccine Type</label>
-                                <select x-model="newVaccine.type" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
-                                    <template x-for="vac in availableVaccines" :key="vac">
-                                        <option :value="vac" x-text="vac"></option>
-                                    </template>
-                                </select>
-                            </div>
-                
-                            <div x-show="newVaccine.type === 'Other'" style="display: none;">
-                                <label class="block text-sm font-semibold text-gray-700">Specify Custom Vaccine</label>
-                                <input type="text" x-model="newVaccine.customType" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
-                            </div>
-                
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700">Batch / Lot Number</label>
-                                    <input type="text" x-model="newVaccine.batchNumber" placeholder="Optional" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700">Administered By</label>
-                                    <input type="text" x-model="newVaccine.administeredBy" placeholder="Clinic/Vet Name" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
-                                </div>
-                            </div>
-                
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700">Notes / Reactions</label>
-                                <textarea x-model="newVaccine.notes" rows="2" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200" placeholder="Mild lethargy post-injection, specific manufacturer..."></textarea>
-                            </div>
-                            
-                            <div class="flex justify-end pt-2 gap-3">
-                                <button @click="showVaccinationForm = false" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium">Cancel</button>
-                                <button @click="saveVaccine()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium">Save Record</button>
-                            </div>
+                        </template>
+            
+                        <div x-show="sortedVaccinationLog.length === 0"
+                             style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
+                            No vaccination records found.
                         </div>
                     </div>
                 </div>
-            </template>
-    
+            </template>    
                                     <!-- ******************************** -->
                                     <!-- SRR CHART and Analytics          -->
                                     <!-- ******************************** -->

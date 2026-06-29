@@ -277,7 +277,7 @@ init() {
 
             } catch(e) {
                 this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
-                this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = [];  this.activityLog = [];
+                this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.vaccinationLog = []; this.activityLog = [];
             }
 
     // Set initial active patient safely
@@ -475,7 +475,7 @@ saveOnboardedPatient() {
             this.coughLog = this.coughLog.filter(s => s.patientId !== patientId);
             this.activityLog = this.activityLog.filter(s => s.patientId !== patientId);
             this.vaccinationLog = this.vaccinationLog.filter(v => v.patientId !== patientId);                      
-            this.coughLog = [];  this.activityLog = [];
+  
 
             // 2. Persist the flushed arrays to local storage
             this.saveToStorage('vch_patients', this.patients);
@@ -677,6 +677,43 @@ get hasAnyDataForActivePet() {
             return labels[this.timeScale] || 'Filtered Range';
         },
       // --- VACCINATION LOGIC ---
+      
+      
+      // Vaccine due-date status engine
+getVaccineStatus(nextDueDate) {
+    if (!nextDueDate) return null;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const due = new Date(nextDueDate);
+    if (isNaN(due.getTime())) return null;
+    const days = Math.round((due - now) / 86400000);
+
+    if (days < -60)  return { status: 'critical',  days, label: `Overdue by ${Math.abs(days)}d`,   color: '#7f1d1d', bg: '#fef2f2', border: '#fca5a5' };
+    if (days < 0)    return { status: 'overdue',   days, label: `Overdue by ${Math.abs(days)}d`,   color: '#dc2626', bg: '#fef2f2', border: '#fecaca' };
+    if (days === 0)  return { status: 'due-today', days, label: 'Due today!',                       color: '#b45309', bg: '#fffbeb', border: '#fde68a' };
+    if (days <= 14)  return { status: 'due-soon',  days, label: `Due in ${days}d`,                  color: '#d97706', bg: '#fffbeb', border: '#fde68a' };
+    if (days <= 42)  return { status: 'upcoming',  days, label: `Due in ${days}d`,                  color: '#0369a1', bg: '#f0f9ff', border: '#bae6fd' };
+    return           { status: 'ok',               days, label: `Due ${due.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}`, color: '#15803d', bg: '#f0fdf4', border: '#bbf7d0' };
+},
+
+// Surfaces the most-recent due date per vaccine type for the alerts panel
+get vaccineAlerts() {
+    if (!this.activePatientId) return [];
+    const byType = {};
+    [...this.vaccinationLog]
+        .filter(v => v.patientId === this.activePatientId && v.nextDueDate)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .forEach(v => {
+            const key = v.type === 'Other' ? (v.customType || 'Other') : v.type;
+            if (!byType[key]) byType[key] = v; // keeps only the most recent per type
+        });
+    return Object.values(byType)
+        .map(v => ({ ...v, vaccineStatus: this.getVaccineStatus(v.nextDueDate) }))
+        .filter(v => v.vaccineStatus && v.vaccineStatus.status !== 'ok')
+        .sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
+},
+
+
 get availableVaccines() {
     return this.currentSpecies === 'cat' ? this.catVaccines : this.dogVaccines;
 },
@@ -3722,6 +3759,7 @@ const backupData = {
                     this.coughLog = data.vch_coughLog;
                     this.activityLog = data.vch_activityLog;
                     this.weightLog = data.vch_weightLog || [];
+                    this.vaccinationLog = data.vch_vaccinationLog || [];
 
                     this.saveToStorage('vch_patients', this.patients);
                     this.saveToStorage('vch_srrHistory', this.srrHistory);
@@ -3731,6 +3769,7 @@ const backupData = {
                     this.saveToStorage('vch_coughLog', this.coughLog);
                     this.saveToStorage('vch_activityLog', this.activityLog);
                     this.saveToStorage('vch_weightLog', this.weightLog);
+                    this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
                     
 
                     if (this.patients.length > 0) this.activePatientId = this.patients[0].id; 
