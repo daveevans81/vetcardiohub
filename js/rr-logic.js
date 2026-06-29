@@ -166,6 +166,8 @@ showHeart2HeartImport: false,
         chartInstance: null,
         chartRenderTimeout: null,
         isChartExpanded: false,
+        showCutoffLine: true,
+showMeanRef: true,
         
         // Medication Module State
  
@@ -271,6 +273,8 @@ init() {
     this.$watch('activityPlotType', () => { this.renderChart(); });
     this.$watch('showSyncopeOverlay', () => { this.renderChart(); });
     this.$watch('showDiagnosisOverlay', () => { this.renderChart(); });
+    this.$watch('showCutoffLine', () => { this.renderChart(); });
+    this.$watch('showMeanRef',    () => { this.renderChart(); });
     this.$watch('showManualSrr', (isVisible) => {
         if (isVisible) {
             // Pre-populate to current local datetime when panel opens
@@ -1926,27 +1930,26 @@ resetData() {
     return this.calculateStats(data);
 },
         
-        calculateStats(data) {
-            if (!data || data.length === 0) return { mean: 0, upperCI: 0, lowerCI: 0 };
-            
-            const n = data.length;
-            const mean = data.reduce((sum, val) => sum + val.rate, 0) / n;
-            
-            // Calculate Standard Deviation
-            const variance = data.reduce((sum, val) => sum + Math.pow(val.rate - mean, 2), 0) / (n - 1 || 1);
-            const sd = Math.sqrt(variance);
-            
-            // Standard Error
-            const se = sd / Math.sqrt(n);
-            const marginOfError = 1.96 * se;
+   calculateStats(data) {
+    if (!data || data.length === 0) return { mean: 0, sd: 0, upperCI: 0, lowerCI: 0, upperRef: 0 };
 
-            return {
-                mean: mean,
-                upperCI: mean + marginOfError,
-                lowerCI: mean - marginOfError
-            };
-        },
-        
+    const n = data.length;
+    const mean = data.reduce((sum, val) => sum + val.rate, 0) / n;
+
+    const variance = data.reduce((sum, val) => sum + Math.pow(val.rate - mean, 2), 0) / (n - 1 || 1);
+    const sd = Math.sqrt(variance);
+
+    const se = sd / Math.sqrt(n);
+    const marginOfError = 1.96 * se;
+
+    return {
+        mean,
+        sd,
+        upperCI:  mean + marginOfError,
+        lowerCI:  mean - marginOfError,
+        upperRef: mean + (2 * sd)   // Population reference range, not CI — stays wide regardless of n
+    };
+},        
                 // --- CHARTING FUNCTIONS ---
                 
 toggleChartExpansion() {
@@ -2200,11 +2203,67 @@ renderChart() {
         });
 
         const stats = this.calculateStats(srrValuesForStats);
+        const cutoff = this.activePatientProfile?.customSrrCutoff
+            ? parseInt(this.activePatientProfile.customSrrCutoff)
+            : 30;
         
-        let annotations = {
-            thresholdLine: { type: 'line', yMin: 30, yMax: 30, scaleID: 'y', borderColor: 'rgb(220, 38, 38)', borderWidth: 2, borderDash: [5, 5], label: { display: true, content: 'Cutoff (30)', position: 'end', backgroundColor: 'rgba(220,38,38,0.8)', color: '#fff' } },
-            meanLine: { type: 'line', yMin: stats.mean, yMax: stats.mean, scaleID: 'y', borderColor: 'rgb(59, 130, 246)', borderWidth: 1.5, label: { display: true, content: `Mean: ${stats.mean.toFixed(1)}`, position: 'start' } }
-        };
+        let annotations = {};
+        
+        if (this.showCutoffLine) {
+            annotations.thresholdLine = {
+                type: 'line',
+                yMin: cutoff, yMax: cutoff,
+                scaleID: 'y',
+                borderColor: 'rgb(220, 38, 38)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                label: {
+                    display: true,
+                    content: `Cutoff (${cutoff})`,
+                    position: 'end',
+                    backgroundColor: 'rgba(220,38,38,0.85)',
+                    color: '#fff',
+                    font: { size: 11 }
+                }
+            };
+        }
+        
+        if (this.showMeanRef && stats.mean > 0) {
+            annotations.meanLine = {
+                type: 'line',
+                yMin: stats.mean, yMax: stats.mean,
+                scaleID: 'y',
+                borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 1.5,
+                borderDash: [5, 4],
+                label: {
+                    display: true,
+                    content: `Mean ${stats.mean.toFixed(1)}`,
+                    position: 'start',
+                    backgroundColor: 'rgba(59,130,246,0.85)',
+                    color: '#fff',
+                    font: { size: 11 }
+                }
+            };
+            if (stats.sd > 0) {
+                annotations.upperRefLine = {
+                    type: 'line',
+                    yMin: stats.upperRef, yMax: stats.upperRef,
+                    scaleID: 'y',
+                    borderColor: 'rgba(99, 102, 241, 0.75)',
+                    borderWidth: 1.5,
+                    borderDash: [3, 5],
+                    label: {
+                        display: true,
+                        content: `+2SD ${stats.upperRef.toFixed(1)}`,
+                        position: 'start',
+                        backgroundColor: 'rgba(99,102,241,0.75)',
+                        color: '#fff',
+                        font: { size: 11 }
+                    }
+                };
+            }
+        }
 
         const datasets = [
             {
