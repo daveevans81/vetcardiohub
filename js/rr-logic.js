@@ -1193,13 +1193,7 @@ deleteWeightEntry(id) {
         
         // Getters dor diagnosis and syncope logic
         
-        get currentClinicalStatus() {
-            if (!this.activePatientId) return null;
-            const history = this.diagnosisLog
-                .filter(d => d.patientId === this.activePatientId)
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
-            return history.length > 0 ? history[0] : null;
-        },
+
 
 sortedDiagnosisLog() {
             if (!this.activePatientId) return [];
