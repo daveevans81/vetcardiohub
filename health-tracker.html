@@ -869,7 +869,7 @@
                                 <p x-text="clinicalInterpretation.text" class="mb-0" style="line-height: 1.5;"></p>
                                 
                                 <template x-if="clinicalInterpretation.status === 'equivocal'">
-                                    <button @click="openGlossary('equivocal_rrr')" class="btn btn-warning-outline" style="margin-top: 12px; font-size: 0.85rem; padding: 6px 12px;">
+                                    <button @click="openGlossary('equivocal_rrr')" class="btn btn-warning-outline" style="background: rgba(255,255,255,0.5); border: 1px solid #f59e0b; color: #b45309; margin-top: 12px; font-size: 0.85rem; padding: 6px 12px;">
                                         Why recount? <i class="fa-solid fa-book-medical" style="margin-left: 4px;"></i>
                                     </button>
                                 </template>
@@ -881,7 +881,7 @@
                                 <button @click="saveToHistory()" class="btn btn-success" style="padding: 14px 28px; font-size: 1.1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                                     <i class="fa-solid fa-floppy-disk"></i> Save Reading
                                 </button>
-                                <button @click="closeResult(); startCount()" class="btn btn-outline" style="padding: 12px 24px; font-size: 1rem;">
+                                <button @click="closeResult(); startCount()" class="btn btn-outline" style="padding: 12px 24px; font-size: 1rem;background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">
                                     <i class="fa-solid fa-rotate-right"></i> Discard & Recount
                                 </button>
                             </div>
@@ -892,16 +892,24 @@
                                 <p class="text-success font-bold mt-0 mb-10" style="font-size: 1.1rem;">
                                     <i class="fa-solid fa-check-circle"></i> Reading saved!
                                 </p>
-                                <p class="text-sm text-muted mb-15">Would you like to update today's symptom summaries while you're here?</p>
-                                
-                                <div class="flex-between gap-10 mb-15">
-                                    <button @click="nudgeToSymptom('cough')" class="btn btn-outline w-full text-primary font-bold">
-                                        <i class="fa-solid fa-head-side-cough text-rose-500"></i> Log Cough
-                                    </button>
-                                    <button @click="nudgeToSymptom('activity')" class="btn btn-outline w-full text-primary font-bold">
-                                        <i class="fa-solid fa-person-running text-blue-500"></i> Log Activity
-                                    </button>
-                                </div>
+                                <template x-if="activePatientProfile?.modules?.activityLog || activePatientProfile?.modules?.coughLog">
+                                    <div>
+                                        <p class="text-sm text-muted mb-15">Would you like to update today's symptom summaries while you're here?</p>
+                                        
+                                        <div class="flex-between gap-10 mb-15">
+                                            <template x-if="activePatientProfile?.modules?.coughLog">
+                                                <button @click="nudgeToSymptom('cough')" class="btn btn-outline w-full text-primary font-bold">
+                                                    <i class="fa-solid fa-head-side-cough text-rose-500"></i> Log Cough
+                                                </button>
+                                            </template>
+                                            <template x-if="activePatientProfile?.modules?.activityLog">
+                                                <button @click="nudgeToSymptom('activity')" class="btn btn-outline w-full text-primary font-bold">
+                                                    <i class="fa-solid fa-person-running text-blue-500"></i> Log Activity
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
                 
                                 <button @click="closeResult()" class="btn w-full font-bold" style="background: #e2e8f0; color: #334155;">Done for now</button>
                             </div>
@@ -1857,7 +1865,7 @@
                         <h2 style="margin: 0; font-size: 1.25rem;">
                             <i class="fa-solid fa-stethoscope" style="color: #b45309;"></i>
                             Murmur Grade Progression
-                            <span style="font-size: 0.8rem; font-weight: 400; color: #92400e; margin-left: 8px;">Levine Scale I–VI</span>
+                            <span style="font-size: 0.8rem; font-weight: 400; color: #92400e; margin-left: 8px;">Levine Scale I–VI</span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('murmurGrade')"></i>
                         </h2>
 
                         <button @click="murmurExpanded = !murmurExpanded"

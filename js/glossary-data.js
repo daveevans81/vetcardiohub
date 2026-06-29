@@ -155,7 +155,8 @@ const VET_GLOSSARY_DB = {
         audience: ["vet", "owner"],
         difficulty: 2,
         textOwner: "A scale from 1 to 6 that vets use to describe how loud a murmur is. Grade 1 is very quiet, while Grade 6 is so loud you can sometimes feel it buzzing against the chest.",
-        textClinical: "The Levine grading system for murmur intensity. Ranges from I/VI (barely audible in a quiet room) to VI/VI (audible with the stethoscope lifted off the chest wall, accompanied by a precordial thrill).",
+        textClinical: "The Levine grading system for murmur intensity, modified by veterinary cardiologists. Ranges from I/VI (barely audible in a quiet room) to VI/VI (audible with the stethoscope lifted off the chest wall, accompanied by a precordial thrill).",
+        pmid: "30017853"
     },
     
     mmvd: {
