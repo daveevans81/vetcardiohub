@@ -3934,6 +3934,12 @@ input {
     text-align: left;
 }
 
+@media (max-width: 980px) {
+    .rr-dashboard {
+        max-width: 600px;
+    }
+}
+
 /* The Massive Tap Target */
 .btn-massive-tap {
     width: 100%;
