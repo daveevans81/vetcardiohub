@@ -908,7 +908,7 @@ openVaccineForm(logEntry = null) {
         }
     }
 
-    this.showVaccinationForm = true;
+    this.showVaccinationForm = true; 
 },
 
 saveVaccine() {

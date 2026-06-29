@@ -2163,15 +2163,7 @@
                             </div>
                         </template>
             
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <span class="text-muted" style="font-size: 0.9rem; font-style: italic;">
-                                Core and non-core vaccines — WSAVA guidelines as baseline
-                            </span>
-                            <button @click="openVaccineForm()" type="button" class="btn-secondary"
-                                    style="padding: 6px 12px; font-size: 0.85rem;">
-                                <i class="fa-solid fa-plus"></i> Add Record
-                            </button>
-                        </div>
+
                         <div style="display: flex; gap: 8px; align-items: center;">
                             <template x-if="sortedVaccinationLog.some(v => v.nextDueDate)">
                                 <button @click="exportAllVaccineReminders()" type="button"
