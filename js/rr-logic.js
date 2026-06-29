@@ -130,19 +130,24 @@ vaccinationLog: [],
 showVaccinationLogPanel: false,
 showVaccinationForm: false,
 editingVaccineId: null,
+selectedCatalogueEntry: null,   // active catalogue entry while form is open
+vaccineAddonList: [],           // array of addon objects for the current form
+
 newVaccine: {
     date: new Date().toISOString().split('T')[0],
-    type: '',
+    vaccineId: '',              // catalogue ID
+    type: '',                   // shortLabel — kept for backward compat display
     customType: '',
+    isCombi: false,
+    components: [],             // auto-filled from catalogue
+    additionals: [],            // [{ id, label, nextDueDate }] — saved alongside
     nextDueDate: '',
+    wsavaSuggestedDate: '',
+    intervalMode: 'wsava',      // 'wsava' | 'custom'
     batchNumber: '',
     administeredBy: '',
-    notes: '' // Ideal for noting local vet recommendations vs WSAVA guidelines
+    notes: ''
 },
-
-// WSAVA Core & Common Guidelines (Species specific)
-dogVaccines: ['Distemper (CDV)', 'Hepatitis (CAV)', 'Parvovirus (CPV)', 'Parainfluenza (CPiV)', 'Adenovirus', 'Leptospirosis', 'Rabies', 'Bordetella (Kennel Cough)', 'Other'],
-catVaccines: ['Parvovirus / Panleukopenia (FPV)', 'Herpesvirus (FHV-1)', 'Calicivirus (FCV)', 'Feline Leukaemia (FeLV)', 'Rabies', 'Chlamydia felis', 'Other'],
 
 
         // --- DIAGNOSIS & STAGING ---
@@ -699,23 +704,52 @@ getVaccineStatus(nextDueDate) {
 // Surfaces the most-recent due date per vaccine type for the alerts panel
 get vaccineAlerts() {
     if (!this.activePatientId) return [];
-    const byType = {};
+    const byKey = {};
+
     [...this.vaccinationLog]
-        .filter(v => v.patientId === this.activePatientId && v.nextDueDate)
+        .filter(v => v.patientId === this.activePatientId)
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .forEach(v => {
-            const key = v.type === 'Other' ? (v.customType || 'Other') : v.type;
-            if (!byType[key]) byType[key] = v; // keeps only the most recent per type
+            // Main vaccine
+            if (v.nextDueDate) {
+                const key = v.vaccineId || v.type;
+                if (!byKey[key]) {
+                    byKey[key] = {
+                        ...v,
+                        displayLabel: v.type || v.vaccineId,
+                        isAddon: false
+                    };
+                }
+            }
+            // Each addon's own due date
+            (v.additionals || []).forEach(addon => {
+                if (!addon.nextDueDate) return;
+                const aKey = `addon_${addon.id}`;
+                if (!byKey[aKey]) {
+                    byKey[aKey] = {
+                        ...v,
+                        displayLabel: addon.label,
+                        nextDueDate: addon.nextDueDate,
+                        isAddon: true,
+                        parentVaccineLabel: v.type
+                    };
+                }
+            });
         });
-    return Object.values(byType)
+
+    return Object.values(byKey)
         .map(v => ({ ...v, vaccineStatus: this.getVaccineStatus(v.nextDueDate) }))
         .filter(v => v.vaccineStatus && v.vaccineStatus.status !== 'ok')
         .sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
 },
 
-
-get availableVaccines() {
-    return this.currentSpecies === 'cat' ? this.catVaccines : this.dogVaccines;
+get availableVaccineGroups() {
+    const catalogue = VACCINE_CATALOGUE[this.currentSpecies] || VACCINE_CATALOGUE.dog;
+    return {
+        combis:     catalogue.combis     || [],
+        nonCore:    catalogue.nonCore    || [],
+        individual: catalogue.individual || []
+    };
 },
 
 get sortedVaccinationLog() {
@@ -725,44 +759,195 @@ get sortedVaccinationLog() {
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 },
 
+// Finds a catalogue entry by ID across all groups for the current species
+_getCatalogueEntry(vaccineId) {
+    const g = this.availableVaccineGroups;
+    return [...g.combis, ...g.nonCore, ...g.individual].find(e => e.id === vaccineId) || null;
+},
+
+// Counts prior records where this vaccine/addon appears as main OR as an additional
+_prevVaccineCount(vaccineId) {
+    return this.vaccinationLog.filter(v =>
+        v.patientId === this.activePatientId &&
+        v.id !== this.editingVaccineId &&
+        (v.vaccineId === vaccineId ||
+         v.type      === vaccineId ||
+         (v.additionals || []).some(a => a.id === vaccineId))
+    ).length;
+},
+
+// Computes the WSAVA-suggested due date for any catalogue entry from a given date
+_wsavaDueDate(entry, fromDateStr) {
+    if (!entry || !fromDateStr) return '';
+    const prevCount = this._prevVaccineCount(entry.id);
+    const days      = prevCount >= 1 ? entry.subsequentDays : entry.firstBoosterDays;
+    const d         = new Date(fromDateStr + 'T12:00:00');
+    d.setDate(d.getDate() + days);
+    return d.toISOString().split('T')[0];
+},
+
+// Called when the vaccine selector changes
+onVaccineSelected(vaccineId) {
+    this.selectedCatalogueEntry    = null;
+    this.vaccineAddonList          = [];
+    this.newVaccine.components     = [];
+    this.newVaccine.isCombi        = false;
+    this.newVaccine.vaccineId      = vaccineId;
+    this.newVaccine.wsavaSuggestedDate = '';
+
+    if (!vaccineId || vaccineId === 'Other') {
+        this.newVaccine.type = vaccineId === 'Other' ? 'Other' : '';
+        return;
+    }
+
+    const entry = this._getCatalogueEntry(vaccineId);
+    if (!entry) return;
+
+    this.selectedCatalogueEntry = entry;
+    this.newVaccine.type        = entry.shortLabel || entry.id;
+    this.newVaccine.isCombi     = !!(entry.components && entry.components.length);
+    this.newVaccine.components  = entry.components || [];
+
+    // Build addon list — not pre-ticked; vet confirms what was actually given
+    this.vaccineAddonList = (entry.suggestedAddons || []).map(addon => ({
+        id:               addon.id,
+        label:            addon.label,
+        note:             addon.note || '',
+        selected:         false,
+        nextDueDate:      this._wsavaDueDate(addon, this.newVaccine.date),
+        firstBoosterDays: addon.firstBoosterDays,
+        subsequentDays:   addon.subsequentDays
+    }));
+
+    this._refreshMainDueDate();
+},
+
+// Re-derives the main WSAVA date — called on vaccine change or date change
+_refreshMainDueDate() {
+    const entry = this.selectedCatalogueEntry;
+    if (!entry) return;
+    const suggested = this._wsavaDueDate(entry, this.newVaccine.date);
+    this.newVaccine.wsavaSuggestedDate = suggested;
+    if (this.newVaccine.intervalMode === 'wsava') {
+        this.newVaccine.nextDueDate = suggested;
+    }
+},
+
+// Re-derives all addon due dates when the administered date changes
+_refreshAddonDueDates() {
+    this.vaccineAddonList = this.vaccineAddonList.map(addon => ({
+        ...addon,
+        nextDueDate: this._wsavaDueDate(
+            { id: addon.id, firstBoosterDays: addon.firstBoosterDays, subsequentDays: addon.subsequentDays },
+            this.newVaccine.date
+        )
+    }));
+},
+
 openVaccineForm(logEntry = null) {
+    this.selectedCatalogueEntry = null;
+    this.vaccineAddonList       = [];
+
     if (logEntry) {
-        this.newVaccine = { ...logEntry };
-        this.editingVaccineId = logEntry.id;
-    } else {
         this.newVaccine = {
-            date: new Date().toISOString().split('T')[0],
-            type: this.availableVaccines[0],
-            customType: '',
-            nextDueDate: '',
-            batchNumber: '',
-            administeredBy: '',
-            notes: ''
+            ...logEntry,
+            intervalMode:       'custom',   // saved dates are authoritative
+            wsavaSuggestedDate: '',
+            components:  logEntry.components  || [],
+            additionals: logEntry.additionals || []
+        };
+        this.editingVaccineId = logEntry.id;
+
+        // Restore catalogue entry
+        if (logEntry.vaccineId) {
+            this.selectedCatalogueEntry = this._getCatalogueEntry(logEntry.vaccineId);
+        }
+
+        // Restore addon list — include saved additionals + any suggested-but-not-saved addons
+        const entry = this.selectedCatalogueEntry;
+        const savedAdditionals = logEntry.additionals || [];
+
+        if (entry && entry.suggestedAddons) {
+            this.vaccineAddonList = entry.suggestedAddons.map(addon => {
+                const saved = savedAdditionals.find(a => a.id === addon.id);
+                return {
+                    id:               addon.id,
+                    label:            addon.label,
+                    note:             addon.note || '',
+                    selected:         !!saved,
+                    nextDueDate:      saved ? saved.nextDueDate : this._wsavaDueDate(addon, logEntry.date),
+                    firstBoosterDays: addon.firstBoosterDays,
+                    subsequentDays:   addon.subsequentDays
+                };
+            });
+        }
+    } else {
+        const groups       = this.availableVaccineGroups;
+        const defaultEntry = groups.combis[0] || null;
+
+        this.newVaccine = {
+            date:               new Date().toISOString().split('T')[0],
+            vaccineId:          '',
+            type:               '',
+            customType:         '',
+            isCombi:            false,
+            components:         [],
+            additionals:        [],
+            nextDueDate:        '',
+            wsavaSuggestedDate: '',
+            intervalMode:       'wsava',
+            batchNumber:        '',
+            administeredBy:     '',
+            notes:              ''
         };
         this.editingVaccineId = null;
+
+        if (defaultEntry) {
+            this.newVaccine.vaccineId = defaultEntry.id;
+            this.onVaccineSelected(defaultEntry.id);
+        }
     }
+
     this.showVaccinationForm = true;
 },
 
 saveVaccine() {
     if (!this.activePatientId) return alert("Select a patient first.");
-    if (!this.newVaccine.type) return alert("Vaccine type is required.");
+    if (!this.newVaccine.vaccineId) return alert("Please select a vaccine type.");
+    if (this.newVaccine.vaccineId === 'Other' && !this.newVaccine.customType.trim()) {
+        return alert("Please specify the custom vaccine name.");
+    }
+
+    // Compile selected addons into the additionals array
+    const additionals = this.vaccineAddonList
+        .filter(a => a.selected)
+        .map(a => ({ id: a.id, label: a.label, nextDueDate: a.nextDueDate || '' }));
 
     const entryToSave = {
         ...this.newVaccine,
-        id: this.editingVaccineId || this.generateId(),
-        patientId: this.activePatientId
+        id:          this.editingVaccineId || this.generateId(),
+        patientId:   this.activePatientId,
+        additionals,
+        type: this.newVaccine.vaccineId === 'Other'
+            ? (this.newVaccine.customType || 'Other')
+            : (this.newVaccine.type || this.newVaccine.vaccineId)
     };
 
+    // Strip transient form-only fields before persisting
+    delete entryToSave.wsavaSuggestedDate;
+    delete entryToSave.intervalMode;
+
     if (this.editingVaccineId) {
-        const index = this.vaccinationLog.findIndex(v => v.id === this.editingVaccineId);
-        if (index !== -1) this.vaccinationLog[index] = entryToSave;
+        const idx = this.vaccinationLog.findIndex(v => v.id === this.editingVaccineId);
+        if (idx !== -1) this.vaccinationLog[idx] = entryToSave;
     } else {
         this.vaccinationLog.push(entryToSave);
     }
 
     this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
     this.showVaccinationForm = false;
+    this.selectedCatalogueEntry = null;
+    this.vaccineAddonList = [];
 },
 
 deleteVaccine(id) {

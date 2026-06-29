@@ -1923,49 +1923,206 @@
                             </div>
                             <div class="p-5 space-y-4">
                                 
+                                                <!-- WSAVA guideline notice -->
                                 <div class="bg-indigo-50 text-indigo-800 text-xs p-3 rounded border border-indigo-100">
-                                    <strong>Note:</strong> Defaults to WSAVA core guidelines. Local veterinary recommendations and regional infectious disease pressures always supersede standard schedules.
+                                    <strong>WSAVA Guidelines applied:</strong> Next due dates are auto-suggested based on
+                                    this patient's vaccination history. Core vaccines (DHP/RCP) suggest triennial
+                                    intervals after the first annual booster. All dates are overridable. Local disease
+                                    pressure and veterinary judgement always takes precedence.
                                 </div>
-                    
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700">Date Administered</label>
-                                        <input type="date" x-model="newVaccine.date" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700">Next Due Date</label>
-                                        <input type="date" x-model="newVaccine.nextDueDate" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
-                                    </div>
-                                </div>
-                                
+                                    
+                                                <!-- Date administered -->
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700">Vaccine Type</label>
-                                    <select x-model="newVaccine.type" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
-                                        <template x-for="vac in availableVaccines" :key="vac">
-                                            <option :value="vac" x-text="vac"></option>
-                                        </template>
+                                    <label class="block text-sm font-semibold text-gray-700">Date Administered</label>
+                                    <input type="date" x-model="newVaccine.date"
+                                           @change="_refreshMainDueDate(); _refreshAddonDueDates();"
+                                           class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                </div>
+                
+                                <!-- Vaccine selector — grouped optgroups -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Vaccine</label>
+                                    <select x-model="newVaccine.vaccineId"
+                                            @change="onVaccineSelected($event.target.value)"
+                                            class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                        <option value="" disabled>— Select vaccine —</option>
+                
+                                        <optgroup label="⭐ Core Combination Vaccines">
+                                            <template x-for="v in availableVaccineGroups.combis" :key="v.id">
+                                                <option :value="v.id" x-text="v.label"></option>
+                                            </template>
+                                        </optgroup>
+                
+                                        <optgroup label="Non-Core / Standalone">
+                                            <template x-for="v in availableVaccineGroups.nonCore" :key="v.id">
+                                                <option :value="v.id" x-text="v.label"></option>
+                                            </template>
+                                        </optgroup>
+                
+                                        <optgroup label="Individual Components (Uncommon)">
+                                            <template x-for="v in availableVaccineGroups.individual" :key="v.id">
+                                                <option :value="v.id" x-text="v.label"></option>
+                                            </template>
+                                        </optgroup>
+                
+                                        <optgroup label="Custom">
+                                            <option value="Other">Other / Custom Vaccine</option>
+                                        </optgroup>
                                     </select>
                                 </div>
-                    
-                                <div x-show="newVaccine.type === 'Other'" style="display: none;">
-                                    <label class="block text-sm font-semibold text-gray-700">Specify Custom Vaccine</label>
-                                    <input type="text" x-model="newVaccine.customType" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                
+                                <!-- Custom vaccine name input -->
+                                <div x-show="newVaccine.vaccineId === 'Other'" style="display: none;">
+                                    <label class="block text-sm font-semibold text-gray-700">Custom Vaccine Name</label>
+                                    <input type="text" x-model="newVaccine.customType"
+                                           placeholder="e.g., Pirifen, Versican Plus L4, Quantum Cat"
+                                           class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
                                 </div>
-                    
+                
+                                <!-- Component chips — shown for combis -->
+                                <template x-if="newVaccine.components && newVaccine.components.length > 0">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            Contains
+                                        </label>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                            <template x-for="comp in newVaccine.components" :key="comp">
+                                                <span style="background: #e0e7ff; color: #3730a3; border-radius: 999px;
+                                                             padding: 2px 10px; font-size: 0.75rem; font-weight: 500;"
+                                                      x-text="comp"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                
+                                <!-- Non-core / individual note -->
+                                <template x-if="selectedCatalogueEntry && !newVaccine.isCombi && selectedCatalogueEntry.note">
+                                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px;
+                                                padding: 8px 12px; font-size: 0.78rem; color: #166534;">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                        <span x-text="selectedCatalogueEntry.note"></span>
+                                    </div>
+                                </template>
+                
+                                <!-- Addon section — only for combis with suggested addons -->
+                                <template x-if="vaccineAddonList.length > 0">
+                                    <div style="background: #f8fafc; border: 1px solid #e2e8f0;
+                                                border-radius: 8px; padding: 14px;">
+                
+                                        <div class="block text-sm font-semibold text-gray-700 mb-3">
+                                            <i class="fa-solid fa-plus-circle" style="color: #6366f1;"></i>
+                                            Also given at this visit?
+                                        </div>
+                
+                                        <template x-for="(addon, idx) in vaccineAddonList" :key="addon.id">
+                                            <div style="margin-bottom: 12px;">
+                
+                                                <!-- Checkbox + label + note -->
+                                                <label style="display: flex; align-items: flex-start; gap: 10px;
+                                                              cursor: pointer;">
+                                                    <input type="checkbox"
+                                                           x-model="vaccineAddonList[idx].selected"
+                                                           style="margin-top: 3px; width: 16px; height: 16px;
+                                                                  accent-color: #6366f1; flex-shrink: 0;">
+                                                    <div>
+                                                        <div style="font-size: 0.875rem; font-weight: 600; color: #1e293b;"
+                                                             x-text="addon.label"></div>
+                                                        <div x-show="addon.note"
+                                                             style="font-size: 0.73rem; color: #64748b; margin-top: 1px;"
+                                                             x-text="addon.note"></div>
+                                                    </div>
+                                                </label>
+                
+                                                <!-- Per-addon due date — only visible when checked -->
+                                                <div x-show="vaccineAddonList[idx].selected"
+                                                     style="margin-top: 7px; margin-left: 26px; display: flex;
+                                                            align-items: center; gap: 8px; flex-wrap: wrap;">
+                                                    <label style="font-size: 0.75rem; color: #64748b; white-space: nowrap;">
+                                                        Next due:
+                                                    </label>
+                                                    <input type="date"
+                                                           x-model="vaccineAddonList[idx].nextDueDate"
+                                                           style="border: 1px solid #d1d5db; border-radius: 4px;
+                                                                  padding: 3px 7px; font-size: 0.8rem; flex: 1;
+                                                                  min-width: 130px;">
+                                                    <span style="font-size: 0.7rem; color: #6366f1; white-space: nowrap;"
+                                                          x-show="vaccineAddonList[idx].nextDueDate">
+                                                        WSAVA suggestion
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                
+                                <!-- Main next due date -->
+                                <div>
+                                    <div style="display: flex; justify-content: space-between;
+                                                align-items: flex-start; flex-wrap: wrap; gap: 4px;">
+                                        <label class="block text-sm font-semibold text-gray-700">
+                                            Next Due Date
+                                            <span x-show="newVaccine.vaccineId && newVaccine.vaccineId !== 'Other'"
+                                                  style="font-size: 0.68rem; font-weight: normal; color: #6366f1;
+                                                         margin-left: 6px;">WSAVA-derived</span>
+                                        </label>
+                
+                                        <!-- Restore WSAVA date — only shown when user has manually overridden -->
+                                        <button type="button"
+                                                x-show="newVaccine.wsavaSuggestedDate &&
+                                                        newVaccine.intervalMode === 'custom' &&
+                                                        newVaccine.nextDueDate !== newVaccine.wsavaSuggestedDate"
+                                                @click="newVaccine.nextDueDate = newVaccine.wsavaSuggestedDate;
+                                                        newVaccine.intervalMode = 'wsava'"
+                                                style="font-size: 0.7rem; color: #6366f1; background: none; border: none;
+                                                       cursor: pointer; text-decoration: underline; padding: 0;">
+                                            ↩ Restore WSAVA date
+                                            (<span x-text="newVaccine.wsavaSuggestedDate"></span>)
+                                        </button>
+                                    </div>
+                
+                                    <input type="date" x-model="newVaccine.nextDueDate"
+                                           @change="newVaccine.intervalMode = 'custom'"
+                                           class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                
+                                    <!-- Interval description line -->
+                                    <div x-show="newVaccine.wsavaSuggestedDate && selectedCatalogueEntry"
+                                         style="font-size: 0.72rem; color: #64748b; margin-top: 4px;">
+                                        <span x-text="(() => {
+                                            const entry = selectedCatalogueEntry;
+                                            if (!entry) return '';
+                                            const prev  = _prevVaccineCount(newVaccine.vaccineId);
+                                            const days  = prev >= 1 ? entry.subsequentDays : entry.firstBoosterDays;
+                                            const label = days === 1095
+                                                ? 'Triennial — WSAVA core (low-risk adult)'
+                                                : days === 365
+                                                    ? 'Annual — WSAVA recommendation'
+                                                    : days + ' days';
+                                            return (prev === 0 ? 'First booster: ' : 'Subsequent booster: ') + label
+                                                + (prev > 0 ? ' (' + prev + ' prior record' + (prev !== 1 ? 's' : '') + ')' : '');
+                                        })()"></span>
+                                    </div>
+                                </div>
+                
+                                <!-- Batch + administered by -->
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700">Batch / Lot Number</label>
-                                        <input type="text" x-model="newVaccine.batchNumber" placeholder="Optional" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                        <input type="text" x-model="newVaccine.batchNumber" placeholder="Optional"
+                                               class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700">Administered By</label>
-                                        <input type="text" x-model="newVaccine.administeredBy" placeholder="Clinic/Vet Name" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                        <input type="text" x-model="newVaccine.administeredBy"
+                                               placeholder="Clinic / Vet name"
+                                               class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
                                     </div>
                                 </div>
-                    
+                
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700">Notes / Reactions</label>
-                                    <textarea x-model="newVaccine.notes" rows="2" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200" placeholder="Mild lethargy post-injection, specific manufacturer..."></textarea>
+                                    <textarea x-model="newVaccine.notes" rows="2"
+                                              class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200"
+                                              placeholder="Mild lethargy, specific manufacturer, local vet advice..."></textarea>
                                 </div>
                                 
                                 <div class="flex justify-end pt-2 gap-3">
@@ -1990,7 +2147,7 @@
                                                 padding: 6px 0; font-size: 0.85rem;"
                                          :style="idx < vaccineAlerts.length - 1 ? 'border-bottom: 1px solid #fecaca;' : ''">
                                         <span style="color: #1e293b; font-weight: 500;"
-                                              x-text="alert.type === 'Other' ? (alert.customType || 'Other') : alert.type"></span>
+                                              x-text="alert.displayLabel || alert.type"></span>
                                         <span :style="`background: ${alert.vaccineStatus.bg};
                                                        color: ${alert.vaccineStatus.color};
                                                        border: 1px solid ${alert.vaccineStatus.border};
@@ -2034,10 +2191,10 @@
                         <template x-for="vaccine in sortedVaccinationLog" :key="vaccine.id">
                             <div class="log-entry">
                                 <div style="width: 100%;">
-            
-                                    <!-- Date row with due-date badge -->
-                                    <div style="display: flex; justify-content: space-between;
-                                                align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+                        
+                                    <!-- Date + main due-date badge -->
+                                    <div style="display: flex; justify-content: space-between; align-items: center;
+                                                flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
                                         <div style="font-size: 0.8rem; color: #6366f1; font-weight: bold;">
                                             <i class="fa-regular fa-calendar-check"></i>
                                             <span x-text="new Date(vaccine.date).toLocaleDateString(undefined,
@@ -2051,7 +2208,6 @@
                                                            font-size: 0.72rem; font-weight: bold;`"
                                                   x-text="getVaccineStatus(vaccine.nextDueDate).label"></span>
                                         </template>
-                                        <!-- No next-due date set -->
                                         <template x-if="!vaccine.nextDueDate">
                                             <span style="background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0;
                                                          border-radius: 999px; padding: 1px 9px; font-size: 0.72rem;">
@@ -2059,21 +2215,64 @@
                                             </span>
                                         </template>
                                     </div>
-            
-                                    <div style="font-weight: bold; color: #1e293b; font-size: 1rem;"
-                                         x-text="vaccine.type === 'Other' ? (vaccine.customType || 'Other') : vaccine.type"></div>
-            
-                                    <div style="font-size: 0.85rem; color: #475569; margin-top: 5px; line-height: 1.5;">
+                        
+                                    <!-- Vaccine name -->
+                                    <div style="font-weight: bold; color: #1e293b; font-size: 1rem; margin-bottom: 5px;"
+                                         x-text="vaccine.vaccineId === 'Other'
+                                            ? (vaccine.customType || 'Other')
+                                            : (vaccine.type || vaccine.vaccineId || 'Unknown')"></div>
+                        
+                                    <!-- Component chips (combi vaccines) -->
+                                    <template x-if="vaccine.components && vaccine.components.length > 0">
+                                        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 7px;">
+                                            <template x-for="comp in vaccine.components" :key="comp">
+                                                <span style="background: #e0e7ff; color: #3730a3; border-radius: 999px;
+                                                             padding: 1px 8px; font-size: 0.7rem; font-weight: 500;"
+                                                      x-text="comp"></span>
+                                            </template>
+                                        </div>
+                                    </template>
+                        
+                                    <!-- Additionals (given alongside) -->
+                                    <template x-if="vaccine.additionals && vaccine.additionals.length > 0">
+                                        <div style="border-top: 1px solid #f1f5f9; padding-top: 6px; margin-bottom: 5px;">
+                                            <div style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 5px; font-style: italic;">
+                                                Also given at this visit:
+                                            </div>
+                                            <template x-for="addon in vaccine.additionals" :key="addon.id">
+                                                <div style="display: flex; justify-content: space-between; align-items: center;
+                                                            margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
+                                                    <span style="font-size: 0.82rem; color: #374151; font-weight: 500;"
+                                                          x-text="addon.label"></span>
+                                                    <template x-if="addon.nextDueDate && getVaccineStatus(addon.nextDueDate)">
+                                                        <span :style="`background: ${getVaccineStatus(addon.nextDueDate).bg};
+                                                                       color: ${getVaccineStatus(addon.nextDueDate).color};
+                                                                       border: 1px solid ${getVaccineStatus(addon.nextDueDate).border};
+                                                                       border-radius: 999px; padding: 1px 8px; font-size: 0.68rem;
+                                                                       font-weight: bold;`"
+                                                              x-text="getVaccineStatus(addon.nextDueDate).label"></span>
+                                                    </template>
+                                                    <template x-if="!addon.nextDueDate">
+                                                        <span style="color: #94a3b8; font-size: 0.68rem;">no due date</span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                        
+                                    <!-- Admin details -->
+                                    <div style="font-size: 0.84rem; color: #475569; line-height: 1.5;">
                                         <template x-if="vaccine.administeredBy">
                                             <span>
-                                                <strong>Administered by:</strong>
-                                                <span x-text="vaccine.administeredBy"></span><br>
+                                                <strong>By:</strong>
+                                                <span x-text="vaccine.administeredBy"></span>
+                                                <span x-show="vaccine.batchNumber"
+                                                      x-text="' | Batch: ' + vaccine.batchNumber"></span><br>
                                             </span>
                                         </template>
-                                        <template x-if="vaccine.batchNumber">
+                                        <template x-if="!vaccine.administeredBy && vaccine.batchNumber">
                                             <span>
-                                                <strong>Batch:</strong>
-                                                <span x-text="vaccine.batchNumber"></span><br>
+                                                <strong>Batch:</strong> <span x-text="vaccine.batchNumber"></span><br>
                                             </span>
                                         </template>
                                         <template x-if="vaccine.notes">
@@ -2083,23 +2282,23 @@
                                         </template>
                                     </div>
                                 </div>
-            
+                        
+                                <!-- Action buttons -->
                                 <div style="display: flex; gap: 10px; flex-shrink: 0; align-items: flex-start;">
-                                    <template x-if="vaccine.nextDueDate">
+                                    <!-- Calendar export — hidden if no due dates anywhere on this record -->
+                                    <template x-if="vaccine.nextDueDate || (vaccine.additionals || []).some(a => a.nextDueDate)">
                                         <button @click="addVaccineReminder(vaccine)"
                                                 style="background: none; border: none; color: #6366f1; cursor: pointer;"
-                                                title="Add to calendar">
+                                                title="Add due date(s) to calendar">
                                             <i class="fa-regular fa-calendar-plus"></i>
                                         </button>
                                     </template>
                                     <button @click="openVaccineForm(vaccine)"
-                                            style="background: none; border: none; color: #64748b; cursor: pointer;"
-                                            title="Edit">
+                                            style="background: none; border: none; color: #64748b; cursor: pointer;" title="Edit">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
                                     <button @click="deleteVaccine(vaccine.id)"
-                                            style="background: none; border: none; color: #ef4444; cursor: pointer;"
-                                            title="Delete">
+                                            style="background: none; border: none; color: #ef4444; cursor: pointer;" title="Delete">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </div>
