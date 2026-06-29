@@ -248,9 +248,9 @@ init() {
     }
 
     if (this.paginatedHistory.length > 0) {
-        this.showHeroHeader = true;
-    } else {
         this.showHeroHeader = false;
+    } else {
+        this.showHeroHeader = true;
     }
     
     // 2. ACCORDION WATCHERS: Forces Chart.js to redraw *only* after Alpine makes the canvas visible
