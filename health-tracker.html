@@ -227,8 +227,12 @@
                     <div class="hero-pill"><i class="fa-solid fa-chart-line" style="color: #93c5fd;"></i> Analytics & Trends</div>
                     <div class="hero-pill"><i class="fa-solid fa-pills" style="color: #6ee7b7;"></i> Medication Ledger</div>
                     <div class="hero-pill"><i class="fa-solid fa-heart-pulse" style="color: #fca5a5;"></i> Quality of Life</div>
+                    <div class="hero-pill"><i class="fa-solid fa-head-side-cough" style="color: #fca5a5;"></i> Cough</div>
+                    <div class="hero-pill"><i class="fa-solid fa-person-running" style="color: #fca5a5;"></i> Activity</div>
                     <div class="hero-pill"><i class="fa-solid fa-stethoscope" style="color: #fcd34d;"></i> ACVIM Staging</div>
+                    <div class="hero-pill"><i class="fa-solid fa-scale-balanced" style="color: #fca5a5;"></i> Weight</div>
                     <div class="hero-pill"><i class="fa-solid fa-bolt" style="color: #fdba74;"></i> Syncope Log</div>
+                    <div class="hero-pill"><i class="fa-solid fa-syringe" style="color: #fca5a5;"></i> Vaccinations</div>
                 </div>
             </div>
         
@@ -364,12 +368,12 @@
                               <p class="w-feat-desc">Track exercise tolerance and energy levels over time</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-walk" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                              <i class="ti ti-scale" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
                               <p class="w-feat-title">Weight and Diet log</p>
                               <p class="w-feat-desc">Track weight, diet, appetite and supplements over time</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-walk" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                              <i class="ti ti-syringe" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
                               <p class="w-feat-title">Vaccination log</p>
                               <p class="w-feat-desc">Track your pet's vaccinations. Don't just rely on your vet's database and reminders, take control yourself.</p>
                             </div>
@@ -587,7 +591,7 @@
                             </label>
                             <label class="module-selector" :class="{'active-amber': editingPatient.modules.weightDiet}">
                                 <div class="flex-center gap-10">
-                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-bolt" style="font-size: 1.4rem; color: #d97706;"></i></div>
+                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-scale-balanced" style="font-size: 1.4rem; color: #d97706;"></i></div>
                                     <div>
                                         <strong style="color: #1e293b; font-size: 0.95rem;">Weight, Diet and Supplements Log</strong>
                                         <span class="text-muted text-sm block">Record your pet's weight, diet, supplements, appetite and more.</span>
@@ -607,7 +611,7 @@
                             </label>
                             <label class="module-selector" :class="{'active-amber': editingPatient.modules.vaccinations}">
                                 <div class="flex-center gap-10">
-                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-bolt" style="font-size: 1.4rem; color: #d97706;"></i></div>
+                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-syringe" style="font-size: 1.4rem; color: #d97706;"></i></div>
                                     <div>
                                         <strong style="color: #1e293b; font-size: 0.95rem;">Vaccination Log</strong>
                                         <span class="text-muted text-sm block">Record your pet's vaccinations and when they need repeating.</span>
@@ -698,7 +702,7 @@
                                     ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; opacity:1;'
                                     : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
                                     style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-bolt"></i> Weight
+                                    <i class="fa-solid fa-scale-balanced"></i> Weight
                                 </span>
                                 <span :style="activePatientProfile.modules.syncopeLog
                                     ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; opacity:1;'
@@ -711,7 +715,7 @@
                                     ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; opacity:1;'
                                     : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
                                     style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-bolt"></i> Vaccines
+                                    <i class="fa-solid fa-syringe"></i> Vaccines
                                 </span>
 
                             </div>
