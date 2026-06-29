@@ -2268,11 +2268,6 @@ renderChart() {
                 };
             }
         }
-        
-        console.log('Annotations:', JSON.stringify(annotations));
-console.log('Stats:', stats);
-console.log('Cutoff:', cutoff);
-console.log('showCutoffLine:', this.showCutoffLine, 'showMeanRef:', this.showMeanRef);
 
         const datasets = [
             {
