@@ -1645,13 +1645,13 @@
                                     </div>
                                     
                                     <div class="flex justify-end pt-2 gap-3">
-                                        <button @click="showWeightForm = false" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium">Cancel</button>
-                                        <button @click="saveWeightEntry()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium">Save Record</button>
+                                        <button @click="showWeightForm = false" class="btn-secondary">Cancel</button>
+                                        <button @click="saveWeightEntry()" class="btn-primary" style="background: #0f766e;">Save Record</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         
                         <div x-show="showWeightLogPanel && !showWeightForm" x-transition>
                 
@@ -1969,12 +1969,21 @@
                                 </div>
                                 
                                 <div class="flex justify-end pt-2 gap-3">
-                                    <button @click="showVaccinationForm = false" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium">Cancel</button>
-                                    <button @click="saveVaccine()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium">Save Record</button>
+                                    <button @click="showVaccinationForm = false" c class="btn-secondary">Cancel</button>
+                                    <button @click="saveVaccine()" class="btn-primary" style="background: #0f766e;">Save Record</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                                            <button @click="saveConcurrentDiagnosis()" class="btn-primary" style="background: #0f766e;">
+                                    <i class="fa-solid fa-check"></i> Save Concurrent Issue
+                                </button>
+                                <button @click="showConcurrentForm = false" class="btn-secondary">Cancel</button>
+            
+            
+            
+            
+            
             
                     <div x-show="showVaccinationLogPanel && !showVaccinationForm" x-transition>
             
