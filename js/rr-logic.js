@@ -2203,20 +2203,23 @@ renderChart() {
         });
 
         const stats = this.calculateStats(srrValuesForStats);
-        const cutoff = this.activePatientProfile?.customSrrCutoff
-            ? parseInt(this.activePatientProfile.customSrrCutoff)
-            : 30;
+        const cutoff = parseInt(this.activePatientProfile?.customSrrCutoff) || 30;
+        
+        // Defensive fallback: treat undefined as true so lines show even if
+        // state variables were not yet added to the Alpine data block
+        const showCutoff  = this.showCutoffLine  !== false;
+        const showMeanRef = this.showMeanRef     !== false;
         
         let annotations = {};
         
-        if (this.showCutoffLine) {
+        if (showCutoff) {
             annotations.thresholdLine = {
                 type: 'line',
-                yMin: cutoff, yMax: cutoff,
-                scaleID: 'y',
+                yMin: cutoff,
+                yMax: cutoff,
                 borderColor: 'rgb(220, 38, 38)',
                 borderWidth: 2,
-                borderDash: [5, 5],
+                borderDash: [6, 4],
                 label: {
                     display: true,
                     content: `Cutoff (${cutoff})`,
@@ -2228,11 +2231,11 @@ renderChart() {
             };
         }
         
-        if (this.showMeanRef && stats.mean > 0) {
+        if (showMeanRef && srrValuesForStats.length >= 2) {
             annotations.meanLine = {
                 type: 'line',
-                yMin: stats.mean, yMax: stats.mean,
-                scaleID: 'y',
+                yMin: stats.mean,
+                yMax: stats.mean,
                 borderColor: 'rgb(59, 130, 246)',
                 borderWidth: 1.5,
                 borderDash: [5, 4],
@@ -2245,25 +2248,31 @@ renderChart() {
                     font: { size: 11 }
                 }
             };
+        
             if (stats.sd > 0) {
                 annotations.upperRefLine = {
                     type: 'line',
-                    yMin: stats.upperRef, yMax: stats.upperRef,
-                    scaleID: 'y',
-                    borderColor: 'rgba(99, 102, 241, 0.75)',
+                    yMin: stats.upperRef,
+                    yMax: stats.upperRef,
+                    borderColor: 'rgba(99, 102, 241, 0.8)',
                     borderWidth: 1.5,
                     borderDash: [3, 5],
                     label: {
                         display: true,
                         content: `+2SD ${stats.upperRef.toFixed(1)}`,
                         position: 'start',
-                        backgroundColor: 'rgba(99,102,241,0.75)',
+                        backgroundColor: 'rgba(99,102,241,0.8)',
                         color: '#fff',
                         font: { size: 11 }
                     }
                 };
             }
         }
+        
+        console.log('Annotations:', JSON.stringify(annotations));
+console.log('Stats:', stats);
+console.log('Cutoff:', cutoff);
+console.log('showCutoffLine:', this.showCutoffLine, 'showMeanRef:', this.showMeanRef);
 
         const datasets = [
             {
