@@ -980,15 +980,21 @@ get murmurChartHtml() {
     });
 
     // ── 4. NOW pointer ────────────────────────────────────────────────────
-    if (latestMX !== null) {
-        const tipY = CY - R - 8;
-        html += `
-            <polygon points="${latestMX - 24},${tipY - 26} ${latestMX + 24},${tipY - 26} ${latestMX},${tipY}"
-                fill="#2563eb"/>
-            <text x="${latestMX}" y="${tipY - 8}" text-anchor="middle"
-                font-size="12" fill="white" font-weight="bold"
-                font-family="sans-serif">NOW</text>`;
-    }
+if (latestMX !== null) {
+    const tipY       = CY - R - 8;
+    const BADGE_W    = 42, BADGE_H = 22;
+    const bx         = latestMX - BADGE_W / 2;
+    const badgeBottom = tipY - 7;
+    const badgeTop    = badgeBottom - BADGE_H;
+
+    html += `
+        <polygon points="${latestMX - 7},${badgeBottom} ${latestMX + 7},${badgeBottom} ${latestMX},${tipY}"
+            fill="#2563eb"/>
+        <rect x="${bx}" y="${badgeTop}" width="${BADGE_W}" height="${BADGE_H}" rx="5" fill="#2563eb"/>
+        <text x="${latestMX}" y="${badgeTop + 15}" text-anchor="middle"
+            font-size="12" fill="white" font-weight="bold"
+            font-family="sans-serif">NOW</text>`;
+}
 
     return html;
 },
@@ -1214,15 +1220,22 @@ get acvimChartHtml() {
             </g>`;
     });
 
-    // 4. NOW pointer (Floating above the big circles)
-    if (latestMX !== null) {
-        const tipY = CY - R - 8;
-        html += `
-            <polygon points="${latestMX - 24},${tipY - 26} ${latestMX + 24},${tipY - 26} ${latestMX},${tipY}"
-                fill="#2563eb"/>
-            <text x="${latestMX}" y="${tipY - 8}" text-anchor="middle"
-                font-size="12" fill="white" font-weight="bold">NOW</text>`;
-    }
+// 4. NOW pointer (Floating above the big circles)
+if (latestMX !== null) {
+    const tipY        = CY - R - 8;
+    const BADGE_W     = 42, BADGE_H = 22;
+    const bx          = latestMX - BADGE_W / 2;
+    const badgeBottom = tipY - 7;
+    const badgeTop    = badgeBottom - BADGE_H;
+
+    html += `
+        <polygon points="${latestMX - 7},${badgeBottom} ${latestMX + 7},${badgeBottom} ${latestMX},${tipY}"
+            fill="#2563eb"/>
+        <rect x="${bx}" y="${badgeTop}" width="${BADGE_W}" height="${BADGE_H}" rx="5" fill="#2563eb"/>
+        <text x="${latestMX}" y="${badgeTop + 15}" text-anchor="middle"
+            font-size="12" fill="white" font-weight="bold"
+            font-family="sans-serif">NOW</text>`;
+}
 
     // 5. Treatment bands (Shifted down below the new timeline markers)
     const BAND_Y0  = CY + R + 55;    
