@@ -1595,8 +1595,8 @@
                                 <i class="fa-solid" :class="showWeightLogPanel ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                             </button>
                         </div>
-                        <div x-show="showWeightForm" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
-                            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                        <div x-show="showWeightForm"  class="diagnosis-panel fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
+                            <div class="diagnosis-panel bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
                                 <div class="bg-blue-600 px-4 py-3 flex justify-between items-center text-white">
                                     <h3 class="font-bold text-lg" x-text="editingWeightId ? 'Edit Diet & Weight' : 'Log Diet & Weight'"></h3>
                                     
@@ -1916,7 +1916,7 @@
                     </div>
                     
                     <div x-show="showVaccinationForm" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
-                        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                        <div class="diagnosis-panel bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
                             <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
                                 <h3 class="font-bold text-lg" x-text="editingVaccineId ? 'Edit Vaccination' : 'Log Vaccination'"></h3>
                                 
