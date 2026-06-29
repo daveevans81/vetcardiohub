@@ -259,7 +259,7 @@
                     
                     <p style="font-size: 0.75rem; color: #94a3b8; margin: 6px 0 16px;">Ctrl+Enter to save</p>
                     <div class="flex-between" style="justify-content: flex-end; gap: 10px;">
-                        <button @click="cancelComment()" class="btn btn-outline" style="background: white;  color: #475569;">Cancel</button>
+                        <button @click="cancelComment()"  style="padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; cursor: pointer; font-size: 0.875rem; color: #475569;">Cancel</button>
                         <button @click="saveComment()" class="btn btn-primary">Save Note</button>
                     </div>
                 </div>
@@ -972,7 +972,7 @@
                                                 <i class="fa-solid fa-comment-dots" style="color: #3b82f6; margin-top: 2px; font-size: 0.8rem; flex-shrink: 0;"></i>
                                                 <span style="font-size: 0.85rem; color: #1e40af; line-height: 1.5;" x-text="log.comment"></span>
                                             </div>
-                                            <button @click="openCommentEditor(log)" class="btn btn-outline" sstyle="background: none; border: 1px solid #bfdbfe; border-radius: 4px; color: #3b82f6; cursor: pointer; padding: 3px 8px; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">Edit</button>
+                                            <button @click="openCommentEditor(log)" style="background: none; border: 1px solid #bfdbfe; border-radius: 4px; color: #3b82f6; cursor: pointer; padding: 3px 8px; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">Edit</button>
                                         </div>
                                     </div>
                                 </template>
