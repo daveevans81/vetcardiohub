@@ -4520,49 +4520,6 @@ async _svgToJpegDataUrl(svgElement, width, height) {
     }
 },
  
-async shareReport() {
-    if (!this.activePatientId) return;
-    const profile = this.activePatientProfile;
-    const srrData = this.getFilteredReadings().slice(-5).reverse();
-
-    let text = `${profile.name}'s VetCardioHub Cardiac Summary (${this.timeScaleLabel})\n`;
-    text += `Species: ${profile.species}  |  Owner: ${profile.ownerName || 'N/A'}\n`;
-    text += `Current weight: ${this.latestWeightText}\n\n`;
-
-    if (srrData.length > 0) {
-        text += `Recent SRR Readings:\n`;
-        srrData.forEach(r => {
-            text += `• ${new Date(r.date).toLocaleDateString('en-GB')} — ${r.rate} bpm\n`;
-        });
-    }
-
-    const latestDiag = this.diagnosisLog
-        .filter(d => d.patientId === this.activePatientId)
-        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    if (latestDiag) {
-        text += `\nClinical Status: ${latestDiag.diagnosis || ''}`;
-        if (latestDiag.acvimStage && latestDiag.acvimStage !== 'N/A') text += ` | ACVIM ${latestDiag.acvimStage}`;
-        text += '\n';
-    }
-
-    text += `\nTracked with VetCardioHub — vetcardiohub.com/health-tracker`;
-
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: `${profile.name} — VetCardioHub Report`,
-                text,
-                url: 'https://vetcardiohub.com/health-tracker'
-            });
-        } catch (e) {
-            // User cancelled — no action needed
-        }
-    } else {
-        // Fallback: copy full clinical report to clipboard
-        this.copyToClipboard();
-        alert("Share sheet not available on this browser. Full report copied to clipboard instead.");
-    }
-},
 
  
 // ── generatePDF ───────────────────────────────────────────────────────────────
@@ -5116,24 +5073,25 @@ generateCSV() {
 
 
  
-// ── copyToClipboard ───────────────────────────────────────────────────────────
-copyToClipboard() {
-    if (!this.activePatientId) return;
+// Builds the full plain-text clinical report string shared by
+// copyToClipboard() and shareReport().
+_buildReportText() {
+    if (!this.activePatientId) return '';
     const profile = this.activePatientProfile;
     const { startDate, endDate } = this.getDateRange();
- 
+
     const inRange = (dateStr) => {
         if (!startDate) return true;
         const d = this.parseDateSafe(dateStr);
         return d >= startDate && d <= endDate;
     };
- 
+
     const rule   = (char = '─') => char.repeat(58);
     const nl     = '\n';
     const indent = '   ';
- 
+
     let out = '';
- 
+
     // Report header
     out += `VETCARDIOHUB CLINICAL REPORT — ${profile.name.toUpperCase()}${nl}`;
     out += `Generated : ${new Date().toLocaleDateString('en-GB')}${nl}`;
@@ -5141,7 +5099,7 @@ copyToClipboard() {
     out += `Species   : ${profile.species}  |  Breed: ${profile.breed || 'N/A'}  |  Age: ${this.computedAgeText}${nl}`;
     out += `Owner     : ${profile.ownerName || 'N/A'}${nl}`;
     out += rule('═') + nl + nl;
- 
+
     // ── SRR Log ───────────────────────────────────────────────────────────
     const srrData = this.getFilteredReadings().slice().reverse();
     if (srrData.length > 0) {
@@ -5156,12 +5114,12 @@ copyToClipboard() {
         });
         out += nl;
     }
- 
+
     // ── Medication Log ────────────────────────────────────────────────────
     const medData = this.medLedger
         .filter(m => m.patientId === this.activePatientId && inRange(m.eventDate))
         .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
- 
+
     if (medData.length > 0) {
         out += `MEDICATION LOG (${medData.length} entr${medData.length !== 1 ? 'ies' : 'y'})${nl}`;
         out += rule() + nl;
@@ -5178,12 +5136,12 @@ copyToClipboard() {
         });
         out += nl;
     }
- 
+
     // ── Diagnosis & Staging Log ───────────────────────────────────────────
     const diagData = this.diagnosisLog
         .filter(d => d.patientId === this.activePatientId && inRange(d.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
- 
+
     if (diagData.length > 0) {
         out += `DIAGNOSIS & STAGING LOG (${diagData.length} entr${diagData.length !== 1 ? 'ies' : 'y'})${nl}`;
         out += rule() + nl;
@@ -5198,32 +5156,32 @@ copyToClipboard() {
         });
         out += nl;
     }
- 
+
     // ── Syncope / Collapse Log ────────────────────────────────────────────
     const syncData = this.syncopeLog
         .filter(s => s.patientId === this.activePatientId && inRange(s.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
- 
+
     if (syncData.length > 0) {
         out += `SYNCOPE / COLLAPSE EVENTS (${syncData.length} event${syncData.length !== 1 ? 's' : ''})${nl}`;
         out += rule() + nl;
         syncData.forEach(s => {
             out += `${s.date} ${s.time || ''}  |  ${s.type || 'Episode'}`;
-            if (s.duration)    out += `  |  Duration: ${s.duration}`;
-            if (s.loc)         out += `  |  LOC: ${s.loc}`;
-            if (s.muscleTone)  out += `  |  Tone: ${s.muscleTone}`;
+            if (s.duration)       out += `  |  Duration: ${s.duration}`;
+            if (s.loc)            out += `  |  LOC: ${s.loc}`;
+            if (s.muscleTone)     out += `  |  Tone: ${s.muscleTone}`;
             if (s.activityBefore) out += `${nl}${indent}Before: ${s.activityBefore}`;
             if (s.notes)          out += `${nl}${indent}Notes: ${s.notes}`;
             out += nl;
         });
         out += nl;
     }
- 
+
     // ── Cough Log ─────────────────────────────────────────────────────────
     const coughData = this.coughLog
         .filter(c => c.patientId === this.activePatientId && inRange(c.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
- 
+
     if (coughData.length > 0) {
         out += `COUGH LOG (${coughData.length} entr${coughData.length !== 1 ? 'ies' : 'y'})${nl}`;
         out += rule() + nl;
@@ -5237,12 +5195,12 @@ copyToClipboard() {
         });
         out += nl;
     }
- 
+
     // ── Activity Log ──────────────────────────────────────────────────────
     const actData = this.activityLog
         .filter(a => a.patientId === this.activePatientId && inRange(a.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
- 
+
     if (actData.length > 0) {
         out += `ACTIVITY LOG (${actData.length} entr${actData.length !== 1 ? 'ies' : 'y'})${nl}`;
         out += rule() + nl;
@@ -5255,55 +5213,87 @@ copyToClipboard() {
         });
         out += nl;
     }
-    
+
     // ── Weight & Diet Log ─────────────────────────────────────────────────
-    const weightDataTxt = this.weightLog
+    const weightData = this.weightLog
         .filter(w => w.patientId === this.activePatientId && inRange(w.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    if (weightDataTxt.length > 0) {
+    if (weightData.length > 0) {
         const wUnit = profile.weightUnit || 'kg';
-        out += `WEIGHT & DIET LOG (${weightDataTxt.length} entr${weightDataTxt.length !== 1 ? 'ies' : 'y'})${nl}`;
+        out += `WEIGHT & DIET LOG (${weightData.length} entr${weightData.length !== 1 ? 'ies' : 'y'})${nl}`;
         out += rule() + nl;
-        weightDataTxt.forEach(w => {
+        weightData.forEach(w => {
             out += `${(w.date || '').split('T')[0]}  |  ${w.weightValue} ${wUnit}  |  Appetite: ${w.appetite || '—'}`;
-            if (w.foodBrand) out += `  |  Diet: ${w.foodBrand}`;
+            if (w.foodBrand)   out += `  |  Diet: ${w.foodBrand}`;
             if (w.portionSize) out += `  (${w.portionSize})`;
             if (w.supplements) out += `${nl}${indent}Supplements: ${w.supplements}`;
-            if (w.notes) out += `${nl}${indent}Notes: ${w.notes}`;
+            if (w.notes)       out += `${nl}${indent}Notes: ${w.notes}`;
             out += nl;
         });
         out += nl;
     }
 
     // ── Vaccination Log ───────────────────────────────────────────────────
-    const vaccDataTxt = this.vaccinationLog
+    const vaccData = this.vaccinationLog
         .filter(v => v.patientId === this.activePatientId && inRange(v.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    if (vaccDataTxt.length > 0) {
-        out += `VACCINATION LOG (${vaccDataTxt.length} entr${vaccDataTxt.length !== 1 ? 'ies' : 'y'})${nl}`;
+    if (vaccData.length > 0) {
+        out += `VACCINATION LOG (${vaccData.length} entr${vaccData.length !== 1 ? 'ies' : 'y'})${nl}`;
         out += rule() + nl;
-        vaccDataTxt.forEach(v => {
+        vaccData.forEach(v => {
             out += `${v.date}  |  ${v.type || 'Unknown vaccine'}`;
-            if (v.batchNumber) out += `  |  Batch: ${v.batchNumber}`;
+            if (v.batchNumber)  out += `  |  Batch: ${v.batchNumber}`;
             if (v.administeredBy) out += `  |  By: ${v.administeredBy}`;
-            if (v.nextDueDate) out += `  |  Next due: ${v.nextDueDate}`;
-            if ((v.additionals || []).length > 0) out += `${nl}${indent}Additionals: ${v.additionals.map(a => `${a.label}${a.nextDueDate ? ' (due '+a.nextDueDate+')' : ''}`).join(', ')}`;
+            if (v.nextDueDate)  out += `  |  Next due: ${v.nextDueDate}`;
+            if ((v.additionals || []).length > 0) {
+                out += `${nl}${indent}Additionals: ${v.additionals.map(a => `${a.label}${a.nextDueDate ? ' (due ' + a.nextDueDate + ')' : ''}`).join(', ')}`;
+            }
             if (v.notes) out += `${nl}${indent}Notes: ${v.notes}`;
             out += nl;
         });
         out += nl;
     }
- 
-    if (out.trim() === '') return alert("No data to copy for this patient in the selected date range.");
- 
+
+    return out;
+},
+
+copyToClipboard() {
+    const out = this._buildReportText();
+    if (!out.trim()) return alert("No data to copy for this patient in the selected date range.");
+
     navigator.clipboard.writeText(out)
         .then(() => alert("Clinical report copied to clipboard."))
         .catch(err => {
             console.error("VCH clipboard error:", err);
             alert("Failed to copy to clipboard — check browser permissions.");
         });
+},
+
+async shareReport() {
+    if (!this.activePatientId) return;
+    const out = this._buildReportText();
+    if (!out.trim()) return alert("No data to share for this patient in the selected date range.");
+
+    const profile = this.activePatientProfile;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: `${profile.name} — VetCardioHub Clinical Report`,
+                text: out,
+                url: 'https://vetcardiohub.com/health-tracker'
+            });
+        } catch (e) {
+            // User cancelled the share sheet — no action needed
+        }
+    } else {
+        // Fallback for desktop browsers without Web Share API
+        navigator.clipboard.writeText(out)
+            .then(() => alert("Full clinical report copied to clipboard (share sheet not available on this browser)."))
+            .catch(() => alert("Failed to copy to clipboard — check browser permissions."));
+    }
 },
         
         exportPDF() {
