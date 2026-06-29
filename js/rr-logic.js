@@ -18,11 +18,13 @@ onboardingData: {
 // Default module template
 defaultModules: {
     srr: true,
-    medications: false,
-    coughLog: false,
-    activityLog: false,
-    syncopeLog: false,
-    acvimStaging: false
+    medications: true,
+    coughLog: true,
+    activityLog: true,
+    syncopeLog: true,
+    acvimStaging: true,
+    weightDiet: true,  
+    vaccinations: true
 },
 
 showProgressionBanner: false,
@@ -107,6 +109,41 @@ eventDate: '',
 eventDuration: '',
 eventNotes: '',
 eventTimeline: [],
+
+
+// --- WEIGHT & DIET STATE ---
+showWeightLogPanel: false,
+showWeightForm: false,
+editingWeightId: null,
+newWeightEntry: {
+    date: new Date().toISOString().split('T')[0],
+    weightValue: '',
+    appetite: 'Normal', // Ravenous, Normal, Reduced, Anorexic
+    foodBrand: '',
+    portionSize: '',
+    supplements: '',
+    notes: ''
+},
+
+// --- VACCINATION STATE ---
+vaccinationLog: [],
+showVaccinationLogPanel: false,
+showVaccinationForm: false,
+editingVaccineId: null,
+newVaccine: {
+    date: new Date().toISOString().split('T')[0],
+    type: '',
+    customType: '',
+    nextDueDate: '',
+    batchNumber: '',
+    administeredBy: '',
+    notes: '' // Ideal for noting local vet recommendations vs WSAVA guidelines
+},
+
+// WSAVA Core & Common Guidelines (Species specific)
+dogVaccines: ['Distemper (CDV)', 'Hepatitis (CAV)', 'Parvovirus (CPV)', 'Parainfluenza (CPiV)', 'Adenovirus', 'Leptospirosis', 'Rabies', 'Bordetella (Kennel Cough)', 'Other'],
+catVaccines: ['Parvovirus / Panleukopenia (FPV)', 'Herpesvirus (FHV-1)', 'Calicivirus (FCV)', 'Feline Leukaemia (FeLV)', 'Rabies', 'Chlamydia felis', 'Other'],
+
 
         // --- DIAGNOSIS & STAGING ---
 
@@ -236,6 +273,7 @@ init() {
                 this.syncopeLog = JSON.parse(localStorage.getItem('vch_syncopeLog')) || [];
                 this.coughLog = JSON.parse(localStorage.getItem('vch_coughLog')) || [];       
                 this.activityLog = JSON.parse(localStorage.getItem('vch_activityLog')) || [];
+                this.vaccinationLog = JSON.parse(localStorage.getItem('vch_vaccinationLog')) || [];
 
             } catch(e) {
                 this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
@@ -436,7 +474,7 @@ saveOnboardedPatient() {
             this.syncopeLog = this.syncopeLog.filter(s => s.patientId !== patientId);
             this.coughLog = this.coughLog.filter(s => s.patientId !== patientId);
             this.activityLog = this.activityLog.filter(s => s.patientId !== patientId);
-                                    
+            this.vaccinationLog = this.vaccinationLog.filter(v => v.patientId !== patientId);                      
             this.coughLog = [];  this.activityLog = [];
 
             // 2. Persist the flushed arrays to local storage
@@ -448,6 +486,7 @@ saveOnboardedPatient() {
             this.saveToStorage('vch_syncopeLog', this.syncopeLog);
             this.saveToStorage('vch_coughLog', this.coughLog);
             this.saveToStorage('vch_activityLog', this.activityLog);
+            this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);  
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -519,18 +558,23 @@ savePatient() {
     this.closePatientManager();
 },
         
-        logWeight(patientId, value) {
-            // Only add a new log entry if the weight actually changed today
-            const today = new Date().toISOString().split('T')[0];
-            const recent = this.weightLog.find(w => w.patientId === patientId && w.date.startsWith(today));
-            
-            if (recent) {
-                recent.weightValue = value; // Update today's entry
-            } else {
-                this.weightLog.push({ id: this.generateId(), patientId, date: new Date().toISOString(), weightValue: value });
-            }
-            this.saveToStorage('vch_weightLog', this.weightLog);
-        },
+logWeight(patientId, value) {
+    const today = new Date().toISOString().split('T')[0];
+    const recent = this.weightLog.find(w => w.patientId === patientId && w.date.startsWith(today));
+    
+    if (recent) {
+        recent.weightValue = value;
+    } else {
+        this.weightLog.push({ 
+            id: this.generateId(), 
+            patientId, 
+            date: new Date().toISOString(), 
+            weightValue: value,
+            appetite: 'Normal', foodBrand: '', portionSize: '', supplements: '', notes: ''
+        });
+    }
+    this.saveToStorage('vch_weightLog', this.weightLog);
+},
         
         // --- DATA MERGING ALGORITHM ---
         
@@ -545,6 +589,7 @@ savePatient() {
             this.syncopeLog = this.syncopeLog.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
             this.coughLog = this.coughLog.map(c => c.patientId === sourceId ? { ...c, patientId: targetId } : c);
             this.activityLog = this.activityLog.map(c => c.patientId === sourceId ? { ...c, patientId: targetId } : c);
+            this.vaccinationLog = this.vaccinationLog.map(v => v.patientId === sourceId ? { ...v, patientId: targetId } : v);
 
 
             // Delete Source Patient
@@ -558,7 +603,9 @@ savePatient() {
             this.saveToStorage('vch_syncopeLog', this.syncopeLog);
             this.saveToStorage('vch_coughLog', this.coughLog);
             this.saveToStorage('vch_activityLog', this.activityLog);
+            this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
             this.saveToStorage('vch_patients', this.patients);
+            
             
 
             this.activePatientId = targetId;
@@ -629,6 +676,132 @@ get hasAnyDataForActivePet() {
             };
             return labels[this.timeScale] || 'Filtered Range';
         },
+      // --- VACCINATION LOGIC ---
+get availableVaccines() {
+    return this.currentSpecies === 'cat' ? this.catVaccines : this.dogVaccines;
+},
+
+get sortedVaccinationLog() {
+    if (!this.activePatientId) return [];
+    return this.vaccinationLog
+        .filter(v => v.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+},
+
+openVaccineForm(logEntry = null) {
+    if (logEntry) {
+        this.newVaccine = { ...logEntry };
+        this.editingVaccineId = logEntry.id;
+    } else {
+        this.newVaccine = {
+            date: new Date().toISOString().split('T')[0],
+            type: this.availableVaccines[0],
+            customType: '',
+            nextDueDate: '',
+            batchNumber: '',
+            administeredBy: '',
+            notes: ''
+        };
+        this.editingVaccineId = null;
+    }
+    this.showVaccinationForm = true;
+},
+
+saveVaccine() {
+    if (!this.activePatientId) return alert("Select a patient first.");
+    if (!this.newVaccine.type) return alert("Vaccine type is required.");
+
+    const entryToSave = {
+        ...this.newVaccine,
+        id: this.editingVaccineId || this.generateId(),
+        patientId: this.activePatientId
+    };
+
+    if (this.editingVaccineId) {
+        const index = this.vaccinationLog.findIndex(v => v.id === this.editingVaccineId);
+        if (index !== -1) this.vaccinationLog[index] = entryToSave;
+    } else {
+        this.vaccinationLog.push(entryToSave);
+    }
+
+    this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
+    this.showVaccinationForm = false;
+},
+
+deleteVaccine(id) {
+    if (confirm("Delete this vaccination record?")) {
+        this.vaccinationLog = this.vaccinationLog.filter(v => v.id !== id);
+        this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
+    }
+},  
+        
+        // --- WEIGHT & DIET LOGIC ---
+get sortedWeightLog() {
+    if (!this.activePatientId) return [];
+    return this.weightLog
+        .filter(w => w.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+},
+
+openWeightForm(logEntry = null) {
+    if (logEntry) {
+        this.newWeightEntry = { ...logEntry };
+        this.editingWeightId = logEntry.id;
+        // Format ISO date to standard YYYY-MM-DD for the HTML input
+        this.newWeightEntry.date = logEntry.date.split('T')[0]; 
+    } else {
+        this.newWeightEntry = {
+            date: new Date().toISOString().split('T')[0],
+            weightValue: '',
+            appetite: 'Normal',
+            foodBrand: '',
+            portionSize: '',
+            supplements: '',
+            notes: ''
+        };
+        this.editingWeightId = null;
+    }
+    this.showWeightForm = true;
+},
+
+saveWeightEntry() {
+    if (!this.activePatientId) return alert("Select a patient first.");
+    const val = parseFloat(this.newWeightEntry.weightValue);
+    if (isNaN(val) || val <= 0) return alert("A valid weight is required.");
+
+    const entryToSave = {
+        ...this.newWeightEntry,
+        id: this.editingWeightId || this.generateId(),
+        patientId: this.activePatientId,
+        weightValue: val,
+        // Ensure date is stored cleanly
+        date: this.newWeightEntry.date.includes('T') ? this.newWeightEntry.date : `${this.newWeightEntry.date}T12:00:00.000Z` 
+    };
+
+    if (this.editingWeightId) {
+        const index = this.weightLog.findIndex(w => w.id === this.editingWeightId);
+        if (index !== -1) this.weightLog[index] = entryToSave;
+    } else {
+        this.weightLog.push(entryToSave);
+    }
+
+    this.saveToStorage('vch_weightLog', this.weightLog);
+    this.showWeightForm = false;
+    
+    // Force a chart re-render as historical mg/kg calculations may have changed
+    this.$nextTick(() => { this.renderMedChart(); }); 
+},
+
+deleteWeightEntry(id) {
+    if (confirm("Delete this weight and diet record?")) {
+        this.weightLog = this.weightLog.filter(w => w.id !== id);
+        this.saveToStorage('vch_weightLog', this.weightLog);
+        this.$nextTick(() => { this.renderMedChart(); });
+    }
+},
+        
+        
+        
         // Getters dor diagnosis and syncope logic
         
         get currentClinicalStatus() {
@@ -3512,6 +3685,7 @@ const backupData = {
                 vch_syncopeLog: this.syncopeLog,
                 vch_coughLog: this.coughLog,
                 vch_activityLog: this.activityLog,
+                vch_vaccinationLog: this.vaccinationLog,
                 exportDate: new Date().toISOString()
             };
 

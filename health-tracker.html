@@ -279,7 +279,7 @@
                                 <!-- ON BOARDING                      -->
                                 <!-- ******************************** -->
             <!-- The Overlay Wrapper -->
-            <div x-show="showOnboarding" class="modal-overlay" style="background: rgba(0,0,0,0.7);">
+            <div x-show="showOnboarding" class="modal-overlay" style="background: rgba(0,0,0,0.7);" x-cloak>
                  
                  <!-- STEP 0: Welcome Screen -->
                                 
@@ -363,6 +363,16 @@
                               <p class="w-feat-title">Activity log</p>
                               <p class="w-feat-desc">Track exercise tolerance and energy levels over time</p>
                             </div>
+                            <div class="w-feat">
+                              <i class="ti ti-walk" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                              <p class="w-feat-title">Weight and Diet log</p>
+                              <p class="w-feat-desc">Track weight, diet, appetite and supplements over time</p>
+                            </div>
+                            <div class="w-feat">
+                              <i class="ti ti-walk" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                              <p class="w-feat-title">Vaccination log</p>
+                              <p class="w-feat-desc">Track your pet's vaccinations. Don't just rely on your vet's database and reminders, take control yourself.</p>
+                            </div>
                           </div>
                     
                       <!-- Setup steps -->
@@ -415,10 +425,10 @@
                             <label class="form-label">Sex: 
                                 <select x-model="editingPatient.sex" class="form-control mt-0">
                                     <option value="">Select...</option>
-                                    <option value="MN">Male Neutered</option>
-                                    <option value="MI">Male Intact</option>
-                                    <option value="FN">Female Neutered</option>
-                                    <option value="FI">Female Intact</option>
+                                    <option value="MN">Male Neutered (Castrated)</option>
+                                    <option value="ME">Male Entire (Intact)</option>
+                                    <option value="FN">Female Neutered (Spayed)</option>
+                                    <option value="FE">Female Entire (Intact)</option>
                                 </select>
                             </label>
                     
@@ -575,16 +585,35 @@
                                 </div>
                                 <input type="checkbox" x-model="editingPatient.modules.acvimStaging" style="width: 20px; height: 20px; accent-color: #0284c7;">
                             </label>
-                    
+                            <label class="module-selector" :class="{'active-amber': editingPatient.modules.weightDiet}">
+                                <div class="flex-center gap-10">
+                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-bolt" style="font-size: 1.4rem; color: #d97706;"></i></div>
+                                    <div>
+                                        <strong style="color: #1e293b; font-size: 0.95rem;">Weight, Diet and Supplements Log</strong>
+                                        <span class="text-muted text-sm block">Record your pet's weight, diet, supplements, appetite and more.</span>
+                                    </div>
+                                </div>
+                                <input type="checkbox" x-model="editingPatient.modules.weightDiet" style="width: 20px; height: 20px; accent-color: #d97706;">
+                            </label>
                             <label class="module-selector" :class="{'active-amber': editingPatient.modules.syncopeLog}">
                                 <div class="flex-center gap-10">
                                     <div style="width: 32px; text-align: center;"><i class="fa-solid fa-bolt" style="font-size: 1.4rem; color: #d97706;"></i></div>
                                     <div>
                                         <strong style="color: #1e293b; font-size: 0.95rem;">Syncope / Collapse Diary</strong>
-                                        <span class="text-muted text-sm block">Record fainting episodes, triggers, and durations.</span>
+                                        <span class="text-muted text-sm block">Record fainting episodes, seizures, with triggers, and durations.</span>
                                     </div>
                                 </div>
                                 <input type="checkbox" x-model="editingPatient.modules.syncopeLog" style="width: 20px; height: 20px; accent-color: #d97706;">
+                            </label>
+                            <label class="module-selector" :class="{'active-amber': editingPatient.modules.vaccinations}">
+                                <div class="flex-center gap-10">
+                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-bolt" style="font-size: 1.4rem; color: #d97706;"></i></div>
+                                    <div>
+                                        <strong style="color: #1e293b; font-size: 0.95rem;">Vaccination Log</strong>
+                                        <span class="text-muted text-sm block">Record your pet's vaccinations and when they need repeating.</span>
+                                    </div>
+                                </div>
+                                <input type="checkbox" x-model="editingPatient.modules.vaccinations" style="width: 20px; height: 20px; accent-color: #d97706;">
                             </label>
                         </div>
                         
@@ -627,57 +656,66 @@
                                 </span>
                             </template>
                         </div>
+                        <template x-if="activePatientProfile?.modules">
                         <!-- Module status pills -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 5px !important; margin-top: 8px;" x-show="activePatientProfile?.modules">
-                            <template x-if="activePatientProfile?.modules">
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px !important; margin-top: 8px;" x-show="activePatientProfile?.modules">
+                            
                                 <span :style="activePatientProfile.modules.srr
                                     ? 'background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; opacity:1;'
                                     : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
                                     style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
                                     <i class="fa-solid fa-lungs"></i> SRR
                                 </span>
-                            </template>
-                            <template x-if="activePatientProfile?.modules">
+                            
+                    
                                 <span :style="activePatientProfile.modules.medications
                                     ? 'background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe; opacity:1;'
                                     : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
                                     style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
                                     <i class="fa-solid fa-pills"></i> Meds
                                 </span>
-                            </template>
-                            <template x-if="activePatientProfile?.modules">
+
                                 <span :style="activePatientProfile.modules.coughLog
                                     ? 'background:#fff1f2; color:#be123c; border:1px solid #fecdd3; opacity:1;'
                                     : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
                                     style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
                                     <i class="fa-solid fa-head-side-cough"></i> Cough
                                 </span>
-                            </template>
-                            <template x-if="activePatientProfile?.modules">
                                 <span :style="activePatientProfile.modules.activityLog
                                     ? 'background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; opacity:1;'
                                     : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
                                     style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
                                     <i class="fa-solid fa-person-running"></i> Activity
                                 </span>
-                            </template>
-                            <template x-if="activePatientProfile?.modules">
                                 <span :style="activePatientProfile.modules.acvimStaging
                                     ? 'background:#ede9fe; color:#6d28d9; border:1px solid #ddd6fe; opacity:1;'
                                     : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
                                     style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
                                     <i class="fa-solid fa-stethoscope"></i> Staging
                                 </span>
-                            </template>
-                            <template x-if="activePatientProfile?.modules">
+
+                                <span :style="activePatientProfile.modules.weightDiet
+                                    ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; opacity:1;'
+                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
+                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-bolt"></i> Weight
+                                </span>
                                 <span :style="activePatientProfile.modules.syncopeLog
                                     ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; opacity:1;'
                                     : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
                                     style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
                                     <i class="fa-solid fa-bolt"></i> Syncope
                                 </span>
-                            </template>
-                        </div>
+                            
+                                <span :style="activePatientProfile.modules.vaccines
+                                    ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; opacity:1;'
+                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
+                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-bolt"></i> Vaccines
+                                </span>
+
+                            </div>
+                        </template>
                     </div>
                     
                     <div style="display: flex; gap: 5px;" x-show="!isCounting" x-transition>
@@ -707,10 +745,10 @@
                         </label>
                         <label class="form-label w-full">Sex: 
                             <select x-model="editingPatient.sex" class="form-control">
-                                <option value="MN">Male Neutered</option>
-                                <option value="ME">Male Entire</option>
-                                <option value="FN">Female Neutered</option>
-                                <option value="FE">Female Entire</option>
+                                    <option value="MN">Male Neutered (Castrated)</option>
+                                    <option value="ME">Male Entire (Intact)</option>
+                                    <option value="FN">Female Neutered (Spayed)</option>
+                                    <option value="FE">Female Entire (Intact)</option>
                             </select>
                         </label>
                     </div>
@@ -750,9 +788,16 @@
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.activityLog"> Activity Log
                             </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" x-model="editingPatient.modules.weightDiet"> Weight and Diet Log
+                            </label>
                             
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.syncopeLog"> Syncope/Collapse Diary
+                            </label>
+                                                        
+                            <label class="checkbox-label">
+                                <input type="checkbox" x-model="editingPatient.modules.vaccinations"> Vaccination Record
                             </label>
                             
                             <label class="checkbox-label">
@@ -860,67 +905,69 @@
             </template>
             
             
-            <div x-show="!isCounting">
-                <div x-show="finalRate !== null && !isCounting" x-cloak>
-                    <div class="summary-box" style="border: 1px solid #cbd5e1;">
-                        <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
-                        
-                        <template x-if="clinicalInterpretation">
-                            <div :class="'status-' + clinicalInterpretation.status" class="text-left mb-20 mt-20">
-                                <h3 class="flex-center mt-0" style="justify-content: flex-start; gap: 8px;">
-                                    <i class="fa-solid" :class="{'fa-triangle-exclamation': clinicalInterpretation.status === 'danger', 'fa-circle-exclamation': clinicalInterpretation.status === 'equivocal', 'fa-circle-check': clinicalInterpretation.status === 'normal'}"></i>
-                                    <span x-text="clinicalInterpretation.title"></span>
-                                </h3>
-                                <p x-text="clinicalInterpretation.text" class="mb-0" style="line-height: 1.5;"></p>
-                                
-                                <template x-if="clinicalInterpretation.status === 'equivocal'">
-                                    <button @click="openGlossary('equivocal_rrr')" class="btn btn-warning-outline" style="background: rgba(255,255,255,0.5); border: 1px solid #f59e0b; color: #b45309; margin-top: 12px; font-size: 0.85rem; padding: 6px 12px;">
-                                        Why recount? <i class="fa-solid fa-book-medical" style="margin-left: 4px;"></i>
+            <template x-if="activePatientProfile?.modules?.srr">
+                <div x-show="!isCounting">
+                    <div x-show="finalRate !== null && !isCounting" x-cloak>
+                        <div class="summary-box" style="border: 1px solid #cbd5e1;">
+                            <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
+                            
+                            <template x-if="clinicalInterpretation">
+                                <div :class="'status-' + clinicalInterpretation.status" class="text-left mb-20 mt-20">
+                                    <h3 class="flex-center mt-0" style="justify-content: flex-start; gap: 8px;">
+                                        <i class="fa-solid" :class="{'fa-triangle-exclamation': clinicalInterpretation.status === 'danger', 'fa-circle-exclamation': clinicalInterpretation.status === 'equivocal', 'fa-circle-check': clinicalInterpretation.status === 'normal'}"></i>
+                                        <span x-text="clinicalInterpretation.title"></span>
+                                    </h3>
+                                    <p x-text="clinicalInterpretation.text" class="mb-0" style="line-height: 1.5;"></p>
+                                    
+                                    <template x-if="clinicalInterpretation.status === 'equivocal'">
+                                        <button @click="openGlossary('equivocal_rrr')" class="btn btn-warning-outline" style="background: rgba(255,255,255,0.5); border: 1px solid #f59e0b; color: #b45309; margin-top: 12px; font-size: 0.85rem; padding: 6px 12px;">
+                                            Why recount? <i class="fa-solid fa-book-medical" style="margin-left: 4px;"></i>
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+                    
+                            <div x-show="!hasSavedCurrentCount">
+                                <div style="display: flex; gap: 10px; flex-direction: column;">
+                                    <button @click="saveToHistory()" class="btn btn-success" style="padding: 14px 28px; font-size: 1.1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                                        <i class="fa-solid fa-floppy-disk"></i> Save Reading
                                     </button>
-                                </template>
+                                    <button @click="closeResult(); startCount()" class="btn btn-outline" style="padding: 12px 24px; font-size: 1rem;background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">
+                                        <i class="fa-solid fa-rotate-right"></i> Discard & Recount
+                                    </button>
+                                </div>
                             </div>
-                        </template>
-                
-                        <div x-show="!hasSavedCurrentCount">
-                            <div style="display: flex; gap: 10px; flex-direction: column;">
-                                <button @click="saveToHistory()" class="btn btn-success" style="padding: 14px 28px; font-size: 1.1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                                    <i class="fa-solid fa-floppy-disk"></i> Save Reading
-                                </button>
-                                <button @click="closeResult(); startCount()" class="btn btn-outline" style="padding: 12px 24px; font-size: 1rem;background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">
-                                    <i class="fa-solid fa-rotate-right"></i> Discard & Recount
-                                </button>
-                            </div>
-                        </div>
-                
-                        <div x-show="hasSavedCurrentCount" x-transition>
-                            <div class="info-box mt-20">
-                                <p class="text-success font-bold mt-0 mb-10" style="font-size: 1.1rem;">
-                                    <i class="fa-solid fa-check-circle"></i> Reading saved!
-                                </p>
-                                <template x-if="activePatientProfile?.modules?.activityLog || activePatientProfile?.modules?.coughLog">
-                                    <div>
-                                        <p class="text-sm text-muted mb-15">Would you like to update today's symptom summaries while you're here?</p>
-                                        
-                                        <div class="flex-between gap-10 mb-15">
-                                            <template x-if="activePatientProfile?.modules?.coughLog">
-                                                <button @click="nudgeToSymptom('cough')" class="btn btn-outline w-full text-primary font-bold">
-                                                    <i class="fa-solid fa-head-side-cough text-rose-500"></i> Log Cough
-                                                </button>
-                                            </template>
-                                            <template x-if="activePatientProfile?.modules?.activityLog">
-                                                <button @click="nudgeToSymptom('activity')" class="btn btn-outline w-full text-primary font-bold">
-                                                    <i class="fa-solid fa-person-running text-blue-500"></i> Log Activity
-                                                </button>
-                                            </template>
+                    
+                            <div x-show="hasSavedCurrentCount" x-transition>
+                                <div class="info-box mt-20">
+                                    <p class="text-success font-bold mt-0 mb-10" style="font-size: 1.1rem;">
+                                        <i class="fa-solid fa-check-circle"></i> Reading saved!
+                                    </p>
+                                    <template x-if="activePatientProfile?.modules?.activityLog || activePatientProfile?.modules?.coughLog">
+                                        <div>
+                                            <p class="text-sm text-muted mb-15">Would you like to update today's symptom summaries while you're here?</p>
+                                            
+                                            <div class="flex-between gap-10 mb-15">
+                                                <template x-if="activePatientProfile?.modules?.coughLog">
+                                                    <button @click="nudgeToSymptom('cough')" class="btn btn-outline w-full text-primary font-bold">
+                                                        <i class="fa-solid fa-head-side-cough text-rose-500"></i> Log Cough
+                                                    </button>
+                                                </template>
+                                                <template x-if="activePatientProfile?.modules?.activityLog">
+                                                    <button @click="nudgeToSymptom('activity')" class="btn btn-outline w-full text-primary font-bold">
+                                                        <i class="fa-solid fa-person-running text-blue-500"></i> Log Activity
+                                                    </button>
+                                                </template>
+                                            </div>
                                         </div>
-                                    </div>
-                                </template>
-                
-                                <button @click="closeResult()" class="btn w-full font-bold" style="background: #e2e8f0; color: #334155;">Done for now</button>
+                                    </template>
+                    
+                                    <button @click="closeResult()" class="btn w-full font-bold" style="background: #e2e8f0; color: #334155;">Done for now</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </template>
                     
                                         <!-- ******************************** -->
                                         <!-- SRR LOG history                  -->
@@ -1525,8 +1572,67 @@
                         </div>
                     </div>
                 </div>
-    
-    
+                                    <!-- ******************************** -->
+                                    <!-- WEIGHT  SECTION                  -->
+                                    <!-- ******************************** -->                
+                <template x-if="activePatientProfile?.modules?.weightDiet"> 
+                    <div x-show="showWeightForm" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
+                        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                            <div class="bg-blue-600 px-4 py-3 flex justify-between items-center text-white">
+                                <h3 class="font-bold text-lg" x-text="editingWeightId ? 'Edit Diet & Weight' : 'Log Diet & Weight'"></h3>
+                                <button @click="showWeightForm = false" class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
+                            </div>
+                            <div class="p-5 space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700">Date</label>
+                                        <input type="date" x-model="newWeightEntry.date" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700">Weight (<span x-text="activePatientProfile?.weightUnit || 'kg'"></span>)</label>
+                                        <input type="number" step="0.01" x-model="newWeightEntry.weightValue" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Appetite</label>
+                                    <select x-model="newWeightEntry.appetite" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                                        <option value="Ravenous">Ravenous (Polyphagia)</option>
+                                        <option value="Normal">Normal</option>
+                                        <option value="Reduced">Reduced (Hyporexia)</option>
+                                        <option value="Anorexic">Anorexic (Not eating)</option>
+                                    </select>
+                                </div>
+                    
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700">Food Brand / Diet Type</label>
+                                        <input type="text" x-model="newWeightEntry.foodBrand" placeholder="e.g., Royal Canin Cardiac" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700">Portion Size</label>
+                                        <input type="text" x-model="newWeightEntry.portionSize" placeholder="e.g., 200g twice daily" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                                    </div>
+                                </div>
+                    
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Supplements</label>
+                                    <input type="text" x-model="newWeightEntry.supplements" placeholder="Omega-3, Taurine, etc." class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                                </div>
+                    
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Clinical Notes</label>
+                                    <textarea x-model="newWeightEntry.notes" rows="2" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200" placeholder="Changes in body condition score, muscle wasting..."></textarea>
+                                </div>
+                                
+                                <div class="flex justify-end pt-2 gap-3">
+                                    <button @click="showWeightForm = false" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium">Cancel</button>
+                                    <button @click="saveWeightEntry()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium">Save Record</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
                                     <!-- ******************************** -->
                                     <!-- SYNCOPE SECTION                  -->
                                     <!-- ******************************** -->
@@ -1667,6 +1773,71 @@
                     </div>
                 </div>  
             </template>
+            
+                                    <!-- ******************************** -->
+                                    <!-- VACCINATION SECTION              -->
+                                    <!-- ******************************** -->            
+            <template x-if="activePatientProfile?.modules?.vaccinations"> 
+            <div x-show="showVaccinationForm" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                    <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
+                        <h3 class="font-bold text-lg" x-text="editingVaccineId ? 'Edit Vaccination' : 'Log Vaccination'"></h3>
+                        <button @click="showVaccinationForm = false" class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        
+                        <div class="bg-indigo-50 text-indigo-800 text-xs p-3 rounded border border-indigo-100">
+                            <strong>Note:</strong> Defaults to WSAVA core guidelines. Local veterinary recommendations and regional infectious disease pressures always supersede standard schedules.
+                        </div>
+            
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700">Date Administered</label>
+                                <input type="date" x-model="newVaccine.date" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700">Next Due Date</label>
+                                <input type="date" x-model="newVaccine.nextDueDate" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700">Vaccine Type</label>
+                            <select x-model="newVaccine.type" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                                <template x-for="vac in availableVaccines" :key="vac">
+                                    <option :value="vac" x-text="vac"></option>
+                                </template>
+                            </select>
+                        </div>
+            
+                        <div x-show="newVaccine.type === 'Other'" style="display: none;">
+                            <label class="block text-sm font-semibold text-gray-700">Specify Custom Vaccine</label>
+                            <input type="text" x-model="newVaccine.customType" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                        </div>
+            
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700">Batch / Lot Number</label>
+                                <input type="text" x-model="newVaccine.batchNumber" placeholder="Optional" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700">Administered By</label>
+                                <input type="text" x-model="newVaccine.administeredBy" placeholder="Clinic/Vet Name" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200">
+                            </div>
+                        </div>
+            
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700">Notes / Reactions</label>
+                            <textarea x-model="newVaccine.notes" rows="2" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-indigo-200" placeholder="Mild lethargy post-injection, specific manufacturer..."></textarea>
+                        </div>
+                        
+                        <div class="flex justify-end pt-2 gap-3">
+                            <button @click="showVaccinationForm = false" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium">Cancel</button>
+                            <button @click="saveVaccine()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium">Save Record</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
     
                                     <!-- ******************************** -->
                                     <!-- SRR CHART and Analytics          -->
