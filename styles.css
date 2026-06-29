@@ -4448,3 +4448,15 @@ button.btn-cancel:active,
     position: static !important;
 }
 
+.default input[type="radio"],
+.default input[type="checkbox"] {
+    -webkit-appearance: auto !important; 
+    -moz-appearance: auto !important;
+    appearance: auto !important; 
+    display: inline-block !important;
+    margin: 0 12px 0 0 !important; /* Explicit spacing between input and text */
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+    position: static !important;
+}

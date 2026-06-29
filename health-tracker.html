@@ -2353,7 +2353,7 @@
                             </template>
                             
                             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #475569; border-left: 1px solid #cbd5e1; padding-left: 12px; margin: 0;">
-                                    <input type="checkbox" x-model="srrUseRelationalTime" style="margin: 0; padding: 0;"> <i class="fa-solid fa-ruler-horizontal"></i> True Time<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('trueTime')"></i>
+                                    <input type="checkbox" x-model="srrUseRelationalTime" class="default" style="margin: 0; padding: 0;"> <i class="fa-solid fa-ruler-horizontal"></i> True Time<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('trueTime')"></i>
                             </label>
                             
                             <!-- Reference line toggles -->
@@ -2362,38 +2362,38 @@
                                     <i class="fa-solid fa-ruler-horizontal"></i> Refs
                                 </span>
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #dc2626; margin: 0; border-left: 1px solid #cbd5e1; padding-left: 12px;">
-                                    <input type="checkbox" x-model="showCutoffLine" style="margin: 0; padding: 0;">
+                                    <input type="checkbox" x-model="showCutoffLine" class="default" style="margin: 0; padding: 0;">
                                     <i class="fa-solid fa-triangle-exclamation"></i> Cutoff
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #4f46e5; margin: 0; border-left: 1px solid #cbd5e1; padding-left: 12px;">
-                                    <input type="checkbox" x-model="showMeanRef" style="margin: 0; padding: 0;">
+                                    <input type="checkbox" x-model="showMeanRef" class="default" style="margin: 0; padding: 0;">
                                     <i class="fa-solid fa-chart-line"></i> Mean + 2SD
                                 </label>
                             </div>
                 
                             <div style="display: flex; gap: 12px; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; flex-wrap: wrap; align-items: center;">
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #475569; margin: 0;">
-                                    <input type="checkbox" x-model="showMedications" style="margin: 0; padding: 0;"> <span>💊 Meds</span>
+                                    <input type="checkbox" x-model="showMedications" class="default" style="margin: 0; padding: 0;"> <span>💊 Meds</span>
                                 </label>
                                 
                                 
                 
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #9333ea; border-left: 1px solid #cbd5e1; padding-left: 12px; margin: 0;">
-                                    <input type="checkbox" x-model="showDiagnosisOverlay" style="margin: 0; padding: 0;"> <i class="fa-solid fa-stethoscope"></i> Diagnosis
+                                    <input type="checkbox" x-model="showDiagnosisOverlay" class="default" style="margin: 0; padding: 0;"> <i class="fa-solid fa-stethoscope"></i> Diagnosis
                                 </label>
                 
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #ef4444; border-left: 1px solid #cbd5e1; padding-left: 12px; margin: 0;">
-                                    <input type="checkbox" x-model="showSyncopeOverlay" style="margin: 0; padding: 0;"> <i class="fa-solid fa-heart-crack"></i> Syncope
+                                    <input type="checkbox" x-model="showSyncopeOverlay" class="default" style="margin: 0; padding: 0;"> <i class="fa-solid fa-heart-crack"></i> Syncope
                                 </label>
                                 
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #b45309; border-left: 1px solid #cbd5e1; padding-left: 12px; margin: 0;">
-                                    <input type="checkbox" x-model="showCoughOverlay" style="margin: 0; padding: 0;"> <i class="fa-solid fa-head-side-cough"></i> Cough
+                                    <input type="checkbox" x-model="showCoughOverlay" class="default" style="margin: 0; padding: 0;"> <i class="fa-solid fa-head-side-cough"></i> Cough
                                 </label>
                 
                 
                                 <div style="display: flex; align-items: center; gap: 6px; border-left: 1px solid #cbd5e1; padding-left: 12px;">
                                     <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #059669; margin: 0;">
-                                        <input type="checkbox" x-model="showActivityOverlay" style="margin: 0; padding: 0;"> <i class="fa-solid fa-person-running"></i> Activity
+                                        <input type="checkbox" x-model="showActivityOverlay" class="default" style="margin: 0; padding: 0;"> <i class="fa-solid fa-person-running"></i> Activity
                                     </label>
                                     <select x-show="showActivityOverlay" x-model="activityPlotType" @change="renderChart()" x-transition style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1; color: #059669; outline: none; background: white;">
                                         <option value="durationMins">Mins</option>
