@@ -32,7 +32,7 @@ showProgressionBanner: false,
 
 
         showHeroHeader: true,
-        showLog: true,
+        showLog: false,
         showMedGraph: true,
         showAnalytics: true,
         srrUseRelationalTime: false,
