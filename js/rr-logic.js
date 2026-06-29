@@ -49,7 +49,28 @@ showProgressionBanner: false,
         showManualSrr: false,
 
         // Form bindings
-        editingPatient: {}, 
+        editingPatient: {
+    id: '',
+    name: '',
+    ownerName: '',
+    species: 'dog',
+    breed: '',
+    sex: 'MN',
+    dob: '',
+    weight: null,
+    weightUnit: 'kg',
+    customSrrCutoff: 30,
+    modules: {
+        srr: false,
+        medications: false,
+        coughLog: false,
+        activityLog: false,
+        syncopeLog: false,
+        acvimStaging: false,
+        weightDiet: true,
+        vaccinations: true
+    }
+}, 
         manualSrrInput: null,
         manualSrrDate: '',
 
@@ -649,10 +670,19 @@ logWeight(patientId, value) {
         };
     }
 },
+
+closePatientManager() {
+    this.showPatientManager = false;
+},
         
-        closePatientManager() {
-            this.showPatientManager = false;
-        },
+openModuleSettings() {
+    this.openPatientManager(false, this.activePatientId);
+    this.showProgressionBanner = false;
+    setTimeout(() => {
+        const el = document.getElementById('edit-patient-modules-section');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+},
 
 get currentSpecies() {
     return this.activePatientProfile?.species || 'dog';

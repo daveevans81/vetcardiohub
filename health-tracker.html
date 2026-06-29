@@ -772,7 +772,7 @@
             
                     <label class="form-label">Custom Alarm Cutoff (bpm): <input type="number" x-model="editingPatient.customSrrCutoff" placeholder="Default: 30" class="form-control"></label>
                     
-                    <div style="margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 15px;" x-show="isEditingExistingPatient && editingPatient.modules">
+                    <div  id="edit-patient-modules-section" style="margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 15px;" x-show="isEditingExistingPatient && editingPatient.modules">
                         <h4 style="color: #0f766e; margin-top: 0; margin-bottom: 5px;"><i class="fa-solid fa-layer-group"></i> Active Tracking Modules</h4>
                         <p class="text-sm text-muted mt-0 mb-10">Toggle sections on or off for your dashboard.</p>
                         
