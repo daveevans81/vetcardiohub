@@ -619,15 +619,108 @@
                                 </div>
                                 <input type="checkbox" x-model="editingPatient.modules.vaccinations" style="width: 20px; height: 20px; accent-color: #d97706;">
                             </label>
+                            <label class="module-selector" :class="{'active-amber': editingPatient.modules.antiparasitics}">
+                                <div class="flex-center gap-10">
+                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-shield-virus" style="font-size: 1.4rem; color: #0f766e;"></i></div>
+                                    <div>
+                                        <strong style="color: #1e293b; font-size: 0.95rem;">Parasite Protection</strong>
+                                        <span class="text-muted text-sm block">Track flea, tick & worm cover — including lungworm & heartworm.</span>
+                                    </div>
+                                </div>
+                                <input type="checkbox" x-model="editingPatient.modules.antiparasitics" style="width: 20px; height: 20px; accent-color: #0f766e;">
+                            </label>
                         </div>
                         
                         <div class="flex-between">
                             <button @click="onboardingStep = 2" class="btn btn-back" style="background-color: #f1f5f9 !important;"><i class="fa-solid fa-arrow-left"></i> Back</button>
-                            <button @click="saveOnboardedPatient()" class="btn btn-success"><i class="fa-solid fa-check"></i> Finalise Dashboard</button>
+                            <button x-show="!editingPatient.modules.antiparasitics" @click="saveOnboardedPatient()" class="btn btn-success"><i class="fa-solid fa-check"></i> Finalise Dashboard</button>
+                            <button x-show="editingPatient.modules.antiparasitics" @click="openPrioritiesModal('onboarding')" class="btn btn-primary" style="background:#0f766e;">Parasite Plan <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>     
                 </div> 
             </div>   
+            
+            <!-- ******************************** -->
+            <!-- PARASITE PRIORITIES PAGE         -->
+            <!-- ******************************** -->
+            <div x-show="showPrioritiesModal" class="fixed inset-0 flex items-center justify-center p-4"
+                 style="z-index:60;background:rgba(0,0,0,0.6);" x-cloak>
+                <div style="max-width:520px;width:100%;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+                    <div style="background:#0f766e;color:#fff;padding:14px 18px;">
+                        <h3 style="margin:0;font-size:1.1rem;"><i class="fa-solid fa-shield-virus"></i> Parasite Protection Plan</h3>
+                        <div style="font-size:0.78rem;opacity:0.9;margin-top:2px;">Choose what this pet needs cover against — risk-based, not maximal.</div>
+                    </div>
+                    <div style="padding:18px;max-height:70vh;overflow-y:auto;">
+            
+                        <label class="form-label">Where does this pet live / travel?</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px;">
+                            <template x-for="rk in ['uk','europe','us']" :key="rk">
+                                <button type="button" @click="applyRegionDefaults(rk)"
+                                        :style="`flex:1;min-width:120px;border-radius:8px;padding:8px;font-size:0.82rem;cursor:pointer;border:1px solid;${prioritiesDraft.region===rk?'background:#ccfbf1;border-color:#0f766e;color:#0f766e;font-weight:bold;':'background:#fff;border-color:#e2e8f0;color:#475569;'}`"
+                                        x-text="parasiteRegionDefaults[rk].label"></button>
+                            </template>
+                        </div>
+            
+                        <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:6px;padding:8px 12px;font-size:0.76rem;color:#115e59;margin-bottom:12px;">
+                            <i class="fa-solid fa-circle-info"></i> <span x-text="prioritiesRegionNote"></span>
+                        </div>
+            
+                        <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;cursor:pointer;font-size:0.85rem;color:#334155;">
+                            <input type="checkbox" x-model="prioritiesDraft.travel" style="width:16px;height:16px;accent-color:#0f766e;">
+                            This pet travels abroad (adds travel-relevant cover, e.g. heartworm)
+                        </label>
+            
+                        <label class="form-label">Coverage priorities (tap to toggle)</label>
+                        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+                            <template x-for="t in parasiteTargets" :key="t.id">
+                                <label :style="`display:flex;align-items:center;gap:10px;border:1px solid;border-radius:8px;padding:8px 12px;cursor:pointer;${prioritiesDraft.priorities.includes(t.id)?'background:#f0fdf4;border-color:#86efac;':'background:#fff;border-color:#e2e8f0;'}`">
+                                    <input type="checkbox" :checked="prioritiesDraft.priorities.includes(t.id)" @change="togglePriority(t.id)" style="width:16px;height:16px;accent-color:#15803d;">
+                                    <div style="flex:1;">
+                                        <div style="font-size:0.86rem;font-weight:600;color:#1e293b;display:flex;align-items:center;gap:6px;">
+                                            <span x-text="t.label"></span>
+                                            <i x-show="t.cardiac" class="fa-solid fa-heart-pulse" style="color:#dc2626;font-size:0.72rem;" title="Cardiac-relevant"></i>
+                                        </div>
+                                        <div x-show="t.note" style="font-size:0.72rem;color:#94a3b8;margin-top:1px;" x-text="t.note"></div>
+                                    </div>
+                                </label>
+                            </template>
+                        </div>
+            
+                        <div style="font-size:0.72rem;color:#94a3b8;margin-top:12px;">
+                            <i class="fa-solid fa-circle-info"></i> More products isn't always better — match cover to this pet's lifestyle and your vet's local risk advice.
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid #e2e8f0;">
+                        <button @click="showPrioritiesModal = false" type="button" class="btn-cancel" style="margin:0;">Cancel</button>
+                        <button @click="savePriorities()" type="button" class="btn-primary" style="background:#0f766e;"
+                                x-text="prioritiesContext === 'onboarding' ? 'Save & Finish' : 'Save Plan'"></button>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <!-- GLOBAL CLINICAL & DATA DISCLAIMER -->
+            <div x-data="{ showDisclaimer: true }" x-show="showDisclaimer" x-transition class="summary-box" style="border: 2px solid #f59e0b; background: #fffbeb; padding: 20px; margin-bottom: 25px; border-radius: 8px; position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                
+                <button @click="showDisclaimer = false" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #b45309; cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" aria-label="Dismiss">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            
+                <h3 style="margin-top: 0; color: #b45309; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Important Clinical & Privacy Notice
+                </h3>
+                
+                <div style="font-size: 0.85rem; color: #78350f; line-height: 1.5;">
+                    <p style="margin-top: 0; margin-bottom: 12px;">
+                        <strong>Data Privacy & Retention:</strong> VetCardioHub operates entirely on your local device. <strong>No clinical data, patient profiles, or tracking metrics are transmitted to or stored on external cloud servers.</strong> While this guarantees total privacy, it also means that clearing your browser cache or site data will permanently delete your records. We strongly advise utilizing the <a href="#" @click.prevent="showImportExport = true; document.getElementById('symptomSection').scrollIntoView({ behavior: 'smooth' })" style="color: #d97706; text-decoration: underline; font-weight: bold;">Master Backup feature</a> regularly.
+                    </p>
+                    <p style="margin: 0;">
+                        <strong>Veterinary Partnership:</strong> This application is designed strictly as an evidence-based monitoring adjunct. It does not provide definitive medical diagnoses, nor does it replace the clinical judgment of a veterinary surgeon. Always interpret resting respiratory rates, activity logs, and syncopal events in direct consultation with your primary care veterinarian or board-certified cardiologist.
+                    </p>
+                </div>
+            </div>
+
+
                                 <!-- ******************************** -->
                                 <!-- PATIENT MANAGEMENT               -->
                                 <!-- ******************************** -->
@@ -716,6 +809,13 @@
                                     : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
                                     style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
                                     <i class="fa-solid fa-syringe"></i> Vaccines
+                                </span>
+                                
+                                <span :style="activePatientProfile.modules.antiparasitics
+                                    ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; opacity:1;'
+                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
+                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-syringe"></i> Anti-Parasitics
                                 </span>
 
                             </div>
@@ -806,6 +906,11 @@
                             
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.acvimStaging"> ACVIM Staging
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" x-model="editingPatient.modules.antiparasitics"
+                                       @change="editingPatient.modules.antiparasitics ? openPrioritiesModal('edit') : null"> Parasite Protection
                             </label>
                         </div>
                     </div>
@@ -2318,6 +2423,267 @@
                         </div>
                     </div>
                 </template>    
+                
+                <!-- ******************************** -->
+                <!-- ANTIPARASITIC SECTION            -->
+                <!-- ******************************** -->
+                <template x-if="activePatientProfile?.modules?.antiparasitics">
+                    <div class="module-card" x-show="patients.length > 0" x-cloak>
+                
+                        <!-- Accordion header + gap-alert badge -->
+                        <div style="margin-bottom: 15px;">
+                            <button @click="showAntiparasiticPanel = !showAntiparasiticPanel"
+                                    :aria-expanded="showAntiparasiticPanel.toString()" type="button" class="btn-accordion">
+                                <h3>
+                                    <i class="fa-solid fa-shield-virus"></i>
+                                    <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Parasite Protection' : 'Parasite Protection'"></span>
+                                    <template x-if="parasiticAlerts().length > 0">
+                                        <span style="display:inline-flex;align-items:center;background:#dc2626;color:#fff;border-radius:999px;font-size:0.7rem;padding:2px 9px;margin-left:10px;font-weight:bold;gap:4px;">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                            <span x-text="parasiticAlerts().length + ' gap' + (parasiticAlerts().length !== 1 ? 's' : '')"></span>
+                                        </span>
+                                    </template>
+                                </h3>
+                                <i class="fa-solid" :class="showAntiparasiticPanel ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </button>
+                        </div>
+                
+                        <!-- DASHBOARD -->
+                        <div x-show="showAntiparasiticPanel && !showAntiparasiticForm" x-transition>
+                
+                            <!-- Region + review priorities -->
+                            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:14px;">
+                                <div style="font-size:0.82rem;color:#475569;">
+                                    <i class="fa-solid fa-location-dot" style="color:#6366f1;"></i>
+                                    Region: <strong x-text="parasiteRegionDefaults[antiparasiticRegion]?.label || 'UK'"></strong>
+                                    <span x-show="activePatientProfile?.parasiteTravel" style="color:#b45309;"> · travel cover on</span>
+                                </div>
+                                <button @click="openPrioritiesModal('review')" type="button" class="btn-secondary" style="padding:5px 11px;font-size:0.8rem;">
+                                    <i class="fa-solid fa-sliders"></i> Review priorities
+                                </button>
+                            </div>
+                
+                            <!-- Coverage status chips -->
+                            <div style="margin-bottom:8px;font-weight:bold;color:#16325F;font-size:0.9rem;">Current coverage</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                                <template x-for="g in parasiticCoverageGaps()" :key="g.id">
+                                    <span :style="`display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 12px;font-size:0.8rem;font-weight:600;border:1px solid;
+                                        ${g.state==='covered' ? 'background:#f0fdf4;color:#15803d;border-color:#bbf7d0;'
+                                        : g.state==='partial' ? 'background:#fffbeb;color:#b45309;border-color:#fde68a;'
+                                        : g.state==='lapsed'  ? 'background:#fef2f2;color:#dc2626;border-color:#fecaca;'
+                                        : 'background:#fef2f2;color:#7f1d1d;border-color:#fca5a5;'}`">
+                                        <i :class="g.state==='covered' ? 'fa-solid fa-circle-check' : g.state==='partial' ? 'fa-solid fa-circle-half-stroke' : 'fa-solid fa-circle-xmark'"></i>
+                                        <span x-text="g.label"></span>
+                                        <i x-show="g.cardiac" class="fa-solid fa-heart-pulse" style="font-size:0.7rem;opacity:0.7;" title="Cardiac-relevant"></i>
+                                    </span>
+                                </template>
+                            </div>
+                
+                            <!-- Cardiac-relevant gap callout -->
+                            <template x-if="parasiticAlerts().some(a => a.cardiac)">
+                                <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.82rem;color:#7f1d1d;line-height:1.5;">
+                                    <i class="fa-solid fa-heart-pulse"></i>
+                                    <strong>Cardiac-relevant gap:</strong>
+                                    <span x-text="parasiticAlerts().filter(a=>a.cardiac).map(a=>a.label).join(' & ')"></span>
+                                    — these raise respiratory rate and cough, so an uncovered gap here can mimic or mask cardiac decline on the SRR trend.
+                                </div>
+                            </template>
+                
+                            <!-- COVERAGE TIMELINE -->
+                            <div style="margin:6px 0;font-weight:bold;color:#16325F;font-size:0.9rem;">Coverage timeline</div>
+                            <div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;background:#fff;margin-bottom:14px;">
+                                <template x-if="sortedAntiparasiticLog().length > 0">
+                                    <div>
+                                        <template x-for="row in coverageTimeline().rows" :key="row.id">
+                                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                                                <div style="width:76px;flex-shrink:0;font-size:0.72rem;color:#475569;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:3px;">
+                                                    <i x-show="row.cardiac" class="fa-solid fa-heart-pulse" style="color:#dc2626;font-size:0.62rem;"></i>
+                                                    <span x-text="row.short"></span>
+                                                </div>
+                                                <div style="position:relative;flex:1;height:14px;background:#f1f5f9;border-radius:3px;overflow:hidden;">
+                                                    <template x-for="(seg,si) in row.segments" :key="si">
+                                                        <div :style="`position:absolute;top:0;height:100%;left:${seg.left}%;width:${seg.width}%;background:${seg.color};opacity:${seg.partial?0.4:0.9};`" :title="seg.label"></div>
+                                                    </template>
+                                                    <div :style="`position:absolute;top:-2px;bottom:-2px;width:2px;background:#0f172a;left:${coverageTimeline().todayPct}%;`"></div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <div style="display:flex;justify-content:space-between;margin-left:84px;font-size:0.68rem;color:#94a3b8;margin-top:4px;">
+                                            <span x-text="coverageTimeline().startLabel"></span>
+                                            <span style="color:#0f172a;font-weight:600;">today</span>
+                                            <span x-text="coverageTimeline().endLabel"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div x-show="sortedAntiparasiticLog().length === 0" style="font-size:0.8rem;color:#94a3b8;font-style:italic;text-align:center;padding:8px;">
+                                    Log a product to see the coverage timeline.
+                                </div>
+                            </div>
+                
+                            <!-- Actions -->
+                            <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+                                <template x-if="sortedAntiparasiticLog().some(a => a.nextDueDate)">
+                                    <button @click="exportAllParasiticReminders()" type="button" class="btn-secondary" style="padding:6px 12px;font-size:0.85rem;color:#6366f1;border-color:#a5b4fc;" title="Download all recurring due dates">
+                                        <i class="fa-regular fa-calendar-plus"></i> All to Calendar
+                                    </button>
+                                </template>
+                                <button @click="openAntiparasiticForm()" type="button" class="btn-secondary" style="padding:6px 12px;font-size:0.85rem;">
+                                    <i class="fa-solid fa-plus"></i> Add Product
+                                </button>
+                            </div>
+                
+                            <!-- Log list -->
+                            <template x-for="entry in sortedAntiparasiticLog()" :key="entry.id">
+                                <div class="log-entry">
+                                    <div style="width:100%;">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;">
+                                            <div style="font-size:0.8rem;color:#6366f1;font-weight:bold;">
+                                                <i class="fa-regular fa-calendar-check"></i>
+                                                <span x-text="new Date(entry.date).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})"></span>
+                                                <span style="color:#94a3b8;font-weight:normal;" x-text="'· ' + (entry.intervalLabel||'')"></span>
+                                            </div>
+                                            <template x-if="entry.nextDueDate && getParasiticStatus(entry.nextDueDate)">
+                                                <span :style="`background:${getParasiticStatus(entry.nextDueDate).bg};color:${getParasiticStatus(entry.nextDueDate).color};border:1px solid ${getParasiticStatus(entry.nextDueDate).border};border-radius:999px;padding:1px 9px;font-size:0.72rem;font-weight:bold;`"
+                                                      x-text="getParasiticStatus(entry.nextDueDate).label"></span>
+                                            </template>
+                                        </div>
+                                        <div style="font-weight:bold;color:#1e293b;font-size:1rem;margin-bottom:5px;" x-text="entry.productLabel || entry.productId"></div>
+                                        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">
+                                            <template x-for="cid in entry.covers" :key="cid">
+                                                <span style="background:#e0e7ff;color:#3730a3;border-radius:999px;padding:1px 8px;font-size:0.7rem;font-weight:500;" x-text="parasiteTargets.find(t=>t.id===cid)?.short || cid"></span>
+                                            </template>
+                                            <template x-for="cid in (entry.partial||[])" :key="'p'+cid">
+                                                <span style="background:#fef3c7;color:#92400e;border-radius:999px;padding:1px 8px;font-size:0.7rem;font-weight:500;" x-text="(parasiteTargets.find(t=>t.id===cid)?.short || cid)+'*'"></span>
+                                            </template>
+                                        </div>
+                                        <div style="font-size:0.84rem;color:#475569;line-height:1.5;">
+                                            <template x-if="entry.administeredBy"><span><strong>By:</strong> <span x-text="entry.administeredBy"></span><span x-show="entry.batchNumber" x-text="' | Batch: '+entry.batchNumber"></span><br></span></template>
+                                            <template x-if="!entry.administeredBy && entry.batchNumber"><span><strong>Batch:</strong> <span x-text="entry.batchNumber"></span><br></span></template>
+                                            <template x-if="entry.notes"><span style="font-style:italic;color:#64748b;">"<span x-text="entry.notes"></span>"</span></template>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;gap:10px;flex-shrink:0;align-items:flex-start;">
+                                        <template x-if="entry.nextDueDate">
+                                            <button @click="addParasiticReminder(entry)" style="background:none;border:none;color:#6366f1;cursor:pointer;" title="Add recurring reminder to calendar"><i class="fa-regular fa-calendar-plus"></i></button>
+                                        </template>
+                                        <button @click="openAntiparasiticForm(entry)" style="background:none;border:none;color:#64748b;cursor:pointer;" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                        <button @click="deleteAntiparasitic(entry.id)" style="background:none;border:none;color:#ef4444;cursor:pointer;" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+                            </template>
+                            <div x-show="sortedAntiparasiticLog().length === 0" style="padding:20px;text-align:center;color:#94a3b8;font-style:italic;">
+                                No antiparasitic products logged yet.
+                            </div>
+                        </div>
+                
+                        <!-- ADD / EDIT FORM -->
+                        <div x-show="showAntiparasiticForm" x-transition>
+                            <div class="form-panel">
+                                <h4 style="margin-top:0;color:#16325F;font-size:0.95rem;border-bottom:1px solid #eee;padding-bottom:8px;"
+                                    x-text="editingAntiparasiticId ? 'Edit Antiparasitic Record' : 'Log Antiparasitic Product'"></h4>
+                
+                                <div class="grid-cols-2" style="align-items:end;">
+                                    <div>
+                                        <label class="form-label">Date Given</label>
+                                        <input type="date" x-model="newAntiparasitic.date" @change="_refreshParasiticDue()" class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Product</label>
+                                        <select x-model="newAntiparasitic.productId" @change="onProductSelected($event.target.value)" class="form-select">
+                                            <option value="" disabled>Select product…</option>
+                                            <optgroup label="⭐ Broad-spectrum combinations">
+                                                <template x-for="p in productOptions.broad" :key="p.id"><option :value="p.id" x-text="p.brand"></option></template>
+                                            </optgroup>
+                                            <optgroup label="Flea / tick only">
+                                                <template x-for="p in productOptions.ecto" :key="p.id"><option :value="p.id" x-text="p.brand"></option></template>
+                                            </optgroup>
+                                            <optgroup label="Wormers / heartworm only">
+                                                <template x-for="p in productOptions.endo" :key="p.id"><option :value="p.id" x-text="p.brand"></option></template>
+                                            </optgroup>
+                                            <optgroup label="Custom"><option value="other">Other / Custom product</option></optgroup>
+                                        </select>
+                                    </div>
+                
+                                    <div x-show="newAntiparasitic.productId === 'other'" x-cloak>
+                                        <label class="form-label">Custom Name</label>
+                                        <input type="text" x-model="newAntiparasitic.customName" placeholder="e.g., Moxiclear" class="form-input">
+                                    </div>
+                
+                                    <div>
+                                        <label class="form-label">Repeat Every</label>
+                                        <select x-model.number="newAntiparasitic.intervalDays"
+                                                @change="newAntiparasitic.intervalLabel = ({30:'Monthly',60:'2-monthly',84:'12-weekly',91:'3-monthly',182:'6-monthly',240:'7–8 monthly',365:'Annual'}[newAntiparasitic.intervalDays] || 'Custom'); _refreshParasiticDue()"
+                                                class="form-select">
+                                            <option :value="30">Monthly</option>
+                                            <option :value="60">2-monthly</option>
+                                            <option :value="84">12-weekly</option>
+                                            <option :value="91">3-monthly</option>
+                                            <option :value="182">6-monthly</option>
+                                            <option :value="240">7–8 monthly (collar)</option>
+                                            <option :value="365">Annual</option>
+                                        </select>
+                                    </div>
+                
+                                    <div>
+                                        <label class="form-label">Next Due</label>
+                                        <input type="date" x-model="newAntiparasitic.nextDueDate" class="form-input">
+                                    </div>
+                                </div>
+                
+                                <!-- Formulary coverage chips -->
+                                <template x-if="newAntiparasitic.productId && newAntiparasitic.productId !== 'other'">
+                                    <div style="margin-top:10px;">
+                                        <label class="form-label">Covers</label>
+                                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+                                            <template x-for="cid in newAntiparasitic.covers" :key="cid">
+                                                <span style="background:#e0e7ff;color:#3730a3;border-radius:999px;padding:2px 10px;font-size:0.75rem;font-weight:500;" x-text="parasiteTargets.find(t=>t.id===cid)?.label || cid"></span>
+                                            </template>
+                                            <template x-for="cid in newAntiparasitic.partial" :key="'p'+cid">
+                                                <span style="background:#fef3c7;color:#92400e;border-radius:999px;padding:2px 10px;font-size:0.75rem;font-weight:500;" x-text="(parasiteTargets.find(t=>t.id===cid)?.label || cid) + ' (partial)'"></span>
+                                            </template>
+                                        </div>
+                                        <div x-show="selectedProductEntry?.note" style="font-size:0.73rem;color:#64748b;margin-top:6px;font-style:italic;" x-text="selectedProductEntry?.note"></div>
+                                    </div>
+                                </template>
+                
+                                <!-- Custom coverage selector -->
+                                <template x-if="newAntiparasitic.productId === 'other'">
+                                    <div style="margin-top:10px;">
+                                        <label class="form-label">Select what this product covers</label>
+                                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+                                            <template x-for="t in parasiteTargets" :key="t.id">
+                                                <label :style="`display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:3px 10px;font-size:0.76rem;cursor:pointer;${newAntiparasitic.customCovers.includes(t.id)?'background:#e0e7ff;color:#3730a3;border-color:#a5b4fc;':'background:#fff;color:#64748b;border-color:#e2e8f0;'}`">
+                                                    <input type="checkbox" :value="t.id" x-model="newAntiparasitic.customCovers" style="display:none;">
+                                                    <span x-text="t.label"></span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                
+                                <div class="grid-cols-2" style="margin-top:10px;">
+                                    <div>
+                                        <label class="form-label">Batch / Lot (optional)</label>
+                                        <input type="text" x-model="newAntiparasitic.batchNumber" class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Administered By (optional)</label>
+                                        <input type="text" x-model="newAntiparasitic.administeredBy" placeholder="Clinic / owner" class="form-input">
+                                    </div>
+                                </div>
+                                <div style="margin-top:10px;">
+                                    <label class="form-label">Notes</label>
+                                    <textarea x-model="newAntiparasitic.notes" rows="2" class="form-input" placeholder="Reactions, advice…"></textarea>
+                                </div>
+                
+                                <div style="margin-top:12px;">
+                                    <button @click="saveAntiparasitic()" type="button" class="btn-add-blue"><i class="fa-solid fa-plus"></i> Save Record</button>
+                                    <button @click="showAntiparasiticForm = false" type="button" class="btn-cancel" style="margin-bottom:12px;"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
                                         <!-- ******************************** -->
                                         <!-- SRR CHART and Analytics          -->
                                         <!-- ******************************** -->

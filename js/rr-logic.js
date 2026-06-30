@@ -1058,12 +1058,15 @@ savePriorities() {
             p.parasitePriorities = draft.priorities.slice();
             this.saveToStorage('vch_patients', this.patients);
         }
+        this.showPrioritiesModal = false;
     } else {
         this.editingPatient.parasiteRegion     = draft.region;
         this.editingPatient.parasiteTravel     = draft.travel;
         this.editingPatient.parasitePriorities = draft.priorities.slice();
+        this.showPrioritiesModal = false;
+        // Reached from the onboarding wizard → finalise the new patient now.
+        if (this.prioritiesContext === 'onboarding') this.saveOnboardedPatient();
     }
-    this.showPrioritiesModal = false;
 },
 
 // ---- Recurring calendar reminders (RRULE) ----
@@ -1173,7 +1176,51 @@ exportAllParasiticReminders() {
     this._downloadIcs(this._buildIcsString(lines),
         `${patientName.replace(/\s+/g, '-')}-All-Antiparasitic-Reminders.ics`);
 },
+// Horizontal coverage timeline — one row per priority parasite, each a set of
+// covered intervals positioned as % across a fixed look-back window.
+coverageTimeline() {
+    const now   = new Date(); now.setHours(0, 0, 0, 0);
+    const start = new Date(now); start.setDate(start.getDate() - 365);
+    const end   = new Date(now); end.setDate(end.getDate() + 45);   // margin to show next-due edge
+    const span  = end - start;
+    const pct   = (d) => Math.max(0, Math.min(100, ((new Date(d) - start) / span) * 100));
 
+    const coverage   = this.activeParasiticCoverage();
+    const priorities = this.getParasitePriorities();
+    const logs = this.antiparasiticLog
+        .filter(a => a.patientId === this.activePatientId)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const rows = priorities.map(pid => {
+        const target = PARASITE_TARGETS.find(t => t.id === pid);
+        const segments = logs
+            .filter(e => (e.covers || []).includes(pid) || (e.partial || []).includes(pid))
+            .map(e => {
+                const s = new Date(e.date);
+                const f = e.nextDueDate
+                    ? new Date(e.nextDueDate)
+                    : new Date(new Date(e.date).getTime() + (e.intervalDays || 30) * 86400000);
+                const left = pct(s);
+                return {
+                    left,
+                    width: Math.max(1.2, pct(f) - left),
+                    color: this.antiparasiticFormulary[e.productId]?.color || '#64748b',
+                    partial: (e.partial || []).includes(pid) && !(e.covers || []).includes(pid),
+                    label: `${e.productLabel || e.productId}: ${e.date} → ${e.nextDueDate || '—'}`
+                };
+            })
+            .filter(seg => seg.left < 100 && (seg.left + seg.width) > 0);
+
+        return { id: pid, short: target?.short || pid, cardiac: !!target?.cardiac, covered: !!coverage[pid], segments };
+    });
+
+    return {
+        rows,
+        todayPct: pct(now),
+        startLabel: start.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }),
+        endLabel:   end.toLocaleDateString('en-GB',   { month: 'short', year: '2-digit' })
+    };
+},
 
 
 
