@@ -310,6 +310,31 @@ newMed: {
         // State for the Merge UI
         showMergeTools: false,
         mergeTargetId: '',
+        
+        // ===================== VIEW NAVIGATION (activeView) =====================
+activeView: 'count',          // count | trends | meds | wellness | data
+
+navItems: [
+    { id: 'count',    label: 'Count',    icon: 'fa-lungs' },
+    { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line' },
+    { id: 'meds',     label: 'Meds',     icon: 'fa-pills' },
+    { id: 'wellness', label: 'Wellness', icon: 'fa-heart-pulse' },
+    { id: 'data',     label: 'Data',     icon: 'fa-database' }
+],
+
+isView(v) { return this.activeView === v; },
+
+get currentViewLabel() {
+    return (this.navItems.find(n => n.id === this.activeView) || {}).label || '';
+},
+
+setView(v) {
+    const sameTab = this.activeView === v;
+    this.activeView = v;
+    try { localStorage.setItem('vch_activeView', v); } catch (e) {}
+    // Tapping the active tab again scrolls back to top; switching jumps to top
+    window.scrollTo({ top: 0, behavior: sameTab ? 'smooth' : 'auto' });
+},
 
 
 // Generate robust UUID (Fallback for older browsers just in case)
@@ -410,6 +435,17 @@ init() {
                 .slice(0, 16);
             this.manualSrrDate = localIso;
         }
+    });
+    
+    // Restore last-used view
+    try {
+        const savedView = localStorage.getItem('vch_activeView');
+        if (savedView) this.activeView = savedView;
+    } catch (e) {}
+    
+    // Charts only size correctly once their canvas becomes visible (x-show toggles display:none)
+    this.$watch('activeView', () => {
+        this.$nextTick(() => { this.renderChart(); this.renderMedChart(); this.renderWeightChart(); });
     });
     
     // UX-1: Warn user if they try to navigate away with unsaved form state open

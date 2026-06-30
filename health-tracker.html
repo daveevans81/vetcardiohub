@@ -191,7 +191,59 @@
 
 <div class="content">
 
-    <div class="rr-dashboard" x-data="rrTracker" @disclaimer-trigger.window="forceShowDisclaimer(); $nextTick(() => { document.getElementById($event.detail.targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); })">       
+    <div class="rr-dashboard" x-data="rrTracker" @disclaimer-trigger.window="forceShowDisclaimer(); $nextTick(() => { document.getElementById($event.detail.targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); })"> 
+    
+    
+    <!-- ******************************** -->
+    <!-- VIEW NAVIGATION (activeView)     -->
+    <!-- ******************************** -->
+
+    <!-- Mobile: fixed bottom tab bar -->
+    <nav class="vch-bottomnav" role="navigation" aria-label="Primary sections">
+        <template x-for="item in navItems" :key="item.id">
+            <button type="button"
+                    class="vch-bottomnav__btn"
+                    :class="{ 'is-active': isView(item.id) }"
+                    :aria-current="isView(item.id) ? 'page' : null"
+                    @click="setView(item.id)">
+                <i class="fa-solid" :class="item.icon"></i>
+                <span x-text="item.label"></span>
+            </button>
+        </template>
+    </nav>
+    <nav class="vch-sidebar" aria-label="Primary sections">
+        <div class="vch-sidebar__brand">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>VetCardioHub</span>
+        </div>
+
+        <div class="vch-sidebar__patient" x-show="activePatientProfile" x-cloak>
+            <div class="vch-sidebar__petname" x-text="activePatientProfile?.name || 'No patient'"></div>
+            <div class="vch-sidebar__petmeta">
+                <span x-text="computedAgeText"></span>
+                <template x-if="primaryCardiacDiagnosis && primaryCardiacDiagnosis !== 'N/A'">
+                    <span><span> · </span><span x-text="primaryCardiacDiagnosis"></span></span>
+                </template>
+            </div>
+        </div>
+
+        <div class="vch-sidebar__nav">
+            <template x-for="item in navItems" :key="item.id">
+                <button type="button"
+                        class="vch-sidebar__btn"
+                        :class="{ 'is-active': isView(item.id) }"
+                        :aria-current="isView(item.id) ? 'page' : null"
+                        @click="setView(item.id)">
+                    <i class="fa-solid" :class="item.icon"></i>
+                    <span x-text="item.label"></span>
+                </button>
+            </template>
+        </div>
+    </nav>
+
+
+    
+          
         <header class="hero-header card">
         
             <!-- Collapsed mini-title: always visible -->
@@ -993,7 +1045,7 @@
                                 <!-- ******************************** -->
                                 
             <template x-if="activePatientProfile?.modules?.srr">
-                <div>
+                <div x-show="isView('count')">
                     <div x-show="!isCounting" class="summary-box">
                         <h2><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Sleeping Respiratory Rate Tracker</h2>
                         <p>Ensure your pet is fully resting or sleeping. 
@@ -1048,7 +1100,7 @@
             
                 <template x-if="activePatientProfile?.modules?.srr">
                 
-                    <div x-show="finalRate !== null && !isCounting" x-cloak>
+                    <div x-show="finalRate !== null && !isCounting && isView('count')" x-cloak>
                         <div class="summary-box" style="border: 1px solid #cbd5e1;">
                             <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
                             
@@ -1114,7 +1166,7 @@
                                         <!-- SRR LOG history                  -->
                                         <!-- ******************************** -->
                     <template x-if="activePatientProfile?.modules?.srr">            
-                        <div class="paginatedHistory" x-show="patients.length > 0" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
+                        <div class="paginatedHistory" x-show="patients.length > 0 && isView('count')" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
                 
                             <div class="mb-15">
                                 <button @click="showLog = !showLog" type="button" class="log-accordion-header">
@@ -1249,7 +1301,7 @@
                     <!-- QUALITY OF LIFE & SYMPTOMS       -->
                     <!-- ******************************** -->
                 <template x-if="activePatientProfile?.modules?.activityLog || activePatientProfile?.modules?.coughLog">
-                    <div id="symptomSection" class="module-card" x-show="patients.length > 0" x-cloak>
+                    <div id="symptomSection" class="module-card" x-show="patients.length > 0 && isView('wellness')" x-cloak>
                         
                         <div style="margin-bottom: 15px;">
                             <button @click="showSymptomLog = !showSymptomLog" :aria-expanded="showSymptomLog.toString()" type="button" class="btn-accordion">
@@ -1428,7 +1480,7 @@
                                         <!-- Medication History               -->
                                         <!-- ******************************** -->
                  <template x-if="activePatientProfile?.modules?.medications"> 
-                    <div class="module-card" x-show="patients.length > 0" x-cloak>
+                    <div class="module-card" x-show="patients.length > 0 && isView('meds')" x-cloak>
                         
                         <div style="margin-bottom: 15px;">
                             <button @click="showMedLog = !showMedLog" :aria-expanded="showMedLog.toString()" type="button" class="btn-accordion">
@@ -1551,7 +1603,7 @@
                                         <!-- DIAGNOSIS SECTION            -->
                                         <!-- ******************************** -->
                  <template x-if="activePatientProfile?.modules?.acvimStaging">  
-                     <div class="module-card" x-show="patients.length > 0" x-cloak>
+                     <div class="module-card" x-show="patients.length > 0 && isView('meds')" x-cloak>
                         
                         <div style="margin-bottom: 15px;">
                             <button @click="showDiagnosisLog = !showDiagnosisLog" :aria-expanded="showDiagnosisLog.toString()" type="button" class="btn-accordion">
@@ -1723,7 +1775,7 @@
                                         <!-- WEIGHT  SECTION                  -->
                                         <!-- ******************************** -->                
                 <template x-if="activePatientProfile?.modules?.weightDiet">
-                    <div class="module-card" x-show="patients.length > 0" x-cloak>
+                    <div class="module-card" x-show="patients.length > 0 && isView('wellness')" x-cloak>
                 
                         <div style="margin-bottom: 15px;">
                             <button @click="showWeightLogPanel = !showWeightLogPanel"
@@ -1901,7 +1953,7 @@
                                         <!-- SYNCOPE SECTION                  -->
                                         <!-- ******************************** -->
                 <template x-if="activePatientProfile?.modules?.syncopeLog">                        
-                    <div class="module-card" x-show="patients.length > 0" x-cloak>
+                    <div class="module-card" x-show="patients.length > 0 && isView('wellness')" x-cloak>
                         
                         <div style="margin-bottom: 15px;">
                             <button @click="showSyncopeLog = !showSyncopeLog" :aria-expanded="showSyncopeLog.toString()" type="button" class="btn-accordion">
@@ -2043,7 +2095,7 @@
                                         <!-- VACCINATION SECTION              -->
                                         <!-- ******************************** -->            
                 <template x-if="activePatientProfile?.modules?.vaccinations">
-                    <div class="module-card" x-show="patients.length > 0" x-cloak>
+                    <div class="module-card" x-show="patients.length > 0 && isView('wellness')" x-cloak>
                 
                         <div style="margin-bottom: 15px;">
                             <button @click="showVaccinationLogPanel = !showVaccinationLogPanel"
@@ -2462,7 +2514,7 @@
                 <!-- ANTIPARASITIC SECTION            -->
                 <!-- ******************************** -->
                 <template x-if="activePatientProfile?.modules?.antiparasitics">
-                    <div class="module-card" x-show="patients.length > 0" x-cloak>
+                    <div class="module-card" x-show="patients.length > 0 && isView('wellness')" x-cloak>
                 
                         <!-- Accordion header + gap-alert badge -->
                         <div style="margin-bottom: 15px;">
@@ -2721,7 +2773,7 @@
                                         <!-- ******************************** -->
                                         <!-- SRR CHART and Analytics          -->
                                         <!-- ******************************** -->
-                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && isView('trends')" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                         <button @click="showAnalytics = !showAnalytics" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F; transition: background 0.15s ease;" @mouseenter="$el.style.background='#dde6f3'" @mouseleave="$el.style.background='#e8eef7'">
                             <h3 style="margin: 0;">
@@ -2830,7 +2882,7 @@
                                         <!-- MED GRAPH                        -->
                                         <!-- ******************************** -->
                 <template x-if="activePatientProfile?.modules?.medications">                                 
-                    <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                    <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && isView('trends')" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
                         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                             <button @click="showMedGraph = !showMedGraph" type="button" style="
                                 width: 100%;
@@ -2895,7 +2947,7 @@
                     <!-- ******************************************** -->
                     
                     <template x-if="activePatientProfile?.modules?.acvimStaging">
-                        <div x-show="activePathway" 
+                        <div x-show="activePathway && isView('trends')"
                              x-cloak
                              x-data="{ isExpanded: false }"
                              class="module-card summary-box" 
@@ -2930,7 +2982,7 @@
                     <!-- MURMUR GRADE PROGRESSION CHART - controlled by same template as ACVIM              -->
                     <!-- ******************************************** -->
     
-                        <div x-show="murmurProgression.length > 0"
+                        <div x-show="murmurProgression.length > 0 && isView('trends')"
                              x-cloak
                              x-data="{ murmurExpanded: false }"
                              class="module-card summary-box"
@@ -2991,7 +3043,7 @@
                                         <!-- ******************************** -->
                     
 
-                    <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 10px;" x-cloak>
+                    <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && isView('data')" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 10px;" x-cloak>
 
                         <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Vet Export</h3>
                         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px;">
@@ -3149,7 +3201,7 @@
                                         <!-- EXPORT IMPORT SECTION            -->
                                         <!-- ******************************** -->
                     
-                    <div class="summary-box" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
+                    <div class="summary-box" x-show="isView('data')" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
                         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                             <button @click="showImportExport = !showImportExport" type="button" style="
                                 width: 100%;
