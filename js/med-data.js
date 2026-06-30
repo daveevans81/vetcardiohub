@@ -151,20 +151,21 @@ const VACCINE_CATALOGUE = {
    ============================================================================ */
 
 const PARASITE_TARGETS = [
-    { id: 'fleas',     label: 'Fleas',                short: 'Fleas', category: 'ecto',            cardiac: false },
-    { id: 'ticks',     label: 'Ticks',                short: 'Ticks', category: 'ecto',            cardiac: false,
+    { id: 'fleas',     label: 'Fleas',                 short: 'Fleas', category: 'ecto',            cardiac: false, glossaryKey: 'parasite_fleas',
+      note: '' },
+    { id: 'ticks',     label: 'Ticks',                 short: 'Ticks', category: 'ecto',            cardiac: false, glossaryKey: 'parasite_ticks',
       note: 'Vector for Lyme, babesiosis, ehrlichiosis, anaplasmosis.' },
-    { id: 'roundworm', label: 'Roundworm (ascarids)', short: 'Round', category: 'endo',            cardiac: false,
+    { id: 'roundworm', label: 'Roundworm (ascarids)',  short: 'Round', category: 'endo',            cardiac: false, glossaryKey: 'parasite_roundworm',
       note: 'Zoonotic (Toxocara).' },
-    { id: 'hookworm',  label: 'Hookworm',             short: 'Hook',  category: 'endo',            cardiac: false,
+    { id: 'hookworm',  label: 'Hookworm',              short: 'Hook',  category: 'endo',            cardiac: false, glossaryKey: 'parasite_hookworm',
       note: 'Zoonotic.' },
-    { id: 'whipworm',  label: 'Whipworm',             short: 'Whip',  category: 'endo',            cardiac: false },
-    { id: 'tapeworm',  label: 'Tapeworm',             short: 'Tape',  category: 'endo',            cardiac: false },
-    { id: 'lungworm',  label: 'Lungworm (A. vasorum)', short: 'Lung', category: 'cardiopulmonary', cardiac: true,
+    { id: 'whipworm',  label: 'Whipworm',              short: 'Whip',  category: 'endo',            cardiac: false, glossaryKey: 'parasite_whipworm' },
+    { id: 'tapeworm',  label: 'Tapeworm',              short: 'Tape',  category: 'endo',            cardiac: false, glossaryKey: 'parasite_tapeworm' },
+    { id: 'lungworm',  label: 'Lungworm (A. vasorum)', short: 'Lung',  category: 'cardiopulmonary', cardiac: true,  glossaryKey: 'lungworm_av',
       note: 'Raises respiratory rate & cough — can mimic or mask cardiac decline.' },
-    { id: 'heartworm', label: 'Heartworm (D. immitis)', short: 'Heart', category: 'cardiopulmonary', cardiac: true,
+    { id: 'heartworm', label: 'Heartworm (D. immitis)', short: 'Heart', category: 'cardiopulmonary', cardiac: true, glossaryKey: 'heartworm_dirofilaria',
       note: 'Pulmonary hypertension & right-heart disease. Endemic in mainland Europe & US, not the UK.' },
-    { id: 'mites',     label: 'Mites (ear / mange)',  short: 'Mites', category: 'ecto',            cardiac: false }
+    { id: 'mites',     label: 'Mites (ear / mange)',   short: 'Mites', category: 'ecto',            cardiac: false, glossaryKey: 'parasite_mites' }
 ];
 
 const PARASITE_REGION_DEFAULTS = {
@@ -293,6 +294,15 @@ const ANTIPARASITIC_FORMULARY = {
         prescription: true, regions: ['uk', 'europe', 'us'], color: '#f59e0b',
         note: 'Single annual injection — flea & tick only.'
     },
+    bravecto_truno: {
+    id: 'bravecto_truno', brand: 'Bravecto TriUNO', generic: 'Fluralaner + Moxidectin + Pyrantel',
+    species: 'dog', form: 'oral', group: 'broad',
+    covers: ['fleas', 'ticks', 'roundworm', 'hookworm', 'whipworm', 'heartworm'], partial: [],
+    intervalDays: 84, intervalLabel: '12-weekly (ticks/fleas); monthly (heartworm/worm)',
+    prescription: true,
+    regions: ['uk', 'europe', 'us'], color: '#6366f1',
+    note: 'Mixed interval product — 12-week ectoparasite cover, monthly macrocyclic lactone dose for heartworm/worm prevention. No A. vasorum lungworm label claim.'
+},
     simparica: {
         id: 'simparica', brand: 'Simparica', generic: 'Sarolaner',
         species: 'dog', form: 'oral', group: 'ecto',
@@ -384,6 +394,16 @@ const ANTIPARASITIC_FORMULARY = {
         intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
         regions: ['us'], color: '#10b981', note: 'Heartworm preventive with intestinal cover. No flea/tick.'
     },
+    
+    profender: {
+    id: 'profender', brand: 'Profender', generic: 'Emodepside + Praziquantel',
+    species: 'cat', form: 'spot-on', group: 'endo',
+    covers: ['roundworm', 'hookworm', 'tapeworm'], partial: [],
+    intervalDays: 90, intervalLabel: 'As advised / 3-monthly',
+    prescription: true,
+    regions: ['uk', 'europe', 'us'], color: '#10b981',
+    note: 'Feline topical endoparasiticide. No flea, tick, or heartworm cover. ⚠ Pregnant women should avoid skin contact — emodepside may impair fetal development.'
+},
 
     /* ---- CUSTOM ---- */
     other: {

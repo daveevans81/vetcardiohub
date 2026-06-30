@@ -38,7 +38,7 @@ showProgressionBanner: false,
         showLog: false,
         showMedGraph: true,
         showAnalytics: true,
-        srrUseRelationalTime: false,
+        srrUseRelationalTime: true,
         
         patients: [],    // Array of patient demographic objects
         weightLog: [],   // Array of weight entries over time
@@ -1830,45 +1830,9 @@ saveConcurrentDiagnosis() {
             }
 
             this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+            this.checkProgressionTrigger(entryToSave.acvimStage);
         },
-                
-saveDiagnosis() {
-    if (!this.newDiagnosis.diagnosis || this.newDiagnosis.diagnosis.trim() === '') {
-        alert("Primary Cardiac Diagnosis is required.");
-        return;
-    }
-
-    const entryToSave = {
-        id: this.editingDiagnosisId || crypto.randomUUID(),
-        patientId: this.activePatientId, // CRITICAL BUG FIX
-        date: this.newDiagnosis.date,
-        diagnosis: this.newDiagnosis.diagnosis,
-        customDiagnosis: this.newDiagnosis.customDiagnosis, // Save the new field
-        murmurGrade: this.newDiagnosis.murmurGrade,         // Save the new field
-        acvimStage: this.newDiagnosis.acvimStage,
-        concurrentDiagnoses: [...(this.newDiagnosis.concurrentDiagnoses || [])],
-        notes: this.newDiagnosis.notes,
-        timestamp: Date.now()
-    };
-
-    if (this.editingDiagnosisId) {
-        const index = this.diagnosisLog.findIndex(d => d.id === this.editingDiagnosisId);
-        if (index !== -1) this.diagnosisLog[index] = entryToSave;
-    } else {
-        this.diagnosisLog.push(entryToSave);
-    }
-
-    this.diagnosisLog.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    if (this.diagnosisLog.length > 0) {
-        this.primaryCardiacDiagnosis = this.diagnosisLog[0].diagnosis;
-        this.acvimStage = this.diagnosisLog[0].acvimStage;
-    }
-
-    this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
-    this.showDiagnosisForm = false;
-    this.checkProgressionTrigger(entryToSave.acvimStage);
-},
+            
 
 checkProgressionTrigger(newStage) {
     if (!this.activePatientProfile) return;
@@ -2844,9 +2808,8 @@ saveToHistory(manualRate = null, manualDate = null) {
             let dateObj = manualDate ? new Date(manualDate) : new Date();
             if (isNaN(dateObj.getTime())) dateObj = new Date();
 
-            const isEquivocal = profile.species === 'cat' 
-                ? (rate >= 30 && rate < 40) 
-                : (rate >= 30 && rate < 40);
+            const cutoff = parseInt(profile?.customSrrCutoff) || 30;
+            const isEquivocal = rate >= cutoff && rate < cutoff + 10;
 
             const newLog = {
                 id: this.generateId(),
@@ -3094,39 +3057,26 @@ getFilteredReadings() {
 },
         
         
-getFilteredMedications() {
-    if (!this.medLedger || this.medLedger.length === 0) return [];
-    const { startDate, endDate } = this.getDateRange();
-    
-    return this.medLedger.filter(med => {
-        if (!startDate) return true;
-        const medDate = this.parseDateSafe(med.eventDate); // Fixed property name
-        return medDate >= startDate && medDate <= endDate;
-    });
-},
-        
-        
         // --- DATA MANAGEMENT ---
         
 resetData() {
-            if (window.confirm("CRITICAL WARNING: This action permanently clears ALL local data. Proceed?")) {
-                // ... your storage clearing logic ...
-                
-                // Native destroy calls
-                const rrrChart = Chart.getChart(this.$refs.rrrChartCanvas);
-                if (rrrChart) rrrChart.destroy();
-                
-                const medChart = Chart.getChart(this.$refs.medChartCanvas);
-                if (medChart) medChart.destroy();
-                
-                alert("Database completely flushed.");
-            }
-        },
-        
-        get filteredStats() {
-    const data = this.getFilteredReadings();
-    if (data.length < 2) return null;
-    return this.calculateStats(data);
+    if (!window.confirm("CRITICAL WARNING: This permanently clears ALL local data for ALL patients. Proceed?")) return;
+
+    const keys = ['vch_patients','vch_weightLog','vch_srrHistory','vch_medLedger',
+                  'vch_diagnosisLog','vch_syncopeLog','vch_coughLog','vch_activityLog',
+                  'vch_vaccinationLog','vch_antiparasiticLog'];
+    keys.forEach(k => localStorage.removeItem(k));
+
+    this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
+    this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.activityLog = [];
+    this.vaccinationLog = []; this.antiparasiticLog = [];
+    this.activePatientId = null;
+
+    [this.$refs.rrrChartCanvas, this.$refs.medChartCanvas, this.$refs.weightChartCanvas]
+        .forEach(c => { const ch = c && Chart.getChart(c); if (ch) ch.destroy(); });
+
+    alert("Database completely flushed.");
+    this.startNewPatientOnboarding();
 },
         
    calculateStats(data) {
@@ -5060,10 +5010,10 @@ importCompleteBackup(event) {
                     this.patients = data.vch_patients;
                     this.srrHistory = data.vch_srrHistory;
                     this.medLedger = data.vch_medLedger;
-                    this.diagnosisLog = data.vch_diagnosisLog;
-                    this.syncopeLog = data.vch_syncopeLog;
-                    this.coughLog = data.vch_coughLog;
-                    this.activityLog = data.vch_activityLog;
+                    this.diagnosisLog = data.vch_diagnosisLog || [];
+                    this.syncopeLog = data.vch_syncopeLog || [];
+                    this.coughLog = data.vch_coughLog || [];
+                    this.activityLog = data.vch_activityLog || [];
                     this.weightLog = data.vch_weightLog || [];
                     this.vaccinationLog = data.vch_vaccinationLog || [];
                     this.antiparasiticLog = data.vch_antiparasiticLog || [];

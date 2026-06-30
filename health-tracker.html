@@ -685,7 +685,7 @@
             
                         <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;cursor:pointer;font-size:0.85rem;color:#334155;">
                             <input type="checkbox" x-model="prioritiesDraft.travel" style="width:16px;height:16px;accent-color:#0f766e;">
-                            This pet travels abroad (adds travel-relevant cover, e.g. heartworm)
+                            This pet travels abroad (adds travel-relevant cover, e.g. heartworm<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('heartworm_dirofilaria')"></i>)
                         </label>
             
                         <label class="form-label">Coverage priorities (tap to toggle)</label>
@@ -697,6 +697,12 @@
                                         <div style="font-size:0.86rem;font-weight:600;color:#1e293b;display:flex;align-items:center;gap:6px;">
                                             <span x-text="t.label"></span>
                                             <i x-show="t.cardiac" class="fa-solid fa-heart-pulse" style="color:#dc2626;font-size:0.72rem;" title="Cardiac-relevant"></i>
+                                            <i x-show="t.glossaryKey"
+                                               class="fa-solid fa-circle-info"
+                                               style="color:#94a3b8;cursor:pointer;transition:color 0.2s;"
+                                               onmouseover="this.style.color='#0ea5e9'"
+                                               onmouseout="this.style.color='#94a3b8'"
+                                               @click.stop="openGlossary(t.glossaryKey)"></i>
                                         </div>
                                         <div x-show="t.note" style="font-size:0.72rem;color:#94a3b8;margin-top:1px;" x-text="t.note"></div>
                                     </div>
@@ -705,7 +711,7 @@
                         </div>
             
                         <div style="font-size:0.72rem;color:#94a3b8;margin-top:12px;">
-                            <i class="fa-solid fa-circle-info"></i> More products isn't always better — match cover to this pet's lifestyle and your vet's local risk advice.
+                            <i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('parasite_coverage_principle')"></i> More products isn't always better — match cover to this pet's lifestyle and your vet's local risk advice.
                         </div>
                     </div>
                     <div style="display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid #e2e8f0;">
@@ -904,39 +910,40 @@
                         <div class="checkbox-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.srr"> SRR Monitor
-                            </label>
+                            </label><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_srr')"></i>
                             
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.medications"> Medication Ledger
-                            </label>
+                            </label><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_medications')"></i>
                             
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.coughLog"> Cough Log
-                            </label>
+                            </label><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_cough')"></i>
                             
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.activityLog"> Activity Log
-                            </label>
+                            </label><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_activity')"></i>
+                            
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.weightDiet"> Weight and Diet Log
-                            </label>
+                            </label><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_diet_weight')"></i>
                             
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.syncopeLog"> Syncope/Collapse Diary
-                            </label>
+                            </label><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_syncope')"></i>
                                                         
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.vaccinations"> Vaccination Record
-                            </label>
+                            </label><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_vaccination')"></i>
                             
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.acvimStaging"> Diagnosis Tracker
-                            </label>
+                            </label><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_diagnosis')"></i>
                             
                             <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.antiparasitics"
                                        @change="editingPatient.modules.antiparasitics ? openPrioritiesModal('edit') : null"> Parasite Protection
-                            </label>
+                            </label><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_antiparasitics')"></i>
                         </div>
                     </div>
                 </div>
@@ -1548,9 +1555,9 @@
                         
                         <div style="margin-bottom: 15px;">
                             <button @click="showDiagnosisLog = !showDiagnosisLog" :aria-expanded="showDiagnosisLog.toString()" type="button" class="btn-accordion">
-                                <h3><i class="fa-solid fa-stethoscope"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Diagnosis & Clinical History' : 'Diagnosis & Clinical History'"></span></h3> 
+                                <h3><i class="fa-solid fa-stethoscope"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Diagnosis & Clinical History' : 'Diagnosis & Clinical History'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('module_diagnosis')"></i></h3> 
                                 <i class="fa-solid" :class="showDiagnosisLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                            </button>
+                            </button> 
                         </div>
                     
                         <div x-show="showDiagnosisLog" x-transition>
