@@ -83,6 +83,27 @@ showProgressionBanner: false,
         timerInterval: null,
         hasSavedCurrentCount: false,
 
+
+
+
+
+// ── Vet Export panel state ──
+vetExportTimeScale: 'all',
+vetExportCustomStart: '',
+vetExportCustomEnd: '',
+vetExportModules: {
+    srr: true,
+    medications: true,
+    coughLog: true,
+    activityLog: true,
+    weightDiet: true,
+    syncopeLog: true,
+    acvimStaging: true,
+    vaccinations: true,
+    antiparasitics: true
+},
+
+
 // --- SYMPTOM TRACKING STATE ---
         showSymptomLog: false,
         coughLog: [],
@@ -796,6 +817,8 @@ get hasAnyDataForActivePet() {
             };
             return labels[this.timeScale] || 'Filtered Range';
         },
+        
+        
         
         
         // ===================== ANTIPARASITIC LOGIC =====================
@@ -2960,6 +2983,78 @@ get clinicalInterpretation() {
             }
             return { startDate, endDate };
         },
+        // ── Vet Export date range — mirrors getDateRange() but reads vetExportTimeScale ──
+getVetExportDateRange() {
+    const now = new Date();
+    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    let startDate = null;
+    let endDate = endOfToday;
+
+    const dayOfWeek = startOfToday.getDay();
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+    switch (this.vetExportTimeScale) {
+        case 'thisWeek':
+            startDate = new Date(startOfToday);
+            startDate.setDate(startDate.getDate() + daysToMonday);
+            break;
+        case 'lastWeek':
+            startDate = new Date(startOfToday);
+            startDate.setDate(startDate.getDate() + daysToMonday - 7);
+            endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 6);
+            endDate.setHours(23, 59, 59);
+            break;
+        case 'thisMonth':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            break;
+        case 'lastMonth':
+            startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+            break;
+        case '60d':
+            startDate = new Date(startOfToday.getTime() - (60 * 24 * 60 * 60 * 1000));
+            break;
+        case '90d':
+            startDate = new Date(startOfToday.getTime() - (90 * 24 * 60 * 60 * 1000));
+            break;
+        case '180d':
+            startDate = new Date(startOfToday.getTime() - (180 * 24 * 60 * 60 * 1000));
+            break;
+        case 'custom':
+            if (this.vetExportCustomStart && this.vetExportCustomEnd) {
+                const s = new Date(this.vetExportCustomStart + 'T00:00:00');
+                const e = new Date(this.vetExportCustomEnd + 'T23:59:59');
+                if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && s <= e) {
+                    startDate = s;
+                    endDate = e;
+                }
+            }
+            break;
+        case 'all':
+        default:
+            startDate = null;
+            break;
+    }
+    return { startDate, endDate };
+},
+
+get vetExportTimeScaleLabel() {
+    const labels = {
+        'thisWeek': 'This Week',
+        'lastWeek': 'Last Week',
+        'thisMonth': 'This Month',
+        'lastMonth': 'Last Month',
+        '60d': 'Last 60 Days',
+        '90d': 'Last 90 Days',
+        '180d': 'Last 6 Months',
+        'all': 'Entire Dataset',
+        'custom': 'Custom Range'
+    };
+    return labels[this.vetExportTimeScale] || 'Filtered Range';
+},
         
         // --- PAGINATION GETTERS ---
 // paginatedHistory getter
@@ -5132,7 +5227,8 @@ async generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc     = new jsPDF();
     const profile = this.activePatientProfile;
-    const { startDate, endDate } = this.getDateRange();
+    const { startDate, endDate } = this.getVetExportDateRange();
+    const mods = this.vetExportModules;
  
     const inRange = (dateStr) => {
         if (!startDate) return true;
@@ -5147,7 +5243,7 @@ async generatePDF() {
  
     doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text(`Generated: ${new Date().toLocaleDateString('en-GB')}  |  Period: ${this.timeScaleLabel}`, 14, 28);
+    doc.text(`Generated: ${new Date().toLocaleDateString('en-GB')}  |  Period: ${this.vetExportTimeScaleLabel}`, 14, 28);
     doc.text(
         `Species: ${profile.species}  |  Breed: ${profile.breed || 'N/A'}  |  Age: ${this.computedAgeText}  |  Owner: ${profile.ownerName || 'N/A'}`,
         14, 34
@@ -5223,15 +5319,21 @@ async generatePDF() {
     }
  
     // ── 3. SRR Chart ──────────────────────────────────────────────────────
-    embedCanvas(this.$refs.rrrChartCanvas, 'Sleeping Respiratory Rate (SRR) Chart');
+        if (mods.srr) {
+        embedCanvas(this.$refs.rrrChartCanvas, 'Sleeping Respiratory Rate (SRR) Chart');
+    }
  
     // ── 4. Medication Timeline Chart ──────────────────────────────────────
-    if (this.hasAnyMedData()) {
+    if (mods.medications && this.hasAnyMedData()) {
         embedCanvas(this.$refs.medChartCanvas, 'Medication Timeline');
     }
  
     // ── 5. SRR Log Table ──────────────────────────────────────────────────
-    const srrData = this.getFilteredReadings().slice().reverse(); // newest first
+    const srrData = mods.srr
+        ? this.srrHistory
+            .filter(r => r.patientId === this.activePatientId && inRange(r.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date)) // newest first
+        : [];
     if (srrData.length > 0) {
         if (Y > 240) { doc.addPage(); Y = 20; }
         sectionHeader('Sleeping Respiratory Rate Log', 14, 116, 144);
@@ -5252,40 +5354,44 @@ async generatePDF() {
         });
         Y = doc.lastAutoTable.finalY + 12;
     }
- 
+    
+     
     // ── 6. Medication Log Table ───────────────────────────────────────────
-    const medData = this.medLedger
+    if (mods.medications) {
+        const medData = this.medLedger
         .filter(m => m.patientId === this.activePatientId && inRange(m.eventDate))
         .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
  
     if (medData.length > 0) {
         if (Y > 240) { doc.addPage(); Y = 20; }
-        sectionHeader('Medication Log', 146, 64, 14);
-        doc.autoTable({
-            startY: Y,
-            head: [['Date', 'Drug', 'Action', 'Dose (mg)', 'Frequency', 'mg/kg']],
-            body: medData.map(m => {
-                const action  = this.getComputedAction(m);
-                const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
-                const mgPerKg = (!m.isStopped && m.doseMg)
-                    ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate)
-                    : null;
-                return [
-                    m.eventDate,
-                    name,
-                    action,
-                    m.doseMg != null ? `${m.doseMg} mg` : '—',
-                    m.frequency || '—',
-                    mgPerKg ? `${mgPerKg} mg/kg` : '—'
-                ];
-            }),
-            theme: 'striped',
-            headStyles: { fillColor: [146, 64, 14] },
-            columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 38 }, 2: { cellWidth: 22 }, 3: { cellWidth: 22 }, 4: { cellWidth: 22 }, 5: { cellWidth: 'auto' } },
-            styles: { fontSize: 8 }
-        });
-        Y = doc.lastAutoTable.finalY + 12;
+            sectionHeader('Medication Log', 146, 64, 14);
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', 'Drug', 'Action', 'Dose (mg)', 'Frequency', 'mg/kg']],
+                body: medData.map(m => {
+                    const action  = this.getComputedAction(m);
+                    const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+                    const mgPerKg = (!m.isStopped && m.doseMg)
+                        ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate)
+                        : null;
+                    return [
+                        m.eventDate,
+                        name,
+                        action,
+                        m.doseMg != null ? `${m.doseMg} mg` : '—',
+                        m.frequency || '—',
+                        mgPerKg ? `${mgPerKg} mg/kg` : '—'
+                    ];
+                }),
+                theme: 'striped',
+                headStyles: { fillColor: [146, 64, 14] },
+                columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 38 }, 2: { cellWidth: 22 }, 3: { cellWidth: 22 }, 4: { cellWidth: 22 }, 5: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
     }
+    
  
     // ── 7. Diagnosis & Staging Log ────────────────────────────────────────
     const diagData = this.diagnosisLog
@@ -5315,120 +5421,129 @@ async generatePDF() {
     }
  
     // ── 8. Syncope / Collapse Log ─────────────────────────────────────────
-    const syncData = this.syncopeLog
-        .filter(s => s.patientId === this.activePatientId && inRange(s.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
- 
-    if (syncData.length > 0) {
-        if (Y > 240) { doc.addPage(); Y = 20; }
-        sectionHeader('Syncope / Collapse Events', 185, 28, 28);
-        doc.autoTable({
-            startY: Y,
-            head: [['Date', 'Time', 'Type', 'Duration', 'LOC', 'Muscle Tone', 'Activity Before', 'Notes']],
-            body: syncData.map(s => [
-                s.date,
-                s.time || '—',
-                s.type || '—',
-                s.duration || '—',
-                s.loc || '—',
-                s.muscleTone || '—',
-                s.activityBefore || '—',
-                s.notes || '—'
-            ]),
-            theme: 'striped',
-            headStyles: { fillColor: [185, 28, 28] },
-            columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 14 }, 2: { cellWidth: 20 }, 3: { cellWidth: 18 }, 4: { cellWidth: 12 }, 5: { cellWidth: 20 }, 6: { cellWidth: 22 }, 7: { cellWidth: 'auto' } },
-            styles: { fontSize: 8 }
-        });
-        Y = doc.lastAutoTable.finalY + 12;
+    if (mods.syncopeLog) {
+            const syncData = this.syncopeLog
+            .filter(s => s.patientId === this.activePatientId && inRange(s.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+     
+        if (syncData.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Syncope / Collapse Events', 185, 28, 28);
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', 'Time', 'Type', 'Duration', 'LOC', 'Muscle Tone', 'Activity Before', 'Notes']],
+                body: syncData.map(s => [
+                    s.date,
+                    s.time || '—',
+                    s.type || '—',
+                    s.duration || '—',
+                    s.loc || '—',
+                    s.muscleTone || '—',
+                    s.activityBefore || '—',
+                    s.notes || '—'
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [185, 28, 28] },
+                columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 14 }, 2: { cellWidth: 20 }, 3: { cellWidth: 18 }, 4: { cellWidth: 12 }, 5: { cellWidth: 20 }, 6: { cellWidth: 22 }, 7: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
     }
  
     // ── 9. Cough Log ──────────────────────────────────────────────────────
-    const coughData = this.coughLog
-        .filter(c => c.patientId === this.activePatientId && inRange(c.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
- 
-    if (coughData.length > 0) {
-        if (Y > 240) { doc.addPage(); Y = 20; }
-        sectionHeader('Cough Log', 161, 98, 7);
-        doc.autoTable({
-            startY: Y,
-            head: [['Date', 'Severity', 'Frequency', 'Period', 'Description', 'Context', 'Notes']],
-            body: coughData.map(c => [
-                c.date,
-                c.severity || '—',
-                c.frequencyCount || '—',
-                c.frequencyPeriod || '—',
-                c.description || '—',
-                c.context || '—',
-                c.notes || '—'
-            ]),
-            theme: 'striped',
-            headStyles: { fillColor: [161, 98, 7] },
-            columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 18 }, 2: { cellWidth: 16 }, 3: { cellWidth: 14 }, 4: { cellWidth: 30 }, 5: { cellWidth: 24 }, 6: { cellWidth: 'auto' } },
-            styles: { fontSize: 8 }
-        });
-        Y = doc.lastAutoTable.finalY + 12;
+    if (mods.coughLog) {
+            const coughData = this.coughLog
+            .filter(c => c.patientId === this.activePatientId && inRange(c.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+     
+        if (coughData.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Cough Log', 161, 98, 7);
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', 'Severity', 'Frequency', 'Period', 'Description', 'Context', 'Notes']],
+                body: coughData.map(c => [
+                    c.date,
+                    c.severity || '—',
+                    c.frequencyCount || '—',
+                    c.frequencyPeriod || '—',
+                    c.description || '—',
+                    c.context || '—',
+                    c.notes || '—'
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [161, 98, 7] },
+                columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 18 }, 2: { cellWidth: 16 }, 3: { cellWidth: 14 }, 4: { cellWidth: 30 }, 5: { cellWidth: 24 }, 6: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
     }
  
     // ── 10. Activity Log ──────────────────────────────────────────────────
-    const actData = this.activityLog
-        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
- 
-    if (actData.length > 0) {
-        if (Y > 240) { doc.addPage(); Y = 20; }
-        sectionHeader('Activity Log', 5, 150, 105);
-        doc.autoTable({
-            startY: Y,
-            head: [['Date', 'Status', 'Duration (mins)', 'Distance', 'Notes']],
-            body: actData.map(a => [
-                a.date,
-                a.status || '—',
-                a.durationMins || '—',
-                a.distance || '—',
-                a.notes || '—'
-            ]),
-            theme: 'striped',
-            headStyles: { fillColor: [5, 150, 105] },
-            columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 26 }, 2: { cellWidth: 28 }, 3: { cellWidth: 26 }, 4: { cellWidth: 'auto' } },
-            styles: { fontSize: 8 }
-        });
+    if (mods.activityLog) {
+            const actData = this.activityLog
+            .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+     
+        if (actData.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Activity Log', 5, 150, 105);
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', 'Status', 'Duration (mins)', 'Distance', 'Notes']],
+                body: actData.map(a => [
+                    a.date,
+                    a.status || '—',
+                    a.durationMins || '—',
+                    a.distance || '—',
+                    a.notes || '—'
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [5, 150, 105] },
+                columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 26 }, 2: { cellWidth: 28 }, 3: { cellWidth: 26 }, 4: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+        }
     }
  
  // ── 11. Weight Chart + Weight Log ──────────────────────────────────────
-    const weightData = this.weightLog
+    if (mods.weightDiet) {
+        const weightData = this.weightLog
         .filter(w => w.patientId === this.activePatientId && inRange(w.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if (weightData.length > 0) {
-        embedCanvas(this.$refs.weightChartCanvas, 'Weight Trend Chart');
-        if (Y > 240) { doc.addPage(); Y = 20; }
-        sectionHeader('Weight & Diet Log', 15, 118, 110);
-        const weightUnit = profile.weightUnit || 'kg';
-        doc.autoTable({
-            startY: Y,
-            head: [['Date', `Weight (${weightUnit})`, 'Appetite', 'Food / Diet', 'Portion', 'Supplements', 'Notes']],
-            body: weightData.map(w => [
-                (w.date || '').split('T')[0],
-                w.weightValue != null ? `${w.weightValue} ${weightUnit}` : '—',
-                w.appetite || '—',
-                w.foodBrand || '—',
-                w.portionSize || '—',
-                w.supplements || '—',
-                w.notes || '—'
-            ]),
-            theme: 'striped',
-            headStyles: { fillColor: [15, 118, 110] },
-            columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 20 }, 2: { cellWidth: 18 }, 3: { cellWidth: 30 }, 4: { cellWidth: 22 }, 5: { cellWidth: 22 }, 6: { cellWidth: 'auto' } },
-            styles: { fontSize: 8 }
-        });
-        Y = doc.lastAutoTable.finalY + 12;
+            embedCanvas(this.$refs.weightChartCanvas, 'Weight Trend Chart');
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Weight & Diet Log', 15, 118, 110);
+            const weightUnit = profile.weightUnit || 'kg';
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', `Weight (${weightUnit})`, 'Appetite', 'Food / Diet', 'Portion', 'Supplements', 'Notes']],
+                body: weightData.map(w => [
+                    (w.date || '').split('T')[0],
+                    w.weightValue != null ? `${w.weightValue} ${weightUnit}` : '—',
+                    w.appetite || '—',
+                    w.foodBrand || '—',
+                    w.portionSize || '—',
+                    w.supplements || '—',
+                    w.notes || '—'
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [15, 118, 110] },
+                columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 20 }, 2: { cellWidth: 18 }, 3: { cellWidth: 30 }, 4: { cellWidth: 22 }, 5: { cellWidth: 22 }, 6: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
     }
 
     // ── 12. Vaccination Log ────────────────────────────────────────────────
-    const vaccData = this.vaccinationLog
-        .filter(v => v.patientId === this.activePatientId && inRange(v.date))
+    if (mods.vaccinations) {
+        const vaccData = this.vaccinationLog
+        .filter(v => v.patientId === this.activePatientId)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if (vaccData.length > 0) {
@@ -5452,32 +5567,35 @@ async generatePDF() {
         });
         Y = doc.lastAutoTable.finalY + 12;
     }
+    }
     
         // ── 13. Antiparasitic Log ──────────────────────────────────────────────
-    const apData = this.antiparasiticLog
-        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (apData.length > 0) {
-        if (Y > 240) { doc.addPage(); Y = 20; }
-        sectionHeader('Antiparasitic Log', 15, 118, 110);
-        doc.autoTable({
-            startY: Y,
-            head: [['Date', 'Product', 'Covers', 'Schedule', 'Next Due', 'Notes']],
-            body: apData.map(a => [
-                a.date,
-                a.productLabel || a.productId || '—',
-                (a.covers || []).map(cid => PARASITE_TARGETS.find(t => t.id === cid)?.short || cid).join(', ') || '—',
-                a.intervalLabel || '—',
-                a.nextDueDate || '—',
-                a.notes || '—'
-            ]),
-            theme: 'striped',
-            headStyles: { fillColor: [15, 118, 110] },
-            columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 32 }, 2: { cellWidth: 38 }, 3: { cellWidth: 22 }, 4: { cellWidth: 20 }, 5: { cellWidth: 'auto' } },
-            styles: { fontSize: 8 }
-        });
-        Y = doc.lastAutoTable.finalY + 12;
+    if (mods.antiparasitics) {
+            const apData = this.antiparasiticLog
+            .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+        if (apData.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Antiparasitic Log', 15, 118, 110);
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', 'Product', 'Covers', 'Schedule', 'Next Due', 'Notes']],
+                body: apData.map(a => [
+                    a.date,
+                    a.productLabel || a.productId || '—',
+                    (a.covers || []).map(cid => PARASITE_TARGETS.find(t => t.id === cid)?.short || cid).join(', ') || '—',
+                    a.intervalLabel || '—',
+                    a.nextDueDate || '—',
+                    a.notes || '—'
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [15, 118, 110] },
+                columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 32 }, 2: { cellWidth: 38 }, 3: { cellWidth: 22 }, 4: { cellWidth: 20 }, 5: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
     }
 
     doc.save(`${profile.name.replace(/\s+/g, '_')}_Clinical_Report_${new Date().toISOString().split('T')[0]}.pdf`);
@@ -5490,7 +5608,8 @@ async generatePDF() {
 generateCSV() {
     if (!this.activePatientId) return;
     const profile = this.activePatientProfile;
-    const { startDate, endDate } = this.getDateRange();
+        const { startDate, endDate } = this.getVetExportDateRange();
+    const mods = this.vetExportModules;
  
     const inRange = (dateStr) => {
         if (!startDate) return true;
@@ -5506,12 +5625,14 @@ generateCSV() {
     // Report metadata preamble (not a data row — purely informational)
     csv += `${q('VetCardioHub Clinical Report')},${q(profile.name)}\n`;
     csv += `${q('Generated')},${q(new Date().toLocaleDateString('en-GB'))}\n`;
-    csv += `${q('Period')},${q(this.timeScaleLabel)}\n`;
+    csv += `${q('Period')},${q(this.vetExportTimeScaleLabel)}\n`;
     csv += `${q('Species')},${q(profile.species)}  ${q('Breed')},${q(profile.breed || '')}  ${q('Owner')},${q(profile.ownerName || '')}\n`;
     csv += '\n';
  
     // ── SRR Log ───────────────────────────────────────────────────────────
-    const srrData = this.getFilteredReadings().slice().reverse();
+    const srrData = mods.srr
+        ? this.srrHistory.filter(r => r.patientId === this.activePatientId && inRange(r.date)).sort((a, b) => new Date(a.date) - new Date(b.date))
+        : [];
     if (srrData.length > 0) {
         csv += 'SRR LOG\n';
         csv += 'Date,Time,Rate (bpm),Manual,Clinical Notes\n';
@@ -5528,7 +5649,7 @@ generateCSV() {
     }
  
     // ── Medication Log ────────────────────────────────────────────────────
-    const medData = this.medLedger
+    const medData = !mods.medications ? [] : this.medLedger
         .filter(m => m.patientId === this.activePatientId && inRange(m.eventDate))
         .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
  
@@ -5553,9 +5674,9 @@ generateCSV() {
         csv += '\n';
     }
  
-    // ── Diagnosis & Staging Log ───────────────────────────────────────────
-    const diagData = this.diagnosisLog
-        .filter(d => d.patientId === this.activePatientId && inRange(d.date))
+    // ── Diagnosis & Staging Log (always complete history) ─────────────────
+    const diagData = !mods.acvimStaging ? [] : this.diagnosisLog
+        .filter(d => d.patientId === this.activePatientId)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
  
     if (diagData.length > 0) {
@@ -5575,7 +5696,7 @@ generateCSV() {
     }
  
     // ── Syncope / Collapse Log ────────────────────────────────────────────
-    const syncData = this.syncopeLog
+        const syncData = !mods.syncopeLog ? [] : this.syncopeLog
         .filter(s => s.patientId === this.activePatientId && inRange(s.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
  
@@ -5598,7 +5719,7 @@ generateCSV() {
     }
  
     // ── Cough Log ─────────────────────────────────────────────────────────
-    const coughData = this.coughLog
+    const coughData = !mods.coughLog ? [] : this.coughLog
         .filter(c => c.patientId === this.activePatientId && inRange(c.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
  
@@ -5620,7 +5741,7 @@ generateCSV() {
     }
  
     // ── Activity Log ──────────────────────────────────────────────────────
-    const actData = this.activityLog
+    const actData = !mods.activityLog ? [] : this.activityLog
         .filter(a => a.patientId === this.activePatientId && inRange(a.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
  
@@ -5640,7 +5761,7 @@ generateCSV() {
     }
     
     // ── Weight & Diet Log ─────────────────────────────────────────────────
-    const weightDataCSV = this.weightLog
+    const weightDataCSV = !mods.weightDiet ? [] : this.weightLog
         .filter(w => w.patientId === this.activePatientId && inRange(w.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -5663,8 +5784,8 @@ generateCSV() {
     }
 
     // ── Vaccination Log ───────────────────────────────────────────────────
-    const vaccDataCSV = this.vaccinationLog
-        .filter(v => v.patientId === this.activePatientId && inRange(v.date))
+    const vaccDataCSV = !mods.vaccinations ? [] : this.vaccinationLog
+        .filter(v => v.patientId === this.activePatientId)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if (vaccDataCSV.length > 0) {
@@ -5688,7 +5809,7 @@ generateCSV() {
     }
     
         // ── Antiparasitic Log ────────────────────────────────────────────────
-    const apDataCSV = this.antiparasiticLog
+    const apDataCSV = !mods.antiparasitics ? [] : this.antiparasiticLog
         .filter(a => a.patientId === this.activePatientId && inRange(a.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -5734,7 +5855,8 @@ generateCSV() {
 _buildReportText() {
     if (!this.activePatientId) return '';
     const profile = this.activePatientProfile;
-    const { startDate, endDate } = this.getDateRange();
+    const { startDate, endDate } = this.getVetExportDateRange();
+    const mods = this.vetExportModules;
 
     const inRange = (dateStr) => {
         if (!startDate) return true;
@@ -5751,201 +5873,217 @@ _buildReportText() {
     // Report header
     out += `VETCARDIOHUB CLINICAL REPORT — ${profile.name.toUpperCase()}${nl}`;
     out += `Generated : ${new Date().toLocaleDateString('en-GB')}${nl}`;
-    out += `Period    : ${this.timeScaleLabel}${nl}`;
+    out += `Period    : ${this.vetExportTimeScaleLabel}${nl}`;
     out += `Species   : ${profile.species}  |  Breed: ${profile.breed || 'N/A'}  |  Age: ${this.computedAgeText}${nl}`;
     out += `Owner     : ${profile.ownerName || 'N/A'}${nl}`;
     out += rule('═') + nl + nl;
 
     // ── SRR Log ───────────────────────────────────────────────────────────
-    const srrData = this.getFilteredReadings().slice().reverse();
-    if (srrData.length > 0) {
-        out += `SLEEPING RESPIRATORY RATE LOG (${srrData.length} reading${srrData.length !== 1 ? 's' : ''})${nl}`;
-        out += rule() + nl;
-        srrData.forEach(r => {
-            const dateStr = new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-            const time    = r.time || new Date(r.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            out += `${dateStr}  ${time}  |  ${r.rate} bpm${r.isManual ? '  [manual]' : ''}`;
-            if (r.comment) out += `${nl}${indent}${r.comment}`;
+    if (mods.srr) {
+        const srrData = this.srrHistory
+            .filter(r => r.patientId === this.activePatientId && inRange(r.date))
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+        if (srrData.length > 0) {
+            out += `SLEEPING RESPIRATORY RATE LOG (${srrData.length} reading${srrData.length !== 1 ? 's' : ''})${nl}`;
+            out += rule() + nl;
+            srrData.forEach(r => {
+                const dateStr = new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                const time    = r.time || new Date(r.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                out += `${dateStr}  ${time}  |  ${r.rate} bpm${r.isManual ? '  [manual]' : ''}`;
+                if (r.comment) out += `${nl}${indent}${r.comment}`;
+                out += nl;
+            });
             out += nl;
-        });
-        out += nl;
+        }
     }
 
     // ── Medication Log ────────────────────────────────────────────────────
-    const medData = this.medLedger
-        .filter(m => m.patientId === this.activePatientId && inRange(m.eventDate))
-        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
-
-    if (medData.length > 0) {
-        out += `MEDICATION LOG (${medData.length} entr${medData.length !== 1 ? 'ies' : 'y'})${nl}`;
-        out += rule() + nl;
-        medData.forEach(m => {
-            const action  = this.getComputedAction(m);
-            const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
-            const mgPerKg = (!m.isStopped && m.doseMg)
-                ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate)
-                : null;
-            out += `${m.eventDate}  |  ${action.toUpperCase()}: ${name}`;
-            if (!m.isStopped && m.doseMg) out += `  ${m.doseMg}mg ${m.frequency || ''}`;
-            if (mgPerKg) out += `  (${mgPerKg} mg/kg)`;
+    if (mods.medications) {
+        const medData = this.medLedger
+            .filter(m => m.patientId === this.activePatientId && inRange(m.eventDate))
+            .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+        if (medData.length > 0) {
+            out += `MEDICATION LOG (${medData.length} entr${medData.length !== 1 ? 'ies' : 'y'})${nl}`;
+            out += rule() + nl;
+            medData.forEach(m => {
+                const action  = this.getComputedAction(m);
+                const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+                const mgPerKg = (!m.isStopped && m.doseMg) ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate) : '';
+                out += `${m.eventDate}  |  ${action}: ${name}`;
+                if (m.doseMg) out += `  |  ${m.doseMg}mg ${m.frequency || ''}`;
+                if (mgPerKg)  out += `  (${mgPerKg} mg/kg)`;
+                if (m.notes)  out += `${nl}${indent}Notes: ${m.notes}`;
+                out += nl;
+            });
             out += nl;
-        });
-        out += nl;
+        }
     }
 
-    // ── Diagnosis & Staging Log ───────────────────────────────────────────
-    const diagData = this.diagnosisLog
-        .filter(d => d.patientId === this.activePatientId && inRange(d.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (diagData.length > 0) {
-        out += `DIAGNOSIS & STAGING LOG (${diagData.length} entr${diagData.length !== 1 ? 'ies' : 'y'})${nl}`;
-        out += rule() + nl;
-        diagData.forEach(d => {
-            const name = d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || 'Unknown');
-            out += `${d.date}  |  ${name}`;
-            if (d.acvimStage  && d.acvimStage  !== 'N/A') out += `  |  Stage: ${d.acvimStage}`;
-            if (d.murmurGrade && d.murmurGrade !== 'N/A') out += `  |  Murmur: ${d.murmurGrade}`;
-            if (d.concurrentDiagnoses?.length) out += `${nl}${indent}Concurrent: ${d.concurrentDiagnoses.join(', ')}`;
-            if (d.notes) out += `${nl}${indent}Notes: ${d.notes}`;
+    // ── Diagnosis & Staging (ALWAYS full history — no date filter) ─────────
+    if (mods.acvimStaging) {
+        const diagData = this.diagnosisLog
+            .filter(d => d.patientId === this.activePatientId)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (diagData.length > 0) {
+            out += `DIAGNOSIS & STAGING LOG (${diagData.length} entr${diagData.length !== 1 ? 'ies' : 'y'}) — Complete History${nl}`;
+            out += rule() + nl;
+            diagData.forEach(d => {
+                const diagName = d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '');
+                out += `${d.date}  |  ${diagName}`;
+                if (d.acvimStage && d.acvimStage !== 'N/A') out += `  |  ACVIM: ${d.acvimStage}`;
+                if (d.murmurGrade && d.murmurGrade !== 'N/A') out += `  |  Murmur: ${d.murmurGrade}`;
+                if ((d.concurrentDiagnoses || []).length > 0) out += `${nl}${indent}Concurrent: ${d.concurrentDiagnoses.join(', ')}`;
+                if (d.notes) out += `${nl}${indent}Notes: ${d.notes}`;
+                out += nl;
+            });
             out += nl;
-        });
-        out += nl;
+        }
     }
 
     // ── Syncope / Collapse Log ────────────────────────────────────────────
-    const syncData = this.syncopeLog
-        .filter(s => s.patientId === this.activePatientId && inRange(s.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (syncData.length > 0) {
-        out += `SYNCOPE / COLLAPSE EVENTS (${syncData.length} event${syncData.length !== 1 ? 's' : ''})${nl}`;
-        out += rule() + nl;
-        syncData.forEach(s => {
-            out += `${s.date} ${s.time || ''}  |  ${s.type || 'Episode'}`;
-            if (s.duration)       out += `  |  Duration: ${s.duration}`;
-            if (s.loc)            out += `  |  LOC: ${s.loc}`;
-            if (s.muscleTone)     out += `  |  Tone: ${s.muscleTone}`;
-            if (s.activityBefore) out += `${nl}${indent}Before: ${s.activityBefore}`;
-            if (s.notes)          out += `${nl}${indent}Notes: ${s.notes}`;
+    if (mods.syncopeLog) {
+        const syncData = this.syncopeLog
+            .filter(s => s.patientId === this.activePatientId && inRange(s.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (syncData.length > 0) {
+            out += `SYNCOPE / COLLAPSE LOG (${syncData.length} event${syncData.length !== 1 ? 's' : ''})${nl}`;
+            out += rule() + nl;
+            syncData.forEach(s => {
+                out += `${s.date} ${s.time || ''}  |  ${s.type || 'Episode'}`;
+                if (s.duration)       out += `  |  Duration: ${s.duration}`;
+                if (s.loc)            out += `  |  LOC: ${s.loc}`;
+                if (s.muscleTone)     out += `  |  Tone: ${s.muscleTone}`;
+                if (s.activityBefore) out += `${nl}${indent}Before: ${s.activityBefore}`;
+                if (s.notes)          out += `${nl}${indent}Notes: ${s.notes}`;
+                out += nl;
+            });
             out += nl;
-        });
-        out += nl;
+        }
     }
 
     // ── Cough Log ─────────────────────────────────────────────────────────
-    const coughData = this.coughLog
-        .filter(c => c.patientId === this.activePatientId && inRange(c.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (coughData.length > 0) {
-        out += `COUGH LOG (${coughData.length} entr${coughData.length !== 1 ? 'ies' : 'y'})${nl}`;
-        out += rule() + nl;
-        coughData.forEach(c => {
-            out += `${c.date}  |  ${c.severity || ''}`;
-            if (c.frequencyCount) out += `  |  ${c.frequencyCount}x/${c.frequencyPeriod}`;
-            if (c.description)    out += `  |  ${c.description}`;
-            if (c.context)        out += `  |  ${c.context}`;
-            if (c.notes)          out += `${nl}${indent}Notes: ${c.notes}`;
+    if (mods.coughLog) {
+        const coughData = this.coughLog
+            .filter(c => c.patientId === this.activePatientId && inRange(c.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (coughData.length > 0) {
+            out += `COUGH LOG (${coughData.length} entr${coughData.length !== 1 ? 'ies' : 'y'})${nl}`;
+            out += rule() + nl;
+            coughData.forEach(c => {
+                out += `${c.date}  |  ${c.severity || ''}`;
+                if (c.frequencyCount) out += `  |  ${c.frequencyCount}x/${c.frequencyPeriod}`;
+                if (c.description)    out += `  |  ${c.description}`;
+                if (c.context)        out += `  |  ${c.context}`;
+                if (c.notes)          out += `${nl}${indent}Notes: ${c.notes}`;
+                out += nl;
+            });
             out += nl;
-        });
-        out += nl;
+        }
     }
 
     // ── Activity Log ──────────────────────────────────────────────────────
-    const actData = this.activityLog
-        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (actData.length > 0) {
-        out += `ACTIVITY LOG (${actData.length} entr${actData.length !== 1 ? 'ies' : 'y'})${nl}`;
-        out += rule() + nl;
-        actData.forEach(a => {
-            out += `${a.date}  |  ${a.status || ''}`;
-            if (a.durationMins) out += `  |  ${a.durationMins}m`;
-            if (a.distance)     out += `  |  ${a.distance}`;
-            if (a.notes)        out += `${nl}${indent}Notes: ${a.notes}`;
+    if (mods.activityLog) {
+        const actData = this.activityLog
+            .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (actData.length > 0) {
+            out += `ACTIVITY LOG (${actData.length} entr${actData.length !== 1 ? 'ies' : 'y'})${nl}`;
+            out += rule() + nl;
+            actData.forEach(a => {
+                out += `${a.date}  |  ${a.status || ''}`;
+                if (a.durationMins) out += `  |  ${a.durationMins}m`;
+                if (a.distance)     out += `  |  ${a.distance}`;
+                if (a.notes)        out += `${nl}${indent}Notes: ${a.notes}`;
+                out += nl;
+            });
             out += nl;
-        });
-        out += nl;
+        }
     }
 
     // ── Weight & Diet Log ─────────────────────────────────────────────────
-    const weightData = this.weightLog
-        .filter(w => w.patientId === this.activePatientId && inRange(w.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (weightData.length > 0) {
-        const wUnit = profile.weightUnit || 'kg';
-        out += `WEIGHT & DIET LOG (${weightData.length} entr${weightData.length !== 1 ? 'ies' : 'y'})${nl}`;
-        out += rule() + nl;
-        weightData.forEach(w => {
-            out += `${(w.date || '').split('T')[0]}  |  ${w.weightValue} ${wUnit}  |  Appetite: ${w.appetite || '—'}`;
-            if (w.foodBrand)   out += `  |  Diet: ${w.foodBrand}`;
-            if (w.portionSize) out += `  (${w.portionSize})`;
-            if (w.supplements) out += `${nl}${indent}Supplements: ${w.supplements}`;
-            if (w.notes)       out += `${nl}${indent}Notes: ${w.notes}`;
+    if (mods.weightDiet) {
+        const weightData = this.weightLog
+            .filter(w => w.patientId === this.activePatientId && inRange(w.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (weightData.length > 0) {
+            const wUnit = profile.weightUnit || 'kg';
+            out += `WEIGHT & DIET LOG (${weightData.length} entr${weightData.length !== 1 ? 'ies' : 'y'})${nl}`;
+            out += rule() + nl;
+            weightData.forEach(w => {
+                const dateStr = (w.date || '').split('T')[0];
+                out += `${dateStr}`;
+                if (w.weightValue != null) out += `  |  ${w.weightValue} ${wUnit}`;
+                if (w.appetite && w.appetite !== 'Normal') out += `  |  Appetite: ${w.appetite}`;
+                if (w.foodBrand) out += `  |  ${w.foodBrand}`;
+                if (w.supplements) out += `${nl}${indent}Supplements: ${w.supplements}`;
+                if (w.notes) out += `${nl}${indent}Notes: ${w.notes}`;
+                out += nl;
+            });
             out += nl;
-        });
-        out += nl;
+        }
     }
 
-    // ── Vaccination Log ───────────────────────────────────────────────────
-    const vaccData = this.vaccinationLog
-        .filter(v => v.patientId === this.activePatientId && inRange(v.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (vaccData.length > 0) {
-        out += `VACCINATION LOG (${vaccData.length} entr${vaccData.length !== 1 ? 'ies' : 'y'})${nl}`;
-        out += rule() + nl;
-        vaccData.forEach(v => {
-            out += `${v.date}  |  ${v.type || 'Unknown vaccine'}`;
-            if (v.batchNumber)  out += `  |  Batch: ${v.batchNumber}`;
-            if (v.administeredBy) out += `  |  By: ${v.administeredBy}`;
-            if (v.nextDueDate)  out += `  |  Next due: ${v.nextDueDate}`;
-            if ((v.additionals || []).length > 0) {
-                out += `${nl}${indent}Additionals: ${v.additionals.map(a => `${a.label}${a.nextDueDate ? ' (due ' + a.nextDueDate + ')' : ''}`).join(', ')}`;
-            }
-            if (v.notes) out += `${nl}${indent}Notes: ${v.notes}`;
+    // ── Vaccination Log (ALWAYS full history — no date filter) ────────────
+    if (mods.vaccinations) {
+        const vaccData = this.vaccinationLog
+            .filter(v => v.patientId === this.activePatientId)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (vaccData.length > 0) {
+            out += `VACCINATION LOG (${vaccData.length} record${vaccData.length !== 1 ? 's' : ''}) — Complete History${nl}`;
+            out += rule() + nl;
+            vaccData.forEach(v => {
+                out += `${v.date}  |  ${v.type || v.vaccineId || 'Unknown'}`;
+                if (v.batchNumber)    out += `  |  Batch: ${v.batchNumber}`;
+                if (v.administeredBy) out += `  |  By: ${v.administeredBy}`;
+                if (v.nextDueDate)    out += `  |  Next due: ${v.nextDueDate}`;
+                if ((v.additionals || []).length > 0) {
+                    out += `${nl}${indent}Also given: ${v.additionals.map(a => `${a.label}${a.nextDueDate ? ' (due ' + a.nextDueDate + ')' : ''}`).join(', ')}`;
+                }
+                if (v.notes) out += `${nl}${indent}Notes: ${v.notes}`;
+                out += nl;
+            });
             out += nl;
-        });
-        out += nl;
+        }
     }
-    
+
     // ── Antiparasitic Log ────────────────────────────────────────────────
-    const apData = this.antiparasiticLog
-        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (apData.length > 0) {
-        out += `ANTIPARASITIC LOG (${apData.length} entr${apData.length !== 1 ? 'ies' : 'y'})${nl}`;
-        out += rule() + nl;
-        apData.forEach(a => {
-            out += `${a.date}  |  ${a.productLabel || a.productId || 'Unknown product'}`;
-            if (a.intervalLabel) out += `  |  ${a.intervalLabel}`;
-            if (a.nextDueDate)   out += `  |  Next due: ${a.nextDueDate}`;
-            if ((a.covers || []).length > 0) {
-                out += `${nl}${indent}Covers: ${a.covers.map(cid => PARASITE_TARGETS.find(t => t.id === cid)?.label || cid).join(', ')}`;
-            }
-            if (a.notes) out += `${nl}${indent}Notes: ${a.notes}`;
+    if (mods.antiparasitics) {
+        const apData = this.antiparasiticLog
+            .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (apData.length > 0) {
+            out += `ANTIPARASITIC LOG (${apData.length} entr${apData.length !== 1 ? 'ies' : 'y'})${nl}`;
+            out += rule() + nl;
+            apData.forEach(a => {
+                out += `${a.date}  |  ${a.productLabel || a.productId || 'Unknown product'}`;
+                if (a.intervalLabel) out += `  |  ${a.intervalLabel}`;
+                if (a.nextDueDate)   out += `  |  Next due: ${a.nextDueDate}`;
+                if ((a.covers || []).length > 0) {
+                    out += `${nl}${indent}Covers: ${a.covers.map(cid => PARASITE_TARGETS.find(t => t.id === cid)?.label || cid).join(', ')}`;
+                }
+                if (a.notes) out += `${nl}${indent}Notes: ${a.notes}`;
+                out += nl;
+            });
             out += nl;
-        });
-        out += nl;
+        }
     }
 
     // ── Parasite Coverage Gaps (current snapshot) ──────────────────────────
-    const gaps = this.parasiticCoverageGaps().filter(g => g.state !== 'covered');
-    if (gaps.length > 0) {
-        out += `PARASITE COVERAGE GAPS (current)${nl}`;
-        out += rule() + nl;
-        gaps.forEach(g => {
-            out += `${g.label}: ${g.state}${g.cardiac ? '  [cardiac-relevant]' : ''}${nl}`;
-        });
-        out += nl;
+    if (mods.antiparasitics) {
+        const gaps = this.parasiticCoverageGaps().filter(g => g.state !== 'covered');
+        if (gaps.length > 0) {
+            out += `PARASITE COVERAGE GAPS (current)${nl}`;
+            out += rule() + nl;
+            gaps.forEach(g => {
+                out += `${g.label}: ${g.state}${g.cardiac ? '  [cardiac-relevant]' : ''}${nl}`;
+            });
+            out += nl;
+        }
     }
 
     return out;
 },
+
 
 copyToClipboard() {
     const out = this._buildReportText();

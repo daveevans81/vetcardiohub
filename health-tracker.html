@@ -2976,28 +2976,153 @@
                                         <!-- EXPORT VET SECTION            -->
                                         <!-- ******************************** -->
                     
+
                     <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 10px;" x-cloak>
-        
-                        <div style="font-size: 0.85rem; color: #64748b;">
-                            <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Vet Export</h3>
-                            <h4>Export selected range for analysis by a veterinary professional</h4>
-                            <i class="fa-solid fa-circle-info" style="color: #3b82f6;"></i> 
-                            The export will include the charts and data for the <strong>Date Range</strong> and <strong>Overlays</strong> currently selected above. Make sure you select the appropriate range to generate the most appropriate clinical picture.
+
+                        <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Vet Export</h3>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px;">
+                            Generate a clinical report for your veterinary surgeon. Choose the date range and modules to include below.
+                        </p>
+
+                        <!-- ── Date Range ── -->
+                        <div style="margin-bottom: 14px; padding: 10px 12px; background: #f1f5f9; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">
+                                <i class="fa-regular fa-calendar"></i> Export Date Range
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                <select x-model="vetExportTimeScale" class="border rounded p-2 text-sm bg-white cursor-pointer" style="flex: 0 0 auto; width: auto;">
+                                    <option value="thisWeek">This Week</option>
+                                    <option value="lastWeek">Last Week</option>
+                                    <option value="thisMonth">This Month</option>
+                                    <option value="lastMonth">Last Month</option>
+                                    <option value="60d">Last 60 Days</option>
+                                    <option value="90d">Last 90 Days</option>
+                                    <option value="180d">Last 6 Months</option>
+                                    <option value="all">Entire Dataset</option>
+                                    <option value="custom">Custom Range...</option>
+                                </select>
+
+                                <template x-if="vetExportTimeScale === 'custom'">
+                                    <div style="display: flex; align-items: center; gap: 6px; background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                                        <input type="date" x-model="vetExportCustomStart" class="text-sm p-1 border-none bg-transparent">
+                                        <span style="color: #94a3b8;">to</span>
+                                        <input type="date" x-model="vetExportCustomEnd" class="text-sm p-1 border-none bg-transparent">
+                                    </div>
+                                </template>
+                            </div>
+                            <p style="font-size: 0.75rem; color: #94a3b8; margin: 6px 0 0;">
+                                <i class="fa-solid fa-circle-info"></i>
+                                Diagnosis and vaccination records always export as complete history regardless of date range.
+                            </p>
                         </div>
-                    
+
+                        <!-- ── Module Toggles ── -->
+                        <div style="margin-bottom: 14px; padding: 10px 12px; background: #f1f5f9; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">
+                                <i class="fa-solid fa-list-check"></i> Modules to Include
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+
+                                <template x-if="activePatientProfile?.modules?.srr">
+                                    <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                           :style="vetExportModules.srr ? 'background:#eff6ff; color:#1d4ed8; border-color:#93c5fd;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                        <input type="checkbox" x-model="vetExportModules.srr" style="display:none;">
+                                        <i class="fa-solid" :class="vetExportModules.srr ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                        SRR
+                                    </label>
+                                </template>
+
+                                <template x-if="activePatientProfile?.modules?.medications">
+                                    <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                           :style="vetExportModules.medications ? 'background:#ecfdf5; color:#059669; border-color:#6ee7b7;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                        <input type="checkbox" x-model="vetExportModules.medications" style="display:none;">
+                                        <i class="fa-solid" :class="vetExportModules.medications ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                        Medications
+                                    </label>
+                                </template>
+
+                                <template x-if="activePatientProfile?.modules?.coughLog">
+                                    <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                           :style="vetExportModules.coughLog ? 'background:#fff1f2; color:#e11d48; border-color:#fda4af;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                        <input type="checkbox" x-model="vetExportModules.coughLog" style="display:none;">
+                                        <i class="fa-solid" :class="vetExportModules.coughLog ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                        Cough
+                                    </label>
+                                </template>
+
+                                <template x-if="activePatientProfile?.modules?.activityLog">
+                                    <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                           :style="vetExportModules.activityLog ? 'background:#fff1f2; color:#e11d48; border-color:#fda4af;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                        <input type="checkbox" x-model="vetExportModules.activityLog" style="display:none;">
+                                        <i class="fa-solid" :class="vetExportModules.activityLog ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                        Activity
+                                    </label>
+                                </template>
+
+                                <template x-if="activePatientProfile?.modules?.weightDiet">
+                                    <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                           :style="vetExportModules.weightDiet ? 'background:#fffbeb; color:#b45309; border-color:#fcd34d;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                        <input type="checkbox" x-model="vetExportModules.weightDiet" style="display:none;">
+                                        <i class="fa-solid" :class="vetExportModules.weightDiet ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                        Weight
+                                    </label>
+                                </template>
+
+                                <template x-if="activePatientProfile?.modules?.syncopeLog">
+                                    <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                           :style="vetExportModules.syncopeLog ? 'background:#fffbeb; color:#b45309; border-color:#fcd34d;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                        <input type="checkbox" x-model="vetExportModules.syncopeLog" style="display:none;">
+                                        <i class="fa-solid" :class="vetExportModules.syncopeLog ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                        Syncope
+                                    </label>
+                                </template>
+
+                                <template x-if="activePatientProfile?.modules?.acvimStaging">
+                                    <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                           :style="vetExportModules.acvimStaging ? 'background:#f5f3ff; color:#7c3aed; border-color:#c4b5fd;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                        <input type="checkbox" x-model="vetExportModules.acvimStaging" style="display:none;">
+                                        <i class="fa-solid" :class="vetExportModules.acvimStaging ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                        Diagnosis
+                                        <span style="font-size: 0.65rem; opacity: 0.7;">(all)</span>
+                                    </label>
+                                </template>
+
+                                <template x-if="activePatientProfile?.modules?.vaccinations">
+                                    <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                           :style="vetExportModules.vaccinations ? 'background:#f5f3ff; color:#7c3aed; border-color:#c4b5fd;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                        <input type="checkbox" x-model="vetExportModules.vaccinations" style="display:none;">
+                                        <i class="fa-solid" :class="vetExportModules.vaccinations ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                        Vaccines
+                                        <span style="font-size: 0.65rem; opacity: 0.7;">(all)</span>
+                                    </label>
+                                </template>
+
+                                <template x-if="activePatientProfile?.modules?.antiparasitics">
+                                    <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                           :style="vetExportModules.antiparasitics ? 'background:#f0fdfa; color:#0f766e; border-color:#5eead4;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                        <input type="checkbox" x-model="vetExportModules.antiparasitics" style="display:none;">
+                                        <i class="fa-solid" :class="vetExportModules.antiparasitics ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                        Antiparasitics
+                                    </label>
+                                </template>
+
+                            </div>
+                        </div>
+
+                        <!-- ── Export Buttons ── -->
                         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                             <button @click="copyToClipboard()" style="padding: 8px 16px; background: white; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s;" @mouseenter="$el.style.background='#f8fafc'" @mouseleave="$el.style.background='white'">
                                 <i class="fa-solid fa-copy"></i> Copy Text
                             </button>
-                            
+
                             <button @click="generateCSV()" style="padding: 8px 16px; background: white; color: #10b981; border: 1px solid #10b981; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s;" @mouseenter="$el.style.background='#ecfdf5'" @mouseleave="$el.style.background='white'">
                                 <i class="fa-solid fa-file-csv"></i> .CSV
                             </button>
-                        
+
                             <button @click="generatePDF()" style="padding: 8px 16px; background: #16325F; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                 <i class="fa-solid fa-file-pdf text-red-400"></i> Generate PDF
                             </button>
-                        
+
                             <button @click="shareReport()" style="padding: 8px 16px; background: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 6px;">
                                 <i class="fa-solid fa-share-nodes"></i> Share
                             </button>
