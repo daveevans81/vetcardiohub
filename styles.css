@@ -2541,7 +2541,7 @@ details[open] summary {
 /* ECHO calculator styles */
         .reference { color: #050505; font-size: 8px; }
         .input-group { margin-bottom: 15px; }
-        label { 
+ .input-group label { 
     font-weight: bold; 
     margin-bottom: 5px; 
     color: #333; 
@@ -2553,7 +2553,7 @@ details[open] summary {
     display: flex; 
     align-items: flex-end; 
 }
-        input { 
+ .input-group       input { 
             width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; 
             box-sizing: border-box; /* Ensures padding doesn't break width */
         }
@@ -4479,4 +4479,38 @@ button.btn-cancel:active,
     height: 18px !important;
     flex-shrink: 0 !important;
     position: static !important;
+}
+
+.chart-toggle-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    align-items: center;
+    background: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+.chart-toggle-row label {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 0 !important;
+    gap: 6px;
+    margin: 0 !important;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.chart-toggle-row input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+/* Fix for iphone auto-zooming */
+html { -webkit-text-size-adjust: 100%; }
+@media (max-width: 768px) {
+    input, select, textarea { font-size: 16px !important; }
 }

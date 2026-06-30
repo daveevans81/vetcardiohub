@@ -4,7 +4,7 @@
     <script src="/js/global-head.js" defer></script>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="/manifestrr.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="VCH Health Tracker">
@@ -1351,6 +1351,9 @@
                                         <button @click="addMedication()" type="button" class="btn-add-blue">
                                             <i class="fa-solid fa-plus"></i> Save Entry
                                         </button>
+                                        <button @click="showMedLog = false" type="button" class="btn-cancel" style="margin-bottom: 12px;">
+                                            <i class="fa-solid fa-xmark"></i> Cancel
+                                        </button>
                                     </div>
                                 </div>
                     
@@ -2357,7 +2360,7 @@
                             </label>
                             
                             <!-- Reference line toggles -->
-                            <div style="display: flex; gap: 12px; background: #f0f4ff; padding: 6px 12px; border-radius: 6px; border: 1px solid #c7d4f0; flex-wrap: wrap; align-items: center;">
+                            <div class="chart-toggle-row">
                                 <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">
                                     <i class="fa-solid fa-ruler-horizontal"></i> Refs
                                 </span>
@@ -2371,7 +2374,7 @@
                                 </label>
                             </div>
                 
-                            <div style="display: flex; gap: 12px; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; flex-wrap: wrap; align-items: center;">
+                            <div class="chart-toggle-row">
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #475569; margin: 0;">
                                     <input type="checkbox" x-model="showMedications" class="default" style="margin: 0; padding: 0;"> <span>💊 Meds</span>
                                 </label>
