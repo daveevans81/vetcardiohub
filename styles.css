@@ -3926,7 +3926,7 @@ input {
     color: #334155;
 }
 
-/* RRR Tracker Specific Styles */
+/* RRR Tracker Specific Styles 
 .rr-dashboard {
     max-width: 1200px;
     margin: 0 auto;
@@ -3939,6 +3939,7 @@ input {
         max-width: 600px;
     }
 }
+*/
 
 /* The Massive Tap Target */
 .btn-massive-tap {
@@ -4586,7 +4587,7 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 /* Tracker page: full-bleed — drop the centred 900px "card" edges */
 .app-page .content{
     max-width:none; margin:0;
-    padding:16px; border-radius:0; box-shadow:none;
+    padding:0px; border-radius:0; box-shadow:none;
     background:#f1f5f9;
 }
 .app-page .container{ max-width:none; padding:0; }
