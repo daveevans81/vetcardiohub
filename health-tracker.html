@@ -200,11 +200,11 @@
 
     <!-- Mobile: fixed bottom tab bar -->
     <nav class="vch-bottomnav" role="navigation" aria-label="Primary sections">
-        <template x-for="item in navItems" :key="item.id">
+        <template x-for="item in visibleNavItems()" :key="item.id">
             <button type="button"
                     class="vch-bottomnav__btn"
-                    :class="{ 'is-active': isView(item.id) }"
-                    :aria-current="isView(item.id) ? 'page' : null"
+                    :class="{ 'is-active': activeView === item.id }"
+                    :aria-current="activeView === item.id ? 'page' : null"
                     @click="setView(item.id)">
                 <i class="fa-solid" :class="item.icon"></i>
                 <span x-text="item.label"></span>
@@ -272,6 +272,10 @@
     <!-- App section nav — sticky left column on desktop -->
         <nav class="vch-sidebar" aria-label="App sections">
             <div class="vch-sidebar__brand">
+                <img src="/logo-placeholder.png" alt="VetCardioHub" class="vch-sidebar__logo">
+                <span>VetCardioHub</span>
+            </div>
+            <div class="vch-sidebar__brand">
                 <i class="fa-solid fa-heart-pulse"></i><span>Cardiac Tracker</span>
             </div>
             <div class="vch-sidebar__patient" x-show="activePatientProfile" x-cloak>
@@ -284,10 +288,10 @@
                 </div>
             </div>
             <div class="vch-sidebar__nav">
-                <template x-for="item in navItems" :key="item.id">
+                <template x-for="item in visibleNavItems()" :key="item.id">
                     <button type="button" class="vch-sidebar__btn"
-                            :class="{ 'is-active': isView(item.id) }"
-                            :aria-current="isView(item.id) ? 'page' : null"
+                            :class="{ 'is-active': activeView === item.id }"
+                            :aria-current="activeView === item.id ? 'page' : null"
                             @click="setView(item.id)">
                         <i class="fa-solid" :class="item.icon"></i>
                         <span x-text="item.label"></span>

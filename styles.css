@@ -4580,5 +4580,16 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
   .vch-sidebar__btn.is-active{ background:var(--vch-accent); color:#fff; }
 }
 
-/* slim the global banner on the tracker page only (keep the nav links) */
-.app-page .banner-image{ display:none; }
+/* Tracker page: hide the global site header entirely */
+.app-page #site-header{ display:none; }
+
+/* Tracker page: full-bleed — drop the centred 900px "card" edges */
+.app-page .content{
+    max-width:none; margin:0;
+    padding:16px; border-radius:0; box-shadow:none;
+    background:#f1f5f9;
+}
+.app-page .container{ max-width:none; padding:0; }
+
+/* small logo inside the rail brand */
+.vch-sidebar__logo{ width:28px; height:28px; object-fit:contain; border-radius:6px; flex-shrink:0; }

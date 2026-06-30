@@ -312,17 +312,25 @@ newMed: {
         mergeTargetId: '',
         
         // ===================== VIEW NAVIGATION (activeView) =====================
-activeView: 'count',          // count | trends | meds | wellness | data
+activeView: 'all',            // ← default to the full scroll
 
 navItems: [
-    { id: 'count',    label: 'Count',    icon: 'fa-lungs' },
-    { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line' },
-    { id: 'meds',     label: 'Meds',     icon: 'fa-pills' },
-    { id: 'wellness', label: 'Wellness', icon: 'fa-heart-pulse' },
-    { id: 'data',     label: 'Data',     icon: 'fa-database' }
+    { id: 'all',      label: 'All',      icon: 'fa-layer-group', modules: null },
+    { id: 'count',    label: 'Count',    icon: 'fa-lungs',       modules: ['srr'] },
+    { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line',  modules: ['srr','medications','acvimStaging'] },
+    { id: 'meds',     label: 'Meds',     icon: 'fa-pills',       modules: ['medications','acvimStaging'] },
+    { id: 'wellness', label: 'Wellness', icon: 'fa-heart-pulse', modules: ['coughLog','activityLog','weightDiet','syncopeLog','vaccinations','antiparasitics'] },
+    { id: 'data',     label: 'Data',     icon: 'fa-database',     modules: null }
 ],
 
-isView(v) { return this.activeView === v; },
+// 'all' shows every section; otherwise exact match
+isView(v) { return this.activeView === 'all' || this.activeView === v; },
+
+// Tabs whose required modules are all disabled get hidden
+visibleNavItems() {
+    const mods = this.activePatientProfile?.modules || {};
+    return this.navItems.filter(item => !item.modules || item.modules.some(m => mods[m]));
+},
 
 get currentViewLabel() {
     return (this.navItems.find(n => n.id === this.activeView) || {}).label || '';
@@ -414,7 +422,7 @@ init() {
 });
 
     // Existing watchers
-    this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); });
+    this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all';});
     this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); });
     this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
     this.$watch('showCoughOverlay', () => { this.renderChart(); });
@@ -439,9 +447,9 @@ init() {
     
     // Restore last-used view
     try {
-        const savedView = localStorage.getItem('vch_activeView');
-        if (savedView) this.activeView = savedView;
-    } catch (e) {}
+    const savedView = localStorage.getItem('vch_activeView');
+    if (savedView) this.activeView = savedView;
+} catch (e) {}
     
     // Charts only size correctly once their canvas becomes visible (x-show toggles display:none)
     this.$watch('activeView', () => {
