@@ -191,7 +191,7 @@
 
 <div class="content">
 
-    <div class="rr-dashboard" x-data="rrTracker">       
+    <div class="rr-dashboard" x-data="rrTracker" @disclaimer-trigger.window="forceShowDisclaimer()">       
         <header class="hero-header card">
         
             <!-- Collapsed mini-title: always visible -->
@@ -3329,7 +3329,7 @@
         All patient data and historical logs are securely stored <em>locally</em> on this device. VetCardioHub does not transmit or archive your data. Please utilize the export tools regularly to maintain a secure backup of these clinical records.
     </p>
     <p style="margin: 0px;">
-        <button @click="forceShowDisclaimer()" style="bottom-margin: 30px;" class="text-blue-600 hover:text-blue-800 underline focus:outline-none">
+        <button onclick="window.dispatchEvent(new CustomEvent('disclaimer-trigger'))" style="bottom-margin: 30px;" class="text-blue-600 hover:text-blue-800 underline focus:outline-none">
             Review Full Terms & Disclaimer
         </button>
     </p>
