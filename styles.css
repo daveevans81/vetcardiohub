@@ -4518,76 +4518,67 @@ html { -webkit-text-size-adjust: 100%; }
 /* ======================================================= */
 /* VIEW NAVIGATION — bottom tab bar (mobile) + sidebar (desktop) */
 /* ======================================================= */
+/* ===== App section nav: sticky left column (desktop) + bottom bar (mobile) ===== */
 :root{
-    --vch-navy:#16325F;
-    --vch-accent:#0284c7;
-    --vch-bottomnav-h:64px;
-    --vch-sidebar-w:220px;
+  --vch-navy:#16325F;
+  --vch-accent:#0284c7;
+  --vch-sidebar-w:200px;
+  --vch-nav-top:16px;            /* matches your right aside; raise if your header is sticky */
+  --vch-bottomnav-h:64px;
 }
 
-/* Hidden by default; each is enabled at its breakpoint */
-.vch-bottomnav{ display:none; }
+/* MOBILE (default, ≤980px): bottom tab bar, no left rail */
 .vch-sidebar{ display:none; }
+.vch-bottomnav{
+  display:flex; position:fixed; left:0; right:0; bottom:0; z-index:50;
+  height:var(--vch-bottomnav-h); background:#fff; border-top:1px solid #e2e8f0;
+  box-shadow:0 -2px 10px rgba(15,23,42,.06); padding-bottom:env(safe-area-inset-bottom);
+}
+.vch-bottomnav__btn{
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; border:none; background:transparent; cursor:pointer;
+  color:#94a3b8; font-size:.68rem; font-weight:600; padding:6px 2px; transition:color .15s ease;
+}
+.vch-bottomnav__btn i{ font-size:1.15rem; transition:transform .15s ease; }
+.vch-bottomnav__btn.is-active{ color:var(--vch-accent); }
+.vch-bottomnav__btn.is-active i{ transform:translateY(-2px); }
 
-/* ---------- MOBILE: bottom tab bar ---------- */
-@media (max-width: 979px){
-    .vch-bottomnav{
-        display:flex;
-        position:fixed; left:0; right:0; bottom:0; z-index:50;
-        height:var(--vch-bottomnav-h);
-        background:#ffffff;
-        border-top:1px solid #e2e8f0;
-        box-shadow:0 -2px 10px rgba(15,23,42,0.06);
-        padding-bottom:env(safe-area-inset-bottom); /* iPhone home indicator */
-    }
-    .vch-bottomnav__btn{
-        flex:1; display:flex; flex-direction:column;
-        align-items:center; justify-content:center; gap:3px;
-        border:none; background:transparent; cursor:pointer;
-        color:#94a3b8; font-size:0.68rem; font-weight:600; padding:6px 2px;
-        transition:color .15s ease;
-    }
-    .vch-bottomnav__btn i{ font-size:1.15rem; transition:transform .15s ease; }
-    .vch-bottomnav__btn.is-active{ color:var(--vch-accent); }
-    .vch-bottomnav__btn.is-active i{ transform:translateY(-2px); }
+/* keep the footer clear of the fixed bar on mobile */
+body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom)); }
 
-    /* keep page content clear of the fixed bar */
-    .content{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom) + 12px); }
+/* DESKTOP (≥981px): sticky left column, no bottom bar */
+@media (min-width:981px){
+  body{ padding-bottom:0; }
+  .vch-bottomnav{ display:none; }
+
+  /* nav becomes a real 3rd grid column: [nav | main | info aside] */
+  .grid{ grid-template-columns:var(--vch-sidebar-w) 1fr 340px; }
+
+  .vch-sidebar{
+    display:flex; flex-direction:column;
+    position:sticky; top:var(--vch-nav-top); align-self:start;
+    max-height:calc(100vh - var(--vch-nav-top) - 20px); overflow-y:auto;
+    background:var(--vch-navy); color:#e2e8f0; border-radius:12px; padding:16px 12px;
+  }
+  .vch-sidebar__brand{
+    display:flex; align-items:center; gap:10px; font-size:1rem; font-weight:700; color:#fff;
+    padding:4px 8px 14px; border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .vch-sidebar__brand i{ color:#fca5a5; }
+  .vch-sidebar__patient{ padding:12px 8px; border-bottom:1px solid rgba(255,255,255,.12); margin-bottom:8px; }
+  .vch-sidebar__petname{ font-weight:700; color:#fff; font-size:.92rem; }
+  .vch-sidebar__petmeta{ font-size:.76rem; color:rgba(255,255,255,.6); margin-top:2px; }
+  .vch-sidebar__nav{ display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+  .vch-sidebar__btn{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    border:none; cursor:pointer; background:transparent; color:rgba(255,255,255,.75);
+    font-size:.9rem; font-weight:600; padding:11px 12px; border-radius:8px;
+    transition:background .15s ease,color .15s ease;
+  }
+  .vch-sidebar__btn i{ width:20px; text-align:center; }
+  .vch-sidebar__btn:hover{ background:rgba(255,255,255,.08); color:#fff; }
+  .vch-sidebar__btn.is-active{ background:var(--vch-accent); color:#fff; }
 }
 
-/* ---------- DESKTOP: left sidebar ---------- */
-@media (min-width: 980px){
-    .vch-sidebar{
-        display:flex; flex-direction:column;
-        position:fixed; top:0; left:0; bottom:0; z-index:40;
-        width:var(--vch-sidebar-w);
-        background:var(--vch-navy); color:#e2e8f0;
-        padding:20px 14px; overflow-y:auto;
-    }
-    .vch-sidebar__brand{
-        display:flex; align-items:center; gap:10px;
-        font-size:1.05rem; font-weight:700; color:#fff;
-        padding:4px 8px 16px; border-bottom:1px solid rgba(255,255,255,0.12);
-    }
-    .vch-sidebar__brand i{ color:#fca5a5; }
-    .vch-sidebar__patient{
-        padding:14px 8px; margin-bottom:10px;
-        border-bottom:1px solid rgba(255,255,255,0.12);
-    }
-    .vch-sidebar__petname{ font-weight:700; color:#fff; font-size:0.95rem; }
-    .vch-sidebar__petmeta{ font-size:0.78rem; color:rgba(255,255,255,0.6); margin-top:2px; }
-    .vch-sidebar__nav{ display:flex; flex-direction:column; gap:4px; margin-top:6px; }
-    .vch-sidebar__btn{
-        display:flex; align-items:center; gap:12px; width:100%;
-        text-align:left; border:none; cursor:pointer;
-        background:transparent; color:rgba(255,255,255,0.75);
-        font-size:0.92rem; font-weight:600; padding:11px 12px; border-radius:8px;
-        transition:background .15s ease, color .15s ease;
-    }
-    .vch-sidebar__btn i{ width:20px; text-align:center; }
-    .vch-sidebar__btn:hover{ background:rgba(255,255,255,0.08); color:#fff; }
-    .vch-sidebar__btn.is-active{ background:var(--vch-accent); color:#fff; }
-
-    /* shift the whole app right to make room for the sidebar */
-    #site-header, .content{ padding-left:var(--vch-sidebar-w); }
-}
+/* slim the global banner on the tracker page only (keep the nav links) */
+.app-page .banner-image{ display:none; }

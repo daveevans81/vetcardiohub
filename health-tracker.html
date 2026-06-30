@@ -102,7 +102,7 @@
        
 <style type="text/css">
 
-  .content { max-width: 1200px; }
+/*  .content { max-width: 1200px; }  */
   
 @media print {
     /* 1. Global Reset - Ensures padding doesn't push width over 100% */
@@ -186,7 +186,7 @@
 
     </style>
 </head>
-<body>
+<body class="app-page">
 <div id="site-header"></div>
 
 <div class="content">
@@ -211,35 +211,7 @@
             </button>
         </template>
     </nav>
-    <nav class="vch-sidebar" aria-label="Primary sections">
-        <div class="vch-sidebar__brand">
-            <i class="fa-solid fa-heart-pulse"></i>
-            <span>VetCardioHub</span>
-        </div>
 
-        <div class="vch-sidebar__patient" x-show="activePatientProfile" x-cloak>
-            <div class="vch-sidebar__petname" x-text="activePatientProfile?.name || 'No patient'"></div>
-            <div class="vch-sidebar__petmeta">
-                <span x-text="computedAgeText"></span>
-                <template x-if="primaryCardiacDiagnosis && primaryCardiacDiagnosis !== 'N/A'">
-                    <span><span> · </span><span x-text="primaryCardiacDiagnosis"></span></span>
-                </template>
-            </div>
-        </div>
-
-        <div class="vch-sidebar__nav">
-            <template x-for="item in navItems" :key="item.id">
-                <button type="button"
-                        class="vch-sidebar__btn"
-                        :class="{ 'is-active': isView(item.id) }"
-                        :aria-current="isView(item.id) ? 'page' : null"
-                        @click="setView(item.id)">
-                    <i class="fa-solid" :class="item.icon"></i>
-                    <span x-text="item.label"></span>
-                </button>
-            </template>
-        </div>
-    </nav>
 
 
     
@@ -297,6 +269,32 @@
 
     <div class="container" style="padding: 0;">
     <div class="grid">
+    <!-- App section nav — sticky left column on desktop -->
+        <nav class="vch-sidebar" aria-label="App sections">
+            <div class="vch-sidebar__brand">
+                <i class="fa-solid fa-heart-pulse"></i><span>Cardiac Tracker</span>
+            </div>
+            <div class="vch-sidebar__patient" x-show="activePatientProfile" x-cloak>
+                <div class="vch-sidebar__petname" x-text="activePatientProfile?.name || 'No patient'"></div>
+                <div class="vch-sidebar__petmeta">
+                    <span x-text="computedAgeText"></span>
+                    <template x-if="primaryCardiacDiagnosis && primaryCardiacDiagnosis !== 'N/A'">
+                        <span> · <span x-text="primaryCardiacDiagnosis"></span></span>
+                    </template>
+                </div>
+            </div>
+            <div class="vch-sidebar__nav">
+                <template x-for="item in navItems" :key="item.id">
+                    <button type="button" class="vch-sidebar__btn"
+                            :class="{ 'is-active': isView(item.id) }"
+                            :aria-current="isView(item.id) ? 'page' : null"
+                            @click="setView(item.id)">
+                        <i class="fa-solid" :class="item.icon"></i>
+                        <span x-text="item.label"></span>
+                    </button>
+                </template>
+            </div>
+        </nav>
     <main>
         
                                 <!-- ******************************** -->
