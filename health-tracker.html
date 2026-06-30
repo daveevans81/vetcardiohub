@@ -730,7 +730,7 @@
                     
                     <div style="font-size: 0.85rem; color: #78350f; line-height: 1.5;">
                         <p style="margin-top: 0; margin-bottom: 12px;">
-                            <strong>Data Privacy & Retention:</strong> VetCardioHub operates entirely on your local device. <strong>No clinical data, patient profiles, or tracking metrics are transmitted to or stored on external cloud servers.</strong> While this guarantees total privacy, it also means that clearing your browser cache or site data will permanently delete your records. We strongly advise utilizing the <a href="#" @click.prevent="showImportExport = true; document.getElementById('symptomSection').scrollIntoView({ behavior: 'smooth' })" style="color: #d97706; text-decoration: underline; font-weight: bold;">Master Backup feature</a> regularly.
+                            <strong>Data Privacy & Retention:</strong> VetCardioHub operates entirely on your local device. <strong>No clinical data, patient profiles, or tracking metrics are transmitted to or stored on external cloud servers.</strong> While this guarantees total privacy, it also means that clearing your browser cache or site data will permanently delete your records. We strongly advise utilizing the <a href="#" @click.prevent="showImportExport = true; $nextTick(() => document.getElementById('masterBackup').scrollIntoView({ behavior: 'smooth' }))" style="color: #d97706; text-decoration: underline; font-weight: bold;">Master Backup feature</a> regularly.
                         </p>
                         <p style="margin: 0;">
                             <strong>Veterinary Partnership:</strong> This application is designed strictly as an evidence-based monitoring adjunct. It does not provide definitive medical diagnoses, nor does it replace the clinical judgment of a veterinary surgeon. Always interpret resting respiratory rates, activity logs, and syncopal events in direct consultation with your primary care veterinarian or board-certified cardiologist.
@@ -3414,7 +3414,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                <div id="masterBackup" style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                                     <div>
                                         <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)</h4>
                                         <p style="margin: 0; font-size: 0.75rem; color: #64748b;">Backups everything: Patients, Breathing, and Medications.</p>
