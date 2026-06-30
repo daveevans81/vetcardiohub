@@ -5807,7 +5807,7 @@ async shareReport() {
     }
 },
 
-disclaimerEngine: {
+// Disclaimer Engine
     showDisclaimerModal: false,
     
     initDisclaimer() {
@@ -5828,8 +5828,7 @@ disclaimerEngine: {
     // Optional: Allow users to manually invoke it from the footer
     forceShowDisclaimer() {
         this.showDisclaimerModal = true;
-    }
-},
+    },
         
         exportPDF() {
             // Web-native PDF generation using the browser's print dialog.
