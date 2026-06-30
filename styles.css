@@ -4587,7 +4587,7 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 /* Tracker page: full-bleed — drop the centred 900px "card" edges */
 .app-page .content{
     max-width:none; margin:0;
-    padding:0px; border-radius:0; box-shadow:none;
+    padding:5px; border-radius:0; box-shadow:none;
     background:#f1f5f9;
 }
 .app-page .container{ max-width:none; padding:0; }
