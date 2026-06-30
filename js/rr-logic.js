@@ -437,7 +437,7 @@ init() {
 startNewPatientOnboarding() {
     this.editingPatient = {
         id: crypto.randomUUID(),
-        name: '', ownerName: '', species: 'dog', breed: '', sex: '', dob: '', weight: '', weightUnit: '',
+        name: '', ownerName: '', species: 'dog', breed: '', sex: '', dob: '', weight: '', weightUnit: '',customSrrCutoff: 30,
         modules: { ...this.defaultModules }
     };
     
@@ -511,13 +511,13 @@ saveOnboardedPatient() {
         
         // --- PET MANAGEMENT ---
         // Determines if we are editing an existing record or creating a new one
-        get isEditingExistingPatient() {
+get isEditingExistingPatient() {
             if (!this.editingPatient?.id) return false;
             return this.patients.some(p => p.id === this.editingPatient.id);
         },
         
         // Safely executes the existing merge logic from the UI
-        executeMerge() {
+executeMerge() {
             if (!this.mergeTargetId) {
                 return alert("Validation Error: Please select a Master Profile to merge into.");
             }
@@ -535,7 +535,7 @@ saveOnboardedPatient() {
         },
 
         // Cascading relational delete
-        deletePatient(patientId) {
+deletePatient(patientId) {
             const profile = this.patients.find(p => p.id === patientId);
             if (!profile) return;
 
@@ -582,8 +582,9 @@ saveOnboardedPatient() {
                 this.activePatientId = this.patients[0].id;
             } else {
                 this.activePatientId = null;
-                // Leave them in the creation screen if database is empty
-                this.editingPatient = { id: this.generateId(), name: '', species: 'dog', weightUnit: 'kg', customSrrCutoff: 30 };
+                this.closePatientManager();
+                this.$nextTick(() => this.startNewPatientOnboarding());
+                return;   // nothing to plot; skip the chart re-render below
             }
 
             this.closePatientManager();
@@ -595,20 +596,26 @@ saveOnboardedPatient() {
             });
         },
         
-        get activePatientProfile() {
+get activePatientProfile() {
             if (!this.activePatientId) return null;
             return this.patients.find(p => p.id === this.activePatientId) || null;
         },
         
-        get computedAgeText() {
-            const p = this.activePatientProfile;
-            if (!p || !p.dob) return 'Age Unknown';
-            const dob = new Date(p.dob);
-            const diffMs = Date.now() - dob.getTime();
-            const ageDate = new Date(diffMs);
-            const years = Math.abs(ageDate.getUTCFullYear() - 1970);
-            return years > 0 ? `${years}y` : `< 1y`;
-        },
+get computedAgeText() {
+    const p = this.activePatientProfile;
+    if (!p || !p.dob) return 'Age Unknown';
+    const dob = new Date(p.dob);
+    if (isNaN(dob)) return 'Age Unknown';
+    const now = new Date();
+    let months = (now.getFullYear() - dob.getFullYear()) * 12 + (now.getMonth() - dob.getMonth());
+    if (now.getDate() < dob.getDate()) months--;        // day-of-month not yet reached
+    if (months < 0) months = 0;
+    const years = Math.floor(months / 12);
+    const rem = months % 12;
+    if (years === 0) return `${months}m`;               // e.g. "6m"
+    if (years < 2 || rem > 0) return `${years}y ${rem}m`; // e.g. "1y 4m"
+    return `${years}y`;
+},
         
         get latestWeightText() {
             if (!this.activePatientId) return '';
@@ -3179,32 +3186,25 @@ toggleChartExpansion() {
                 
 renderChart() {
     if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
-
     this.chartRenderTimeout = setTimeout(() => {
         const canvas = this.$refs.rrrChartCanvas;
-        
+
         // GATEKEEPER: Stop Chart.js from crashing if canvas is display: none
         if (!canvas || (canvas.offsetParent === null && !this.isChartExpanded)) return;
-
         const rawSrrData = this.getFilteredReadings() || [];
         const ctx = canvas.getContext('2d');
-
         const existingChart = Chart.getChart(canvas);
         if (existingChart) existingChart.destroy();
-
         if (rawSrrData.length < 2) return;
-
         const safeTimestamp = (dateStr) => {
             if (!dateStr) return new Date().getTime();
             if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                return new Date(`${dateStr}T12:00:00`).getTime(); 
+                return new Date(`${dateStr}T12:00:00`).getTime();
             }
             return this.parseDateSafe(dateStr).getTime();
         };
-
         const combinedEvents = [];
         const { startDate, endDate } = this.getDateRange();
-
         // 1. SRR Data (Daily Mean Aggregation)
         const srrByDate = {};
         rawSrrData.forEach(r => {
@@ -3215,13 +3215,12 @@ renderChart() {
         Object.keys(srrByDate).forEach(dStr => {
             const rates = srrByDate[dStr];
             const meanRate = rates.reduce((sum, val) => sum + val, 0) / rates.length;
-            combinedEvents.push({ 
-                type: 'srr', 
-                timestamp: safeTimestamp(dStr), 
-                data: { rate: Math.round(meanRate * 10) / 10, readingCount: rates.length, date: dStr } 
+            combinedEvents.push({
+                type: 'srr',
+                timestamp: safeTimestamp(dStr),
+                data: { rate: Math.round(meanRate * 10) / 10, readingCount: rates.length, date: dStr }
             });
         });
-
         // 2. Medication Data
         const safeMedLedger = Array.isArray(this.medLedger) ? this.medLedger : [];
         if (this.showMedications && safeMedLedger.length > 0) {
@@ -3230,14 +3229,13 @@ renderChart() {
             petMeds.forEach(m => {
                 const ts = safeTimestamp(m.eventDate);
                 if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) {
-                    const dStr = new Date(ts).toISOString().split('T')[0]; 
+                    const dStr = new Date(ts).toISOString().split('T')[0];
                     if (!medsByDate[dStr]) medsByDate[dStr] = [];
                     medsByDate[dStr].push(m);
                 }
             });
             Object.keys(medsByDate).forEach(dStr => combinedEvents.push({ type: 'med', timestamp: new Date(`${dStr}T12:00:00`).getTime(), data: medsByDate[dStr] }));
         }
-
         // 3. Symptom Data (Coughs & Activity)
         if (this.showCoughOverlay && Array.isArray(this.coughLog)) {
             this.coughLog.filter(c => c.patientId === this.activePatientId).forEach(c => {
@@ -3251,7 +3249,6 @@ renderChart() {
                 if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) combinedEvents.push({ type: 'activity', timestamp: ts, data: a });
             });
         }
-
         // 4. Clinical Events (Syncope & Diagnosis)
         if (this.showSyncopeOverlay && Array.isArray(this.syncopeLog)) {
             this.syncopeLog.filter(s => s.patientId === this.activePatientId).forEach(s => {
@@ -3265,102 +3262,122 @@ renderChart() {
                 if (!startDate || (ts >= startDate.getTime() && ts <= endDate.getTime())) combinedEvents.push({ type: 'diagnosis', timestamp: ts, data: d });
             });
         }
-
         // Sort everything chronologically
         combinedEvents.sort((a, b) => a.timestamp - b.timestamp);
 
-        // --- 5. EXTRACT CHART DATASETS ---
-        const labels = [];
-        const srrDataPoints = [], srrTooltips = [];
-        const medDataPoints = [], medColors = [], medTooltips = [];
-        const coughDataPoints = [], coughColors = [], coughTooltips = [];
-        const activityDataPoints = [], activityTooltips = [];
-        const syncDataPoints = [], syncTooltips = [];
-        const diagDataPoints = [], diagTooltips = [];
+        // --- 5. BUILD SHARED COLUMN INDEX ---
+        // In category mode, collapse events on the same calendar day into one
+        // shared column so overlays sit on the SRR point. In true-time mode,
+        // each distinct timestamp is its own column (the time scale aligns them).
+        const useTime = this.srrUseRelationalTime;
+        const dayKey = ts => new Date(ts).toISOString().split('T')[0];
 
-        let lastSrrRate = null; 
-        const srrValuesForStats = []; 
+        const columns = [];          // timestamp per column, in chronological order
+        const keyToIndex = {};
+        combinedEvents.forEach(ev => {
+            const k = useTime ? ev.timestamp : dayKey(ev.timestamp);
+            if (!(k in keyToIndex)) {
+                keyToIndex[k] = columns.length;
+                columns.push(ev.timestamp);
+            }
+        });
+        const n = columns.length;
+
+        const labels = columns.map(ts => {
+            if (useTime) return ts;
+            const d = new Date(ts);
+            if (n <= 14) return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
+            if (n <= 60) return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+            return d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+        });
+
+        // Pre-sized, index-addressable series arrays
+        const srrDataPoints = Array(n).fill(null),  srrTooltips = Array(n).fill(null);
+        const medDataPoints = Array(n).fill(null),  medColors = Array(n).fill('transparent'), medTooltips = Array(n).fill([]);
+        const coughDataPoints = Array(n).fill(null), coughColors = Array(n).fill('transparent'), coughTooltips = Array(n).fill('');
+        const activityDataPoints = Array(n).fill(null), activityTooltips = Array(n).fill('');
+        const syncDataPoints = Array(n).fill(null), syncTooltips = Array(n).fill('');
+        const diagDataPoints = Array(n).fill(null), diagTooltips = Array(n).fill('');
+
+        let lastSrrRate = null;
+        const srrValuesForStats = [];
 
         combinedEvents.forEach(ev => {
-            const dObj = new Date(ev.timestamp);
-            let label = '';
-            if (combinedEvents.length <= 14) label = dObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
-            else if (combinedEvents.length <= 60) label = dObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-            else label = dObj.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
-            
-            labels.push(this.srrUseRelationalTime ? ev.timestamp : label);
-
-            // Initialize empty states
-            let srrVal = null, sTip = null;
-            let medVal = null, mCol = 'transparent', mTip = [];
-            let coughVal = null, cCol = 'transparent', cTip = '';
-            let actVal = null, aTip = '';
-            let syncVal = null, syTip = '';
-            let diagVal = null, dTip = '';
+            const i = keyToIndex[useTime ? ev.timestamp : dayKey(ev.timestamp)];
 
             if (ev.type === 'srr') {
-                srrVal = ev.data.rate;
+                const srrVal = ev.data.rate;
                 srrValuesForStats.push(ev.data);
-                lastSrrRate = ev.data.rate;
-                sTip = `Rate: ${srrVal} bpm${ev.data.readingCount > 1 ? ` (Mean of ${ev.data.readingCount})` : ''}`;
-            } 
+                lastSrrRate = srrVal;
+                srrDataPoints[i] = srrVal;
+                srrTooltips[i] = `Rate: ${srrVal} bpm${ev.data.readingCount > 1 ? ` (Mean of ${ev.data.readingCount})` : ''}`;
+            }
             else if (ev.type === 'med') {
-                medVal = lastSrrRate !== null ? lastSrrRate : 30; 
-                mCol = this.formulary[ev.data[0].drugId]?.color || '#f59e0b';
-                mTip = ev.data.map(m => `💊 ${m.action}: ${m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId)} (${m.doseMg ? m.doseMg+'mg' : '?'})`);
+                medDataPoints[i] = lastSrrRate !== null ? lastSrrRate : 30;
+                medColors[i] = this.formulary[ev.data[0].drugId]?.color || '#f59e0b';
+                medTooltips[i] = ev.data.map(m => `💊 ${m.action}: ${m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId)} (${m.doseMg ? m.doseMg + 'mg' : '?'})`);
             }
             else if (ev.type === 'syncope') {
-                syncVal = lastSrrRate !== null ? lastSrrRate : 30;
-                syTip = `⚠️ Syncope Episode\nNotes: ${ev.data.notes || ev.data.context || 'Recorded collapse/fainting'}`;
+                syncDataPoints[i] = lastSrrRate !== null ? lastSrrRate : 30;
+                syncTooltips[i] = `⚠️ Syncope Episode\nNotes: ${ev.data.notes || ev.data.context || 'Recorded collapse/fainting'}`;
             }
             else if (ev.type === 'diagnosis') {
-                diagVal = lastSrrRate !== null ? lastSrrRate : 30;
+                diagDataPoints[i] = lastSrrRate !== null ? lastSrrRate : 30;
                 const diagName = ev.data.diagnosis || ev.data.stage || ev.data.title || 'Status Update';
-                dTip = `🩺 Clinical Update: ${diagName}\n${ev.data.notes ? 'Notes: ' + ev.data.notes : ''}`;
+                diagTooltips[i] = `🩺 Clinical Update: ${diagName}\n${ev.data.notes ? 'Notes: ' + ev.data.notes : ''}`;
             }
             else if (ev.type === 'cough') {
                 const c = ev.data;
                 let cpd = parseFloat(c.frequencyCount);
+                let coughVal;
                 if (!isNaN(cpd)) {
                     if (c.frequencyPeriod === 'hour') cpd *= 24;
                     if (c.frequencyPeriod === 'week') cpd /= 7;
                     coughVal = Math.round(cpd * 10) / 10;
-                } else { coughVal = 1; } 
-                
-                if (c.severity === 'Severe') cCol = 'rgba(239, 68, 68, 0.85)';
-                else if (c.severity === 'Moderate') cCol = 'rgba(245, 158, 11, 0.85)';
-                else cCol = 'rgba(253, 224, 71, 0.85)';
-                
-                cTip = `Cough (${c.severity}): ${isNaN(parseFloat(c.frequencyCount)) ? 'Freq Unknown' : c.frequencyCount+'x/'+c.frequencyPeriod} - ${c.description}`;
+                } else { coughVal = 1; }
+                coughDataPoints[i] = coughVal;
+
+                if (c.severity === 'Severe') coughColors[i] = 'rgba(239, 68, 68, 0.85)';
+                else if (c.severity === 'Moderate') coughColors[i] = 'rgba(245, 158, 11, 0.85)';
+                else coughColors[i] = 'rgba(253, 224, 71, 0.85)';
+
+                coughTooltips[i] = `Cough (${c.severity}): ${isNaN(parseFloat(c.frequencyCount)) ? 'Freq Unknown' : c.frequencyCount + 'x/' + c.frequencyPeriod} - ${c.description}`;
             }
             else if (ev.type === 'activity') {
                 const a = ev.data;
+                let actVal = null;
                 if (this.activityPlotType === 'durationMins' && a.durationMins) actVal = parseFloat(a.durationMins);
                 else if (this.activityPlotType === 'distance' && a.distance) {
                     const parsed = parseFloat(a.distance.replace(/[^\d.]/g, ''));
                     if (!isNaN(parsed)) actVal = parsed;
                 }
-                if (actVal !== null) aTip = `Activity (${a.status}): ${this.activityPlotType === 'durationMins' ? a.durationMins+'m' : a.distance}`;
+                if (actVal !== null) {
+                    activityDataPoints[i] = actVal;
+                    activityTooltips[i] = `Activity (${a.status}): ${this.activityPlotType === 'durationMins' ? a.durationMins + 'm' : a.distance}`;
+                }
             }
-
-            srrDataPoints.push(srrVal); srrTooltips.push(sTip);
-            medDataPoints.push(medVal); medColors.push(mCol); medTooltips.push(mTip);
-            coughDataPoints.push(coughVal); coughColors.push(cCol); coughTooltips.push(cTip);
-            activityDataPoints.push(actVal); activityTooltips.push(aTip);
-            syncDataPoints.push(syncVal); syncTooltips.push(syTip);
-            diagDataPoints.push(diagVal); diagTooltips.push(dTip);
         });
+
+        // Snap event markers onto the SRR point sharing their column, so they sit
+        // exactly on the line rather than at the 30-bpm fallback.
+        for (let i = 0; i < n; i++) {
+            if (srrDataPoints[i] !== null) {
+                if (medDataPoints[i]  !== null) medDataPoints[i]  = srrDataPoints[i];
+                if (syncDataPoints[i] !== null) syncDataPoints[i] = srrDataPoints[i];
+                if (diagDataPoints[i] !== null) diagDataPoints[i] = srrDataPoints[i];
+            }
+        }
 
         const stats = this.calculateStats(srrValuesForStats);
         const cutoff = parseInt(this.activePatientProfile?.customSrrCutoff) || 30;
-        
+
         // Defensive fallback: treat undefined as true so lines show even if
         // state variables were not yet added to the Alpine data block
         const showCutoff  = this.showCutoffLine  !== false;
         const showMeanRef = this.showMeanRef     !== false;
-        
+
         let annotations = {};
-        
+
         if (showCutoff) {
             annotations.thresholdLine = {
                 type: 'line',
@@ -3379,7 +3396,7 @@ renderChart() {
                 }
             };
         }
-        
+
         if (showMeanRef && srrValuesForStats.length >= 2) {
             annotations.meanLine = {
                 type: 'line',
@@ -3397,7 +3414,7 @@ renderChart() {
                     font: { size: 11 }
                 }
             };
-        
+
             if (stats.sd > 0) {
                 annotations.upperRefLine = {
                     type: 'line',
@@ -3423,36 +3440,36 @@ renderChart() {
                 label: `${this.activePatientProfile?.name ?? 'Patient'}'s Respiratory Rate (bpm)`,
                 data: srrDataPoints, srrTooltips: srrTooltips,
                 borderColor: 'rgb(14, 165, 233)', backgroundColor: 'rgba(14, 165, 233, 0.08)',
-                tension: 0.25, pointRadius: combinedEvents.length > 30 ? 2 : 5,
+                tension: 0.25, pointRadius: n > 30 ? 2 : 5,
                 spanGaps: true, fill: true, order: 5, yAxisID: 'y'
             }
         ];
 
         if (this.showMedications && medDataPoints.some(d => d !== null)) datasets.push({ label: 'Medication Change', type: 'line', showLine: false, data: medDataPoints, backgroundColor: medColors, borderColor: '#ffffff', borderWidth: 2, pointStyle: 'triangle', rotation: 180, radius: 10, hoverRadius: 13, order: 3, medTooltips: medTooltips, yAxisID: 'y' });
         if (this.showSyncopeOverlay && syncDataPoints.some(d => d !== null)) datasets.push({
-    label: 'Syncope Event',
-    type: 'line',
-    showLine: false,
-    data: syncDataPoints,
-    backgroundColor: '#ef4444',
-    borderColor: '#b91c1c',
-    borderWidth: 2,
-    pointStyle: 'triangle',
-    rotation: 0,          // points upwards
-    radius: 12,
-    hoverRadius: 15,
-    order: 1,
-    syncTooltips: syncTooltips,
-    yAxisID: 'y'
-});
+            label: 'Syncope Event',
+            type: 'line',
+            showLine: false,
+            data: syncDataPoints,
+            backgroundColor: '#ef4444',
+            borderColor: '#b91c1c',
+            borderWidth: 2,
+            pointStyle: 'triangle',
+            rotation: 0,          // points upwards
+            radius: 12,
+            hoverRadius: 15,
+            order: 1,
+            syncTooltips: syncTooltips,
+            yAxisID: 'y'
+        });
         if (this.showDiagnosisOverlay && diagDataPoints.some(d => d !== null)) datasets.push({ label: 'Diagnosis / Stage', type: 'line', showLine: false, data: diagDataPoints, backgroundColor: '#9333ea', borderColor: '#ffffff', borderWidth: 2, pointStyle: 'rectRot', radius: 10, hoverRadius: 13, order: 2, diagTooltips: diagTooltips, yAxisID: 'y' });
         if (this.showCoughOverlay && coughDataPoints.some(d => d !== null)) datasets.push({ label: 'Cough Frequency', type: 'bar', data: coughDataPoints, backgroundColor: coughColors, borderRadius: 4, barThickness: 12, order: 6, yAxisID: 'yCough', coughTooltips: coughTooltips });
         if (this.showActivityOverlay && activityDataPoints.some(d => d !== null)) datasets.push({ label: 'Activity', type: 'line', data: activityDataPoints, borderColor: '#10b981', backgroundColor: '#10b981', pointBackgroundColor: '#ffffff', pointBorderWidth: 2, tension: 0.3, spanGaps: true, order: 4, yAxisID: 'yActivity', activityTooltips: activityTooltips });
 
         // --- DYNAMIC SCALES ---
         const scalesObj = {
-            x: this.srrUseRelationalTime 
-                ? { type: 'time', time: { tooltipFormat: 'dd MMM yyyy HH:mm' }, ticks: { maxRotation: 0 }, grid: { color: '#e2e8f0' } } 
+            x: this.srrUseRelationalTime
+                ? { type: 'time', time: { tooltipFormat: 'dd MMM yyyy HH:mm' }, ticks: { maxRotation: 0 }, grid: { color: '#e2e8f0' } }
                 : { type: 'category', ticks: { maxTicksLimit: 10, maxRotation: 0 } },
             y: { type: 'linear', display: true, position: 'left', beginAtZero: true, suggestedMax: 45, title: { display: true, text: 'Breaths / Min' } }
         };
@@ -3465,13 +3482,13 @@ renderChart() {
             type: 'line',
             data: { labels: labels, datasets: datasets },
             options: {
-                responsive: true, 
+                responsive: true,
                 maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false }, 
+                interaction: { mode: 'index', intersect: false },
                 plugins: {
                     annotation: { annotations: annotations },
-                    tooltip: { 
-                        callbacks: { 
+                    tooltip: {
+                        callbacks: {
                             title: (context) => context[0].label,
                             label: (context) => {
                                 if (context.dataset.label === 'Medication Change') return context.dataset.medTooltips[context.dataIndex];
@@ -3482,30 +3499,32 @@ renderChart() {
                                 if (context.raw === null) return null;
                                 return context.dataset.srrTooltips ? context.dataset.srrTooltips[context.dataIndex] : `Rate: ${context.parsed.y} bpm`;
                             }
-                        } 
+                        }
                     },
-                    zoom: { 
-                        pan: { 
-                            enabled: true, 
+                    zoom: {
+                        pan: {
+                            enabled: true,
                             mode: 'x',
-                            onPanRejected: ({ chart }) => { console.warn('Pan boundary reached'); } 
-                        }, 
-                        zoom: { 
-                            wheel: { enabled: true }, 
-                            pinch: { enabled: true }, 
-                            mode: 'x', 
-                            limits: { 
-                                x: { min: 'original', max: 'original', minRange: 1000 * 60 * 60 * 24 * 7 }, 
-                                y: { min: 0, max: 100 } 
-                            } 
-                        } 
+                            onPanRejected: ({ chart }) => { console.warn('Pan boundary reached'); }
+                        },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'x',
+                            limits: {
+                                x: { min: 'original', max: 'original', minRange: 1000 * 60 * 60 * 24 * 7 },
+                                y: { min: 0, max: 100 }
+                            }
+                        }
                     }
-                },            
+                },
                 scales: scalesObj
             }
         });
     }, 50);
 },
+
+
 
 renderWeightChart() {
     if (this.weightChartRenderTimeout) clearTimeout(this.weightChartRenderTimeout);
