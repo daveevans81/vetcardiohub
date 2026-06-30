@@ -140,6 +140,261 @@ const VACCINE_CATALOGUE = {
     }
 };
 
+/* ============================================================================
+   ANTIPARASITIC MODULE DATA
+   - PARASITE_TARGETS          : the 9 trackable parasites (matrix columns)
+   - PARASITE_REGION_DEFAULTS  : seeded priority sets per region
+   - ANTIPARASITIC_FORMULARY   : product catalogue + coverage matrix
+   Coverage model: `covers` = full label claim; `partial` = treats/controls
+   only or limited spectrum (engine flags these with a caveat).
+   ⚠ Coverage cells are a clinical seed — verify against current SPCs pre-release.
+   ============================================================================ */
+
+const PARASITE_TARGETS = [
+    { id: 'fleas',     label: 'Fleas',                short: 'Fleas', category: 'ecto',            cardiac: false },
+    { id: 'ticks',     label: 'Ticks',                short: 'Ticks', category: 'ecto',            cardiac: false,
+      note: 'Vector for Lyme, babesiosis, ehrlichiosis, anaplasmosis.' },
+    { id: 'roundworm', label: 'Roundworm (ascarids)', short: 'Round', category: 'endo',            cardiac: false,
+      note: 'Zoonotic (Toxocara).' },
+    { id: 'hookworm',  label: 'Hookworm',             short: 'Hook',  category: 'endo',            cardiac: false,
+      note: 'Zoonotic.' },
+    { id: 'whipworm',  label: 'Whipworm',             short: 'Whip',  category: 'endo',            cardiac: false },
+    { id: 'tapeworm',  label: 'Tapeworm',             short: 'Tape',  category: 'endo',            cardiac: false },
+    { id: 'lungworm',  label: 'Lungworm (A. vasorum)', short: 'Lung', category: 'cardiopulmonary', cardiac: true,
+      note: 'Raises respiratory rate & cough — can mimic or mask cardiac decline.' },
+    { id: 'heartworm', label: 'Heartworm (D. immitis)', short: 'Heart', category: 'cardiopulmonary', cardiac: true,
+      note: 'Pulmonary hypertension & right-heart disease. Endemic in mainland Europe & US, not the UK.' },
+    { id: 'mites',     label: 'Mites (ear / mange)',  short: 'Mites', category: 'ecto',            cardiac: false }
+];
+
+const PARASITE_REGION_DEFAULTS = {
+    uk: {
+        label: 'United Kingdom & Ireland',
+        priorities: ['fleas', 'ticks', 'roundworm', 'tapeworm', 'lungworm'],
+        travelAdds: ['heartworm'],
+        note: 'Heartworm is not endemic in the UK but becomes essential on travel to southern/eastern Europe.'
+    },
+    europe: {
+        label: 'Continental Europe',
+        priorities: ['fleas', 'ticks', 'roundworm', 'tapeworm', 'lungworm', 'heartworm'],
+        travelAdds: [],
+        note: 'Heartworm endemic across southern & eastern Europe. In sandfly regions, prioritise a repellent product (collar / pyrethroid spot-on) for leishmaniasis vector control.'
+    },
+    us: {
+        label: 'United States & Canada',
+        priorities: ['fleas', 'ticks', 'roundworm', 'hookworm', 'whipworm', 'tapeworm', 'heartworm'],
+        travelAdds: [],
+        note: 'CAPC/AHS advise year-round heartworm + broad-spectrum control. A. vasorum lungworm is not endemic (US lungworm species differ).'
+    }
+};
+
+const ANTIPARASITIC_FORMULARY = {
+
+    /* ---- BROAD-SPECTRUM (ecto + endo endectocides) ---- */
+    advocate: {
+        id: 'advocate', brand: 'Advocate / Advantage Multi', generic: 'Imidacloprid + Moxidectin',
+        species: 'both', form: 'spot-on', group: 'broad',
+        covers: ['fleas', 'roundworm', 'hookworm', 'lungworm', 'heartworm', 'mites'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['uk', 'europe', 'us'], color: '#6366f1',
+        note: 'No tick or tapeworm cover. Prinovox is the generic equivalent.'
+    },
+    nexgard_spectra: {
+        id: 'nexgard_spectra', brand: 'NexGard Spectra', generic: 'Afoxolaner + Milbemycin oxime',
+        species: 'dog', form: 'oral', group: 'broad',
+        covers: ['fleas', 'ticks', 'roundworm', 'hookworm', 'whipworm', 'lungworm', 'heartworm'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['uk', 'europe'], color: '#6366f1', note: 'No tapeworm cover.'
+    },
+    nexgard_combo: {
+        id: 'nexgard_combo', brand: 'NexGard Combo', generic: 'Esafoxolaner + Eprinomectin + Praziquantel',
+        species: 'cat', form: 'spot-on', group: 'broad',
+        covers: ['fleas', 'ticks', 'roundworm', 'hookworm', 'tapeworm', 'lungworm', 'heartworm'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['uk', 'europe', 'us'], color: '#6366f1', note: 'Broad-spectrum feline spot-on.'
+    },
+    simparica_trio: {
+        id: 'simparica_trio', brand: 'Simparica Trio', generic: 'Sarolaner + Moxidectin + Pyrantel',
+        species: 'dog', form: 'oral', group: 'broad',
+        covers: ['fleas', 'ticks', 'roundworm', 'hookworm', 'lungworm', 'heartworm'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['uk', 'europe', 'us'], color: '#6366f1',
+        note: 'EU label includes A. vasorum; no tapeworm cover.'
+    },
+    credelio_plus: {
+        id: 'credelio_plus', brand: 'Credelio Plus', generic: 'Lotilaner + Milbemycin oxime',
+        species: 'dog', form: 'oral', group: 'broad',
+        covers: ['fleas', 'ticks', 'roundworm', 'hookworm', 'whipworm', 'lungworm', 'heartworm'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['uk', 'europe'], color: '#6366f1', note: 'No tapeworm cover.'
+    },
+    credelio_quattro: {
+        id: 'credelio_quattro', brand: 'Credelio Quattro', generic: 'Lotilaner + Moxidectin + Praziquantel + Pyrantel',
+        species: 'dog', form: 'oral', group: 'broad',
+        covers: ['fleas', 'ticks', 'roundworm', 'hookworm', 'tapeworm', 'heartworm'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['us'], color: '#6366f1', note: '6-in-1 chewable. No labelled A. vasorum lungworm claim.'
+    },
+    broadline: {
+        id: 'broadline', brand: 'Broadline', generic: 'Fipronil + (S)-methoprene + Eprinomectin + Praziquantel',
+        species: 'cat', form: 'spot-on', group: 'broad',
+        covers: ['fleas', 'ticks', 'roundworm', 'hookworm', 'tapeworm', 'lungworm', 'heartworm'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['uk', 'europe'], color: '#6366f1', note: 'Broad-spectrum feline spot-on.'
+    },
+    felpreva: {
+        id: 'felpreva', brand: 'Felpreva', generic: 'Tigolaner + Emodepside + Praziquantel',
+        species: 'cat', form: 'spot-on', group: 'broad',
+        covers: ['fleas', 'ticks', 'roundworm', 'hookworm', 'tapeworm', 'lungworm', 'mites'], partial: [],
+        intervalDays: 91, intervalLabel: '3-monthly (13 weeks)', prescription: true,
+        regions: ['uk', 'europe'], color: '#0d9488', note: 'No heartworm cover. 13-week dosing interval.'
+    },
+    bravecto_plus: {
+        id: 'bravecto_plus', brand: 'Bravecto Plus', generic: 'Fluralaner + Moxidectin',
+        species: 'cat', form: 'spot-on', group: 'broad',
+        covers: ['fleas', 'ticks', 'roundworm', 'hookworm', 'lungworm', 'heartworm', 'mites'], partial: [],
+        intervalDays: 60, intervalLabel: '2-monthly', prescription: true,
+        regions: ['uk', 'europe', 'us'], color: '#0d9488', note: 'Feline. No tapeworm cover.'
+    },
+    stronghold: {
+        id: 'stronghold', brand: 'Stronghold / Revolution', generic: 'Selamectin',
+        species: 'both', form: 'spot-on', group: 'broad',
+        covers: ['fleas', 'roundworm', 'heartworm', 'mites'], partial: ['ticks'],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['uk', 'europe', 'us'], color: '#6366f1',
+        note: 'Limited tick activity only. Also treats sarcoptic mange in dogs.'
+    },
+    stronghold_plus: {
+        id: 'stronghold_plus', brand: 'Stronghold Plus / Revolution Plus', generic: 'Selamectin + Sarolaner',
+        species: 'cat', form: 'spot-on', group: 'broad',
+        covers: ['fleas', 'ticks', 'roundworm', 'heartworm', 'mites'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['uk', 'europe', 'us'], color: '#6366f1', note: 'Feline. No tapeworm cover.'
+    },
+
+    /* ---- ECTOPARASITE-ONLY (flea / tick) ---- */
+    nexgard: {
+        id: 'nexgard', brand: 'NexGard', generic: 'Afoxolaner',
+        species: 'dog', form: 'oral', group: 'ecto',
+        covers: ['fleas', 'ticks'], partial: [], intervalDays: 30, intervalLabel: 'Monthly',
+        prescription: true, regions: ['uk', 'europe', 'us'], color: '#f59e0b', note: 'Flea & tick only.'
+    },
+    bravecto: {
+        id: 'bravecto', brand: 'Bravecto', generic: 'Fluralaner',
+        species: 'both', form: 'oral / spot-on', group: 'ecto',
+        covers: ['fleas', 'ticks'], partial: ['mites'], intervalDays: 84, intervalLabel: '12-weekly',
+        prescription: true, regions: ['uk', 'europe', 'us'], color: '#f59e0b',
+        note: 'Oral (dog) lasts 12 weeks; cat spot-on also treats ear mites.'
+    },
+    bravecto_quantum: {
+        id: 'bravecto_quantum', brand: 'Bravecto Quantum', generic: 'Fluralaner (injectable)',
+        species: 'dog', form: 'injectable', group: 'ecto',
+        covers: ['fleas', 'ticks'], partial: [], intervalDays: 365, intervalLabel: 'Annual (12 months)',
+        prescription: true, regions: ['uk', 'europe', 'us'], color: '#f59e0b',
+        note: 'Single annual injection — flea & tick only.'
+    },
+    simparica: {
+        id: 'simparica', brand: 'Simparica', generic: 'Sarolaner',
+        species: 'dog', form: 'oral', group: 'ecto',
+        covers: ['fleas', 'ticks'], partial: [], intervalDays: 30, intervalLabel: 'Monthly',
+        prescription: true, regions: ['uk', 'europe', 'us'], color: '#f59e0b', note: 'Flea & tick only.'
+    },
+    credelio: {
+        id: 'credelio', brand: 'Credelio', generic: 'Lotilaner',
+        species: 'both', form: 'oral', group: 'ecto',
+        covers: ['fleas', 'ticks'], partial: [], intervalDays: 30, intervalLabel: 'Monthly',
+        prescription: true, regions: ['uk', 'europe', 'us'], color: '#f59e0b', note: 'Flea & tick only.'
+    },
+    seresto: {
+        id: 'seresto', brand: 'Seresto', generic: 'Imidacloprid + Flumethrin (collar)',
+        species: 'both', form: 'collar', group: 'ecto',
+        covers: ['fleas', 'ticks'], partial: [], intervalDays: 240, intervalLabel: '7–8 monthly',
+        prescription: false, regions: ['uk', 'europe', 'us'], color: '#f59e0b',
+        note: 'Collar — repels, useful as a leishmaniasis vector measure in sandfly regions.'
+    },
+    frontline: {
+        id: 'frontline', brand: 'Frontline Spot On', generic: 'Fipronil',
+        species: 'both', form: 'spot-on', group: 'ecto',
+        covers: ['fleas', 'ticks'], partial: [], intervalDays: 30, intervalLabel: 'Monthly',
+        prescription: false, regions: ['uk', 'europe', 'us'], color: '#f59e0b',
+        note: 'Documented flea resistance concerns — many vets now prefer isoxazolines.'
+    },
+    frontline_plus: {
+        id: 'frontline_plus', brand: 'Frontline Plus / Combo', generic: 'Fipronil + (S)-methoprene',
+        species: 'both', form: 'spot-on', group: 'ecto',
+        covers: ['fleas', 'ticks'], partial: [], intervalDays: 30, intervalLabel: 'Monthly',
+        prescription: false, regions: ['uk', 'europe', 'us'], color: '#f59e0b',
+        note: 'Adds flea egg/larval control. Resistance concerns as above.'
+    },
+    advantage: {
+        id: 'advantage', brand: 'Advantage', generic: 'Imidacloprid',
+        species: 'both', form: 'spot-on', group: 'ecto',
+        covers: ['fleas'], partial: [], intervalDays: 30, intervalLabel: 'Monthly',
+        prescription: false, regions: ['uk', 'europe', 'us'], color: '#f59e0b',
+        note: 'Fleas only — no tick or worm cover.'
+    },
+    vectra_3d: {
+        id: 'vectra_3d', brand: 'Vectra 3D', generic: 'Dinotefuran + Pyriproxyfen + Permethrin',
+        species: 'dog', form: 'spot-on', group: 'ecto',
+        covers: ['fleas', 'ticks'], partial: [], intervalDays: 30, intervalLabel: 'Monthly',
+        prescription: false, regions: ['uk', 'europe', 'us'], color: '#f59e0b',
+        note: 'DOG ONLY — permethrin is toxic to cats. Repels mosquitoes & sandflies (leishmaniasis vector cover).'
+    },
+    vectra_felis: {
+        id: 'vectra_felis', brand: 'Vectra Felis', generic: 'Dinotefuran + Pyriproxyfen',
+        species: 'cat', form: 'spot-on', group: 'ecto',
+        covers: ['fleas'], partial: [], intervalDays: 30, intervalLabel: 'Monthly',
+        prescription: false, regions: ['uk', 'europe', 'us'], color: '#f59e0b', note: 'Feline — fleas only.'
+    },
+
+    /* ---- ENDOPARASITE-ONLY (wormers / heartworm preventives) ---- */
+    milbemax: {
+        id: 'milbemax', brand: 'Milbemax', generic: 'Milbemycin oxime + Praziquantel',
+        species: 'both', form: 'oral', group: 'endo',
+        covers: ['roundworm', 'hookworm', 'whipworm', 'tapeworm', 'lungworm', 'heartworm'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly (worming)', prescription: true,
+        regions: ['uk', 'europe', 'us'], color: '#10b981', note: 'No flea or tick cover.'
+    },
+    drontal: {
+        id: 'drontal', brand: 'Drontal', generic: 'Praziquantel + Pyrantel + Febantel',
+        species: 'both', form: 'oral', group: 'endo',
+        covers: ['roundworm', 'hookworm', 'whipworm', 'tapeworm'], partial: [],
+        intervalDays: 90, intervalLabel: '3-monthly (or as advised)', prescription: false,
+        regions: ['uk', 'europe', 'us'], color: '#10b981',
+        note: 'All-wormer — no lungworm, heartworm, flea or tick cover.'
+    },
+    droncit: {
+        id: 'droncit', brand: 'Droncit', generic: 'Praziquantel',
+        species: 'both', form: 'oral / spot-on', group: 'endo',
+        covers: ['tapeworm'], partial: [], intervalDays: 90, intervalLabel: 'As advised',
+        prescription: false, regions: ['uk', 'europe', 'us'], color: '#10b981', note: 'Tapeworm only.'
+    },
+    panacur: {
+        id: 'panacur', brand: 'Panacur', generic: 'Fenbendazole',
+        species: 'both', form: 'oral', group: 'endo',
+        covers: ['roundworm', 'hookworm', 'whipworm', 'lungworm'], partial: ['tapeworm'],
+        intervalDays: 90, intervalLabel: 'Course-based / as advised', prescription: false,
+        regions: ['uk', 'europe', 'us'], color: '#10b981',
+        note: 'Multi-day course. Also used for Giardia. Taenia tapeworm only.'
+    },
+    heartgard: {
+        id: 'heartgard', brand: 'Heartgard Plus', generic: 'Ivermectin + Pyrantel',
+        species: 'dog', form: 'oral', group: 'endo',
+        covers: ['heartworm', 'roundworm', 'hookworm'], partial: [],
+        intervalDays: 30, intervalLabel: 'Monthly', prescription: true,
+        regions: ['us'], color: '#10b981', note: 'Heartworm preventive with intestinal cover. No flea/tick.'
+    },
+
+    /* ---- CUSTOM ---- */
+    other: {
+        id: 'other', brand: 'Custom Product', generic: 'User-defined',
+        species: 'both', form: 'other', group: 'custom',
+        covers: [], partial: [], intervalDays: 30, intervalLabel: 'Custom',
+        prescription: false, regions: ['uk', 'europe', 'us'], color: '#64748b',
+        note: 'Define coverage manually.'
+    }
+};
+
 const ACVIM_PATHWAYS = {
 
     MMVD: {

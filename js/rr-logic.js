@@ -24,7 +24,8 @@ defaultModules: {
     syncopeLog: true,
     acvimStaging: true,
     weightDiet: true,  
-    vaccinations: true
+    vaccinations: true,
+    antiparasitics: true
 },
 
 showProgressionBanner: false,
@@ -68,7 +69,8 @@ showProgressionBanner: false,
         syncopeLog: false,
         acvimStaging: false,
         weightDiet: true,
-        vaccinations: true
+        vaccinations: true,
+        antiparasitics: true
     }
 }, 
         manualSrrInput: null,
@@ -143,6 +145,36 @@ newWeightEntry: {
     foodBrand: '',
     portionSize: '',
     supplements: '',
+    notes: ''
+},
+
+// --- ANTIPARASITIC STATE ---
+antiparasiticFormulary: ANTIPARASITIC_FORMULARY,   // expose global to Alpine
+parasiteTargets: PARASITE_TARGETS,                 // expose global to Alpine
+parasiteRegionDefaults: PARASITE_REGION_DEFAULTS,  // expose global to Alpine
+antiparasiticLog: [],
+showAntiparasiticPanel: false,
+showAntiparasiticForm: false,
+editingAntiparasiticId: null,
+selectedProductEntry: null,        // active product entry while form is open
+
+// Reusable priorities page
+showPrioritiesModal: false,
+prioritiesContext: 'edit',         // 'onboarding' | 'edit' | 'review'
+prioritiesDraft: { region: 'uk', travel: false, priorities: [] },
+
+newAntiparasitic: {
+    date: new Date().toISOString().split('T')[0],
+    productId: '',
+    customName: '',
+    customCovers: [],              // user-defined coverage for 'other'
+    covers: [],                    // auto-filled from formulary (display chips)
+    partial: [],
+    intervalDays: 30,
+    intervalLabel: 'Monthly',
+    nextDueDate: '',
+    batchNumber: '',
+    administeredBy: '',
     notes: ''
 },
 
@@ -302,10 +334,11 @@ init() {
                 this.coughLog = JSON.parse(localStorage.getItem('vch_coughLog')) || [];       
                 this.activityLog = JSON.parse(localStorage.getItem('vch_activityLog')) || [];
                 this.vaccinationLog = JSON.parse(localStorage.getItem('vch_vaccinationLog')) || [];
+                this.antiparasiticLog = JSON.parse(localStorage.getItem('vch_antiparasiticLog')) || [];
 
             } catch(e) {
                 this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
-                this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.vaccinationLog = []; this.activityLog = [];
+                this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.vaccinationLog = []; this.antiparasiticLog = []; this.activityLog = [];
             }
 
     // Set initial active patient safely
@@ -406,7 +439,7 @@ startNewPatientOnboarding() {
 
 generateModuleRecommendations() {
     // Reset to baseline
-    let recs = { srr: false, medications: false, coughLog: false, activityLog: false, syncopeLog: false, acvimStaging: false, vaccinations: true, weightDiet: true };
+    let recs = { srr: false, medications: false, coughLog: false, activityLog: false, syncopeLog: false, acvimStaging: false, vaccinations: true, weightDiet: true, antiparasitics: true };
     
     if (this.onboardingData.hasCardiacIssue === 'yes') {
         recs.srr = true;
@@ -505,7 +538,8 @@ saveOnboardedPatient() {
             this.syncopeLog = this.syncopeLog.filter(s => s.patientId !== patientId);
             this.coughLog = this.coughLog.filter(s => s.patientId !== patientId);
             this.activityLog = this.activityLog.filter(s => s.patientId !== patientId);
-            this.vaccinationLog = this.vaccinationLog.filter(v => v.patientId !== patientId);                      
+            this.vaccinationLog = this.vaccinationLog.filter(v => v.patientId !== patientId);   
+            this.antiparasiticLog = this.antiparasiticLog.filter(a => a.patientId !== patientId);                   
   
 
             // 2. Persist the flushed arrays to local storage
@@ -517,7 +551,8 @@ saveOnboardedPatient() {
             this.saveToStorage('vch_syncopeLog', this.syncopeLog);
             this.saveToStorage('vch_coughLog', this.coughLog);
             this.saveToStorage('vch_activityLog', this.activityLog);
-            this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);  
+            this.saveToStorage('vch_vaccinationLog', this.vaccinationLog); 
+            this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog); 
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -662,6 +697,7 @@ logWeight(patientId, value) {
             this.coughLog = this.coughLog.map(c => c.patientId === sourceId ? { ...c, patientId: targetId } : c);
             this.activityLog = this.activityLog.map(c => c.patientId === sourceId ? { ...c, patientId: targetId } : c);
             this.vaccinationLog = this.vaccinationLog.map(v => v.patientId === sourceId ? { ...v, patientId: targetId } : v);
+            this.antiparasiticLog = this.antiparasiticLog.map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
 
 
             // Delete Source Patient
@@ -677,6 +713,7 @@ logWeight(patientId, value) {
             this.saveToStorage('vch_activityLog', this.activityLog);
             this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
             this.saveToStorage('vch_patients', this.patients);
+            this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
             
             
 
@@ -708,7 +745,7 @@ logWeight(patientId, value) {
             .sort((a, b) => new Date(b.date) - new Date(a.date));
         this.editingPatient = {
             ...target,
-            weight: weights.length > 0 ? weights[0].weightValue : null,
+            weight: null,
             // CRITICAL FIX: backfill modules for patients created before this feature
             modules: target.modules
                 ? { ...this.defaultModules, ...target.modules }  // merge: defaults fill any new keys
@@ -757,6 +794,390 @@ get hasAnyDataForActivePet() {
             };
             return labels[this.timeScale] || 'Filtered Range';
         },
+        
+        
+        // ===================== ANTIPARASITIC LOGIC =====================
+
+_defaultRegion() {
+    return 'uk';   // project home base; could later derive from locale
+},
+
+get antiparasiticRegion() {
+    return this.activePatientProfile?.parasiteRegion || this._defaultRegion();
+},
+
+// Effective priority list: explicit patient set, else region default,
+// plus travel-triggered additions (e.g. heartworm for UK travellers).
+getParasitePriorities() {
+    const p = this.activePatientProfile;
+    const region = p?.parasiteRegion || this._defaultRegion();
+    const base = (p && Array.isArray(p.parasitePriorities) && p.parasitePriorities.length)
+        ? p.parasitePriorities.slice()
+        : (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice();
+    if (p?.parasiteTravel) {
+        (PARASITE_REGION_DEFAULTS[region]?.travelAdds || []).forEach(id => {
+            if (!base.includes(id)) base.push(id);
+        });
+    }
+    return base;
+},
+
+// Grouped + region/species-filtered product list for the selector
+get productOptions() {
+    const region  = this.antiparasiticRegion;
+    const species = this.currentSpecies;
+    const groups  = { broad: [], ecto: [], endo: [], custom: [] };
+    for (const prod of Object.values(this.antiparasiticFormulary)) {
+        if (prod.group === 'custom') { groups.custom.push(prod); continue; }
+        if (!prod.regions.includes(region)) continue;
+        if (prod.species !== 'both' && prod.species !== species) continue;
+        (groups[prod.group] || groups.broad).push(prod);
+    }
+    return groups;
+},
+
+_getProductEntry(productId) {
+    return this.antiparasiticFormulary[productId] || null;
+},
+
+_calcParasiticDue(dateStr, intervalDays) {
+    if (!dateStr || !intervalDays) return '';
+    const d = new Date(dateStr + 'T12:00:00');
+    d.setDate(d.getDate() + Number(intervalDays));
+    return d.toISOString().split('T')[0];
+},
+
+onProductSelected(productId) {
+    this.selectedProductEntry       = null;
+    this.newAntiparasitic.productId = productId;
+    this.newAntiparasitic.covers    = [];
+    this.newAntiparasitic.partial   = [];
+
+    if (!productId || productId === 'other') {
+        this.newAntiparasitic.intervalDays  = 30;
+        this.newAntiparasitic.intervalLabel = 'Monthly';
+        this.newAntiparasitic.nextDueDate   = this._calcParasiticDue(this.newAntiparasitic.date, 30);
+        return;
+    }
+    const entry = this._getProductEntry(productId);
+    if (!entry) return;
+
+    this.selectedProductEntry           = entry;
+    this.newAntiparasitic.covers        = entry.covers.slice();
+    this.newAntiparasitic.partial       = (entry.partial || []).slice();
+    this.newAntiparasitic.intervalDays  = entry.intervalDays;
+    this.newAntiparasitic.intervalLabel = entry.intervalLabel;
+    this.newAntiparasitic.nextDueDate   = this._calcParasiticDue(this.newAntiparasitic.date, entry.intervalDays);
+},
+
+// Re-derive due date when the administered date changes
+_refreshParasiticDue() {
+    this.newAntiparasitic.nextDueDate =
+        this._calcParasiticDue(this.newAntiparasitic.date, this.newAntiparasitic.intervalDays);
+},
+
+openAntiparasiticForm(logEntry = null) {
+    this.selectedProductEntry = null;
+    if (logEntry) {
+        this.newAntiparasitic = {
+            ...logEntry,
+            customCovers: logEntry.productId === 'other' ? (logEntry.covers || []).slice() : [],
+            covers:  (logEntry.covers  || []).slice(),
+            partial: (logEntry.partial || []).slice()
+        };
+        this.editingAntiparasiticId = logEntry.id;
+        if (logEntry.productId && logEntry.productId !== 'other') {
+            this.selectedProductEntry = this._getProductEntry(logEntry.productId);
+        }
+    } else {
+        this.newAntiparasitic = {
+            date: new Date().toISOString().split('T')[0],
+            productId: '', customName: '', customCovers: [],
+            covers: [], partial: [], intervalDays: 30, intervalLabel: 'Monthly',
+            nextDueDate: '', batchNumber: '', administeredBy: '', notes: ''
+        };
+        this.editingAntiparasiticId = null;
+    }
+    this.showAntiparasiticForm = true;
+},
+
+saveAntiparasitic() {
+    if (!this.activePatientId) return alert('Select a patient first.');
+    if (!this.newAntiparasitic.productId) return alert('Please select a product.');
+    if (this.newAntiparasitic.productId === 'other' && !this.newAntiparasitic.customName.trim()) {
+        return alert('Please name the custom product.');
+    }
+
+    const isCustom = this.newAntiparasitic.productId === 'other';
+    const entryToSave = {
+        ...this.newAntiparasitic,
+        id:        this.editingAntiparasiticId || this.generateId(),
+        patientId: this.activePatientId,
+        covers:  isCustom ? (this.newAntiparasitic.customCovers || []) : this.newAntiparasitic.covers,
+        partial: isCustom ? [] : this.newAntiparasitic.partial,
+        productLabel: isCustom
+            ? (this.newAntiparasitic.customName || 'Custom Product')
+            : (this._getProductEntry(this.newAntiparasitic.productId)?.brand || this.newAntiparasitic.productId)
+    };
+    delete entryToSave.customCovers;
+
+    if (this.editingAntiparasiticId) {
+        const idx = this.antiparasiticLog.findIndex(a => a.id === this.editingAntiparasiticId);
+        if (idx !== -1) this.antiparasiticLog[idx] = entryToSave;
+    } else {
+        this.antiparasiticLog.push(entryToSave);
+    }
+    this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
+    this.showAntiparasiticForm = false;
+    this.selectedProductEntry = null;
+},
+
+deleteAntiparasitic(id) {
+    if (confirm('Delete this antiparasitic record?')) {
+        this.antiparasiticLog = this.antiparasiticLog.filter(a => a.id !== id);
+        this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
+    }
+},
+
+sortedAntiparasiticLog() {
+    if (!this.activePatientId) return [];
+    return this.antiparasiticLog
+        .filter(a => a.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+},
+
+// Reuse the vaccine due-date colour engine — identical semantics
+getParasiticStatus(nextDueDate) {
+    return this.getVaccineStatus(nextDueDate);
+},
+
+// For each parasite, the most-recent IN-DATE product covering it.
+// Returns { parasiteId: { product, level, dueStatus, entryId } | null }
+activeParasiticCoverage() {
+    const coverage = {};
+    PARASITE_TARGETS.forEach(t => { coverage[t.id] = null; });
+
+    for (const entry of this.sortedAntiparasiticLog()) {   // newest first
+        const status = this.getParasiticStatus(entry.nextDueDate);
+        if (!status || status.days < 0) continue;          // lapsed — skip
+        const apply = (ids, level) => (ids || []).forEach(pid => {
+            if (coverage[pid]) return;                     // most recent wins
+            coverage[pid] = { product: entry.productLabel || entry.productId, level, dueStatus: status, entryId: entry.id };
+        });
+        apply(entry.covers, 'full');
+        apply(entry.partial, 'partial');
+    }
+    return coverage;
+},
+
+// Diffs priorities against active coverage → one row per priority.
+parasiticCoverageGaps() {
+    const priorities = this.getParasitePriorities();
+    const coverage   = this.activeParasiticCoverage();
+    const logs       = this.sortedAntiparasiticLog();
+
+    return priorities.map(pid => {
+        const target = PARASITE_TARGETS.find(t => t.id === pid);
+        const cov    = coverage[pid];
+        const everCovered = logs.some(e =>
+            (e.covers || []).includes(pid) || (e.partial || []).includes(pid));
+
+        let state = 'gap';                                 // covered | partial | lapsed | gap
+        if (cov && cov.level === 'full')         state = 'covered';
+        else if (cov && cov.level === 'partial') state = 'partial';
+        else if (everCovered)                    state = 'lapsed';
+
+        return {
+            id: pid,
+            label: target?.label || pid,
+            cardiac: !!target?.cardiac,
+            state,
+            product: cov?.product || null,
+            dueStatus: cov?.dueStatus || null
+        };
+    });
+},
+
+// Actionable alert feed — cardiac-relevant gaps surfaced first.
+parasiticAlerts() {
+    return this.parasiticCoverageGaps()
+        .filter(g => g.state !== 'covered')
+        .map(g => ({
+            id: g.id,
+            label: g.label,
+            cardiac: g.cardiac,
+            state: g.state,
+            message: g.state === 'lapsed'
+                ? `${g.label} cover has lapsed — last product is overdue`
+                : g.state === 'partial'
+                    ? `${g.label} is only partially covered`
+                    : `No active product covers ${g.label}`
+        }))
+        .sort((a, b) => (b.cardiac - a.cardiac));
+},
+
+// ---- Reusable priorities page (onboarding + edit + review) ----
+openPrioritiesModal(context = 'edit') {
+    this.prioritiesContext = context;
+    const src = (context === 'review') ? this.activePatientProfile : this.editingPatient;
+    const region = src?.parasiteRegion || this._defaultRegion();
+    const explicit = Array.isArray(src?.parasitePriorities) && src.parasitePriorities.length;
+
+    this.prioritiesDraft = {
+        region,
+        travel: !!src?.parasiteTravel,
+        priorities: explicit
+            ? src.parasitePriorities.slice()
+            : (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice()
+    };
+    this.showPrioritiesModal = true;
+},
+
+applyRegionDefaults(region) {
+    this.prioritiesDraft.region = region;
+    this.prioritiesDraft.priorities = (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice();
+},
+
+togglePriority(parasiteId) {
+    const arr = this.prioritiesDraft.priorities;
+    const i = arr.indexOf(parasiteId);
+    if (i === -1) arr.push(parasiteId); else arr.splice(i, 1);
+},
+
+get prioritiesRegionNote() {
+    return PARASITE_REGION_DEFAULTS[this.prioritiesDraft.region]?.note || '';
+},
+
+savePriorities() {
+    const draft = this.prioritiesDraft;
+    if (this.prioritiesContext === 'review') {
+        const p = this.activePatientProfile;
+        if (p) {
+            p.parasiteRegion     = draft.region;
+            p.parasiteTravel     = draft.travel;
+            p.parasitePriorities = draft.priorities.slice();
+            this.saveToStorage('vch_patients', this.patients);
+        }
+    } else {
+        this.editingPatient.parasiteRegion     = draft.region;
+        this.editingPatient.parasiteTravel     = draft.travel;
+        this.editingPatient.parasitePriorities = draft.priorities.slice();
+    }
+    this.showPrioritiesModal = false;
+},
+
+// ---- Recurring calendar reminders (RRULE) ----
+_parasiticRrule(intervalDays) {
+    const d = Number(intervalDays) || 30;
+    if (d >= 360)                  return 'FREQ=YEARLY;INTERVAL=1';
+    if (d % 30 === 0 && d <= 366)  return `FREQ=MONTHLY;INTERVAL=${Math.round(d / 30)}`;
+    if (d % 7 === 0)               return `FREQ=WEEKLY;INTERVAL=${d / 7}`;
+    return `FREQ=DAILY;INTERVAL=${d}`;
+},
+
+_buildParasiticVevent(entry, patientName) {
+    const name  = entry.productLabel || entry.productId || 'Antiparasitic';
+    const start = (entry.nextDueDate || '').replace(/-/g, '');
+    if (!start) return [];
+
+    const endDate = new Date(entry.nextDueDate);
+    endDate.setDate(endDate.getDate() + 1);
+    const end = endDate.getFullYear()
+        + String(endDate.getMonth() + 1).padStart(2, '0')
+        + String(endDate.getDate()).padStart(2, '0');
+
+    const now = new Date();
+    const dtstamp = now.getUTCFullYear()
+        + String(now.getUTCMonth() + 1).padStart(2, '0')
+        + String(now.getUTCDate()).padStart(2, '0') + 'T'
+        + String(now.getUTCHours()).padStart(2, '0')
+        + String(now.getUTCMinutes()).padStart(2, '0')
+        + String(now.getUTCSeconds()).padStart(2, '0') + 'Z';
+
+    const coversText = (entry.covers || [])
+        .map(id => PARASITE_TARGETS.find(t => t.id === id)?.label || id)
+        .join(', ');
+
+    const descParts = [
+        `Pet: ${patientName}`,
+        `Product: ${name}`,
+        `Schedule: ${entry.intervalLabel || 'recurring'}`,
+        coversText ? `Covers: ${coversText}` : null,
+        entry.batchNumber    ? `Batch: ${entry.batchNumber}`              : null,
+        entry.administeredBy ? `Administered by: ${entry.administeredBy}` : null,
+        '',
+        'Recurring reminder generated by VetCardioHub — vetcardiohub.com'
+    ].filter(v => v !== null).join('\\n');
+
+    return [
+        'BEGIN:VEVENT',
+        `UID:${this.generateId()}@vetcardiohub.com`,
+        `DTSTAMP:${dtstamp}`,
+        `DTSTART;VALUE=DATE:${start}`,
+        `DTEND;VALUE=DATE:${end}`,
+        `RRULE:${this._parasiticRrule(entry.intervalDays)}`,
+        `SUMMARY:${this._escapeIcs(`${patientName} – ${name} due`)}`,
+        `DESCRIPTION:${this._escapeIcs(descParts)}`,
+        'BEGIN:VALARM',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:${this._escapeIcs(`Reminder: ${patientName}'s ${name} is due in 3 days`)}`,
+        'TRIGGER:-P3D',
+        'END:VALARM',
+        'BEGIN:VALARM',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:${this._escapeIcs(`${patientName}'s ${name} is due today`)}`,
+        'TRIGGER:PT9H',
+        'END:VALARM',
+        'END:VEVENT'
+    ];
+},
+
+addParasiticReminder(entry) {
+    if (!entry.nextDueDate) return alert('No next due date set for this product.');
+    const patientName = this.activePatientProfile?.name || 'Pet';
+    const fileName = (entry.productLabel || entry.productId || 'Antiparasitic').replace(/\s+/g, '-');
+    const lines = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0',
+        'PRODID:-//VetCardioHub//Antiparasitic Reminder//EN',
+        'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+        ...this._buildParasiticVevent(entry, patientName),
+        'END:VCALENDAR'
+    ];
+    this._downloadIcs(this._buildIcsString(lines),
+        `${patientName.replace(/\s+/g, '-')}-${fileName}-Recurring.ics`);
+},
+
+exportAllParasiticReminders() {
+    if (!this.activePatientId) return;
+    const patientName = this.activePatientProfile?.name || 'Pet';
+
+    const byProduct = {};
+    this.sortedAntiparasiticLog()
+        .filter(e => e.nextDueDate)
+        .forEach(e => {
+            const key = e.productId === 'other' ? (e.productLabel || e.id) : e.productId;
+            if (!byProduct[key]) byProduct[key] = e;   // most recent per product
+        });
+
+    const products = Object.values(byProduct);
+    if (products.length === 0) return alert('No antiparasitic records with a due date found.');
+
+    const eventBlocks = products.flatMap(e => this._buildParasiticVevent(e, patientName));
+    const lines = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0',
+        'PRODID:-//VetCardioHub//Antiparasitic Reminders//EN',
+        'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+        ...eventBlocks,
+        'END:VCALENDAR'
+    ];
+    this._downloadIcs(this._buildIcsString(lines),
+        `${patientName.replace(/\s+/g, '-')}-All-Antiparasitic-Reminders.ics`);
+},
+
+
+
+
+
       // --- VACCINATION LOGIC ---
       
       
