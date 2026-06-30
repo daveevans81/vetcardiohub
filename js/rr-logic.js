@@ -5396,7 +5396,7 @@ async generatePDF() {
     // ── 7. Diagnosis & Staging Log ────────────────────────────────────────
     if (mods.acvimStaging) {
             const diagData = this.diagnosisLog
-            .filter(d => d.patientId === this.activePatientId
+            .filter(d => d.patientId === this.activePatientId)
             .sort((a, b) => new Date(b.date) - new Date(a.date));
      
         if (diagData.length > 0) {
