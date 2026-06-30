@@ -9,7 +9,7 @@ onboardingStep: 0, // 0 = Welcome, 1 = Demographics, 2 = Clinical, 3 = Recommend
 isExistingPatientEdit: false, // Flag to bypass wizard when editing later
 
 onboardingData: {
-    hasCardiacIssue: '',
+    hasCardiacIssue: 'no',
     murmurGrade: '',
     diagnosis: '',
     acvimStage: ''

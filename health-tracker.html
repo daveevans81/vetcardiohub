@@ -290,6 +290,17 @@
                  <!-- STEP 0: Welcome Screen -->
                                 
                 <div class="onboarding-modal-inner">
+                    <!-- Step progress indicator — hidden on welcome screen -->
+                    <div x-show="onboardingStep > 0" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 0 4px;margin-bottom:4px;">
+                        <template x-for="s in [1,2,3]" :key="s">
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <div :style="`width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:bold;transition:all 0.2s;
+                                    ${onboardingStep === s ? 'background:#16325F;color:#fff;' : onboardingStep > s ? 'background:#0f766e;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'}`"
+                                    x-text="onboardingStep > s ? '✓' : s"></div>
+                                <div x-show="s < 3" style="width:28px;height:2px;" :style="onboardingStep > s ? 'background:#0f766e;' : 'background:#e2e8f0;'"></div>
+                            </div>
+                        </template>
+                    </div>
                 
                     <div x-show="onboardingStep === 0" style="background: rgba(250,250,250,1.0);">
                     
@@ -330,57 +341,57 @@
                       <!-- Feature grid -->
                         <div class="w-feature-grid">
                             <div class="w-feat">
-                              <i class="ti ti-lungs" style="font-size:20px; color:#0f766e;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-lungs" style="font-size:20px; color:#0f766e;" aria-hidden="true"></i>
                               <p class="w-feat-title">SRR monitor</p>
                               <p class="w-feat-desc">One-tap 30-second counter with instant clinical interpretation</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-pill" style="font-size:20px; color:#3b82f6;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-pills" style="font-size:20px; color:#3b82f6;" aria-hidden="true"></i>
                               <p class="w-feat-title">Medication ledger</p>
                               <p class="w-feat-desc">Track dose changes and see their effect on breathing trends</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-chart-line" style="font-size:20px; color:#0284c7;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-chart-line" style="font-size:20px; color:#0284c7;" aria-hidden="true"></i>
                               <p class="w-feat-title">Trend analytics</p>
                               <p class="w-feat-desc">Charts with medication overlays, statistics, and date filtering</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-stethoscope" style="font-size:20px; color:#7c3aed;" aria-hidden="true"></i>
-                              <p class="w-feat-title">ACVIM staging</p>
+                              <i class="fa-solid fa-stethoscope" style="font-size:20px; color:#7c3aed;" aria-hidden="true"></i>
+                              <p class="w-feat-title">Diagnosis, Murmur and ACVIM staging</p>
                               <p class="w-feat-desc">Log and visualise disease progression over time</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-bolt" style="font-size:20px; color:#d97706;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-bolt" style="font-size:20px; color:#d97706;" aria-hidden="true"></i>
                               <p class="w-feat-title">Syncope diary</p>
                               <p class="w-feat-desc">Record collapse events with timing, tone, and triggers</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-file-export" style="font-size:20px; color:#475569;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-chart-line" style="font-size:20px; color:#475569;" aria-hidden="true"></i>
                               <p class="w-feat-title">Vet export</p>
                               <p class="w-feat-desc">PDF, CSV, or clipboard report for your next appointment</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-wind" style="font-size:20px; color:#b45309;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-head-side-cough" style="font-size:20px; color:#b45309;" aria-hidden="true"></i>
                               <p class="w-feat-title">Cough log</p>
                               <p class="w-feat-desc">Daily cough frequency, severity, and description summaries</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-walk" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-person-running" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
                               <p class="w-feat-title">Activity log</p>
                               <p class="w-feat-desc">Track exercise tolerance and energy levels over time</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-scale" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-scale-balanced" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
                               <p class="w-feat-title">Weight and Diet log</p>
                               <p class="w-feat-desc">Track weight, diet, appetite and supplements over time</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-syringe" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-syringe" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
                               <p class="w-feat-title">Vaccination log</p>
                               <p class="w-feat-desc">Track your pet's vaccinations. Don't just rely on your vet's database and reminders, take control yourself.</p>
                             </div>
                             <div class="w-feat">
-                              <i class="ti ti-worm" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                              <i class="fa-solid fa-bug-slash" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
                               <p class="w-feat-title">Anti-Parasitic log</p>
                               <p class="w-feat-desc">Make sure your pet has proper full coverage of heartworm, lungworm and others as indicated by your region. Track the products and when they are next due.</p>
                             </div>
@@ -651,8 +662,8 @@
             <!-- ******************************** -->
             <!-- PARASITE PRIORITIES PAGE         -->
             <!-- ******************************** -->
-            <div id="parasite-priorities" x-show="showPrioritiesModal" class="modal-overlay" style="background: rgba(0,0,0,0.6); z-index: 60;" x-cloak>
-                <div class="onboarding-modal-inner" style="max-width: 520px; padding: 0; overflow: hidden; text-align: left;" @click.away="showPrioritiesModal = false">
+            <div id="parasite-priorities" x-show="showPrioritiesModal" class="modal-overlay" style="background: rgba(0,0,0,0.6); z-index: z-index: 10200;" x-cloak>
+                <div class="onboarding-modal-inner" style="max-width: 520px; padding: 0; overflow: hidden; text-align: left;" @click.away="prioritiesContext !== 'onboarding' && (showPrioritiesModal = false)">
                     <div style="background:#0f766e;color:#fff;padding:14px 18px;">
                         <h3 style="margin:0;font-size:1.1rem;"><i class="fa-solid fa-shield-virus"></i> Parasite Protection Plan</h3>
                         <div style="font-size:0.78rem;opacity:0.9;margin-top:2px;">Choose what this pet needs cover against — risk-based, not maximal.</div>
