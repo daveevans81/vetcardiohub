@@ -5277,7 +5277,7 @@ async generatePDF() {
     };
  
     // ── 2. ACVIM Staging Chart ────────────────────────────────────────────
-    if (this.activePathway) {
+    if (mods.acvimStaging && this.activePathway) {
         try {
             const svgEl = document.getElementById('acvim-svg-export');
             if (svgEl) {
@@ -5297,7 +5297,7 @@ async generatePDF() {
     }
 
     // ── 2b. Murmur Grade Chart ────────────────────────────────────────────
-    if (this.murmurProgression && this.murmurProgression.length > 0) {
+    if (mods.acvimStaging && this.murmurProgression && this.murmurProgression.length > 0) {
         try {
             const murmurSvgEl = document.getElementById('murmur-svg-export');
             if (murmurSvgEl) {
@@ -5394,30 +5394,32 @@ async generatePDF() {
     
  
     // ── 7. Diagnosis & Staging Log ────────────────────────────────────────
-    const diagData = this.diagnosisLog
-        .filter(d => d.patientId === this.activePatientId && inRange(d.date))
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
- 
-    if (diagData.length > 0) {
-        if (Y > 240) { doc.addPage(); Y = 20; }
-        sectionHeader('Diagnosis & Staging Log', 109, 40, 217);
-        doc.autoTable({
-            startY: Y,
-            head: [['Date', 'Diagnosis', 'ACVIM Stage', 'Murmur Grade', 'Concurrent Conditions', 'Notes']],
-            body: diagData.map(d => [
-                d.date,
-                d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '—'),
-                d.acvimStage || '—',
-                d.murmurGrade || '—',
-                (d.concurrentDiagnoses || []).join(', ') || '—',
-                d.notes || '—'
-            ]),
-            theme: 'striped',
-            headStyles: { fillColor: [109, 40, 217] },
-            columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 32 }, 2: { cellWidth: 20 }, 3: { cellWidth: 20 }, 4: { cellWidth: 34 }, 5: { cellWidth: 'auto' } },
-            styles: { fontSize: 8 }
-        });
-        Y = doc.lastAutoTable.finalY + 12;
+    if (mods.acvimStaging) {
+            const diagData = this.diagnosisLog
+            .filter(d => d.patientId === this.activePatientId
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+     
+        if (diagData.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Diagnosis & Staging Log', 109, 40, 217);
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', 'Diagnosis', 'ACVIM Stage', 'Murmur Grade', 'Concurrent Conditions', 'Notes']],
+                body: diagData.map(d => [
+                    d.date,
+                    d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '—'),
+                    d.acvimStage || '—',
+                    d.murmurGrade || '—',
+                    (d.concurrentDiagnoses || []).join(', ') || '—',
+                    d.notes || '—'
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [109, 40, 217] },
+                columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 32 }, 2: { cellWidth: 20 }, 3: { cellWidth: 20 }, 4: { cellWidth: 34 }, 5: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
     }
  
     // ── 8. Syncope / Collapse Log ─────────────────────────────────────────
@@ -5542,31 +5544,31 @@ async generatePDF() {
 
     // ── 12. Vaccination Log ────────────────────────────────────────────────
     if (mods.vaccinations) {
-        const vaccData = this.vaccinationLog
-        .filter(v => v.patientId === this.activePatientId)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (vaccData.length > 0) {
-        if (Y > 240) { doc.addPage(); Y = 20; }
-        sectionHeader('Vaccination Log', 124, 58, 237);
-        doc.autoTable({
-            startY: Y,
-            head: [['Date', 'Vaccine', 'Batch No.', 'Administered By', 'Next Due', 'Notes']],
-            body: vaccData.map(v => [
-                v.date,
-                v.type || '—',
-                v.batchNumber || '—',
-                v.administeredBy || '—',
-                v.nextDueDate || '—',
-                v.notes || '—'
-            ]),
-            theme: 'striped',
-            headStyles: { fillColor: [124, 58, 237] },
-            columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 38 }, 2: { cellWidth: 22 }, 3: { cellWidth: 32 }, 4: { cellWidth: 22 }, 5: { cellWidth: 'auto' } },
-            styles: { fontSize: 8 }
-        });
-        Y = doc.lastAutoTable.finalY + 12;
-    }
+            const vaccData = this.vaccinationLog
+            .filter(v => v.patientId === this.activePatientId)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+        if (vaccData.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Vaccination Log', 124, 58, 237);
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', 'Vaccine', 'Batch No.', 'Administered By', 'Next Due', 'Notes']],
+                body: vaccData.map(v => [
+                    v.date,
+                    v.type || '—',
+                    v.batchNumber || '—',
+                    v.administeredBy || '—',
+                    v.nextDueDate || '—',
+                    v.notes || '—'
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [124, 58, 237] },
+                columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 38 }, 2: { cellWidth: 22 }, 3: { cellWidth: 32 }, 4: { cellWidth: 22 }, 5: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
     }
     
         // ── 13. Antiparasitic Log ──────────────────────────────────────────────
