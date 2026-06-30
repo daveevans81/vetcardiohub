@@ -4581,7 +4581,7 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 }
 
 /* Tracker page: hide the global site header entirely */
-.app-page #site-header{ display:none; }
+.app-page .banner { display:none; }
 
 /* Tracker page: full-bleed — drop the centred 900px "card" edges */
 .app-page .content{
