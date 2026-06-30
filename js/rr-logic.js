@@ -340,6 +340,8 @@ init() {
                 this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
                 this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.vaccinationLog = []; this.antiparasiticLog = []; this.activityLog = [];
             }
+            
+    this.initDisclaimer();
 
     // Set initial active patient safely
     if (this.patients.length > 0) {
@@ -5802,6 +5804,30 @@ async shareReport() {
         navigator.clipboard.writeText(out)
             .then(() => alert("Full clinical report copied to clipboard (share sheet not available on this browser)."))
             .catch(() => alert("Failed to copy to clipboard — check browser permissions."));
+    }
+},
+
+disclaimerEngine: {
+    showDisclaimerModal: false,
+    
+    initDisclaimer() {
+        const lastAccepted = localStorage.getItem('vch_disclaimer_timestamp');
+        const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000; 
+
+        // Trigger if no record exists, or if the stored timestamp is older than 30 days
+        if (!lastAccepted || (Date.now() - parseInt(lastAccepted, 10)) > thirtyDaysInMs) {
+            this.showDisclaimerModal = true;
+        }
+    },
+    
+    acceptDisclaimer() {
+        localStorage.setItem('vch_disclaimer_timestamp', Date.now().toString());
+        this.showDisclaimerModal = false;
+    },
+
+    // Optional: Allow users to manually invoke it from the footer
+    forceShowDisclaimer() {
+        this.showDisclaimerModal = true;
     }
 },
         

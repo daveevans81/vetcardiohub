@@ -707,23 +707,30 @@
             
             
             <!-- GLOBAL CLINICAL & DATA DISCLAIMER -->
-            <div x-data="{ showDisclaimer: true }" x-show="showDisclaimer" x-transition class="summary-box" style="border: 2px solid #f59e0b; background: #fffbeb; padding: 20px; margin-bottom: 25px; border-radius: 8px; position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+            <div x-show="showDisclaimerModal" 
+                 class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm"
+                 x-cloak>
                 
-                <button @click="showDisclaimer = false" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #b45309; cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" aria-label="Dismiss">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+               <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 m-4" @click.away="showDisclaimerModal = true">
             
-                <h3 style="margin-top: 0; color: #b45309; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Important Clinical & Privacy Notice
-                </h3>
-                
-                <div style="font-size: 0.85rem; color: #78350f; line-height: 1.5;">
-                    <p style="margin-top: 0; margin-bottom: 12px;">
-                        <strong>Data Privacy & Retention:</strong> VetCardioHub operates entirely on your local device. <strong>No clinical data, patient profiles, or tracking metrics are transmitted to or stored on external cloud servers.</strong> While this guarantees total privacy, it also means that clearing your browser cache or site data will permanently delete your records. We strongly advise utilizing the <a href="#" @click.prevent="showImportExport = true; document.getElementById('symptomSection').scrollIntoView({ behavior: 'smooth' })" style="color: #d97706; text-decoration: underline; font-weight: bold;">Master Backup feature</a> regularly.
-                    </p>
-                    <p style="margin: 0;">
-                        <strong>Veterinary Partnership:</strong> This application is designed strictly as an evidence-based monitoring adjunct. It does not provide definitive medical diagnoses, nor does it replace the clinical judgment of a veterinary surgeon. Always interpret resting respiratory rates, activity logs, and syncopal events in direct consultation with your primary care veterinarian or board-certified cardiologist.
-                    </p>
+                    <h3 style="margin-top: 0; color: #b45309; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Important Clinical & Privacy Notice
+                    </h3>
+                    
+                    <div style="font-size: 0.85rem; color: #78350f; line-height: 1.5;">
+                        <p style="margin-top: 0; margin-bottom: 12px;">
+                            <strong>Data Privacy & Retention:</strong> VetCardioHub operates entirely on your local device. <strong>No clinical data, patient profiles, or tracking metrics are transmitted to or stored on external cloud servers.</strong> While this guarantees total privacy, it also means that clearing your browser cache or site data will permanently delete your records. We strongly advise utilizing the <a href="#" @click.prevent="showImportExport = true; document.getElementById('symptomSection').scrollIntoView({ behavior: 'smooth' })" style="color: #d97706; text-decoration: underline; font-weight: bold;">Master Backup feature</a> regularly.
+                        </p>
+                        <p style="margin: 0;">
+                            <strong>Veterinary Partnership:</strong> This application is designed strictly as an evidence-based monitoring adjunct. It does not provide definitive medical diagnoses, nor does it replace the clinical judgment of a veterinary surgeon. Always interpret resting respiratory rates, activity logs, and syncopal events in direct consultation with your primary care veterinarian or board-certified cardiologist.
+                        </p>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button @click="acceptDisclaimer()" 
+                                class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline transition duration-150">
+                            <i class="fa-solid fa-check mr-2"></i> I Acknowledge and Agree
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -3314,8 +3321,18 @@
 
 <div id="site-footer"></div>
 <div style="text-align: center; font-size: 0.75rem; background: #1e293b; color: #f8fafc; margin-top: 0px;">
-    <i class="fa-solid fa-shield-halved"></i> 
-    <strong>Privacy Note for SRR Tracker App:</strong> All clinical data and history are stored locally on your device. VetCardioHub does not transmit or collect this information. <br> Please take care to backup and store this data regularly as it is a useful medical record.
+    <p class="mb-2">
+        <i class="fa-solid fa-shield-halved text-gray-400 mr-1"></i>
+        <strong>Clinical & Privacy Notice:</strong> This application is an adjunctive monitoring tool and does not substitute professional veterinary medical advice. 
+    </p>
+    <p class="mb-2">
+        All patient data and historical logs are securely stored <em>locally</em> on this device. VetCardioHub does not transmit or archive your data. Please utilize the export tools regularly to maintain a secure backup of these clinical records.
+    </p>
+    <p>
+        <button @click="forceShowDisclaimer()" class="text-blue-600 hover:text-blue-800 underline focus:outline-none">
+            Review Full Terms & Disclaimer
+        </button>
+    </p>
 </div>
 
 <script src="/js/load-partials.js"></script>
