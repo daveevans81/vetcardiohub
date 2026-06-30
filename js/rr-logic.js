@@ -4738,6 +4738,90 @@ importVaccinationCSV(event) {
 },
 
 // ==========================================
+// --- ANTIPARASITIC LOG CSV EXPORT / IMPORT ---
+// ==========================================
+
+exportAntiparasiticCSV() {
+    if (!this.antiparasiticLog || this.antiparasiticLog.length === 0) return alert("No antiparasitic data to export.");
+    const headers = "Date,PatientName,Product,IntervalDays,IntervalLabel,Covers,Partial,BatchNumber,AdministeredBy,NextDueDate,Notes\n";
+    const rows = this.antiparasiticLog.map(a => {
+        const patient = this.patients.find(p => p.id === a.patientId);
+        const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+        const product = a.productId === 'other' ? (a.productLabel || a.customName || 'Custom') : (a.productLabel || a.productId);
+        const covers = (a.covers || []).join('; ');
+        const partial = (a.partial || []).join('; ');
+        return [
+            a.date,
+            `"${patientName}"`,
+            `"${this.sanitiseCSV(product)}"`,
+            a.intervalDays != null ? a.intervalDays : '',
+            `"${this.sanitiseCSV(a.intervalLabel || '')}"`,
+            `"${this.sanitiseCSV(covers)}"`,
+            `"${this.sanitiseCSV(partial)}"`,
+            `"${this.sanitiseCSV(a.batchNumber || '')}"`,
+            `"${this.sanitiseCSV(a.administeredBy || '')}"`,
+            a.nextDueDate || '',
+            `"${this.sanitiseCSV(a.notes || '')}"`
+        ].join(',');
+    }).join("\n");
+    const BOM = '\uFEFF';
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `VCH_AntiparasiticLog_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+},
+
+importAntiparasiticCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const lines = e.target.result.split("\n").map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) return alert("The selected CSV file appears empty.");
+            const clean = (s) => (s || '').replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+            let importedCount = 0, skipped = 0;
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].match(/(".*?"|[^",]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g);
+                if (!parts || parts.length < 3) { skipped++; continue; }
+                const patientName = clean(parts[1]);
+                const patient = this.patients.find(p => p.name.toLowerCase() === patientName.toLowerCase());
+                if (!patient) { skipped++; continue; }
+                const date = clean(parts[0]);
+                if (!date) { skipped++; continue; }
+                const productLabel = clean(parts[2]);
+                // Try to resolve back to a known catalogue product by brand name; else treat as custom
+                const matched = Object.values(this.antiparasiticFormulary).find(p => p.brand.toLowerCase() === productLabel.toLowerCase());
+                this.antiparasiticLog.push({
+                    id: this.generateId(),
+                    patientId: patient.id,
+                    date,
+                    productId: matched ? matched.id : 'other',
+                    productLabel: matched ? matched.brand : (productLabel || 'Custom'),
+                    intervalDays: parseInt(clean(parts[3])) || 30,
+                    intervalLabel: clean(parts[4]) || 'Monthly',
+                    covers: clean(parts[5]) ? clean(parts[5]).split(';').map(s => s.trim()).filter(Boolean) : [],
+                    partial: clean(parts[6]) ? clean(parts[6]).split(';').map(s => s.trim()).filter(Boolean) : [],
+                    batchNumber: clean(parts[7]) || '',
+                    administeredBy: clean(parts[8]) || '',
+                    nextDueDate: clean(parts[9]) || '',
+                    notes: clean(parts[10]) || ''
+                });
+                importedCount++;
+            }
+            this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
+            const note = skipped > 0 ? ` (${skipped} skipped)` : '';
+            alert(`Imported ${importedCount} antiparasitic record(s)${note}.`);
+        } catch (err) { alert("Failed to parse Antiparasitic CSV. Check the file format."); }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
+
+// ==========================================
 // --- DIAGNOSIS LOG CSV EXPORT / IMPORT ---
 // ==========================================
 
@@ -4832,7 +4916,11 @@ importDiagnosisCSV(event) {
     reader.readAsText(file);
 },
 
+
+
+
         // --- FULL SYSTEM MASTER BACKUP (JSON) ---
+        
 exportCompleteBackup() {
 const backupData = {
                 vch_patients: this.patients,
@@ -4844,6 +4932,7 @@ const backupData = {
                 vch_coughLog: this.coughLog,
                 vch_activityLog: this.activityLog,
                 vch_vaccinationLog: this.vaccinationLog,
+                vch_antiparasiticLog: this.antiparasiticLog,
                 exportDate: new Date().toISOString()
             };
 
@@ -4856,7 +4945,8 @@ const backupData = {
     link.remove();
 },
 
-        importCompleteBackup(event) {
+
+importCompleteBackup(event) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -4881,6 +4971,7 @@ const backupData = {
                     this.activityLog = data.vch_activityLog;
                     this.weightLog = data.vch_weightLog || [];
                     this.vaccinationLog = data.vch_vaccinationLog || [];
+                    this.antiparasiticLog = data.vch_antiparasiticLog || [];
 
                     this.saveToStorage('vch_patients', this.patients);
                     this.saveToStorage('vch_srrHistory', this.srrHistory);
@@ -4891,6 +4982,7 @@ const backupData = {
                     this.saveToStorage('vch_activityLog', this.activityLog);
                     this.saveToStorage('vch_weightLog', this.weightLog);
                     this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
+                    this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
                     
 
                     if (this.patients.length > 0) this.activePatientId = this.patients[0].id; 
@@ -5360,6 +5452,33 @@ async generatePDF() {
         });
         Y = doc.lastAutoTable.finalY + 12;
     }
+    
+        // ── 13. Antiparasitic Log ──────────────────────────────────────────────
+    const apData = this.antiparasiticLog
+        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (apData.length > 0) {
+        if (Y > 240) { doc.addPage(); Y = 20; }
+        sectionHeader('Antiparasitic Log', 15, 118, 110);
+        doc.autoTable({
+            startY: Y,
+            head: [['Date', 'Product', 'Covers', 'Schedule', 'Next Due', 'Notes']],
+            body: apData.map(a => [
+                a.date,
+                a.productLabel || a.productId || '—',
+                (a.covers || []).map(cid => PARASITE_TARGETS.find(t => t.id === cid)?.short || cid).join(', ') || '—',
+                a.intervalLabel || '—',
+                a.nextDueDate || '—',
+                a.notes || '—'
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [15, 118, 110] },
+            columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 32 }, 2: { cellWidth: 38 }, 3: { cellWidth: 22 }, 4: { cellWidth: 20 }, 5: { cellWidth: 'auto' } },
+            styles: { fontSize: 8 }
+        });
+        Y = doc.lastAutoTable.finalY + 12;
+    }
 
     doc.save(`${profile.name.replace(/\s+/g, '_')}_Clinical_Report_${new Date().toISOString().split('T')[0]}.pdf`);
 },
@@ -5567,6 +5686,32 @@ generateCSV() {
         });
         csv += '\n';
     }
+    
+        // ── Antiparasitic Log ────────────────────────────────────────────────
+    const apDataCSV = this.antiparasiticLog
+        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (apDataCSV.length > 0) {
+        csv += 'ANTIPARASITIC LOG\n';
+        csv += 'Date,Product,Interval,Covers,Partial,Batch No.,Administered By,Next Due Date,Notes\n';
+        apDataCSV.forEach(a => {
+            const covers = (a.covers || []).join('; ');
+            const partial = (a.partial || []).join('; ');
+            csv += [
+                q(a.date),
+                q(a.productLabel || a.productId || ''),
+                q(a.intervalLabel || ''),
+                q(covers),
+                q(partial),
+                q(a.batchNumber || ''),
+                q(a.administeredBy || ''),
+                q(a.nextDueDate || ''),
+                q(a.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
  
     if (!csv.trim()) return alert("No data to export for this patient in the selected date range.");
  
@@ -5763,6 +5908,38 @@ _buildReportText() {
             }
             if (v.notes) out += `${nl}${indent}Notes: ${v.notes}`;
             out += nl;
+        });
+        out += nl;
+    }
+    
+    // ── Antiparasitic Log ────────────────────────────────────────────────
+    const apData = this.antiparasiticLog
+        .filter(a => a.patientId === this.activePatientId && inRange(a.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (apData.length > 0) {
+        out += `ANTIPARASITIC LOG (${apData.length} entr${apData.length !== 1 ? 'ies' : 'y'})${nl}`;
+        out += rule() + nl;
+        apData.forEach(a => {
+            out += `${a.date}  |  ${a.productLabel || a.productId || 'Unknown product'}`;
+            if (a.intervalLabel) out += `  |  ${a.intervalLabel}`;
+            if (a.nextDueDate)   out += `  |  Next due: ${a.nextDueDate}`;
+            if ((a.covers || []).length > 0) {
+                out += `${nl}${indent}Covers: ${a.covers.map(cid => PARASITE_TARGETS.find(t => t.id === cid)?.label || cid).join(', ')}`;
+            }
+            if (a.notes) out += `${nl}${indent}Notes: ${a.notes}`;
+            out += nl;
+        });
+        out += nl;
+    }
+
+    // ── Parasite Coverage Gaps (current snapshot) ──────────────────────────
+    const gaps = this.parasiticCoverageGaps().filter(g => g.state !== 'covered');
+    if (gaps.length > 0) {
+        out += `PARASITE COVERAGE GAPS (current)${nl}`;
+        out += rule() + nl;
+        gaps.forEach(g => {
+            out += `${g.label}: ${g.state}${g.cardiac ? '  [cardiac-relevant]' : ''}${nl}`;
         });
         out += nl;
     }

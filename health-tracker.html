@@ -650,9 +650,8 @@
             <!-- ******************************** -->
             <!-- PARASITE PRIORITIES PAGE         -->
             <!-- ******************************** -->
-            <div id="parasite-priorities" x-show="showPrioritiesModal" class="fixed inset-0 flex items-center justify-center p-4"
-                 style="z-index:60;background:rgba(0,0,0,0.6);" x-cloak>
-                <div style="max-width:520px;width:100%;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+            <div id="parasite-priorities" x-show="showPrioritiesModal" class="modal-overlay" style="background: rgba(0,0,0,0.6); z-index: 60;" x-cloak>
+                <div class="onboarding-modal-inner" style="max-width: 520px; padding: 0; overflow: hidden; text-align: left;" @click.away="showPrioritiesModal = false">
                     <div style="background:#0f766e;color:#fff;padding:14px 18px;">
                         <h3 style="margin:0;font-size:1.1rem;"><i class="fa-solid fa-shield-virus"></i> Parasite Protection Plan</h3>
                         <div style="font-size:0.78rem;opacity:0.9;margin-top:2px;">Choose what this pet needs cover against — risk-based, not maximal.</div>
