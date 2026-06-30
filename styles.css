@@ -112,7 +112,7 @@ html, body {
 .content {
     padding: 30px; /* Adds more padding inside the content area */
     max-width: 900px; /* Expands the width for larger screens */
-    margin: 20px auto; /* Centers content and adds top/bottom margin */
+    margin: 0px auto; /* Centers content and adds top/bottom margin */
     background: #fafafa;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Slightly softer shadow for depth */
     border-radius: 10px; /* Adds rounded corners for a smoother appearance */
