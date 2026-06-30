@@ -191,7 +191,7 @@
 
 <div class="content">
 
-    <div class="rr-dashboard" x-data="rrTracker" @disclaimer-trigger.window="forceShowDisclaimer()">       
+    <div class="rr-dashboard" x-data="rrTracker" @disclaimer-trigger.window="forceShowDisclaimer(); $nextTick(() => { document.getElementById($event.detail.targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); })">       
         <header class="hero-header card">
         
             <!-- Collapsed mini-title: always visible -->
@@ -650,7 +650,7 @@
             <!-- ******************************** -->
             <!-- PARASITE PRIORITIES PAGE         -->
             <!-- ******************************** -->
-            <div x-show="showPrioritiesModal" class="fixed inset-0 flex items-center justify-center p-4"
+            <div id="parasite-priorities" x-show="showPrioritiesModal" class="fixed inset-0 flex items-center justify-center p-4"
                  style="z-index:60;background:rgba(0,0,0,0.6);" x-cloak>
                 <div style="max-width:520px;width:100%;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
                     <div style="background:#0f766e;color:#fff;padding:14px 18px;">
@@ -707,7 +707,7 @@
             
             
             <!-- GLOBAL CLINICAL & DATA DISCLAIMER -->
-            <div x-show="showDisclaimerModal" 
+            <div id="app-disclaimer" x-show="showDisclaimerModal" 
                  style="border: 2px solid #f59e0b; background: #fffbeb; padding: 20px; margin-bottom: 25px; border-radius: 8px; position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);"
                  x-cloak>
                 
@@ -3329,7 +3329,7 @@
         All patient data and historical logs are securely stored <em>locally</em> on this device. VetCardioHub does not transmit or archive your data. Please utilize the export tools regularly to maintain a secure backup of these clinical records.
     </p>
     <p style="margin: 0px;">
-        <button onclick="window.dispatchEvent(new CustomEvent('disclaimer-trigger'))" style="bottom-margin: 30px;" class="text-blue-600 hover:text-blue-800 underline focus:outline-none">
+        <button onclick="window.dispatchEvent(new CustomEvent('disclaimer-trigger', { detail: { targetId: 'app-disclaimer' } }))" style="bottom-margin: 30px;" class="text-blue-600 hover:text-blue-800 underline focus:outline-none">
             Review Full Terms & Disclaimer
         </button>
     </p>
