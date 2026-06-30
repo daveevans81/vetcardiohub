@@ -216,7 +216,43 @@
 
     
           
-        <header class="hero-header card">
+
+    
+    
+
+
+    <div class="container" style="padding: 0;">
+    <div class="grid">
+    <!-- App section nav — sticky left column on desktop -->
+        <nav class="vch-sidebar" aria-label="App sections">
+            <div class="vch-sidebar__brand">
+                <img src="/logo-placeholder.png" alt="VetCardioHub" style="width:28px; height:28px;" class="vch-sidebar__logo">
+                <span>VetCardioHub Cardiac Tracker</span>
+            </div>
+ 
+            <div class="vch-sidebar__patient" x-show="activePatientProfile" x-cloak>
+                <div class="vch-sidebar__petname" x-text="activePatientProfile?.name || 'No patient'"></div>
+                <div class="vch-sidebar__petmeta">
+                    <span x-text="computedAgeText"></span>
+                    <template x-if="primaryCardiacDiagnosis && primaryCardiacDiagnosis !== 'N/A'">
+                        <span> · <span x-text="primaryCardiacDiagnosis"></span></span>
+                    </template>
+                </div>
+            </div>
+            <div class="vch-sidebar__nav">
+                <template x-for="item in visibleNavItems()" :key="item.id">
+                    <button type="button" class="vch-sidebar__btn"
+                            :class="{ 'is-active': activeView === item.id }"
+                            :aria-current="activeView === item.id ? 'page' : null"
+                            @click="setView(item.id)">
+                        <i class="fa-solid" :class="item.icon"></i>
+                        <span x-text="item.label"></span>
+                    </button>
+                </template>
+            </div>
+        </nav>
+    <main>
+                <header class="hero-header card">
         
             <!-- Collapsed mini-title: always visible -->
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -263,43 +299,6 @@
             </div>
         
         </header>
-    
-    
-
-
-    <div class="container" style="padding: 0;">
-    <div class="grid">
-    <!-- App section nav — sticky left column on desktop -->
-        <nav class="vch-sidebar" aria-label="App sections">
-            <div class="vch-sidebar__brand">
-                <img src="/logo-placeholder.png" alt="VetCardioHub" style="width:28px; height:28px;" class="vch-sidebar__logo">
-                <span>VetCardioHub</span>
-            </div>
-            <div class="vch-sidebar__brand">
-                <i class="fa-solid fa-heart-pulse"></i><span>Cardiac Tracker</span>
-            </div>
-            <div class="vch-sidebar__patient" x-show="activePatientProfile" x-cloak>
-                <div class="vch-sidebar__petname" x-text="activePatientProfile?.name || 'No patient'"></div>
-                <div class="vch-sidebar__petmeta">
-                    <span x-text="computedAgeText"></span>
-                    <template x-if="primaryCardiacDiagnosis && primaryCardiacDiagnosis !== 'N/A'">
-                        <span> · <span x-text="primaryCardiacDiagnosis"></span></span>
-                    </template>
-                </div>
-            </div>
-            <div class="vch-sidebar__nav">
-                <template x-for="item in visibleNavItems()" :key="item.id">
-                    <button type="button" class="vch-sidebar__btn"
-                            :class="{ 'is-active': activeView === item.id }"
-                            :aria-current="activeView === item.id ? 'page' : null"
-                            @click="setView(item.id)">
-                        <i class="fa-solid" :class="item.icon"></i>
-                        <span x-text="item.label"></span>
-                    </button>
-                </template>
-            </div>
-        </nav>
-    <main>
         
                                 <!-- ******************************** -->
                                 <!-- COMMENT EDITOR                   -->
