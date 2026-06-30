@@ -77,12 +77,12 @@ module_srr: {
 },
 
 module_syncope: {
-    title: "Syncope & Collapse Log",
+    title: "Seizure, Syncope & Collapse Log",
     group: "Tracker",
     category: "Modules",
     audience: ["vet", "owner"],
     difficulty: 2,
-    textOwner: "This module is a diary for any fainting, collapsing, or concerning episodes your pet experiences. For each event you record the date and time, what the episode looked like (syncope, seizure, weakness, or a custom description), how long it lasted, whether they remained conscious, their muscle tone and gum colour during the episode, their heart and breathing rate if you were able to check, what they were doing beforehand, and any additional observations. Having an accurate, timestamped account of these events is extremely valuable for your cardiologist.",
+    textOwner: "This module is a diary for any seizures, fainting, collapsing, or concerning episodes your pet experiences. For each event you record the date and time, what the episode looked like (syncope, seizure, weakness, or a custom description), how long it lasted, whether they remained conscious, their muscle tone and gum colour during the episode, their heart and breathing rate if you were able to check, what they were doing beforehand, and any additional observations. Having an accurate, timestamped account of these events is extremely valuable for your cardiologist.",
     textClinical: "Structured event diary capturing: datetime, event type (syncope, seizure, weakness, unknown, or custom), duration, level of consciousness, muscle tone, mucous membrane colour, HR, RR, pre-event activity context, and free-text clinical notes. Provides a longitudinal record to distinguish cardiogenic syncope from neurological events, vagally-mediated episodes, or primary myopathy. Critical for triage decisions and for correlating with concurrent Holter or arrhythmia data."
 },
 
@@ -164,6 +164,15 @@ analytics_chart: {
     difficulty: 2,
     textOwner: "The analytics chart displays all of your pet's sleeping breathing rate readings plotted over time as a line graph. What makes it particularly useful are the optional overlays you can add on top: medication changes appear as vertical annotation lines so you can see exactly when a drug was started or adjusted; cough severity entries appear as coloured markers; and activity duration or distance can be plotted alongside. The x-axis can be set to True Time (which spreads readings out to reflect real months passing, averaging multiple readings on the same day) or Sequential (which shows each reading individually side by side). The chart supports pinch-to-zoom, pan, and full-screen expansion.",
     textClinical: "Chart.js time-series visualisation of SRR readings with multiple optional overlay layers: medication change annotations (vertical event markers with drug labels), cough severity plot, activity duration or distance overlay. X-axis supports two modes — True Time (real-calendar axis; same-day readings averaged) and Sequential (each reading plotted individually, preserving intra-day variation). Supports zoom and pan (mouse wheel and pinch), and full-screen modal expansion for detailed review. Zoom is resettable via button. The chart redraws automatically when new data is added, the date range filter is changed, or an overlay is toggled."
+},
+
+med_chart: {
+    title: "Medication Analytics Chart",
+    group: "Tracker",
+    category: "App Features",
+    audience: ["vet", "owner"],
+    difficulty: 2,
+    textOwner: "The medication chart displays all of your pet's medications over time showing drugs that are started and stoped and the thickness of the bar helps graphically represent dose changes. The chart supports pinch-to-zoom, pan, and full-screen expansion."
 },
 
 vet_export: {
