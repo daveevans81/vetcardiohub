@@ -510,11 +510,14 @@ generateModuleRecommendations() {
             recs.coughLog = true;      
             recs.activityLog = true; 
         }
+    } else if (this.onboardingData.hasCardiacIssue === 'seizure') {
+        recs.syncopeLog = true;
+        recs.activityLog = true;
+        recs.srr = true; // useful for collapse context
     } else {
-        // e.g., general wellness or collapse history
-    recs.coughLog = true;     
-    recs.activityLog = true; 
-    recs.syncopeLog = true;
+        // General wellness
+        recs.coughLog = true;     
+        recs.activityLog = true; 
     }
 
     this.editingPatient.modules = { ...recs };
@@ -3881,6 +3884,12 @@ renderMedChart() {
                 barThickness: calculatedThickness // Now explicitly applied to this specific block!
             };
         });
+        
+        const rowHeight = 72; // px per unique drug
+        const chartHeight = Math.max(180, uniqueDrugs.length * rowHeight + 60);
+        if (canvas.parentElement) {
+            canvas.parentElement.style.height = chartHeight + 'px';
+        }
 
         this.medChartInstance = new Chart(ctx, {
             type: 'bar',

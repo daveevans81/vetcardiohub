@@ -532,16 +532,20 @@
                     <!-- STEP 2: Clinical Baseline (Diagnosis) -->
                     <div x-show="onboardingStep === 2" x-cloak>
                         <h2 class="text-primary mb-15">Clinical Baseline</h2>
-                        <p class="mb-15">Does <strong x-text="editingPatient.name || 'this patient'"></strong> have a known cardiac condition or heart murmur?</p>
-                        
+                        <p class="mb-15">What best describes <strong x-text="editingPatient.name || 'this patient'"></strong>'s primary health concern?</p>
+
                         <div class="onboarding-group" style="display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 20px;">
                             <label class="onboarding-label">
                                 <input type="radio" x-model="onboardingData.hasCardiacIssue" value="yes"> 
-                                Yes, logging a specific diagnosis or murmur
+                                Known cardiac condition or heart murmur
+                            </label>
+                            <label class="onboarding-label">
+                                <input type="radio" x-model="onboardingData.hasCardiacIssue" value="seizure"> 
+                                Episodes of collapse, seizure, or syncope (no cardiac diagnosis)
                             </label>
                             <label class="onboarding-label">
                                 <input type="radio" x-model="onboardingData.hasCardiacIssue" value="no"> 
-                                No, tracking other symptoms (e.g., general syncope, wellness)
+                                No specific diagnosis — general wellness monitoring
                             </label>
                         </div>
                     
