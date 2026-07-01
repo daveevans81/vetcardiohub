@@ -296,11 +296,14 @@ newMed: {
     drugId: '',
     customName: '',
     isStopped: false,
-    doseMg: '',
+        openedDate: '',     // NEW — date liquid bottle was opened
+    discardDays: '', 
+    form: 'tablet',           // NEW — 'tablet' | 'liquid'
+    tabletStrengthMg: '',     // tablet: mg/tablet   | liquid: mg/ml (concentration)
+    tabletsPerDose: '',       // tablet: tablets/dose | liquid: ml/dose
     frequency: 'q12h',
-    tabletsPerDose: '',      // tablets per administration (e.g. 1.5)
-    tabletsInStock: '',      //  current count on hand
-    stockDate: new Date().toISOString().split('T')[0]  // NEW — date stock was counted
+    tabletsInStock: '',       // tablet: tablets      | liquid: total ml
+    stockDate: new Date().toISOString().split('T')[0]
 },
 
         // Medication Chart State
@@ -2489,18 +2492,18 @@ deleteSyncope(id) {
         
         
  // --- COUGH LOGIC (DAILY SUMMARY) ---
-        get sortedCoughLog() {
+get sortedCoughLog() {
             if (!this.activePatientId) return [];
             return this.coughLog
                 .filter(c => c.patientId === this.activePatientId)
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
         },
 
-        hasCoughForDate() {
+hasCoughForDate() {
             return this.coughLog.some(c => c.patientId === this.activePatientId && c.date === this.newCough.date);
         },
 
-        loadCoughForDate() {
+loadCoughForDate() {
             const existing = this.coughLog.find(c => c.patientId === this.activePatientId && c.date === this.newCough.date);
             if (existing) {
                 this.newCough = { ...existing };
@@ -2514,13 +2517,13 @@ deleteSyncope(id) {
             }
         },
         
-        openCoughForm(dateStr = null) {
+openCoughForm(dateStr = null) {
             this.showCoughForm = true;
             this.newCough.date = dateStr || new Date().toISOString().split('T')[0];
             this.loadCoughForDate();
         },
 
-        closeCoughForm() {
+closeCoughForm() {
             this.showCoughForm = false;
         },
 
@@ -2539,7 +2542,7 @@ saveCough() {
             this.closeCoughForm(); // Hide the form after saving
         },
 
-        deleteCough(id) {
+deleteCough(id) {
             if (confirm("Delete this daily cough summary?")) {
                 this.coughLog = this.coughLog.filter(c => c.id !== id);
                 this.saveToStorage('vch_coughLog', this.coughLog);
@@ -2548,18 +2551,18 @@ saveCough() {
         },
 
         // --- ACTIVITY LOGIC (DAILY SUMMARY) ---
-        get sortedActivityLog() {
+get sortedActivityLog() {
             if (!this.activePatientId) return [];
             return this.activityLog
                 .filter(a => a.patientId === this.activePatientId)
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
         },
 
-        hasActivityForDate() {
+hasActivityForDate() {
             return this.activityLog.some(a => a.patientId === this.activePatientId && a.date === this.newActivity.date);
         },
 
-        loadActivityForDate() {
+loadActivityForDate() {
             const existing = this.activityLog.find(a => a.patientId === this.activePatientId && a.date === this.newActivity.date);
             if (existing) {
                 this.newActivity = { ...existing };
@@ -2572,17 +2575,17 @@ saveCough() {
         },
 
 // --- ACTIVITY LOGIC ---
-        openActivityForm(dateStr = null) {
+openActivityForm(dateStr = null) {
             this.showActivityForm = true;
             this.newActivity.date = dateStr || new Date().toISOString().split('T')[0];
             this.loadActivityForDate();
         },
 
-        closeActivityForm() {
+closeActivityForm() {
             this.showActivityForm = false;
         },
 
-        saveActivity() {
+saveActivity() {
             if (!this.activePatientId) return alert("Select a patient first.");
             
             const existingIndex = this.activityLog.findIndex(a => a.patientId === this.activePatientId && a.date === this.newActivity.date);
@@ -2597,7 +2600,7 @@ saveCough() {
             this.closeActivityForm(); // Hide the form after saving
         },
 
-        deleteActivity(id) {
+deleteActivity(id) {
             if (confirm("Delete this daily activity summary?")) {
                 this.activityLog = this.activityLog.filter(a => a.id !== id);
                 this.saveToStorage('vch_activityLog', this.activityLog);
@@ -2605,7 +2608,7 @@ saveCough() {
             }
         },
         
-        editCough(dateStr) {
+editCough(dateStr) {
             this.newCough.date = dateStr;
             this.loadCoughForDate();
         },
@@ -2615,7 +2618,7 @@ saveCough() {
             this.loadActivityForDate();
         },
                 
-// Creates an alphabetical list of "Generic (Brands)"
+    // Creates an alphabetical list of "Generic (Brands)"
         get medicationOptions() {
             let options = [];
             for (const [id, drug] of Object.entries(this.formulary)) {
@@ -2638,10 +2641,20 @@ saveCough() {
         },
         
         // Helper function to calculate mg/kg dynamically in the UI
-        
+      
+      
+      // Total dose (mg) derived from tablet strength × tablets per dose
+newMedDoseMg() {
+    const strength = parseFloat(this.newMed.tabletStrengthMg);
+    const perDose  = parseFloat(this.newMed.tabletsPerDose);
+    if (isNaN(strength) || isNaN(perDose)) return null;
+    return Math.round(strength * perDose * 1000) / 1000;
+},
+
+  
 // Dynamic mg/kg Calculator (with strict null/clinical safety checks)
 calculatedMgPerKg() {
-    const profile = this.activePatientProfile;  // fix: was activePetProfile
+    const profile = this.activePatientProfile;  
     if (!profile) return null;
 
     const weights = this.weightLog
@@ -2649,13 +2662,13 @@ calculatedMgPerKg() {
         .sort((a, b) => new Date(b.date) - new Date(a.date));
     
     const latestWeight = weights.length > 0 ? parseFloat(weights[0].weightValue) : null;
-    const dose = parseFloat(this.newMed.doseMg);
-
-    if (!latestWeight || isNaN(dose) || latestWeight <= 0 || isNaN(latestWeight)) return null;
+    const dose = this.newMedDoseMg();
+    if (!latestWeight || dose == null || latestWeight <= 0 || isNaN(latestWeight)) return null;
 
     const weightInKg = profile.weightUnit === 'lbs' ? latestWeight / 2.2046 : latestWeight;
     return (dose / weightInKg).toFixed(2);
 },
+
 // Returns the most recent weight log entry at or before a given date
 getWeightAtDate(patientId, dateStr) {
     const targetDate = new Date(dateStr);
@@ -2713,7 +2726,7 @@ startCount() {
         },
         
         
-        registerTap() {
+registerTap() {
             if (!this.isCounting) return;
             this.tapCount++;
             
@@ -2746,7 +2759,7 @@ nudgeToSymptom(type) {
             });
         },
         
-        closeResult() {
+closeResult() {
             // Manually closes the results panel and returns to the start screen
             this.finalRate = null;
             this.tapCount = 0;
@@ -2759,8 +2772,8 @@ addMedication() {
     if (!this.newMed.drugId) return alert("Clinical Entry Error: Please select a medication.");
     
     // Explicit null/empty check that works regardless of type
-    if (!this.newMed.isStopped && (this.newMed.doseMg === '' || this.newMed.doseMg === null || this.newMed.doseMg === undefined)) {
-        return alert("Clinical Entry Error: Please specify the dose.");
+    if (!this.newMed.isStopped && (this.newMed.tabletStrengthMg === '' || this.newMed.tabletsPerDose === '')) {
+        return alert("Clinical Entry Error: Please enter tablet strength and tablets per dose.");
     }
 
     const entry = {
@@ -2770,10 +2783,14 @@ addMedication() {
         drugId: this.newMed.drugId,
         customName: this.newMed.drugId === 'other' ? this.newMed.customName : null,
         isStopped: this.newMed.isStopped,                                    // raw intent stored
-        doseMg: this.newMed.isStopped ? null : parseFloat(this.newMed.doseMg),
-        frequency: this.newMed.isStopped ? null : this.newMed.frequency,
-        mgPerKg: this.newMed.isStopped ? null : this.calculatedMgPerKg(),
-        tabletsPerDose: this.newMed.isStopped ? null : (this.newMed.tabletsPerDose === '' ? null : parseFloat(this.newMed.tabletsPerDose)),
+        doseMg:           this.newMed.isStopped ? null : this.newMedDoseMg(),   // ← derived
+        frequency:        this.newMed.isStopped ? null : this.newMed.frequency,
+        mgPerKg:          this.newMed.isStopped ? null : this.calculatedMgPerKg(),
+        tabletsPerDose:   this.newMed.isStopped ? null : parseFloat(this.newMed.tabletsPerDose),
+        form:             this.newMed.form || 'tablet',
+        openedDate:  this.newMed.isStopped ? null : (this.newMed.openedDate || null),
+        discardDays: this.newMed.isStopped ? null : (this.newMed.discardDays === '' ? null : parseFloat(this.newMed.discardDays)),
+        tabletStrengthMg: this.newMed.isStopped ? null : parseFloat(this.newMed.tabletStrengthMg),
         tabletsInStock: this.newMed.isStopped ? null : (this.newMed.tabletsInStock === '' ? null : parseFloat(this.newMed.tabletsInStock)),
         stockDate:      this.newMed.isStopped ? null : (this.newMed.stockDate || this.newMed.eventDate),
     };
@@ -2784,14 +2801,11 @@ addMedication() {
 
     this.newMed = {
         eventDate: this.newMed.eventDate,
-        drugId: '',
-        customName: '',
-        isStopped: false,
-        doseMg: '',
+        drugId: '', customName: '', isStopped: false,
+        tabletStrengthMg: '', tabletsPerDose: '',
         frequency: 'q12h',
-        tabletsPerDose: '',
-        tabletsInStock: '',
-        stockDate: new Date().toISOString().split('T')[0]
+        form: 'tablet'
+        tabletsInStock: '', stockDate: new Date().toISOString().split('T')[0]
     };
 },
 
@@ -2833,32 +2847,74 @@ dosesPerDay(freq) {
     return { q24h: 1, q12h: 2, q8h: 3 }[freq] || 0;
 },
 
+// Labels + units for the current preparation type
+medUnits(form) {
+    return form === 'liquid'
+        ? { strengthLabel: 'Concentration (mg/ml)', doseLabel: 'ml per Dose',     stockLabel: 'Total ml in Stock', dose: 'ml',  count: 'ml' }
+        : { strengthLabel: 'Tablet Strength (mg)',  doseLabel: 'Tablets per Dose', stockLabel: 'Tablets in Stock',  dose: 'tab', count: 'tab' };
+},
+
 // Projects run-out from a med entry's stock data. Returns null if not computable.
 medStockProjection(entry) {
     if (!entry || entry.isStopped) return null;
     const perDose = parseFloat(entry.tabletsPerDose);
     const stock   = parseFloat(entry.tabletsInStock);
     const perDay  = this.dosesPerDay(entry.frequency) * (perDose || 0);
-    if (!(stock >= 0) || !(perDay > 0)) return null;   // PRN or missing data
-    const daysLeft = Math.floor(stock / perDay);
-    const base = new Date(entry.stockDate || entry.eventDate);
-    base.setHours(0, 0, 0, 0);
-    const emptyDate = new Date(base.getTime() + daysLeft * 86400000);
-    return { tabletsPerDay: perDay, daysLeft, emptyDate: emptyDate.toISOString().split('T')[0] };
+
+    // (a) run-out from consumption
+    let runOutDate = null, tabletsPerDay = null;
+    if (stock >= 0 && perDay > 0) {
+        tabletsPerDay = perDay;
+        const base = new Date(entry.stockDate || entry.eventDate);
+        base.setHours(0, 0, 0, 0);
+        runOutDate = new Date(base.getTime() + Math.floor(stock / perDay) * 86400000);
+    }
+
+    // (b) in-use expiry from opened date + shelf life
+    let discardDate = null;
+    const discardDays = parseFloat(entry.discardDays);
+    if (entry.openedDate && !isNaN(discardDays) && discardDays > 0) {
+        const od = new Date(entry.openedDate);
+        if (!isNaN(od.getTime())) {
+            od.setHours(0, 0, 0, 0);
+            discardDate = new Date(od.getTime() + discardDays * 86400000);
+        }
+    }
+
+    if (!runOutDate && !discardDate) return null;
+
+    // limiting factor = whichever is sooner
+    let emptyDate, reason;
+    if (runOutDate && discardDate) {
+        if (discardDate <= runOutDate) { emptyDate = discardDate; reason = 'expiry'; }
+        else                           { emptyDate = runOutDate;  reason = 'runout'; }
+    } else if (discardDate) { emptyDate = discardDate; reason = 'expiry'; }
+    else                    { emptyDate = runOutDate;  reason = 'runout'; }
+
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    return {
+        tabletsPerDay,
+        daysLeft:    Math.round((emptyDate - now) / 86400000),   // to the limiting date
+        emptyDate:   emptyDate.toISOString().split('T')[0],       // limiting date
+        runOutDate:  runOutDate  ? runOutDate.toISOString().split('T')[0]  : null,
+        discardDate: discardDate ? discardDate.toISOString().split('T')[0] : null,
+        reason       // 'runout' | 'expiry'
+    };
 },
 
 // Graded stock status — same shape as getVaccineStatus, 7-day warn window
-getStockStatus(emptyDate) {
+getStockStatus(emptyDate, reason) {
     if (!emptyDate) return null;
     const now = new Date(); now.setHours(0, 0, 0, 0);
     const due = new Date(emptyDate);
     if (isNaN(due.getTime())) return null;
     const days = Math.round((due - now) / 86400000);
-    if (days < 0)   return { status: 'empty',    days, label: `Ran out ${Math.abs(days)}d ago`, color: '#7f1d1d', bg: '#fef2f2', border: '#fca5a5' };
-    if (days === 0) return { status: 'empty',    days, label: 'Empty today!',           color: '#dc2626', bg: '#fef2f2', border: '#fecaca' };
-    if (days <= 7)  return { status: 'low',      days, label: `${days}d of stock left`,  color: '#d97706', bg: '#fffbeb', border: '#fde68a' };
-    if (days <= 14) return { status: 'upcoming', days, label: `${days}d left`,           color: '#0369a1', bg: '#f0f9ff', border: '#bae6fd' };
-    return          { status: 'ok',              days, label: `~${days}d left`,          color: '#15803d', bg: '#f0fdf4', border: '#bbf7d0' };
+    const exp  = reason === 'expiry';
+    if (days < 0)   return { status: 'empty',    days, label: exp ? `Expired ${Math.abs(days)}d ago` : `Ran out ${Math.abs(days)}d ago`, color:'#7f1d1d', bg:'#fef2f2', border:'#fca5a5' };
+    if (days === 0) return { status: 'empty',    days, label: exp ? 'Discard today!' : 'Empty today!',            color:'#dc2626', bg:'#fef2f2', border:'#fecaca' };
+    if (days <= 7)  return { status: 'low',      days, label: `${days}d ${exp ? 'until discard' : 'of stock left'}`, color:'#d97706', bg:'#fffbeb', border:'#fde68a' };
+    if (days <= 14) return { status: 'upcoming', days, label: `${days}d left`,                                     color:'#0369a1', bg:'#f0f9ff', border:'#bae6fd' };
+    return          { status: 'ok',              days, label: `~${days}d left`,                                    color:'#15803d', bg:'#f0fdf4', border:'#bbf7d0' };
 },
 
 get allAlerts() {
@@ -2906,7 +2962,10 @@ currentMedStock() {
         .map(m => {
             const name = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
             const projection = this.medStockProjection(m);
-            return { entry: m, name, projection, status: projection ? this.getStockStatus(projection.emptyDate) : null };
+            const isLiquid = m.form === 'liquid';
+            return { entry: m, name, projection,
+                     status: projection ? this.getStockStatus(projection.emptyDate, projection.reason) : null,
+                     isLiquid, doseUnit: isLiquid ? 'ml' : 'tab' };
         })
         .sort((a, b) => a.name.localeCompare(b.name));
 },
@@ -4450,7 +4509,7 @@ exportMedicationsCSV() {
     if (!this.medLedger || this.medLedger.length === 0) 
         return alert("No medication data to export.");
 
-    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletsPerDose,TabletsInStock,StockDate\n";
+    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletStrengthMg,TabletsPerDose,TabletsInStock,StockDate,Form\n";
     
     const rows = this.medLedger.map(med => {
         const patient = this.patients.find(p => p.id === med.patientId);
@@ -4469,9 +4528,11 @@ exportMedicationsCSV() {
             med.frequency || '',
             med.mgPerKg != null ? med.mgPerKg : '',
             med.isStopped ? 'true' : 'false',
+            med.tabletStrengthMg != null ? med.tabletStrengthMg : '',
             med.tabletsPerDose != null ? med.tabletsPerDose : '',
             med.tabletsInStock != null ? med.tabletsInStock : '',
-            med.stockDate || ''
+            med.stockDate || '',
+            med.form || 'tablet'
         ].join(',');
     }).join("\n");
 
@@ -4484,7 +4545,7 @@ exportMedicationsCSV() {
     document.body.removeChild(link);
 },
 
-      importMedicationsCSV(event) {
+importMedicationsCSV(event) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -4514,9 +4575,14 @@ exportMedicationsCSV() {
                 const frequency   = clean(parts[6]);
                 const mgPerKg     = parts[7] ? parseFloat(clean(parts[7])) : null;
                 const isStopped   = parts[8] ? clean(parts[8]).toLowerCase() === 'true' : false;
-                const tabletsPerDose = parts[9]  ? parseFloat(clean(parts[9]))  : NaN;
-                const tabletsInStock = parts[10] ? parseFloat(clean(parts[10])) : NaN;
-                const stockDate      = parts[11] ? clean(parts[11]) : '';
+                const tabletStrengthMg = parts[9]  ? parseFloat(clean(parts[9]))  : NaN;
+                const tabletsPerDose   = parts[10] ? parseFloat(clean(parts[10])) : NaN;
+                const tabletsInStock   = parts[11] ? parseFloat(clean(parts[11])) : NaN;
+                const stockDate        = parts[12] ? clean(parts[12]) : '';
+                const form = parts[13] && clean(parts[13]) === 'liquid' ? 'liquid' : 'tablet';
+                const derivedDose = (!isNaN(tabletStrengthMg) && !isNaN(tabletsPerDose))
+                    ? Math.round(tabletStrengthMg * tabletsPerDose * 1000) / 1000
+                    : doseMg;   // fall back to the Dose(mg) column
                 
                 // Resolve patient by name — do not auto-create for medication imports
                 const patient = this.patients.find(
@@ -4525,7 +4591,7 @@ exportMedicationsCSV() {
                 if (!patient) { skipped++; continue; }
 
                 // Validate: active entries must have a parseable dose
-                if (!isStopped && isNaN(doseMg)) { skipped++; continue; }
+                if (!isStopped && isNaN(derivedDose)) { skipped++; continue; }
 
                 this.medLedger.push({
                     id: this.generateId(),
@@ -4533,11 +4599,13 @@ exportMedicationsCSV() {
                     patientId:  patient.id,
                     drugId,
                     customName: customName || '',
-                    doseMg:     isStopped ? null : doseMg,
                     frequency:  isStopped ? null : (frequency || 'q12h'),
                     mgPerKg:    isStopped ? null : (isNaN(mgPerKg) ? null : mgPerKg),
                     isStopped,
-                    tabletsPerDose: isStopped ? null : (isNaN(tabletsPerDose) ? null : tabletsPerDose),
+                    tabletStrengthMg: isStopped ? null : (isNaN(tabletStrengthMg) ? null : tabletStrengthMg),
+                    tabletsPerDose:   isStopped ? null : (isNaN(tabletsPerDose) ? null : tabletsPerDose),
+                    doseMg:           isStopped ? null : derivedDose,
+                    form: isStopped ? null : form,
                     tabletsInStock: isStopped ? null : (isNaN(tabletsInStock) ? null : tabletsInStock),
                     stockDate:      isStopped ? null : (stockDate || eventDate),
                 });
@@ -5495,21 +5563,24 @@ async generatePDF() {
             sectionHeader('Current Medications & Stock', 217, 119, 6);
             doc.autoTable({
                 startY: Y,
-                head: [['Drug', 'Regimen', 'Tab/Dose', 'In Stock', 'Days Left', 'Proj. Empty']],
+                head: [['Drug', 'Regimen', 'Per Dose', 'In Stock', 'Days Left', 'Runs Out / Discard']],
                 body: stockRows.map(r => {
                     const p = r.projection;
+                    const limit = p
+                        ? `${p.emptyDate}${p.reason === 'expiry' ? ' (discard)' : ''}`
+                        : (r.entry.frequency === 'PRN' ? 'PRN' : '—');
                     return [
                         r.name,
                         `${r.entry.doseMg != null ? r.entry.doseMg + 'mg ' : ''}${r.entry.frequency || ''}`.trim(),
-                        r.entry.tabletsPerDose != null ? String(r.entry.tabletsPerDose) : '—',
-                        r.entry.tabletsInStock != null ? String(r.entry.tabletsInStock) : '—',
-                        p ? `${p.daysLeft} d` : (r.entry.frequency === 'PRN' ? 'PRN' : '—'),
-                        p ? p.emptyDate : '—'
+                        r.entry.tabletsPerDose != null ? `${r.entry.tabletsPerDose} ${r.doseUnit}` : '—',
+                        r.entry.tabletsInStock != null ? `${r.entry.tabletsInStock} ${r.doseUnit}` : '—',
+                        p ? `${p.daysLeft} d` : '—',
+                        limit
                     ];
                 }),
                 theme: 'striped',
                 headStyles: { fillColor: [217, 119, 6] },
-                columnStyles: { 0:{cellWidth:38}, 1:{cellWidth:40}, 2:{cellWidth:22}, 3:{cellWidth:22}, 4:{cellWidth:22}, 5:{cellWidth:'auto'} },
+                columnStyles: { 0:{cellWidth:36}, 1:{cellWidth:38}, 2:{cellWidth:22}, 3:{cellWidth:22}, 4:{cellWidth:20}, 5:{cellWidth:'auto'} },
                 styles: { fontSize: 8 }
             });
             Y = doc.lastAutoTable.finalY + 12;
@@ -5815,19 +5886,22 @@ generateCSV() {
     const stockRows = !mods.medications ? [] : this.currentMedStock();
     if (stockRows.length > 0) {
         csv += 'CURRENT MEDICATIONS & STOCK\n';
-        csv += 'Drug,Dose (mg),Frequency,Tablets/Dose,In Stock,Stock Counted,Tablets/Day,Days Left,Projected Empty\n';
+        csv += 'Drug,Form,Dose (mg),Frequency,Per Dose,In Stock,Stock Counted,Per Day,Days Left,Runs Out,Discard Date,Limiting Factor\n';
         stockRows.forEach(r => {
             const p = r.projection;
             csv += [
                 q(r.name),
+                q(r.isLiquid ? 'Liquid' : 'Tablet'),
                 r.entry.doseMg != null ? r.entry.doseMg : '',
                 q(r.entry.frequency || ''),
-                r.entry.tabletsPerDose != null ? r.entry.tabletsPerDose : '',
-                r.entry.tabletsInStock != null ? r.entry.tabletsInStock : '',
+                r.entry.tabletsPerDose != null ? q(`${r.entry.tabletsPerDose} ${r.doseUnit}`) : '',
+                r.entry.tabletsInStock != null ? q(`${r.entry.tabletsInStock} ${r.doseUnit}`) : '',
                 q(r.entry.stockDate || ''),
-                p ? p.tabletsPerDay : '',
+                p && p.tabletsPerDay != null ? p.tabletsPerDay : '',
                 p ? p.daysLeft : (r.entry.frequency === 'PRN' ? 'PRN' : ''),
-                p ? q(p.emptyDate) : ''
+                q(p && p.runOutDate  ? p.runOutDate  : ''),
+                q(p && p.discardDate ? p.discardDate : ''),
+                q(p ? (p.reason === 'expiry' ? 'Discard/expiry' : 'Runs out') : '')
             ].join(',') + '\n';
         });
         csv += '\n';
@@ -6090,12 +6164,17 @@ _buildReportText() {
             out += rule() + nl;
             stockRows.forEach(r => {
                 const p = r.projection;
-                out += `${r.name}`;
-                if (r.entry.doseMg)                  out += `  |  ${r.entry.doseMg}mg ${r.entry.frequency || ''}`;
-                if (r.entry.tabletsPerDose != null)  out += `  |  ${r.entry.tabletsPerDose} tab/dose`;
-                if (r.entry.tabletsInStock != null)  out += `  |  ${r.entry.tabletsInStock} in stock`;
-                if (p)      out += `${nl}${indent}~${p.daysLeft}d left → empty ${p.emptyDate}${r.status && r.status.status !== 'ok' ? '  [' + r.status.label + ']' : ''}`;
-                else if (r.entry.frequency === 'PRN') out += `${nl}${indent}PRN — run-out not projected`;
+                out += `${r.name}${r.isLiquid ? ' (liquid)' : ''}`;
+                if (r.entry.doseMg)                 out += `  |  ${r.entry.doseMg}mg ${r.entry.frequency || ''}`;
+                if (r.entry.tabletsPerDose != null) out += `  |  ${r.entry.tabletsPerDose} ${r.doseUnit}/dose`;
+                if (r.entry.tabletsInStock != null) out += `  |  ${r.entry.tabletsInStock} ${r.doseUnit} in stock`;
+                if (p) {
+                    out += `${nl}${indent}~${p.daysLeft}d left → ${p.reason === 'expiry' ? 'discard' : 'empty'} ${p.emptyDate}`;
+                    if (p.runOutDate && p.discardDate) out += ` (runs out ${p.runOutDate}; discard ${p.discardDate})`;
+                    if (r.status && r.status.status !== 'ok') out += `  [${r.status.label}]`;
+                } else if (r.entry.frequency === 'PRN') {
+                    out += `${nl}${indent}PRN — run-out not projected`;
+                }
                 out += nl;
             });
             out += nl;
