@@ -222,7 +222,7 @@
 
 
     <div class="container" style="padding: 0;">
-    <div class="grid">
+    <div class="grid-srrt">
     <!-- App section nav — sticky left column on desktop -->
         <nav class="vch-sidebar" aria-label="App sections">
             <div class="vch-sidebar__brand">
@@ -250,9 +250,40 @@
                     </button>
                 </template>
             </div>
+            <div class="vch-sidebar__alerts" x-show="allAlerts.length > 0" x-cloak>
+                <div class="vch-sidebar__alerts-title">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span x-text="allAlerts.length + ' alert' + (allAlerts.length !== 1 ? 's' : '')"></span>
+                </div>
+                <template x-for="al in allAlerts" :key="al.id">
+                    <button type="button" class="vch-sidebar__alert" @click="setView(al.view)" :style="`border-left:3px solid ${al.color};`">
+                        <span class="vch-sidebar__alert-label" x-text="al.label"></span>
+                        <span class="vch-sidebar__alert-status" :style="`background:${al.bg}; color:${al.color}; border:1px solid ${al.border};`" x-text="al.statusLabel"></span>
+                    </button>
+                </template>
+            </div>
         </nav>
-    <main>
-                <header class="hero-header card">
+        <main class="vch-main">
+        
+        <!-- Alert banner for mobile only -->
+            <div class="vch-mobile-alerts" x-show="allAlerts.length > 0" x-cloak x-data="{ open:false }">
+                <button type="button" class="vch-mobile-alerts__bar" @click="open = !open">
+                    <span><i class="fa-solid fa-triangle-exclamation"></i>
+                        <span x-text="allAlerts.length + ' active alert' + (allAlerts.length !== 1 ? 's' : '')"></span></span>
+                    <i class="fa-solid" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                </button>
+                <div class="vch-mobile-alerts__list" x-show="open" x-transition>
+                    <template x-for="al in allAlerts" :key="al.id">
+                        <div class="vch-mobile-alerts__item" :style="`border-left:3px solid ${al.color};`">
+                            <span x-text="al.label"></span>
+                            <span :style="`background:${al.bg}; color:${al.color}; border:1px solid ${al.border};`" x-text="al.statusLabel"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            
+            
+            <header class="hero-header card">
         
             <!-- Collapsed mini-title: always visible -->
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1495,7 +1526,25 @@
                         </div>
                     
                         <div x-show="showMedLog" x-transition>
-                            
+                            <template x-if="medStockAlerts.length > 0">
+                                <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
+                                    <div style="font-weight: bold; color: #92400e; font-size: 0.85rem; margin-bottom: 8px;">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> Medication Stock Warnings
+                                    </div>
+                                    <template x-for="(alert, idx) in medStockAlerts" :key="alert.id">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 0.85rem;"
+                                             :style="idx < medStockAlerts.length - 1 ? 'border-bottom: 1px solid #fde68a;' : ''">
+                                            <span style="color: #1e293b; font-weight: 500;" x-text="alert.drugName"></span>
+                                            <span :style="`background: ${alert.stockStatus.bg}; color: ${alert.stockStatus.color}; border: 1px solid ${alert.stockStatus.border}; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: bold;`"
+                                                  x-text="alert.stockStatus.label"></span>
+                                        </div>
+                                    </template>
+                                    <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 8px;">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                        Order repeat prescriptions in good time — projections assume steady dosing and exclude PRN medications.
+                                    </div>
+                                </div>
+                            </template>
                             <div class="form-panel">
                                 <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Medication Change</h4>
                                 
@@ -1540,7 +1589,19 @@
                                             <option value="q8h">q8h (TID)</option>
                                             <option value="PRN">PRN (As Needed)</option>
                                         </select>
-                                    </div>            
+                                    </div>  
+                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                        <label class="form-label">Tablets / Dose</label>
+                                        <input type="number" step="0.25" min="0" x-model="newMed.tabletsPerDose" :disabled="newMed.isStopped" placeholder="e.g., 1.5" class="form-input">
+                                    </div>
+                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                        <label class="form-label">Tablets in Stock</label>
+                                        <input type="number" step="1" min="0" x-model="newMed.tabletsInStock" :disabled="newMed.isStopped" placeholder="e.g., 60" class="form-input">
+                                    </div>
+                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                        <label class="form-label">Stock Counted On</label>
+                                        <input type="date" x-model="newMed.stockDate" :disabled="newMed.isStopped" class="form-input">
+                                    </div>          
                                     <div>
                                         <button @click="addMedication()" type="button" class="btn-add-blue">
                                             <i class="fa-solid fa-plus"></i> Save Entry
@@ -1550,6 +1611,14 @@
                                         </button>
                                     </div>
                                 </div>
+                                
+                                <template x-if="!newMed.isStopped && medStockProjection({isStopped:false, tabletsPerDose:newMed.tabletsPerDose, tabletsInStock:newMed.tabletsInStock, frequency:newMed.frequency, stockDate:newMed.stockDate, eventDate:newMed.eventDate})">
+                                    <div x-transition style="margin-top: 10px; margin-left: 8px; font-size: 0.85rem; color: #b45309; font-weight: bold; background: #fffbeb; padding: 6px 12px; border-radius: 4px; display: inline-block;">
+                                        <i class="fa-solid fa-pills"></i> Projected empty in
+                                        <span x-text="medStockProjection({isStopped:false, tabletsPerDose:newMed.tabletsPerDose, tabletsInStock:newMed.tabletsInStock, frequency:newMed.frequency, stockDate:newMed.stockDate, eventDate:newMed.eventDate}).daysLeft"></span> days
+                                        (<span x-text="medStockProjection({isStopped:false, tabletsPerDose:newMed.tabletsPerDose, tabletsInStock:newMed.tabletsInStock, frequency:newMed.frequency, stockDate:newMed.stockDate, eventDate:newMed.eventDate}).emptyDate"></span>)
+                                    </div>
+                                </template>
                     
                                 <div x-show="calculatedMgPerKg() !== null" x-transition style="margin-top: 10px; font-size: 0.85rem; color: #059669; font-weight: bold; background: #d1fae5; padding: 6px 12px; border-radius: 4px; display: inline-block;">
                                     Calculated Dosage: <span x-text="calculatedMgPerKg()"></span> mg/kg
@@ -1564,6 +1633,7 @@
                                             <th>Action</th>
                                             <th>Medication</th>
                                             <th>Regimen</th>
+                                            <th>Stock</th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -1584,6 +1654,15 @@
                                                         (<span x-text="med.dynamicMgPerKg"></span> mg/kg
                                                         <span x-show="med.weightChanged" title="Patient weight changed since entry" style="color: #f59e0b; cursor: help;">⚠</span>)
                                                     </span>
+                                                </td>
+                                                <td>
+                                                    <template x-if="!med.isStopped && medStockProjection(med)">
+                                                        <span :style="`background: ${getStockStatus(medStockProjection(med).emptyDate).bg}; color: ${getStockStatus(medStockProjection(med).emptyDate).color}; border: 1px solid ${getStockStatus(medStockProjection(med).emptyDate).border}; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: bold; white-space: nowrap;`"
+                                                              x-text="getStockStatus(medStockProjection(med).emptyDate).label"></span>
+                                                    </template>
+                                                    <template x-if="med.isStopped || !medStockProjection(med)">
+                                                        <span class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
+                                                    </template>
                                                 </td>
                                                 <td style="text-align: right;">
                                                     <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
@@ -3520,7 +3599,8 @@
          </main>
          
          
-         <aside>
+         <aside class="vch-extras">
+
              <div class="card" style="margin-top:16px">
                   <h2>SRR FAQ & Clinical Guidance</h2>
                   <div class="faq-item">

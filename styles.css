@@ -4553,7 +4553,13 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
   .vch-bottomnav{ display:none; }
 
   /* nav becomes a real 3rd grid column: [nav | main | info aside] */
-  .grid{ grid-template-columns:var(--vch-sidebar-w) 1fr 340px; }
+    .grid-srrt{
+    grid-template-columns: var(--vch-sidebar-w) 1fr;
+    grid-template-areas:
+      "nav    main"
+      "extras main";
+  }
+  .vch-sidebar{ grid-area: nav; }
 
   .vch-sidebar{
     display:flex; flex-direction:column;
@@ -4594,3 +4600,32 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 
 /* small logo inside the rail brand */
 .vch-sidebar__logo{ width:28px; height:28px; object-fit:contain; border-radius:6px; flex-shrink:0; }
+
+/* Left column = nav + extras; right column = app. Source order: nav, main, extras */
+.grid-srrt {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas: "main" "extras";   /* mobile: app first, extras below */
+  gap: 20px;
+  align-items: start;
+}
+.vch-main      { grid-area: main; }
+.vch-extras { grid-area: extras; }
+.vch-extras { display: block; }
+
+
+/* Desktop rail alerts */
+.vch-sidebar__alerts{ margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,.12); }
+.vch-sidebar__alerts-title{ font-size:.72rem; font-weight:700; color:#fca5a5; text-transform:uppercase; letter-spacing:.04em; margin:0 8px 8px; display:flex; gap:6px; align-items:center; }
+.vch-sidebar__alert{ display:flex; flex-direction:column; align-items:flex-start; gap:3px; width:100%; text-align:left; background:rgba(255,255,255,.05); border:none; border-radius:8px; padding:8px 10px; margin-bottom:6px; cursor:pointer; }
+.vch-sidebar__alert:hover{ background:rgba(255,255,255,.1); }
+.vch-sidebar__alert-label{ font-size:.8rem; font-weight:600; color:#e2e8f0; }
+.vch-sidebar__alert-status{ font-size:.68rem; font-weight:700; border-radius:999px; padding:1px 8px; }
+
+/* Mobile top banner (hidden on desktop — rail covers it) */
+.vch-mobile-alerts{ display:block; position:sticky; top:0; z-index:40; margin-bottom:10px; }
+@media (min-width:981px){ .vch-mobile-alerts{ display:none; } }
+.vch-mobile-alerts__bar{ width:100%; display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fef2f2; color:#991b1b; border:1px solid #fca5a5; border-radius:10px; padding:10px 14px; font-weight:700; font-size:.85rem; cursor:pointer; }
+.vch-mobile-alerts__list{ background:#fff; border:1px solid #fecaca; border-top:none; border-radius:0 0 10px 10px; padding:6px; }
+.vch-mobile-alerts__item{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 10px; font-size:.82rem; border-radius:6px; }
+.vch-mobile-alerts__item span:last-child{ border-radius:999px; padding:1px 8px; font-size:.7rem; font-weight:700; white-space:nowrap; }

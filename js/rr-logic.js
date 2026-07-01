@@ -295,9 +295,12 @@ newMed: {
     eventDate: new Date().toISOString().split('T')[0],
     drugId: '',
     customName: '',
-    isStopped: false,   // replaces the action dropdown
+    isStopped: false,
     doseMg: '',
-    frequency: 'q12h'
+    frequency: 'q12h',
+    tabletsPerDose: '',      // tablets per administration (e.g. 1.5)
+    tabletsInStock: '',      //  current count on hand
+    stockDate: new Date().toISOString().split('T')[0]  // NEW — date stock was counted
 },
 
         // Medication Chart State
@@ -2765,6 +2768,9 @@ addMedication() {
         doseMg: this.newMed.isStopped ? null : parseFloat(this.newMed.doseMg),
         frequency: this.newMed.isStopped ? null : this.newMed.frequency,
         mgPerKg: this.newMed.isStopped ? null : this.calculatedMgPerKg(),
+        tabletsPerDose: this.newMed.isStopped ? null : (this.newMed.tabletsPerDose === '' ? null : parseFloat(this.newMed.tabletsPerDose)),
+        tabletsInStock: this.newMed.isStopped ? null : (this.newMed.tabletsInStock === '' ? null : parseFloat(this.newMed.tabletsInStock)),
+        stockDate:      this.newMed.isStopped ? null : (this.newMed.stockDate || this.newMed.eventDate),
     };
 
     this.medLedger.push(entry);
@@ -2777,7 +2783,10 @@ addMedication() {
         customName: '',
         isStopped: false,
         doseMg: '',
-        frequency: 'q12h'
+        frequency: 'q12h',
+        tabletsPerDose: '',
+        tabletsInStock: '',
+        stockDate: new Date().toISOString().split('T')[0]
     };
 },
 
@@ -2812,6 +2821,89 @@ getComputedAction(entry) {
     }
 
     return priorEntries.length === 0 ? 'Started' : 'Adjusted';
+},
+
+// Doses per day for the stored frequency codes (PRN is unpredictable → 0)
+dosesPerDay(freq) {
+    return { q24h: 1, q12h: 2, q8h: 3 }[freq] || 0;
+},
+
+// Projects run-out from a med entry's stock data. Returns null if not computable.
+medStockProjection(entry) {
+    if (!entry || entry.isStopped) return null;
+    const perDose = parseFloat(entry.tabletsPerDose);
+    const stock   = parseFloat(entry.tabletsInStock);
+    const perDay  = this.dosesPerDay(entry.frequency) * (perDose || 0);
+    if (!(stock >= 0) || !(perDay > 0)) return null;   // PRN or missing data
+    const daysLeft = Math.floor(stock / perDay);
+    const base = new Date(entry.stockDate || entry.eventDate);
+    base.setHours(0, 0, 0, 0);
+    const emptyDate = new Date(base.getTime() + daysLeft * 86400000);
+    return { tabletsPerDay: perDay, daysLeft, emptyDate: emptyDate.toISOString().split('T')[0] };
+},
+
+// Graded stock status — same shape as getVaccineStatus, 7-day warn window
+getStockStatus(emptyDate) {
+    if (!emptyDate) return null;
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    const due = new Date(emptyDate);
+    if (isNaN(due.getTime())) return null;
+    const days = Math.round((due - now) / 86400000);
+    if (days < 0)   return { status: 'empty',    days, label: `Ran out ${Math.abs(days)}d ago`, color: '#7f1d1d', bg: '#fef2f2', border: '#fca5a5' };
+    if (days === 0) return { status: 'empty',    days, label: 'Empty today!',           color: '#dc2626', bg: '#fef2f2', border: '#fecaca' };
+    if (days <= 7)  return { status: 'low',      days, label: `${days}d of stock left`,  color: '#d97706', bg: '#fffbeb', border: '#fde68a' };
+    if (days <= 14) return { status: 'upcoming', days, label: `${days}d left`,           color: '#0369a1', bg: '#f0f9ff', border: '#bae6fd' };
+    return          { status: 'ok',              days, label: `~${days}d left`,          color: '#15803d', bg: '#f0fdf4', border: '#bbf7d0' };
+},
+
+get allAlerts() {
+    const list = [];
+    (this.medStockAlerts || []).forEach(a => list.push({
+        id: 'stock-' + a.id, kind: 'Medication stock', view: 'meds',
+        label: a.drugName, statusLabel: a.stockStatus.label,
+        color: a.stockStatus.color, bg: a.stockStatus.bg, border: a.stockStatus.border, days: a.stockStatus.days
+    }));
+    (this.vaccineAlerts || []).forEach(a => list.push({
+        id: 'vac-' + a.id, kind: 'Vaccination', view: 'wellness',
+        label: a.displayLabel || a.type, statusLabel: a.vaccineStatus.label,
+        color: a.vaccineStatus.color, bg: a.vaccineStatus.bg, border: a.vaccineStatus.border, days: a.vaccineStatus.days
+    }));
+    (this.parasiticAlerts() || []).forEach(a => {
+        const c = a.state === 'lapsed'
+            ? { color:'#dc2626', bg:'#fef2f2', border:'#fecaca' }
+            : { color:'#d97706', bg:'#fffbeb', border:'#fde68a' };
+        list.push({
+            id: 'par-' + a.id, kind: 'Parasite cover', view: 'wellness',
+            label: a.label, statusLabel: a.state === 'lapsed' ? 'Lapsed' : (a.state === 'partial' ? 'Partial' : 'Gap'),
+            color: c.color, bg: c.bg, border: c.border, days: a.cardiac ? -100 : -50
+        });
+    });
+    return list.sort((x, y) => (x.days ?? 0) - (y.days ?? 0));
+},
+
+get medStockAlerts() {
+    return this.currentMedStock()
+        .filter(r => r.status && (r.status.status === 'low' || r.status.status === 'empty'))
+        .map(r => ({ id: r.entry.id, drugName: r.name, projection: r.projection, stockStatus: r.status }))
+        .sort((a, b) => a.stockStatus.days - b.stockStatus.days);
+},
+
+// Current active meds for the patient, newest entry per drug, projection attached
+currentMedStock() {
+    if (!this.activePatientId) return [];
+    const latestByDrug = {};
+    [...this.medLedger]
+        .filter(m => m.patientId === this.activePatientId)
+        .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
+        .forEach(m => { latestByDrug[m.drugId] = m; });
+    return Object.values(latestByDrug)
+        .filter(m => !m.isStopped)
+        .map(m => {
+            const name = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+            const projection = this.medStockProjection(m);
+            return { entry: m, name, projection, status: projection ? this.getStockStatus(projection.emptyDate) : null };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
 },
 
         
@@ -4085,7 +4177,7 @@ importCSV(event) {
     reader.readAsText(file);
 },
 
-       importHeart2HeartData() {
+importHeart2HeartData() {
     const text = this.heart2HeartText;
     if (!text || !text.trim()) {
         return alert("Please paste the Heart2Heart PDF data first.");
@@ -4343,13 +4435,17 @@ importCSV(event) {
     alert(`Successfully imported ${importedCount} reading(s) for ${petName}${dupNote}${invalidNote}.`);
 },
 
+
+// ==========================================
+// --- MEDICATION LOG CSV EXPORT / IMPORT ---
+// ==========================================
         
         // --- MEDICATION CSV MANAGEMENT ---
 exportMedicationsCSV() {
     if (!this.medLedger || this.medLedger.length === 0) 
         return alert("No medication data to export.");
 
-    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped\n";
+    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletsPerDose,TabletsInStock,StockDate\n";
     
     const rows = this.medLedger.map(med => {
         const patient = this.patients.find(p => p.id === med.patientId);
@@ -4368,6 +4464,9 @@ exportMedicationsCSV() {
             med.frequency || '',
             med.mgPerKg != null ? med.mgPerKg : '',
             med.isStopped ? 'true' : 'false'
+            med.tabletsPerDose != null ? med.tabletsPerDose : '',
+            med.tabletsInStock != null ? med.tabletsInStock : '',
+            med.stockDate || ''
         ].join(',');
     }).join("\n");
 
@@ -4410,7 +4509,10 @@ exportMedicationsCSV() {
                 const frequency   = clean(parts[6]);
                 const mgPerKg     = parts[7] ? parseFloat(clean(parts[7])) : null;
                 const isStopped   = parts[8] ? clean(parts[8]).toLowerCase() === 'true' : false;
-
+                const tabletsPerDose = parts[9]  ? parseFloat(clean(parts[9]))  : NaN;
+                const tabletsInStock = parts[10] ? parseFloat(clean(parts[10])) : NaN;
+                const stockDate      = parts[11] ? clean(parts[11]) : '';
+                
                 // Resolve patient by name — do not auto-create for medication imports
                 const patient = this.patients.find(
                     p => p.name.toLowerCase() === patientName.toLowerCase()
@@ -4429,7 +4531,10 @@ exportMedicationsCSV() {
                     doseMg:     isStopped ? null : doseMg,
                     frequency:  isStopped ? null : (frequency || 'q12h'),
                     mgPerKg:    isStopped ? null : (isNaN(mgPerKg) ? null : mgPerKg),
-                    isStopped
+                    isStopped,
+                    tabletsPerDose: isStopped ? null : (isNaN(tabletsPerDose) ? null : tabletsPerDose),
+                    tabletsInStock: isStopped ? null : (isNaN(tabletsInStock) ? null : tabletsInStock),
+                    stockDate:      isStopped ? null : (stockDate || eventDate),
                 });
                 importedCount++;
             }
@@ -5377,6 +5482,35 @@ async generatePDF() {
         Y = doc.lastAutoTable.finalY + 12;
     }
     
+    // ── 5b. Current Medications & Stock ───────────────────────────────────
+    if (mods.medications) {
+        const stockRows = this.currentMedStock();
+        if (stockRows.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Current Medications & Stock', 217, 119, 6);
+            doc.autoTable({
+                startY: Y,
+                head: [['Drug', 'Regimen', 'Tab/Dose', 'In Stock', 'Days Left', 'Proj. Empty']],
+                body: stockRows.map(r => {
+                    const p = r.projection;
+                    return [
+                        r.name,
+                        `${r.entry.doseMg != null ? r.entry.doseMg + 'mg ' : ''}${r.entry.frequency || ''}`.trim(),
+                        r.entry.tabletsPerDose != null ? String(r.entry.tabletsPerDose) : '—',
+                        r.entry.tabletsInStock != null ? String(r.entry.tabletsInStock) : '—',
+                        p ? `${p.daysLeft} d` : (r.entry.frequency === 'PRN' ? 'PRN' : '—'),
+                        p ? p.emptyDate : '—'
+                    ];
+                }),
+                theme: 'striped',
+                headStyles: { fillColor: [217, 119, 6] },
+                columnStyles: { 0:{cellWidth:38}, 1:{cellWidth:40}, 2:{cellWidth:22}, 3:{cellWidth:22}, 4:{cellWidth:22}, 5:{cellWidth:'auto'} },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
+    }
+    
      
     // ── 6. Medication Log Table ───────────────────────────────────────────
     if (mods.medications) {
@@ -5671,6 +5805,28 @@ generateCSV() {
         });
         csv += '\n';
     }
+    
+    // ── Current Medications & Stock ───────────────────────────────────────
+    const stockRows = !mods.medications ? [] : this.currentMedStock();
+    if (stockRows.length > 0) {
+        csv += 'CURRENT MEDICATIONS & STOCK\n';
+        csv += 'Drug,Dose (mg),Frequency,Tablets/Dose,In Stock,Stock Counted,Tablets/Day,Days Left,Projected Empty\n';
+        stockRows.forEach(r => {
+            const p = r.projection;
+            csv += [
+                q(r.name),
+                r.entry.doseMg != null ? r.entry.doseMg : '',
+                q(r.entry.frequency || ''),
+                r.entry.tabletsPerDose != null ? r.entry.tabletsPerDose : '',
+                r.entry.tabletsInStock != null ? r.entry.tabletsInStock : '',
+                q(r.entry.stockDate || ''),
+                p ? p.tabletsPerDay : '',
+                p ? p.daysLeft : (r.entry.frequency === 'PRN' ? 'PRN' : ''),
+                p ? q(p.emptyDate) : ''
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
  
     // ── Medication Log ────────────────────────────────────────────────────
     const medData = !mods.medications ? [] : this.medLedger
@@ -5920,7 +6076,27 @@ _buildReportText() {
             out += nl;
         }
     }
-
+    
+// ── Current Medications & Stock ───────────────────────────────────────
+    if (mods.medications) {
+        const stockRows = this.currentMedStock();
+        if (stockRows.length > 0) {
+            out += `CURRENT MEDICATIONS & STOCK (${stockRows.length})${nl}`;
+            out += rule() + nl;
+            stockRows.forEach(r => {
+                const p = r.projection;
+                out += `${r.name}`;
+                if (r.entry.doseMg)                  out += `  |  ${r.entry.doseMg}mg ${r.entry.frequency || ''}`;
+                if (r.entry.tabletsPerDose != null)  out += `  |  ${r.entry.tabletsPerDose} tab/dose`;
+                if (r.entry.tabletsInStock != null)  out += `  |  ${r.entry.tabletsInStock} in stock`;
+                if (p)      out += `${nl}${indent}~${p.daysLeft}d left → empty ${p.emptyDate}${r.status && r.status.status !== 'ok' ? '  [' + r.status.label + ']' : ''}`;
+                else if (r.entry.frequency === 'PRN') out += `${nl}${indent}PRN — run-out not projected`;
+                out += nl;
+            });
+            out += nl;
+        }
+    }
+    
     // ── Medication Log ────────────────────────────────────────────────────
     if (mods.medications) {
         const medData = this.medLedger
