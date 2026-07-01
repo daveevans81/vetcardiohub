@@ -4463,7 +4463,7 @@ exportMedicationsCSV() {
             med.doseMg != null ? med.doseMg : '',
             med.frequency || '',
             med.mgPerKg != null ? med.mgPerKg : '',
-            med.isStopped ? 'true' : 'false'
+            med.isStopped ? 'true' : 'false',
             med.tabletsPerDose != null ? med.tabletsPerDose : '',
             med.tabletsInStock != null ? med.tabletsInStock : '',
             med.stockDate || ''
