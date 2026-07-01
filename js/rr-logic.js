@@ -4509,7 +4509,7 @@ exportMedicationsCSV() {
     if (!this.medLedger || this.medLedger.length === 0) 
         return alert("No medication data to export.");
 
-    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletStrengthMg,TabletsPerDose,TabletsInStock,StockDate,Form\n";
+    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletStrengthMg,TabletsPerDose,TabletsInStock,StockDate,Form,OpenedDate,DiscardDays\n";
     
     const rows = this.medLedger.map(med => {
         const patient = this.patients.find(p => p.id === med.patientId);
@@ -4532,7 +4532,9 @@ exportMedicationsCSV() {
             med.tabletsPerDose != null ? med.tabletsPerDose : '',
             med.tabletsInStock != null ? med.tabletsInStock : '',
             med.stockDate || '',
-            med.form || 'tablet'
+            med.form || 'tablet',
+            med.openedDate || '',
+            med.discardDays != null ? med.discardDays : ''
         ].join(',');
     }).join("\n");
 
@@ -4579,7 +4581,9 @@ importMedicationsCSV(event) {
                 const tabletsPerDose   = parts[10] ? parseFloat(clean(parts[10])) : NaN;
                 const tabletsInStock   = parts[11] ? parseFloat(clean(parts[11])) : NaN;
                 const stockDate        = parts[12] ? clean(parts[12]) : '';
-                const form = parts[13] && clean(parts[13]) === 'liquid' ? 'liquid' : 'tablet';
+                const form = parts[13] && clean(parts[13]).toLowerCase() === 'liquid' ? 'liquid' : 'tablet';
+                const openedDate  = parts[14] ? clean(parts[14]) : '';
+                const discardDays = parts[15] ? parseFloat(clean(parts[15])) : NaN;
                 const derivedDose = (!isNaN(tabletStrengthMg) && !isNaN(tabletsPerDose))
                     ? Math.round(tabletStrengthMg * tabletsPerDose * 1000) / 1000
                     : doseMg;   // fall back to the Dose(mg) column
@@ -4608,6 +4612,8 @@ importMedicationsCSV(event) {
                     form: isStopped ? null : form,
                     tabletsInStock: isStopped ? null : (isNaN(tabletsInStock) ? null : tabletsInStock),
                     stockDate:      isStopped ? null : (stockDate || eventDate),
+                     openedDate:  isStopped ? null : (openedDate || null),
+                    discardDays: isStopped ? null : (isNaN(discardDays) ? null : discardDays),
                 });
                 importedCount++;
             }
