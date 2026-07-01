@@ -4547,6 +4547,16 @@ html { -webkit-text-size-adjust: 100%; }
 /* keep the footer clear of the fixed bar on mobile */
 body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom)); }
 
+.grid-srrt {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas: "main" "extras";
+  gap: 20px;
+  align-items: start;
+}
+.vch-main   { grid-area: main; }
+.vch-extras { grid-area: extras; display: block; }
+
 /* DESKTOP (≥981px): sticky left column, no bottom bar */
 @media (min-width:981px){
   body{ padding-bottom:0; }
@@ -4600,18 +4610,6 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 
 /* small logo inside the rail brand */
 .vch-sidebar__logo{ width:28px; height:28px; object-fit:contain; border-radius:6px; flex-shrink:0; }
-
-/* Left column = nav + extras; right column = app. Source order: nav, main, extras */
-.grid-srrt {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-areas: "main" "extras";   /* mobile: app first, extras below */
-  gap: 20px;
-  align-items: start;
-}
-.vch-main      { grid-area: main; }
-.vch-extras { grid-area: extras; }
-.vch-extras { display: block; }
 
 
 /* Desktop rail alerts */
