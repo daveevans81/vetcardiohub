@@ -2858,8 +2858,9 @@ addMedication() {
         drugId: '', customName: '', isStopped: false,
         tabletStrengthMg: '', tabletsPerDose: '',
         frequency: 'q12h',
-        form: 'tablet'
-        tabletsInStock: '', stockDate: new Date().toISOString().split('T')[0]
+        form: 'tablet',
+        tabletsInStock: '', 
+        stockDate: new Date().toISOString().split('T')[0]
     };
 },
 
