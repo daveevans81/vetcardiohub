@@ -1579,89 +1579,91 @@
                             </template>
                             <div class="form-panel">
                                 <h4 style="margin-top: 0; color: #16325F; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">Log Medication Change</h4>
+                                <div>
                                 
-                                <div class="grid-cols-2" style="align-items: end;">
-                                    <div>
-                                        <label class="form-label">Event Date</label>
-                                        <input type="date" x-model="newMed.eventDate" class="form-input">
-                                    </div>
-                    
-                                    <div>
-                                        <label class="form-label">Medication</label>
-                                        <select x-model="newMed.drugId" class="form-select">
-                                            <option value="" disabled>Select Drug...</option>
-                                            <template x-for="opt in medicationOptions" :key="opt.value">
-                                                <option :value="opt.value" x-text="opt.label"></option>
-                                            </template>
-                                        </select>
-                                    </div>
-                    
-                                    <div x-show="newMed.drugId === 'other'" x-cloak>
-                                        <label class="form-label">Custom Name</label>
-                                        <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" class="form-input">
-                                    </div>
-                    
-                                    <div style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
-                                        <input type="checkbox" id="stoppedCheck" x-model="newMed.isStopped" style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
-                                        <label for="stoppedCheck" class="text-danger font-bold" style="font-size: 0.85rem; cursor: pointer; user-select: none;">
-                                            Stopped
-                                        </label>
-                                    </div>
-                                    <div style="grid-column: 1 / -1;" :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                        <label class="form-label">Preparation</label>
-                                        <div style="display:flex; gap:8px;">
-                                            <button type="button" @click="newMed.form='tablet'"
-                                                    :style="`flex:1; padding:8px; border-radius:6px; cursor:pointer; font-weight:600; border:1px solid ${newMed.form==='tablet' ? '#2563eb' : '#cbd5e1'}; background:${newMed.form==='tablet' ? '#dbeafe' : '#fff'}; color:${newMed.form==='tablet' ? '#1e3a8a' : '#64748b'};`">
-                                                <i class="fa-solid fa-tablets"></i> Tablet / Capsule
-                                            </button>
-                                            <button type="button" @click="newMed.form='liquid'"
-                                                    :style="`flex:1; padding:8px; border-radius:6px; cursor:pointer; font-weight:600; border:1px solid ${newMed.form==='liquid' ? '#2563eb' : '#cbd5e1'}; background:${newMed.form==='liquid' ? '#dbeafe' : '#fff'}; color:${newMed.form==='liquid' ? '#1e3a8a' : '#64748b'};`">
-                                                <i class="fa-solid fa-bottle-droplet"></i> Liquid
-                                            </button>
+                                    <div class="grid-cols-2" style="align-items: end;">
+                                        <div>
+                                            <label class="form-label">Event Date</label>
+                                            <input type="date" x-model="newMed.eventDate" class="form-input">
                                         </div>
-                                    </div>
-                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                        <label class="form-label" x-text="medUnits(newMed.form).strengthLabel"></label>
-                                        <input type="number" step="0.1" min="0" x-model="newMed.tabletStrengthMg" :disabled="newMed.isStopped"
-                                               :placeholder="newMed.form==='liquid' ? 'e.g., 2.5' : 'e.g., 20'" class="form-input">
-                                    </div>
-                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                        <label class="form-label" x-text="medUnits(newMed.form).doseLabel"></label>
-                                        <input type="number" :step="newMed.form==='liquid' ? '0.1' : '0.25'" min="0" x-model="newMed.tabletsPerDose" :disabled="newMed.isStopped"
-                                               :placeholder="newMed.form==='liquid' ? 'e.g., 1.2' : 'e.g., 1.5'" class="form-input">
-                                    </div>
-                                    
-                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                        <label class="form-label">Frequency</label>
-                                        <select x-model="newMed.frequency" :disabled="newMed.isStopped" class="form-select">
-                                            <option value="q24h">q24h (SID)</option>
-                                            <option value="q12h">q12h (BID)</option>
-                                            <option value="q8h">q8h (TID)</option>
-                                            <option value="PRN">PRN (As Needed)</option>
-                                        </select>
-                                    </div>  
-
-                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                        <label class="form-label" x-text="medUnits(newMed.form).stockLabel"></label>
-                                        <input type="number" :step="newMed.form==='liquid' ? '0.5' : '1'" min="0" x-model="newMed.tabletsInStock" :disabled="newMed.isStopped" class="form-input">
-                                    </div>
-                                    <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
-                                        <label class="form-label">Stock Counted On</label>
-                                        <input type="date" x-model="newMed.stockDate" :disabled="newMed.isStopped" class="form-input">
-                                    </div>         
-                                    <template x-if="newMed.form==='liquid' && !newMed.isStopped">
-                                        <div style="display:contents">
-                                            <div>
-                                                <label class="form-label">Opened On</label>
-                                                <input type="date" x-model="newMed.openedDate" class="form-input">
-                                            </div>
-                                            <div>
-                                                <label class="form-label">Discard After (days)</label>
-                                                <input type="number" step="1" min="1" x-model="newMed.discardDays" placeholder="e.g., 28" class="form-input">
+                        
+                                        <div>
+                                            <label class="form-label">Medication</label>
+                                            <select x-model="newMed.drugId" class="form-select">
+                                                <option value="" disabled>Select Drug...</option>
+                                                <template x-for="opt in medicationOptions" :key="opt.value">
+                                                    <option :value="opt.value" x-text="opt.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                        
+                                        <div x-show="newMed.drugId === 'other'" x-cloak>
+                                            <label class="form-label">Custom Name</label>
+                                            <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" class="form-input">
+                                        </div>
+                        
+                                        <div style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
+                                            <input type="checkbox" id="stoppedCheck" x-model="newMed.isStopped" style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
+                                            <label for="stoppedCheck" class="text-danger font-bold" style="font-size: 0.85rem; cursor: pointer; user-select: none;">
+                                                Stopped
+                                            </label>
+                                        </div>
+                                        <div style="grid-column: 1 / -1;" :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                            <label class="form-label">Preparation</label>
+                                            <div style="display:flex; gap:8px;">
+                                                <button type="button" @click="newMed.form='tablet'"
+                                                        :style="`flex:1; padding:8px; border-radius:6px; cursor:pointer; font-weight:600; border:1px solid ${newMed.form==='tablet' ? '#2563eb' : '#cbd5e1'}; background:${newMed.form==='tablet' ? '#dbeafe' : '#fff'}; color:${newMed.form==='tablet' ? '#1e3a8a' : '#64748b'};`">
+                                                    <i class="fa-solid fa-tablets"></i> Tablet / Capsule
+                                                </button>
+                                                <button type="button" @click="newMed.form='liquid'"
+                                                        :style="`flex:1; padding:8px; border-radius:6px; cursor:pointer; font-weight:600; border:1px solid ${newMed.form==='liquid' ? '#2563eb' : '#cbd5e1'}; background:${newMed.form==='liquid' ? '#dbeafe' : '#fff'}; color:${newMed.form==='liquid' ? '#1e3a8a' : '#64748b'};`">
+                                                    <i class="fa-solid fa-bottle-droplet"></i> Liquid
+                                                </button>
                                             </div>
                                         </div>
-                                    </template> 
-                                    <div style="display: flex; gap: 8px;">
+                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                            <label class="form-label" x-text="medUnits(newMed.form).strengthLabel"></label>
+                                            <input type="number" step="0.1" min="0" x-model="newMed.tabletStrengthMg" :disabled="newMed.isStopped"
+                                                   :placeholder="newMed.form==='liquid' ? 'e.g., 2.5' : 'e.g., 20'" class="form-input">
+                                        </div>
+                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                            <label class="form-label" x-text="medUnits(newMed.form).doseLabel"></label>
+                                            <input type="number" :step="newMed.form==='liquid' ? '0.1' : '0.25'" min="0" x-model="newMed.tabletsPerDose" :disabled="newMed.isStopped"
+                                                   :placeholder="newMed.form==='liquid' ? 'e.g., 1.2' : 'e.g., 1.5'" class="form-input">
+                                        </div>
+                                        
+                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                            <label class="form-label">Frequency</label>
+                                            <select x-model="newMed.frequency" :disabled="newMed.isStopped" class="form-select">
+                                                <option value="q24h">q24h (SID)</option>
+                                                <option value="q12h">q12h (BID)</option>
+                                                <option value="q8h">q8h (TID)</option>
+                                                <option value="PRN">PRN (As Needed)</option>
+                                            </select>
+                                        </div>  
+    
+                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                            <label class="form-label" x-text="medUnits(newMed.form).stockLabel"></label>
+                                            <input type="number" :step="newMed.form==='liquid' ? '0.5' : '1'" min="0" x-model="newMed.tabletsInStock" :disabled="newMed.isStopped" class="form-input">
+                                        </div>
+                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                            <label class="form-label">Stock Counted On</label>
+                                            <input type="date" x-model="newMed.stockDate" :disabled="newMed.isStopped" class="form-input">
+                                        </div>         
+                                        <template x-if="newMed.form==='liquid' && !newMed.isStopped">
+                                            <div style="display:contents">
+                                                <div>
+                                                    <label class="form-label">Opened On</label>
+                                                    <input type="date" x-model="newMed.openedDate" class="form-input">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Discard After (days)</label>
+                                                    <input type="number" step="1" min="1" x-model="newMed.discardDays" placeholder="e.g., 28" class="form-input">
+                                                </div>
+                                            </div>
+                                        </template> 
+                                    </div>
+                                    <div  class="flex-gap-10" style="display: flex; gap: 8px;">
                                         
                                         <button @click="showMedLog = false" type="button" class="btn-cancel" style="margin-bottom: 12px;">
                                             <i class="fa-solid fa-xmark"></i> Cancel
