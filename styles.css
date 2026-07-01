@@ -4627,3 +4627,36 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 .vch-mobile-alerts__list{ background:#fff; border:1px solid #fecaca; border-top:none; border-radius:0 0 10px 10px; padding:6px; }
 .vch-mobile-alerts__item{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 10px; font-size:.82rem; border-radius:6px; }
 .vch-mobile-alerts__item span:last-child{ border-radius:999px; padding:1px 8px; font-size:.7rem; font-weight:700; white-space:nowrap; }
+
+
+/* Advertising on banner */
+
+.banner-cta {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1.25rem;
+    background: #e63946;           /* match your accent — adjust */
+    color: #fff;
+    font-weight: 700;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.banner-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+
+.nav-item--cta a {
+    background: #e63946;
+    color: #fff !important;
+    padding: .4rem .9rem;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .banner-cta { position: static; display: flex; justify-content: center; margin: .75rem auto; width: fit-content; }
+}
