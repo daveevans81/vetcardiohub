@@ -1,0 +1,108 @@
+<!--
+  PARTIAL: /partials/terms.html
+  Fragment only (no <html>/<head>/<body>). Inject via loadPartial() into an
+  empty <div id="terms-content"> that lives inside your Alpine overlay shell,
+  OR serve on a standalone /terms page. No Alpine directives inside — all
+  interactivity (open/close/accept) lives in the overlay shell, not here.
+  Styles are scoped under #app-terms so they cannot leak to the rest of the page.
+
+
+-->
+<style>
+  #app-terms { text-align: left; color: #1f2937; line-height: 1.6; }
+  #app-terms h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  #app-terms h2 { font-size: 1.02rem; color: #b45309; margin-top: 26px; border-bottom: 1px solid #f0e6d6; padding-bottom: 4px; }
+  #app-terms p, #app-terms li { font-size: 0.88rem; }
+  #app-terms .meta { color: #6b7280; font-size: 0.8rem; margin-top: 0; }
+  #app-terms .callout { background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:12px 14px; margin:14px 0; }
+  #app-terms .callout strong { color:#78350f; }
+  #app-terms .critical { background:#fef2f2; border:1px solid #fecaca; }
+  #app-terms .critical strong { color:#991b1b; }
+</style>
+
+<div id="app-terms" data-terms-version="1st July 2026">
+
+  <h1>Terms of Use &amp; Clinical / Privacy Disclaimer</h1>
+  <p class="meta">Effective date / version: <strong>1st July 2026</strong> &middot; Operated by <strong>VetCardioHub</strong>, established in Wales, UK.</p>
+
+  <div class="callout">
+    <strong>Please read before use.</strong> By accepting these terms during setup you confirm you have read, understood and agree to them, and to the clinical and privacy notices below. If you do not agree, please do not use VetCardioHub.
+  </div>
+
+  <p><strong>Summary (informational only &mdash; the full terms govern):</strong> VetCardioHub is an <em>adjunctive monitoring and record-keeping tool</em>. It does not diagnose disease, does not recommend or prescribe treatment, and does not replace a veterinary surgeon&rsquo;s clinical judgement. All tracker data is stored locally on your device and is never transmitted to us. You are responsible for keeping backups. The tool is provided &ldquo;as is,&rdquo; without warranty.</p>
+
+  <h2>1. Acceptance of these terms</h2>
+  <p>These Terms of Use, together with the clinical and privacy notices they contain (collectively, the &ldquo;Terms&rdquo;), form a legally binding agreement between you (&ldquo;you,&rdquo; the &ldquo;user&rdquo;) and VetCardioHub (&ldquo;we,&rdquo; &ldquo;us,&rdquo; the &ldquo;provider&rdquo;) governing your use of the VetCardioHub application and its associated tools, including the Resting Respiratory Rate (RR) Tracker, Echocardiography Calculator, Learning Hub and any related features (the &ldquo;Application&rdquo;). By accepting these Terms and using the Application you confirm that you have read, understood and agree to them. If you are using the Application on behalf of a veterinary practice or other organisation, you confirm you are authorised to accept these Terms on its behalf.</p>
+
+  <h2>2. What VetCardioHub is &mdash; and is not</h2>
+  <p>VetCardioHub is an evidence-informed <strong>monitoring and record-keeping aid</strong>. Its purpose is to help users record, organise, visualise and share observations such as resting respiratory rates, activity levels, cough episodes, syncopal events, medication history and clinical staging entries.</p>
+  <p>VetCardioHub is <strong>not</strong> a medical device, diagnostic system, treatment planner, or a substitute for examination, testing, diagnosis or treatment by a qualified veterinary professional. It does not make clinical decisions. Any figures, thresholds, interpretations, colour codes, charts or scores it displays are informational aids derived from data you enter, and must be interpreted by a suitably qualified person in the full clinical context of the individual animal.</p>
+
+  <h2>3. Who the tool is for</h2>
+  <p>The Application is intended for use by (a) veterinary professionals as an adjunct to their own clinical judgement, and (b) animal owners and carers, under the guidance of their veterinary surgeon, to record and monitor observations at home, and to help them keep track of medications, vaccinations and anti-parasitics prescribed by their veterinarian. It is not intended to enable a lay user to self-direct the medical management of an animal. Where the Application presents clinical information to a non-professional user, that information is provided so it can be recorded and discussed with a veterinary professional &mdash; not acted upon independently.</p>
+
+  <h2>4. Not veterinary advice; no diagnosis</h2>
+  <p>Nothing in or produced by the Application constitutes veterinary advice, a diagnosis, a prognosis, or a recommendation for or against any course of treatment. The Application does not establish a veterinarian&ndash;client&ndash;patient relationship. You must always obtain and rely on the advice of your primary-care veterinary surgeon or a board-certified specialist for any decision concerning an animal&rsquo;s health, and you should seek prompt professional attention if an animal&rsquo;s condition gives cause for concern, regardless of what the Application displays. Never delay or disregard professional veterinary advice because of anything shown by the Application.</p>
+
+  <h2>5. Interpretation of readings and clinical scores</h2>
+  <p>Features such as resting respiratory rate interpretation (for example, indications of &ldquo;normal,&rdquo; &ldquo;equivocal&rdquo; or &ldquo;danger&rdquo;), reference ranges, statistical summaries, ACVIM staging entries and any calculators are simplified aids based on the data you provide and on general reference values. They may not reflect the specific circumstances, breed, comorbidities, medication or clinical history of an individual animal, and they may be affected by measurement technique, timing or data-entry error. They are not a clinical assessment. Do not treat any threshold or interpretation as a definitive indication of health or disease. Where the app allows a custom cut-off this should be set in conjunction with discussions with your cardiologist or veterinarian.</p>
+
+  <h2>6. Medication tracking and dosing figures</h2>
+  <div class="callout critical">
+    <strong>Important &mdash; dosing must be independently verified.</strong> Any dose, dose-per-body-weight (mg/kg) figure, frequency label, or medication-related warning shown by the Application is a <em>convenience calculation performed on the information you enter</em>. It is not a prescribing recommendation and may be inaccurate if the underlying data (weight, dose, dates) is incomplete or out of date. Never start, stop, adjust or withhold any medication on the basis of the Application. Always confirm every dose against your veterinary surgeon&rsquo;s written prescription and the product&rsquo;s labelling before acting.
+  </div>
+  <p>The Application may allow you to select medications, including by proprietary (trade) name, from a formulary list. This functionality exists solely to let you accurately record what has been prescribed to your animal. The presence of any medication or brand name in the Application:</p>
+  <ul>
+    <li>is for identification and record-keeping only;</li>
+    <li>does <strong>not</strong> constitute a recommendation, endorsement, promotion or advertisement of that product, its manufacturer, or its use;</li>
+    <li>does not imply the product is suitable, licensed or available for any particular animal, indication or territory; and</li>
+    <li>does not imply any affiliation with, or sponsorship by, any manufacturer or rights-holder.</li>
+  </ul>
+  <p>Trade names are the property of their respective owners and are used here only to identify the products concerned.</p>
+
+  <h2>7. No warranty</h2>
+  <p>The Application is provided &ldquo;as is&rdquo; and &ldquo;as available,&rdquo; without warranty of any kind, whether express, implied or statutory, to the fullest extent permitted by law. Without limiting the foregoing, we do not warrant that the Application will be accurate, complete, error-free, uninterrupted, secure, or fit for any particular purpose, that any calculation or interpretation it produces is correct, or that it will be compatible with your device or browser. Any material downloaded or otherwise obtained through the Application is accessed at your own discretion and risk.</p>
+
+  <h2>8. Limitation of liability</h2>
+  <p>To the fullest extent permitted by applicable law, and subject to the paragraph on non-excludable rights below:</p>
+  <ul>
+    <li>the Application is used entirely at your own risk, and you remain solely responsible for all clinical and care decisions concerning any animal;</li>
+    <li>we shall not be liable for any injury, illness, deterioration, loss of or harm to any animal, nor for any loss of data, loss of records, loss of profit, or any indirect, incidental, special or consequential loss, arising out of or in connection with your use of, or inability to use, the Application, or your reliance on anything it displays;</li>
+    <li>where liability cannot be wholly excluded, our total aggregate liability arising out of or in connection with the Application (whether in contract, tort including negligence, breach of statutory duty, or otherwise) shall be limited to the greater of the amount you paid to us for the Application in the twelve months preceding the event giving rise to the claim, or GBP &pound;50.</li>
+  </ul>
+  <p><strong>Rights that cannot be excluded.</strong> Nothing in these Terms excludes or limits our liability to the extent it may not lawfully be excluded or limited &mdash; this includes, for example, liability for death or personal injury caused by negligence, for fraud or fraudulent misrepresentation, and any rights or remedies granted to you by mandatory consumer-protection law in your country of residence that cannot be waived by agreement. If you are a consumer, you may have statutory rights (for example under UK or EU consumer legislation, or applicable US state law) that these Terms do not affect.</p>
+
+  <h2>9. Data, privacy and storage</h2>
+  <p><strong>Local-only operation.</strong> VetCardioHub operates entirely on your own device using your browser&rsquo;s local storage. Patient profiles, clinical logs, medication records and all other data you enter are stored locally and are <strong>not</strong> transmitted to, collected by, or archived on any server operated by us. We have no access to your records and cannot recover them for you.</p>
+  <p><strong>Your responsibility for backups.</strong> Because data is stored only on your device, clearing your browser cache or site data, uninstalling the application, or device loss or failure will permanently and irrecoverably delete your records. You are solely responsible for maintaining backups using the Application&rsquo;s export / Master Backup features, and we accept no liability for lost data.</p>
+  <p><strong>Personal data.</strong> Records you create may include personal data relating to you or other people (for example an owner&rsquo;s name). Because such data never leaves your device, you act as the controller of it. Our full <a href="#" onclick="window.dispatchEvent(new CustomEvent('open-privacy')); return false;">Privacy Policy</a> explains how any website and mailing-list data is handled.</p>
+
+  <h2>10. Third-party content, imports and dependencies</h2>
+  <p>The Application may let you import data generated by third-party applications (for example, exports from external cardiac-monitoring tools). You are responsible for ensuring you are entitled to import and use any such data, and we are not responsible for the accuracy, formatting or lawfulness of data originating from third-party sources. The Application relies on third-party software libraries and icon sets provided under their own licences; those components remain the property of their respective owners. Educational references, identifiers (such as PMIDs) and links to external literature are provided for information only; we do not control and are not responsible for external content, and their inclusion does not imply endorsement.</p>
+
+  <h2>11. Intellectual property</h2>
+  <p>The Application, including its design, code, text, and original educational content, is owned by or licensed to VetCardioHub and is protected by intellectual-property laws. You are granted a limited, personal, non-exclusive, non-transferable, revocable licence to use the Application for its intended purpose. You may not copy, modify, distribute, sell, reverse-engineer, or create derivative works from the Application except to the extent expressly permitted by law. The data <em>you</em> enter remains yours.</p>
+
+  <h2>12. Acceptable use</h2>
+  <p>You agree to use the Application only for lawful purposes and in accordance with these Terms. You must not use it in any way that could damage, disable or impair the Application, attempt to gain unauthorised access to it, or use it to store or process data unlawfully. Professional users must not represent the Application&rsquo;s output as a substitute for their own professional assessment.</p>
+
+  <h2>13. Availability and changes to the tool</h2>
+  <p>We may modify, suspend or discontinue the Application, or any feature of it, at any time and without liability. Because the Application runs locally, we do not guarantee continued availability, compatibility with future browsers or devices, or the continued functioning of any offline or installed version.</p>
+
+  <h2>14. Changes to these terms</h2>
+  <p>We may update these Terms from time to time. When we make a material change, we will update the version/effective date and may require you to review and accept the revised Terms before continuing to use the Application. Your continued use after acceptance constitutes agreement to the revised Terms. Immaterial changes take effect when published.</p>
+
+  <h2>15. Governing law and your local rights</h2>
+  <p>These Terms and any dispute or claim arising out of or in connection with them or the Application are governed by the laws of England and Wales, and the courts of England and Wales shall have jurisdiction, save that:</p>
+  <ul>
+    <li>if you are a consumer, you benefit from any mandatory protections of the law of the country in which you reside, and nothing in this section deprives you of the protection afforded by provisions that cannot be derogated from by agreement under that law; and</li>
+    <li>if you are a consumer resident in the European Union, the United Kingdom, or a jurisdiction with equivalent rules, you may also be entitled to bring proceedings in the courts of your place of residence.</li>
+  </ul>
+  <p>This choice of law does not override data-protection, consumer-protection or other mandatory laws that apply to you where you use the Application. To the extent any provision of these Terms is unenforceable in your jurisdiction, that provision applies to the maximum extent permitted and the remainder continues in force.</p>
+
+  <h2>16. Contact</h2>
+  <p>Questions about these Terms can be directed to VetCardioHub at info@vetcardiohub.com.</p>
+
+  <p style="margin-top:24px;"><strong>By accepting, you confirm that you have read, understood and agree to these Terms, and that you understand VetCardioHub is an adjunctive monitoring aid that does not replace professional veterinary advice.</strong></p>
+
+</div>

@@ -15,6 +15,16 @@ onboardingData: {
     acvimStage: ''
 },
 
+// --- Terms gate (hard, first-use, versioned) ---
+termsVersion: '2026-07-01',   // bump this string when terms materially change
+termsAgreed: false,
+showTermsModal: false,
+showPrivacyModal: false,
+showTermsGate: false,         // returning-user re-acceptance only
+    showDisclaimerModal: false,
+
+
+
 // Default module template
 defaultModules: {
     srr: true,
@@ -350,6 +360,42 @@ setView(v) {
     window.scrollTo({ top: 0, behavior: sameTab ? 'smooth' : 'auto' });
 },
 
+    // Disclaimer Engine
+acceptTermsAndStart() {          // step-0 CTA
+  if (!this.termsAgreed) return;
+  this.recordTermsAcceptance();
+  this.onboardingStep = 1;
+},
+recordTermsAcceptance() {
+  localStorage.setItem('vch_terms_version', this.termsVersion);
+  localStorage.setItem('vch_terms_accepted_at', new Date().toISOString());
+  this.termsAgreed = true;
+  this.showTermsGate = false;
+},
+
+
+
+    
+initDisclaimer() {
+  if (this.patients.length === 0) return;   // brand-new users see onboarding instead
+  const last = localStorage.getItem('vch_disclaimer_timestamp');
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+  if (!last || (Date.now() - parseInt(last, 10)) > thirtyDays) {
+    this.showDisclaimerModal = true;
+  }
+},
+    
+acceptDisclaimer() {
+        localStorage.setItem('vch_disclaimer_timestamp', Date.now().toString());
+        this.showDisclaimerModal = false;
+    },
+
+    // Optional: Allow users to manually invoke it from the footer
+    forceShowDisclaimer() {
+        this.showDisclaimerModal = true;
+    },
+
+
 
 // Generate robust UUID (Fallback for older browsers just in case)
         generateId() {
@@ -401,7 +447,15 @@ init() {
                 this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.vaccinationLog = []; this.antiparasiticLog = []; this.activityLog = [];
             }
             
-    this.initDisclaimer();
+      const termsCurrent = localStorage.getItem('vch_terms_version') === this.termsVersion;
+
+  if (this.patients.length === 0) {
+    this.showOnboarding = true;      // new user — step 0 captures acceptance
+  } else if (!termsCurrent) {
+    this.showTermsGate = true;       // returning user, never accepted / terms changed
+  } else {
+    this.initDisclaimer();           // fully onboarded & current — only now nudge backups
+  }
 
     // Set initial active patient safely
     if (this.patients.length > 0) {
@@ -6412,28 +6466,7 @@ async shareReport() {
     }
 },
 
-// Disclaimer Engine
-    showDisclaimerModal: false,
-    
-    initDisclaimer() {
-        const lastAccepted = localStorage.getItem('vch_disclaimer_timestamp');
-        const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000; 
 
-        // Trigger if no record exists, or if the stored timestamp is older than 30 days
-        if (!lastAccepted || (Date.now() - parseInt(lastAccepted, 10)) > thirtyDaysInMs) {
-            this.showDisclaimerModal = true;
-        }
-    },
-    
-    acceptDisclaimer() {
-        localStorage.setItem('vch_disclaimer_timestamp', Date.now().toString());
-        this.showDisclaimerModal = false;
-    },
-
-    // Optional: Allow users to manually invoke it from the footer
-    forceShowDisclaimer() {
-        this.showDisclaimerModal = true;
-    },
         
         exportPDF() {
             // Web-native PDF generation using the browser's print dialog.

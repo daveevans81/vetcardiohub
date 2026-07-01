@@ -20,3 +20,6 @@ loadPartial("site-footer", "/partials/footer.html");
 
 // Load the glossary (will safely do nothing if 'glossary-container' isn't on the page)
 loadPartial("glossary-container", "/partials/glossary.html");
+
+loadPartial("terms-content",   "/partials/terms.html");
+loadPartial("privacy-content", "/partials/privacy.html");
