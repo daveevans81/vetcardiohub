@@ -876,7 +876,12 @@ get hasAnyDataForActivePet() {
         },
         
         
-        
+              
+get filteredStats() {
+    const data = this.getFilteredReadings();
+    if (data.length < 2) return null;
+    return this.calculateStats(data);
+},  
         
         // ===================== ANTIPARASITIC LOGIC =====================
 
