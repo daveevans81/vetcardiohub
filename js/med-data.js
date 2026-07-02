@@ -1,4 +1,10 @@
 //  med-data.js 
+
+// ── Clinical data review date ─────────────────────────────────────────────
+// Bump whenever the medication formulary, vaccine catalogue, or antiparasitic
+// product data is reviewed against current licensed-product information.
+const VCH_FORMULARY_REVIEWED = '2026-07-02';
+
 const VET_FORMULARY = {
     // --- DIURETICS (Blues) ---
     furosemide: { id: 'furosemide', generic: 'Furosemide', brands: ['Lasix', 'Salix', 'Dimazon', 'Libeo', 'Frusedale', 'Frusol'], classes: ['Loop Diuretic'], color: '#3b82f6' },

@@ -1752,6 +1752,12 @@
                                 </table>
                             </div>
                         </div>
+                        <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                            <i class="fa-solid fa-book-medical"></i>
+                            Product and formulary data last reviewed: <span x-text="formularyReviewedLabel"></span>.
+                            Product availability, formulations and licensing vary by region and change over time —
+                            always confirm against current product literature and your veterinary surgeon's advice.
+                        </p>
                     </div>
                 </template>
                     
@@ -2663,6 +2669,12 @@
                                 No vaccination records found.
                             </div>
                         </div>
+                        <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                            <i class="fa-solid fa-book-medical"></i>
+                            Product and formulary data last reviewed: <span x-text="formularyReviewedLabel"></span>.
+                            Product availability, formulations and licensing vary by region and change over time —
+                            always confirm against current product literature and your veterinary surgeon's advice.
+                        </p>
                     </div>
                 </template>    
                 
@@ -2924,6 +2936,12 @@
                                 </div>
                             </div>
                         </div>
+                        <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                            <i class="fa-solid fa-book-medical"></i>
+                            Product and formulary data last reviewed: <span x-text="formularyReviewedLabel"></span>.
+                            Product availability, formulations and licensing vary by region and change over time —
+                            always confirm against current product literature and your veterinary surgeon's advice.
+                        </p>
                     </div>
                 </template>
                                         <!-- ******************************** -->
@@ -3209,10 +3227,12 @@
                         <!-- ── Date Range ── -->
                         <div style="margin-bottom: 14px; padding: 10px 12px; background: #f1f5f9; border-radius: 6px; border: 1px solid #e2e8f0;">
                             <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">
-                                <i class="fa-regular fa-calendar"></i> Export Date Range
+                                <i class="fa-regular fa-calendar"></i> Export Date Range <span style="font-size: 0.7rem; color: #94a3b8;">
+    <i class="fa-solid fa-link"></i> Shared with the logbook &amp; charts
+</span>
                             </div>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-                                <select x-model="vetExportTimeScale" class="border rounded p-2 text-sm bg-white cursor-pointer" style="flex: 0 0 auto; width: auto;">
+                                <select x-model="timeScale" class="border rounded p-2 text-sm bg-white cursor-pointer" style="flex: 0 0 auto; width: auto;">
                                     <option value="thisWeek">This Week</option>
                                     <option value="lastWeek">Last Week</option>
                                     <option value="thisMonth">This Month</option>
@@ -3224,11 +3244,11 @@
                                     <option value="custom">Custom Range...</option>
                                 </select>
 
-                                <template x-if="vetExportTimeScale === 'custom'">
+                                <template x-if="timeScale === 'custom'">
                                     <div style="display: flex; align-items: center; gap: 6px; background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
-                                        <input type="date" x-model="vetExportCustomStart" class="text-sm p-1 border-none bg-transparent">
+                                        <input type="date" x-model="customStartDate" class="text-sm p-1 border-none bg-transparent">
                                         <span style="color: #94a3b8;">to</span>
-                                        <input type="date" x-model="vetExportCustomEnd" class="text-sm p-1 border-none bg-transparent">
+                                        <input type="date" x-model="customEndDate" class="text-sm p-1 border-none bg-transparent">
                                     </div>
                                 </template>
                             </div>
@@ -3576,6 +3596,11 @@
                                             Pet name is read from the email header. A new profile is created automatically if needed. 
                                             Duplicate readings (within 60 seconds of an existing entry) are skipped silently.
                                         </p>
+                                        <p style="font-size: 0.7rem; color: #94a3b8; margin: -4px 0 10px; font-style: italic;">
+                                            Cardalis&reg; is a trademark of Ceva Sant&eacute; Animale. VetCardioHub is an independent
+                                            tool and is not affiliated with, endorsed by, or sponsored by Ceva. This feature parses
+                                            only the export text you choose to paste.
+                                        </p>
                                     </div>
                                 </div>
                                 <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
@@ -3626,6 +3651,10 @@
                                         <p style="font-size: 0.72rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
                                             <i class="fa-solid fa-triangle-exclamation" style="color: #fbbf24;"></i>
                                             <strong>Warning:</strong> Heart2Heart exports do not contain the pet's name. The data will be imported into the currently active profile in the app header.
+                                        </p>
+                                        <p style="font-size: 0.7rem; color: #94a3b8; margin: -4px 0 10px; font-style: italic;">
+                                            Heart2Heart&trade; is a trademark of Boehringer Ingelheim. VetCardioHub is an independent
+                                            tool and is not affiliated with, endorsed by, or sponsored by Boehringer Ingelheim. This feature parses only the export text you choose to paste.
                                         </p>
                                     </div>
                                 </div>

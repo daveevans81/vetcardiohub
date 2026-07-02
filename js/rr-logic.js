@@ -98,9 +98,7 @@ showProgressionBanner: false,
 
 
 // ── Vet Export panel state ──
-vetExportTimeScale: 'all',
-vetExportCustomStart: '',
-vetExportCustomEnd: '',
+
 vetExportModules: {
     srr: true,
     medications: true,
@@ -413,6 +411,13 @@ acceptDisclaimer() {
     forceShowDisclaimer() {
         this.showDisclaimerModal = true;
     },
+    
+get formularyReviewedLabel() {
+    try {
+        return new Date(VCH_FORMULARY_REVIEWED + 'T12:00:00')
+            .toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) { return VCH_FORMULARY_REVIEWED; }
+},
 
 
 
@@ -448,25 +453,31 @@ sanitiseCSV(val) {
 
         
 init() {
-    // 1. ROBUST DATA LOAD: Prevents the "filter of undefined" crash
-    try {
-                this.patients = JSON.parse(localStorage.getItem('vch_patients')) || [];
-                this.weightLog = JSON.parse(localStorage.getItem('vch_weightLog')) || [];
-                this.srrHistory = JSON.parse(localStorage.getItem('vch_srrHistory')) || [];
-                this.medLedger = JSON.parse(localStorage.getItem('vch_medLedger')) || [];
-                this.diagnosisLog = JSON.parse(localStorage.getItem('vch_diagnosisLog')) || [];
-                this.syncopeLog = JSON.parse(localStorage.getItem('vch_syncopeLog')) || [];
-                this.coughLog = JSON.parse(localStorage.getItem('vch_coughLog')) || [];       
-                this.activityLog = JSON.parse(localStorage.getItem('vch_activityLog')) || [];
-                this.vaccinationLog = JSON.parse(localStorage.getItem('vch_vaccinationLog')) || [];
-                this.antiparasiticLog = JSON.parse(localStorage.getItem('vch_antiparasiticLog')) || [];
+ // 1. ROBUST DATA LOAD: per-key isolation — one corrupt key cannot
+    //    blank the other nine datasets. Non-array payloads are also rejected.
+    const loadKey = (key) => {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(key));
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            console.error(`VCH: corrupt localStorage key "${key}" — loading empty.`, e);
+            return [];
+        }
+    };
+    this.patients         = loadKey('vch_patients');
+    this.weightLog        = loadKey('vch_weightLog');
+    this.srrHistory       = loadKey('vch_srrHistory');
+    this.medLedger        = loadKey('vch_medLedger');
+    this.diagnosisLog     = loadKey('vch_diagnosisLog');
+    this.syncopeLog       = loadKey('vch_syncopeLog');
+    this.coughLog         = loadKey('vch_coughLog');
+    this.activityLog      = loadKey('vch_activityLog');
+    this.vaccinationLog   = loadKey('vch_vaccinationLog');
+    this.antiparasiticLog = loadKey('vch_antiparasiticLog');
 
-            } catch(e) {
-                this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
-                this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.vaccinationLog = []; this.antiparasiticLog = []; this.activityLog = [];
-            }
-      // Backfill module flags for legacy / restored profiles
+    // Backfill module flags for legacy / restored profiles
     this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
+    this._syncVetExportModules();
    
       const termsCurrent = localStorage.getItem('vch_terms_version') === this.termsVersion;
 
@@ -503,7 +514,7 @@ init() {
 });
 
     // Existing watchers
-    this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all';});
+    this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all'; this._syncVetExportModules(); });
     this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); });
     this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
     this.$watch('showCoughOverlay', () => { this.renderChart(); });
@@ -514,6 +525,7 @@ init() {
     this.$watch('showDiagnosisOverlay', () => { this.renderChart(); });
     this.$watch('showCutoffLine', () => { this.renderChart(); });
     this.$watch('showMeanRef',    () => { this.renderChart(); });
+    
     this.$watch('showManualSrr', (isVisible) => {
         if (isVisible) {
             // Pre-populate to current local datetime when panel opens
@@ -2785,7 +2797,10 @@ parseDateSafe(dateStr) {
                 // Otherwise, rely on native JS which expects US format (MM/DD/YYYY)
                 return new Date(`${parts[2]}-${parts[0]}-${parts[1]}T12:00:00`);
             }
-            return new Date(); // Absolute fallback
+                       // Absolute fallback: Invalid Date — .getTime() → NaN, so all range
+            // comparisons fail and the row drops out rather than posing as "today"
+            console.warn('VCH: unparseable date encountered —', dateStr);
+            return new Date(NaN);
         },
         
 startCount() {
@@ -3238,77 +3253,24 @@ get clinicalInterpretation() {
             }
             return { startDate, endDate };
         },
+        
+        // Sync the Vet Export module pills to the active patient's enabled modules.
+// The user can still toggle pills afterwards — this only sets sensible defaults.
+_syncVetExportModules() {
+    const mods = this.activePatientProfile?.modules;
+    if (!mods) return;
+    Object.keys(this.vetExportModules).forEach(k => {
+        if (k in mods) this.vetExportModules[k] = !!mods[k];
+    });
+},
         // ── Vet Export date range — mirrors getDateRange() but reads vetExportTimeScale ──
+// ── Vet Export date range — unified with the dashboard filter ──
 getVetExportDateRange() {
-    const now = new Date();
-    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    let startDate = null;
-    let endDate = endOfToday;
-
-    const dayOfWeek = startOfToday.getDay();
-    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-
-    switch (this.vetExportTimeScale) {
-        case 'thisWeek':
-            startDate = new Date(startOfToday);
-            startDate.setDate(startDate.getDate() + daysToMonday);
-            break;
-        case 'lastWeek':
-            startDate = new Date(startOfToday);
-            startDate.setDate(startDate.getDate() + daysToMonday - 7);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 6);
-            endDate.setHours(23, 59, 59);
-            break;
-        case 'thisMonth':
-            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-            break;
-        case 'lastMonth':
-            startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-            endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-            break;
-        case '60d':
-            startDate = new Date(startOfToday.getTime() - (60 * 24 * 60 * 60 * 1000));
-            break;
-        case '90d':
-            startDate = new Date(startOfToday.getTime() - (90 * 24 * 60 * 60 * 1000));
-            break;
-        case '180d':
-            startDate = new Date(startOfToday.getTime() - (180 * 24 * 60 * 60 * 1000));
-            break;
-        case 'custom':
-            if (this.vetExportCustomStart && this.vetExportCustomEnd) {
-                const s = new Date(this.vetExportCustomStart + 'T00:00:00');
-                const e = new Date(this.vetExportCustomEnd + 'T23:59:59');
-                if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && s <= e) {
-                    startDate = s;
-                    endDate = e;
-                }
-            }
-            break;
-        case 'all':
-        default:
-            startDate = null;
-            break;
-    }
-    return { startDate, endDate };
+    return this.getDateRange();
 },
 
 get vetExportTimeScaleLabel() {
-    const labels = {
-        'thisWeek': 'This Week',
-        'lastWeek': 'Last Week',
-        'thisMonth': 'This Month',
-        'lastMonth': 'Last Month',
-        '60d': 'Last 60 Days',
-        '90d': 'Last 90 Days',
-        '180d': 'Last 6 Months',
-        'all': 'Entire Dataset',
-        'custom': 'Custom Range'
-    };
-    return labels[this.vetExportTimeScale] || 'Filtered Range';
+    return this.timeScaleLabel;
 },
         
         // --- PAGINATION GETTERS ---
