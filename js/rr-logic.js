@@ -366,6 +366,7 @@ _expandForView(v) {
                             this.showSyncopeLog = true; this.showVaccinationLogPanel = true;
                             this.showAntiparasiticPanel = true; }
     if (v === 'trends')   { this.showAnalytics = true; }
+    if (v === 'count')   { this.showLog = true; }
 },
 
 setView(v) {
