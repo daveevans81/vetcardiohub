@@ -238,7 +238,7 @@ newVaccine: {
 
 acvimStage: '', // Easily mutable without changing the primary diagnosis
 concurrentDiagnoses: [], // Array to hold non-cardiac issues
-newConcurrentDiagnosis: '', // v-model for the input field
+
         
 showCardiacForm: false,
         showConcurrentForm: false,
@@ -339,6 +339,15 @@ navItems: [
     { id: 'data',     label: 'Data',     icon: 'fa-database',     modules: null }
 ],
 
+
+// True if ANY of the given modules is enabled for the active patient.
+// Legacy profiles without a modules object show everything.
+modOn(...keys) {
+    const mods = this.activePatientProfile?.modules;
+    if (!mods) return true;
+    return keys.some(k => mods[k]);
+},
+
 // 'all' shows every section; otherwise exact match
 isView(v) { return this.activeView === 'all' || this.activeView === v; },
 
@@ -352,9 +361,19 @@ get currentViewLabel() {
     return (this.navItems.find(n => n.id === this.activeView) || {}).label || '';
 },
 
+// Focused tabs auto-expand their accordions; 'all' keeps the compact scroll
+_expandForView(v) {
+    if (v === 'meds')     { this.showMedLog = true; this.showDiagnosisLog = true; }
+    if (v === 'wellness') { this.showSymptomLog = true; this.showWeightLogPanel = true;
+                            this.showSyncopeLog = true; this.showVaccinationLogPanel = true;
+                            this.showAntiparasiticPanel = true; }
+    if (v === 'trends')   { this.showAnalytics = true; }
+},
+
 setView(v) {
     const sameTab = this.activeView === v;
     this.activeView = v;
+    this._expandForView(v);
     try { localStorage.setItem('vch_activeView', v); } catch (e) {}
     // Tapping the active tab again scrolls back to top; switching jumps to top
     window.scrollTo({ top: 0, behavior: sameTab ? 'smooth' : 'auto' });
@@ -446,7 +465,9 @@ init() {
                 this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
                 this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.vaccinationLog = []; this.antiparasiticLog = []; this.activityLog = [];
             }
-            
+      // Backfill module flags for legacy / restored profiles
+    this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
+   
       const termsCurrent = localStorage.getItem('vch_terms_version') === this.termsVersion;
 
   if (this.patients.length === 0) {
@@ -507,9 +528,11 @@ init() {
     
     // Restore last-used view
     try {
-    const savedView = localStorage.getItem('vch_activeView');
-    if (savedView) this.activeView = savedView;
-} catch (e) {}
+        const savedView = localStorage.getItem('vch_activeView');
+        if (savedView) this.activeView = savedView;
+        if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all';
+        this._expandForView(this.activeView);
+    } catch (e) {}
     
     // Charts only size correctly once their canvas becomes visible (x-show toggles display:none)
     this.$watch('activeView', () => {
@@ -540,14 +563,14 @@ init() {
 // Initialization method for new patients
 startNewPatientOnboarding() {
     this.editingPatient = {
-        id: crypto.randomUUID(),
+        id: this.generateId(),
         name: '', ownerName: '', species: 'dog', breed: '', sex: '', dob: '', weight: '', weightUnit: '',customSrrCutoff: 30,
         modules: { ...this.defaultModules }
     };
     
     // Initialize your ACTUAL diagnosis tracker object for the onboarding wizard
     this.newDiagnosis = {
-        id: crypto.randomUUID(),
+        id: this.generateId(),
         patientId: this.editingPatient.id,
         date: new Date().toISOString().split('T')[0],
         diagnosis: '',
@@ -822,7 +845,7 @@ logWeight(patientId, value) {
         
         // --- DATA MERGING ALGORITHM ---
         
-        mergePatients(targetId, sourceId) {
+mergePatients(targetId, sourceId) {
             if (!confirm("CRITICAL: Merge all clinical logs from the source patient into the target patient? The source profile will be deleted. This cannot be undone.")) return;
 
             // Reassign IDs across all normalized arrays
@@ -1929,7 +1952,7 @@ saveConcurrentDiagnosis() {
         
         _saveDiagnosisLogEntry() {
             const entryToSave = {
-                id: this.editingDiagnosisId || crypto.randomUUID(),
+                id: this.editingDiagnosisId || this.generateId(),
                 patientId: this.activePatientId, 
                 date: this.newDiagnosis.date,
                 diagnosis: this.newDiagnosis.diagnosis,
@@ -2507,7 +2530,7 @@ saveSyncope() {
     // Spread the newSyncope object to include ALL bound fields from the HTML form
     const entryToSave = {
         ...this.newSyncope, 
-        id: this.editingSyncopeId || crypto.randomUUID(),
+        id: this.editingSyncopeId || this.generateId(),
         patientId: this.activePatientId // CRITICAL: Binds event to the current patient
     };
 
@@ -2774,9 +2797,9 @@ startCount() {
             this.hasSavedCurrentCount = false; // Reset the save state
 
             this.timerInterval = setInterval(() => {
-                this.timeLeft--;
+                this.timeLeft = Math.max(0, 30 - Math.round((Date.now() - this._countStart) / 1000));
                 if (this.timeLeft <= 0) this.finishCount();
-            }, 1000);
+            }, 250);
         },
         
         
@@ -2871,7 +2894,7 @@ getComputedAction(entry) {
     const priorEntries = this.medLedger
         .filter(m =>
             m.patientId === entry.patientId &&
-            m.drugId === entry.drugId &&
+            this._drugKey(m) === this._drugKey(entry) &&
             !m.isStopped &&
             new Date(m.eventDate) < new Date(entry.eventDate)
         );
@@ -2880,7 +2903,7 @@ getComputedAction(entry) {
     const lastStop = this.medLedger
         .filter(m =>
             m.patientId === entry.patientId &&
-            m.drugId === entry.drugId &&
+            this._drugKey(m) === this._drugKey(entry) &&
             m.isStopped &&
             new Date(m.eventDate) <= new Date(entry.eventDate)
         )
@@ -2908,6 +2931,8 @@ medUnits(form) {
         ? { strengthLabel: 'Concentration (mg/ml)', doseLabel: 'ml per Dose',     stockLabel: 'Total ml in Stock', dose: 'ml',  count: 'ml' }
         : { strengthLabel: 'Tablet Strength (mg)',  doseLabel: 'Tablets per Dose', stockLabel: 'Tablets in Stock',  dose: 'tab', count: 'tab' };
 },
+
+_drugKey(m) { return m.drugId === 'other' ? 'other:' + (m.customName || '') : m.drugId; },
 
 // Projects run-out from a med entry's stock data. Returns null if not computable.
 medStockProjection(entry) {
@@ -2974,17 +2999,18 @@ getStockStatus(emptyDate, reason) {
 
 get allAlerts() {
     const list = [];
-    (this.medStockAlerts || []).forEach(a => list.push({
+    const mods = this.activePatientProfile?.modules || {};
+    if (mods.medications !== false) (this.medStockAlerts || []).forEach(a => list.push({
         id: 'stock-' + a.id, kind: 'Medication stock', view: 'meds',
         label: a.drugName, statusLabel: a.stockStatus.label,
         color: a.stockStatus.color, bg: a.stockStatus.bg, border: a.stockStatus.border, days: a.stockStatus.days
     }));
-    (this.vaccineAlerts || []).forEach(a => list.push({
+    if (mods.vaccinations !== false) (this.vaccineAlerts || []).forEach(a => list.push({
         id: 'vac-' + a.id, kind: 'Vaccination', view: 'wellness',
         label: a.displayLabel || a.type, statusLabel: a.vaccineStatus.label,
         color: a.vaccineStatus.color, bg: a.vaccineStatus.bg, border: a.vaccineStatus.border, days: a.vaccineStatus.days
     }));
-    (this.parasiticAlerts() || []).forEach(a => {
+    if (mods.antiparasitics !== false)(this.parasiticAlerts() || []).forEach(a => {
         const c = a.state === 'lapsed'
             ? { color:'#dc2626', bg:'#fef2f2', border:'#fecaca' }
             : { color:'#d97706', bg:'#fffbeb', border:'#fde68a' };
@@ -3011,7 +3037,7 @@ currentMedStock() {
     [...this.medLedger]
         .filter(m => m.patientId === this.activePatientId)
         .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
-        .forEach(m => { latestByDrug[m.drugId] = m; });
+        .forEach(m => { latestByDrug[this._drugKey(m)] = m; });
     return Object.values(latestByDrug)
         .filter(m => !m.isStopped)
         .map(m => {
@@ -3104,6 +3130,7 @@ saveToHistory(manualRate = null, manualDate = null) {
         saveManualSrr() {
             const rate = parseFloat(this.manualSrrInput);
             if (isNaN(rate) || rate < 0) return alert("Invalid respiratory rate.");
+            if (rate > 120 && !confirm('That is an unusually high rate — save anyway?')) return;
             this.saveToHistory(rate, this.manualSrrDate);
             this.showManualSrr = false;
             this.manualSrrInput = null;
@@ -3441,6 +3468,68 @@ toggleChartExpansion() {
             // Sort chronologically (newest first for the table)
             return combinedEvents.sort((a, b) => b.dateObj - a.dateObj);
         },
+        
+        // ── Offscreen SRR chart for PDF export — honours the Vet Export date range,
+//    immune to on-screen zoom, logbook filter, and hidden-canvas staleness ──
+_srrChartExportDataUrl(startDate, endDate) {
+    const rows = this.srrHistory.filter(r => {
+        if (r.patientId !== this.activePatientId) return false;
+        if (!startDate) return true;
+        const d = this.parseDateSafe(r.date);
+        return d >= startDate && d <= endDate;
+    });
+    if (rows.length < 2) return null;
+
+    // Daily mean aggregation — mirrors renderChart()
+    const byDate = {};
+    rows.forEach(r => {
+        const dStr = r.date.split('T')[0];
+        (byDate[dStr] = byDate[dStr] || []).push(r.rate);
+    });
+    const points = Object.keys(byDate).sort().map(dStr => ({
+        x: new Date(dStr + 'T12:00:00').getTime(),
+        y: Math.round(byDate[dStr].reduce((s, v) => s + v, 0) / byDate[dStr].length * 10) / 10
+    }));
+
+    const cutoff = parseInt(this.activePatientProfile?.customSrrCutoff) || 30;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200; canvas.height = 480;
+    const chart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: { datasets: [{
+            label: 'Daily mean SRR (bpm)', data: points,
+            borderColor: '#0e7490', backgroundColor: '#0e7490',
+            pointRadius: 3, tension: 0.2
+        }]},
+        options: {
+            responsive: false, animation: false, devicePixelRatio: 2,
+            scales: {
+                x: { type: 'time', time: { unit: points.length > 60 ? 'month' : 'day' } },
+                y: { beginAtZero: true, title: { display: true, text: 'Breaths per minute' } }
+            },
+            plugins: {
+                legend: { display: false },
+                annotation: { annotations: { cutoffLine: {
+                    type: 'line', yMin: cutoff, yMax: cutoff,
+                    borderColor: '#dc2626', borderWidth: 2, borderDash: [6, 4],
+                    label: { display: true, content: `Cutoff (${cutoff})`, position: 'end',
+                             backgroundColor: '#dc2626', font: { size: 11 } }
+                }}}
+            }
+        }
+    });
+
+    // Flatten onto white for JPEG
+    const out = document.createElement('canvas');
+    out.width = canvas.width; out.height = canvas.height;
+    const ctx = out.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(canvas, 0, 0);
+    chart.destroy();
+    return out.toDataURL('image/jpeg', 0.92);
+},
                 
 renderChart() {
     if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
@@ -5319,6 +5408,8 @@ importCompleteBackup(event) {
 ) {
                 if (confirm("This will replace all current data with the backup file. Proceed?")) {
                     this.patients = data.vch_patients;
+                    // Backfill module flags for legacy / restored profiles
+                    this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
                     this.srrHistory = data.vch_srrHistory;
                     this.medLedger = data.vch_medLedger;
                     this.diagnosisLog = data.vch_diagnosisLog || [];
@@ -5579,13 +5670,22 @@ async generatePDF() {
         }
     }
  
-    // ── 3. SRR Chart ──────────────────────────────────────────────────────
-        if (mods.srr) {
-        embedCanvas(this.$refs.rrrChartCanvas, 'Sleeping Respiratory Rate (SRR) Chart');
+    // ── 3. SRR Chart — rendered offscreen against the Vet Export range ────
+    if (mods.srr) {
+        const srrImg = this._srrChartExportDataUrl(startDate, endDate);
+        if (srrImg) {
+            const pdfH = Math.round(180 * 480 / 1200);
+            if (Y + pdfH > 280) { doc.addPage(); Y = 20; }
+            sectionHeader('Sleeping Respiratory Rate (SRR) Chart');
+            doc.addImage(srrImg, 'JPEG', 14, Y, 180, pdfH);
+            Y += pdfH + 14;
+        }
     }
  
     // ── 4. Medication Timeline Chart ──────────────────────────────────────
-    if (mods.medications && this.hasAnyMedData()) {
+      if (mods.medications && this.hasAnyMedData()) {
+        const medChart = Chart.getChart(this.$refs.medChartCanvas);
+        if (medChart?.resetZoom) medChart.resetZoom();
         embedCanvas(this.$refs.medChartCanvas, 'Medication Timeline');
     }
  
