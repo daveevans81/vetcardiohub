@@ -2806,6 +2806,7 @@ parseDateSafe(dateStr) {
         
 startCount() {
     if (!this.activePatientId) return alert("Please establish or select a patient profile first.");
+    clearInterval(this.timerInterval);   // ← guard: restarting mid-count must kill the old timer
     this.isCounting = true;
     this.tapCount = 0;
     this.timeLeft = 30;
@@ -2817,7 +2818,16 @@ startCount() {
         if (this.timeLeft <= 0) this.finishCount();
     }, 250);
 },
-        
+
+cancelCount() {
+    // Abort the current count without producing a reading
+    clearInterval(this.timerInterval);
+    this.isCounting = false;
+    this.tapCount = 0;
+    this.timeLeft = 30;
+    this.finalRate = null;
+    this.hasSavedCurrentCount = false;
+},        
         
 registerTap() {
             if (!this.isCounting) return;
