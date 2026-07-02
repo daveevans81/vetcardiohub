@@ -2805,18 +2805,18 @@ parseDateSafe(dateStr) {
         },
         
 startCount() {
-            if (!this.activePatientId) return alert("Please establish or select a patient profile first.");
-            this.isCounting = true;
-            this.tapCount = 0;
-            this.timeLeft = 30;
-            this.finalRate = null;
-            this.hasSavedCurrentCount = false; // Reset the save state
-
-            this.timerInterval = setInterval(() => {
-                this.timeLeft = Math.max(0, 30 - Math.round((Date.now() - this._countStart) / 1000));
-                if (this.timeLeft <= 0) this.finishCount();
-            }, 250);
-        },
+    if (!this.activePatientId) return alert("Please establish or select a patient profile first.");
+    this.isCounting = true;
+    this.tapCount = 0;
+    this.timeLeft = 30;
+    this.finalRate = null;
+    this.hasSavedCurrentCount = false; // Reset the save state
+    this._countStart = Date.now();     // ← anchor the 30s window to wall-clock time
+    this.timerInterval = setInterval(() => {
+        this.timeLeft = Math.max(0, 30 - Math.round((Date.now() - this._countStart) / 1000));
+        if (this.timeLeft <= 0) this.finishCount();
+    }, 250);
+},
         
         
 registerTap() {
@@ -3357,14 +3357,22 @@ resetData() {
                 // --- CHARTING FUNCTIONS ---
                 
 toggleChartExpansion() {
-            this.isChartExpanded = !this.isChartExpanded;
-            
-            this.$nextTick(() => {
-                // Grab the chart directly from the DOM element to resize it
+    this.isChartExpanded = !this.isChartExpanded;
+
+    this.$nextTick(() => {
+        setTimeout(() => {
+            if (this.isChartExpanded) {
+                // Expanding: overlay is position:fixed, size is immediate — resize is enough
                 const chart = Chart.getChart(this.$refs.rrrChartCanvas);
                 if (chart) chart.resize();
-            });
-        },
+            } else {
+                // Collapsing: rebuild at the settled container size so a stale
+                // oversized canvas can never prop the layout open
+                this.renderChart();
+            }
+        }, 350);   // outlasts the card's 0.3s CSS transition
+    });
+},
         
         get compiledTimeline() {
             if (!this.activePatientId) return [];
