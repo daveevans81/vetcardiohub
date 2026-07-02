@@ -41,10 +41,18 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
     if (e.request.method !== 'GET') return;
     const url = new URL(e.request.url);
-    if (url.origin !== self.location.origin) return;   // leave any残 cross-origin requests alone
+    if (url.origin !== self.location.origin) return;
 
-    // HTML: network-first so users always get app updates, cache fallback offline
-    if (e.request.mode === 'navigate' || url.pathname.endsWith('.html')) {
+    // ── App shell: HTML + first-party JS/CSS ──────────────────────────────
+    // Network-first so every deploy reaches users immediately; the cached
+    // copy is only served when offline.
+    const isAppShell =
+        e.request.mode === 'navigate' ||
+        url.pathname.endsWith('.html') ||
+        url.pathname === '/styles.css' ||
+        (url.pathname.startsWith('/js/') && !url.pathname.startsWith('/js/vendor/'));
+
+    if (isAppShell) {
         e.respondWith(
             fetch(e.request)
                 .then(res => {
@@ -57,7 +65,8 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // Everything else (JS/CSS/fonts/icons): cache-first, populate on miss
+    // ── Everything else: pinned vendor libs, fonts, icons ────────────────
+    // Cache-first — these files only change when you bump CACHE_VERSION.
     e.respondWith(
         caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
             const copy = res.clone();
