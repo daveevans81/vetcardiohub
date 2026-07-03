@@ -22,7 +22,12 @@ const APP_SHELL = [
     '/js/vendor/alpine.min.js',
     '/css/fontawesome/all.min.css',
     '/manifestrr.json',
-    '/apple-touch-icon.png'
+    '/apple-touch-icon.png',
+    '/echocalc.html',
+    '/js/echo-breeds.js',
+    '/js/echocalc.js',
+    '/js/global-head.js',
+    '/js/vendor/mathjax/tex-mml-chtml.js'
 ];
 
 self.addEventListener('install', (e) => {
