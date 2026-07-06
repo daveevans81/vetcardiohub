@@ -2327,12 +2327,21 @@
                                 <div class="p-5 space-y-4">
                                     
                                                     <!-- WSAVA guideline notice -->
-                                    <div class="bg-indigo-50 text-indigo-800 text-xs p-3 rounded border border-indigo-100">
+                                    <p class="text-sm text-muted" x-show="!isCatalogueSpecies"
+                                           style="background:#f1f5f9; border-left:3px solid #0ea5e9; padding:8px 10px; border-radius:6px;">
+                                            <i class="fa-solid fa-circle-info" style="color:#0ea5e9;"></i>
+                                            Structured WSAVA vaccine schedules are validated for canine and feline patients.
+                                            For <span x-text="speciesLabel(activePatientProfile)"></span>, record vaccines via
+                                            the <strong>Other / Custom Vaccine</strong> option using your practice's species-specific protocol.
+                                    </p>                
+                                    <p class="text-sm text-muted" x-show="isCatalogueSpecies"
+                                           style="background:#f1f5f9; border-left:3px solid #0ea5e9; padding:8px 10px; border-radius:6px;">
+                                            <i class="fa-solid fa-circle-info" style="color:#0ea5e9;"></i>
                                         <strong>WSAVA Guidelines applied:</strong> Next due dates are auto-suggested based on
                                         this patient's vaccination history. Core vaccines (DHP/RCP) suggest triennial
                                         intervals after the first annual booster. All dates are overridable. Local disease
                                         pressure and veterinary judgement always takes precedence.
-                                    </div>
+                                    </p>
                                         
                                                     <!-- Date administered -->
                                     <div>
@@ -2344,13 +2353,7 @@
                     
                                     <!-- Vaccine selector — grouped optgroups -->
                                     <div>
-                                        <p class="text-sm text-muted" x-show="!isCatalogueSpecies"
-                                           style="background:#f1f5f9; border-left:3px solid #0ea5e9; padding:8px 10px; border-radius:6px;">
-                                            <i class="fa-solid fa-circle-info" style="color:#0ea5e9;"></i>
-                                            Structured WSAVA vaccine schedules are validated for canine and feline patients.
-                                            For <span x-text="speciesLabel(activePatientProfile)"></span>, record vaccines via
-                                            the <strong>Other / Custom Vaccine</strong> option using your practice's species-specific protocol.
-                                        </p>
+
                                         <label class="block text-sm font-semibold text-gray-700">Vaccine</label>
                                         <select x-model="newVaccine.vaccineId"
                                                 @change="onVaccineSelected($event.target.value)"
