@@ -720,7 +720,7 @@ generateModuleRecommendations() {
         recs.srr = true; // useful for collapse context
     } else {
         // General wellness
-        recs.coughLog = true;     
+        recs.coughLog = ;     
         recs.activityLog = true; 
     }
 
@@ -1095,7 +1095,7 @@ get antiparasiticRegion() {
 
 // Effective priority list: explicit patient set, else region default,
 // plus travel-triggered additions (e.g. heartworm for UK travellers).
-ggetParasitePriorities() {
+getParasitePriorities() {
   const p = this.activePatientProfile;
   const region = p?.parasiteRegion || this._defaultRegion();
   const base = (p && Array.isArray(p.parasitePriorities) && p.parasitePriorities.length)
@@ -1103,11 +1103,11 @@ ggetParasitePriorities() {
       : (this.isCatalogueSpecies                              // ← only dog/cat get region seeds
             ? (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice()
             : []);
-  if (p?.parasiteTravel) {
-    (PARASITE_REGION_DEFAULTS[region]?.travelAdds || []).forEach(id => {
-      if (!base.includes(id)) base.push(id);
-    });
-  }
+    if (this.isCatalogueSpecies && p?.parasiteTravel) {
+      (PARASITE_REGION_DEFAULTS[region]?.travelAdds || []).forEach(id => {
+        if (!base.includes(id)) base.push(id);
+      });
+    }
   return base;
 },
 
@@ -1338,20 +1338,24 @@ openPrioritiesModal(context = 'edit') {
     const src = (context === 'review') ? this.activePatientProfile : this.editingPatient;
     const region = src?.parasiteRegion || this._defaultRegion();
     const explicit = Array.isArray(src?.parasitePriorities) && src.parasitePriorities.length;
+    const catalogue = (src?.species === 'dog' || src?.species === 'cat');   // ← add
 
     this.prioritiesDraft = {
         region,
         travel: !!src?.parasiteTravel,
         priorities: explicit
             ? src.parasitePriorities.slice()
-            : (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice()
+            : (catalogue ? (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice() : [])  // ← gate
     };
     this.showPrioritiesModal = true;
 },
 
 applyRegionDefaults(region) {
     this.prioritiesDraft.region = region;
-    this.prioritiesDraft.priorities = (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice();
+    const catalogue = this.isCatalogueSpecies;   // or check editingPatient.species as above
+    this.prioritiesDraft.priorities = catalogue
+        ? (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice()
+        : [];
 },
 
 togglePriority(parasiteId) {
