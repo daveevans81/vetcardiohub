@@ -1011,11 +1011,22 @@
                     <label class="form-label">Owner Surname: <input type="text" x-model="editingPatient.ownerName" class="form-control"></label>
                     
                     <div class="flex-between gap-10">
-                        <label class="form-label w-full">Species: 
-                            <select x-model="editingPatient.species" class="form-control">
-                                <option value="dog">Canine</option>
-                                <option value="cat">Feline</option>
+                        <label class="form-label">Species: 
+                            <select x-model="editingPatient.species" class="form-control mt-0" @change="if (editingPatient.species !== 'other') editingPatient.speciesOther = ''">
+                                <option value="dog">Dog</option>
+                                <option value="cat">Cat</option>
+                                <option value="other">Other</option>
                             </select>
+                        </label>
+                        <label class="form-label mt-2"
+                               x-show="editingPatient.species === 'other'"
+                               x-transition>
+                            Specify species:
+                            <input type="text"
+                                   x-model="editingPatient.speciesOther"
+                                   class="form-control mt-0"
+                                   placeholder="e.g. Rabbit, Ferret"
+                                   @blur="editingPatient.speciesOther = toTitleCase(editingPatient.speciesOther)">
                         </label>
                         <label class="form-label w-full">Sex: 
                             <select x-model="editingPatient.sex" class="form-control">
