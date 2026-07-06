@@ -2344,6 +2344,13 @@
                     
                                     <!-- Vaccine selector — grouped optgroups -->
                                     <div>
+                                        <p class="text-sm text-muted" x-show="!isCatalogueSpecies"
+                                           style="background:#f1f5f9; border-left:3px solid #0ea5e9; padding:8px 10px; border-radius:6px;">
+                                            <i class="fa-solid fa-circle-info" style="color:#0ea5e9;"></i>
+                                            Structured WSAVA vaccine schedules are validated for canine and feline patients.
+                                            For <span x-text="speciesLabel(activePatientProfile)"></span>, record vaccines via
+                                            the <strong>Other / Custom Vaccine</strong> option using your practice's species-specific protocol.
+                                        </p>
                                         <label class="block text-sm font-semibold text-gray-700">Vaccine</label>
                                         <select x-model="newVaccine.vaccineId"
                                                 @change="onVaccineSelected($event.target.value)"
@@ -2752,6 +2759,8 @@
                                     <i class="fa-solid fa-sliders"></i> Review priorities
                                 </button>
                             </div>
+                            
+
                 
                             <!-- Coverage status chips -->
                             <div style="margin-bottom:8px;font-weight:bold;color:#16325F;font-size:0.9rem;">Current coverage</div>
@@ -2874,6 +2883,13 @@
                 width: 100%; max-width: 32rem; overflow: hidden;">
                                 <h4 style="margin-top:0;color:#16325F;font-size:0.95rem;border-bottom:1px solid #eee;padding-bottom:8px;"
                                     x-text="editingAntiparasiticId ? 'Edit Antiparasitic Record' : 'Log Antiparasitic Product'"></h4>
+                               <p class="text-sm text-muted" x-show="!isCatalogueSpecies"
+                               style="background:#f1f5f9; border-left:3px solid #0f766e; padding:8px 10px; border-radius:6px;">
+                                <i class="fa-solid fa-circle-info" style="color:#0f766e;"></i>
+                                Listed antiparasitic products are licensed for dogs and cats. For
+                                <span x-text="speciesLabel(activePatientProfile)"></span>, use broad-spectrum or
+                                <strong>custom</strong> entries and confirm species suitability with your veterinary surgeon.
+                            </p>
                 
                                 <div class="grid-cols-2" style="align-items:end;">
                                     <div>

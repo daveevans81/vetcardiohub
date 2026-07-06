@@ -470,6 +470,15 @@ speciesIcon(patient) {
   return match ? match[1] : 'fa-paw';
 },
 
+normalisePatientText(p) {
+  if (!p) return p;
+  p.name      = this.toTitleCase(p.name);
+  p.ownerName = this.toTitleCase(p.ownerName);
+  p.breed     = this.toTitleCase(p.breed);
+  if (p.species === 'other') p.speciesOther = this.toTitleCase(p.speciesOther);
+  return p;
+},
+
 sanitiseCSV(val) {
     const s = String(val == null ? '' : val);
     // Prefix formula-injection characters to prevent spreadsheet execution
@@ -653,6 +662,7 @@ generateModuleRecommendations() {
 },
 
 saveOnboardedPatient() {
+    this.normalisePatientText(this.editingPatient);
     const { weight, ...patientData } = this.editingPatient;
     const patientIdToSave = patientData.id;
 
@@ -784,20 +794,26 @@ get computedAgeText() {
     return `${years}y`;
 },
         
-        get latestWeightText() {
-            if (!this.activePatientId) return '';
-            const weights = this.weightLog
-                .filter(w => w.patientId === this.activePatientId)
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
-            if (weights.length === 0) return 'No weight logged';
-            const unit = this.activePatientProfile?.weightUnit || 'kg';
-            return `${weights[0].weightValue} ${unit}`;
-        },
+get latestWeightText() {
+    if (!this.activePatientId) return '';
+    const weights = this.weightLog
+        .filter(w => w.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (weights.length === 0) return 'No weight logged';
+    const unit = this.activePatientProfile?.weightUnit || 'kg';
+    return `${weights[0].weightValue} ${unit}`;
+},
+
+get isCatalogueSpecies() {
+  return this.currentSpecies === 'dog' || this.currentSpecies === 'cat';
+},
         
 savePatient() {
+    
     const cleanName = (this.editingPatient.name || '').trim();
     if (!cleanName) return alert("Patient Name is clinically required.");
-
+    
+    this.normalisePatientText(this.editingPatient);
     const { weight, ...patientData } = this.editingPatient;
     const currentWeightValue = parseFloat(weight);
     const patientIdToSave = patientData.id;
@@ -1028,16 +1044,17 @@ getParasitePriorities() {
 
 // Grouped + region/species-filtered product list for the selector
 get productOptions() {
-    const region  = this.antiparasiticRegion;
-    const species = this.currentSpecies;
-    const groups  = { broad: [], ecto: [], endo: [], custom: [] };
-    for (const prod of Object.values(this.antiparasiticFormulary)) {
-        if (prod.group === 'custom') { groups.custom.push(prod); continue; }
-        if (!prod.regions.includes(region)) continue;
-        if (prod.species !== 'both' && prod.species !== species) continue;
-        (groups[prod.group] || groups.broad).push(prod);
-    }
-    return groups;
+  const region  = this.antiparasiticRegion;
+  const species = this.currentSpecies;
+  const groups  = { broad: [], ecto: [], endo: [], custom: [] };
+  for (const prod of Object.values(this.antiparasiticFormulary)) {
+    if (prod.group === 'custom') { groups.custom.push(prod); continue; }
+    if (!prod.regions.includes(region)) continue;
+    // dog/cat: filter to species. 'other': show every product (vet judges suitability).
+    if (this.isCatalogueSpecies && prod.species !== 'both' && prod.species !== species) continue;
+    (groups[prod.group] || groups.broad).push(prod);
+  }
+  return groups;
 },
 
 _getProductEntry(productId) {
@@ -1515,12 +1532,15 @@ get vaccineAlerts() {
 },
 
 get availableVaccineGroups() {
-    const catalogue = VACCINE_CATALOGUE[this.currentSpecies] || VACCINE_CATALOGUE.dog;
-    return {
-        combis:     catalogue.combis     || [],
-        nonCore:    catalogue.nonCore    || [],
-        individual: catalogue.individual || []
-    };
+  // WSAVA catalogues are validated for dog & cat only.
+  // For 'other', return empty — the "Other / Custom Vaccine" option remains.
+  if (!this.isCatalogueSpecies) return { combis: [], nonCore: [], individual: [] };
+  const catalogue = VACCINE_CATALOGUE[this.currentSpecies] || VACCINE_CATALOGUE.dog;
+  return {
+    combis:     catalogue.combis     || [],
+    nonCore:    catalogue.nonCore    || [],
+    individual: catalogue.individual || []
+  };
 },
 
 get sortedVaccinationLog() {
@@ -5619,13 +5639,13 @@ async generatePDF() {
     // ── 1. Header ─────────────────────────────────────────────────────────
     doc.setFontSize(20);
     doc.setTextColor(22, 50, 95);
-    doc.text(`${profile.name} — Clinical Report`, 14, 20);
+    doc.text(`${this.toTitleCase(profile.name) || 'Unnamed Patient'} — Clinical Report`, 14, 20);
  
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Generated: ${new Date().toLocaleDateString('en-GB')}  |  Period: ${this.vetExportTimeScaleLabel}`, 14, 28);
     doc.text(
-        `Species: ${profile.species}  |  Breed: ${profile.breed || 'N/A'}  |  Age: ${this.computedAgeText}  |  Owner: ${profile.ownerName || 'N/A'}`,
+        `Species: ${this.speciesLabel(profile)}  |  Breed: ${this.toTitleCase(profile.breed) || 'N/A'}  |  Age: ${this.computedAgeText}  |  Owner: ${this.toTitleCase(profile.ownerName) || 'N/A'}`,
         14, 34
     );
  
@@ -6046,10 +6066,10 @@ generateCSV() {
     let csv = '';
  
     // Report metadata preamble (not a data row — purely informational)
-    csv += `${q('VetCardioHub Clinical Report')},${q(profile.name)}\n`;
+    csv += `${q('VetCardioHub Clinical Report')},${q(this.toTitleCase(profile.name))}\n`;
     csv += `${q('Generated')},${q(new Date().toLocaleDateString('en-GB'))}\n`;
     csv += `${q('Period')},${q(this.vetExportTimeScaleLabel)}\n`;
-    csv += `${q('Species')},${q(profile.species)}  ${q('Breed')},${q(profile.breed || '')}  ${q('Owner')},${q(profile.ownerName || '')}\n`;
+    csv += `${q('Species')},${q(this.speciesLabel(profile))}  ${q('Breed')},${q(this.toTitleCase(profile.breed))}  ${q('Owner')},${q(this.toTitleCase(profile.ownerName))}\n`;
     csv += '\n';
  
     // ── SRR Log ───────────────────────────────────────────────────────────
@@ -6609,7 +6629,7 @@ async shareReport() {
     if (navigator.share) {
         try {
             await navigator.share({
-                title: `${profile.name} — VetCardioHub Clinical Report`,
+                title: `${this.toTitleCase(profile.name)} — VetCardioHub Clinical Report`,
                 text: out,
                 url: 'https://vetcardiohub.com/health-tracker'
             });
