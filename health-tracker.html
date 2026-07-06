@@ -823,8 +823,8 @@
                         <label class="form-label">Coverage priorities (tap to toggle)</label>
                         <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
                             <template x-for="t in parasiteTargets" :key="t.id">
-                                <label :style="`display:flex;align-items:center;gap:10px;border:1px solid;border-radius:8px;padding:8px 12px;cursor:pointer;${prioritiesDraft.priorities.includes(t.id)?'background:#f0fdf4;border-color:#86efac;':'background:#fff;border-color:#e2e8f0;'}`">
-                                    <input type="checkbox" :checked="prioritiesDraft.priorities.includes(t.id)" @change="togglePriority(t.id)" style="width:16px;height:16px;accent-color:#15803d;">
+                                <label :style="`display:flex;align-items:center;gap:10px;border:1px solid;border-radius:8px;padding:8px 12px;cursor:pointer;${draftEffectivePriorities().includes(t.id)?'background:#f0fdf4;border-color:#86efac;':'background:#fff;border-color:#e2e8f0;'}`">
+                                    <input type="checkbox" :checked="draftEffectivePriorities().includes(t.id)" @change="togglePriority(t.id)" style="width:16px;height:16px;accent-color:#15803d;">
                                     <div style="flex:1;">
                                         <div style="font-size:0.86rem;font-weight:600;color:#1e293b;display:flex;align-items:center;gap:6px;">
                                             <span x-text="t.label"></span>
@@ -835,6 +835,7 @@
                                                onmouseover="this.style.color='#0ea5e9'"
                                                onmouseout="this.style.color='#94a3b8'"
                                                @click.stop="openGlossary(t.glossaryKey)"></i>
+                                               <span x-show="isPriorityForcedByTravel(t.id)" style="font-size:0.68rem;font-weight:600;color:#b45309;background:#fef3c7;border-radius:4px;padding:1px 6px;">Travel cover</span>
                                         </div>
                                         <div x-show="t.note" style="font-size:0.72rem;color:#94a3b8;margin-top:1px;" x-text="t.note"></div>
                                     </div>

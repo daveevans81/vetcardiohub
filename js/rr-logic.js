@@ -1224,6 +1224,29 @@ togglePriority(parasiteId) {
     if (i === -1) arr.push(parasiteId); else arr.splice(i, 1);
 },
 
+// Effective priorities for the draft being edited — same merge logic as
+// getParasitePriorities(), but reads live draft state so ticking "travels
+// abroad" is reflected in the checklist immediately, before Save.
+draftEffectivePriorities() {
+    const draft = this.prioritiesDraft;
+    const base = draft.priorities.slice();
+    if (draft.travel) {
+        (PARASITE_REGION_DEFAULTS[draft.region]?.travelAdds || []).forEach(id => {
+            if (!base.includes(id)) base.push(id);
+        });
+    }
+    return base;
+},
+
+// True when a priority is showing as covered only because "travels abroad"
+// is ticked, not because it's explicitly selected below.
+isPriorityForcedByTravel(parasiteId) {
+    const draft = this.prioritiesDraft;
+    return !!draft.travel
+        && (PARASITE_REGION_DEFAULTS[draft.region]?.travelAdds || []).includes(parasiteId)
+        && !draft.priorities.includes(parasiteId);
+},
+
 get prioritiesRegionNote() {
     return PARASITE_REGION_DEFAULTS[this.prioritiesDraft.region]?.note || '';
 },
