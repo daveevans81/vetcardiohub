@@ -806,19 +806,19 @@
             <!-- PARASITE PRIORITIES PAGE         -->
             <!-- ******************************** -->
             <div id="parasite-priorities" x-show="showPrioritiesModal" class="modal-overlay" style="background: rgba(0,0,0,0.6); z-index: z-index: 10200;" x-cloak>
-                <div class="onboarding-modal-inner" style="max-width: 520px; padding: 0; overflow: hidden; text-align: left;" @click.away="prioritiesContext !== 'onboarding' && (showPrioritiesModal = false)">
+                <div class="onboarding-modal-inner" style="max-width: 520px; padding: 0; overflow: hidden; text-align: left; display:flex; flex-direction:column; max-height:90vh;" @click.away="prioritiesContext !== 'onboarding' && (showPrioritiesModal = false)">
                     <div style="background:#0f766e;color:#fff;padding:14px 18px;">
                         <h3 style="margin:0;font-size:1.1rem;"><i class="fa-solid fa-shield-virus"></i> Parasite Protection Plan<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('parasite_protection_plan')"></i></h3>
                         <div style="font-size:0.78rem;opacity:0.9;margin-top:2px;">Discuss with your vet and choose carefully what this pet needs cover against — risk-based, not maximal.</div>
                     </div>
-                    <div style="padding:18px;max-height:70vh;overflow-y:auto;">
+                    <div style="padding:18px; flex:1 1 auto; min-height:0; overflow-y:auto;">
             
                         <label class="form-label">Where does this pet live / travel?</label>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px;">
-                            <template x-for="rk in ['uk','europe','us']" :key="rk">
-                                <button type="button" @click="applyRegionDefaults(rk)"
-                                        :style="`flex:1;min-width:120px;border-radius:8px;padding:8px;font-size:0.82rem;cursor:pointer;border:1px solid;${prioritiesDraft.region===rk?'background:#ccfbf1;border-color:#0f766e;color:#0f766e;font-weight:bold;':'background:#fff;border-color:#e2e8f0;color:#475569;'}`"
-                                        x-text="parasiteRegionDefaults[rk].label"></button>
+                            <template x-for="rk in Object.keys(parasiteRegionDefaults)" :key="rk">
+                              <button type="button" @click="applyRegionDefaults(rk)"
+                                      :style="`flex:1;min-width:100px;border-radius:8px;padding:8px;font-size:0.82rem;cursor:pointer;border:1px solid;${prioritiesDraft.region===rk?'background:#ccfbf1;border-color:#0f766e;color:#0f766e;font-weight:bold;':'background:#fff;border-color:#e2e8f0;color:#475569;'}`"
+                                      x-text="parasiteRegionDefaults[rk].label"></button>
                             </template>
                         </div>
             
@@ -852,26 +852,35 @@
                                     </div>
                                 </label>
                             </template>
-                            <div style="margin-top:12px;border-top:1px dashed #e2e8f0;padding-top:10px;">
-                              <label class="form-label">Add a parasite not listed above</label>
-                              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:end;">
-                                <input type="text" x-model="newCustomParasite.label" class="form-input"
-                                       placeholder="e.g., Lungworm (feline), Encephalitozoon" style="flex:1;min-width:180px;">
-                                <select x-model="newCustomParasite.category" class="form-select" style="width:auto;">
-                                  <option value="ecto">Ectoparasite</option>
-                                  <option value="endo">Endoparasite</option>
-                                  <option value="other">Other</option>
-                                </select>
-                                <button type="button" class="btn btn-primary" style="background:#0f766e;"
-                                        @click="addCustomParasite()"><i class="fa-solid fa-plus"></i> Add</button>
-                              </div>
-                              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
-                                <template x-for="cp in (activePatientProfile?.customParasites || [])" :key="cp.id">
-                                  <span style="background:#ecfeff;color:#155e75;border:1px solid #a5f3fc;border-radius:999px;padding:2px 8px 2px 10px;font-size:0.75rem;display:inline-flex;align-items:center;gap:6px;">
-                                    <span x-text="cp.label"></span>
-                                    <i class="fa-solid fa-xmark" style="cursor:pointer;" @click="removeCustomParasite(cp.id)"></i>
-                                  </span>
-                                </template>
+                            
+                            <div x-data="{ openCustom: false }" style="margin-top:12px;border-top:1px dashed #e2e8f0;padding-top:10px;">
+
+                              <button type="button" @click="openCustom = !openCustom"
+                                      style="display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;cursor:pointer;padding:4px 0;font-size:0.8rem;color:#64748b;">
+                                <span><i class="fa-solid fa-circle-plus" style="color:#0f766e;"></i> Add a parasite not listed <em style="color:#94a3b8;">(advanced)</em></span>
+                                <i class="fa-solid" :class="openCustom ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                              </button>
+                            
+                              <div x-show="openCustom" x-transition x-cloak style="margin-top:8px;">
+                                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:end;">
+                                  <input type="text" x-model="newCustomParasite.label" class="form-input"
+                                         placeholder="e.g., Lungworm (feline), Encephalitozoon" style="flex:1;min-width:180px;">
+                                  <select x-model="newCustomParasite.category" class="form-select" style="width:auto;">
+                                    <option value="ecto">Ectoparasite</option>
+                                    <option value="endo">Endoparasite</option>
+                                    <option value="other">Other</option>
+                                  </select>
+                                  <button type="button" class="btn-primary" style="background:#0f766e;margin:0;"
+                                          @click="addCustomParasite()"><i class="fa-solid fa-plus"></i> Add</button>
+                                </div>
+                                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+                                  <template x-for="cp in (activePatientProfile?.customParasites || [])" :key="cp.id">
+                                    <span style="background:#ecfeff;color:#155e75;border:1px solid #a5f3fc;border-radius:999px;padding:2px 8px 2px 10px;font-size:0.75rem;display:inline-flex;align-items:center;gap:6px;">
+                                      <span x-text="cp.label"></span>
+                                      <i class="fa-solid fa-xmark" style="cursor:pointer;" @click="removeCustomParasite(cp.id)"></i>
+                                    </span>
+                                  </template>
+                                </div>
                               </div>
                             </div>
                         </div>
@@ -880,7 +889,7 @@
                             <i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('parasite_coverage_principle')"></i> More products isn't always better — match cover to this pet's lifestyle and your vet's local risk advice.
                         </div>
                     </div>
-                    <div style="display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid #e2e8f0;">
+                    <div style="display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid #e2e8f0; flex-shrink:0;">
                         <button @click="showPrioritiesModal = false" type="button" class="btn-cancel" style="margin:0;">Cancel</button>
                         <button @click="savePriorities()" type="button" class="btn-primary" style="background:#0f766e;"
                                 x-text="prioritiesContext === 'onboarding' ? 'Save & Finish' : 'Save Plan'"></button>
