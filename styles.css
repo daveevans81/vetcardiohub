@@ -4550,6 +4550,7 @@ html { -webkit-text-size-adjust: 100%; }
 }
 .mp-enable { background: #0f766e; color: #fff; }
 .mp-learn  { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+.mp-disable { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
 
 /* ======================================================= */
 /* VIEW NAVIGATION — bottom tab bar (mobile) + sidebar (desktop) */

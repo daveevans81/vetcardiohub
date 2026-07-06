@@ -361,16 +361,17 @@ inactiveModuleCount() {
 },
 
 onModulePillClick(m, ev) {
-  const active = this.activePatientProfile?.modules?.[m.key];
-  if (active) {
-    // already on — jump to its section if you have anchors, else no-op
-    const el = document.getElementById('module-' + m.key);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    return;
-  }
   const x = Math.min(ev.clientX, window.innerWidth - 250);
-  const y = Math.min(ev.clientY + 12, window.innerHeight - 160);
+  const y = Math.min(ev.clientY + 12, window.innerHeight - 190);
   this.modulePopover = { open: true, key: m.key, x, y };
+},
+
+disableModuleFromPill(key) {
+  const p = this.patients.find(p => p.id === this.activePatientId);
+  if (!p || !p.modules) return;
+  p.modules[key] = false;
+  this.saveToStorage('vch_patients', this.patients);
+  this.modulePopover.open = false;
 },
 
 enableModuleFromPill(key) {

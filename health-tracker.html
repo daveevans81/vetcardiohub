@@ -977,13 +977,15 @@
                                   </span>
                                 </template>
                             
+                                <!-- More module pill?
                                 <span class="module-pill"
                                       x-show="!showAllModules && inactiveModuleCount() > 0"
                                       @click="showAllModules = true"
                                       style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0;">
                                   <i class="fa-solid fa-ellipsis"></i>
                                   <span x-text="inactiveModuleCount() + ' more'"></span>
-                                </span>
+                                </span> -->
+                                
                               </div>
                             </div>
                         </template>
@@ -3813,8 +3815,15 @@
                   </h4>
                   <p x-text="moduleMetaByKey(modulePopover.key).desc"></p>
                   <div class="mp-actions">
-                    <button class="mp-btn mp-enable" @click="enableModuleFromPill(modulePopover.key)">
+                    <button x-show="!activePatientProfile.modules[modulePopover.key]"
+                            class="mp-btn mp-enable"
+                            @click="enableModuleFromPill(modulePopover.key)">
                       <i class="fa-solid fa-plus"></i> Enable
+                    </button>
+                    <button x-show="activePatientProfile.modules[modulePopover.key]"
+                            class="mp-btn mp-disable"
+                            @click="disableModuleFromPill(modulePopover.key)">
+                      <i class="fa-solid fa-xmark"></i> Disable
                     </button>
                     <button class="mp-btn mp-learn" @click="learnModuleFromPill(modulePopover.key)">
                       <i class="fa-solid fa-circle-info"></i> Learn more
