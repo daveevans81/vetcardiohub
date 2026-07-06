@@ -341,7 +341,7 @@ moduleMeta: [
     desc:'Record energy levels, walk duration and distance.' },
   { key:'acvimStaging',   label:'Diagnosis',      icon:'fa-stethoscope',     c:'#6d28d9', bg:'#ede9fe', bd:'#ddd6fe', glossary:'module_diagnosis',
     desc:'Record diagnosis and ACVIM heart-disease stage.' },
-  { key:'weightDiet',     label:'Weight',         icon:'fa-scale-balanced',  c:'#c2410c', bg:'#fff7ed', bd:'#fed7aa', glossary:'module_weight',
+  { key:'weightDiet',     label:'Weight',         icon:'fa-scale-balanced',  c:'#c2410c', bg:'#fff7ed', bd:'#fed7aa', glossary:'module_diet_weight',
     desc:'Monitor body weight and diet as a time series.' },
   { key:'syncopeLog',     label:'Syncope',        icon:'fa-bolt',            c:'#b91c1c', bg:'#fef2f2', bd:'#fecaca', glossary:'module_syncope',
     desc:'Diary of fainting or collapse episodes.' },
