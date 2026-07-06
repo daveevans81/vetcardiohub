@@ -33,8 +33,6 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="shortcut icon" href="/favicon.ico" />
 
-<meta name="apple-mobile-web-app-title" content="MyWebSite" />
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetCardioHub EchoCalc">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -42,6 +40,20 @@
 <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="VetCardioHub EchoCalc">
+
+<link rel="canonical" href="https://vetcardiohub.com/echocalc.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+
+<meta property="og:title" content="Veterinary Echocardiography Calculator | VetCardioHub">
+<meta property="og:description" content="Free veterinary echo calculator: allometric reference sizing, canine MINE prognostic scoring, Qp:Qs ratios, diastolic function grading and feline HCM screening.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vetcardiohub.com/echocalc.html">
+<meta property="og:image" content="https://vetcardiohub.com/images/og-echocalc.png">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Veterinary Echocardiography Calculator | VetCardioHub">
+<meta name="twitter:description" content="Allometric sizing, MINE scoring, Qp:Qs and diastolic grading — a free clinical toolkit for veterinary echocardiography.">
+<meta name="twitter:image" content="https://vetcardiohub.com/images/og-echocalc.png">
 
 <script type="application/ld+json">
 {
@@ -59,7 +71,8 @@
     "name": "Cardiology"
   },
   "mainEntity": {
-    "@type": "MedicalDevice",
+    "@type": "WebApplication",
+    "applicationCategory": "HealthApplication",
     "name": "VetCardioHub Advanced Echo Calc Suite",
     "description": "Calculates normalized dimensions, advanced volumetric indices, Mitral INsufficiency Echocardiographic (MINE) risk score, shunt ratios (Qp:Qs), and diastolic performance grading.",
     "purpose": "Comprehensive structural, hemodynamic, and prognostic interpretation of canine and feline echocardiography"
@@ -71,8 +84,18 @@
     "Vezzosi et al. (2021 & 2025) Mitral INsufficiency Echocardiographic (MINE) scoring system for prognostic stratification.",
     "Schober et al. (2010) Echocardiographic assessment of left ventricular diastolic function in dogs."
   ],
+  "reviewedBy": {
+  "@type": "Person",
+  "name": "Dave Evans",
+  "jobTitle": "Veterinary Surgeon"
+},
+"publisher": {
+  "@type": "Organization",
+  "name": "VetCardioHub",
+  "url": "https://vetcardiohub.com"
+},
   "lastReviewed": "2026-05-17",
-  "isAccessibleForFree": "true"
+  "isAccessibleForFree": true
 }
 </script>
 <script type="application/ld+json">
