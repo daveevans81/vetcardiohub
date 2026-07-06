@@ -2293,9 +2293,12 @@
                             </button>
                         </div>
                         
-                        <div x-show="showVaccinationForm" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
-                            <div class="diagnosis-panel bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-                                <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
+                        <div x-show="showVaccinationForm" style="display: none; position: fixed; inset: 0; z-index: 50;
+            background: rgba(0,0,0,0.5); align-items: center;
+            justify-content: center; padding: 16px;">
+                            <div class="diagnosis-panel">
+                                <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white" style="background: #fff; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+                width: 100%; max-width: 32rem; overflow: hidden;">
                                     <h3 class="font-bold text-lg" x-text="editingVaccineId ? 'Edit Vaccination' : 'Log Vaccination'"></h3>
                                     
                                 </div>
