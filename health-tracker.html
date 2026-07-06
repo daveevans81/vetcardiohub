@@ -956,69 +956,35 @@
                         </div>
                         <template x-if="activePatientProfile?.modules">
                         <!-- Module status pills -->
-                            <div style="display: flex; flex-wrap: wrap; gap: 5px !important; margin-top: 8px;" x-show="activePatientProfile?.modules">
+                            <div x-show="activePatientProfile?.modules" style="margin-top:8px;">
+                              <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.04em; color:#94a3b8; margin-bottom:4px;">Tracking
+                              </div>
                             
-                                <span :style="activePatientProfile.modules.srr
-                                    ? 'background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; opacity:1;'
-                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
-                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-lungs"></i> SRR
-                                </span>
+                              <div class="module-pills-row">
+                                <template x-for="m in moduleMeta" :key="m.key">
+                                  <span class="module-pill"
+                                        x-show="activePatientProfile.modules[m.key] || showAllModules"
+                                        @click="onModulePillClick(m, $event)"
+                                        :title="m.desc"
+                                        :style="activePatientProfile.modules[m.key]
+                                          ? `background:${m.bg}; color:${m.c}; border:1px solid ${m.bd};`
+                                          : 'background:transparent; color:#64748b; border:1px dashed #cbd5e1;'">
+                                    <i class="fa-solid"
+                                       :class="activePatientProfile.modules[m.key] ? m.icon : 'fa-plus'"
+                                       style="font-size:0.6rem;"></i>
+                                    <span x-text="m.label"></span>
+                                    <i x-show="activePatientProfile.modules[m.key]" class="fa-solid fa-check" style="font-size:0.55rem;"></i>
+                                  </span>
+                                </template>
                             
-                    
-                                <span :style="activePatientProfile.modules.medications
-                                    ? 'background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe; opacity:1;'
-                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
-                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-pills"></i> Meds
+                                <span class="module-pill"
+                                      x-show="!showAllModules && inactiveModuleCount() > 0"
+                                      @click="showAllModules = true"
+                                      style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0;">
+                                  <i class="fa-solid fa-ellipsis"></i>
+                                  <span x-text="inactiveModuleCount() + ' more'"></span>
                                 </span>
-
-                                <span :style="activePatientProfile.modules.coughLog
-                                    ? 'background:#fff1f2; color:#be123c; border:1px solid #fecdd3; opacity:1;'
-                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
-                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-head-side-cough"></i> Cough
-                                </span>
-                                <span :style="activePatientProfile.modules.activityLog
-                                    ? 'background:#ecfeff; color:#0f766e; border:1px solid #a5f3fc; opacity:1;'
-                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
-                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-person-running"></i> Activity
-                                </span>
-                                <span :style="activePatientProfile.modules.acvimStaging
-                                    ? 'background:#ede9fe; color:#6d28d9; border:1px solid #ddd6fe; opacity:1;'
-                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
-                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-stethoscope"></i> Diagnosis
-                                </span>
-
-                                <span :style="activePatientProfile.modules.weightDiet
-                                    ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; opacity:1;'
-                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
-                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-scale-balanced"></i> Weight
-                                </span>
-                                <span :style="activePatientProfile.modules.syncopeLog
-                                    ? 'background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; opacity:1;'
-                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
-                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-bolt"></i> Syncope
-                                </span>
-                            
-                                <span :style="activePatientProfile.modules.vaccinations
-                                    ? 'background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; opacity:1;'
-                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
-                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-syringe"></i> Vaccines
-                                </span>
-                                
-                                <span :style="activePatientProfile.modules.antiparasitics
-                                    ? 'background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; opacity:1;'
-                                    : 'background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6;'"
-                                    style="font-size:0.7rem; padding:2px 8px; border-radius:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                                    <i class="fa-solid fa-bug-slash"></i> Anti-Parasitics
-                                </span>
-
+                              </div>
                             </div>
                         </template>
                     </div>
@@ -3830,7 +3796,37 @@
           </aside>
           </div> <!-- Close .grid -->
           </div> <!-- Close .container -->
+          
+          <!-- Module Popover (for pills) -->
+          <div class="module-popover"
+                 x-show="modulePopover.open"
+                 x-cloak
+                 @click.outside="modulePopover.open = false"
+                 @keydown.escape.window="modulePopover.open = false"
+                 :style="`left:${modulePopover.x}px; top:${modulePopover.y}px;`">
+              <template x-if="modulePopover.open">
+                <div>
+                  <h4>
+                    <i class="fa-solid" :class="moduleMetaByKey(modulePopover.key).icon"
+                       :style="`color:${moduleMetaByKey(modulePopover.key).c}`"></i>
+                    <span x-text="moduleMetaByKey(modulePopover.key).label"></span>
+                  </h4>
+                  <p x-text="moduleMetaByKey(modulePopover.key).desc"></p>
+                  <div class="mp-actions">
+                    <button class="mp-btn mp-enable" @click="enableModuleFromPill(modulePopover.key)">
+                      <i class="fa-solid fa-plus"></i> Enable
+                    </button>
+                    <button class="mp-btn mp-learn" @click="learnModuleFromPill(modulePopover.key)">
+                      <i class="fa-solid fa-circle-info"></i> Learn more
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </div>
+            
+            
         <div id="glossary-container"></div>
+        
     
     </div>         <!-- Close Alpine obj rrTracker -->
 </div>          <!-- Close 'Content' -->

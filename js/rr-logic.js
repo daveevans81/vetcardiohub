@@ -326,6 +326,71 @@ newMed: {
         showMergeTools: false,
         mergeTargetId: '',
         
+// --- module status pills ---
+showAllModules: false,
+modulePopover: { open: false, key: null, x: 0, y: 0 },
+
+moduleMeta: [
+  { key:'srr',            label:'SRR',            icon:'fa-lungs',            c:'#15803d', bg:'#dcfce7', bd:'#bbf7d0', glossary:'module_srr',
+    desc:'Resting respiratory rate — the key early-warning sign of heart failure.' },
+  { key:'medications',    label:'Meds',           icon:'fa-pills',           c:'#1d4ed8', bg:'#dbeafe', bd:'#bfdbfe', glossary:'module_medications',
+    desc:'Log cardiac drugs, doses and changes over time.' },
+  { key:'coughLog',       label:'Cough',          icon:'fa-head-side-cough', c:'#be123c', bg:'#fff1f2', bd:'#fecdd3', glossary:'module_cough',
+    desc:'Track cough frequency, type and severity day to day.' },
+  { key:'activityLog',    label:'Activity',       icon:'fa-person-running',  c:'#0f766e', bg:'#ecfeff', bd:'#a5f3fc', glossary:'module_activity',
+    desc:'Record energy levels, walk duration and distance.' },
+  { key:'acvimStaging',   label:'Diagnosis',      icon:'fa-stethoscope',     c:'#6d28d9', bg:'#ede9fe', bd:'#ddd6fe', glossary:'module_diagnosis',
+    desc:'Record diagnosis and ACVIM heart-disease stage.' },
+  { key:'weightDiet',     label:'Weight',         icon:'fa-scale-balanced',  c:'#c2410c', bg:'#fff7ed', bd:'#fed7aa', glossary:'module_weight',
+    desc:'Monitor body weight and diet as a time series.' },
+  { key:'syncopeLog',     label:'Syncope',        icon:'fa-bolt',            c:'#b91c1c', bg:'#fef2f2', bd:'#fecaca', glossary:'module_syncope',
+    desc:'Diary of fainting or collapse episodes.' },
+  { key:'vaccinations',   label:'Vaccines',       icon:'fa-syringe',         c:'#2563eb', bg:'#eff6ff', bd:'#bfdbfe', glossary:'module_vaccinations',
+    desc:'Keep a vaccination history and due dates.' },
+  { key:'antiparasitics', label:'Anti-Parasitics',icon:'fa-bug-slash',       c:'#166534', bg:'#f0fdf4', bd:'#bbf7d0', glossary:'module_antiparasitics',
+    desc:'Track flea, tick and worming protection.' },
+],
+
+moduleMetaByKey(key) {
+  return this.moduleMeta.find(m => m.key === key) || {};
+},
+
+inactiveModuleCount() {
+  const mods = this.activePatientProfile?.modules || {};
+  return this.moduleMeta.filter(m => !mods[m.key]).length;
+},
+
+onModulePillClick(m, ev) {
+  const active = this.activePatientProfile?.modules?.[m.key];
+  if (active) {
+    // already on — jump to its section if you have anchors, else no-op
+    const el = document.getElementById('module-' + m.key);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  const x = Math.min(ev.clientX, window.innerWidth - 250);
+  const y = Math.min(ev.clientY + 12, window.innerHeight - 160);
+  this.modulePopover = { open: true, key: m.key, x, y };
+},
+
+enableModuleFromPill(key) {
+  const p = this.patients.find(p => p.id === this.activePatientId);
+  if (!p) return;
+  if (!p.modules) p.modules = {};
+  p.modules[key] = true;
+
+  this.saveToStorage('vch_patients', this.patients);   // same call savePatient() uses
+  this.modulePopover.open = false;
+
+  if (key === 'antiparasitics') this.openPrioritiesModal('edit');
+},
+
+learnModuleFromPill(key) {
+  const g = this.moduleMetaByKey(key).glossary;
+  this.modulePopover.open = false;
+  this.openGlossary(g);
+},
+        
         // ===================== VIEW NAVIGATION (activeView) =====================
 activeView: 'all',            // ← default to the full scroll
 
@@ -3480,7 +3545,7 @@ toggleChartExpansion() {
     });
 },
         
-        get compiledTimeline() {
+get compiledTimeline() {
             if (!this.activePatientId) return [];
             
             const combinedEvents = [];
