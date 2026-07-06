@@ -186,6 +186,7 @@ showAntiparasiticPanel: false,
 showAntiparasiticForm: false,
 editingAntiparasiticId: null,
 selectedProductEntry: null,        // active product entry while form is open
+newCustomParasite: { label: '', category: 'endo' },
 
 // Reusable priorities page
 showPrioritiesModal: false,
@@ -1028,18 +1029,20 @@ get antiparasiticRegion() {
 
 // Effective priority list: explicit patient set, else region default,
 // plus travel-triggered additions (e.g. heartworm for UK travellers).
-getParasitePriorities() {
-    const p = this.activePatientProfile;
-    const region = p?.parasiteRegion || this._defaultRegion();
-    const base = (p && Array.isArray(p.parasitePriorities) && p.parasitePriorities.length)
-        ? p.parasitePriorities.slice()
-        : (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice();
-    if (p?.parasiteTravel) {
-        (PARASITE_REGION_DEFAULTS[region]?.travelAdds || []).forEach(id => {
-            if (!base.includes(id)) base.push(id);
-        });
-    }
-    return base;
+ggetParasitePriorities() {
+  const p = this.activePatientProfile;
+  const region = p?.parasiteRegion || this._defaultRegion();
+  const base = (p && Array.isArray(p.parasitePriorities) && p.parasitePriorities.length)
+      ? p.parasitePriorities.slice()
+      : (this.isCatalogueSpecies                              // ← only dog/cat get region seeds
+            ? (PARASITE_REGION_DEFAULTS[region]?.priorities || []).slice()
+            : []);
+  if (p?.parasiteTravel) {
+    (PARASITE_REGION_DEFAULTS[region]?.travelAdds || []).forEach(id => {
+      if (!base.includes(id)) base.push(id);
+    });
+  }
+  return base;
 },
 
 // Grouped + region/species-filtered product list for the selector
@@ -1066,6 +1069,32 @@ _calcParasiticDue(dateStr, intervalDays) {
     const d = new Date(dateStr + 'T12:00:00');
     d.setDate(d.getDate() + Number(intervalDays));
     return d.toISOString().split('T')[0];
+},
+
+get effectiveParasiteTargets() {
+  return [...PARASITE_TARGETS, ...(this.activePatientProfile?.customParasites || [])];
+},
+
+addCustomParasite() {
+  const label = this.toTitleCase((this.newCustomParasite.label || '').trim());
+  if (!label) return;
+  const p = this.activePatientProfile; if (!p) return;
+  if (!Array.isArray(p.customParasites)) p.customParasites = [];
+  p.customParasites.push({
+    id: 'custom_' + (crypto.randomUUID ? crypto.randomUUID() : Date.now()),
+    label, category: this.newCustomParasite.category || 'other', custom: true
+  });
+  this.newCustomParasite.label = '';
+  this.saveToStorage('vch_patients', this.patients);   // use whatever key savePatient() uses
+},
+
+removeCustomParasite(id) {
+  const p = this.activePatientProfile;
+  if (!p || !Array.isArray(p.customParasites)) return;
+  p.customParasites = p.customParasites.filter(cp => cp.id !== id);
+  if (Array.isArray(p.parasitePriorities))
+    p.parasitePriorities = p.parasitePriorities.filter(x => x !== id);
+  this.saveToStorage('vch_patients', this.patients);
 },
 
 onProductSelected(productId) {

@@ -833,7 +833,7 @@
             
                         <label class="form-label">Coverage priorities (tap to toggle)</label>
                         <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
-                            <template x-for="t in parasiteTargets" :key="t.id">
+                            <template x-for="t in effectiveParasiteTargets" :key="t.id">
                                 <label :style="`display:flex;align-items:center;gap:10px;border:1px solid;border-radius:8px;padding:8px 12px;cursor:pointer;${draftEffectivePriorities().includes(t.id)?'background:#f0fdf4;border-color:#86efac;':'background:#fff;border-color:#e2e8f0;'}`">
                                     <input type="checkbox" :checked="draftEffectivePriorities().includes(t.id)" @change="togglePriority(t.id)" style="width:16px;height:16px;accent-color:#15803d;">
                                     <div style="flex:1;">
@@ -852,6 +852,28 @@
                                     </div>
                                 </label>
                             </template>
+                            <div style="margin-top:12px;border-top:1px dashed #e2e8f0;padding-top:10px;">
+                              <label class="form-label">Add a parasite not listed above</label>
+                              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:end;">
+                                <input type="text" x-model="newCustomParasite.label" class="form-input"
+                                       placeholder="e.g., Lungworm (feline), Encephalitozoon" style="flex:1;min-width:180px;">
+                                <select x-model="newCustomParasite.category" class="form-select" style="width:auto;">
+                                  <option value="ecto">Ectoparasite</option>
+                                  <option value="endo">Endoparasite</option>
+                                  <option value="other">Other</option>
+                                </select>
+                                <button type="button" class="btn btn-primary" style="background:#0f766e;"
+                                        @click="addCustomParasite()"><i class="fa-solid fa-plus"></i> Add</button>
+                              </div>
+                              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+                                <template x-for="cp in (activePatientProfile?.customParasites || [])" :key="cp.id">
+                                  <span style="background:#ecfeff;color:#155e75;border:1px solid #a5f3fc;border-radius:999px;padding:2px 8px 2px 10px;font-size:0.75rem;display:inline-flex;align-items:center;gap:6px;">
+                                    <span x-text="cp.label"></span>
+                                    <i class="fa-solid fa-xmark" style="cursor:pointer;" @click="removeCustomParasite(cp.id)"></i>
+                                  </span>
+                                </template>
+                              </div>
+                            </div>
                         </div>
             
                         <div style="font-size:0.72rem;color:#94a3b8;margin-top:12px;">
@@ -2852,10 +2874,10 @@
                                         <div style="font-weight:bold;color:#1e293b;font-size:1rem;margin-bottom:5px;" x-text="entry.productLabel || entry.productId"></div>
                                         <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">
                                             <template x-for="cid in entry.covers" :key="cid">
-                                                <span style="background:#e0e7ff;color:#3730a3;border-radius:999px;padding:1px 8px;font-size:0.7rem;font-weight:500;" x-text="parasiteTargets.find(t=>t.id===cid)?.short || cid"></span>
+                                                <span style="background:#e0e7ff;color:#3730a3;border-radius:999px;padding:1px 8px;font-size:0.7rem;font-weight:500;" x-text="effectiveParasiteTargets.find(t=>t.id===cid)?.short || cid"></span>
                                             </template>
                                             <template x-for="cid in (entry.partial||[])" :key="'p'+cid">
-                                                <span style="background:#fef3c7;color:#92400e;border-radius:999px;padding:1px 8px;font-size:0.7rem;font-weight:500;" x-text="(parasiteTargets.find(t=>t.id===cid)?.short || cid)+'*'"></span>
+                                                <span style="background:#fef3c7;color:#92400e;border-radius:999px;padding:1px 8px;font-size:0.7rem;font-weight:500;" x-text="(effectiveParasiteTargets.find(t=>t.id===cid)?.short || cid)+'*'"></span>
                                             </template>
                                         </div>
                                         <div style="font-size:0.84rem;color:#475569;line-height:1.5;">
@@ -2904,13 +2926,22 @@
                                         <select x-model="newAntiparasitic.productId" @change="onProductSelected($event.target.value)" class="form-select">
                                             <option value="" disabled>Select product…</option>
                                             <optgroup label="⭐ Broad-spectrum combinations">
-                                                <template x-for="p in productOptions.broad" :key="p.id"><option :value="p.id" x-text="p.brand"></option></template>
+                                              <template x-for="p in productOptions.broad" :key="p.id">
+                                                <option :value="p.id"
+                                                        x-text="p.brand + (!isCatalogueSpecies ? (p.species==='both' ? ' — dog/cat' : ' — '+p.species) : '')"></option>
+                                              </template>
                                             </optgroup>
                                             <optgroup label="Flea / tick only">
-                                                <template x-for="p in productOptions.ecto" :key="p.id"><option :value="p.id" x-text="p.brand"></option></template>
+                                              <template x-for="p in productOptions.ecto" :key="p.id">
+                                                <option :value="p.id"
+                                                        x-text="p.brand + (!isCatalogueSpecies ? (p.species==='both' ? ' — dog/cat' : ' — '+p.species) : '')"></option>
+                                              </template>
                                             </optgroup>
                                             <optgroup label="Wormers / heartworm only">
-                                                <template x-for="p in productOptions.endo" :key="p.id"><option :value="p.id" x-text="p.brand"></option></template>
+                                              <template x-for="p in productOptions.endo" :key="p.id">
+                                                <option :value="p.id"
+                                                        x-text="p.brand + (!isCatalogueSpecies ? (p.species==='both' ? ' — dog/cat' : ' — '+p.species) : '')"></option>
+                                              </template>
                                             </optgroup>
                                             <optgroup label="Custom"><option value="other">Other / Custom product</option></optgroup>
                                         </select>
@@ -2963,7 +2994,7 @@
                                     <div style="margin-top:10px;">
                                         <label class="form-label">Select what this product covers</label>
                                         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
-                                            <template x-for="t in parasiteTargets" :key="t.id">
+                                            <template x-for="t in effectiveParasiteTargets" :key="t.id">
                                                 <label :style="`display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:3px 10px;font-size:0.76rem;cursor:pointer;${newAntiparasitic.customCovers.includes(t.id)?'background:#e0e7ff;color:#3730a3;border-color:#a5b4fc;':'background:#fff;color:#64748b;border-color:#e2e8f0;'}`">
                                                     <input type="checkbox" :value="t.id" x-model="newAntiparasitic.customCovers" style="display:none;">
                                                     <span x-text="t.label"></span>

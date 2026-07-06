@@ -192,7 +192,13 @@ const PARASITE_REGION_DEFAULTS = {
         priorities: ['fleas', 'ticks', 'roundworm', 'hookworm', 'whipworm', 'tapeworm', 'heartworm'],
         travelAdds: [],
         note: 'CAPC/AHS advise year-round heartworm + broad-spectrum control. A. vasorum lungworm is not endemic (US lungworm species differ).'
-    }
+    },
+    asia:    { label: 'Asia',                priorities: [], travelAdds: [],
+           note: 'Highly variable by country — build the plan manually with local veterinary advice.' },
+    oceania: { label: 'Oceania',             priorities: [], travelAdds: [],
+           note: 'Regionally specific risks (e.g. Australian paralysis tick, Spirometra) — confirm locally before seeding.' },
+    row:     { label: 'Other / Rest of world', priorities: [], travelAdds: [],
+           note: 'No seeded defaults — use manual toggles and custom parasites.' }
 };
 
 const ANTIPARASITIC_FORMULARY = {
