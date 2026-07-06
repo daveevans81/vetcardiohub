@@ -7,7 +7,7 @@ document.addEventListener('alpine:init', () => {
 showOnboarding: false,
 onboardingStep: 0, // 0 = Welcome, 1 = Demographics, 2 = Clinical, 3 = Recommendations
 isExistingPatientEdit: false, // Flag to bypass wizard when editing later
-
+speciesOther: '',
 onboardingData: {
     hasCardiacIssue: 'no',
     murmurGrade: '',
@@ -444,6 +444,30 @@ get formularyReviewedLabel() {
         }
         return false;
     }
+},
+speciesIcon(patient) {
+  if (!patient) return 'fa-paw';
+  if (patient.species === 'dog') return 'fa-dog';
+  if (patient.species === 'cat') return 'fa-cat';
+
+  // 'other' → sniff the free-text field for an obvious match
+  const s = (patient.speciesOther || '').toLowerCase();
+
+  const match = [
+    [/rabbit|bunny|lagomorph/,                'fa-rabbit'],
+    [/horse|pony|equine|foal|mare|stallion/,  'fa-horse'],
+    [/bird|budgie|parrot|cockatiel|canary|finch|dove|pigeon|chicken|hen|duck|goose|avian/, 'fa-feather'],
+    [/fish|goldfish|koi/,                      'fa-fish'],
+    [/frog|toad|newt|amphibian/,               'fa-frog'],
+    [/snake|lizard|gecko|reptile|tortoise|turtle/, 'fa-worm'],   // no reptile icon in free set; fa-worm is the closest
+    [/ferret|weasel|stoat|mustelid/,           'fa-otter'],
+    [/cow|cattle|calf|bovine|bull/,            'fa-cow'],
+    [/sheep|lamb|ewe|ram|goat/,                'fa-sheep'],
+    [/pig|hog|swine|piglet/,                   'fa-pig'],
+    [/hamster|gerbil|mouse|rat|guinea|rodent/, 'fa-paw'],        // no rodent icon; paw fallback
+  ].find(([re]) => re.test(s));
+
+  return match ? match[1] : 'fa-paw';
 },
 
 sanitiseCSV(val) {
@@ -6272,7 +6296,36 @@ generateCSV() {
     URL.revokeObjectURL(url);
 },
 
+toTitleCase(str) {
+  if (!str) return '';
+  return String(str)
+    .trim()
+    .split(/\s+/)                       // split on whitespace, collapse doubles
+    .map(word => {
+      // If the word already has an uppercase letter after position 0,
+      // assume the user meant it (McDonald, O'Brien, DiCaprio, DCM) — leave it.
+      if (/[A-Z]/.test(word.slice(1))) return word;
+      // Otherwise title-case each hyphen/apostrophe segment.
+      return word
+        .split(/([-'])/)                // keep the - and ' as separators
+        .map(part =>
+          /[-']/.test(part)
+            ? part
+            : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+        )
+        .join('');
+    })
+    .join(' ');
+},
 
+speciesLabel(patient) {
+  if (!patient) return '';
+  const map = { dog: 'Dog', cat: 'Cat' };
+  if (patient.species === 'other') {
+    return this.toTitleCase(patient.speciesOther) || 'Other';
+  }
+  return map[patient.species] ?? this.toTitleCase(patient.species);
+},
  
 // Builds the full plain-text clinical report string shared by
 // copyToClipboard() and shareReport().
@@ -6295,11 +6348,11 @@ _buildReportText() {
     let out = '';
 
     // Report header
-    out += `VETCARDIOHUB CLINICAL REPORT — ${profile.name.toUpperCase()}${nl}`;
+    out += `VETCARDIOHUB CLINICAL REPORT — ${(profile.name || 'UNNAMED PATIENT').toUpperCase()}${nl}`;
     out += `Generated : ${new Date().toLocaleDateString('en-GB')}${nl}`;
     out += `Period    : ${this.vetExportTimeScaleLabel}${nl}`;
-    out += `Species   : ${profile.species}  |  Breed: ${profile.breed || 'N/A'}  |  Age: ${this.computedAgeText}${nl}`;
-    out += `Owner     : ${profile.ownerName || 'N/A'}${nl}`;
+    out += `Species   : ${this.speciesLabel(profile)}  |  Breed: ${this.toTitleCase(profile.breed) || 'N/A'}  |  Age: ${this.computedAgeText}${nl}`;
+    out += `Owner     : ${this.toTitleCase(profile.ownerName) || 'N/A'}${nl}`;
     out += rule('═') + nl + nl;
 
     // ── SRR Log ───────────────────────────────────────────────────────────

@@ -560,10 +560,21 @@
                             
                             <!-- Species -->
                             <label class="form-label">Species: 
-                                <select x-model="editingPatient.species" class="form-control mt-0">
-                                    <option value="dog">Canine</option>
-                                    <option value="cat">Feline</option>
+                                <select x-model="editingPatient.species" class="form-control mt-0" @change="if (editingPatient.species !== 'other') editingPatient.speciesOther = ''">
+                                    <option value="dog">Dog</option>
+                                    <option value="cat">Cat</option>
+                                    <option value="other">Other</option>
                                 </select>
+                            </label>
+                            <label class="form-label mt-2"
+                                   x-show="editingPatient.species === 'other'"
+                                   x-transition>
+                                Specify species:
+                                <input type="text"
+                                       x-model="editingPatient.speciesOther"
+                                       class="form-control mt-0"
+                                       placeholder="e.g. Rabbit, Ferret"
+                                       @blur="editingPatient.speciesOther = toTitleCase(editingPatient.speciesOther)">
                             </label>
                     
                             <!-- Breed -->
@@ -888,18 +899,18 @@
                 <div class="flex-between" style="background: white; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
                     <div style="display: flex; flex-direction: column; text-align: left;">
                         <div class="flex-left" style="gap: 10px; margin-bottom: 20px;">
-                            <i class="fa-solid fa-dog" x-show="activePatientProfile?.species === 'dog'" style="font-size: 1.5rem; color: #64748b;"></i>
-                            <i class="fa-solid fa-cat" x-show="activePatientProfile?.species === 'cat'" style="font-size: 1.5rem; color: #64748b;"></i>
+                            <i class="fa-solid" :class="speciesIcon(activePatientProfile)"
+                             style="font-size: 1.5rem; color: #64748b;"></i>
                             
                             <select x-model="activePatientId" :disabled="isCounting" style="font-size: 1.2rem; font-weight: bold; border: none; background: transparent; outline: none; color: #1e293b;" :style="isCounting ? 'cursor: not-allowed; opacity: 0.8;' : 'cursor: pointer;'">
                                 <template x-for="patient in patients" :key="patient.id">
-                                    <option :value="patient.id" x-text="`${patient.name} ${patient.ownerName ? '('+patient.ownerName+')' : ''}`"></option>
+                                    <option :value="patient.id" x-text="`${toTitleCase(patient.name)} ${patient.ownerName ? '('+toTitleCase(patient.ownerName)+')' : ''}`"></option>
                                 </template>
                             </select>
                         </div>
                         <div class="text-sm text-muted mt-0">
                             <span x-text="computedAgeText"></span> | 
-                            <span x-text="activePatientProfile?.breed || 'Mixed'"></span> | 
+                            <span x-text="toTitleCase(activePatientProfile?.breed) || 'Mixed'"></span> | 
                             <span x-text="latestWeightText"></span>
                             <template x-if="primaryCardiacDiagnosis && primaryCardiacDiagnosis !== 'N/A'">
                                 <span style="font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">
