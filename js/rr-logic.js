@@ -720,7 +720,7 @@ generateModuleRecommendations() {
         recs.srr = true; // useful for collapse context
     } else {
         // General wellness
-        recs.coughLog = ;     
+        recs.coughLog = false;     
         recs.activityLog = true; 
     }
 
