@@ -330,6 +330,7 @@ newMed: {
 // --- module status pills ---
 showAllModules: false,
 modulePopover: { open: false, key: null, x: 0, y: 0 },
+termsError: false,
 
 moduleMeta: [
   { key:'srr',            label:'SRR',            icon:'fa-lungs',            c:'#15803d', bg:'#dcfce7', bd:'#bbf7d0', glossary:'module_srr',
