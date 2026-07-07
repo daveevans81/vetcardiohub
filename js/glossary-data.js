@@ -307,6 +307,17 @@ parasite_protection_plan: {
         article: "/blog-posts/post4.html"
     },
     
+    bcs: {
+        title: "Body Condition Score (BCS, 1–9)",
+        group: "Clinical Concepts",
+        category: "Body Condition & Nutrition",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "A simple 1 to 9 scale for judging whether your pet is too thin, ideal, or overweight. It looks past the number on the scales and asks a more useful question: can you feel the ribs easily, is there a visible waist from above, and does the tummy tuck up from the side? A 4 or 5 is ideal, where the ribs are easy to feel under a thin layer of fat and the waist is clear. Below that your pet is too lean, above it they are carrying excess weight. It is worth scoring at home every few weeks, because a gradual change in body condition often tells you more than a single weight reading, particularly in heart patients where muscle loss can hide behind a stable weight.",
+        textClinical: "A validated 9-point semi-quantitative assessment of adiposity based on rib palpation, waist definition on dorsal view, and abdominal tuck on lateral view. Scores 4–5/9 represent ideal condition (ribs palpable with minimal fat cover, discernible waist), 1–3/9 underweight, and 6–9/9 overweight, with each point above ideal approximating 10–15% over ideal body weight. BCS should be interpreted alongside a separate muscle condition score, as cardiac cachexia can produce significant lean tissue loss while body weight and BCS remain static or even rise due to concurrent fat gain or third-spacing (effusion, ascites). Serial scoring by the same observer improves reliability and is more informative than isolated body weight in monitoring cardiac patients.",
+        pmid: "31844547"
+    },
+    
     // ==========================================
 // GROUP: ANTIPARASITICS & PARASITE PROTECTION
 // ==========================================

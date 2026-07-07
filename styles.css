@@ -2992,7 +2992,8 @@ input {
         box-shadow: 0 10px 15px rgba(0,0,0,0.1);
     }
     /* 5. Clean up the Main area */
-    main {
+        main {
+        box-sizing: border-box; /* keeps the 15px padding inside the 100% width */
         width: 100% !important;
         margin: 0 !important;
         padding: 15px !important;
@@ -4592,6 +4593,11 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 }
 .vch-main   { grid-area: main; }
 .vch-extras { grid-area: extras; display: block; }
+  .vch-sidebar__dx{
+    display:inline-block; background:rgba(2,132,199,.25); color:#bae6fd;
+    border:1px solid rgba(2,132,199,.4); border-radius:999px;
+    padding:1px 8px; font-size:.68rem; font-weight:700; margin-right:4px;
+  }
 
 /* DESKTOP (≥981px): sticky left column, no bottom bar */
 @media (min-width:981px){
@@ -4600,10 +4606,10 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 
   /* nav becomes a real 3rd grid column: [nav | main | info aside] */
     .grid-srrt{
-    grid-template-columns: var(--vch-sidebar-w) 1fr;
+    grid-template-columns: var(--vch-sidebar-w) minmax(0,1fr);
     grid-template-areas:
-      "nav    main"
-      "extras main";
+      "nav main"
+      "nav extras"; /* nav spans full column height → sticky can travel */
   }
   .vch-sidebar{ grid-area: nav; }
 
@@ -4631,6 +4637,18 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
   .vch-sidebar__btn i{ width:20px; text-align:center; }
   .vch-sidebar__btn:hover{ background:rgba(255,255,255,.08); color:#fff; }
   .vch-sidebar__btn.is-active{ background:var(--vch-accent); color:#fff; }
+}
+
+/* WIDESCREEN (≥1280px): true 3 columns — nav | main | FAQ/cards */
+@media (min-width:1280px){
+  .grid-srrt{
+    grid-template-columns: var(--vch-sidebar-w) minmax(0,1fr) 320px;
+    grid-template-areas: "nav main extras";
+  }
+  .vch-extras{
+    position:sticky; top:var(--vch-nav-top); align-self:start;
+    max-height:calc(100vh - var(--vch-nav-top) - 20px); overflow-y:auto;
+  }
 }
 
 /* Tracker page: hide the global site header entirely */

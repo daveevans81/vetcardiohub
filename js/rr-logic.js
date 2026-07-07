@@ -170,6 +170,7 @@ editingWeightId: null,
 newWeightEntry: {
     date: new Date().toISOString().split('T')[0],
     weightValue: '',
+    bcs: '',
     appetite: 'Normal', // Ravenous, Normal, Reduced, Anorexic
     foodBrand: '',
     portionSize: '',
@@ -591,17 +592,22 @@ init() {
   }
 
     // Set initial active patient safely
-    if (this.patients.length > 0) {
-        this.activePatientId = this.patients[0].id;
+       if (this.patients.length > 0) {
+        const lastId = localStorage.getItem('vch_lastPatientId');
+        this.activePatientId = this.patients.some(p => p.id === lastId)
+            ? lastId
+            : this.patients[0].id;
     } else {
         this.startNewPatientOnboarding();
     }
 
-    if (this.paginatedHistory.length > 0) {
-        this.showHeroHeader = false;
-    } else {
-        this.showHeroHeader = true;
-    }
+    // Compact the hero for anyone with data OR anyone past their 2nd visit
+    let vchVisits = 1;
+    try {
+        vchVisits = parseInt(localStorage.getItem('vch_visitCount') || '0', 10) + 1;
+        localStorage.setItem('vch_visitCount', String(vchVisits));
+    } catch (e) {}
+    this.showHeroHeader = (this.paginatedHistory.length === 0 && vchVisits <= 2);
     
     // 2. ACCORDION WATCHERS: Forces Chart.js to redraw *only* after Alpine makes the canvas visible
     this.$watch('showAnalytics', (isVisible) => { 
@@ -615,7 +621,7 @@ init() {
 });
 
     // Existing watchers
-    this.$watch('activePatientId', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all'; this._syncVetExportModules(); });
+    this.$watch('activePatientId', () => { if (this.activePatientId) { try { localStorage.setItem('vch_lastPatientId', this.activePatientId); } catch (e) {} } this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all'; this._syncVetExportModules(); });
     this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); });
     this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
     this.$watch('showCoughOverlay', () => { this.renderChart(); });
@@ -2032,6 +2038,7 @@ openWeightForm(logEntry = null) {
         this.newWeightEntry = {
             date: new Date().toISOString().split('T')[0],
             weightValue: '',
+            bcs: '',
             appetite: 'Normal',
             foodBrand: '',
             portionSize: '',
@@ -2048,8 +2055,10 @@ saveWeightEntry() {
     const val = parseFloat(this.newWeightEntry.weightValue);
     if (isNaN(val) || val <= 0) return alert("A valid weight is required.");
 
+    const bcsVal = parseInt(this.newWeightEntry.bcs, 10);
     const entryToSave = {
         ...this.newWeightEntry,
+        bcs: (Number.isInteger(bcsVal) && bcsVal >= 1 && bcsVal <= 9) ? bcsVal : null,
         id: this.editingWeightId || this.generateId(),
         patientId: this.activePatientId,
         weightValue: val,

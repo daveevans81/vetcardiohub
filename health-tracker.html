@@ -237,11 +237,26 @@
             </div>
  
             <div class="vch-sidebar__patient" x-show="activePatientProfile" x-cloak>
-                <div class="vch-sidebar__petname" x-text="activePatientProfile?.name || 'No patient'"></div>
+                <div class="vch-sidebar__petname">
+                    <i class="fa-solid" :class="speciesIcon(activePatientProfile)" style="margin-right: 6px; color: #7dd3fc;"></i>
+                    <span x-text="activePatientProfile?.name || 'No patient'"></span>
+                </div>
                 <div class="vch-sidebar__petmeta">
                     <span x-text="computedAgeText"></span>
+                    <template x-if="activePatientProfile?.breed">
+                        <span> · <span x-text="toTitleCase(activePatientProfile.breed)"></span></span>
+                    </template>
+                    <template x-if="activePatientProfile?.sex">
+                        <span> · <span x-text="activePatientProfile.sex"></span></span>
+                    </template>
+                </div>
+                <div class="vch-sidebar__petmeta" x-text="latestWeightText"></div>
+                <div class="vch-sidebar__petmeta" style="margin-top: 6px;">
                     <template x-if="primaryCardiacDiagnosis && primaryCardiacDiagnosis !== 'N/A'">
-                        <span> · <span x-text="primaryCardiacDiagnosis"></span></span>
+                        <span class="vch-sidebar__dx" x-text="primaryCardiacDiagnosis"></span>
+                    </template>
+                    <template x-if="currentClinicalStatus && currentClinicalStatus.acvimStage !== 'N/A'">
+                        <span class="vch-sidebar__dx" x-text="'Stage ' + currentClinicalStatus.acvimStage"></span>
                     </template>
                 </div>
             </div>
@@ -2010,7 +2025,21 @@
                                             <option value="Anorexic">Anorexic (Not eating)</option>
                                         </select>
                                     </div>
-                        
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700">Body Condition Score (1–9)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('bcs')"></i></label>
+                                        <select x-model="newWeightEntry.bcs" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                                            <option value="">Not assessed</option>
+                                            <option value="1">1 — Emaciated</option>
+                                            <option value="2">2 — Very thin</option>
+                                            <option value="3">3 — Thin</option>
+                                            <option value="4">4 — Lean (ideal)</option>
+                                            <option value="5">5 — Ideal</option>
+                                            <option value="6">6 — Overweight</option>
+                                            <option value="7">7 — Heavy</option>
+                                            <option value="8">8 — Obese</option>
+                                            <option value="9">9 — Severely obese</option>
+                                        </select>
+                                    </div>
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-sm font-semibold text-gray-700">Food Brand / Diet Type</label>
@@ -2097,6 +2126,14 @@
                                             <span style="font-size: 0.82rem; background: #f1f5f9; color: #475569;
                                                          border-radius: 999px; padding: 1px 8px;"
                                                   x-text="entry.appetite"></span>
+                                            <template x-if="entry.bcs">
+                                                <span style="font-size: 0.82rem; border-radius: 999px; padding: 1px 8px;"
+                                                      :style="(entry.bcs <= 3 || entry.bcs >= 7)
+                                                          ? 'background: #fef3c7; color: #92400e;'
+                                                          : 'background: #d1fae5; color: #065f46;'"
+                                                      x-text="'BCS ' + entry.bcs + '/9'">
+                                                </span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('bcs')"></i>
+                                            </template>
                                         </div>
                 
                                         <div style="font-size: 0.85rem; color: #475569; margin-top: 6px; line-height: 1.5;">
