@@ -2403,9 +2403,7 @@
                             </button>
                         </div>
                         
-                        <div x-show="showVaccinationForm" style="display: none; position: fixed; inset: 0; z-index: 50;
-            background: rgba(0,0,0,0.5); align-items: center;
-            justify-content: center; padding: 16px;">
+                        <div x-show="showVaccinationForm"  x-transition x-cloak class="vch-modal">
                             <div class="diagnosis-panel">
                                 <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white" style="background: #fff; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
                 width: 100%; max-width: 32rem; overflow: hidden;">
@@ -2967,11 +2965,8 @@
                         </div>
                 
                         <!-- ADD / EDIT FORM -->
-                        <div x-show="showAntiparasiticForm" x-transition style="display: none; position: fixed; inset: 0; z-index: 50;
-            background: rgba(0,0,0,0.5); align-items: center;
-            justify-content: center; padding: 16px;">
-                            <div class="form-panel" style="background: #fff; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-                width: 100%; max-width: 32rem; overflow: hidden;">
+                         <div x-show="showAntiparasiticForm" x-transition x-cloak class="vch-modal">
+                            <div class="form-panel vch-modal-card" style="border: none;">
                                 <h4 style="margin-top:0;color:#16325F;font-size:0.95rem;border-bottom:1px solid #eee;padding-bottom:8px;"
                                     x-text="editingAntiparasiticId ? 'Edit Antiparasitic Record' : 'Log Antiparasitic Product'"></h4>
                                <p class="text-sm text-muted" x-show="!isCatalogueSpecies"
