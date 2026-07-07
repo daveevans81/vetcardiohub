@@ -427,6 +427,239 @@ const ANTIPARASITIC_FORMULARY = {
     }
 };
 
+/* ============================================================================
+   SUPPLEMENT MODULE DATA
+   - SUPPLEMENT_CONSTITUENTS : the active-ingredient taxonomy (warning engine)
+   - SUPPLEMENT_FORMULARY    : brand catalogue with constituent mapping
+   Constituent overlap between two active products triggers a double-dosing
+   caution; `medCaution` entries cross-check against the medication ledger.
+   ⚠ Constituent lists are a clinical seed — formulations change; verify
+   against current product datasheets before release.
+   ============================================================================ */
+
+const SUPPLEMENT_CONSTITUENTS = {
+    omega3:      { id: 'omega3',      label: 'Omega-3 (EPA/DHA)',   color: '#0ea5e9',
+                   note: 'Count every source — fish oils, joint chews with green-lipped mussel, and senior/cognitive blends all contribute.' },
+    taurine:     { id: 'taurine',     label: 'Taurine',             color: '#ef4444' },
+    lcarnitine:  { id: 'lcarnitine',  label: 'L-Carnitine',         color: '#f97316' },
+    coq10:       { id: 'coq10',       label: 'Coenzyme Q10',        color: '#8b5cf6' },
+    potassium:   { id: 'potassium',   label: 'Potassium',           color: '#10b981',
+                   medCaution: {
+                       drugs: ['cardalis', 'prilactone', 'benazepril', 'enalapril'],
+                       text: 'Potassium supplementation alongside spironolactone or an ACE inhibitor increases the risk of hyperkalaemia — confirm this combination with the prescribing veterinary surgeon.'
+                   } },
+    magnesium:   { id: 'magnesium',   label: 'Magnesium',           color: '#14b8a6' },
+    hawthorn:    { id: 'hawthorn',    label: 'Hawthorn',            color: '#e11d48',
+                   medCaution: {
+                       drugs: ['digoxin'],
+                       text: 'Hawthorn may potentiate the effects of digoxin — this combination should only be used under direct veterinary guidance.'
+                   } },
+    vitamin_e:   { id: 'vitamin_e',   label: 'Vitamin E',           color: '#eab308' },
+    glucosamine: { id: 'glucosamine', label: 'Glucosamine',         color: '#f59e0b' },
+    chondroitin: { id: 'chondroitin', label: 'Chondroitin',         color: '#d97706' },
+    glm:         { id: 'glm',         label: 'Green-Lipped Mussel', color: '#06b6d4',
+                   note: 'Also a source of omega-3 fatty acids.' },
+    msm:         { id: 'msm',         label: 'MSM',                 color: '#a3a3a3' },
+    same:        { id: 'same',        label: 'SAMe',                color: '#a16207' },
+    silybin:     { id: 'silybin',     label: 'Silybin (Milk Thistle)', color: '#84cc16' },
+    b_vitamins:  { id: 'b_vitamins',  label: 'B Vitamins',          color: '#6366f1' },
+    phos_serine: { id: 'phos_serine', label: 'Phosphatidylserine',  color: '#c084fc' },
+    probiotic:   { id: 'probiotic',   label: 'Probiotic',           color: '#22c55e' }
+};
+
+const SUPPLEMENT_FORMULARY = {
+
+    /* ---- CARDIAC COMBINATION PRODUCTS (category: cardiac) ---- */
+    cardiovet: {
+        id: 'cardiovet', brand: 'CardioVet', maker: 'Vet Expert',
+        species: 'dog', category: 'cardiac', regions: ['uk', 'europe'], color: '#e11d48',
+        constituents: ['lcarnitine', 'taurine', 'coq10', 'vitamin_e'],
+        note: 'Tablet. L-carnitine, taurine, CoQ10 and vitamin E per tablet.'
+    },
+    nutricarevet_cardiac: {
+        id: 'nutricarevet_cardiac', brand: 'NutriCareVet Cardiac Support', maker: 'Covetrus',
+        species: 'both', category: 'cardiac', regions: ['uk'], color: '#e11d48',
+        constituents: ['omega3', 'taurine', 'lcarnitine', 'hawthorn', 'potassium'],
+        note: 'Chewable tablet; separate canine and feline presentations. Contains salmon oil (omega-3), hawthorn and potassium chloride.'
+    },
+    maxxicardio: {
+        id: 'maxxicardio', brand: 'maxxicardio', maker: 'maxxipaws',
+        species: 'dog', category: 'cardiac', regions: ['uk', 'us'], color: '#e11d48',
+        constituents: ['lcarnitine', 'taurine', 'hawthorn', 'coq10', 'magnesium', 'potassium', 'vitamin_e'],
+        note: 'Powder. Also contains ginkgo biloba.'
+    },
+    vetriscience_cardio: {
+        id: 'vetriscience_cardio', brand: 'Cardio-Strength', maker: 'VetriScience',
+        species: 'both', category: 'cardiac', regions: ['us'], color: '#e11d48',
+        constituents: ['taurine', 'lcarnitine', 'coq10', 'hawthorn', 'magnesium', 'potassium', 'vitamin_e'],
+        note: 'Capsule. Broad multi-constituent cardiac blend.'
+    },
+    rx_formula_cv: {
+        id: 'rx_formula_cv', brand: 'Formula CV', maker: 'Rx Vitamins',
+        species: 'both', category: 'cardiac', regions: ['us'], color: '#e11d48',
+        constituents: ['taurine', 'lcarnitine', 'coq10', 'hawthorn', 'magnesium', 'vitamin_e'],
+        note: 'Capsule. Veterinary cardiologist-formulated blend.'
+    },
+    thorne_heart: {
+        id: 'thorne_heart', brand: 'Heart Health Formula (Bio-Cardio)', maker: 'Thorne Vet',
+        species: 'both', category: 'cardiac', regions: ['us'], color: '#e11d48',
+        constituents: ['taurine', 'lcarnitine', 'coq10', 'hawthorn'],
+        note: 'Capsule. Formerly marketed as Bio-Cardio.'
+    },
+
+    /* ---- OMEGA-3 / FISH OILS (category: omega) ---- */
+    fish_oil_generic: {
+        id: 'fish_oil_generic', brand: 'Fish / Salmon / Krill Oil (generic)', maker: '',
+        species: 'both', category: 'omega', regions: ['uk', 'europe', 'us'], color: '#0ea5e9',
+        constituents: ['omega3'],
+        note: 'Any unbranded EPA/DHA oil. EPA/DHA content per pump or capsule varies widely between products.'
+    },
+    welactin: {
+        id: 'welactin', brand: 'Welactin', maker: 'Nutramax',
+        species: 'both', category: 'omega', regions: ['uk', 'us'], color: '#0ea5e9',
+        constituents: ['omega3'],
+        note: 'Salmon oil liquid or softgel.'
+    },
+    nordic_omega3_pet: {
+        id: 'nordic_omega3_pet', brand: 'Omega-3 Pet', maker: 'Nordic Naturals',
+        species: 'both', category: 'omega', regions: ['us', 'uk'], color: '#0ea5e9',
+        constituents: ['omega3'],
+        note: 'Triglyceride-form fish oil, high EPA/DHA per ml.'
+    },
+    grizzly_salmon: {
+        id: 'grizzly_salmon', brand: 'Grizzly Salmon Plus', maker: 'Grizzly Pet Products',
+        species: 'both', category: 'omega', regions: ['us', 'europe'], color: '#0ea5e9',
+        constituents: ['omega3'],
+        note: 'Wild salmon oil pump bottle.'
+    },
+
+    /* ---- SINGLE-AGENT SUPPLEMENTS (category: single) ---- */
+    taurine_pure: {
+        id: 'taurine_pure', brand: 'Taurine (plain powder / capsule)', maker: '',
+        species: 'both', category: 'single', regions: ['uk', 'europe', 'us'], color: '#ef4444',
+        constituents: ['taurine'],
+        note: 'Frequently prescribed for diet-associated DCM and feline taurine deficiency.'
+    },
+    lcarnitine_pure: {
+        id: 'lcarnitine_pure', brand: 'L-Carnitine (plain powder / capsule)', maker: '',
+        species: 'both', category: 'single', regions: ['uk', 'europe', 'us'], color: '#f97316',
+        constituents: ['lcarnitine'],
+        note: 'Adjunct in DCM, particularly Boxers and Dobermanns.'
+    },
+    coq10_pure: {
+        id: 'coq10_pure', brand: 'Coenzyme Q10 (plain capsule)', maker: '',
+        species: 'both', category: 'single', regions: ['uk', 'europe', 'us'], color: '#8b5cf6',
+        constituents: ['coq10'],
+        note: 'Often a human product given at veterinary direction.'
+    },
+    vitamin_e_pure: {
+        id: 'vitamin_e_pure', brand: 'Vitamin E (plain capsule)', maker: '',
+        species: 'both', category: 'single', regions: ['uk', 'europe', 'us'], color: '#eab308',
+        constituents: ['vitamin_e'],
+        note: ''
+    },
+
+    /* ---- POTASSIUM & ELECTROLYTES (category: electrolyte) ---- */
+    kaminox: {
+        id: 'kaminox', brand: 'Kaminox', maker: 'VetPlus',
+        species: 'both', category: 'electrolyte', regions: ['uk', 'europe'], color: '#10b981',
+        constituents: ['potassium', 'b_vitamins'],
+        note: 'Liquid potassium gluconate with B vitamins, iron and amino acids — commonly used in CKD cats.'
+    },
+    tumil_k: {
+        id: 'tumil_k', brand: 'Tumil-K', maker: 'Virbac',
+        species: 'both', category: 'electrolyte', regions: ['us'], color: '#10b981',
+        constituents: ['potassium'],
+        note: 'Potassium gluconate tablets, gel or powder.'
+    },
+
+    /* ---- JOINT SUPPORT (category: joint) ---- */
+    yumove: {
+        id: 'yumove', brand: 'YuMOVE Joint Care', maker: 'Lintbells',
+        species: 'both', category: 'joint', regions: ['uk'], color: '#f59e0b',
+        constituents: ['glucosamine', 'chondroitin', 'glm', 'omega3'],
+        note: 'Green-lipped mussel base — an easily missed omega-3 source when a fish oil is also given.'
+    },
+    cosequin: {
+        id: 'cosequin', brand: 'Cosequin', maker: 'Nutramax',
+        species: 'both', category: 'joint', regions: ['us', 'uk'], color: '#f59e0b',
+        constituents: ['glucosamine', 'chondroitin', 'msm'],
+        note: 'MSM present in the DS Plus MSM presentation only.'
+    },
+    dasuquin: {
+        id: 'dasuquin', brand: 'Dasuquin', maker: 'Nutramax',
+        species: 'both', category: 'joint', regions: ['us'], color: '#f59e0b',
+        constituents: ['glucosamine', 'chondroitin'],
+        note: 'Adds avocado/soybean unsaponifiables (ASU) to the Cosequin base.'
+    },
+    synoquin: {
+        id: 'synoquin', brand: 'Synoquin EFA', maker: 'VetPlus',
+        species: 'both', category: 'joint', regions: ['uk', 'europe'], color: '#f59e0b',
+        constituents: ['glucosamine', 'chondroitin', 'omega3'],
+        note: 'Krill-derived EFA content — contributes omega-3.'
+    },
+    seraquin: {
+        id: 'seraquin', brand: 'Seraquin', maker: 'Boehringer Ingelheim',
+        species: 'both', category: 'joint', regions: ['uk', 'europe'], color: '#f59e0b',
+        constituents: ['glucosamine', 'chondroitin'],
+        note: 'Adds curcumin (turmeric extract).'
+    },
+
+    /* ---- LIVER SUPPORT (category: liver) ---- */
+    denamarin: {
+        id: 'denamarin', brand: 'Denamarin', maker: 'Nutramax / Protexin',
+        species: 'both', category: 'liver', regions: ['uk', 'europe', 'us'], color: '#a16207',
+        constituents: ['same', 'silybin'],
+        note: 'SAMe + silybin-phosphatidylcholine complex.'
+    },
+    samylin: {
+        id: 'samylin', brand: 'Samylin', maker: 'VetPlus',
+        species: 'both', category: 'liver', regions: ['uk', 'europe'], color: '#a16207',
+        constituents: ['same', 'silybin', 'vitamin_e', 'b_vitamins'],
+        note: 'SAMe, silybin, vitamin E and B vitamins.'
+    },
+    hepatosyl: {
+        id: 'hepatosyl', brand: 'Hepatosyl Plus', maker: 'CEVA',
+        species: 'both', category: 'liver', regions: ['uk', 'europe'], color: '#a16207',
+        constituents: ['same', 'silybin', 'vitamin_e'],
+        note: 'Also contains vitamin K.'
+    },
+
+    /* ---- SENIOR / COGNITIVE (category: senior) ---- */
+    aktivait: {
+        id: 'aktivait', brand: 'Aktivait', maker: 'VetPlus',
+        species: 'both', category: 'senior', regions: ['uk', 'europe'], color: '#8b5cf6',
+        constituents: ['omega3', 'lcarnitine', 'coq10', 'vitamin_e', 'phos_serine'],
+        note: 'Cognitive blend that quietly duplicates several cardiac constituents (omega-3, L-carnitine, CoQ10). Species-specific presentations — the canine capsule contains alpha-lipoic acid and must never be given to cats.'
+    },
+    senilife: {
+        id: 'senilife', brand: 'Senilife', maker: 'CEVA',
+        species: 'both', category: 'senior', regions: ['uk', 'europe', 'us'], color: '#8b5cf6',
+        constituents: ['phos_serine', 'vitamin_e'],
+        note: 'Also contains ginkgo biloba, resveratrol and pyridoxine.'
+    },
+
+    /* ---- OTHER (category: other) ---- */
+    probiotic_generic: {
+        id: 'probiotic_generic', brand: 'Probiotic (e.g. FortiFlora, Pro-Kolin)', maker: '',
+        species: 'both', category: 'other', regions: ['uk', 'europe', 'us'], color: '#22c55e',
+        constituents: ['probiotic'],
+        note: ''
+    },
+    multivitamin_generic: {
+        id: 'multivitamin_generic', brand: 'Multivitamin (general)', maker: '',
+        species: 'both', category: 'other', regions: ['uk', 'europe', 'us'], color: '#6366f1',
+        constituents: ['b_vitamins', 'vitamin_e'],
+        note: 'Formulations vary — check the label; many include omega-3 or minerals as well.'
+    },
+    other: {
+        id: 'other', brand: 'Other / Custom Supplement', maker: '',
+        species: 'both', category: 'custom', regions: ['uk', 'europe', 'us'], color: '#64748b',
+        constituents: [],
+        note: 'User-defined — constituents ticked manually.'
+    }
+};
+
 const ACVIM_PATHWAYS = {
 
     MMVD: {

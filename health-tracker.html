@@ -850,8 +850,8 @@
                                 <div class="flex-center gap-10">
                                     <div style="width: 32px; text-align: center;"><i class="fa-solid fa-pills" style="font-size: 1.4rem; color: #3b82f6;"></i></div>
                                     <div>
-                                        <strong style="color: #1e293b; font-size: 0.95rem;">Medication Ledger<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_medications')"></i></strong>
-                                        <span class="text-muted text-sm block">Track dose adjustments and view effects on breathing.</span>
+                                        <strong style="color: #1e293b; font-size: 0.95rem;">Medication and Supplements Ledger<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_medications')"></i></strong>
+                                        <span class="text-muted text-sm block">Track medications, supplements, dose adjustments and view effects on symptoms.</span>
                                     </div>
                                 </div>
                                 <input type="checkbox" x-model="editingPatient.modules.medications" style="width: 20px; height: 20px; accent-color: #3b82f6;">
@@ -894,8 +894,8 @@
                                 <div class="flex-center gap-10">
                                     <div style="width: 32px; text-align: center;"><i class="fa-solid fa-scale-balanced" style="font-size: 1.4rem; color: #d97706;"></i></div>
                                     <div>
-                                        <strong style="color: #1e293b; font-size: 0.95rem;">Weight, Diet and Supplements Log<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_diet_weight')"></i></strong>
-                                        <span class="text-muted text-sm block">Record your pet's weight, diet, supplements, appetite and more.</span>
+                                        <strong style="color: #1e293b; font-size: 0.95rem;">Weight and Diet Log<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_diet_weight')"></i></strong>
+                                        <span class="text-muted text-sm block">Record your pet's weight, diet, appetite and more.</span>
                                     </div>
                                 </div>
                                 <input type="checkbox" x-model="editingPatient.modules.weightDiet" style="width: 20px; height: 20px; accent-color: #d97706;">
@@ -1760,9 +1760,12 @@
                                     </div>
                                 </div>
                             </template>
-                            <div style="margin-bottom: 12px;">
+                            <div style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
                                 <button @click="openMedForm()" type="button" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">
                                     <i class="fa-solid fa-plus"></i> Add Medication
+                                </button>
+                                <button @click="openSuppForm()" type="button" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">
+                                    <i class="fa-solid fa-seedling"></i> Add Supplement
                                 </button>
                             </div>
                             <div x-show="showMedForm" x-cloak class="vch-modal">
@@ -1884,6 +1887,135 @@
                                     </div>
                                 </div>
                             </div> <!-- /vch-modal -->
+                            
+                            <div x-show="showSuppForm" x-cloak class="vch-modal">
+                                <div class="form-panel vch-modal-card" style="border: none;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px;">
+                                        <h4 style="margin: 0; color: #16325F; font-size: 0.95rem;">Log Supplement Change</h4>
+                                        <button @click="showSuppForm = false" type="button" style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <div class="med-form-grid">
+                                            <div>
+                                                <label class="form-label">Event Date</label>
+                                                <input type="date" x-model="newSupp.eventDate" class="form-input">
+                                            </div>
+                                            <div>
+                                                <label class="form-label">Supplement</label>
+                                                <select x-model="newSupp.productId" class="form-select">
+                                                    <option value="" disabled>Select Supplement...</option>
+                                                    <template x-for="group in supplementOptions()" :key="group.label">
+                                                        <optgroup :label="group.label">
+                                                            <template x-for="opt in group.items" :key="opt.value">
+                                                                <option :value="opt.value" x-text="opt.label"></option>
+                                                            </template>
+                                                        </optgroup>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
+                                                <input type="checkbox" id="suppStoppedCheck" x-model="newSupp.isStopped" style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
+                                                <label for="suppStoppedCheck" class="text-danger font-bold" style="font-size: 0.85rem; cursor: pointer; user-select: none;">
+                                                    Stopped
+                                                </label>
+                                            </div>
+                                            <template x-if="newSupp.productId === 'other'">
+                                                <div style="grid-column: 1 / -1;">
+                                                    <label class="form-label">Custom Name</label>
+                                                    <input type="text" x-model="newSupp.customName" placeholder="e.g., Hemp &amp; Heart Chews" class="form-input">
+                                                    <label class="form-label" style="margin-top: 10px;">Which of these does it contain? (tick all that apply)</label>
+                                                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 4px;">
+                                                        <template x-for="c in Object.values(suppConstituents)" :key="c.id">
+                                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;">
+                                                                <input type="checkbox" :value="c.id" x-model="newSupp.customConstituents">
+                                                                <span x-text="c.label"></span>
+                                                            </label>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <template x-if="newSupp.productId && newSupp.productId !== 'other'">
+                                                <div style="grid-column: 1 / -1;">
+                                                    <label class="form-label">Contains</label>
+                                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                                        <template x-for="cid in newSuppConstituentIds()" :key="cid">
+                                                            <span :style="`background: ${suppConstituents[cid]?.color}18; color: ${suppConstituents[cid]?.color}; border: 1px solid ${suppConstituents[cid]?.color}55; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600;`"
+                                                                  x-text="suppConstituents[cid]?.label || cid"></span>
+                                                        </template>
+                                                    </div>
+                                                    <template x-if="suppFormulary[newSupp.productId]?.note">
+                                                        <p style="font-size: 0.75rem; color: #94a3b8; margin: 6px 0 0;" x-text="suppFormulary[newSupp.productId].note"></p>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <div :style="newSupp.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                                <label class="form-label">Dose (optional)</label>
+                                                <div style="display: flex; gap: 6px;">
+                                                    <input type="text" x-model="newSupp.doseAmount" :disabled="newSupp.isStopped" placeholder="e.g., 1" class="form-input" style="flex: 1;">
+                                                    <select x-model="newSupp.doseUnit" :disabled="newSupp.isStopped" class="form-select" style="flex: 1;">
+                                                        <option>tablet(s)</option>
+                                                        <option>capsule(s)</option>
+                                                        <option>chew(s)</option>
+                                                        <option>scoop(s)</option>
+                                                        <option>pump(s)</option>
+                                                        <option>sachet(s)</option>
+                                                        <option>ml</option>
+                                                        <option>mg</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div :style="newSupp.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                                <label class="form-label">Frequency</label>
+                                                <select x-model="newSupp.frequency" :disabled="newSupp.isStopped" class="form-select">
+                                                    <option value="q24h">q24h (SID)</option>
+                                                    <option value="q12h">q12h (BID)</option>
+                                                    <option value="q8h">q8h (TID)</option>
+                                                    <option value="PRN">PRN (As Needed)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <template x-if="newSuppDuplicateWarnings().length > 0">
+                                            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; margin: 10px 0;">
+                                                <div style="font-weight: bold; color: #92400e; font-size: 0.85rem; margin-bottom: 6px;">
+                                                    <i class="fa-solid fa-triangle-exclamation"></i> Possible Double-Dosing
+                                                </div>
+                                                <template x-for="w in newSuppDuplicateWarnings()" :key="w.label">
+                                                    <div style="font-size: 0.8rem; color: #78350f; padding: 2px 0;">
+                                                        <strong x-text="w.label"></strong> is already provided by <span x-text="w.sources.join(', ')"></span>.
+                                                        <span x-show="w.note" style="color: #a16207;" x-text="w.note"></span>
+                                                    </div>
+                                                </template>
+                                                <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 6px;">
+                                                    Combination products frequently share constituents — compare labels before adding a second source.
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template x-if="newSuppMedCautions().length > 0">
+                                            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; margin: 10px 0;">
+                                                <div style="font-weight: bold; color: #b91c1c; font-size: 0.85rem; margin-bottom: 6px;">
+                                                    <i class="fa-solid fa-circle-exclamation"></i> Medication Caution
+                                                </div>
+                                                <template x-for="w in newSuppMedCautions()" :key="w.label">
+                                                    <div style="font-size: 0.8rem; color: #7f1d1d; padding: 2px 0;">
+                                                        <strong x-text="w.label"></strong> + <span x-text="w.drugs.join(', ')"></span>: <span x-text="w.text"></span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        <div class="flex-gap-10" style="display: flex; gap: 8px;">
+                                            <button @click="showSuppForm = false" type="button" class="btn-cancel" style="margin-bottom: 12px;">
+                                                <i class="fa-solid fa-xmark"></i> Cancel
+                                            </button>
+                                            <button @click="addSupplement()" type="button" class="btn-add-blue" style="padding-top: 10px;">
+                                                <i class="fa-solid fa-plus"></i> Save Entry
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> <!-- /vch-modal (supplement) -->
+                            
                             <div style="border-radius: 6px; border: 1px solid #c8d6eb; overflow: hidden; background: white;">
                                 <table class="data-table">
                                     <thead>
@@ -1939,6 +2071,63 @@
                                 </table>
                             </div>
                         </div>
+                        
+                        <div style="margin-top: 16px;">
+                                <div style="font-weight: bold; color: #16325F; font-size: 0.9rem; margin-bottom: 8px;">
+                                    <i class="fa-solid fa-seedling" style="color: #10b981;"></i> Supplement Log
+                                </div>
+                                <div style="border-radius: 6px; border: 1px solid #c8d6eb; overflow: hidden; background: white;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Action</th>
+                                                <th>Supplement</th>
+                                                <th>Contains</th>
+                                                <th>Dose</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-for="supp in sortedSuppLedger()" :key="supp.id">
+                                                <tr>
+                                                    <td style="font-weight: bold; color: #334155;" x-text="supp.eventDate"></td>
+                                                    <td>
+                                                        <span :class="supp.isMajorChange ? 'text-danger font-bold' : 'text-warning font-bold'" x-text="supp.action"></span>
+                                                    </td>
+                                                    <td>
+                                                        <span x-text="supp.displayName"></span>
+                                                    </td>
+                                                    <td>
+                                                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                                            <template x-for="chip in supp.chips" :key="chip.id">
+                                                                <span :style="`background: ${chip.color}18; color: ${chip.color}; border: 1px solid ${chip.color}55; border-radius: 999px; padding: 1px 8px; font-size: 0.7rem; font-weight: 600; white-space: nowrap;`"
+                                                                      x-text="chip.label"></span>
+                                                            </template>
+                                                            <span x-show="supp.chips.length === 0" class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
+                                                        </div>
+                                                    </td>
+                                                    <td style="color: #64748b;">
+                                                        <span x-show="!supp.isStopped && supp.doseLabel" x-text="supp.doseLabel"></span>
+                                                        <span x-show="!supp.isStopped && !supp.doseLabel" class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
+                                                        <span x-show="supp.isStopped" class="text-muted" style="font-style: italic;">Discontinued</span>
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        <button @click="deleteSupplement(supp.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+                                                            <i class="fa-solid fa-trash-can"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                            <tr x-show="sortedSuppLedger().length === 0">
+                                                <td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
+                                                    No supplements recorded.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
                             <i class="fa-solid fa-book-medical"></i>
                             Product and formulary data last reviewed: <span x-text="formularyReviewedLabel"></span>.
@@ -2198,7 +2387,9 @@
                         
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700">Supplements</label>
-                                        <input type="text" x-model="newWeightEntry.supplements" placeholder="Omega-3, Taurine, etc." class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                                        <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 6px; font-style: italic;">
+                                            Supplements are now recorded alongside medications in the Medication &amp; Supplement Ledger.
+                                        </p>
                                     </div>
                         
                                     <div>
@@ -2290,12 +2481,7 @@
                                                           x-text="' — ' + entry.portionSize"></span><br>
                                                 </span>
                                             </template>
-                                            <template x-if="entry.supplements">
-                                                <span>
-                                                    <strong>Supplements:</strong>
-                                                    <span x-text="entry.supplements"></span><br>
-                                                </span>
-                                            </template>
+                                    
                                             <template x-if="entry.notes">
                                                 <span style="font-style: italic; color: #64748b;">
                                                     "<span x-text="entry.notes"></span>"

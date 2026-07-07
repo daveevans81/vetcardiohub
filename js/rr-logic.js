@@ -326,6 +326,22 @@ newMed: {
     tabletsInStock: '',       // tablet: tablets      | liquid: total ml
     stockDate: new Date().toISOString().split('T')[0]
 },
+suppLedger: [],  // Array of supplement events (mirrors medLedger, dose optional)
+// Supplement Module State
+showSuppForm: false,
+suppFormulary: SUPPLEMENT_FORMULARY,
+suppConstituents: SUPPLEMENT_CONSTITUENTS,
+newSupp: {
+    eventDate: new Date().toISOString().split('T')[0],
+    productId: '',
+    customName: '',
+    customConstituents: [],
+    isStopped: false,
+    doseAmount: '',
+    doseUnit: 'tablet(s)',
+    frequency: 'q24h'
+},
+
 
         // Medication Chart State
       //  medTimeScale: '180d', 
@@ -618,6 +634,8 @@ init() {
     this.weightLog        = loadKey('vch_weightLog');
     this.srrHistory       = loadKey('vch_srrHistory');
     this.medLedger        = loadKey('vch_medLedger');
+    this.suppLedger       = loadKey('vch_suppLedger');
+    this.migrateLegacySupplements();   // one-time diet → supplement ledger migration
     this.diagnosisLog     = loadKey('vch_diagnosisLog');
     this.syncopeLog       = loadKey('vch_syncopeLog');
     this.coughLog         = loadKey('vch_coughLog');
@@ -862,6 +880,7 @@ deletePatient(patientId) {
             this.patients = this.patients.filter(p => p.id !== patientId);
             this.srrHistory = this.srrHistory.filter(s => s.patientId !== patientId);
             this.medLedger = this.medLedger.filter(m => m.patientId !== patientId);
+            this.suppLedger = this.suppLedger.filter(s => s.patientId !== patientId);
             this.weightLog = this.weightLog.filter(w => w.patientId !== patientId);
             this.diagnosisLog = this.diagnosisLog.filter(d => d.patientId !== patientId);
             this.syncopeLog = this.syncopeLog.filter(s => s.patientId !== patientId);
@@ -875,6 +894,7 @@ deletePatient(patientId) {
             this.saveToStorage('vch_patients', this.patients);
             this.saveToStorage('vch_srrHistory', this.srrHistory);
             this.saveToStorage('vch_medLedger', this.medLedger);
+            this.saveToStorage('vch_suppLedger', this.suppLedger);
             this.saveToStorage('vch_weightLog', this.weightLog);
             this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
             this.saveToStorage('vch_syncopeLog', this.syncopeLog);
@@ -1034,6 +1054,7 @@ mergePatients(targetId, sourceId) {
             this.weightLog = this.weightLog.map(w => w.patientId === sourceId ? { ...w, patientId: targetId } : w);
             this.srrHistory = this.srrHistory.map(s => s.patientId === sourceId ? { ...s, patientId: targetId } : s);
             this.medLedger = this.medLedger.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
+            this.suppLedger = this.suppLedger.map(s => s.patientId === sourceId ? { ...s, patientId: targetId } : s);
             this.diagnosisLog = this.diagnosisLog.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
             this.syncopeLog = this.syncopeLog.map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
             this.coughLog = this.coughLog.map(c => c.patientId === sourceId ? { ...c, patientId: targetId } : c);
@@ -1058,6 +1079,7 @@ mergePatients(targetId, sourceId) {
             this.saveToStorage('vch_weightLog', this.weightLog);
             this.saveToStorage('vch_srrHistory', this.srrHistory);
             this.saveToStorage('vch_medLedger', this.medLedger);
+            this.saveToStorage('vch_suppLedger', this.suppLedger);
             this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
             this.saveToStorage('vch_syncopeLog', this.syncopeLog);
             this.saveToStorage('vch_coughLog', this.coughLog);
@@ -3367,6 +3389,291 @@ deleteMedication(id) {
     }
 },
 
+// ── SUPPLEMENT MODULE ──────────────────────────────────────────────
+
+_suppKey(s) { return s.productId === 'other' ? 'other:' + (s.customName || '') : s.productId; },
+
+suppDisplayName(s) {
+    if (s.productId === 'other') return s.customName || 'Custom Supplement';
+    const p = this.suppFormulary[s.productId];
+    return p ? p.brand : s.productId;
+},
+
+// Constituent ids for a ledger entry (product mapping, or manual ticks for custom)
+suppConstituentIdsFor(s) {
+    if (s.productId === 'other') return Array.isArray(s.customConstituents) ? s.customConstituents : [];
+    return this.suppFormulary[s.productId]?.constituents || [];
+},
+
+// Constituent ids for the entry currently being drafted in the form
+newSuppConstituentIds() {
+    if (!this.newSupp.productId) return [];
+    if (this.newSupp.productId === 'other') return this.newSupp.customConstituents;
+    return this.suppFormulary[this.newSupp.productId]?.constituents || [];
+},
+
+// Grouped options for the <select> (optgroups per category)
+supplementOptions() {
+    const cats = [
+        { id: 'cardiac',     label: 'Cardiac Combination Products' },
+        { id: 'omega',       label: 'Omega-3 / Fish Oils' },
+        { id: 'single',      label: 'Single-Agent Supplements' },
+        { id: 'electrolyte', label: 'Potassium & Electrolytes' },
+        { id: 'joint',       label: 'Joint Support' },
+        { id: 'liver',       label: 'Liver Support' },
+        { id: 'senior',      label: 'Senior / Cognitive' },
+        { id: 'other',       label: 'Other' },
+        { id: 'custom',      label: 'Custom' }
+    ];
+    return cats.map(cat => ({
+        label: cat.label,
+        items: Object.values(this.suppFormulary)
+            .filter(p => p.category === cat.id)
+            .map(p => ({ value: p.id, label: p.maker ? `${p.brand} (${p.maker})` : p.brand }))
+            .sort((a, b) => a.label.localeCompare(b.label))
+    })).filter(g => g.items.length > 0);
+},
+
+openSuppForm() {
+    this.newSupp = {
+        eventDate: new Date().toISOString().split('T')[0],
+        productId: '', customName: '', customConstituents: [],
+        isStopped: false, doseAmount: '', doseUnit: 'tablet(s)', frequency: 'q24h'
+    };
+    this.showSuppForm = true;
+},
+
+addSupplement() {
+    if (!this.activePatientId) return alert("Clinical Entry Error: No patient selected.");
+    if (!this.newSupp.productId) return alert("Clinical Entry Error: Please select a supplement.");
+    if (this.newSupp.productId === 'other' && !this.newSupp.customName.trim()) {
+        return alert("Clinical Entry Error: Please enter a name for the custom supplement.");
+    }
+
+    const entry = {
+        id: this.generateId(),
+        patientId: this.activePatientId,
+        eventDate: this.newSupp.eventDate,
+        productId: this.newSupp.productId,
+        customName: this.newSupp.productId === 'other' ? this.newSupp.customName.trim() : null,
+        customConstituents: this.newSupp.productId === 'other' ? [...this.newSupp.customConstituents] : null,
+        isStopped: this.newSupp.isStopped,
+        doseAmount: this.newSupp.isStopped ? null : (this.newSupp.doseAmount === '' ? null : this.newSupp.doseAmount),
+        doseUnit:   this.newSupp.isStopped ? null : this.newSupp.doseUnit,
+        frequency:  this.newSupp.isStopped ? null : this.newSupp.frequency
+    };
+
+    this.suppLedger.push(entry);
+    this.saveToStorage('vch_suppLedger', this.suppLedger);
+    this.renderMedChart();
+    this.showSuppForm = false;
+},
+
+deleteSupplement(id) {
+    if (confirm("Delete this supplement entry? This will remove it from the patient's historical chart.")) {
+        this.suppLedger = this.suppLedger.filter(s => s.id !== id);
+        this.saveToStorage('vch_suppLedger', this.suppLedger);
+        this.renderMedChart();
+    }
+},
+
+// Started / Adjusted / Stopped — mirrors getComputedAction()
+getComputedSuppAction(entry) {
+    if (entry.isStopped) return 'Stopped';
+
+    const prior = this.suppLedger.filter(s =>
+        s.patientId === entry.patientId &&
+        this._suppKey(s) === this._suppKey(entry) &&
+        !s.isStopped &&
+        new Date(s.eventDate) < new Date(entry.eventDate)
+    );
+
+    const lastStop = this.suppLedger.filter(s =>
+        s.patientId === entry.patientId &&
+        this._suppKey(s) === this._suppKey(entry) &&
+        s.isStopped &&
+        new Date(s.eventDate) <= new Date(entry.eventDate)
+    ).sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate))[0];
+
+    const lastDoseBefore = prior.sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate))[0];
+
+    if (lastStop && (!lastDoseBefore || new Date(lastStop.eventDate) > new Date(lastDoseBefore.eventDate))) {
+        return 'Started';
+    }
+    return prior.length === 0 ? 'Started' : 'Adjusted';
+},
+
+// Ledger rows for the table (newest first, with action + constituent chips)
+sortedSuppLedger() {
+    if (!this.activePatientId) return [];
+    return this.suppLedger
+        .filter(s => s.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate))
+        .map(s => {
+            const action = this.getComputedSuppAction(s);
+            return {
+                ...s,
+                action,
+                isMajorChange: action !== 'Adjusted',
+                displayName: this.suppDisplayName(s),
+                doseLabel: s.doseAmount ? `${s.doseAmount} ${s.doseUnit || ''}`.trim() + (s.frequency ? ' ' + s.frequency : '') : null,
+                chips: this.suppConstituentIdsFor(s).map(cid =>
+                    this.suppConstituents[cid] || { id: cid, label: cid, color: '#64748b' })
+            };
+        });
+},
+
+// Active supplements = newest entry per product, not stopped
+activeSupplements() {
+    if (!this.activePatientId) return [];
+    const latest = {};
+    [...this.suppLedger]
+        .filter(s => s.patientId === this.activePatientId)
+        .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
+        .forEach(s => { latest[this._suppKey(s)] = s; });
+    return Object.values(latest).filter(s => !s.isStopped);
+},
+
+// ── WARNING ENGINE ─────────────────────────────────────────────────
+
+// Constituents of the drafted entry already provided by another active supplement
+newSuppDuplicateWarnings() {
+    const ids = this.newSuppConstituentIds();
+    if (!ids.length) return [];
+    const draftKey = this._suppKey({ productId: this.newSupp.productId, customName: this.newSupp.customName });
+
+    const clashes = {};
+    this.activeSupplements()
+        .filter(s => this._suppKey(s) !== draftKey)
+        .forEach(s => {
+            this.suppConstituentIdsFor(s).forEach(cid => {
+                if (ids.includes(cid)) {
+                    if (!clashes[cid]) clashes[cid] = [];
+                    const name = this.suppDisplayName(s);
+                    if (!clashes[cid].includes(name)) clashes[cid].push(name);
+                }
+            });
+        });
+
+    return Object.entries(clashes).map(([cid, sources]) => ({
+        label: this.suppConstituents[cid]?.label || cid,
+        note:  this.suppConstituents[cid]?.note || '',
+        sources
+    }));
+},
+
+// Constituent ↔ medication cautions (e.g. potassium + spironolactone/ACE-i)
+newSuppMedCautions() {
+    const ids = this.newSuppConstituentIds();
+    if (!ids.length || !this.activePatientId) return [];
+
+    const latest = {};
+    [...this.medLedger]
+        .filter(m => m.patientId === this.activePatientId)
+        .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
+        .forEach(m => { latest[this._drugKey(m)] = m; });
+    const activeDrugIds = Object.values(latest).filter(m => !m.isStopped).map(m => m.drugId);
+
+    const out = [];
+    ids.forEach(cid => {
+        const mc = this.suppConstituents[cid]?.medCaution;
+        if (!mc) return;
+        const hits = mc.drugs.filter(d => activeDrugIds.includes(d));
+        if (hits.length) {
+            out.push({
+                label: this.suppConstituents[cid].label,
+                drugs: hits.map(d => this.formulary[d]?.generic || d),
+                text: mc.text
+            });
+        }
+    });
+    return out;
+},
+
+// ── CHART EPOCHS ───────────────────────────────────────────────────
+
+// Mirrors generateMedEpochs() — solid blocks per supplement
+generateSuppEpochs() {
+    if (!Array.isArray(this.suppLedger) || !this.activePatientId) return [];
+
+    const petSupps = this.suppLedger
+        .filter(s => s.patientId === this.activePatientId)
+        .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+
+    const epochs = [];
+    const active = {};
+
+    petSupps.forEach(s => {
+        const ts = new Date(s.eventDate + 'T12:00:00').getTime();
+        const key = this._suppKey(s);
+        const action = this.getComputedSuppAction(s);
+
+        if (action === 'Started' || action === 'Adjusted') {
+            if (active[key]) { active[key].endTime = ts; epochs.push({ ...active[key] }); }
+            active[key] = {
+                _isSupp: true,
+                name: this.suppDisplayName(s),
+                color: s.productId === 'other' ? '#64748b' : (this.suppFormulary[s.productId]?.color || '#64748b'),
+                doseLabel: s.doseAmount ? `${s.doseAmount} ${s.doseUnit || ''}`.trim() + (s.frequency ? ' ' + s.frequency : '') : null,
+                startTime: ts,
+                endTime: null
+            };
+        } else if (action === 'Stopped') {
+            if (active[key]) { active[key].endTime = ts; epochs.push({ ...active[key] }); delete active[key]; }
+        }
+    });
+
+    const nowTs = new Date().getTime();
+    Object.values(active).forEach(e => { e.endTime = nowTs; epochs.push(e); });
+    return epochs;
+},
+
+// ── LEGACY MIGRATION (diet log free-text → supplement ledger) ──────
+
+migrateLegacySupplements() {
+    try {
+        if (localStorage.getItem('vch_suppMigrated')) return;
+
+        // Earliest appearance of each comma-separated token, per patient
+        const seen = {};
+        (this.weightLog || []).forEach(w => {
+            if (!w.supplements || !String(w.supplements).trim() || !w.patientId) return;
+            String(w.supplements).split(/[,;/]+/).map(t => t.trim()).filter(Boolean).forEach(token => {
+                const key = w.patientId + '::' + token.toLowerCase();
+                if (!seen[key] || new Date(w.date) < new Date(seen[key].date)) {
+                    seen[key] = { patientId: w.patientId, name: token, date: w.date };
+                }
+            });
+        });
+
+        let count = 0;
+        Object.values(seen).forEach(s => {
+            const exists = this.suppLedger.some(e =>
+                e.patientId === s.patientId &&
+                (e.customName || '').toLowerCase() === s.name.toLowerCase());
+            if (exists) return;
+            this.suppLedger.push({
+                id: this.generateId(),
+                patientId: s.patientId,
+                eventDate: String(s.date).split('T')[0],
+                productId: 'other',
+                customName: s.name,
+                customConstituents: [],
+                isStopped: false,
+                doseAmount: null, doseUnit: null, frequency: 'q24h',
+                migratedFromDiet: true
+            });
+            count++;
+        });
+
+        if (count > 0) this.saveToStorage('vch_suppLedger', this.suppLedger);
+        localStorage.setItem('vch_suppMigrated', '1');
+        if (count > 0) console.info(`VCH: migrated ${count} legacy diet supplement entr${count === 1 ? 'y' : 'ies'}.`);
+    } catch (e) {
+        console.warn('VCH: legacy supplement migration skipped —', e);
+    }
+},
+
 // --- SRR RECORDING (MANUAL & AUTOMATIC) ---
         
 saveToHistory(manualRate = null, manualDate = null) {
@@ -3581,12 +3888,12 @@ getFilteredReadings() {
 resetData() {
     if (!window.confirm("CRITICAL WARNING: This permanently clears ALL local data for ALL patients. Proceed?")) return;
 
-    const keys = ['vch_patients','vch_weightLog','vch_srrHistory','vch_medLedger',
+    const keys = ['vch_patients','vch_weightLog','vch_srrHistory','vch_medLedger','vch_suppLedger',
                   'vch_diagnosisLog','vch_syncopeLog','vch_coughLog','vch_activityLog',
                   'vch_vaccinationLog','vch_antiparasiticLog'];
     keys.forEach(k => localStorage.removeItem(k));
 
-    this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = [];
+    this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = []; this.suppLedger = [];
     this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.activityLog = [];
     this.vaccinationLog = []; this.antiparasiticLog = [];
     this.activePatientId = null;
@@ -3665,6 +3972,15 @@ get compiledTimeline() {
                     if (isWithinRange(safeTimestamp(m.eventDate))) {
                         const drugName = m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId);
                         combinedEvents.push({ type: 'Medication', dateObj: new Date(m.eventDate), displayDate: new Date(m.eventDate).toLocaleDateString(), summary: `${m.action.toUpperCase()}: ${drugName} (${m.doseMg ? m.doseMg+'mg' : '?'})`, notes: m.notes || '' });
+                    }
+                });
+            }
+            
+             // 2b. Supplements
+            if (this.showMedications && Array.isArray(this.suppLedger)) {
+                this.suppLedger.filter(s => s.patientId === this.activePatientId).forEach(s => {
+                    if (isWithinRange(safeTimestamp(s.eventDate))) {
+                        combinedEvents.push({ type: 'Supplement', dateObj: new Date(s.eventDate), displayDate: new Date(s.eventDate).toLocaleDateString(), summary: `${this.getComputedSuppAction(s).toUpperCase()}: ${this.suppDisplayName(s)}`, notes: s.doseAmount ? `${s.doseAmount} ${s.doseUnit || ''} ${s.frequency || ''}`.trim() : '' });
                     }
                 });
             }
@@ -4665,11 +4981,13 @@ renderMedChart() {
         }
 
         const epochs = this.generateMedEpochs();
-        if (epochs.length === 0) return;
+        const suppEpochs = this.generateSuppEpochs();
+        if (epochs.length === 0 && suppEpochs.length === 0) return;
 
         const { startDate, endDate } = this.getMedDateRange();
         const uniqueDrugs = [...new Set(epochs.map(e => e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId)))];
-
+        const uniqueSupps = [...new Set(suppEpochs.map(e => e.name))];
+        
         const ctx = this.$refs.medChartCanvas.getContext('2d');
         if (this.medChartInstance) {
             this.medChartInstance.destroy();
@@ -4735,8 +5053,23 @@ renderMedChart() {
             };
         });
         
+        // Supplement rows — fixed thin bars, no dose scaling
+        const suppDatasets = suppEpochs.map((e, index) => {
+            const rgb = hex2rgb(e.color);
+            return {
+                label: `Supp_${index}`,
+                data: [{ x: [e.startTime, e.endTime], y: e.name, _rawEpoch: e }],
+                backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.35)`,
+                borderColor: e.color,
+                borderWidth: 1.5,
+                borderSkipped: false,
+                borderRadius: 4,
+                barThickness: 12
+            };
+        });
+        
         const rowHeight = 72; // px per unique drug
-        const chartHeight = Math.max(180, uniqueDrugs.length * rowHeight + 60);
+        const chartHeight = Math.max(180, (uniqueDrugs.length + uniqueSupps.length * 0.6) * rowHeight + 60);
         if (canvas.parentElement) {
             canvas.parentElement.style.height = chartHeight + 'px';
         }
@@ -4744,7 +5077,7 @@ renderMedChart() {
         this.medChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                datasets: dynamicDatasets
+                datasets: [...dynamicDatasets, ...suppDatasets]
             },
             options: {
                 indexAxis: 'y', 
@@ -4756,6 +5089,7 @@ renderMedChart() {
                         callbacks: {
                             title: (context) => {
                                 const e = context[0].raw._rawEpoch;
+                                if (e._isSupp) return `${e.name} (supplement)`;
                                 return e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
                             },
                             label: (context) => {
@@ -4764,7 +5098,13 @@ renderMedChart() {
                                 const todayTs = new Date().getTime();
                                 const diff = Math.abs(e.endTime - todayTs);
                                 const eDate = diff < 1000 ? 'Present' : new Date(e.endTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-                                
+
+                                if (e._isSupp) {
+                                    return [
+                                        e.doseLabel ? `Dose: ${e.doseLabel}` : 'Dose not recorded',
+                                        `Duration: ${sDate} to ${eDate}`
+                                    ];
+                                }
                                 return [
                                     `Dose: ${e.doseMg}mg ${e.frequency}`,
                                     `Duration: ${sDate} to ${eDate}`
@@ -4790,7 +5130,7 @@ renderMedChart() {
                     y: {
                         type: 'category',
                         stacked: true, 
-                        labels: uniqueDrugs,
+                        labels: [...uniqueDrugs, ...uniqueSupps],
                         grid: { display: false }
                     }
                 }
@@ -5918,6 +6258,7 @@ exportCompleteBackup(patientId = null) {
         vch_weightLog: scoped(this.weightLog),
         vch_srrHistory: scoped(this.srrHistory),
         vch_medLedger: scoped(this.medLedger),
+        vch_suppLedger: scoped(this.suppLedger),
         vch_diagnosisLog: scoped(this.diagnosisLog),
         vch_syncopeLog: scoped(this.syncopeLog),
         vch_coughLog: scoped(this.coughLog),
@@ -5974,7 +6315,7 @@ importCompleteBackup(event) {
 backupLogCount(pid) {
     const d = this.backupPreview;
     if (!d) return 0;
-    return ['vch_srrHistory', 'vch_medLedger', 'vch_diagnosisLog', 'vch_syncopeLog',
+    return ['vch_srrHistory', 'vch_medLedger', 'vch_suppLedger', 'vch_diagnosisLog', 'vch_syncopeLog',
             'vch_coughLog', 'vch_activityLog', 'vch_weightLog', 'vch_vaccinationLog',
             'vch_antiparasiticLog']
         .reduce((n, k) => n + (d[k] || []).filter(e => e.patientId === pid).length, 0);
@@ -6014,7 +6355,7 @@ confirmBackupImport() {
     });
 
     // Append log entries for selected patients — fresh entry IDs, remapped patient IDs
-    const logKeys = ['weightLog', 'srrHistory', 'medLedger', 'diagnosisLog', 'syncopeLog',
+    const logKeys = ['weightLog', 'srrHistory', 'medLedger', 'suppLedger', 'diagnosisLog', 'syncopeLog',
                      'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog'];
     logKeys.forEach(key => {
         const incoming = (data['vch_' + key] || [])
@@ -6515,14 +6856,13 @@ async generatePDF() {
             const weightUnit = profile.weightUnit || 'kg';
             doc.autoTable({
                 startY: Y,
-                head: [['Date', `Weight (${weightUnit})`, 'Appetite', 'Food / Diet', 'Portion', 'Supplements', 'Notes']],
+                head: [['Date', `Weight (${weightUnit})`, 'Appetite', 'Food / Diet', 'Portion', 'Notes']],
                 body: weightData.map(w => [
                     (w.date || '').split('T')[0],
                     w.weightValue != null ? `${w.weightValue} ${weightUnit}` : '—',
                     w.appetite || '—',
                     w.foodBrand || '—',
                     w.portionSize || '—',
-                    w.supplements || '—',
                     w.notes || '—'
                 ]),
                 theme: 'striped',
