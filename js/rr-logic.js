@@ -300,6 +300,7 @@ weightChartRenderTimeout: null,
         // Medication Module State
  
 showMedLog: false, // Accordion toggle state
+showMedForm: false, // Overlay form visibility
 formulary: VET_FORMULARY, // Expose the global object to Alpine
 newMed: {
     eventDate: new Date().toISOString().split('T')[0],
@@ -3062,6 +3063,19 @@ closeResult() {
             this.hasSavedCurrentCount = false;
         },
         
+openMedForm() {
+    this.newMed = {
+        eventDate: new Date().toISOString().split('T')[0],
+        drugId: '', customName: '', isStopped: false,
+        openedDate: '', discardDays: '', form: 'tablet',
+        tabletStrengthMg: '', tabletsPerDose: '',
+        frequency: 'q12h',
+        tabletsInStock: '',
+        stockDate: new Date().toISOString().split('T')[0]
+    };
+    this.showMedForm = true;
+},
+
         // Save function for the Ledger
 addMedication() {
     if (!this.activePatientId) return alert("Clinical Entry Error: No patient selected.");
@@ -3104,6 +3118,7 @@ addMedication() {
         tabletsInStock: '', 
         stockDate: new Date().toISOString().split('T')[0]
     };
+    this.showMedForm = false;
 },
 
 getComputedAction(entry) {
