@@ -3293,6 +3293,30 @@
                         <button type="button" x-show="getFilteredReadings().length >= 2" @click="Chart.getChart($refs.rrrChartCanvas)?.resetZoom()" class="btn-nudge-static" style="background: #64748b; margin-top: 10px;">
                             <i class="fa-solid fa-arrows-rotate"></i> Reset Zoom
                         </button>
+                        <template x-if="filteredStats">
+                            <div class="stats-grid" style="margin-top: 14px;">
+                                <div class="stat-card">
+                                    <div class="stat-label">Readings</div>
+                                    <div class="stat-value" x-text="getFilteredReadings().length"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Mean SRR</div>
+                                    <div class="stat-value" :class="filteredStats.mean >= (parseInt(activePatientProfile?.customSrrCutoff) || 30) ? 'text-danger' : 'text-success'" x-text="filteredStats.mean.toFixed(1) + ' bpm'"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Upper Ref (mean+2SD)</div>
+                                    <div class="stat-value" :class="filteredStats.upperCI >= (parseInt(activePatientProfile?.customSrrCutoff) || 30) ? 'text-danger' : 'text-success'" x-text="filteredStats.upperCI.toFixed(1) + ' bpm'"></div>
+                                </div>
+                                <div class="stat-card" x-show="getFilteredReadings().length >= 2">
+                                    <div class="stat-label">Range</div>
+                                    <div class="stat-value" x-text="Math.min(...getFilteredReadings().map(d => d.rate)) + '–' + Math.max(...getFilteredReadings().map(d => d.rate)) + ' bpm'"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Alarm Cutoff</div>
+                                    <div class="stat-value" style="color: #dc2626;" x-text="(parseInt(activePatientProfile?.customSrrCutoff) || 30) + ' bpm'"></div>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>                
                                         <!-- ******************************** -->
@@ -3356,6 +3380,100 @@
                         <div x-show="!hasAnyMedData()" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
                             <i class="fa-solid fa-pills text-3xl mb-2"></i>
                             <p>Log medications to generate a pharmacologic timeline.</p>
+                        </div>
+                    </template>
+                    
+                    <!-- ******************************** -->
+                    <!-- WEIGHT TREND (Trends view)       -->
+                    <!-- ******************************** -->
+                    <template x-if="activePatientProfile?.modules?.weightDiet">
+                        <div class="module-card summary-box" x-show="patients.length > 0 && activeView === 'trends'" x-cloak>
+                            <h2 style="margin: 0 0 12px 0; font-size: 1.25rem;">
+                                <i class="fa-solid fa-weight-scale" style="color: #0f766e;"></i>
+                                Weight Trend
+                            </h2>
+                            <template x-if="sortedWeightLog.length >= 2">
+                                <div>
+                                    <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.85rem; color: #0369a1;">
+                                        <i class="fa-solid fa-chart-line"></i>
+                                        <span x-text="(() => {
+                                            const log = sortedWeightLog;
+                                            const unit = activePatientProfile?.weightUnit || 'kg';
+                                            const latest = parseFloat(log[0].weightValue);
+                                            const oldest = parseFloat(log[log.length - 1].weightValue);
+                                            const diff = (latest - oldest).toFixed(2);
+                                            const arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '→';
+                                            return `${arrow} ${Math.abs(diff)} ${unit} over ${log.length} weigh-ins  |  Latest: ${latest} ${unit}`;
+                                        })()"></span>
+                                    </div>
+                                    <canvas x-ref="weightChartTrendsCanvas" style="max-height: 240px;"></canvas>
+                                </div>
+                            </template>
+                            <div x-show="sortedWeightLog.length < 2" class="flex flex-col items-center justify-center h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
+                                <i class="fa-solid fa-weight-scale text-3xl mb-2"></i>
+                                <p>Log at least 2 weigh-ins to generate a weight trend.</p>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- ******************************** -->
+                    <!-- PARASITE COVERAGE (Trends view)  -->
+                    <!-- ******************************** -->
+                    <template x-if="activePatientProfile?.modules?.antiparasitics">
+                        <div class="module-card summary-box" x-show="patients.length > 0 && activeView === 'trends'" x-cloak>
+                            <h2 style="margin: 0 0 12px 0; font-size: 1.25rem;">
+                                <i class="fa-solid fa-shield-dog" style="color: #6366f1;"></i>
+                                Parasite Coverage
+                            </h2>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+                                <template x-for="g in parasiticCoverageGaps()" :key="'tr-' + g.id">
+                                    <span :style="`display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 12px;font-size:0.8rem;font-weight:600;border:1px solid;
+                                        ${g.state==='covered' ? 'background:#f0fdf4;color:#15803d;border-color:#bbf7d0;'
+                                        : g.state==='partial' ? 'background:#fffbeb;color:#b45309;border-color:#fde68a;'
+                                        : g.state==='lapsed'  ? 'background:#fef2f2;color:#dc2626;border-color:#fecaca;'
+                                        : 'background:#fef2f2;color:#7f1d1d;border-color:#fca5a5;'}`">
+                                        <i :class="g.state==='covered' ? 'fa-solid fa-circle-check' : g.state==='partial' ? 'fa-solid fa-circle-half-stroke' : 'fa-solid fa-circle-xmark'"></i>
+                                        <span x-text="g.label"></span>
+                                        <i x-show="g.cardiac" class="fa-solid fa-heart-pulse" style="font-size:0.7rem;opacity:0.7;" title="Cardiac-relevant"></i>
+                                    </span>
+                                </template>
+                            </div>
+                            <template x-if="parasiticAlerts().some(a => a.cardiac)">
+                                <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.82rem;color:#7f1d1d;line-height:1.5;">
+                                    <i class="fa-solid fa-heart-pulse"></i>
+                                    <strong>Cardiac-relevant gap:</strong>
+                                    <span x-text="parasiticAlerts().filter(a=>a.cardiac).map(a=>a.label).join(' & ')"></span>
+                                    — these raise respiratory rate and cough, so an uncovered gap here can mimic or mask cardiac decline on the SRR trend.
+                                </div>
+                            </template>
+                            <div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;background:#fff;">
+                                <template x-if="sortedAntiparasiticLog().length > 0">
+                                    <div>
+                                        <template x-for="row in coverageTimeline().rows" :key="'tr-' + row.id">
+                                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                                                <div style="width:76px;flex-shrink:0;font-size:0.72rem;color:#475569;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:3px;">
+                                                    <i x-show="row.cardiac" class="fa-solid fa-heart-pulse" style="color:#dc2626;font-size:0.62rem;"></i>
+                                                    <span x-text="row.short"></span>
+                                                </div>
+                                                <div style="position:relative;flex:1;height:14px;background:#f1f5f9;border-radius:3px;overflow:hidden;">
+                                                    <template x-for="(seg,si) in row.segments" :key="si">
+                                                        <div :style="`position:absolute;top:0;height:100%;left:${seg.left}%;width:${seg.width}%;background:${seg.color};opacity:${seg.partial?0.4:0.9};`" :title="seg.label"></div>
+                                                    </template>
+                                                    <div :style="`position:absolute;top:-2px;bottom:-2px;width:2px;background:#0f172a;left:${coverageTimeline().todayPct}%;`"></div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <div style="display:flex;justify-content:space-between;margin-left:84px;font-size:0.68rem;color:#94a3b8;margin-top:4px;">
+                                            <span x-text="coverageTimeline().startLabel"></span>
+                                            <span style="color:#0f172a;font-weight:600;">today</span>
+                                            <span x-text="coverageTimeline().endLabel"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div x-show="sortedAntiparasiticLog().length === 0" style="font-size:0.8rem;color:#94a3b8;font-style:italic;text-align:center;padding:8px;">
+                                    Log a product to see the coverage timeline.
+                                </div>
+                            </div>
                         </div>
                     </template>
                     

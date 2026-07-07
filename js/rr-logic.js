@@ -407,7 +407,7 @@ activeView: 'all',            // ← default to the full scroll
 navItems: [
     { id: 'all',      label: 'All',      icon: 'fa-layer-group', modules: null },
     { id: 'count',    label: 'Count',    icon: 'fa-lungs',       modules: ['srr'] },
-    { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line',  modules: ['srr','medications','acvimStaging'] },
+    { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line',  modules: ['srr','medications','acvimStaging','weightDiet','antiparasitics'] },
     { id: 'meds',     label: 'Meds',     icon: 'fa-pills',       modules: ['medications','acvimStaging'] },
     { id: 'wellness', label: 'Wellness', icon: 'fa-heart-pulse', modules: ['coughLog','activityLog','weightDiet','syncopeLog','vaccinations','antiparasitics'] },
     { id: 'data',     label: 'Data',     icon: 'fa-database',     modules: null }
@@ -441,7 +441,7 @@ _expandForView(v) {
     if (v === 'wellness') { this.showSymptomLog = true; this.showWeightLogPanel = true;
                             this.showSyncopeLog = true; this.showVaccinationLogPanel = true;
                             this.showAntiparasiticPanel = true; }
-    if (v === 'trends')   { this.showAnalytics = true; }
+    if (v === 'trends')   { this.showAnalytics = true; this.showMedGraph = true; this.$nextTick(() => this.renderWeightChart()); }
     if (v === 'count')   { this.showLog = true; }
 },
 
@@ -4107,16 +4107,13 @@ renderChart() {
 renderWeightChart() {
     if (this.weightChartRenderTimeout) clearTimeout(this.weightChartRenderTimeout);
     this.weightChartRenderTimeout = setTimeout(() => {
-        const canvas = this.$refs.weightChartCanvas;
-        if (!canvas || canvas.offsetParent === null) return;
-
-        const existingChart = Chart.getChart(canvas);
-        if (existingChart) existingChart.destroy();
+        const canvases = [this.$refs.weightChartCanvas, this.$refs.weightChartTrendsCanvas]
+            .filter(c => c && c.offsetParent !== null);
+        if (!canvases.length) return;
 
         const data = this.weightLog
             .filter(w => w.patientId === this.activePatientId)
             .sort((a, b) => new Date(a.date) - new Date(b.date));
-
         if (data.length < 2) return;
 
         const unit = this.activePatientProfile?.weightUnit || 'kg';
@@ -4125,48 +4122,48 @@ renderWeightChart() {
         );
         const values = data.map(w => parseFloat(w.weightValue));
 
-        const ctx = canvas.getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [{
-                    label: `Weight (${unit})`,
-                    data: values,
-                    borderColor: '#0f766e',
-                    backgroundColor: 'rgba(15, 118, 110, 0.08)',
-                    tension: 0.25,
-                    pointRadius: data.length > 30 ? 3 : 5,
-                    fill: true,
-                    spanGaps: true
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            afterLabel: (ctx) => {
-                                const e = data[ctx.dataIndex];
-                                const parts = [];
-                                if (e.appetite && e.appetite !== 'Normal') parts.push(`Appetite: ${e.appetite}`);
-                                if (e.foodBrand) parts.push(`Diet: ${e.foodBrand}`);
-                                if (e.portionSize) parts.push(e.portionSize);
-                                if (e.notes) parts.push(e.notes);
-                                return parts;
+        canvases.forEach(canvas => {
+            const existingChart = Chart.getChart(canvas);
+            if (existingChart) existingChart.destroy();
+            new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: `Weight (${unit})`,
+                        data: values,
+                        borderColor: '#0f766e',
+                        backgroundColor: 'rgba(15, 118, 110, 0.08)',
+                        tension: 0.25,
+                        pointRadius: data.length > 30 ? 3 : 5,
+                        fill: true,
+                        spanGaps: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: (ctx) => {
+                                    const e = data[ctx.dataIndex];
+                                    const parts = [];
+                                    if (e.appetite && e.appetite !== 'Normal') parts.push(`Appetite: ${e.appetite}`);
+                                    if (e.foodBrand) parts.push(`Diet: ${e.foodBrand}`);
+                                    if (e.portionSize) parts.push(e.portionSize);
+                                    if (e.notes) parts.push(e.notes);
+                                    return parts;
+                                }
                             }
                         }
-                    }
-                },
-                scales: {
-                    x: { ticks: { maxRotation: 0, maxTicksLimit: 10 }, grid: { color: '#e2e8f0' } },
-                    y: {
-                        beginAtZero: false,
-                        title: { display: true, text: `Weight (${unit})` }
+                    },
+                    scales: {
+                        x: { ticks: { maxRotation: 0, maxTicksLimit: 10 }, grid: { color: '#e2e8f0' } },
+                        y: { beginAtZero: false, title: { display: true, text: `Weight (${unit})` } }
                     }
                 }
-            }
+            });
         });
     }, 100);
 },
