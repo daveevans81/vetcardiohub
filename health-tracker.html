@@ -2070,9 +2070,9 @@
                                 <i class="fa-solid" :class="showWeightLogPanel ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                             </button>
                         </div>
-                        <div x-show="showWeightForm"  class="diagnosis-panel fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" style="display: none;">
-                            <div class="diagnosis-panel bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-                                <div class="bg-blue-600 px-4 py-3 flex justify-between items-center text-white">
+                        <div x-show="showWeightForm" x-cloak class="vch-modal">
+                            <div class="vch-modal-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #e2e8f0;">
                                     <h3 class="font-bold text-lg" x-text="editingWeightId ? 'Edit Diet & Weight' : 'Log Diet & Weight'"></h3>
                                     
                                 </div>
