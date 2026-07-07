@@ -4938,6 +4938,27 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
     .med-form-grid { grid-template-columns: 1fr; }
 }
 
+/* Install app version nudge */
+
+.install-steps {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 0.85rem;
+    color: #334155;
+}
+.install-step { display: flex; align-items: flex-start; gap: 10px; }
+.install-step-num {
+    min-width: 22px; height: 22px; border-radius: 50%;
+    background: #16325F; color: #fff; font-weight: bold; font-size: 0.72rem;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
 /* Advertising on banner */
 
 .banner-cta {

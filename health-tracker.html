@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
     <script src="/js/global-head.js" defer></script>
+    <script>
+        window.vchDeferredInstall = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.vchDeferredInstall = e;
+            window.dispatchEvent(new CustomEvent('vch-installable'));
+        });
+    </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
@@ -385,7 +393,7 @@
                 <button @click="showProgressionBanner = false" class="btn-sm btn-ghost" style="padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; cursor: pointer; font-size: 0.875rem; color: #475569;">Dismiss</button>
             </div>
                                 <!-- ******************************** -->
-                                <!-- DISCLAIMERS                      -->
+                                <!-- DISCLAIMERS and other overlays   -->
                                 <!-- ******************************** -->
 
             <!-- TERMS overlay: shell is Alpine, content is injected -->
@@ -437,6 +445,64 @@
                         <button @click="cancelBackupImport()" class="btn btn-cancel">Cancel</button>
                         <button @click="confirmBackupImport()" class="btn btn-primary" :disabled="backupSelection.length === 0"
                                 x-text="`Import ${backupSelection.length} Patient(s)`"></button>
+                    </div>
+                </div>
+            </div>
+            
+                    <!-- PWA INSTALL OVERLAY -->
+            <div x-show="showInstallOverlay" class="modal-overlay" style="background: rgba(0,0,0,0.75); z-index: 10002;" x-cloak>
+                <div class="onboarding-modal-inner" style="max-width: 420px; max-height: 85vh; display: flex; flex-direction: column;">
+                    <div class="onboarding-scroll" style="padding: 24px; text-align: center;">
+                        <div style="font-size: 2.2rem; color: #16325F; margin-bottom: 10px;">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <h2 style="color: #16325F; margin: 0 0 8px; font-size: 1.2rem;">Use this tracker as an app</h2>
+                        <p class="text-sm text-muted" style="margin-bottom: 16px;">
+                            Install the free app to your home screen for one-tap access, full-screen use, and offline breath counting — no app store required.
+                        </p>
+        
+                        <!-- iOS warning: install BEFORE entering data -->
+                        <div x-show="installPlatform === 'ios' && patients.length === 0" class="info-box" style="text-align: left; margin-bottom: 16px; border-left: 3px solid #d97706;">
+                            <p class="mt-0 mb-0" style="font-size: 0.82rem;"><strong>Install first, then register your pet.</strong> On iPhone and iPad the app keeps its own separate records — anything entered here in the browser will not transfer across automatically.</p>
+                        </div>
+        
+                        <!-- iOS with existing data: backup route -->
+                        <div x-show="installPlatform === 'ios' && patients.length > 0" class="info-box" style="text-align: left; margin-bottom: 16px; border-left: 3px solid #d97706;">
+                            <p class="mt-0 mb-0" style="font-size: 0.82rem;"><strong>You already have records in this browser.</strong> Export a backup (Data &amp; Export → Export Backup), install the app, then use <em>Import patient(s) from backup</em> on the app's welcome screen.</p>
+                        </div>
+        
+                        <!-- ANDROID: one-tap native install -->
+                        <template x-if="installPlatform === 'android'">
+                            <div>
+                                <button x-show="canNativeInstall" @click="triggerNativeInstall()" class="btn btn-primary w-full" style="padding: 14px; font-size: 1rem;">
+                                    <i class="fa-solid fa-download"></i> Install app
+                                </button>
+                                <div x-show="!canNativeInstall" class="install-steps">
+                                    <div class="install-step"><span class="install-step-num">1</span> Tap the <i class="fa-solid fa-ellipsis-vertical"></i> menu in your browser</div>
+                                    <div class="install-step"><span class="install-step-num">2</span> Choose <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong></div>
+                                </div>
+                                <p class="text-sm text-muted" style="margin-top: 10px; font-size: 0.78rem;">On Android your records carry over automatically between browser and app.</p>
+                            </div>
+                        </template>
+        
+                        <!-- iOS: Safari instructions -->
+                        <template x-if="installPlatform === 'ios'">
+                            <div>
+                                <div x-show="iosIsSafari()" class="install-steps">
+                                    <div class="install-step"><span class="install-step-num">1</span> Tap the Share button <i class="fa-solid fa-arrow-up-from-bracket" style="color: #0ea5e9;"></i> at the bottom of Safari</div>
+                                    <div class="install-step"><span class="install-step-num">2</span> Scroll down and tap <strong>"Add to Home Screen"</strong> <i class="fa-solid fa-square-plus" style="color: #0ea5e9;"></i></div>
+                                    <div class="install-step"><span class="install-step-num">3</span> Tap <strong>Add</strong>, then open the tracker from your home screen</div>
+                                </div>
+                                <div x-show="!iosIsSafari()" class="install-steps">
+                                    <div class="install-step"><span class="install-step-num">1</span> Open this page in <strong>Safari</strong> (installing works best there)</div>
+                                    <div class="install-step"><span class="install-step-num">2</span> Tap Share <i class="fa-solid fa-arrow-up-from-bracket"></i> → <strong>"Add to Home Screen"</strong></div>
+                                </div>
+                            </div>
+                        </template>
+        
+                        <button @click="dismissInstallOverlay()" class="btn btn-cancel w-full" style="margin-top: 14px; background: #f1f5f9;">
+                            Continue in browser
+                        </button>
                     </div>
                 </div>
             </div>
@@ -581,6 +647,10 @@
                               </div>
                           </div>
                           <div class="onboarding-footer">
+                            <button x-show="!isStandalone && installPlatform !== 'other'" @click="showInstallOverlay = true"
+                                    class="hero-pill" style="display: block; margin: 0 auto 16px; color: #16325F; background: #eff6ff; border-color: #bfdbfe; font-size: 0.8rem; cursor: pointer;">
+                                <i class="fa-solid fa-download"></i> Prefer an app? Install first — recommended
+                            </button>
                             <label :class="{ 'terms-nudge': termsError }" style="display:flex;align-items:flex-start;gap:8px;font-size:0.78rem;color:#475569;margin:4px 0 12px;text-align:left;cursor:pointer;">
                                   <input type="checkbox" x-model="termsAgreed" @change="termsError = false" style="width:16px;height:16px;margin-top:1px;accent-color:#16325F;flex-shrink:0;">
                                   <span>
@@ -3870,7 +3940,7 @@
                             <h4>Save as a Pet App</h4>
                             <p>Add this tracker to your home screen for instant, offline access.</p>
                         </div>
-                        <button onclick="showInstructions()" class="btn-nudge-static">How-To</button>
+                        <button @click="showInstallOverlay = true" class="btn-nudge-static">How-To</button>
                 
                     </section>
             </div> <!-- CLOSE COUNTING HIDER -->

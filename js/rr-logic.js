@@ -15,6 +15,12 @@ onboardingData: {
     acvimStage: ''
 },
 
+// --- PWA install nudge ---
+showInstallOverlay: false,
+installPlatform: 'other',      // 'ios' | 'android' | 'other'
+canNativeInstall: false,       // beforeinstallprompt captured (Android)
+isStandalone: false,
+
 // --- Terms gate (hard, first-use, versioned) ---
 termsVersion: '2026-07-01',   // bump this string when terms materially change
 termsAgreed: false,
@@ -490,7 +496,41 @@ get formularyReviewedLabel() {
     } catch (e) { return VCH_FORMULARY_REVIEWED; }
 },
 
+initInstallNudge() {
+    this.isStandalone = window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+    const ua = navigator.userAgent;
+    const isIPad = /Macintosh/.test(ua) && 'ontouchend' in document; // iPadOS reports as Mac
+    if (/iPhone|iPad|iPod/.test(ua) || isIPad) this.installPlatform = 'ios';
+    else if (/Android/.test(ua)) this.installPlatform = 'android';
 
+    this.canNativeInstall = !!window.vchDeferredInstall;
+    window.addEventListener('vch-installable', () => { this.canNativeInstall = true; });
+    window.addEventListener('appinstalled', () => { this.showInstallOverlay = false; });
+
+    // Auto-offer once: mobile browser tab, no patient data yet, not previously dismissed
+    if (!this.isStandalone && this.installPlatform !== 'other'
+        && this.patients.length === 0
+        && !localStorage.getItem('vch_install_prompt_seen')) {
+        setTimeout(() => { this.showInstallOverlay = true; }, 800);
+    }
+},
+iosIsSafari() {
+    return this.installPlatform === 'ios' && !/CriOS|FxiOS|EdgiOS|OPT\//.test(navigator.userAgent);
+},
+dismissInstallOverlay() {
+    localStorage.setItem('vch_install_prompt_seen', '1');
+    this.showInstallOverlay = false;
+},
+async triggerNativeInstall() {
+    const p = window.vchDeferredInstall;
+    if (!p) return;
+    p.prompt();
+    const { outcome } = await p.userChoice;
+    window.vchDeferredInstall = null;
+    this.canNativeInstall = false;
+    if (outcome === 'accepted') this.dismissInstallOverlay();
+},
 
 // Generate robust UUID (Fallback for older browsers just in case)
         generateId() {
@@ -584,6 +624,8 @@ init() {
     // Backfill module flags for legacy / restored profiles
     this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
     this._syncVetExportModules();
+    
+    this.initInstallNudge();
    
       const termsCurrent = localStorage.getItem('vch_terms_version') === this.termsVersion;
 
