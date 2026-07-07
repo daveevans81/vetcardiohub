@@ -4818,6 +4818,143 @@ trendsSnapshot() {
 },
 
 
+// ── Smart Insights engine (rule-based) ─────────────────────────────────
+trendsInsights() {
+    const out = [];
+    if (!this.activePatientId) return out;
+    const day = 86400000, now = Date.now();
+    const cutoff = parseInt(this.activePatientProfile?.customSrrCutoff) || 30;
+    const rows = this._srrForPatient();
+    const petName = this.activePatientProfile?.name || 'your pet';
+    const win = (from, to) => {
+        const v = rows.filter(r => r.t >= from && r.t < to).map(r => r.rate);
+        return v.length >= 3 ? { mean: this._meanOf(v), sd: this._sdOf(v), n: v.length } : null;
+    };
+    const recent = win(now - 7 * day, now + day);
+    const prior  = win(now - 14 * day, now - 7 * day);
+
+    // 1. Week-on-week SRR trend (a sustained rise is the classic pre-CHF signal)
+    if (recent && prior && prior.mean > 0) {
+        const pct = ((recent.mean - prior.mean) / prior.mean) * 100;
+        if (pct >= 20) {
+            out.push({ severity: 'danger', icon: 'fa-arrow-trend-up', title: 'Sustained rise in resting respiratory rate',
+                text: `The 7-day mean has risen ${pct.toFixed(0)}% week-on-week (${prior.mean.toFixed(1)} → ${recent.mean.toFixed(1)} bpm). A sustained rise of this magnitude may precede congestive decompensation; contact your veterinary surgeon.` });
+        } else if (pct >= 10) {
+            out.push({ severity: 'warn', icon: 'fa-arrow-trend-up', title: 'Upward drift in resting respiratory rate',
+                text: `The 7-day mean is ${pct.toFixed(0)}% higher than the preceding week (${prior.mean.toFixed(1)} → ${recent.mean.toFixed(1)} bpm). Continue daily counts and watch for further rises.` });
+        } else if (pct <= -15) {
+            out.push({ severity: 'ok', icon: 'fa-arrow-trend-down', title: 'Improving respiratory trend',
+                text: `The 7-day mean has fallen ${Math.abs(pct).toFixed(0)}% (${prior.mean.toFixed(1)} → ${recent.mean.toFixed(1)} bpm), consistent with a favourable response to current management.` });
+        }
+    }
+
+    // 2. Mean at or above cutoff
+    if (recent && recent.mean >= cutoff) {
+        out.push({ severity: 'danger', icon: 'fa-triangle-exclamation', title: 'Mean rate at or above alarm cutoff',
+            text: `The mean of the last 7 days is ${recent.mean.toFixed(1)} bpm (n=${recent.n}), at or above the target cutoff of ${cutoff} bpm. This warrants prompt veterinary review.` });
+    }
+
+    // 3. Rising variability
+    if (recent && prior && prior.sd > 0 && recent.sd >= prior.sd * 1.5 && recent.sd - prior.sd >= 2) {
+        out.push({ severity: 'info', icon: 'fa-wave-square', title: 'Increasing reading-to-reading variability',
+            text: `The spread of readings has widened (SD ${prior.sd.toFixed(1)} → ${recent.sd.toFixed(1)} bpm). Greater scatter can reflect inconsistent counting conditions or genuine instability; count during settled sleep where possible.` });
+    }
+
+    // 4. Weight rules — cachexia and fluid-gain patterns
+    if (this.modOn('weightDiet')) {
+        const wl = (this.weightLog || []).filter(w => w.patientId === this.activePatientId)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+        if (wl.length >= 2) {
+            const latest = wl[wl.length - 1];
+            const latestT = new Date(latest.date).getTime();
+            const lv = parseFloat(latest.weightValue);
+            let ref = wl[0];
+            wl.forEach(w => { if (new Date(w.date).getTime() <= latestT - 42 * day) ref = w; });
+            const rv = parseFloat(ref.weightValue);
+            if (rv > 0 && ref !== latest) {
+                const pct = ((lv - rv) / rv) * 100;
+                if (pct <= -5) out.push({ severity: 'warn', icon: 'fa-weight-scale', title: 'Progressive weight loss',
+                    text: `${petName} has lost ${Math.abs(pct).toFixed(1)}% of body weight since ${new Date(ref.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}. In cardiac patients this pattern raises the possibility of cardiac cachexia; discuss nutrition at your next visit.` });
+            }
+            const recentRef = [...wl].reverse().find(w => {
+                const t = new Date(w.date).getTime();
+                return t <= latestT - 3 * day && t >= latestT - 14 * day;
+            });
+            if (recentRef) {
+                const rrv = parseFloat(recentRef.weightValue);
+                const gpct = rrv > 0 ? ((lv - rrv) / rrv) * 100 : 0;
+                if (gpct >= 5) out.push({ severity: 'warn', icon: 'fa-droplet', title: 'Rapid weight gain',
+                    text: `Body weight has increased ${gpct.toFixed(1)}% in under two weeks. Rapid gain in a cardiac patient can reflect fluid retention rather than true tissue gain; mention this to your veterinary surgeon, particularly if the breathing rate is also rising.` });
+            }
+        }
+    }
+
+    // 5. Diuretic burden (≥8 mg/kg/day furosemide = an ACVIM Stage D criterion)
+    if (this.modOn('medications')) {
+        const furo = (this.medLedger || [])
+            .filter(m => m.patientId === this.activePatientId && m.drugId === 'furosemide')
+            .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
+        const lastF = furo[furo.length - 1];
+        if (lastF && !lastF.isStopped && lastF.mgPerKg) {
+            const dosesPerDay = { SID: 1, BID: 2, TID: 3, QID: 4 }[lastF.frequency] || 0;
+            const daily = parseFloat(lastF.mgPerKg) * dosesPerDay;
+            if (dosesPerDay && daily >= 8) out.push({ severity: 'warn', icon: 'fa-pills', title: 'High diuretic requirement',
+                text: `The current furosemide dose equates to ~${daily.toFixed(1)} mg/kg/day. A requirement of ≥8 mg/kg/day is one ACVIM criterion for advanced (Stage D) disease; this is worth reviewing with your cardiologist.` });
+        }
+    }
+
+    // 6. Symptom burden trend (fortnight vs preceding fortnight)
+    if (this.modOn('coughLog', 'activityLog', 'syncopeLog')) {
+        const burden = this._dailyBurdenMap();
+        const sum = (from, to) => Object.entries(burden)
+            .filter(([d]) => { const t = this.parseDateSafe(d).getTime(); return t >= from && t < to; })
+            .reduce((s, [, v]) => s + v, 0);
+        const bRecent = sum(now - 14 * day, now + day);
+        const bPrior  = sum(now - 28 * day, now - 14 * day);
+        if (bPrior >= 3 && bRecent >= bPrior * 1.5) {
+            out.push({ severity: 'warn', icon: 'fa-head-side-cough', title: 'Rising symptom burden',
+                text: `Combined cough, activity and collapse scores over the last fortnight (${bRecent}) are markedly higher than the preceding fortnight (${bPrior}). Review the symptom calendar and consider a check-up if this continues.` });
+        } else if (bPrior >= 3 && bRecent <= bPrior * 0.5) {
+            out.push({ severity: 'ok', icon: 'fa-face-smile', title: 'Falling symptom burden',
+                text: `Combined symptom scores over the last fortnight (${bRecent}) are substantially lower than the preceding fortnight (${bPrior}) — an encouraging quality-of-life signal.` });
+        }
+    }
+
+    // 7. Collapse event in the last 7 days
+    if (this.modOn('syncopeLog')) {
+        const recentSync = (this.syncopeLog || []).filter(s =>
+            s.patientId === this.activePatientId && now - this.parseDateSafe(s.date).getTime() <= 7 * day);
+        if (recentSync.length) out.push({ severity: 'danger', icon: 'fa-heart-crack', title: 'Recent collapse event',
+            text: `${recentSync.length === 1 ? 'A collapse event has' : recentSync.length + ' collapse events have'} been logged within the last 7 days. Episodes of syncope or collapse in a cardiac patient always merit prompt veterinary assessment.` });
+    }
+
+    // 8. Monitoring adherence nudge
+    if (this.modOn('srr')) {
+        const n14 = rows.filter(r => r.t >= now - 14 * day).length;
+        if (rows.length && n14 < 4) out.push({ severity: 'info', icon: 'fa-calendar-check', title: 'Sparse recent monitoring',
+            text: `Only ${n14} resting rate ${n14 === 1 ? 'reading has' : 'readings have'} been logged in the last fortnight. Trends are far more reliable with regular counts — ideally once daily during settled sleep.` });
+    }
+
+    // 9. All clear
+    if (!out.some(o => o.severity === 'danger' || o.severity === 'warn')) {
+        out.unshift({ severity: 'ok', icon: 'fa-circle-check', title: 'No adverse trends detected',
+            text: 'The current data show no concerning patterns in respiratory rate, weight, medication burden or symptom scores. Continue routine monitoring.' });
+    }
+
+    const css = {
+        danger: 'background:#fef2f2;border-color:#fca5a5;color:#7f1d1d;',
+        warn:   'background:#fffbeb;border-color:#fde68a;color:#92400e;',
+        info:   'background:#eff6ff;border-color:#bfdbfe;color:#1e40af;',
+        ok:     'background:#f0fdf4;border-color:#bbf7d0;color:#166534;'
+    };
+    const order = { danger: 0, warn: 1, info: 2, ok: 3 };
+    out.sort((a, b) => order[a.severity] - order[b.severity]);
+    out.forEach(i => i.css = css[i.severity]);
+    return out;
+},
+
+
+
 // ── Medication Response panel ───────────────────────────────────────────
 // Mean SRR 7 days before vs 7 days after each medication event.
 medResponsePanel() {
