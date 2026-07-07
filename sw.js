@@ -1,6 +1,6 @@
 // sw.js — VetCardioHub offline shell
 // Bump CACHE_VERSION on every deployment that changes any listed file.
-const CACHE_VERSION = 'vch-v1';
+const CACHE_VERSION = 'vch-v1.1';
 
 const APP_SHELL = [
     '/health-tracker.html',
@@ -31,7 +31,11 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', (e) => {
-    e.waitUntil(caches.open(CACHE_VERSION).then(c => c.addAll(APP_SHELL)));
+    e.waitUntil(
+        caches.open(CACHE_VERSION).then(c =>
+            Promise.allSettled(APP_SHELL.map(url => c.add(url)))
+        )
+    );
     self.skipWaiting();
 });
 
@@ -74,9 +78,22 @@ self.addEventListener('fetch', (e) => {
     // Cache-first — these files only change when you bump CACHE_VERSION.
     e.respondWith(
         caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
-            const copy = res.clone();
-            caches.open(CACHE_VERSION).then(c => c.put(e.request, copy));
+            if (res.ok) {
+                const copy = res.clone();
+                caches.open(CACHE_VERSION).then(c => c.put(e.request, copy));
+            }
             return res;
         }))
     );
+});
+
+navigator.serviceWorker.register('/sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                // New version ready — show your own "Refresh for updates" toast
+            }
+        });
+    });
 });
