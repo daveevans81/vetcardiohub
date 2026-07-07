@@ -4880,7 +4880,7 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
     align-items: center;
     gap: .5rem;
     padding: .75rem 1.25rem;
-    background: #e63946;           /* match your accent — adjust */
+    background: #e63946;           
     color: #fff;
     font-weight: 700;
     border-radius: 999px;
@@ -4905,6 +4905,7 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
     }
 }
 
+/*
 @media (max-width: 768px) {
     .banner-cta { position: static; display: flex; justify-content: center; margin: .75rem auto; width: fit-content; }
-}
+} */
