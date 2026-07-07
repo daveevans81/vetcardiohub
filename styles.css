@@ -4867,10 +4867,16 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 .nav-item--cta a {
     background: #e63946;
     color: #fff !important;
-    padding: .4rem .9rem;
+    padding: .3rem .7rem;
     margin-top: 4px;
     border-radius: 999px;
-    font-weight: 700;
+    font-weight: 600;
+}
+
+@media (min-width:981px) {
+    .banner-cta {
+    display:none;
+    }
 }
 
 @media (max-width: 768px) {
