@@ -489,9 +489,12 @@
                         <template x-if="installPlatform === 'ios'">
                             <div>
                                 <div x-show="iosIsSafari()" class="install-steps">
-                                    <div class="install-step"><span class="install-step-num">1</span> Tap the Share button <i class="fa-solid fa-arrow-up-from-bracket" style="color: #0ea5e9;"></i> at the bottom of Safari</div>
-                                    <div class="install-step"><span class="install-step-num">2</span> Scroll down and tap <strong>"Add to Home Screen"</strong> <i class="fa-solid fa-square-plus" style="color: #0ea5e9;"></i></div>
-                                    <div class="install-step"><span class="install-step-num">3</span> Tap <strong>Add</strong>, then open the tracker from your home screen</div>
+                                    <div class="install-step"><span class="install-step-num">1</span>
+                                        <span>Tap the Share button <i class="fa-solid fa-arrow-up-from-bracket" style="color: #0ea5e9;"></i> — usually at the bottom of Safari. <br>
+                                        <em style="font-size: 0.78rem; color: #64748b;">Can't see it? In newer Safari, tap the <i class="fa-solid fa-ellipsis"></i> menu in the address bar first — Share is in there.</em></span>
+                                    </div>
+                                    <div class="install-step"><span class="install-step-num">2</span> <span>Scroll down and tap <strong>"Add to Home Screen"</strong> <i class="fa-solid fa-square-plus" style="color: #0ea5e9;"></i></span></div>
+                                    <div class="install-step"><span class="install-step-num">3</span> <span>Tap <strong>Add</strong>, then open the tracker from your home screen</span></div>
                                 </div>
                                 <div x-show="!iosIsSafari()" class="install-steps">
                                     <div class="install-step"><span class="install-step-num">1</span> Open this page in <strong>Safari</strong> (installing works best there)</div>
