@@ -28,7 +28,11 @@ showTermsModal: false,
 showPrivacyModal: false,
 showTermsGate: false,         // returning-user re-acceptance only
     showDisclaimerModal: false,
-
+    
+    
+    
+    
+showRollingMean: true,
 
 
 // Default module template
@@ -678,7 +682,7 @@ init() {
     this.$watch('showDiagnosisOverlay', () => { this.renderChart(); });
     this.$watch('showCutoffLine', () => { this.renderChart(); });
     this.$watch('showMeanRef',    () => { this.renderChart(); });
-    
+    this.$watch('showRollingMean', () => this.renderChart());
     this.$watch('showManualSrr', (isVisible) => {
         if (isVisible) {
             // Pre-populate to current local datetime when panel opens
@@ -4022,6 +4026,26 @@ renderChart() {
                 spanGaps: true, fill: true, order: 5, yAxisID: 'y'
             }
         ];
+        
+        // ── 7-day rolling mean overlay ──
+        if (this.showRollingMean) {
+            const rmWindow = 7 * 86400000;
+            const allSrr = this.srrHistory
+                .filter(r => r.patientId === this.activePatientId)
+                .map(r => ({ t: this.parseDateSafe(r.date).getTime(), rate: r.rate }));
+            const rollingData = Array(n).fill(null);
+            for (let i = 0; i < n; i++) {
+                if (srrDataPoints[i] === null) continue;
+                const winVals = allSrr.filter(r => r.t > columns[i] - rmWindow && r.t <= columns[i]).map(r => r.rate);
+                if (winVals.length >= 3) rollingData[i] = Math.round(winVals.reduce((s, v) => s + v, 0) / winVals.length * 10) / 10;
+            }
+            if (rollingData.some(d => d !== null)) datasets.push({
+                label: '7-day rolling mean', type: 'line', data: rollingData,
+                borderColor: '#f59e0b', backgroundColor: 'transparent',
+                borderWidth: 2.5, borderDash: [8, 4], pointRadius: 0,
+                tension: 0.35, spanGaps: true, fill: false, order: 4, yAxisID: 'y'
+            });
+        }
 
         if (this.showMedications && medDataPoints.some(d => d !== null)) datasets.push({ label: 'Medication Change', type: 'line', showLine: false, data: medDataPoints, backgroundColor: medColors, borderColor: '#ffffff', borderWidth: 2, pointStyle: 'triangle', rotation: 180, radius: 10, hoverRadius: 13, order: 3, medTooltips: medTooltips, yAxisID: 'y' });
         if (this.showSyncopeOverlay && syncDataPoints.some(d => d !== null)) datasets.push({
@@ -4166,6 +4190,366 @@ renderWeightChart() {
             });
         });
     }, 100);
+},
+
+// ===================== TRENDS DASHBOARD ENGINE =====================
+
+_srrForPatient() {
+    if (!Array.isArray(this.srrHistory) || !this.activePatientId) return [];
+    return this.srrHistory
+        .filter(r => r.patientId === this.activePatientId)
+        .map(r => ({ t: this.parseDateSafe(r.date).getTime(), rate: r.rate }))
+        .sort((a, b) => a.t - b.t);
+},
+
+_meanOf(arr) { return arr.reduce((s, v) => s + v, 0) / arr.length; },
+
+_sdOf(arr) {
+    if (arr.length < 2) return 0;
+    const m = this._meanOf(arr);
+    return Math.sqrt(arr.reduce((s, v) => s + (v - m) ** 2, 0) / (arr.length - 1));
+},
+
+// Combined daily symptom burden: cough severity + reduced activity + collapse events
+_dailyBurdenMap() {
+    const sevMap = { Mild: 1, Moderate: 2, Severe: 3 };
+    const actMap = { Reduced: 1, Lethargic: 2, Hyper: 1 };
+    const map = {};
+    const add = (date, pts) => { if (date && pts) map[date] = (map[date] || 0) + pts; };
+    (this.coughLog || []).filter(c => c.patientId === this.activePatientId)
+        .forEach(c => add(c.date, sevMap[c.severity] || 1));
+    (this.activityLog || []).filter(a => a.patientId === this.activePatientId)
+        .forEach(a => add(a.date, actMap[a.status] || 0));
+    (this.syncopeLog || []).filter(s => s.patientId === this.activePatientId)
+        .forEach(s => add(s.date, 3));
+    return map;
+},
+
+_tileCss(state) {
+    const c = {
+        ok:      'background:#f0fdf4;border-color:#bbf7d0;color:#15803d;',
+        warn:    'background:#fffbeb;border-color:#fde68a;color:#b45309;',
+        danger:  'background:#fef2f2;border-color:#fecaca;color:#dc2626;',
+        neutral: 'background:#f8fafc;border-color:#e2e8f0;color:#475569;'
+    };
+    return c[state] || c.neutral;
+},
+
+// ── Patient Snapshot scorecard ──────────────────────────────────────────
+trendsSnapshot() {
+    const tiles = [];
+    if (!this.activePatientId) return tiles;
+    const day = 86400000, now = Date.now();
+    const cutoff = parseInt(this.activePatientProfile?.customSrrCutoff) || 30;
+    const rows = this._srrForPatient();
+
+    if (this.modOn('srr') && rows.length) {
+        const last = rows[rows.length - 1];
+        tiles.push({
+            icon: 'fa-lungs', label: 'Latest SRR', value: last.rate + ' bpm',
+            sub: new Date(last.t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+            state: last.rate >= cutoff + 10 ? 'danger' : last.rate >= cutoff ? 'warn' : 'ok'
+        });
+    }
+
+    const m7v  = rows.filter(r => r.t >= now - 7 * day).map(r => r.rate);
+    const m30v = rows.filter(r => r.t >= now - 30 * day).map(r => r.rate);
+    if (m7v.length >= 3 && m30v.length >= 6) {
+        const m7 = this._meanOf(m7v), m30 = this._meanOf(m30v);
+        const pct = m30 > 0 ? ((m7 - m30) / m30) * 100 : 0;
+        tiles.push({
+            icon: 'fa-chart-line', label: '7d vs 30d mean',
+            value: `${m7.toFixed(1)} / ${m30.toFixed(1)}`,
+            sub: (pct > 2 ? '▲ ' : pct < -2 ? '▼ ' : '→ ') + Math.abs(pct).toFixed(0) + '%',
+            state: pct >= 20 ? 'danger' : pct >= 10 ? 'warn' : 'ok'
+        });
+    }
+
+    if (this.modOn('weightDiet')) {
+        const wl = (this.weightLog || [])
+            .filter(w => w.patientId === this.activePatientId)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+        if (wl.length >= 2) {
+            const unit = this.activePatientProfile?.weightUnit || 'kg';
+            const latest = wl[wl.length - 1];
+            const latestT = new Date(latest.date).getTime();
+            let ref = wl[0];
+            wl.forEach(w => { if (new Date(w.date).getTime() <= latestT - 56 * day) ref = w; });
+            const lv = parseFloat(latest.weightValue), rv = parseFloat(ref.weightValue);
+            const pct = rv > 0 ? ((lv - rv) / rv) * 100 : 0;
+            tiles.push({
+                icon: 'fa-weight-scale', label: 'Weight', value: `${lv} ${unit}`,
+                sub: (pct > 0 ? '▲ ' : pct < 0 ? '▼ ' : '→ ') + Math.abs(pct).toFixed(1) + '% vs '
+                     + new Date(ref.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+                state: pct <= -5 ? 'danger' : Math.abs(pct) >= 5 ? 'warn' : 'ok'
+            });
+        }
+    }
+
+    if (this.modOn('syncopeLog')) {
+        const sl = (this.syncopeLog || []).filter(s => s.patientId === this.activePatientId);
+        if (sl.length) {
+            const lastT = Math.max(...sl.map(s => this.parseDateSafe(s.date).getTime()));
+            const days = Math.floor((now - lastT) / day);
+            tiles.push({
+                icon: 'fa-heart-crack', label: 'Last collapse event',
+                value: days === 0 ? 'Today' : days + 'd ago',
+                sub: sl.length + ' logged',
+                state: days < 7 ? 'danger' : days < 30 ? 'warn' : 'ok'
+            });
+        } else {
+            tiles.push({ icon: 'fa-heart-crack', label: 'Collapse events', value: 'None', sub: 'logged', state: 'neutral' });
+        }
+    }
+
+    if (this.modOn('acvimStaging') && this.currentClinicalStatus) {
+        const s = this.currentClinicalStatus;
+        tiles.push({
+            icon: 'fa-stethoscope', label: s.diagnosis || 'Diagnosis',
+            value: s.acvimStage && s.acvimStage !== 'N/A' ? s.acvimStage : '—',
+            sub: new Date(s.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }),
+            state: ['Stage C', 'Stage D'].includes(s.acvimStage) ? 'warn' : 'neutral'
+        });
+    }
+
+    if (this.modOn('antiparasitics')) {
+        const alerts = this.parasiticAlerts();
+        tiles.push({
+            icon: 'fa-shield-dog', label: 'Parasite gaps',
+            value: alerts.length === 0 ? 'Covered' : alerts.length + (alerts.length === 1 ? ' gap' : ' gaps'),
+            sub: alerts.some(a => a.cardiac) ? 'cardiac-relevant' : ' ',
+            state: alerts.some(a => a.cardiac) ? 'danger' : alerts.length ? 'warn' : 'ok'
+        });
+    }
+
+    tiles.forEach(t => t.css = this._tileCss(t.state));
+    return tiles;
+},
+
+// ── Smart Insights engine (rule-based) ─────────────────────────────────
+trendsInsights() {
+    const out = [];
+    if (!this.activePatientId) return out;
+    const day = 86400000, now = Date.now();
+    const cutoff = parseInt(this.activePatientProfile?.customSrrCutoff) || 30;
+    const rows = this._srrForPatient();
+    const petName = this.activePatientProfile?.name || 'your pet';
+    const win = (from, to) => {
+        const v = rows.filter(r => r.t >= from && r.t < to).map(r => r.rate);
+        return v.length >= 3 ? { mean: this._meanOf(v), sd: this._sdOf(v), n: v.length } : null;
+    };
+    const recent = win(now - 7 * day, now + day);
+    const prior  = win(now - 14 * day, now - 7 * day);
+
+    // 1. Week-on-week SRR trend (a sustained rise is the classic pre-CHF signal)
+    if (recent && prior && prior.mean > 0) {
+        const pct = ((recent.mean - prior.mean) / prior.mean) * 100;
+        if (pct >= 20) {
+            out.push({ severity: 'danger', icon: 'fa-arrow-trend-up', title: 'Sustained rise in resting respiratory rate',
+                text: `The 7-day mean has risen ${pct.toFixed(0)}% week-on-week (${prior.mean.toFixed(1)} → ${recent.mean.toFixed(1)} bpm). A sustained rise of this magnitude may precede congestive decompensation; contact your veterinary surgeon.` });
+        } else if (pct >= 10) {
+            out.push({ severity: 'warn', icon: 'fa-arrow-trend-up', title: 'Upward drift in resting respiratory rate',
+                text: `The 7-day mean is ${pct.toFixed(0)}% higher than the preceding week (${prior.mean.toFixed(1)} → ${recent.mean.toFixed(1)} bpm). Continue daily counts and watch for further rises.` });
+        } else if (pct <= -15) {
+            out.push({ severity: 'ok', icon: 'fa-arrow-trend-down', title: 'Improving respiratory trend',
+                text: `The 7-day mean has fallen ${Math.abs(pct).toFixed(0)}% (${prior.mean.toFixed(1)} → ${recent.mean.toFixed(1)} bpm), consistent with a favourable response to current management.` });
+        }
+    }
+
+    // 2. Mean at or above cutoff
+    if (recent && recent.mean >= cutoff) {
+        out.push({ severity: 'danger', icon: 'fa-triangle-exclamation', title: 'Mean rate at or above alarm cutoff',
+            text: `The mean of the last 7 days is ${recent.mean.toFixed(1)} bpm (n=${recent.n}), at or above the target cutoff of ${cutoff} bpm. This warrants prompt veterinary review.` });
+    }
+
+    // 3. Rising variability
+    if (recent && prior && prior.sd > 0 && recent.sd >= prior.sd * 1.5 && recent.sd - prior.sd >= 2) {
+        out.push({ severity: 'info', icon: 'fa-wave-square', title: 'Increasing reading-to-reading variability',
+            text: `The spread of readings has widened (SD ${prior.sd.toFixed(1)} → ${recent.sd.toFixed(1)} bpm). Greater scatter can reflect inconsistent counting conditions or genuine instability; count during settled sleep where possible.` });
+    }
+
+    // 4. Weight rules — cachexia and fluid-gain patterns
+    if (this.modOn('weightDiet')) {
+        const wl = (this.weightLog || []).filter(w => w.patientId === this.activePatientId)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+        if (wl.length >= 2) {
+            const latest = wl[wl.length - 1];
+            const latestT = new Date(latest.date).getTime();
+            const lv = parseFloat(latest.weightValue);
+            let ref = wl[0];
+            wl.forEach(w => { if (new Date(w.date).getTime() <= latestT - 42 * day) ref = w; });
+            const rv = parseFloat(ref.weightValue);
+            if (rv > 0 && ref !== latest) {
+                const pct = ((lv - rv) / rv) * 100;
+                if (pct <= -5) out.push({ severity: 'warn', icon: 'fa-weight-scale', title: 'Progressive weight loss',
+                    text: `${petName} has lost ${Math.abs(pct).toFixed(1)}% of body weight since ${new Date(ref.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}. In cardiac patients this pattern raises the possibility of cardiac cachexia; discuss nutrition at your next visit.` });
+            }
+            const recentRef = [...wl].reverse().find(w => {
+                const t = new Date(w.date).getTime();
+                return t <= latestT - 3 * day && t >= latestT - 14 * day;
+            });
+            if (recentRef) {
+                const rrv = parseFloat(recentRef.weightValue);
+                const gpct = rrv > 0 ? ((lv - rrv) / rrv) * 100 : 0;
+                if (gpct >= 5) out.push({ severity: 'warn', icon: 'fa-droplet', title: 'Rapid weight gain',
+                    text: `Body weight has increased ${gpct.toFixed(1)}% in under two weeks. Rapid gain in a cardiac patient can reflect fluid retention rather than true tissue gain; mention this to your veterinary surgeon, particularly if the breathing rate is also rising.` });
+            }
+        }
+    }
+
+    // 5. Diuretic burden (≥8 mg/kg/day furosemide = an ACVIM Stage D criterion)
+    if (this.modOn('medications')) {
+        const furo = (this.medLedger || [])
+            .filter(m => m.patientId === this.activePatientId && m.drugId === 'furosemide')
+            .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
+        const lastF = furo[furo.length - 1];
+        if (lastF && !lastF.isStopped && lastF.mgPerKg) {
+            const dosesPerDay = { SID: 1, BID: 2, TID: 3, QID: 4 }[lastF.frequency] || 0;
+            const daily = parseFloat(lastF.mgPerKg) * dosesPerDay;
+            if (dosesPerDay && daily >= 8) out.push({ severity: 'warn', icon: 'fa-pills', title: 'High diuretic requirement',
+                text: `The current furosemide dose equates to ~${daily.toFixed(1)} mg/kg/day. A requirement of ≥8 mg/kg/day is one ACVIM criterion for advanced (Stage D) disease; this is worth reviewing with your cardiologist.` });
+        }
+    }
+
+    // 6. Symptom burden trend (fortnight vs preceding fortnight)
+    if (this.modOn('coughLog', 'activityLog', 'syncopeLog')) {
+        const burden = this._dailyBurdenMap();
+        const sum = (from, to) => Object.entries(burden)
+            .filter(([d]) => { const t = this.parseDateSafe(d).getTime(); return t >= from && t < to; })
+            .reduce((s, [, v]) => s + v, 0);
+        const bRecent = sum(now - 14 * day, now + day);
+        const bPrior  = sum(now - 28 * day, now - 14 * day);
+        if (bPrior >= 3 && bRecent >= bPrior * 1.5) {
+            out.push({ severity: 'warn', icon: 'fa-head-side-cough', title: 'Rising symptom burden',
+                text: `Combined cough, activity and collapse scores over the last fortnight (${bRecent}) are markedly higher than the preceding fortnight (${bPrior}). Review the symptom calendar and consider a check-up if this continues.` });
+        } else if (bPrior >= 3 && bRecent <= bPrior * 0.5) {
+            out.push({ severity: 'ok', icon: 'fa-face-smile', title: 'Falling symptom burden',
+                text: `Combined symptom scores over the last fortnight (${bRecent}) are substantially lower than the preceding fortnight (${bPrior}) — an encouraging quality-of-life signal.` });
+        }
+    }
+
+    // 7. Collapse event in the last 7 days
+    if (this.modOn('syncopeLog')) {
+        const recentSync = (this.syncopeLog || []).filter(s =>
+            s.patientId === this.activePatientId && now - this.parseDateSafe(s.date).getTime() <= 7 * day);
+        if (recentSync.length) out.push({ severity: 'danger', icon: 'fa-heart-crack', title: 'Recent collapse event',
+            text: `${recentSync.length === 1 ? 'A collapse event has' : recentSync.length + ' collapse events have'} been logged within the last 7 days. Episodes of syncope or collapse in a cardiac patient always merit prompt veterinary assessment.` });
+    }
+
+    // 8. Monitoring adherence nudge
+    if (this.modOn('srr')) {
+        const n14 = rows.filter(r => r.t >= now - 14 * day).length;
+        if (rows.length && n14 < 4) out.push({ severity: 'info', icon: 'fa-calendar-check', title: 'Sparse recent monitoring',
+            text: `Only ${n14} resting rate ${n14 === 1 ? 'reading has' : 'readings have'} been logged in the last fortnight. Trends are far more reliable with regular counts — ideally once daily during settled sleep.` });
+    }
+
+    // 9. All clear
+    if (!out.some(o => o.severity === 'danger' || o.severity === 'warn')) {
+        out.unshift({ severity: 'ok', icon: 'fa-circle-check', title: 'No adverse trends detected',
+            text: 'The current data show no concerning patterns in respiratory rate, weight, medication burden or symptom scores. Continue routine monitoring.' });
+    }
+
+    const css = {
+        danger: 'background:#fef2f2;border-color:#fca5a5;color:#7f1d1d;',
+        warn:   'background:#fffbeb;border-color:#fde68a;color:#92400e;',
+        info:   'background:#eff6ff;border-color:#bfdbfe;color:#1e40af;',
+        ok:     'background:#f0fdf4;border-color:#bbf7d0;color:#166534;'
+    };
+    const order = { danger: 0, warn: 1, info: 2, ok: 3 };
+    out.sort((a, b) => order[a.severity] - order[b.severity]);
+    out.forEach(i => i.css = css[i.severity]);
+    return out;
+},
+
+// ── Medication Response panel ───────────────────────────────────────────
+// Mean SRR 7 days before vs 7 days after each medication event.
+medResponsePanel() {
+    if (!Array.isArray(this.medLedger) || !this.activePatientId) return [];
+    const day = 86400000;
+    const rows = this._srrForPatient();
+    const meds = this.medLedger
+        .filter(m => m.patientId === this.activePatientId)
+        .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
+    const seen = {};
+    const out = [];
+    meds.forEach(m => {
+        const key = this._drugKey(m);
+        const action = m.isStopped ? 'Stopped' : (seen[key] ? 'Adjusted' : 'Started');
+        seen[key] = true;
+        const t = this.parseDateSafe(m.eventDate).getTime();
+        const pre  = rows.filter(r => r.t >= t - 7 * day && r.t < t).map(r => r.rate);
+        const post = rows.filter(r => r.t > t && r.t <= t + 7 * day).map(r => r.rate);
+        if (pre.length < 3 || post.length < 3) return;
+        const preM = this._meanOf(pre), postM = this._meanOf(post);
+        const delta = postM - preM;
+        const name = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+        out.push({
+            id: m.id,
+            dateLabel: new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }),
+            name, action,
+            doseLabel: m.doseMg ? `${m.doseMg} mg ${m.frequency || ''}`.trim() : '',
+            pre: preM.toFixed(1), post: postM.toFixed(1),
+            delta: (delta > 0 ? '+' : '') + delta.toFixed(1),
+            state: delta <= -2 ? 'ok' : delta >= 2 ? 'danger' : 'neutral',
+            n: `${pre.length}/${post.length}`
+        });
+    });
+    return out.reverse();   // newest first
+},
+
+// ── SRR distribution histogram (synced to the active date filter) ──────
+srrHistogram() {
+    const data = this.getFilteredReadings().map(d => d.rate);
+    if (data.length < 5) return null;
+    const cutoff = parseInt(this.activePatientProfile?.customSrrCutoff) || 30;
+    const lo = Math.floor(Math.min(...data) / 5) * 5;
+    const hi = Math.max(...data);
+    const bins = [];
+    for (let b = lo; b <= hi; b += 5) {
+        bins.push({
+            label: `${b}–${b + 4}`,
+            count: data.filter(r => r >= b && r < b + 5).length,
+            color: b + 5 <= cutoff ? '#16a34a' : b >= cutoff + 10 ? '#dc2626' : '#d97706'
+        });
+    }
+    const maxCount = Math.max(...bins.map(b => b.count));
+    bins.forEach(b => b.pct = maxCount ? Math.round(b.count / maxCount * 100) : 0);
+    const inNormal = data.filter(r => r < cutoff).length;
+    return { bins, total: data.length, normalPct: Math.round(inNormal / data.length * 100) };
+},
+
+// ── Symptom calendar heatmap (last 16 weeks, GitHub-style) ─────────────
+symptomHeatmap() {
+    const day = 86400000, weeks = 16;
+    const burden = this._dailyBurdenMap();
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    const monday = new Date(today.getTime() - ((today.getDay() + 6) % 7) * day);
+    const cols = [];
+    for (let w = weeks - 1; w >= 0; w--) {
+        const colStart = new Date(monday.getTime() - w * 7 * day);
+        const cells = [];
+        for (let d = 0; d < 7; d++) {
+            const dt = new Date(colStart.getTime() + d * day);
+            const key = dt.toISOString().split('T')[0];
+            const future = dt.getTime() > today.getTime();
+            const score = burden[key] || 0;
+            cells.push({
+                key,
+                color: future ? 'transparent'
+                     : score === 0 ? '#e8edf3'
+                     : score <= 2 ? '#fde68a'
+                     : score <= 4 ? '#f59e0b' : '#dc2626',
+                title: dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+                       + (score ? ` — burden ${score}` : ' — no entries')
+            });
+        }
+        cols.push({
+            key: colStart.getTime(),
+            monthLabel: colStart.getDate() <= 7 ? colStart.toLocaleDateString('en-GB', { month: 'short' }) : '',
+            cells
+        });
+    }
+    return { cols, hasData: Object.keys(burden).length > 0 };
 },
         
          // --- MED CHART FUNCTIONS ---       

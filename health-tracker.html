@@ -3187,6 +3187,46 @@
                         </p>
                     </div>
                 </template>
+                
+                                        <!-- ******************************** -->
+                                        <!-- TRENDS: PATIENT SNAPSHOT         -->
+                                        <!-- ******************************** -->
+                <div class="module-card summary-box" x-show="patients.length > 0 && activeView === 'trends'" x-cloak style="margin-top: 20px;">
+                    <h2 style="margin: 0 0 14px 0; font-size: 1.25rem;">
+                        <i class="fa-solid fa-gauge-high" style="color: #2563eb;"></i>
+                        <span x-text="(activePatientProfile?.name || 'Patient') + ' at a Glance'"></span>
+                    </h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                        <template x-for="tile in trendsSnapshot()" :key="tile.label">
+                            <div :style="'border: 1px solid; border-radius: 8px; padding: 10px 12px; ' + tile.css">
+                                <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.8;">
+                                    <i class="fa-solid" :class="tile.icon"></i> <span x-text="tile.label"></span>
+                                </div>
+                                <div style="font-size: 1.25rem; font-weight: 800; margin-top: 2px;" x-text="tile.value"></div>
+                                <div style="font-size: 0.72rem; opacity: 0.85;" x-text="tile.sub"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                                        <!-- ******************************** -->
+                                        <!-- TRENDS: SMART INSIGHTS           -->
+                                        <!-- ******************************** -->
+                <div class="module-card summary-box" x-show="patients.length > 0 && activeView === 'trends'" x-cloak>
+                    <h2 style="margin: 0 0 4px 0; font-size: 1.25rem;">
+                        <i class="fa-solid fa-lightbulb" style="color: #d97706;"></i>
+                        Clinical Insights
+                    </h2>
+                    <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px 0;">
+                        Automated pattern analysis of the logged data. This is guidance for discussion with your veterinary surgeon, not a diagnosis.
+                    </p>
+                    <template x-for="ins in trendsInsights()" :key="ins.title">
+                        <div :style="'border: 1px solid; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 0.85rem; line-height: 1.5; ' + ins.css">
+                            <strong><i class="fa-solid" :class="ins.icon"></i> <span x-text="ins.title"></span></strong><br>
+                            <span x-text="ins.text"></span>
+                        </div>
+                    </template>
+                </div>
                                         <!-- ******************************** -->
                                         <!-- SRR CHART and Analytics          -->
                                         <!-- ******************************** -->
@@ -3240,6 +3280,10 @@
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #4f46e5; margin: 0; border-left: 1px solid #cbd5e1; padding-left: 12px;">
                                     <input type="checkbox" x-model="showMeanRef" class="default" style="margin: 0; padding: 0;">
                                     <i class="fa-solid fa-chart-line"></i> Mean + 2SD
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #d97706; margin: 0; border-left: 1px solid #cbd5e1; padding-left: 12px;">
+                                    <input type="checkbox" x-model="showRollingMean" class="default" style="margin: 0; padding: 0;">
+                                    <i class="fa-solid fa-wave-square"></i> 7d Mean
                                 </label>
                             </div>
                 
@@ -3380,6 +3424,117 @@
                         <div x-show="!hasAnyMedData()" class="flex flex-col items-center justify-center h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
                             <i class="fa-solid fa-pills text-3xl mb-2"></i>
                             <p>Log medications to generate a pharmacologic timeline.</p>
+                        </div>
+                    </template>
+                    
+                    <!-- ******************************** -->
+                    <!-- MEDICATION RESPONSE (Trends)     -->
+                    <!-- ******************************** -->
+                    <template x-if="activePatientProfile?.modules?.medications">
+                        <div class="module-card summary-box" x-show="patients.length > 0 && activeView === 'trends' && modOn('srr')" x-cloak>
+                            <h2 style="margin: 0 0 4px 0; font-size: 1.25rem;">
+                                <i class="fa-solid fa-flask-vial" style="color: #059669;"></i>
+                                Medication Response
+                            </h2>
+                            <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px 0;">
+                                Mean resting rate in the 7 days before versus after each medication event (shown where at least 3 readings exist on both sides).
+                            </p>
+                            <template x-if="medResponsePanel().length > 0">
+                                <div>
+                                    <template x-for="r in medResponsePanel()" :key="r.id">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; flex-wrap: wrap;">
+                                            <div style="font-size: 0.85rem;">
+                                                <strong x-text="r.action + ': ' + r.name"></strong>
+                                                <span style="color: #64748b;" x-text="r.doseLabel ? ' — ' + r.doseLabel : ''"></span><br>
+                                                <span style="font-size: 0.72rem; color: #94a3b8;" x-text="r.dateLabel + ' · readings n=' + r.n"></span>
+                                            </div>
+                                            <span :style="'font-weight: 700; border-radius: 999px; padding: 4px 12px; font-size: 0.82rem; border: 1px solid; ' + (r.state === 'ok' ? 'background:#f0fdf4;color:#15803d;border-color:#bbf7d0;' : r.state === 'danger' ? 'background:#fef2f2;color:#dc2626;border-color:#fecaca;' : 'background:#f8fafc;color:#475569;border-color:#e2e8f0;')"
+                                                  x-text="r.pre + ' → ' + r.post + ' bpm (' + r.delta + ')'"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <div x-show="medResponsePanel().length === 0" style="font-size: 0.8rem; color: #94a3b8; font-style: italic; padding: 8px;">
+                                No medication events yet have at least 3 readings in both the week before and the week after.
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- ******************************** -->
+                    <!-- SRR DISTRIBUTION (Trends)        -->
+                    <!-- ******************************** -->
+                    <div class="module-card summary-box" x-show="patients.length > 0 && activeView === 'trends' && modOn('srr')" x-cloak>
+                        <h2 style="margin: 0 0 4px 0; font-size: 1.25rem;">
+                            <i class="fa-solid fa-chart-column" style="color: #0e7490;"></i>
+                            SRR Distribution
+                        </h2>
+                        <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px 0;">
+                            How the readings in the selected date range fall relative to the alarm zones. Uses the same date filter as the Analytics chart.
+                        </p>
+                        <template x-if="srrHistogram()">
+                            <div>
+                                <div style="display: flex; align-items: flex-end; gap: 6px; height: 130px; padding: 0 4px;">
+                                    <template x-for="b in srrHistogram().bins" :key="b.label">
+                                        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+                                            <span style="font-size: 0.65rem; color: #64748b;" x-text="b.count || ''"></span>
+                                            <div :style="'width: 100%; border-radius: 4px 4px 0 0; background: ' + b.color + '; height: ' + Math.max(b.pct, b.count ? 4 : 0) + '%;'"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div style="display: flex; gap: 6px; padding: 0 4px; margin-top: 4px;">
+                                    <template x-for="b in srrHistogram().bins" :key="'l-' + b.label">
+                                        <div style="flex: 1; text-align: center; font-size: 0.62rem; color: #94a3b8;" x-text="b.label"></div>
+                                    </template>
+                                </div>
+                                <p style="font-size: 0.8rem; color: #475569; margin-top: 10px;">
+                                    <i class="fa-solid fa-circle-check" style="color: #16a34a;"></i>
+                                    <span x-text="srrHistogram().normalPct + '% of the ' + srrHistogram().total + ' readings in this range are below the alarm cutoff.'"></span>
+                                </p>
+                            </div>
+                        </template>
+                        <div x-show="!srrHistogram()" style="font-size: 0.8rem; color: #94a3b8; font-style: italic; padding: 8px;">
+                            At least 5 readings in the selected date range are required for a distribution.
+                        </div>
+                    </div>
+
+                    <!-- ******************************** -->
+                    <!-- SYMPTOM CALENDAR HEATMAP (Trends)-->
+                    <!-- ******************************** -->
+                    <template x-if="activePatientProfile?.modules?.coughLog || activePatientProfile?.modules?.activityLog || activePatientProfile?.modules?.syncopeLog">
+                        <div class="module-card summary-box" x-show="patients.length > 0 && activeView === 'trends'" x-cloak>
+                            <h2 style="margin: 0 0 4px 0; font-size: 1.25rem;">
+                                <i class="fa-solid fa-calendar-days" style="color: #b45309;"></i>
+                                Symptom Calendar
+                                <span style="font-size: 0.8rem; font-weight: 400; color: #92400e; margin-left: 8px;">last 16 weeks</span>
+                            </h2>
+                            <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px 0;">
+                                Each square is one day, coloured by combined cough severity, reduced activity and collapse events.
+                            </p>
+                            <template x-if="symptomHeatmap().hasData">
+                                <div style="overflow-x: auto;">
+                                    <div style="display: flex; gap: 3px; min-width: 520px; padding-bottom: 4px;">
+                                        <template x-for="col in symptomHeatmap().cols" :key="col.key">
+                                            <div style="display: flex; flex-direction: column; gap: 3px;">
+                                                <div style="height: 12px; font-size: 0.6rem; color: #94a3b8; white-space: nowrap;" x-text="col.monthLabel"></div>
+                                                <template x-for="cell in col.cells" :key="cell.key">
+                                                    <div :title="cell.title" :style="'width: 14px; height: 14px; border-radius: 3px; background: ' + cell.color + ';'"></div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 0.68rem; color: #94a3b8;">
+                                        <span>Less</span>
+                                        <div style="width: 12px; height: 12px; border-radius: 3px; background: #e8edf3;"></div>
+                                        <div style="width: 12px; height: 12px; border-radius: 3px; background: #fde68a;"></div>
+                                        <div style="width: 12px; height: 12px; border-radius: 3px; background: #f59e0b;"></div>
+                                        <div style="width: 12px; height: 12px; border-radius: 3px; background: #dc2626;"></div>
+                                        <span>More</span>
+                                    </div>
+                                </div>
+                            </template>
+                            <div x-show="!symptomHeatmap().hasData" style="font-size: 0.8rem; color: #94a3b8; font-style: italic; padding: 8px;">
+                                Log cough, activity or collapse entries to populate the calendar.
+                            </div>
                         </div>
                     </template>
                     
