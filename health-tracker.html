@@ -434,124 +434,126 @@
                     </div>
                 
                     <div x-show="onboardingStep === 0" style="background: rgba(250,250,250,1.0);">
-                    
+                        <div class="onboarding-scroll">
                       <!-- Logo bar -->
-                        <div class="flex-center mb-20 gap-10">
-                            <div style="width: 44px; height: 44px; background: #16325F; border-radius: 8px;" class="flex-center">
-                              <i class="fa-solid fa-heart-pulse" style="font-size: 1.2rem; color: white;"></i>
-                        </div>
-                        <div>
-                              <div style="font-size: 1rem; font-weight: bold; color: #1e293b; line-height: 1.2;">VetCardioHub</div>
-                              <div style="font-size: 0.75rem; color: #64748b;">Cardiac Health Tracker</div>
-                        </div>
-                      </div>
-                    
-                      <!-- Headline -->
-                      <div class="text-center mb-20">
-                        <h2 style="color: #16325F; margin: 0 0 8px; font-size: 1.3rem;">Home monitoring for cardiac patients</h2>
-                        <p class="text-sm text-muted">
-                          Designed for owners of dogs and cats with heart disease — to track what matters,
-                          share it with your vet, and catch warning signs early.
-                        </p>
-                      </div>
-                    
-                      <!-- Trust badges -->
-                      <div class="flex-center mb-20 gap-10" style="flex-wrap: wrap;">
-                            <span class="hero-pill" style="color:#64748b; background:#f1f5f9; border-color:#e2e8f0; font-size:0.75rem;"><i class="fa-solid fa-mobile-screen"></i> Works offline</span>
-                            <span class="hero-pill" style="color:#64748b; background:#f1f5f9; border-color:#e2e8f0; font-size:0.75rem;"><i class="fa-solid fa-lock"></i> Data stays on device</span>
-                            <span class="hero-pill" style="color:#64748b; background:#f1f5f9; border-color:#e2e8f0; font-size:0.75rem;"><i class="fa-solid fa-heart"></i> Free to use</span>
-                            <span class="hero-pill" style="color:#64748b; background:#f1f5f9; border-color:#e2e8f0; font-size:0.75rem;"><i class="fa-solid fa-stethoscope"></i> Vet-designed</span>
-                      </div>
-                    
-                      <!-- Why it matters -->
-                        <div class="info-box mb-20">
-                            <p class="mt-0">In heart disease, a rising sleeping respiratory rate is often the <strong>first sign of fluid building on the lungs</strong> — days before your pet appears unwell. Catching it early can be life-saving.</p>
-                            <p class="mb-0">This app helps you measure, record, and share that rate — alongside medications, symptoms, and clinical staging — all in one place.</p>
-                          </div>
-                    
-                      <!-- Feature grid -->
-                        <div class="w-feature-grid">
-                            <div class="w-feat">
-                              <i class="fa-solid fa-lungs" style="font-size:20px; color:#0f766e;" aria-hidden="true"></i>
-                              <p class="w-feat-title">SRR monitor</p>
-                              <p class="w-feat-desc">One-tap 30-second counter with instant clinical interpretation</p>
+                            <div class="flex-center mb-20 gap-10">
+                                <div style="width: 44px; height: 44px; background: #16325F; border-radius: 8px;" class="flex-center">
+                                  <i class="fa-solid fa-heart-pulse" style="font-size: 1.2rem; color: white;"></i>
                             </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-pills" style="font-size:20px; color:#3b82f6;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Medication ledger</p>
-                              <p class="w-feat-desc">Track dose changes and see their effect on breathing trends</p>
-                            </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-chart-line" style="font-size:20px; color:#0284c7;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Trend analytics</p>
-                              <p class="w-feat-desc">Charts with medication overlays, statistics, and date filtering</p>
-                            </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-stethoscope" style="font-size:20px; color:#7c3aed;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Diagnosis, Murmur and ACVIM staging</p>
-                              <p class="w-feat-desc">Log and visualise disease progression over time</p>
-                            </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-bolt" style="font-size:20px; color:#d97706;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Syncope diary</p>
-                              <p class="w-feat-desc">Record collapse events with timing, tone, and triggers</p>
-                            </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-chart-line" style="font-size:20px; color:#475569;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Vet export</p>
-                              <p class="w-feat-desc">PDF, CSV, or clipboard report for your next appointment</p>
-                            </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-head-side-cough" style="font-size:20px; color:#b45309;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Cough log</p>
-                              <p class="w-feat-desc">Daily cough frequency, severity, and description summaries</p>
-                            </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-person-running" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Activity log</p>
-                              <p class="w-feat-desc">Track exercise tolerance and energy levels over time</p>
-                            </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-scale-balanced" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Weight and Diet log</p>
-                              <p class="w-feat-desc">Track weight, diet, appetite and supplements over time</p>
-                            </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-syringe" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Vaccination log</p>
-                              <p class="w-feat-desc">Track your pet's vaccinations. Don't just rely on your vet's database and reminders, take control yourself.</p>
-                            </div>
-                            <div class="w-feat">
-                              <i class="fa-solid fa-bug-slash" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
-                              <p class="w-feat-title">Anti-Parasitic log</p>
-                              <p class="w-feat-desc">Make sure your pet has proper full coverage of heartworm, lungworm and others as indicated by your region. Track the products and when they are next due.</p>
+                            <div>
+                                  <div style="font-size: 1rem; font-weight: bold; color: #1e293b; line-height: 1.2;">VetCardioHub</div>
+                                  <div style="font-size: 0.75rem; color: #64748b;">Cardiac Health Tracker</div>
                             </div>
                           </div>
-                    
-                      <!-- Setup steps -->
-                        <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-bottom: 20px;">
-                            <p style="font-size: 0.8rem; font-weight: bold; color: #475569; text-transform: uppercase; letter-spacing: 0.04em;">Setup takes about 2 minutes</p>
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                              <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">1</div><div class="text-sm text-muted"><strong>Register your pet</strong><br>Name, species, breed, DOB, weight</div></div>
-                              <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">2</div><div class="text-sm text-muted"><strong>Cardiac history</strong><br>Diagnosis, murmur grade, ACVIM stage</div></div>
-                              <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">3</div><div class="text-sm text-muted"><strong>Choose modules</strong><br>We'll recommend the right tools</div></div>
-                            </div>
+                        
+                          <!-- Headline -->
+                          <div class="text-center mb-20">
+                            <h2 style="color: #16325F; margin: 0 0 8px; font-size: 1.3rem;">Home monitoring for cardiac patients</h2>
+                            <p class="text-sm text-muted">
+                              Designed for owners of dogs and cats with heart disease — to track what matters,
+                              share it with your vet, and catch warning signs early.
+                            </p>
                           </div>
-                          
-                          <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.78rem;color:#475569;margin:4px 0 12px;text-align:left;cursor:pointer;">
-                              <input type="checkbox" x-model="termsAgreed" style="width:16px;height:16px;margin-top:1px;accent-color:#16325F;flex-shrink:0;">
-                              <span>
-                                I've read and agree to the
-                                <a href="#" @click.prevent="showTermsModal = true" style="color:#0ea5e9;text-decoration:underline;">Terms &amp; Disclaimer</a>
-                                and <a href="#" @click.prevent="showPrivacyModal = true" style="color:#0ea5e9;text-decoration:underline;">Privacy Policy</a>,
-                                and understand this app supports but does not replace veterinary advice.
-                              </span>
-                          </label>
-                          <button @click="acceptTermsAndStart()" :disabled="!termsAgreed"
-                                    class="btn btn-primary w-full" style="padding: 15px; font-size: 1rem;">
-                              <i class="fa-solid fa-paw"></i> Set up my first patient
-                            </button>
-                          <p style="font-size: 0.75rem; text-align: center; margin-top: 10px;" class="text-muted">You can add multiple patients and change settings later.</p>
+                        
+                          <!-- Trust badges -->
+                          <div class="flex-center mb-20 gap-10" style="flex-wrap: wrap;">
+                            
+                                <span class="hero-pill" style="color:#64748b; background:#f1f5f9; border-color:#e2e8f0; font-size:0.75rem;"><i class="fa-solid fa-lock"></i> Data stays on device</span>
+                                <span class="hero-pill" style="color:#64748b; background:#f1f5f9; border-color:#e2e8f0; font-size:0.75rem;"><i class="fa-solid fa-heart"></i> Free to use</span>
+                                <span class="hero-pill" style="color:#64748b; background:#f1f5f9; border-color:#e2e8f0; font-size:0.75rem;"><i class="fa-solid fa-stethoscope"></i> Vet-designed</span>
+                          </div>
+                        
+                          <!-- Why it matters -->
+                            <div class="info-box mb-20">
+                                <p class="mt-0">In heart disease, a rising sleeping respiratory rate is often the <strong>first sign of fluid building on the lungs</strong> — days before your pet appears unwell. Catching it early can be life-saving.</p>
+                                <p class="mb-0">This app helps you measure, record, and share that rate — alongside medications, symptoms, and clinical staging — all in one place.</p>
+                              </div>
+                        
+                          <!-- Feature grid -->
+                            <div class="w-feature-grid">
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-lungs" style="font-size:20px; color:#0f766e;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">SRR monitor</p>
+                                  <p class="w-feat-desc">One-tap 30-second counter with instant clinical interpretation</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-pills" style="font-size:20px; color:#3b82f6;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Medication ledger</p>
+                                  <p class="w-feat-desc">Track dose changes and see their effect on breathing trends</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-chart-line" style="font-size:20px; color:#0284c7;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Trend analytics</p>
+                                  <p class="w-feat-desc">Charts with medication overlays, statistics, and date filtering</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-stethoscope" style="font-size:20px; color:#7c3aed;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Diagnosis, Murmur and ACVIM staging</p>
+                                  <p class="w-feat-desc">Log and visualise disease progression over time</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-bolt" style="font-size:20px; color:#d97706;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Syncope diary</p>
+                                  <p class="w-feat-desc">Record collapse events with timing, tone, and triggers</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-chart-line" style="font-size:20px; color:#475569;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Vet export</p>
+                                  <p class="w-feat-desc">PDF, CSV, or clipboard report for your next appointment</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-head-side-cough" style="font-size:20px; color:#b45309;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Cough log</p>
+                                  <p class="w-feat-desc">Daily cough frequency, severity, and description summaries</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-person-running" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Activity log</p>
+                                  <p class="w-feat-desc">Track exercise tolerance and energy levels over time</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-scale-balanced" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Weight and Diet log</p>
+                                  <p class="w-feat-desc">Track weight, diet, appetite and supplements over time</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-syringe" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Vaccination log</p>
+                                  <p class="w-feat-desc">Track your pet's vaccinations. Don't just rely on your vet's database and reminders, take control yourself.</p>
+                                </div>
+                                <div class="w-feat">
+                                  <i class="fa-solid fa-bug-slash" style="font-size:20px; color:#059669;" aria-hidden="true"></i>
+                                  <p class="w-feat-title">Anti-Parasitic log</p>
+                                  <p class="w-feat-desc">Make sure your pet has proper full coverage of heartworm, lungworm and others as indicated by your region. Track the products and when they are next due.</p>
+                                </div>
+                              </div>
+                        
+                          <!-- Setup steps -->
+                            <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-bottom: 20px;">
+                                <p style="font-size: 0.8rem; font-weight: bold; color: #475569; text-transform: uppercase; letter-spacing: 0.04em;">Setup takes about 2 minutes</p>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                  <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">1</div><div class="text-sm text-muted"><strong>Register your pet</strong><br>Name, species, breed, DOB, weight</div></div>
+                                  <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">2</div><div class="text-sm text-muted"><strong>Cardiac history</strong><br>Diagnosis, murmur grade, ACVIM stage</div></div>
+                                  <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">3</div><div class="text-sm text-muted"><strong>Choose modules</strong><br>We'll recommend the right tools</div></div>
+                                </div>
+                              </div>
+                          </div>
+                          <div class="onboarding-footer">
+                              <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.78rem;color:#475569;margin:4px 0 12px;text-align:left;cursor:pointer;">
+                                  <input type="checkbox" x-model="termsAgreed" style="width:16px;height:16px;margin-top:1px;accent-color:#16325F;flex-shrink:0;">
+                                  <span>
+                                    I've read and agree to the
+                                    <a href="#" @click.prevent="showTermsModal = true" style="color:#0ea5e9;text-decoration:underline;">Terms &amp; Disclaimer</a>
+                                    and <a href="#" @click.prevent="showPrivacyModal = true" style="color:#0ea5e9;text-decoration:underline;">Privacy Policy</a>,
+                                    and understand this app supports but does not replace veterinary advice.
+                                  </span>
+                              </label>
+                              <button @click="acceptTermsAndStart()" :disabled="!termsAgreed"
+                                        class="btn btn-primary w-full" style="padding: 15px; font-size: 1rem;">
+                                  <i class="fa-solid fa-paw"></i> Set up my first patient
+                                </button>
+                              <p style="font-size: 0.75rem; text-align: center; margin-top: 10px;" class="text-muted">You can add multiple patients and change settings later.</p>
+                            </div>
                         </div>
 
         
