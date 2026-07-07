@@ -581,7 +581,24 @@
                               </div>
                           </div>
                           <div class="onboarding-footer">
-                              <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.78rem;color:#475569;margin:4px 0 12px;text-align:left;cursor:pointer;">
+                              This button still works when you click it and haven't agreed terms, what is wrong? <label :style="display: block; width: 100%; box-sizing: border-box; margin-top: 10px; padding: 12px; font-size: 0.9rem; font-weight: 500; text-align: center; background: #f1f5f9; color: #16325F; border: 1px solid #cbd5e1; border-radius: 8px; cursor: ${termsAgreed ? 'pointer' : 'not-allowed'}; opacity: ${termsAgreed ? 1 : 0.5};">
+                                    <i class="fa-solid fa-file-import"></i> Switched device? Import patient(s) from backup
+                                    <input type="file" accept=".json" @change="termsAgreed && importCompleteBackup($event)" style="display: none;">
+                                </label>Show moreThought processThought processThe styling is purely cosmetic — you've greyed out the label and set cursor: not-allowed, but nothing actually blocks the click. Clicking a <label> that wraps a file input always opens the file picker regardless of CSS opacity/cursor. Your @change guard (termsAgreed && importCompleteBackup) stops the import from running, but the dialog still opens, so it feels like the button works.
+Two fixes — use either:
+Option A — disable the input (simplest):
+html                                <label :style="`display: block; width: 100%; box-sizing: border-box; margin-top: 10px; padding: 12px; font-size: 0.9rem; font-weight: 500; text-align: center; background: #f1f5f9; color: #16325F; border: 1px solid #cbd5e1; border-radius: 8px; cursor: ${termsAgreed ? 'pointer' : 'not-allowed'}; opacity: ${termsAgreed ? 1 : 0.5};`">
+                                    <i class="fa-solid fa-file-import"></i> Switched device? Import patient(s) from backup
+                                    <input type="file" accept=".json" :disabled="!termsAgreed" @change="importCompleteBackup($event)" style="display: none;">
+                                </label>
+Option B — block clicks on the label with pointer-events:
+Add to the :style binding:
+pointer-events: ${termsAgreed ? 'auto' : 'none'};
+I'd go with Option A. :disabled prevents the file picker from opening at all, which is the real intent — and it's more robust than relying on the @change guard, since a disabled input can't fire change. You can then simplify the handler back to just importCompleteBackup($event).
+Note this same pattern likely affects any other terms-gated <label>-wrapped file inputs (e.g. CSV import) — worth applying the same :disabled there.Great. The behaviour is not immediately obvious why, especially with the main button <button @click="acceptTermsAndStart()" :disabled="!termsAgreed"
+                                        class="btn btn-primary w-full" style="padding: 15px; font-size: 1rem;">
+                                  <i class="fa-solid fa-paw"></i> Set up my first patient
+                                </button> - any ideas on how to best explain that terms need agreeing?    <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.78rem;color:#475569;margin:4px 0 12px;text-align:left;cursor:pointer;">
                                   <input type="checkbox" x-model="termsAgreed" style="width:16px;height:16px;margin-top:1px;accent-color:#16325F;flex-shrink:0;">
                                   <span>
                                     I've read and agree to the
@@ -594,9 +611,34 @@
                                         class="btn btn-primary w-full" style="padding: 15px; font-size: 1rem;">
                                   <i class="fa-solid fa-paw"></i> Set up my first patient
                                 </button>
-                                <label :style="`display: block; width: 100%; box-sizing: border-box; margin-top: 10px; padding: 12px; font-size: 0.9rem; font-weight: 500; text-align: center; background: #f1f5f9; color: #16325F; border: 1px solid #cbd5e1; border-radius: 8px; cursor: ${termsAgreed ? 'pointer' : 'not-allowed'}; opacity: ${termsAgreed ? 1 : 0.5};`">
+                                <label :style="display: block; width: 100%; box-sizing: border-box; margin-top: 10px; padding: 12px; font-size: 0.9rem; font-weight: 500; text-align: center; background: #f1f5f9; color: #16325F; border: 1px solid #cbd5e1; border-radius: 8px; cursor: ${termsAgreed ? 'pointer' : 'not-allowed'}; opacity: ${termsAgreed ? 1 : 0.5};">
                                     <i class="fa-solid fa-file-import"></i> Switched device? Import patient(s) from backup
                                     <input type="file" accept=".json" :disabled="!termsAgreed" @change="termsAgreed && importCompleteBackup($event)" style="display: none;">
+                                </label>
+                              <p style="font-size: 0.75rem; text-align: center; margin-top: 10px;" class="text-muted">You can add multiple patients and change settings later.</p>
+                            </div>    
+                            <label :class="{ 'terms-nudge': termsError }" style="display:flex;align-items:flex-start;gap:8px;font-size:0.78rem;color:#475569;margin:4px 0 12px;text-align:left;cursor:pointer;">
+                                  <input type="checkbox" x-model="termsAgreed" @change="termsError = false" style="width:16px;height:16px;margin-top:1px;accent-color:#16325F;flex-shrink:0;">
+                                  <span>
+                                    I've read and agree to the
+                                    <a href="#" @click.prevent="showTermsModal = true" style="color:#0ea5e9;text-decoration:underline;">Terms &amp; Disclaimer</a>
+                                    and <a href="#" @click.prevent="showPrivacyModal = true" style="color:#0ea5e9;text-decoration:underline;">Privacy Policy</a>,
+                                    and understand this app supports but does not replace veterinary advice.
+                                  </span>
+                              </label>
+                              <button @click="termsAgreed ? acceptTermsAndStart() : (termsError = true)"
+                                      class="btn btn-primary w-full" :style="`padding: 15px; font-size: 1rem; opacity: ${termsAgreed ? 1 : 0.6};`">
+                                  <i class="fa-solid fa-paw"></i> Set up my first patient
+                              </button>
+
+                              <p x-show="termsError" x-cloak style="font-size:0.78rem;color:#dc2626;text-align:center;margin-top:8px;">
+                                  <i class="fa-solid fa-circle-exclamation"></i> Please confirm you agree to the Terms &amp; Privacy Policy to continue.
+                              </p>
+                                <label @click="!termsAgreed && (termsError = true)"
+                                       :class="{ 'terms-nudge': termsError }"
+                                       :style="`display: block; width: 100%; box-sizing: border-box; margin-top: 10px; padding: 12px; font-size: 0.9rem; font-weight: 500; text-align: center; background: #f1f5f9; color: #16325F; border: 1px solid #cbd5e1; border-radius: 8px; cursor: ${termsAgreed ? 'pointer' : 'not-allowed'}; opacity: ${termsAgreed ? 1 : 0.5};`">
+                                    <i class="fa-solid fa-file-import"></i> Switched device? Import patient(s) from backup
+                                    <input type="file" accept=".json" :disabled="!termsAgreed" @change="importCompleteBackup($event)" style="display: none;">
                                 </label>
                               <p style="font-size: 0.75rem; text-align: center; margin-top: 10px;" class="text-muted">You can add multiple patients and change settings later.</p>
                             </div>

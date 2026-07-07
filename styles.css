@@ -4876,6 +4876,18 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 .vch-mobile-alerts__item span:last-child{ border-radius:999px; padding:1px 8px; font-size:.7rem; font-weight:700; white-space:nowrap; }
 
 
+@keyframes termsNudge {
+                                    0%, 100% { transform: translateX(0); }
+                                    20%, 60% { transform: translateX(-4px); }
+                                    40%, 80% { transform: translateX(4px); }
+                                }
+                                .terms-nudge {
+                                    animation: termsNudge 0.4s ease;
+                                    outline: 2px solid #dc2626;
+                                    outline-offset: 2px;
+                                    border-radius: 6px;
+                                }
+
 /* Advertising on banner */
 
 .banner-cta {
@@ -4910,6 +4922,7 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
     display:none;
     }
 }
+
 
 /*
 @media (max-width: 768px) {
