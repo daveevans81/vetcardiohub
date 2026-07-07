@@ -1,6 +1,6 @@
 // sw.js — VetCardioHub offline shell
 // Bump CACHE_VERSION on every deployment that changes any listed file.
-const CACHE_VERSION = 'vch-v1.1';
+const CACHE_VERSION = 'vch-v1.11';
 
 const APP_SHELL = [
     '/health-tracker.html',
@@ -87,13 +87,3 @@ self.addEventListener('fetch', (e) => {
     );
 });
 
-navigator.serviceWorker.register('/sw.js').then(reg => {
-    reg.addEventListener('updatefound', () => {
-        const nw = reg.installing;
-        nw.addEventListener('statechange', () => {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-                // New version ready — show your own "Refresh for updates" toast
-            }
-        });
-    });
-});
