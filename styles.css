@@ -4927,6 +4927,16 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
                                     outline-offset: 2px;
                                     border-radius: 6px;
                                 }
+                                
+.med-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+@media (max-width: 520px) {
+    .med-form-grid { grid-template-columns: 1fr; }
+}
 
 /* Advertising on banner */
 
