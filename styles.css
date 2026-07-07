@@ -4905,7 +4905,7 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
     font-weight: 600;
 }
 
-@media (min-width:981px) {
+@media (max-width:768px) {
     .banner-cta {
     display:none;
     }
