@@ -422,7 +422,7 @@
                     <div style="overflow-y: auto; flex: 1; display: flex !important; flex-direction: column !important; gap: 8px;">
                         <template x-for="p in (backupPreview?.vch_patients || [])" :key="p.id">
                             <label style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; text-align: left;"
-                                   :style="backupSelection.includes(p.id) ? 'background:#f0f9ff; border-color:#0ea5e9;' : ''">
+                                   :style="backupSelection.includes(p.id) ? { background: '#f0f9ff', borderColor: '#0ea5e9' } : {}">
                                 <input type="checkbox" :checked="backupSelection.includes(p.id)"
                                        @change="toggleBackupSelection(p.id)" style="width: 16px; height: 16px; accent-color: #16325F;">
                                 <div>
@@ -574,9 +574,9 @@
                             <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-bottom: 20px;">
                                 <p style="font-size: 0.8rem; font-weight: bold; color: #475569; text-transform: uppercase; letter-spacing: 0.04em;">Setup takes about 2 minutes</p>
                                 <div style="display: flex !important; flex-direction: column !important; gap: 10px !important;">
-                                  <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">1</div><div class="text-sm text-muted"><strong>Register your pet</strong><br>Name, species, breed, DOB, weight</div></div>
-                                  <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">2</div><div class="text-sm text-muted"><strong>Cardiac history</strong><br>Diagnosis, murmur grade, ACVIM stage</div></div>
-                                  <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">3</div><div class="text-sm text-muted"><strong>Choose modules</strong><br>We'll recommend the right tools</div></div>
+                                  <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">1</div><div style="text-align: left" class="text-sm text-muted"><strong>Register your pet</strong><br>Name, species, breed, DOB, weight</div></div>
+                                  <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">2</div><div class="text-sm text-muted" style="text-align: left"><strong>Cardiac history</strong><br>Diagnosis, murmur grade, ACVIM stage</div></div>
+                                  <div style="display: flex; gap: 12px;"><div style="min-width: 24px; height: 24px; background: #16325F; color: white; border-radius: 50%;" class="flex-center font-bold">3</div><div class="text-sm text-muted" style="text-align: left"><strong>Choose modules</strong><br>We'll recommend the right tools</div></div>
                                 </div>
                               </div>
                           </div>
@@ -596,7 +596,7 @@
                                 </button>
                                 <label :style="`display: block; width: 100%; box-sizing: border-box; margin-top: 10px; padding: 12px; font-size: 0.9rem; font-weight: 500; text-align: center; background: #f1f5f9; color: #16325F; border: 1px solid #cbd5e1; border-radius: 8px; cursor: ${termsAgreed ? 'pointer' : 'not-allowed'}; opacity: ${termsAgreed ? 1 : 0.5};`">
                                     <i class="fa-solid fa-file-import"></i> Switched device? Import patient(s) from backup
-                                    <input type="file" accept=".json" @change="termsAgreed && importCompleteBackup($event)" style="display: none;">
+                                    <input type="file" accept=".json" :disabled="!termsAgreed" @change="termsAgreed && importCompleteBackup($event)" style="display: none;">
                                 </label>
                               <p style="font-size: 0.75rem; text-align: center; margin-top: 10px;" class="text-muted">You can add multiple patients and change settings later.</p>
                             </div>
