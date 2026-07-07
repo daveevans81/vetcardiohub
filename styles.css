@@ -4643,6 +4643,12 @@ button.btn-cancel:active,
     padding: 4px 0 !important;
 }
 
+    .onboarding-step-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
 /* Restores native rendering for both radios and checkboxes */
 .onboarding-label input[type="radio"],
 .onboarding-label input[type="checkbox"] {
