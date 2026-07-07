@@ -514,6 +514,8 @@ get formularyReviewedLabel() {
         return false;
     }
 },
+
+
 speciesIcon(patient) {
   if (!patient) return 'fa-paw';
   if (patient.species === 'dog') return 'fa-dog';
@@ -523,17 +525,17 @@ speciesIcon(patient) {
   const s = (patient.speciesOther || '').toLowerCase();
 
   const match = [
-    [/rabbit|bunny|lagomorph/,                'fa-rabbit'],
+    [/rabbit|bunny|lagomorph/,                'fa-carrot'],      // no free rabbit; carrot as thematic stand-in
     [/horse|pony|equine|foal|mare|stallion/,  'fa-horse'],
-    [/bird|budgie|parrot|cockatiel|canary|finch|dove|pigeon|chicken|hen|duck|goose|avian/, 'fa-feather'],
+    [/bird|budgie|parrot|cockatiel|canary|finch|dove|pigeon|chicken|hen|duck|goose|avian/, 'fa-dove'],  // fa-dove is free
     [/fish|goldfish|koi/,                      'fa-fish'],
     [/frog|toad|newt|amphibian/,               'fa-frog'],
-    [/snake|lizard|gecko|reptile|tortoise|turtle/, 'fa-worm'],   // no reptile icon in free set; fa-worm is the closest
+    [/snake|lizard|gecko|reptile|tortoise|turtle/, 'fa-worm'],
     [/ferret|weasel|stoat|mustelid/,           'fa-otter'],
     [/cow|cattle|calf|bovine|bull/,            'fa-cow'],
-    [/sheep|lamb|ewe|ram|goat/,                'fa-sheep'],
-    [/pig|hog|swine|piglet/,                   'fa-pig'],
-    [/hamster|gerbil|mouse|rat|guinea|rodent/, 'fa-paw'],        // no rodent icon; paw fallback
+    [/sheep|lamb|ewe|ram|goat/,                'fa-paw'],         // no free sheep/goat icon
+    [/pig|hog|swine|piglet/,                   'fa-paw'],         // no free pig icon
+    [/hamster|gerbil|mouse|rat|guinea|rodent/, 'fa-paw'],       // no rodent icon; paw fallback
   ].find(([re]) => re.test(s));
 
   return match ? match[1] : 'fa-paw';
