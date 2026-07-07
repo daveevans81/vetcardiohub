@@ -2036,7 +2036,7 @@
                                 </div>
                             </div> <!-- /vch-modal (supplement) -->
                             
-                            <div style="border-radius: 6px; border: 1px solid #c8d6eb; overflow: hidden; background: white;">
+                            <div style="border-radius: 6px; border: 1px solid #c8d6eb; overflow-x: auto; -webkit-overflow-scrolling: touch; background: white;">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
@@ -2086,7 +2086,7 @@
                                             </tr>
                                         </template>
                                         <tr x-show="medLedger.length === 0">
-                                            <td colspan="5" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
+                                            <td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
                                                 No pharmacologic history recorded.
                                             </td>
                                         </tr>
@@ -2099,7 +2099,7 @@
                                 <div style="font-weight: bold; color: #16325F; font-size: 0.9rem; margin-bottom: 8px;">
                                     <i class="fa-solid fa-seedling" style="color: #10b981;"></i> Supplement Log
                                 </div>
-                                <div style="border-radius: 6px; border: 1px solid #c8d6eb; overflow: hidden; background: white;">
+                                <div style="border-radius: 6px; border: 1px solid #c8d6eb; overflow-x: auto; -webkit-overflow-scrolling: touch; background: white;">
                                     <table class="data-table">
                                         <thead>
                                             <tr>
@@ -2460,7 +2460,9 @@
                                 <div style="font-size: 0.8rem; font-weight: 600; color: #0f766e; margin-bottom: 8px;">
                                     <i class="fa-solid fa-chart-line"></i> Weight Trend
                                 </div>
-                                <canvas x-ref="weightChartCanvas" style="max-height: 200px;"></canvas>
+                                <div style="position: relative; width: 100%; height: 200px;">
+                                    <canvas x-ref="weightChartCanvas"></canvas>
+                                </div>
                             </div>
                 
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -3773,7 +3775,9 @@
                                             return `${arrow} ${Math.abs(diff)} ${unit} over ${log.length} weigh-ins  |  Latest: ${latest} ${unit}`;
                                         })()"></span>
                                     </div>
-                                    <canvas x-ref="weightChartTrendsCanvas" style="max-height: 240px;"></canvas>
+                                    <div style="position: relative; width: 100%; height: 240px;">
+                                        <canvas x-ref="weightChartTrendsCanvas"></canvas>
+                                    </div>
                                 </div>
                             </template>
                             <div x-show="sortedWeightLog.length < 2" class="flex flex-col items-center justify-center h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
