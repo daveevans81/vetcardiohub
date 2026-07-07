@@ -3758,6 +3758,7 @@ input {
     padding: 25px;
     border-radius: 12px;
     max-height: 90vh;
+    max-height: 90dvh;
     display: flex;
     flex-direction: column;
 
