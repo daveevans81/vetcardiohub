@@ -1495,67 +1495,69 @@
                                         </button>
                                     </div>
                                     
-                                    <div x-show="showCoughForm" x-transition class="form-panel">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                            <strong style="color: #1e293b;">Data Entry</strong>
-                                            <input type="date" x-model="newCough.date" @change="loadCoughForDate()" class="form-input" style="width: auto; padding: 4px 8px; font-size: 0.85rem;">
-                                        </div>
-                                        
-                                        <label class="form-label">Approximate Frequency:</label>
-                                        <div style="display: flex; gap: 5px; margin-bottom: 12px; align-items: center;">
-                                            <input type="number" x-model="newCough.frequencyCount" placeholder="#" class="form-input" style="width: 60px; text-align: center;">
-                                            <span style="color: #64748b; font-size: 0.9rem;">times per</span>
-                                            <select x-model="newCough.frequencyPeriod" class="form-select" style="flex: 1;">
-                                                <option value="hour">Hour</option>
-                                                <option value="day">Day</option>
-                                                <option value="week">Week</option>
+                                    <div x-show="showCoughForm" x-cloak class="vch-modal">
+                                        <div class="form-panel vch-modal-card">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                                <strong style="color: #1e293b;">Data Entry</strong>
+                                                <input type="date" x-model="newCough.date" @change="loadCoughForDate()" class="form-input" style="width: auto; padding: 4px 8px; font-size: 0.85rem;">
+                                            </div>
+                                            
+                                            <label class="form-label">Approximate Frequency:</label>
+                                            <div style="display: flex; gap: 5px; margin-bottom: 12px; align-items: center;">
+                                                <input type="number" x-model="newCough.frequencyCount" placeholder="#" class="form-input" style="width: 60px; text-align: center;">
+                                                <span style="color: #64748b; font-size: 0.9rem;">times per</span>
+                                                <select x-model="newCough.frequencyPeriod" class="form-select" style="flex: 1;">
+                                                    <option value="hour">Hour</option>
+                                                    <option value="day">Day</option>
+                                                    <option value="week">Week</option>
+                                                </select>
+                                            </div>
+                    
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <label class="form-label">Description:</label>
+                                                <a href="#" @click.prevent="openGlossary('cough_types')" style="color: #3b82f6; text-decoration: none; font-size: 0.8rem; font-weight:bold;"><i class="fa-solid fa-circle-question"></i> Sound Guide</a>
+                                            </div>
+                                            <select x-model="newCough.description" class="form-select" style="margin-bottom: 12px;">
+                                                <option value="chesty/productive">Chesty / Productive</option>
+                                                <option value="goose honking">Goose Honking</option>
+                                                <option value="reverse sneezing">Reverse Sneezing</option>
+                                                <option value="expiratory reflex (gag)">Terminal Retch / Gagging</option>
+                                                <option value="dry/harsh">Dry / Harsh</option>
                                             </select>
-                                        </div>
-                
-                                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                            <label class="form-label">Description:</label>
-                                            <a href="#" @click.prevent="openGlossary('cough_types')" style="color: #3b82f6; text-decoration: none; font-size: 0.8rem; font-weight:bold;"><i class="fa-solid fa-circle-question"></i> Sound Guide</a>
-                                        </div>
-                                        <select x-model="newCough.description" class="form-select" style="margin-bottom: 12px;">
-                                            <option value="chesty/productive">Chesty / Productive</option>
-                                            <option value="goose honking">Goose Honking</option>
-                                            <option value="reverse sneezing">Reverse Sneezing</option>
-                                            <option value="expiratory reflex (gag)">Terminal Retch / Gagging</option>
-                                            <option value="dry/harsh">Dry / Harsh</option>
-                                        </select>
-                                        
-                                        <div class="grid-cols-2" style="margin-bottom: 12px;">
-                                            <div>
-                                                <label class="form-label">Severity:</label>
-                                                <select x-model="newCough.severity" class="form-select">
-                                                    <option value="Mild">Mild</option>
-                                                    <option value="Moderate">Moderate</option>
-                                                    <option value="Severe">Severe</option>
-                                                </select>
+                                            
+                                            <div class="grid-cols-2" style="margin-bottom: 12px;">
+                                                <div>
+                                                    <label class="form-label">Severity:</label>
+                                                    <select x-model="newCough.severity" class="form-select">
+                                                        <option value="Mild">Mild</option>
+                                                        <option value="Moderate">Moderate</option>
+                                                        <option value="Severe">Severe</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Main Trigger:</label>
+                                                    <select x-model="newCough.context" class="form-select">
+                                                        <option value="Resting/Night">Resting/Night</option>
+                                                        <option value="Excitement">Excitement</option>
+                                                        <option value="Exercise">Exercise</option>
+                                                        <option value="Post-Drinking">Post-Drinking</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label class="form-label">Main Trigger:</label>
-                                                <select x-model="newCough.context" class="form-select">
-                                                    <option value="Resting/Night">Resting/Night</option>
-                                                    <option value="Excitement">Excitement</option>
-                                                    <option value="Exercise">Exercise</option>
-                                                    <option value="Post-Drinking">Post-Drinking</option>
-                                                </select>
+                                            
+                                            <input type="text" x-model="newCough.notes" placeholder="Additional notes..." class="form-input" style="margin-bottom: 15px;">
+                                            
+                                            <div class="flex-gap-10">
+                                                <button @click="closeCoughForm()" class="btn-secondary">Cancel</button>
+                                                <button @click="saveCough()" class="btn-primary">
+                                                    <i class="fa-solid" :class="hasCoughForDate() ? 'fa-arrows-rotate' : 'fa-check'"></i> 
+                                                    <span x-text="hasCoughForDate() ? 'Update' : 'Save'"></span>
+                                                </button>
                                             </div>
-                                        </div>
-                                        
-                                        <input type="text" x-model="newCough.notes" placeholder="Additional notes..." class="form-input" style="margin-bottom: 15px;">
-                                        
-                                        <div class="flex-gap-10">
-                                            <button @click="closeCoughForm()" class="btn-secondary">Cancel</button>
-                                            <button @click="saveCough()" class="btn-primary">
-                                                <i class="fa-solid" :class="hasCoughForDate() ? 'fa-arrows-rotate' : 'fa-check'"></i> 
-                                                <span x-text="hasCoughForDate() ? 'Update' : 'Save'"></span>
-                                            </button>
                                         </div>
                                     </div>
                                     
-                                    <div x-show="!showCoughForm">
+                                    <div>
                                         <div x-show="sortedCoughLog.length === 0" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px 0;">No cough summaries logged.</div>
                                         <div style="max-height: 250px; overflow-y: auto;">
                                             <template x-for="c in sortedCoughLog" :key="c.id">
@@ -1587,43 +1589,45 @@
                                         </button>
                                     </div>
                                     
-                                    <div x-show="showActivityForm" x-transition class="form-panel">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                            <strong style="color: #1e293b;">Data Entry</strong>
-                                            <input type="date" x-model="newActivity.date" @change="loadActivityForDate()" class="form-input" style="width: auto; padding: 4px 8px; font-size: 0.85rem;">
-                                        </div>
-                                        
-                                        <label class="form-label">Energy Level / Status:</label>
-                                        <select x-model="newActivity.status" class="form-select" style="margin-bottom: 12px;">
-                                            <option value="Normal">Normal</option>
-                                            <option value="Reduced">Reduced (Tiring easier)</option>
-                                            <option value="Lethargic">Lethargic / Refusing walks</option>
-                                            <option value="Hyper">Hyper / Restless</option>
-                                        </select>
-                                        
-                                        <div class="grid-cols-2" style="margin-bottom: 12px;">
-                                            <div>
-                                                <label class="form-label">Duration (mins):</label>
-                                                <input type="number" x-model="newActivity.durationMins" placeholder="e.g. 45" class="form-input">
+                                    <div x-show="showActivityForm" x-cloak class="vch-modal">
+                                        <div class="form-panel vch-modal-card">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                                <strong style="color: #1e293b;">Data Entry</strong>
+                                                <input type="date" x-model="newActivity.date" @change="loadActivityForDate()" class="form-input" style="width: auto; padding: 4px 8px; font-size: 0.85rem;">
                                             </div>
-                                            <div>
-                                                <label class="form-label">Distance:</label>
-                                                <input type="text" x-model="newActivity.distance" placeholder="e.g. 2 miles" class="form-input">
+                                            
+                                            <label class="form-label">Energy Level / Status:</label>
+                                            <select x-model="newActivity.status" class="form-select" style="margin-bottom: 12px;">
+                                                <option value="Normal">Normal</option>
+                                                <option value="Reduced">Reduced (Tiring easier)</option>
+                                                <option value="Lethargic">Lethargic / Refusing walks</option>
+                                                <option value="Hyper">Hyper / Restless</option>
+                                            </select>
+                                            
+                                            <div class="grid-cols-2" style="margin-bottom: 12px;">
+                                                <div>
+                                                    <label class="form-label">Duration (mins):</label>
+                                                    <input type="number" x-model="newActivity.durationMins" placeholder="e.g. 45" class="form-input">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Distance:</label>
+                                                    <input type="text" x-model="newActivity.distance" placeholder="e.g. 2 miles" class="form-input">
+                                                </div>
                                             </div>
-                                        </div>
-                                        
-                                        <input type="text" x-model="newActivity.notes" placeholder="Notes (e.g., sat down 3 times on walk)" class="form-input" style="margin-bottom: 15px;">
-                                        
-                                        <div class="flex-gap-10">
-                                            <button @click="closeActivityForm()" class="btn-secondary">Cancel</button>
-                                            <button @click="saveActivity()" class="btn-primary">
-                                                <i class="fa-solid" :class="hasActivityForDate() ? 'fa-arrows-rotate' : 'fa-check'"></i> 
-                                                <span x-text="hasActivityForDate() ? 'Update' : 'Save'"></span>
-                                            </button>
+                                            
+                                            <input type="text" x-model="newActivity.notes" placeholder="Notes (e.g., sat down 3 times on walk)" class="form-input" style="margin-bottom: 15px;">
+                                            
+                                            <div class="flex-gap-10">
+                                                <button @click="closeActivityForm()" class="btn-secondary">Cancel</button>
+                                                <button @click="saveActivity()" class="btn-primary">
+                                                    <i class="fa-solid" :class="hasActivityForDate() ? 'fa-arrows-rotate' : 'fa-check'"></i> 
+                                                    <span x-text="hasActivityForDate() ? 'Update' : 'Save'"></span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                         
-                                    <div x-show="!showActivityForm">
+                                    <div>
                                         <div x-show="sortedActivityLog.length === 0" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px 0;">No activity summaries logged.</div>
                                         <div style="max-height: 250px; overflow-y: auto;">
                                             <template x-for="a in sortedActivityLog" :key="a.id">
@@ -1689,7 +1693,7 @@
                                 </button>
                             </div>
                             <div x-show="showMedForm" x-cloak class="vch-modal">
-                                <div class="form-panel vch-modal-card" style="border: none; margin-bottom: 0;">
+                                <div class="form-panel vch-modal-card" style="border: none;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px;">
                                         <h4 style="margin: 0; color: #16325F; font-size: 0.95rem;">Log Medication Change</h4>
                                         <button @click="showMedForm = false" type="button" style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">
@@ -1895,106 +1899,110 @@
                                 </button>
                             </div>
                     
-                            <div x-show="showCardiacForm" x-transition class="diagnosis-panel">
-                                <h4 style="margin-top: 0; color: #16325F; font-size: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
-                                    <i class="fa-solid fa-heart-pulse text-danger" style="margin-right: 5px;"></i> Primary Cardiac Status
-                                </h4>
-                                
-                                <div class="grid-cols-2" style="margin-bottom: 15px;">
-                                    <div>
-                                        <label class="form-label">Date of Diagnosis/Scan</label>
-                                        <input type="date" x-model="newDiagnosis.date" class="form-input">
+                            <div x-show="showCardiacForm" x-cloak class="vch-modal">
+                                <div class="diagnosis-panel vch-modal-card">
+                                    <h4 style="margin-top: 0; color: #16325F; font-size: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                                        <i class="fa-solid fa-heart-pulse text-danger" style="margin-right: 5px;"></i> Primary Cardiac Status
+                                    </h4>
+                                    
+                                    <div class="grid-cols-2" style="margin-bottom: 15px;">
+                                        <div>
+                                            <label class="form-label">Date of Diagnosis/Scan</label>
+                                            <input type="date" x-model="newDiagnosis.date" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label class="form-label">Primary Cardiac Diagnosis</label>
+                                            <select x-model="newDiagnosis.diagnosis" class="form-select">
+                                                <option value="">Select Diagnosis...</option>
+                                                <option value="MMVD">MMVD (Myxomatous Mitral Valve Disease)</option>
+                                                <option value="HCM">HCM (Hypertrophic Cardiomyopathy)</option>
+                                                <option value="DCM">DCM (Dilated Cardiomyopathy)</option>
+                                                <option value="Pulmonary Hypertension">Pulmonary Hypertension</option>
+                                                <option value="ARVC">Arrhythmogenic Right Ventricular Cardiomyopathy</option>
+                                                <option value="Congenital Defect">Congenital Defect (PDA, SAS, PS...)</option>
+                                                <option value="Murmur - no diagnosis">Murmur - pending echocardiogram</option>
+                                                <option value="Other">Other...</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label class="form-label">Primary Cardiac Diagnosis</label>
-                                        <select x-model="newDiagnosis.diagnosis" class="form-select">
-                                            <option value="">Select Diagnosis...</option>
-                                            <option value="MMVD">MMVD (Myxomatous Mitral Valve Disease)</option>
-                                            <option value="HCM">HCM (Hypertrophic Cardiomyopathy)</option>
-                                            <option value="DCM">DCM (Dilated Cardiomyopathy)</option>
-                                            <option value="Pulmonary Hypertension">Pulmonary Hypertension</option>
-                                            <option value="ARVC">Arrhythmogenic Right Ventricular Cardiomyopathy</option>
-                                            <option value="Congenital Defect">Congenital Defect (PDA, SAS, PS...)</option>
-                                            <option value="Murmur - no diagnosis">Murmur - pending echocardiogram</option>
-                                            <option value="Other">Other...</option>
+                        
+                                    <div x-show="newDiagnosis.diagnosis === 'Congenital Defect' || newDiagnosis.diagnosis === 'Other'" x-transition style="margin-bottom: 15px;">
+                                        <label class="form-label" style="color: #0284c7;">Specify Details</label>
+                                        <input type="text" x-model="newDiagnosis.customDiagnosis" placeholder="e.g. Subaortic Stenosis" class="form-input" style="border-color: #7dd3fc; background: #f0f9ff;">
+                                    </div>
+                        
+                                    <div x-transition class="alert-warning">
+                                        <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #b45309;">Track Murmur Grade (Levine Scale)</label>
+                                        <select x-model="newDiagnosis.murmurGrade" class="form-select" style="border-color: #fcd34d;">
+                                            <option value="N/A">Not Graded / Unknown</option>
+                                            <option value="0/6">No Murmur</option>
+                                            <option value="1/6">Grade I/VI (Very soft, requires quiet room)</option>
+                                            <option value="2/6">Grade II/VI (Soft, localized)</option>
+                                            <option value="3/6">Grade III/VI (Moderate intensity, easy to hear)</option>
+                                            <option value="4/6">Grade IV/VI (Loud, radiating, no palpable thrill)</option>
+                                            <option value="5/6">Grade V/VI (Very loud, palpable thrill)</option>
+                                            <option value="6/6">Grade VI/VI (Heard with stethoscope barely touching)</option>
                                         </select>
                                     </div>
+                                    
+                                    <div class="alert-info" x-show="isStagingApplicable">
+                                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">ACVIM Disease Stage</label>
+                                        <select x-model="newDiagnosis.acvimStage" class="form-select">
+                                            <option value="N/A">Unstaged / N/A</option>
+                                            <option value="Stage A">Stage A (At Risk)</option>
+                                            <option value="Stage B1">Stage B1 (Subclinical, No Remodeling)</option>
+                                            <option value="Stage B2">Stage B2 (Subclinical, Cardiomegaly)</option>
+                                            <option value="Stage C">Stage C (Current/Past Heart Failure)</option>
+                                            <option value="Stage D">Stage D (Refractory Heart Failure)</option>
+                                        </select>
+                                    </div>
+                        
+                                    <div>
+                                        <label class="form-label">Clinical Notes</label>
+                                        <textarea x-model="newDiagnosis.notes" placeholder="Any additional veterinary notes..." class="form-textarea"></textarea>
+                                    </div>
+                        
+                                    <div class="flex-gap-10" style="margin-top: 20px;">
+                                        <button @click="saveCardiacDiagnosis()" class="btn-primary" style="background: #0284c7;">
+                                            <i class="fa-solid fa-check"></i> Save Cardiac Status
+                                        </button>
+                                        <button @click="showCardiacForm = false" class="btn-secondary">Cancel</button>
+                                    </div>
                                 </div>
-                    
-                                <div x-show="newDiagnosis.diagnosis === 'Congenital Defect' || newDiagnosis.diagnosis === 'Other'" x-transition style="margin-bottom: 15px;">
-                                    <label class="form-label" style="color: #0284c7;">Specify Details</label>
-                                    <input type="text" x-model="newDiagnosis.customDiagnosis" placeholder="e.g. Subaortic Stenosis" class="form-input" style="border-color: #7dd3fc; background: #f0f9ff;">
-                                </div>
-                    
-                                <div x-transition class="alert-warning">
-                                    <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #b45309;">Track Murmur Grade (Levine Scale)</label>
-                                    <select x-model="newDiagnosis.murmurGrade" class="form-select" style="border-color: #fcd34d;">
-                                        <option value="N/A">Not Graded / Unknown</option>
-                                        <option value="0/6">No Murmur</option>
-                                        <option value="1/6">Grade I/VI (Very soft, requires quiet room)</option>
-                                        <option value="2/6">Grade II/VI (Soft, localized)</option>
-                                        <option value="3/6">Grade III/VI (Moderate intensity, easy to hear)</option>
-                                        <option value="4/6">Grade IV/VI (Loud, radiating, no palpable thrill)</option>
-                                        <option value="5/6">Grade V/VI (Very loud, palpable thrill)</option>
-                                        <option value="6/6">Grade VI/VI (Heard with stethoscope barely touching)</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="alert-info" x-show="isStagingApplicable">
-                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">ACVIM Disease Stage</label>
-                                    <select x-model="newDiagnosis.acvimStage" class="form-select">
-                                        <option value="N/A">Unstaged / N/A</option>
-                                        <option value="Stage A">Stage A (At Risk)</option>
-                                        <option value="Stage B1">Stage B1 (Subclinical, No Remodeling)</option>
-                                        <option value="Stage B2">Stage B2 (Subclinical, Cardiomegaly)</option>
-                                        <option value="Stage C">Stage C (Current/Past Heart Failure)</option>
-                                        <option value="Stage D">Stage D (Refractory Heart Failure)</option>
-                                    </select>
-                                </div>
-                    
-                                <div>
-                                    <label class="form-label">Clinical Notes</label>
-                                    <textarea x-model="newDiagnosis.notes" placeholder="Any additional veterinary notes..." class="form-textarea"></textarea>
-                                </div>
-                    
-                                <div class="flex-gap-10" style="margin-top: 20px;">
-                                    <button @click="saveCardiacDiagnosis()" class="btn-primary" style="background: #0284c7;">
-                                        <i class="fa-solid fa-check"></i> Save Cardiac Status
-                                    </button>
-                                    <button @click="showCardiacForm = false" class="btn-secondary">Cancel</button>
+                            </div>
+                            
+                            <div x-show="showConcurrentForm" x-cloak class="vch-modal">
+                                <div class="diagnosis-panel vch-modal-card" style="border-color: #bbf7d0;">
+                                    <h4 style="margin-top: 0; color: #14532d; font-size: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                                        <i class="fa-solid fa-notes-medical" style="color: #0d9488; margin-right: 5px;"></i> Concurrent Conditions
+                                    </h4>
+                                    
+                                    <div style="margin-bottom: 15px;">
+                                        <label class="form-label">Date Logged</label>
+                                        <input type="date" x-model="newDiagnosis.date" class="form-input">
+                                    </div>
+                        
+                                    <div style="margin-bottom: 15px;">
+                                        <label class="form-label">Non-Cardiac Diagnoses</label>
+                                        <textarea x-model="newConcurrentDiagnosis" placeholder="One condition per line, e.g.:&#10;Chronic Kidney Disease&#10;Osteoarthritis" class="form-textarea"></textarea>
+                                        <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">Enter each condition on a new line.</div>
+                                    </div>
+                        
+                                    <div>
+                                        <label class="form-label">Clinical Notes</label>
+                                        <textarea x-model="newDiagnosis.notes" placeholder="Notes regarding concurrent conditions..." class="form-textarea"></textarea>
+                                    </div>
+                        
+                                    <div class="flex-gap-10" style="margin-top: 20px;">
+                                        <button @click="saveConcurrentDiagnosis()" class="btn-primary" style="background: #0f766e;">
+                                            <i class="fa-solid fa-check"></i> Save Concurrent Issue
+                                        </button>
+                                        <button @click="showConcurrentForm = false" class="btn-secondary">Cancel</button>
+                                    </div>
                                 </div>
                             </div>
                     
-                            <div x-show="showConcurrentForm" x-transition class="diagnosis-panel" style="border-color: #bbf7d0;">
-                                <h4 style="margin-top: 0; color: #14532d; font-size: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
-                                    <i class="fa-solid fa-notes-medical" style="color: #0d9488; margin-right: 5px;"></i> Concurrent Conditions
-                                </h4>
-                                
-                                <div style="margin-bottom: 15px;">
-                                    <label class="form-label">Date Logged</label>
-                                    <input type="date" x-model="newDiagnosis.date" class="form-input">
-                                </div>
-                    
-                                <div style="margin-bottom: 15px;">
-                                    <label class="form-label">Non-Cardiac Diagnoses</label>
-                                    <textarea x-model="newConcurrentDiagnosis" placeholder="One condition per line, e.g.:&#10;Chronic Kidney Disease&#10;Osteoarthritis" class="form-textarea"></textarea>
-                                    <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">Enter each condition on a new line.</div>
-                                </div>
-                    
-                                <div>
-                                    <label class="form-label">Clinical Notes</label>
-                                    <textarea x-model="newDiagnosis.notes" placeholder="Notes regarding concurrent conditions..." class="form-textarea"></textarea>
-                                </div>
-                    
-                                <div class="flex-gap-10" style="margin-top: 20px;">
-                                    <button @click="saveConcurrentDiagnosis()" class="btn-primary" style="background: #0f766e;">
-                                        <i class="fa-solid fa-check"></i> Save Concurrent Issue
-                                    </button>
-                                    <button @click="showConcurrentForm = false" class="btn-secondary">Cancel</button>
-                                </div>
-                            </div>
-                    
-                            <div x-show="!showCardiacForm && !showConcurrentForm">
+                            <div>
                                 <template x-for="diag in sortedDiagnosisLog()" :key="diag.id">
                                     <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; position: relative;">
                                         <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 6px; font-weight: bold;" x-text="new Date(diag.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></div>
@@ -2265,91 +2273,93 @@
                                 </button>
                             </div>
                 
-                            <div x-show="showSyncopeForm" x-transition class="form-panel form-panel-danger">
-                                <h4 style="margin-top: 0; color: #7f1d1d; font-size: 0.95rem; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">Log Event Details</h4>
-                                
-                                <div class="grid-cols-3">
-                                    <div>
-                                        <label class="form-label">Date</label>
-                                        <input type="date" x-model="newSyncope.date" class="form-input">
-                                    </div>
-                                    <div>
-                                        <label class="form-label">Time</label>
-                                        <input type="time" x-model="newSyncope.time" class="form-input">
-                                    </div>
-                                    <div style="grid-column: span 2;">
-                                        <label class="form-label">What happened?</label>
-                                        <select x-model="newSyncope.type" class="form-select">
-                                            <option value="Unknown">Unknown Event (Collapse/Episode)</option>
-                                            <option value="Syncope">Suspected Syncope (Fainting)</option>
-                                            <option value="Seizure">Suspected Seizure</option>
-                                            <option value="Weakness">Hindlimb Weakness / Paresis</option>
-                                            <option value="Other">Other (Custom)</option>
-                                        </select>
-                                    </div>
+                            <div x-show="showSyncopeForm" x-cloak class="vch-modal">
+                                <div class="form-panel form-panel-danger vch-modal-card">
+                                    <h4 style="margin-top: 0; color: #7f1d1d; font-size: 0.95rem; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">Log Event Details</h4>
                                     
-                                    <div x-show="newSyncope.type === 'Other'" x-collapse style="grid-column: 1 / -1;">
-                                        <label class="form-label">Describe Event Type</label>
-                                        <input type="text" x-model="customEventType" placeholder="e.g., Vestibular episode" class="form-input">
-                                    </div>
-                
-                                    <div>
-                                        <label class="form-label">Est. Duration</label>
-                                        <input type="text" x-model="newSyncope.duration" placeholder="e.g. 30 secs" class="form-input">
-                                    </div>
-                                    <div>
-                                        <label class="form-label">Consciousness</label>
-                                        <select x-model="newSyncope.loc" class="form-select">
-                                            <option>Full Loss</option>
-                                            <option>Partial / Dazed</option>
-                                            <option>Maintained</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="form-label">Muscle Tone</label>
-                                        <select x-model="newSyncope.muscleTone" class="form-select">
-                                            <option>Flaccid (Limp)</option>
-                                            <option>Stiff / Rigid</option>
-                                            <option>Jerking / Twitching</option>
-                                            <option>Normal / Variable</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 5px;">
-                                         <div>
-                                            <label class="form-label">MM Colour</label>
-                                            <input type="text" x-model="newSyncope.mmColour" placeholder="Pale, Blue" class="form-input">
+                                    <div class="grid-cols-3">
+                                        <div>
+                                            <label class="form-label">Date</label>
+                                            <input type="date" x-model="newSyncope.date" class="form-input">
                                         </div>
-                                         <div>
-                                            <label class="form-label">HR (bpm)</label>
-                                            <input type="number" x-model="newSyncope.hr" placeholder="120" class="form-input">
+                                        <div>
+                                            <label class="form-label">Time</label>
+                                            <input type="time" x-model="newSyncope.time" class="form-input">
                                         </div>
-                                         <div>
-                                            <label class="form-label">RR (bpm)</label>
-                                            <input type="number" x-model="newSyncope.rr" placeholder="30" class="form-input">
+                                        <div style="grid-column: span 2;">
+                                            <label class="form-label">What happened?</label>
+                                            <select x-model="newSyncope.type" class="form-select">
+                                                <option value="Unknown">Unknown Event (Collapse/Episode)</option>
+                                                <option value="Syncope">Suspected Syncope (Fainting)</option>
+                                                <option value="Seizure">Suspected Seizure</option>
+                                                <option value="Weakness">Hindlimb Weakness / Paresis</option>
+                                                <option value="Other">Other (Custom)</option>
+                                            </select>
                                         </div>
-                                    </div>
+                                        
+                                        <div x-show="newSyncope.type === 'Other'" x-collapse style="grid-column: 1 / -1;">
+                                            <label class="form-label">Describe Event Type</label>
+                                            <input type="text" x-model="customEventType" placeholder="e.g., Vestibular episode" class="form-input">
+                                        </div>
                     
-                                    <div style="grid-column: 1 / -1;">
-                                        <label class="form-label">Activity at Time of Event</label>
-                                        <input type="text" x-model="newSyncope.activityBefore" placeholder="e.g., Playing in garden, waking up" class="form-input">
-                                    </div>
-                                    
-                                    <div style="grid-column: 1 / -1;">
-                                        <label class="form-label">Clinical Notes & Triggers</label>
-                                        <textarea x-model="newSyncope.notes" rows="3" placeholder="Did this happen during exercise? Coughing prior?" class="form-textarea"></textarea>
-                                    </div>
-                    
-                                    <div style="grid-column: 1 / -1; display: flex; gap: 10px;">
-                                        <button @click="saveSyncope()" type="button" class="btn-primary" style="background: #ef4444;">
-                                            <i class="fa-solid fa-check"></i> Save Event
-                                        </button>
-                                        <button @click="showSyncopeForm = false" type="button" class="btn-secondary">Cancel</button>
+                                        <div>
+                                            <label class="form-label">Est. Duration</label>
+                                            <input type="text" x-model="newSyncope.duration" placeholder="e.g. 30 secs" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label class="form-label">Consciousness</label>
+                                            <select x-model="newSyncope.loc" class="form-select">
+                                                <option>Full Loss</option>
+                                                <option>Partial / Dazed</option>
+                                                <option>Maintained</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="form-label">Muscle Tone</label>
+                                            <select x-model="newSyncope.muscleTone" class="form-select">
+                                                <option>Flaccid (Limp)</option>
+                                                <option>Stiff / Rigid</option>
+                                                <option>Jerking / Twitching</option>
+                                                <option>Normal / Variable</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 5px;">
+                                             <div>
+                                                <label class="form-label">MM Colour</label>
+                                                <input type="text" x-model="newSyncope.mmColour" placeholder="Pale, Blue" class="form-input">
+                                            </div>
+                                             <div>
+                                                <label class="form-label">HR (bpm)</label>
+                                                <input type="number" x-model="newSyncope.hr" placeholder="120" class="form-input">
+                                            </div>
+                                             <div>
+                                                <label class="form-label">RR (bpm)</label>
+                                                <input type="number" x-model="newSyncope.rr" placeholder="30" class="form-input">
+                                            </div>
+                                        </div>
+                        
+                                        <div style="grid-column: 1 / -1;">
+                                            <label class="form-label">Activity at Time of Event</label>
+                                            <input type="text" x-model="newSyncope.activityBefore" placeholder="e.g., Playing in garden, waking up" class="form-input">
+                                        </div>
+                                        
+                                        <div style="grid-column: 1 / -1;">
+                                            <label class="form-label">Clinical Notes & Triggers</label>
+                                            <textarea x-model="newSyncope.notes" rows="3" placeholder="Did this happen during exercise? Coughing prior?" class="form-textarea"></textarea>
+                                        </div>
+                        
+                                        <div style="grid-column: 1 / -1; display: flex; gap: 10px;">
+                                            <button @click="saveSyncope()" type="button" class="btn-primary" style="background: #ef4444;">
+                                                <i class="fa-solid fa-check"></i> Save Event
+                                            </button>
+                                            <button @click="showSyncopeForm = false" type="button" class="btn-secondary">Cancel</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div x-show="!showSyncopeForm">
+                            <div>
                                 <template x-for="event in sortedSyncopeLog()" :key="event.id">
                                     <div class="log-entry log-entry-danger">
                                         <div style="width: 100%;">
@@ -2414,10 +2424,9 @@
                             </button>
                         </div>
                         
-                        <div x-show="showVaccinationForm"  x-transition x-cloak class="vch-modal">
-                            <div class="diagnosis-panel">
-                                <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white" style="background: #fff; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-                width: 100%; max-width: 32rem; overflow: hidden;">
+                        <div x-show="showVaccinationForm" x-cloak class="vch-modal">
+                            <div class="vch-modal-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #e2e8f0;">
                                     <h3 class="font-bold text-lg" x-text="editingVaccineId ? 'Edit Vaccination' : 'Log Vaccination'"></h3>
                                     
                                 </div>
