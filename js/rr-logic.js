@@ -706,6 +706,12 @@ startNewPatientOnboarding() {
     this.showOnboarding = true;
 },
 
+// State for Backup Export / Import UI
+        exportPatientId: 'all',
+        showBackupImportModal: false,
+        backupPreview: null,      // parsed backup file awaiting confirmation
+        backupSelection: [],      // patient IDs ticked for import
+
 generateModuleRecommendations() {
     // Reset to baseline
     let recs = { srr: false, medications: false, coughLog: false, activityLog: false, syncopeLog: false, acvimStaging: false, vaccinations: true, weightDiet: true, antiparasitics: true };
@@ -985,7 +991,16 @@ mergePatients(targetId, sourceId) {
             this.vaccinationLog = this.vaccinationLog.map(v => v.patientId === sourceId ? { ...v, patientId: targetId } : v);
             this.antiparasiticLog = this.antiparasiticLog.map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
 
-
+            // Dedupe identical SRR readings created by merging an imported copy
+            const seen = new Set();
+            this.srrHistory = this.srrHistory.filter(s => {
+                if (s.patientId !== targetId) return true;
+                const sig = `${s.date}|${s.rate}`;
+                if (seen.has(sig)) return false;
+                seen.add(sig);
+                return true;
+            });
+            
             // Delete Source Patient
             this.patients = this.patients.filter(p => p.id !== sourceId);
 
@@ -5522,25 +5537,31 @@ importDiagnosisCSV(event) {
 
         // --- FULL SYSTEM MASTER BACKUP (JSON) ---
         
-exportCompleteBackup() {
-const backupData = {
-                vch_patients: this.patients,
-                vch_weightLog: this.weightLog,
-                vch_srrHistory: this.srrHistory,
-                vch_medLedger: this.medLedger,
-                vch_diagnosisLog: this.diagnosisLog,
-                vch_syncopeLog: this.syncopeLog,
-                vch_coughLog: this.coughLog,
-                vch_activityLog: this.activityLog,
-                vch_vaccinationLog: this.vaccinationLog,
-                vch_antiparasiticLog: this.antiparasiticLog,
-                exportDate: new Date().toISOString()
-            };
+exportCompleteBackup(patientId = null) {
+    const scoped = arr => patientId ? (arr || []).filter(e => e.patientId === patientId) : (arr || []);
+    const patients = patientId ? this.patients.filter(p => p.id === patientId) : this.patients;
+    if (patientId && patients.length === 0) return alert("Patient not found.");
 
+    const backupData = {
+        vch_patients: patients,
+        vch_weightLog: scoped(this.weightLog),
+        vch_srrHistory: scoped(this.srrHistory),
+        vch_medLedger: scoped(this.medLedger),
+        vch_diagnosisLog: scoped(this.diagnosisLog),
+        vch_syncopeLog: scoped(this.syncopeLog),
+        vch_coughLog: scoped(this.coughLog),
+        vch_activityLog: scoped(this.activityLog),
+        vch_vaccinationLog: scoped(this.vaccinationLog),
+        vch_antiparasiticLog: scoped(this.antiparasiticLog),
+        exportDate: new Date().toISOString(),
+        exportScope: patientId ? 'single' : 'all'
+    };
+
+    const label = patientId ? patients[0].name.replace(/[^a-z0-9]/gi, '') : 'Master';
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
     const link = document.createElement("a");
     link.setAttribute("href", dataStr);
-    link.setAttribute("download", `VCH_MasterBackup_${new Date().toISOString().split('T')[0]}.json`);
+    link.setAttribute("download", `VCH_${label}Backup_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -5550,48 +5571,17 @@ const backupData = {
 importCompleteBackup(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
             const data = JSON.parse(e.target.result);
-            
-            // Check for the NEW keys matching your export
-            if (
-    Array.isArray(data.vch_patients) &&
-    Array.isArray(data.vch_srrHistory) &&
-    Array.isArray(data.vch_medLedger)
-) {
-                if (confirm("This will replace all current data with the backup file. Proceed?")) {
-                    this.patients = data.vch_patients;
-                    // Backfill module flags for legacy / restored profiles
-                    this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
-                    this.srrHistory = data.vch_srrHistory;
-                    this.medLedger = data.vch_medLedger;
-                    this.diagnosisLog = data.vch_diagnosisLog || [];
-                    this.syncopeLog = data.vch_syncopeLog || [];
-                    this.coughLog = data.vch_coughLog || [];
-                    this.activityLog = data.vch_activityLog || [];
-                    this.weightLog = data.vch_weightLog || [];
-                    this.vaccinationLog = data.vch_vaccinationLog || [];
-                    this.antiparasiticLog = data.vch_antiparasiticLog || [];
-
-                    this.saveToStorage('vch_patients', this.patients);
-                    this.saveToStorage('vch_srrHistory', this.srrHistory);
-                    this.saveToStorage('vch_medLedger', this.medLedger);
-                    this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
-                    this.saveToStorage('vch_syncopeLog', this.syncopeLog);
-                    this.saveToStorage('vch_coughLog', this.coughLog);
-                    this.saveToStorage('vch_activityLog', this.activityLog);
-                    this.saveToStorage('vch_weightLog', this.weightLog);
-                    this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
-                    this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
-                    
-
-                    if (this.patients.length > 0) this.activePatientId = this.patients[0].id; 
-                    this.currentPage = 1;
-                    this.$nextTick(() => { this.renderChart(); this.renderMedChart(); });
-                    alert("Master Backup successfully restored!");
+            if (Array.isArray(data.vch_patients) && Array.isArray(data.vch_srrHistory) && Array.isArray(data.vch_medLedger)) {
+                if (data.vch_patients.length === 0) {
+                    alert("This backup file contains no patient profiles.");
+                } else {
+                    this.backupPreview = data;
+                    this.backupSelection = data.vch_patients.map(p => p.id); // all selected by default
+                    this.showBackupImportModal = true;
                 }
             } else {
                 alert(
@@ -5607,6 +5597,88 @@ importCompleteBackup(event) {
         event.target.value = '';
     };
     reader.readAsText(file);
+},
+
+// Entry counts shown in the import preview list
+backupLogCount(pid) {
+    const d = this.backupPreview;
+    if (!d) return 0;
+    return ['vch_srrHistory', 'vch_medLedger', 'vch_diagnosisLog', 'vch_syncopeLog',
+            'vch_coughLog', 'vch_activityLog', 'vch_weightLog', 'vch_vaccinationLog',
+            'vch_antiparasiticLog']
+        .reduce((n, k) => n + (d[k] || []).filter(e => e.patientId === pid).length, 0);
+},
+
+toggleBackupSelection(pid) {
+    this.backupSelection = this.backupSelection.includes(pid)
+        ? this.backupSelection.filter(x => x !== pid)
+        : [...this.backupSelection, pid];
+},
+
+confirmBackupImport() {
+    const data = this.backupPreview;
+    if (!data || this.backupSelection.length === 0) return alert("Please select at least one patient to import.");
+
+    const idMap = {};        // original ID -> local ID (re-issued on collision)
+    const dupePrompts = [];  // likely duplicates for optional merge
+    const importedNames = [];
+
+    data.vch_patients.forEach(p => {
+        if (!this.backupSelection.includes(p.id)) return;
+        const incoming = { ...p, modules: { ...this.defaultModules, ...(p.modules || {}) } };
+
+        // Never overwrite: re-issue the UUID if it already exists locally
+        idMap[p.id] = this.patients.some(x => x.id === p.id) ? this.generateId() : p.id;
+        incoming.id = idMap[p.id];
+
+        // Flag likely duplicates (same name + species) for a post-import merge offer
+        const twin = this.patients.find(x =>
+            (x.name || '').trim().toLowerCase() === (incoming.name || '').trim().toLowerCase() &&
+            x.species === incoming.species
+        );
+        if (twin) dupePrompts.push({ importedId: incoming.id, existingId: twin.id, name: incoming.name });
+
+        this.patients.push(incoming);
+        importedNames.push(incoming.name);
+    });
+
+    // Append log entries for selected patients — fresh entry IDs, remapped patient IDs
+    const logKeys = ['weightLog', 'srrHistory', 'medLedger', 'diagnosisLog', 'syncopeLog',
+                     'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog'];
+    logKeys.forEach(key => {
+        const incoming = (data['vch_' + key] || [])
+            .filter(e => idMap[e.patientId] !== undefined)
+            .map(e => ({ ...e, id: this.generateId(), patientId: idMap[e.patientId] }));
+        this[key] = this[key].concat(incoming);
+        if (key === 'diagnosisLog') this[key].sort((a, b) => new Date(b.date) - new Date(a.date));
+        this.saveToStorage('vch_' + key, this[key]);
+    });
+    this.saveToStorage('vch_patients', this.patients);
+
+    this.showBackupImportModal = false;
+    this.backupPreview = null;
+    this.activePatientId = Object.values(idMap)[0];
+    this.currentPage = 1;
+    if (this.showOnboarding) this.showOnboarding = false;  // device-switch onboarding path
+    this.$nextTick(() => { this.renderChart(); this.renderMedChart(); });
+
+    alert(`Imported ${importedNames.length} patient(s): ${importedNames.join(', ')}.`);
+
+    // Offer merge via the existing patient manager
+    if (dupePrompts.length > 0) {
+        const d = dupePrompts[0];
+        if (confirm(`"${d.name}" appears to already exist on this device.\n\nOpen the patient editor to review and merge the two profiles?`)) {
+            this.openPatientManager(false, d.importedId);
+            this.showMergeTools = true;
+            this.mergeTargetId = d.existingId;
+        }
+    }
+},
+
+cancelBackupImport() {
+    this.showBackupImportModal = false;
+    this.backupPreview = null;
+    this.backupSelection = [];
 },
 
         

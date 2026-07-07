@@ -411,6 +411,35 @@
                 <div id="privacy-content" style="overflow-y:auto;padding-top:12px;">Loading…</div>
               </div>
             </div>
+            
+                    <!-- Backup Import Preview Modal -->
+            <div x-show="showBackupImportModal" class="modal-overlay" style="background: rgba(0,0,0,0.7); z-index: 10000;" x-cloak>
+                <div class="onboarding-modal-inner" style="max-width: 460px; max-height: 85vh; display: flex; flex-direction: column;">
+                    <h3 style="color: #16325F; margin: 0 0 4px;"><i class="fa-solid fa-file-import"></i> Import from Backup</h3>
+                    <p class="text-sm text-muted" style="margin: 0 0 12px;">
+                        Select the patient profiles to add to this device. Existing records will not be overwritten.
+                    </p>
+                    <div style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                        <template x-for="p in (backupPreview?.vch_patients || [])" :key="p.id">
+                            <label style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; text-align: left;"
+                                   :style="backupSelection.includes(p.id) ? 'background:#f0f9ff; border-color:#0ea5e9;' : ''">
+                                <input type="checkbox" :checked="backupSelection.includes(p.id)"
+                                       @change="toggleBackupSelection(p.id)" style="width: 16px; height: 16px; accent-color: #16325F;">
+                                <div>
+                                    <div style="font-weight: bold; color: #0f172a;" x-text="p.name"></div>
+                                    <div style="font-size: 0.75rem; color: #64748b;"
+                                         x-text="`${p.species === 'cat' ? 'Feline' : 'Canine'} · ${p.breed || 'Breed n/a'} · ${backupLogCount(p.id)} log entries`"></div>
+                                </div>
+                            </label>
+                        </template>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; flex-shrink: 0;">
+                        <button @click="cancelBackupImport()" class="btn btn-cancel">Cancel</button>
+                        <button @click="confirmBackupImport()" class="btn btn-primary" :disabled="backupSelection.length === 0"
+                                x-text="`Import ${backupSelection.length} Patient(s)`"></button>
+                    </div>
+                </div>
+            </div>
                                 <!-- ******************************** -->
                                 <!-- ON BOARDING                      -->
                                 <!-- ******************************** -->
@@ -565,6 +594,11 @@
                                         class="btn btn-primary w-full" style="padding: 15px; font-size: 1rem;">
                                   <i class="fa-solid fa-paw"></i> Set up my first patient
                                 </button>
+                                <label class="btn w-full" :class="termsAgreed ? '' : 'disabled'"
+                                       :style="`display: block; margin-top: 10px; padding: 12px; font-size: 0.9rem; text-align: center; background: #f1f5f9; color: #16325F; border: 1px solid #cbd5e1; border-radius: 8px; cursor: ${termsAgreed ? 'pointer' : 'not-allowed'}; opacity: ${termsAgreed ? 1 : 0.5};`">
+                                    <i class="fa-solid fa-file-import"></i> Switched device? Import patient(s) from backup
+                                    <input type="file" accept=".json" @change="termsAgreed && importCompleteBackup($event)" style="display: none;">
+                                </label>
                               <p style="font-size: 0.75rem; text-align: center; margin-top: 10px;" class="text-muted">You can add multiple patients and change settings later.</p>
                             </div>
                         </div>
@@ -3780,14 +3814,21 @@
                                         <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('system_backup')"></i></h4>
                                         <p style="margin: 0; font-size: 0.75rem; color: #64748b;">Backups everything: Patients, Breathing, and Medications.</p>
                                     </div>
-                                    <div style="display: flex !important; flex-wrap: wrap !important; gap: 10px !important;">
-                                        <button @click="exportCompleteBackup()" class="btn-nudge-static"
+                                    <div style="display: flex !important; flex-wrap: wrap !important; gap: 10px !important; align-items: center;">
+                                        <select x-model="exportPatientId"
+                                                style="font-size: 0.8rem; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;">
+                                            <option value="all">All patients</option>
+                                            <template x-for="p in patients" :key="p.id">
+                                                <option :value="p.id" x-text="p.name + ' only'"></option>
+                                            </template>
+                                        </select>
+                                        <button @click="exportCompleteBackup(exportPatientId === 'all' ? null : exportPatientId)" class="btn-nudge-static"
                                                 style="background: #334155; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
                                             Download Backup
                                         </button>
                                         <label class="btn-nudge-static"
                                                style="background: #475569; font-size: 0.85rem; padding: 8px 12px; cursor: pointer; text-align: center; flex: 0 0 auto !important; width: auto !important;">
-                                            Restore Backup
+                                            Import Backup
                                             <input type="file" accept=".json" @change="importCompleteBackup" style="display: none;">
                                         </label>
                                         <button @click="resetData()" class="btn-nudge-static"
@@ -3820,7 +3861,7 @@
          <aside class="vch-extras">
 
              <div class="card" style="margin-top:16px">
-                  <h2>SRR FAQ &amp; Clinical Guidance</h2>
+                  <h2>APP FAQ &amp; Clinical Guidance</h2>
                 
                   <div class="faq-item"><details>
                     <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is a normal resting respiratory rate for a dog or cat?</summary>
