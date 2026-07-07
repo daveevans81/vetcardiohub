@@ -1771,7 +1771,7 @@
                             <div x-show="showMedForm" x-cloak class="vch-modal">
                                 <div class="form-panel vch-modal-card" style="border: none;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px;">
-                                        <h4 style="margin: 0; color: #16325F; font-size: 0.95rem;">Log Medication Change</h4>
+                                        <h4 style="margin: 0; color: #16325F; font-size: 0.95rem;" x-text="editingMedId ? 'Edit Medication Entry' : 'Log Medication Change'"></h4>
                                         <button @click="showMedForm = false" type="button" style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">
                                             <i class="fa-solid fa-xmark"></i>
                                         </button>
@@ -1862,7 +1862,7 @@
                                         </div>
                                         <div  class="flex-gap-10" style="display: flex; gap: 8px;">
                                             
-                                            <button @click="showMedForm = false" type="button" class="btn-cancel" style="margin-bottom: 12px;">
+                                            <button @click="showMedForm = false; editingMedId = null" type="button" class="btn-cancel" style="margin-bottom: 12px;">
                                                 <i class="fa-solid fa-xmark"></i> Cancel
                                             </button>
                                             <button @click="addMedication()" type="button" class="btn-add-blue" style="padding-top:10px;">
@@ -1891,7 +1891,7 @@
                             <div x-show="showSuppForm" x-cloak class="vch-modal">
                                 <div class="form-panel vch-modal-card" style="border: none;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px;">
-                                        <h4 style="margin: 0; color: #16325F; font-size: 0.95rem;">Log Supplement Change</h4>
+                                        <h4 style="margin: 0; color: #16325F; font-size: 0.95rem;" x-text="editingSuppId ? 'Edit Supplement Entry' : 'Log Supplement Change'"></h4>
                                         <button @click="showSuppForm = false" type="button" style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">
                                             <i class="fa-solid fa-xmark"></i>
                                         </button>
@@ -1934,6 +1934,26 @@
                                                             </label>
                                                         </template>
                                                     </div>
+                                                    <label class="form-label" style="margin-top: 10px;">Other active ingredients (not listed above)</label>
+                                                    <div style="display: flex; gap: 6px;">
+                                                        <input type="text" x-model="newSuppExtraDraft" list="vchExtraIngredients" placeholder="e.g., Turmeric" class="form-input" style="flex: 1;" @keydown.enter.prevent="addCustomIngredient()">
+                                                        <button type="button" @click="addCustomIngredient()" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">
+                                                            <i class="fa-solid fa-plus"></i> Add
+                                                        </button>
+                                                    </div>
+                                                    <datalist id="vchExtraIngredients">
+                                                        <template x-for="name in knownCustomIngredients()" :key="name">
+                                                            <option :value="name"></option>
+                                                        </template>
+                                                    </datalist>
+                                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                                                        <template x-for="(name, idx) in newSupp.customExtras" :key="name">
+                                                            <span style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                                                                <span x-text="name"></span>
+                                                                <i class="fa-solid fa-xmark" style="cursor: pointer; color: #94a3b8;" @click="newSupp.customExtras.splice(idx, 1)"></i>
+                                                            </span>
+                                                        </template>
+                                                    </div>
                                                 </div>
                                             </template>
                                             <template x-if="newSupp.productId && newSupp.productId !== 'other'">
@@ -1941,8 +1961,8 @@
                                                     <label class="form-label">Contains</label>
                                                     <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                                                         <template x-for="cid in newSuppConstituentIds()" :key="cid">
-                                                            <span :style="`background: ${suppConstituents[cid]?.color}18; color: ${suppConstituents[cid]?.color}; border: 1px solid ${suppConstituents[cid]?.color}55; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600;`"
-                                                                  x-text="suppConstituents[cid]?.label || cid"></span>
+                                                            <span :style="`background: ${suppConstituentColor(cid)}18; color: ${suppConstituentColor(cid)}; border: 1px solid ${suppConstituentColor(cid)}55; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600;`"
+                                                                  x-text="suppConstituentLabel(cid)"></span>
                                                         </template>
                                                     </div>
                                                     <template x-if="suppFormulary[newSupp.productId]?.note">
@@ -2005,7 +2025,7 @@
                                             </div>
                                         </template>
                                         <div class="flex-gap-10" style="display: flex; gap: 8px;">
-                                            <button @click="showSuppForm = false" type="button" class="btn-cancel" style="margin-bottom: 12px;">
+                                            <button @click="showSuppForm = false; editingSuppId = null" type="button" class="btn-cancel" style="margin-bottom: 12px;">
                                                 <i class="fa-solid fa-xmark"></i> Cancel
                                             </button>
                                             <button @click="addSupplement()" type="button" class="btn-add-blue" style="padding-top: 10px;">
@@ -2055,8 +2075,11 @@
                                                         <span class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
                                                     </template>
                                                 </td>
-                                                <td style="text-align: right;">
-                                                    <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+                                                <td style="text-align: right; white-space: nowrap;">
+                                                    <button @click="editMedication(med.id)" style="background: none; border: none; color: #0ea5e9; cursor: pointer; padding: 4px;" title="Edit entry">
+                                                        <i class="fa-solid fa-pen-to-square"></i>
+                                                    </button>
+                                                    <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;" title="Delete entry">
                                                         <i class="fa-solid fa-trash-can"></i>
                                                     </button>
                                                 </td>
@@ -2112,8 +2135,11 @@
                                                         <span x-show="!supp.isStopped && !supp.doseLabel" class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
                                                         <span x-show="supp.isStopped" class="text-muted" style="font-style: italic;">Discontinued</span>
                                                     </td>
-                                                    <td style="text-align: right;">
-                                                        <button @click="deleteSupplement(supp.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+                                                    <td style="text-align: right; white-space: nowrap;">
+                                                        <button @click="editSupplement(supp.id)" style="background: none; border: none; color: #0ea5e9; cursor: pointer; padding: 4px;" title="Edit entry">
+                                                            <i class="fa-solid fa-pen-to-square"></i>
+                                                        </button>
+                                                        <button @click="deleteSupplement(supp.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;" title="Delete entry">
                                                             <i class="fa-solid fa-trash-can"></i>
                                                         </button>
                                                     </td>

@@ -308,7 +308,7 @@ showMeanRef: true,
 weightChartRenderTimeout: null,
         
         // Medication Module State
- 
+ editingMedId: null,   // non-null → med modal is editing this entry
 showMedLog: false, // Accordion toggle state
 showMedForm: false, // Overlay form visibility
 formulary: VET_FORMULARY, // Expose the global object to Alpine
@@ -329,6 +329,7 @@ newMed: {
 suppLedger: [],  // Array of supplement events (mirrors medLedger, dose optional)
 // Supplement Module State
 showSuppForm: false,
+editingSuppId: null,  // non-null → supplement modal is editing this entry
 suppFormulary: SUPPLEMENT_FORMULARY,
 suppConstituents: SUPPLEMENT_CONSTITUENTS,
 newSupp: {
@@ -336,11 +337,13 @@ newSupp: {
     productId: '',
     customName: '',
     customConstituents: [],
+    customExtras: [],
     isStopped: false,
     doseAmount: '',
     doseUnit: 'tablet(s)',
     frequency: 'q24h'
 },
+newSuppExtraDraft: '',
 
 
         // Medication Chart State
@@ -3132,6 +3135,7 @@ closeResult() {
         },
         
 openMedForm() {
+    this.editingMedId = null;
     this.newMed = {
         eventDate: new Date().toISOString().split('T')[0],
         drugId: '', customName: '', isStopped: false,
@@ -3141,6 +3145,26 @@ openMedForm() {
         tabletsInStock: '',
         stockDate: new Date().toISOString().split('T')[0]
     };
+    this.showMedForm = true;
+},
+editMedication(id) {
+    const m = this.medLedger.find(x => x.id === id);
+    if (!m) return;
+    this.newMed = {
+        eventDate: m.eventDate,
+        drugId: m.drugId,
+        customName: m.customName || '',
+        isStopped: !!m.isStopped,
+        openedDate: m.openedDate || '',
+        discardDays: m.discardDays != null ? m.discardDays : '',
+        form: m.form || 'tablet',
+        tabletStrengthMg: m.tabletStrengthMg != null ? m.tabletStrengthMg : '',
+        tabletsPerDose: m.tabletsPerDose != null ? m.tabletsPerDose : '',
+        frequency: m.frequency || 'q12h',
+        tabletsInStock: m.tabletsInStock != null ? m.tabletsInStock : '',
+        stockDate: m.stockDate || m.eventDate
+    };
+    this.editingMedId = id;
     this.showMedForm = true;
 },
 
@@ -3173,7 +3197,18 @@ addMedication() {
         stockDate:      this.newMed.isStopped ? null : (this.newMed.stockDate || this.newMed.eventDate),
     };
 
-    this.medLedger.push(entry);
+    if (this.editingMedId) {
+        const idx = this.medLedger.findIndex(m => m.id === this.editingMedId);
+        if (idx !== -1) {
+            entry.id = this.editingMedId;
+            entry.patientId = this.medLedger[idx].patientId;
+            this.medLedger.splice(idx, 1, entry);
+        }
+        this.editingMedId = null;
+    } else {
+        this.medLedger.push(entry);
+    }
+    
     this.saveToStorage('vch_medLedger', this.medLedger);
     this.renderMedChart();
 
@@ -3401,14 +3436,24 @@ suppDisplayName(s) {
 
 // Constituent ids for a ledger entry (product mapping, or manual ticks for custom)
 suppConstituentIdsFor(s) {
-    if (s.productId === 'other') return Array.isArray(s.customConstituents) ? s.customConstituents : [];
+    if (s.productId === 'other') {
+        const ticked = Array.isArray(s.customConstituents) ? s.customConstituents : [];
+        const extras = (Array.isArray(s.customExtras) ? s.customExtras : [])
+            .map(n => 'custom:' + n.toLowerCase());
+        return [...ticked, ...extras];
+    }
     return this.suppFormulary[s.productId]?.constituents || [];
 },
 
 // Constituent ids for the entry currently being drafted in the form
 newSuppConstituentIds() {
     if (!this.newSupp.productId) return [];
-    if (this.newSupp.productId === 'other') return this.newSupp.customConstituents;
+    if (this.newSupp.productId === 'other') {
+        return [
+            ...this.newSupp.customConstituents,
+            ...this.newSupp.customExtras.map(n => 'custom:' + n.toLowerCase())
+        ];
+    }
     return this.suppFormulary[this.newSupp.productId]?.constituents || [];
 },
 
@@ -3435,11 +3480,30 @@ supplementOptions() {
 },
 
 openSuppForm() {
+    this.editingSuppId = null;
     this.newSupp = {
         eventDate: new Date().toISOString().split('T')[0],
-        productId: '', customName: '', customConstituents: [],
+        productId: '', customName: '', customConstituents: [], customExtras: [],
         isStopped: false, doseAmount: '', doseUnit: 'tablet(s)', frequency: 'q24h'
     };
+    this.showSuppForm = true;
+},
+
+editSupplement(id) {
+    const s = this.suppLedger.find(x => x.id === id);
+    if (!s) return;
+    this.newSupp = {
+        eventDate: s.eventDate,
+        productId: s.productId,
+        customName: s.customName || '',
+        customConstituents: Array.isArray(s.customConstituents) ? [...s.customConstituents] : [],
+        customExtras: Array.isArray(s.customExtras) ? [...s.customExtras] : [],
+        isStopped: !!s.isStopped,
+        doseAmount: s.doseAmount != null ? s.doseAmount : '',
+        doseUnit: s.doseUnit || 'tablet(s)',
+        frequency: s.frequency || 'q24h'
+    };
+    this.editingSuppId = id;
     this.showSuppForm = true;
 },
 
@@ -3457,13 +3521,25 @@ addSupplement() {
         productId: this.newSupp.productId,
         customName: this.newSupp.productId === 'other' ? this.newSupp.customName.trim() : null,
         customConstituents: this.newSupp.productId === 'other' ? [...this.newSupp.customConstituents] : null,
+        customExtras: this.newSupp.productId === 'other' ? [...this.newSupp.customExtras] : null,
         isStopped: this.newSupp.isStopped,
         doseAmount: this.newSupp.isStopped ? null : (this.newSupp.doseAmount === '' ? null : this.newSupp.doseAmount),
         doseUnit:   this.newSupp.isStopped ? null : this.newSupp.doseUnit,
         frequency:  this.newSupp.isStopped ? null : this.newSupp.frequency
     };
 
-    this.suppLedger.push(entry);
+    if (this.editingSuppId) {
+        const idx = this.suppLedger.findIndex(s => s.id === this.editingSuppId);
+        if (idx !== -1) {
+            entry.id = this.editingSuppId;
+            entry.patientId = this.suppLedger[idx].patientId;
+            this.suppLedger.splice(idx, 1, entry);
+        }
+        this.editingSuppId = null;
+    } else {
+        this.suppLedger.push(entry);
+    }
+    
     this.saveToStorage('vch_suppLedger', this.suppLedger);
     this.renderMedChart();
     this.showSuppForm = false;
@@ -3517,8 +3593,11 @@ sortedSuppLedger() {
                 isMajorChange: action !== 'Adjusted',
                 displayName: this.suppDisplayName(s),
                 doseLabel: s.doseAmount ? `${s.doseAmount} ${s.doseUnit || ''}`.trim() + (s.frequency ? ' ' + s.frequency : '') : null,
-                chips: this.suppConstituentIdsFor(s).map(cid =>
-                    this.suppConstituents[cid] || { id: cid, label: cid, color: '#64748b' })
+                chips: this.suppConstituentIdsFor(s).map(cid => ({
+                    id: cid,
+                    label: this.suppConstituentLabel(cid),
+                    color: this.suppConstituentColor(cid)
+                }))
             };
         });
 },
@@ -3556,8 +3635,8 @@ newSuppDuplicateWarnings() {
         });
 
     return Object.entries(clashes).map(([cid, sources]) => ({
-        label: this.suppConstituents[cid]?.label || cid,
-        note:  this.suppConstituents[cid]?.note || '',
+        label: this.suppConstituentLabel(cid),
+        note:  String(cid).startsWith('custom:') ? '' : (this.suppConstituents[cid]?.note || ''),
         sources
     }));
 },
@@ -3628,6 +3707,37 @@ generateSuppEpochs() {
     return epochs;
 },
 
+// Label/colour resolvers that understand 'custom:' pseudo-constituents
+suppConstituentLabel(cid) {
+    if (String(cid).startsWith('custom:')) {
+        return cid.slice(7).replace(/\b\w/g, ch => ch.toUpperCase());
+    }
+    return this.suppConstituents[cid]?.label || cid;
+},
+
+suppConstituentColor(cid) {
+    return String(cid).startsWith('custom:') ? '#64748b' : (this.suppConstituents[cid]?.color || '#64748b');
+},
+
+// Adds the drafted free-text ingredient as a chip (deduplicated, case-insensitive)
+addCustomIngredient() {
+    const name = (this.newSuppExtraDraft || '').trim();
+    if (!name) return;
+    if (!this.newSupp.customExtras.some(n => n.toLowerCase() === name.toLowerCase())) {
+        this.newSupp.customExtras.push(name);
+    }
+    this.newSuppExtraDraft = '';
+},
+
+// Every free-text ingredient ever used — feeds the datalist for consistent spelling
+knownCustomIngredients() {
+    const names = {};
+    (this.suppLedger || []).forEach(s =>
+        (Array.isArray(s.customExtras) ? s.customExtras : []).forEach(n => { names[n.toLowerCase()] = n; }));
+    return Object.values(names).sort((a, b) => a.localeCompare(b));
+},
+
+
 // ── LEGACY MIGRATION (diet log free-text → supplement ledger) ──────
 
 migrateLegacySupplements() {
@@ -3659,6 +3769,7 @@ migrateLegacySupplements() {
                 productId: 'other',
                 customName: s.name,
                 customConstituents: [],
+                customExtras: [],
                 isStopped: false,
                 doseAmount: null, doseUnit: null, frequency: 'q24h',
                 migratedFromDiet: true
@@ -5532,10 +5643,11 @@ importHeart2HeartData() {
         
         // --- MEDICATION CSV MANAGEMENT ---
 exportMedicationsCSV() {
-    if (!this.medLedger || this.medLedger.length === 0) 
-        return alert("No medication data to export.");
+    if ((!this.medLedger || this.medLedger.length === 0) && (!this.suppLedger || this.suppLedger.length === 0))
+        return alert("No medication or supplement data to export.");
 
-    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletStrengthMg,TabletsPerDose,TabletsInStock,StockDate,Form,OpenedDate,DiscardDays\n";
+    
+    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletStrengthMg,TabletsPerDose,TabletsInStock,StockDate,Form,OpenedDate,DiscardDays,DoseUnit,Constituents\n";
     
     const rows = this.medLedger.map(med => {
         const patient = this.patients.find(p => p.id === med.patientId);
@@ -5560,11 +5672,40 @@ exportMedicationsCSV() {
             med.stockDate || '',
             med.form || 'tablet',
             med.openedDate || '',
-            med.discardDays != null ? med.discardDays : ''
+            med.discardDays != null ? med.discardDays : '',
+            '', ''
         ].join(',');
     }).join("\n");
 
-    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + rows);
+    const suppRows = (this.suppLedger || []).map(s => {
+        const patient = this.patients.find(p => p.id === s.patientId);
+        const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+        const brand = s.productId === 'other'
+            ? 'Other'
+            : (this.suppFormulary[s.productId]?.brand || s.productId);
+        const constituents = [
+            ...(Array.isArray(s.customConstituents) ? s.customConstituents : []),
+            ...(Array.isArray(s.customExtras) ? s.customExtras.map(n => 'custom:' + n) : [])
+        ].join(';');
+
+        return [
+            s.eventDate,
+            `"${patientName}"`,
+            'supp:' + (s.productId || 'other'),
+            `"${this.sanitiseCSV(brand)}"`,
+            `"${this.sanitiseCSV(s.customName || '')}"`,
+            s.doseAmount != null ? `"${this.sanitiseCSV(String(s.doseAmount))}"` : '',
+            s.frequency || '',
+            '',                              // mg/kg — n/a
+            s.isStopped ? 'true' : 'false',
+            '', '', '', '', '', '', '',      // tablet/stock/form/opened/discard — n/a
+            `"${this.sanitiseCSV(s.doseUnit || '')}"`,
+            `"${this.sanitiseCSV(constituents)}"`
+        ].join(',');
+    }).join("\n");
+
+    const body = [rows, suppRows].filter(Boolean).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + body);
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
     link.setAttribute("download", `VCH_Medications_${new Date().toISOString().split('T')[0]}.csv`);
@@ -5588,6 +5729,7 @@ importMedicationsCSV(event) {
             const clean = (s) => (s || '').replace(/^"|"$/g, '').replace(/""/g, '"').trim();
 
             let importedCount = 0;
+            let importedSupps = 0;
             let skipped = 0;
 
             for (let i = 1; i < lines.length; i++) {
@@ -5597,6 +5739,37 @@ importMedicationsCSV(event) {
                 const eventDate   = clean(parts[0]);
                 const patientName = clean(parts[1]);
                 const drugId      = clean(parts[2]) || 'other';
+                // ── Supplement rows (DrugId prefixed 'supp:') ──────────────
+                if (drugId.startsWith('supp:')) {
+                    const rawId = drugId.slice(5) || 'other';
+                    const productId = (typeof SUPPLEMENT_FORMULARY !== 'undefined' && SUPPLEMENT_FORMULARY[rawId]) ? rawId : 'other';
+                    const suppPatient = this.patients.find(
+                        p => p.name.toLowerCase() === patientName.toLowerCase()
+                    );
+                    if (!suppPatient) { skipped++; continue; }
+
+                    const isStoppedSupp = parts[8] ? clean(parts[8]).toLowerCase() === 'true' : false;
+                    const rawConstituents = parts[17] ? clean(parts[17]).split(';').map(t => t.trim()).filter(Boolean) : [];
+                    const ticked = rawConstituents.filter(c => !c.startsWith('custom:'));
+                    const extras = rawConstituents.filter(c => c.startsWith('custom:')).map(c => c.slice(7));
+
+                    this.suppLedger.push({
+                        id: this.generateId(),
+                        patientId: suppPatient.id,
+                        eventDate,
+                        productId,
+                        customName: productId === 'other' ? (clean(parts[4]) || clean(parts[3]) || 'Imported supplement') : null,
+                        customConstituents: productId === 'other' ? ticked : null,
+                        customExtras: productId === 'other' ? extras : null,
+                        isStopped: isStoppedSupp,
+                        doseAmount: isStoppedSupp ? null : (clean(parts[5]) || null),
+                        doseUnit:   isStoppedSupp ? null : (parts[16] ? clean(parts[16]) : null),
+                        frequency:  isStoppedSupp ? null : (clean(parts[6]) || 'q24h')
+                    });
+                    importedSupps++;
+                    continue;
+                }
+                
                 // parts[3] = GenericName (display only, not stored)
                 const customName  = clean(parts[4]);
                 const doseMg      = parseFloat(clean(parts[5]));
@@ -5645,10 +5818,11 @@ importMedicationsCSV(event) {
             }
 
             this.saveToStorage('vch_medLedger', this.medLedger);
+            this.saveToStorage('vch_suppLedger', this.suppLedger);
             this.renderMedChart();
 
             const note = skipped > 0 ? ` (${skipped} row(s) skipped — patient not found or invalid data)` : '';
-            alert(`Imported ${importedCount} medication record(s)${note}.`);
+            alert(`Imported ${importedCount} medication and ${importedSupps} supplement record(s)${note}.`);
 
         } catch (err) {
             console.error(err);
@@ -6725,6 +6899,40 @@ async generatePDF() {
         }
     }
     
+    // ── 6b. Supplement Log Table ──────────────────────────────────────────
+    if (mods.medications) {
+        const suppData = (this.suppLedger || [])
+            .filter(s => s.patientId === this.activePatientId && inRange(s.eventDate))
+            .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+
+        if (suppData.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Supplement Log', 16, 185, 129);
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', 'Supplement', 'Action', 'Dose', 'Frequency', 'Contains']],
+                body: suppData.map(s => {
+                    const action = this.getComputedSuppAction(s);
+                    const dose = s.doseAmount ? `${s.doseAmount} ${s.doseUnit || ''}`.trim() : '—';
+                    const contains = this.suppConstituentIdsFor(s)
+                        .map(cid => this.suppConstituentLabel(cid)).join(', ');
+                    return [
+                        s.eventDate,
+                        this.suppDisplayName(s),
+                        action,
+                        s.isStopped ? '—' : dose,
+                        s.isStopped ? '—' : (s.frequency || '—'),
+                        contains || '—'
+                    ];
+                }),
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129] },
+                columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 40 }, 2: { cellWidth: 20 }, 3: { cellWidth: 24 }, 4: { cellWidth: 20 }, 5: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
+    }
  
     // ── 7. Diagnosis & Staging Log ────────────────────────────────────────
     if (mods.acvimStaging) {
@@ -7032,6 +7240,30 @@ generateCSV() {
         });
         csv += '\n';
     }
+    
+    // ── Supplement Log ────────────────────────────────────────────────────
+    const suppData = !mods.medications ? [] : (this.suppLedger || [])
+        .filter(s => s.patientId === this.activePatientId && inRange(s.eventDate))
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+
+    if (suppData.length > 0) {
+        csv += 'SUPPLEMENT LOG\n';
+        csv += 'Date,Supplement,Action,Dose,Frequency,Contains\n';
+        suppData.forEach(s => {
+            const dose = s.doseAmount ? `${s.doseAmount} ${s.doseUnit || ''}`.trim() : '';
+            const contains = this.suppConstituentIdsFor(s)
+                .map(cid => this.suppConstituentLabel(cid)).join('; ');
+            csv += [
+                q(s.eventDate),
+                q(this.suppDisplayName(s)),
+                q(this.getComputedSuppAction(s)),
+                q(s.isStopped ? '' : dose),
+                q(s.isStopped ? '' : (s.frequency || '')),
+                q(contains)
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
  
     // ── Diagnosis & Staging Log (always complete history) ─────────────────
     const diagData = !mods.acvimStaging ? [] : this.diagnosisLog
@@ -7304,6 +7536,25 @@ _buildReportText() {
                 } else if (r.entry.frequency === 'PRN') {
                     out += `${nl}${indent}PRN — run-out not projected`;
                 }
+                out += nl;
+            });
+            out += nl;
+        }
+    }
+    
+    // ── Supplement Log ────────────────────────────────────────────────────
+    if (mods.medications) {
+        const suppData = (this.suppLedger || [])
+            .filter(s => s.patientId === this.activePatientId && inRange(s.eventDate))
+            .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate));
+        if (suppData.length > 0) {
+            out += `SUPPLEMENT LOG (${suppData.length} entr${suppData.length !== 1 ? 'ies' : 'y'})${nl}`;
+            out += rule() + nl;
+            suppData.forEach(s => {
+                out += `${s.eventDate}  |  ${this.getComputedSuppAction(s)}: ${this.suppDisplayName(s)}`;
+                if (!s.isStopped && s.doseAmount) out += `  |  ${`${s.doseAmount} ${s.doseUnit || ''} ${s.frequency || ''}`.trim()}`;
+                const contains = this.suppConstituentIdsFor(s).map(cid => this.suppConstituentLabel(cid)).join(', ');
+                if (contains) out += `${nl}${indent}Contains: ${contains}`;
                 out += nl;
             });
             out += nl;
