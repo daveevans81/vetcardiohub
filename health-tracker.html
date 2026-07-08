@@ -311,6 +311,20 @@
                 </div>
             </div>
             
+            <!-- Backup staleness nudge -->
+            <div x-show="backupNudgeVisible()" x-cloak style="margin-top: 12px; padding: 10px 14px; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.85rem; color: #92400e;">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <strong>Backup reminder:</strong>
+                    <span x-text="lastBackupAt ? `Your last full backup was ${lastBackupLabel.toLowerCase()}.` : 'You have not yet made a full backup.'"></span>
+                    Your records live only on this device.
+                </span>
+                <span style="display: flex; gap: 8px;">
+                    <button type="button" @click="setView('more'); setMoreSection('data'); showImportExport = true; $nextTick(() => document.getElementById('masterBackup')?.scrollIntoView({ behavior: 'smooth' }))" class="btn-nudge-static" style="background: #d97706; font-size: 0.8rem; padding: 6px 12px;">Back up now</button>
+                    <button type="button" @click="snoozeBackupNudge()" style="padding: 6px 12px; border: 1px solid #fcd34d; border-radius: 6px; background: white; cursor: pointer; font-size: 0.8rem; color: #92400e;">Remind me later</button>
+                </span>
+            </div>
+            
             
             <header class="hero-header card">
         
@@ -3961,6 +3975,49 @@
                         </template>
                     </div>
                     
+                    
+                    <!-- ── MORE > SETTINGS ── -->
+                    <div class="module-card" x-show="isView('more') && moreSection === 'settings'" x-cloak style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
+                        <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-sliders"></i> Settings</h3>
+                        <p style="font-size: 0.85rem; color: #64748b;">Preferences apply to this device. Patient-specific values (alarm cutoff, units) can still be overridden per profile.</p>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Opening view</h4>
+                                <p style="font-size: 0.75rem; color: #64748b;">Which section the tracker opens on.</p>
+                                <select x-model="appSettings.defaultLandingView" @change="saveAppSettings()" class="border rounded p-2 text-sm bg-white" style="width: 100%;">
+                                    <option value="remember">Remember my last view</option>
+                                    <template x-for="item in navItems" :key="item.id">
+                                        <option :value="item.id" x-text="item.label"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">New patient defaults</h4>
+                                <p style="font-size: 0.75rem; color: #64748b;">Pre-filled when creating a profile.</p>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <select x-model="appSettings.defaultWeightUnit" @change="saveAppSettings()" class="border rounded p-2 text-sm bg-white" style="flex: 1;">
+                                        <option value="kg">kg</option>
+                                        <option value="lbs">lbs</option>
+                                    </select>
+                                    <input type="number" min="10" max="60" x-model.number="appSettings.defaultSrrCutoff" @change="saveAppSettings()" class="border rounded p-2 text-sm" style="flex: 1;" title="Default SRR alarm cutoff (breaths/min)">
+                                </div>
+                                <p style="font-size: 0.7rem; color: #94a3b8; margin: 6px 0 0;">Unit &middot; SRR alarm cutoff (breaths/min)</p>
+                            </div>
+
+                            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Backup reminder</h4>
+                                <p style="font-size: 0.75rem; color: #64748b;">Warn me if no full backup for:</p>
+                                <select x-model.number="appSettings.backupWarnDays" @change="saveAppSettings()" class="border rounded p-2 text-sm bg-white" style="width: 100%;">
+                                    <option :value="7">7 days</option>
+                                    <option :value="14">14 days</option>
+                                    <option :value="30">30 days</option>
+                                    <option :value="0">Never remind me</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                                         <!-- ******************************** -->
                                         <!-- EXPORT VET SECTION            -->
                                         <!-- ******************************** -->
@@ -4150,6 +4207,54 @@
                                                    
                         </div>
                         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">Your data is stored locally. Create backups before clearing your browser history.</p>
+                        
+                        !-- Storage health -->
+                        <div style="display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 14px; margin-bottom: 12px; background: white; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.8rem; color: #475569;">
+                            <span><i class="fa-solid fa-floppy-disk" style="color: #64748b;"></i> Last full backup: <strong x-text="lastBackupLabel"></strong></span>
+                            <template x-if="storagePersisted !== null">
+                                <span>
+                                    <i class="fa-solid" :class="storagePersisted ? 'fa-lock' : 'fa-lock-open'" :style="storagePersisted ? 'color:#059669;' : 'color:#d97706;'"></i>
+                                    Storage: <strong x-text="storagePersisted ? 'Persistent' : 'Best-effort'"></strong>
+                                </span>
+                            </template>
+                            <template x-if="storageUsage">
+                                <span><i class="fa-solid fa-hard-drive" style="color: #64748b;"></i> <span x-text="`${storageUsage.usedMB} MB used of ~${storageUsage.quotaMB} MB`"></span></span>
+                            </template>
+                        </div>
+                        
+                        
+                        <div id="masterBackup" style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('system_backup')"></i></h4>
+                                <p style="margin: 0; font-size: 0.75rem; color: #64748b;">Backups everything: Patients, Breathing, and Medications.</p>
+                            </div>
+                            <div style="display: flex !important; flex-wrap: wrap !important; gap: 10px !important; align-items: center;">
+                                <select x-model="exportPatientId"
+                                        style="font-size: 0.8rem; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;">
+                                    <option value="all">All patients</option>
+                                    <template x-for="p in patients" :key="p.id">
+                                        <option :value="p.id" x-text="p.name + ' only'"></option>
+                                    </template>
+                                </select>
+                                <button @click="exportCompleteBackup(exportPatientId === 'all' ? null : exportPatientId)" class="btn-nudge-static"
+                                        style="background: #334155; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
+                                    Download Backup
+                                </button>
+                                <label class="btn-nudge-static"
+                                       style="background: #475569; font-size: 0.85rem; padding: 8px 12px; cursor: pointer; text-align: center; flex: 0 0 auto !important; width: auto !important;">
+                                    Import Backup
+                                    <input type="file" accept=".json" @change="importCompleteBackup" style="display: none;">
+                                </label>
+                                <button @click="resetData()" class="btn-nudge-static"
+                                        style="background: #ef4444; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
+                                    <i class="fa-solid fa-trash-can"></i> Erase All
+                                </button>
+                                <button @click="exportPDF()" class="btn-nudge-static"
+                                        style="flex: 0 0 auto !important; width: auto !important;">
+                                    <i class="fa-solid fa-print"></i> PDF/Print
+                                </button>
+                            </div>
+                        </div>
                         
                         
                         <div x-show="showImportExport" x-transition>    
@@ -4407,38 +4512,93 @@
                                         </p>
                                     </div>
                                 </div>
-                                <div id="masterBackup" style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                                    <div>
-                                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #0f172a; margin-bottom: 5px;">Master System Backup (JSON)<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('system_backup')"></i></h4>
-                                        <p style="margin: 0; font-size: 0.75rem; color: #64748b;">Backups everything: Patients, Breathing, and Medications.</p>
-                                    </div>
-                                    <div style="display: flex !important; flex-wrap: wrap !important; gap: 10px !important; align-items: center;">
-                                        <select x-model="exportPatientId"
-                                                style="font-size: 0.8rem; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;">
-                                            <option value="all">All patients</option>
-                                            <template x-for="p in patients" :key="p.id">
-                                                <option :value="p.id" x-text="p.name + ' only'"></option>
-                                            </template>
-                                        </select>
-                                        <button @click="exportCompleteBackup(exportPatientId === 'all' ? null : exportPatientId)" class="btn-nudge-static"
-                                                style="background: #334155; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
-                                            Download Backup
-                                        </button>
-                                        <label class="btn-nudge-static"
-                                               style="background: #475569; font-size: 0.85rem; padding: 8px 12px; cursor: pointer; text-align: center; flex: 0 0 auto !important; width: auto !important;">
-                                            Import Backup
-                                            <input type="file" accept=".json" @change="importCompleteBackup" style="display: none;">
-                                        </label>
-                                        <button @click="resetData()" class="btn-nudge-static"
-                                                style="background: #ef4444; font-size: 0.85rem; padding: 8px 12px; flex: 0 0 auto !important; width: auto !important;">
-                                            <i class="fa-solid fa-trash-can"></i> Erase All
-                                        </button>
-                                        <button @click="exportPDF()" class="btn-nudge-static"
-                                                style="flex: 0 0 auto !important; width: auto !important;">
-                                            <i class="fa-solid fa-print"></i> PDF/Print
-                                        </button>
-                                    </div>
-                                </div>
+                                
+                            </div>
+                        </div>
+                        <!-- ── MORE > ABOUT ── -->
+                        <div class="module-card" x-show="isView('more') && moreSection === 'about'" x-cloak style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
+                            <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-circle-info"></i> About VetCardioHub Health Tracker</h3>
+                            <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;">
+                                A free, private, browser-based monitoring tool for pets, those who are healthy, and those at risk of heart disease.
+                                All data is stored locally on your device and never uploaded to a server.
+                            </p>
+                            <p style="font-size: 0.8rem; color: #64748b;">
+                                Drug formulary last reviewed: <strong x-text="formularyReviewedLabel"></strong>
+                            </p>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                                <button type="button" @click="showTermsModal = true" class="btn-nudge-static" style="background: #475569; font-size: 0.8rem; padding: 6px 12px;">Terms of Use</button>
+                                <button type="button" @click="showPrivacyModal = true" class="btn-nudge-static" style="background: #475569; font-size: 0.8rem; padding: 6px 12px;">Privacy</button>
+                                <button type="button" @click="forceShowDisclaimer()" class="btn-nudge-static" style="background: #475569; font-size: 0.8rem; padding: 6px 12px;">Clinical Disclaimer</button>
+                                <a href="/learning.html" class="btn-nudge-static" style="background: #0e7490; font-size: 0.8rem; padding: 6px 12px; text-decoration: none;"><i class="fa-solid fa-graduation-cap"></i> Learning Hub</a>
+                            </div>
+                            <p style="font-size: 0.72rem; color: #94a3b8; margin-top: 14px;">
+                                This application supports, and does not replace, the advice of your veterinary surgeon.
+                            </p>
+                        </div>
+                            <!-- ── MORE > HELP & FAQs ── -->
+                        <div x-show="isView('more') && moreSection === 'help'" x-cloak style="margin-top: 20px;">
+                            <div class="card" style="margin-top:16px">
+                              <h2>FAQ &amp; Clinical Guidance</h2>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is a normal resting respiratory rate for a dog or cat?</summary>
+                                <p>A normal sleeping or resting respiratory rate for both dogs and cats should consistently be under 30 breaths per minute. Rates between 30 and 40 are considered borderline (equivocal) and should be recounted and interpreted in light of typical normal values for your pet and the current level of concern for heart disease, while rates consistently over 40 require veterinary attention.</p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I count my pet's breathing rate?</summary>
+                                <p>Wait until your pet is fully resting or in a deep sleep. Observe their chest moving in and out. One complete in-and-out motion counts as one breath. Count the number of breaths over 30 seconds and multiply by 2 to get the rate per minute. See <a href="/blog-posts/post2.html">our guide</a></p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Why is tracking my pet's sleeping breathing rate important?</summary>
+                                <p>In dogs and cats with heart disease, a rising resting respiratory rate is often the first clinical sign of fluid building up in the lungs (congestive heart failure). Tracking this rate allows owners to detect failure early, often before the pet shows signs of coughing or distress. See <a href="/blog-posts/post16.html">our guide</a></p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What should I do if my pet's respiratory rate is over 40?</summary>
+                                <p>If your pet is fully asleep (not dreaming or overly warm) and their breathing rate is consistently over 40 breaths per minute, this is a clinical emergency, especially if they have a known heart murmur or heart disease. You should contact your veterinary surgeon immediately.</p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is the difference between a sleeping and a resting respiratory rate?</summary>
+                                <p>A sleeping respiratory rate (SRR) is measured while your pet is genuinely asleep and is the most reliable value, as it is unaffected by activity, excitement, or panting. A resting respiratory rate is taken while the pet is awake but calm and settled. Both should sit comfortably under 30 breaths per minute; where the two differ, the sleeping rate is considered the more dependable clinical indicator.</p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Can I track more than one pet in the tracker?</summary>
+                                <p>Yes. The tracker supports multiple patient profiles, each storing its own species, breed, weight history, medication log, and respiratory rate readings. You can switch between pets at any time, and each profile keeps a fully independent clinical record.</p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Where is my pet's health data stored, and is it private?</summary>
+                                <p>All information is stored locally on your own device, within your browser. No data is uploaded to a server or shared with any third party, so your pet's clinical records remain entirely private to you. Because the data lives on your device, we recommend using the backup feature periodically to avoid loss if you clear your browser or change devices.</p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Can I export my pet's records to share with my veterinary surgeon?</summary>
+                                <p>Yes. Respiratory rate and medication logs can be exported as CSV files, and the tracker can generate a printable PDF summary complete with charts and history. A full JSON backup of every patient and record is also available for safekeeping or transfer to another device.</p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I choose the right respiratory rate alarm threshold for my pet?</summary>
+                                <p>The tracker uses a default cut-off of 30 breaths per minute, which suits most dogs and cats. Each patient profile also allows a custom threshold, so if your veterinary surgeon has advised a different target based on your pet's individual baseline or condition, you can set it per patient and interpretations will update accordingly.</p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">My pet's breathing rate is normal but they are coughing — should I be concerned?</summary>
+                                <p>A cough can arise from heart disease, airway disease, or both, and does not always accompany a raised respiratory rate. Logging cough frequency, character, and severity over time, alongside respiratory rate, helps your veterinary surgeon distinguish cardiac from respiratory causes. Any new, worsening, or persistent cough warrants veterinary assessment.</p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What do the ACVIM stages (A to D) mean?</summary>
+                                <p>The ACVIM staging system describes the progression of heart disease. Stage A denotes a pet at risk but with no detectable disease; Stage B a murmur or structural change without clinical signs (B1 without, B2 with heart enlargement); Stage C current or previous signs of heart failure; and Stage D advanced disease that is refractory to standard treatment. The tracker records staging over time so trends are clear.</p>
+                              </details></div>
+                            
+                              <div class="faq-item"><details>
+                                <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is the difference between fainting (syncope) and a seizure?</summary>
+                                <p>Syncope is a brief loss of consciousness caused by a temporary drop in blood flow to the brain, often triggered by exertion, excitement, or coughing, with rapid and complete recovery. A seizure is neurological in origin and more commonly involves limb paddling, chewing, or loss of bladder control, followed by a period of disorientation. The tracker's event diary captures the detail your veterinary surgeon needs to tell them apart.</p>
+                              </details></div>
                             </div>
                         </div>
                     </div>
@@ -4458,69 +4618,7 @@
          
          <aside class="vch-extras">
 
-             <div class="card" style="margin-top:16px">
-                  <h2>FAQ &amp; Clinical Guidance</h2>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is a normal resting respiratory rate for a dog or cat?</summary>
-                    <p>A normal sleeping or resting respiratory rate for both dogs and cats should consistently be under 30 breaths per minute. Rates between 30 and 40 are considered borderline (equivocal) and should be recounted and interpreted in light of typical normal values for your pet and the current level of concern for heart disease, while rates consistently over 40 require veterinary attention.</p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I count my pet's breathing rate?</summary>
-                    <p>Wait until your pet is fully resting or in a deep sleep. Observe their chest moving in and out. One complete in-and-out motion counts as one breath. Count the number of breaths over 30 seconds and multiply by 2 to get the rate per minute. See <a href="/blog-posts/post2.html">our guide</a></p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Why is tracking my pet's sleeping breathing rate important?</summary>
-                    <p>In dogs and cats with heart disease, a rising resting respiratory rate is often the first clinical sign of fluid building up in the lungs (congestive heart failure). Tracking this rate allows owners to detect failure early, often before the pet shows signs of coughing or distress. See <a href="/blog-posts/post16.html">our guide</a></p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What should I do if my pet's respiratory rate is over 40?</summary>
-                    <p>If your pet is fully asleep (not dreaming or overly warm) and their breathing rate is consistently over 40 breaths per minute, this is a clinical emergency, especially if they have a known heart murmur or heart disease. You should contact your veterinary surgeon immediately.</p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is the difference between a sleeping and a resting respiratory rate?</summary>
-                    <p>A sleeping respiratory rate (SRR) is measured while your pet is genuinely asleep and is the most reliable value, as it is unaffected by activity, excitement, or panting. A resting respiratory rate is taken while the pet is awake but calm and settled. Both should sit comfortably under 30 breaths per minute; where the two differ, the sleeping rate is considered the more dependable clinical indicator.</p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Can I track more than one pet in the tracker?</summary>
-                    <p>Yes. The tracker supports multiple patient profiles, each storing its own species, breed, weight history, medication log, and respiratory rate readings. You can switch between pets at any time, and each profile keeps a fully independent clinical record.</p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Where is my pet's health data stored, and is it private?</summary>
-                    <p>All information is stored locally on your own device, within your browser. No data is uploaded to a server or shared with any third party, so your pet's clinical records remain entirely private to you. Because the data lives on your device, we recommend using the backup feature periodically to avoid loss if you clear your browser or change devices.</p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Can I export my pet's records to share with my veterinary surgeon?</summary>
-                    <p>Yes. Respiratory rate and medication logs can be exported as CSV files, and the tracker can generate a printable PDF summary complete with charts and history. A full JSON backup of every patient and record is also available for safekeeping or transfer to another device.</p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I choose the right respiratory rate alarm threshold for my pet?</summary>
-                    <p>The tracker uses a default cut-off of 30 breaths per minute, which suits most dogs and cats. Each patient profile also allows a custom threshold, so if your veterinary surgeon has advised a different target based on your pet's individual baseline or condition, you can set it per patient and interpretations will update accordingly.</p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">My pet's breathing rate is normal but they are coughing — should I be concerned?</summary>
-                    <p>A cough can arise from heart disease, airway disease, or both, and does not always accompany a raised respiratory rate. Logging cough frequency, character, and severity over time, alongside respiratory rate, helps your veterinary surgeon distinguish cardiac from respiratory causes. Any new, worsening, or persistent cough warrants veterinary assessment.</p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What do the ACVIM stages (A to D) mean?</summary>
-                    <p>The ACVIM staging system describes the progression of heart disease. Stage A denotes a pet at risk but with no detectable disease; Stage B a murmur or structural change without clinical signs (B1 without, B2 with heart enlargement); Stage C current or previous signs of heart failure; and Stage D advanced disease that is refractory to standard treatment. The tracker records staging over time so trends are clear.</p>
-                  </details></div>
-                
-                  <div class="faq-item"><details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is the difference between fainting (syncope) and a seizure?</summary>
-                    <p>Syncope is a brief loss of consciousness caused by a temporary drop in blood flow to the brain, often triggered by exertion, excitement, or coughing, with rapid and complete recovery. A seizure is neurological in origin and more commonly involves limb paddling, chewing, or loss of bladder control, followed by a period of disorientation. The tracker's event diary captures the detail your veterinary surgeon needs to tell them apart.</p>
-                  </details></div>
-                </div>
+             
           </aside>
           </div> <!-- Close .grid -->
           </div> <!-- Close .container -->

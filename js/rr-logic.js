@@ -492,6 +492,23 @@ setView(v) {
     window.scrollTo({ top: 0, behavior: sameTab ? 'smooth' : 'auto' });
 },
 
+// ── App settings — global preferences, persisted separately from patient data ──
+appSettings: {
+    defaultLandingView: 'remember',   // 'remember' or a navItems id
+    defaultWeightUnit: 'kg',          // pre-fills new patient profiles
+    defaultSrrCutoff: 30,             // pre-fills new patient profiles
+    backupWarnDays: 14                // backup staleness threshold
+},
+loadAppSettings() {
+    try {
+        const saved = JSON.parse(localStorage.getItem('vch_appSettings'));
+        if (saved && typeof saved === 'object') Object.assign(this.appSettings, saved);
+    } catch (e) {}
+},
+saveAppSettings() {
+    this.saveToStorage('vch_appSettings', this.appSettings);
+},
+
     // Disclaimer Engine
 acceptTermsAndStart() {          // step-0 CTA
   if (!this.termsAgreed) return;
@@ -635,6 +652,72 @@ sanitiseCSV(val) {
     return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
 },
 
+// ── Storage health ──
+storagePersisted: null,   // true / false / null = API unsupported
+storageUsage: null,       // { usedMB, quotaMB }
+async initStorageHealth() {
+    try {
+        if (navigator.storage && navigator.storage.persisted) {
+            this.storagePersisted = await navigator.storage.persisted();
+            if (this.storagePersisted === false && navigator.storage.persist) {
+                this.storagePersisted = await navigator.storage.persist();
+            }
+        }
+    } catch (e) { this.storagePersisted = null; }
+    try {
+        if (navigator.storage && navigator.storage.estimate) {
+            const est = await navigator.storage.estimate();
+            if (est && est.quota) {
+                this.storageUsage = {
+                    usedMB: (est.usage / 1048576).toFixed(1),
+                    quotaMB: Math.round(est.quota / 1048576)
+                };
+            }
+        }
+    } catch (e) {}
+},
+// ── Backup staleness ──
+lastBackupAt: null,        // ms epoch — reactive mirror of vch_lastBackupAt
+backupSnoozedUntil: 0,
+get daysSinceBackup() {
+    return this.lastBackupAt ? Math.floor((Date.now() - this.lastBackupAt) / 86400000) : null;
+},
+get lastBackupLabel() {
+    if (!this.lastBackupAt) return 'Never';
+    const d = this.daysSinceBackup;
+    return d === 0 ? 'Today' : d === 1 ? 'Yesterday' : `${d} days ago`;
+},
+backupNudgeVisible() {
+    if (!this.appSettings.backupWarnDays) return false;        // 'Never remind me'
+    if (this.patients.length === 0) return false;
+    if (Date.now() < this.backupSnoozedUntil) return false;
+    if (!this.lastBackupAt) return this.srrHistory.length >= 5; // don't nag brand-new users
+    return this.daysSinceBackup > this.appSettings.backupWarnDays;
+},
+snoozeBackupNudge(days = 7) {
+    this.backupSnoozedUntil = Date.now() + days * 86400000;
+    try { localStorage.setItem('vch_backupNudgeSnooze', String(this.backupSnoozedUntil)); } catch (e) {}
+},
+
+// ── WebKit ITP (7-day storage purge) warning ──
+itpWarnDismissedAt: 0,
+isWebKitBrowserTab() {
+    if (this.isStandalone) return false;                       // home-screen apps are exempt
+    const ua = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/.test(ua)
+        || (/Macintosh/.test(ua) && 'ontouchend' in document); // iPadOS reports as Mac
+    const isDesktopSafari = /Safari\//.test(ua)
+        && !/Chrome|Chromium|CriOS|Edg|OPR|FxiOS|Android/.test(ua);
+    return isIOS || isDesktopSafari;
+},
+itpWarningVisible() {
+    if (!this.isWebKitBrowserTab() || this.patients.length === 0) return false;
+    return (Date.now() - this.itpWarnDismissedAt) > 30 * 86400000;   // resurface monthly
+},
+dismissItpWarning() {
+    this.itpWarnDismissedAt = Date.now();
+    try { localStorage.setItem('vch_itpWarnSeen', String(this.itpWarnDismissedAt)); } catch (e) {}
+},
         
 init() {
  // 1. ROBUST DATA LOAD: per-key isolation — one corrupt key cannot
@@ -666,6 +749,12 @@ init() {
     this._syncVetExportModules();
     
     this.initInstallNudge();
+    this.initStorageHealth();
+    
+    this.itpWarnDismissedAt = parseInt(localStorage.getItem('vch_itpWarnSeen'), 10) || 0;
+    
+    this.lastBackupAt = parseInt(localStorage.getItem('vch_lastBackupAt'), 10) || null;
+    this.backupSnoozedUntil = parseInt(localStorage.getItem('vch_backupNudgeSnooze'), 10) || 0;
    
       const termsCurrent = localStorage.getItem('vch_terms_version') === this.termsVersion;
 
@@ -775,7 +864,7 @@ init() {
 startNewPatientOnboarding() {
     this.editingPatient = {
         id: this.generateId(),
-        name: '', ownerName: '', species: 'dog', breed: '', sex: '', dob: '', weight: '', weightUnit: '',customSrrCutoff: 30,
+        name: '', ownerName: '', species: 'dog', breed: '', sex: '', dob: '', weight: '', weightUnit: this.appSettings.defaultWeightUnit, customSrrCutoff: this.appSettings.defaultSrrCutoff,
         modules: { ...this.defaultModules }
     };
     
@@ -5461,7 +5550,7 @@ renderMedChart() {
         // --- EXPORT FUNCTIONS ---
         
         // Export Functionality
-        exportData() {
+exportData() {
             const filtered = this.getFilteredReadings();
             if (!filtered.length) return;
             
@@ -6659,6 +6748,10 @@ exportCompleteBackup(patientId = null) {
     document.body.appendChild(link);
     link.click();
     link.remove();
+    if (!patientId) {
+        this.lastBackupAt = Date.now();
+        try { localStorage.setItem('vch_lastBackupAt', String(this.lastBackupAt)); } catch (e) {}
+    }
 },
 
 
