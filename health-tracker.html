@@ -3944,12 +3944,29 @@
                         </div>
                     </template>
                     
+                    <!-- ******************************** -->
+                    <!-- MORE VIEW — SUB-NAVIGATION       -->
+                    <!-- ******************************** -->
+                    <div x-show="isView('more')" x-cloak style="margin-top: 20px; display: flex; gap: 6px; flex-wrap: wrap;">
+                        <template x-for="s in moreSections" :key="s.id">
+                            <button type="button"
+                                    @click="setMoreSection(s.id)"
+                                    :style="moreSection === s.id
+                                        ? 'background: #16325F; color: white; border: 1px solid #16325F;'
+                                        : 'background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;'"
+                                    style="padding: 8px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid" :class="s.icon"></i>
+                                <span x-text="s.label"></span>
+                            </button>
+                        </template>
+                    </div>
+                    
                                         <!-- ******************************** -->
                                         <!-- EXPORT VET SECTION            -->
                                         <!-- ******************************** -->
                     
 
-                    <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && isView('data')" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 10px;" x-cloak>
+                    <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && isView('more') && moreSection === 'data'" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 10px;" x-cloak>
 
                         <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Vet Export</h3>
                         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px;">
@@ -3960,8 +3977,8 @@
                         <div style="margin-bottom: 14px; padding: 10px 12px; background: #f1f5f9; border-radius: 6px; border: 1px solid #e2e8f0;">
                             <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">
                                 <i class="fa-regular fa-calendar"></i> Export Date Range <span style="font-size: 0.7rem; color: #94a3b8;">
-    <i class="fa-solid fa-link"></i> Shared with the logbook &amp; charts
-</span>
+                                    <i class="fa-solid fa-link"></i> Shared with the logbook &amp; charts
+                                </span>
                             </div>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
                                 <select x-model="timeScale" class="border rounded p-2 text-sm bg-white cursor-pointer" style="flex: 0 0 auto; width: auto;">
@@ -4109,7 +4126,7 @@
                                         <!-- EXPORT IMPORT SECTION            -->
                                         <!-- ******************************** -->
                     
-                    <div class="summary-box" x-show="isView('data')" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
+                    <div class="summary-box" x-show="isView('more') && moreSection === 'data'" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
                         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                             <button @click="showImportExport = !showImportExport" type="button" style="
                                 width: 100%;
@@ -4426,7 +4443,7 @@
                         </div>
                     </div>
                     
-                    <section id="install-nudge-static" class="install-footer-box" style="margin-top: 40px; text-align: left;">
+                    <section id="install-nudge-static" class="install-footer-box" x-show="isView('more') && moreSection === 'help'" x-cloak style="margin-top: 40px; text-align: left;">
                         <div class="nudge-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
                         <div class="nudge-text">
                             <h4>Save as a Pet App</h4>

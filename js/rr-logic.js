@@ -433,9 +433,21 @@ navItems: [
     { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line',  modules: ['srr','medications','acvimStaging','weightDiet','antiparasitics','vaccinations'] },
     { id: 'meds',     label: 'Meds',     icon: 'fa-pills',       modules: ['medications','acvimStaging'] },
     { id: 'wellness', label: 'Wellness', icon: 'fa-heart-pulse', modules: ['coughLog','activityLog','weightDiet','syncopeLog','vaccinations','antiparasitics'] },
-    { id: 'data',     label: 'Data',     icon: 'fa-database',     modules: null }
+    { id: 'more',     label: 'More',     icon: 'fa-ellipsis',    modules: null }
 ],
-
+// ── More view sub-navigation ──
+moreSection: 'data',
+moreSections: [
+    { id: 'settings', label: 'Settings',       icon: 'fa-sliders' },
+    { id: 'data',     label: 'Data & Backup',  icon: 'fa-database' },
+    { id: 'help',     label: 'Help & FAQs',    icon: 'fa-circle-question' },
+    { id: 'about',    label: 'About',          icon: 'fa-circle-info' }
+],
+setMoreSection(s) {
+    this.moreSection = s;
+    try { localStorage.setItem('vch_moreSection', s); } catch (e) {}
+    window.scrollTo({ top: 0, behavior: 'auto' });
+},
 
 // True if ANY of the given modules is enabled for the active patient.
 // Legacy profiles without a modules object show everything.
@@ -446,7 +458,10 @@ modOn(...keys) {
 },
 
 // 'all' shows every section; otherwise exact match
-isView(v) { return this.activeView === 'all' || this.activeView === v; },
+isView(v) {
+    if (v === 'more') return this.activeView === 'more';
+    return this.activeView === 'all' || this.activeView === v;
+},
 
 // Tabs whose required modules are all disabled get hidden
 visibleNavItems() {
@@ -717,11 +732,17 @@ init() {
     });
     
     // Restore last-used view
+        // Restore last-used view
     try {
-        const savedView = localStorage.getItem('vch_activeView');
+        this.loadAppSettings();
+        let savedView = localStorage.getItem('vch_activeView');
+        if (savedView === 'data') savedView = 'more';          // legacy id migration
+        if (this.appSettings.defaultLandingView !== 'remember')
+            savedView = this.appSettings.defaultLandingView;
         if (savedView) this.activeView = savedView;
         if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all';
         this._expandForView(this.activeView);
+        this.moreSection = localStorage.getItem('vch_moreSection') || 'data';
     } catch (e) {}
     
     // Charts only size correctly once their canvas becomes visible (x-show toggles display:none)
