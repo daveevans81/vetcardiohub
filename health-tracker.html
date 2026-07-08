@@ -1339,6 +1339,17 @@
             <template x-if="activePatientProfile?.modules?.srr">
                 <div x-show="isCounting" x-cloak class="vch-modal">
                     <div class="vch-modal-card" style="border: 2px solid #16325F; text-align: center; padding: 20px; max-width: 26rem;">
+                        <div style="display: flex; justify-content: center; gap: 6px; margin: 0 0 4px;">
+                            <template x-for="sec in [15, 30, 60]" :key="sec">
+                                <button type="button"
+                                        @click="setCountWindow(sec)"
+                                        :class="countWindow() === sec ? 'srr-window-pill is-active' : 'srr-window-pill'"
+                                        :aria-pressed="countWindow() === sec">
+                                    <span x-text="sec + 's'"></span>
+                                </button>
+                            </template>
+                        </div>
+                        <p class="text-center" style="margin: 0 0 10px; font-size: 0.7rem; color: #94a3b8;">Tap to switch — restarts the count</p>
                         <div class="timer-pulse" x-text="timeLeft + 's'"></div>
                         <p class="text-center mb-20">Time Remaining</p>
 
@@ -4009,6 +4020,17 @@
                             </div>
                             <p style="font-size: 0.7rem; color: #94a3b8; margin: 6px 0 0;">Unit &middot; SRR alarm cutoff (breaths/min)</p>
                         </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">SRR count window</h4>
+                                <p style="font-size: 0.75rem; color: #64748b;">How long each breath count runs before the rate is calculated.</p>
+                                <select x-model.number="appSettings.countDuration" @change="saveAppSettings()" class="border rounded p-2 text-sm bg-white" style="width: 100%;">
+                                    <option :value="15">15 seconds (&times;4)</option>
+                                    <option :value="30">30 seconds (&times;2)</option>
+                                    <option :value="60">60 seconds (&times;1)</option>
+                                </select>
+                                <p style="font-size: 0.7rem; color: #94a3b8; margin: 6px 0 0;">Shorter is quicker; a full 60&nbsp;seconds gives the most accurate rate.</p>
+                            </div>
 
                         <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
                             <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Backup reminder</h4>

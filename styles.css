@@ -4243,6 +4243,24 @@ transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     font-variant-numeric: tabular-nums;
 }
 
+.srr-window-pill {
+    border: 1px solid #cbd5e1;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 5px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.srr-window-pill:hover   { border-color: #16325F; color: #16325F; }
+.srr-window-pill.is-active {
+    background: #16325F;
+    color: #fff;
+    border-color: #16325F;
+}
+
 /* Clinical Status Boxes */
 .status-equivocal { border-left: 5px solid #f59e0b; background: #fffbeb; padding: 15px; border-radius: 6px; }
 .status-danger { border-left: 5px solid #ef4444; background: #fef2f2; padding: 15px; border-radius: 6px; }

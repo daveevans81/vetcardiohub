@@ -497,6 +497,7 @@ appSettings: {
     defaultLandingView: 'remember',   // 'remember' or a navItems id
     defaultWeightUnit: 'kg',          // pre-fills new patient profiles
     defaultSrrCutoff: 30,             // pre-fills new patient profiles
+    countDuration: 30,                // preferred SRR count window (seconds): 15, 30 or 60
     backupWarnDays: 14                // backup staleness threshold
 },
 loadAppSettings() {
@@ -3179,17 +3180,23 @@ parseDateSafe(dateStr) {
             return new Date(NaN);
         },
         
+countWindow() {
+    // Preferred count window in seconds; guard against stale/invalid stored values
+    return [15, 30, 60].includes(this.appSettings.countDuration) ? this.appSettings.countDuration : 30;
+},
+        
 startCount() {
     if (!this.activePatientId) return alert("Please establish or select a patient profile first.");
     clearInterval(this.timerInterval);   // ← guard: restarting mid-count must kill the old timer
+    const duration = this.countWindow(); // 15, 30 or 60s from settings
     this.isCounting = true;
     this.tapCount = 0;
-    this.timeLeft = 30;
+    this.timeLeft = duration;
     this.finalRate = null;
     this.hasSavedCurrentCount = false; // Reset the save state
-    this._countStart = Date.now();     // ← anchor the 30s window to wall-clock time
+    this._countStart = Date.now();     // ← anchor the count window to wall-clock time
     this.timerInterval = setInterval(() => {
-        this.timeLeft = Math.max(0, 30 - Math.round((Date.now() - this._countStart) / 1000));
+        this.timeLeft = Math.max(0, duration - Math.round((Date.now() - this._countStart) / 1000));
         if (this.timeLeft <= 0) this.finishCount();
     }, 250);
 },
@@ -3199,7 +3206,7 @@ cancelCount() {
     clearInterval(this.timerInterval);
     this.isCounting = false;
     this.tapCount = 0;
-    this.timeLeft = 30;
+    this.timeLeft = this.countWindow();
     this.finalRate = null;
     this.hasSavedCurrentCount = false;
 },        
@@ -3217,9 +3224,16 @@ registerTap() {
 finishCount() {
             clearInterval(this.timerInterval);
             this.isCounting = false;
-            this.finalRate = this.tapCount * 2; // Extrapolate 30s to 60s
-            
+            // Extrapolate the tap count to a full minute (×4 for 15s, ×2 for 30s, ×1 for 60s)
+            this.finalRate = Math.round(this.tapCount * (60 / this.countWindow()));
         },
+        
+setCountWindow(sec) {
+    if (![15, 30, 60].includes(sec)) return;
+    this.appSettings.countDuration = sec;
+    this.saveAppSettings();                 // keep it as the new preference
+    if (this.isCounting) this.startCount(); // restart cleanly with the new window
+},
         
 nudgeToSymptom(type) {
             this.showSymptomLog = true;
