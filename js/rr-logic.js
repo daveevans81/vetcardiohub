@@ -6944,7 +6944,7 @@ async generatePDF() {
         const ratio = canvas.height / canvas.width;
         if (!isFinite(ratio) || ratio <= 0) return;
         const imgData   = this.getCanvasWithWhiteBackground(canvas);
-        const ratio     = canvas.height / canvas.width;
+        
         const pdfH      = Math.round(180 * ratio);
         if (Y + pdfH > 280) { doc.addPage(); Y = 20; }
         sectionHeader(title);
