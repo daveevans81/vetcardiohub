@@ -4192,6 +4192,55 @@ _srrChartExportDataUrl(startDate, endDate) {
     chart.destroy();
     return out.toDataURL('image/jpeg', 0.92);
 },
+
+// ── Offscreen weight chart for PDF export — honours the Vet Export date
+//    range, immune to hidden-canvas staleness ──
+_weightChartExportDataUrl(startDate, endDate) {
+    const data = this.weightLog
+        .filter(w => {
+            if (w.patientId !== this.activePatientId) return false;
+            if (!startDate) return true;
+            const d = this.parseDateSafe(w.date);
+            return d >= startDate && d <= endDate;
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (data.length < 2) return null;
+
+    const unit = this.activePatientProfile?.weightUnit || 'kg';
+    const labels = data.map(w =>
+        new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })
+    );
+    const values = data.map(w => parseFloat(w.weightValue));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200; canvas.height = 480;
+    const chart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: { labels, datasets: [{
+            label: `Weight (${unit})`, data: values,
+            borderColor: '#0f766e', backgroundColor: 'rgba(15, 118, 110, 0.08)',
+            tension: 0.25, pointRadius: 3, fill: true, spanGaps: true
+        }]},
+        options: {
+            responsive: false, animation: false, devicePixelRatio: 2,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { maxRotation: 0, maxTicksLimit: 12 } },
+                y: { beginAtZero: false, title: { display: true, text: `Weight (${unit})` } }
+            }
+        }
+    });
+
+    // Flatten onto white for JPEG
+    const out = document.createElement('canvas');
+    out.width = canvas.width; out.height = canvas.height;
+    const ctx = out.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(canvas, 0, 0);
+    chart.destroy();
+    return out.toDataURL('image/jpeg', 0.92);
+},
                 
 renderChart() {
     if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
@@ -6870,7 +6919,9 @@ async generatePDF() {
  
     // Utility: embed a chart canvas image with auto page-break
     const embedCanvas = (canvas, title) => {
-        if (!canvas) return;
+        if (!canvas || !canvas.width || !canvas.height) return;
+        const ratio = canvas.height / canvas.width;
+        if (!isFinite(ratio) || ratio <= 0) return;
         const imgData   = this.getCanvasWithWhiteBackground(canvas);
         const ratio     = canvas.height / canvas.width;
         const pdfH      = Math.round(180 * ratio);
@@ -7195,10 +7246,19 @@ async generatePDF() {
         .filter(w => w.patientId === this.activePatientId && inRange(w.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    if (weightData.length > 0) {
-            embedCanvas(this.$refs.weightChartCanvas, 'Weight Trend Chart');
+    
+            if (weightData.length > 0) {
+            const wImg = this._weightChartExportDataUrl(startDate, endDate);
+            if (wImg) {
+                const pdfH = Math.round(180 * 480 / 1200);
+                if (Y + pdfH > 280) { doc.addPage(); Y = 20; }
+                sectionHeader('Weight Trend Chart', 15, 118, 110);
+                doc.addImage(wImg, 'JPEG', 14, Y, 180, pdfH);
+                Y += pdfH + 14;
+            }
             if (Y > 240) { doc.addPage(); Y = 20; }
             sectionHeader('Weight & Diet Log', 15, 118, 110);
+            
             const weightUnit = profile.weightUnit || 'kg';
             doc.autoTable({
                 startY: Y,
