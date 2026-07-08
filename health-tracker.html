@@ -1315,14 +1315,16 @@
                         </div>
                     </div>
             
-                    <div x-show="showManualSrr" class="summary-box info-box-blue" x-transition>
-                        <h3 class="mt-0 text-primary"><i class="fa-solid fa-pen-to-square"></i> Manual SRR Entry</h3>
-                        <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
-                            <label class="form-label">Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" class="form-control"></label>
-                            <label class="form-label">Date / Time: <input type="datetime-local" x-model="manualSrrDate" class="form-control"></label>
+                    <div x-show="showManualSrr" x-cloak x-transition class="vch-modal">
+                        <div class="vch-modal-card info-box-blue" style="text-align: center; padding: 20px; max-width: 26rem;">
+                            <h3 class="mt-0 text-primary"><i class="fa-solid fa-pen-to-square"></i> Manual SRR Entry</h3>
+                            <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
+                                <label class="form-label">Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" class="form-control"></label>
+                                <label class="form-label">Date / Time: <input type="datetime-local" x-model="manualSrrDate" class="form-control"></label>
+                            </div>
+                            <button @click="saveManualSrr()" class="btn btn-primary" style="width: 100%; max-width: 300px;">Save Reading</button>
+                            <button @click="showManualSrr = false" class="btn btn-outline mt-0" style="background:transparent; border:none;">Cancel</button>
                         </div>
-                        <button @click="saveManualSrr()" class="btn btn-primary" style="width: 100%; max-width: 300px;">Save Reading</button>
-                        <button @click="showManualSrr = false" class="btn btn-outline mt-0" style="background:transparent; border:none;">Cancel</button>
                     </div>
                 </div>
             </template>
@@ -1363,8 +1365,8 @@
         
             <template x-if="activePatientProfile?.modules?.srr">
             
-                <div x-show="finalRate !== null && !isCounting && isView('count')" x-cloak>
-                    <div class="summary-box" style="border: 1px solid #cbd5e1;">
+                <div x-show="finalRate !== null && !isCounting && isView('count')" x-cloak class="vch-modal">
+                    <div class="vch-modal-card" style="border: 1px solid #cbd5e1; text-align: center; padding: 20px; max-width: 26rem;">
                         <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
                         
                         <template x-if="clinicalInterpretation">
