@@ -4176,7 +4176,94 @@
                             </button>
                         </div>
                     </div>
+                         <!-- ── MORE > HELP & FAQs ── -->
+                    <div x-show="isView('more') && moreSection === 'help'" x-cloak style="margin-top: 20px;">
+                        <div class="card" style="margin-top:16px">
+                          <h2>FAQ &amp; Clinical Guidance</h2>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is a normal resting respiratory rate for a dog or cat?</summary>
+                            <p>A normal sleeping or resting respiratory rate for both dogs and cats should consistently be under 30 breaths per minute. Rates between 30 and 40 are considered borderline (equivocal) and should be recounted and interpreted in light of typical normal values for your pet and the current level of concern for heart disease, while rates consistently over 40 require veterinary attention.</p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I count my pet's breathing rate?</summary>
+                            <p>Wait until your pet is fully resting or in a deep sleep. Observe their chest moving in and out. One complete in-and-out motion counts as one breath. Count the number of breaths over 30 seconds and multiply by 2 to get the rate per minute. See <a href="/blog-posts/post2.html">our guide</a></p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Why is tracking my pet's sleeping breathing rate important?</summary>
+                            <p>In dogs and cats with heart disease, a rising resting respiratory rate is often the first clinical sign of fluid building up in the lungs (congestive heart failure). Tracking this rate allows owners to detect failure early, often before the pet shows signs of coughing or distress. See <a href="/blog-posts/post16.html">our guide</a></p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What should I do if my pet's respiratory rate is over 40?</summary>
+                            <p>If your pet is fully asleep (not dreaming or overly warm) and their breathing rate is consistently over 40 breaths per minute, this is a clinical emergency, especially if they have a known heart murmur or heart disease. You should contact your veterinary surgeon immediately.</p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is the difference between a sleeping and a resting respiratory rate?</summary>
+                            <p>A sleeping respiratory rate (SRR) is measured while your pet is genuinely asleep and is the most reliable value, as it is unaffected by activity, excitement, or panting. A resting respiratory rate is taken while the pet is awake but calm and settled. Both should sit comfortably under 30 breaths per minute; where the two differ, the sleeping rate is considered the more dependable clinical indicator.</p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Can I track more than one pet in the tracker?</summary>
+                            <p>Yes. The tracker supports multiple patient profiles, each storing its own species, breed, weight history, medication log, and respiratory rate readings. You can switch between pets at any time, and each profile keeps a fully independent clinical record.</p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Where is my pet's health data stored, and is it private?</summary>
+                            <p>All information is stored locally on your own device, within your browser. No data is uploaded to a server or shared with any third party, so your pet's clinical records remain entirely private to you. Because the data lives on your device, we recommend using the backup feature periodically to avoid loss if you clear your browser or change devices.</p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Can I export my pet's records to share with my veterinary surgeon?</summary>
+                            <p>Yes. Respiratory rate and medication logs can be exported as CSV files, and the tracker can generate a printable PDF summary complete with charts and history. A full JSON backup of every patient and record is also available for safekeeping or transfer to another device.</p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I choose the right respiratory rate alarm threshold for my pet?</summary>
+                            <p>The tracker uses a default cut-off of 30 breaths per minute, which suits most dogs and cats. Each patient profile also allows a custom threshold, so if your veterinary surgeon has advised a different target based on your pet's individual baseline or condition, you can set it per patient and interpretations will update accordingly.</p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">My pet's breathing rate is normal but they are coughing — should I be concerned?</summary>
+                            <p>A cough can arise from heart disease, airway disease, or both, and does not always accompany a raised respiratory rate. Logging cough frequency, character, and severity over time, alongside respiratory rate, helps your veterinary surgeon distinguish cardiac from respiratory causes. Any new, worsening, or persistent cough warrants veterinary assessment.</p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What do the ACVIM stages (A to D) mean?</summary>
+                            <p>The ACVIM staging system describes the progression of heart disease. Stage A denotes a pet at risk but with no detectable disease; Stage B a murmur or structural change without clinical signs (B1 without, B2 with heart enlargement); Stage C current or previous signs of heart failure; and Stage D advanced disease that is refractory to standard treatment. The tracker records staging over time so trends are clear.</p>
+                          </details></div>
+                        
+                          <div class="faq-item"><details>
+                            <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is the difference between fainting (syncope) and a seizure?</summary>
+                            <p>Syncope is a brief loss of consciousness caused by a temporary drop in blood flow to the brain, often triggered by exertion, excitement, or coughing, with rapid and complete recovery. A seizure is neurological in origin and more commonly involves limb paddling, chewing, or loss of bladder control, followed by a period of disorientation. The tracker's event diary captures the detail your veterinary surgeon needs to tell them apart.</p>
+                          </details></div>
+                        </div>
+                    </div>
                     
+                    
+                    <!-- ── MORE > ABOUT ── -->
+                    <div class="module-card" x-show="isView('more') && moreSection === 'about'" x-cloak style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
+                        <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-circle-info"></i> About VetCardioHub Health Tracker</h3>
+                        <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;">
+                            A free, private, browser-based monitoring tool for pets, those who are healthy, and those at risk of heart disease.
+                            All data is stored locally on your device and never uploaded to a server.
+                        </p>
+                        <p style="font-size: 0.8rem; color: #64748b;">
+                            Drug formulary last reviewed: <strong x-text="formularyReviewedLabel"></strong>
+                        </p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                            <button type="button" @click="showTermsModal = true" class="btn-nudge-static" style="background: #475569; font-size: 0.8rem; padding: 6px 12px;">Terms of Use</button>
+                            <button type="button" @click="showPrivacyModal = true" class="btn-nudge-static" style="background: #475569; font-size: 0.8rem; padding: 6px 12px;">Privacy</button>
+                            <button type="button" @click="forceShowDisclaimer()" class="btn-nudge-static" style="background: #475569; font-size: 0.8rem; padding: 6px 12px;">Clinical Disclaimer</button>
+                            <a href="/learning.html" class="btn-nudge-static" style="background: #0e7490; font-size: 0.8rem; padding: 6px 12px; text-decoration: none;"><i class="fa-solid fa-graduation-cap"></i> Learning Hub</a>
+                        </div>
+                        <p style="font-size: 0.72rem; color: #94a3b8; margin-top: 14px;">
+                            This application supports, and does not replace, the advice of your veterinary surgeon.
+                        </p>
+                    </div>
                     
                     
                                         <!-- ******************************** -->
@@ -4208,7 +4295,7 @@
                         </div>
                         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">Your data is stored locally. Create backups before clearing your browser history.</p>
                         
-                        !-- Storage health -->
+                        <!-- Storage health -->
                         <div style="display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 14px; margin-bottom: 12px; background: white; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.8rem; color: #475569;">
                             <span><i class="fa-solid fa-floppy-disk" style="color: #64748b;"></i> Last full backup: <strong x-text="lastBackupLabel"></strong></span>
                             <template x-if="storagePersisted !== null">
@@ -4515,92 +4602,8 @@
                                 
                             </div>
                         
-                        <!-- ── MORE > ABOUT ── -->
-                            <div class="module-card" x-show="isView('more') && moreSection === 'about'" x-cloak style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
-                                <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-circle-info"></i> About VetCardioHub Health Tracker</h3>
-                                <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;">
-                                    A free, private, browser-based monitoring tool for pets, those who are healthy, and those at risk of heart disease.
-                                    All data is stored locally on your device and never uploaded to a server.
-                                </p>
-                                <p style="font-size: 0.8rem; color: #64748b;">
-                                    Drug formulary last reviewed: <strong x-text="formularyReviewedLabel"></strong>
-                                </p>
-                                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
-                                    <button type="button" @click="showTermsModal = true" class="btn-nudge-static" style="background: #475569; font-size: 0.8rem; padding: 6px 12px;">Terms of Use</button>
-                                    <button type="button" @click="showPrivacyModal = true" class="btn-nudge-static" style="background: #475569; font-size: 0.8rem; padding: 6px 12px;">Privacy</button>
-                                    <button type="button" @click="forceShowDisclaimer()" class="btn-nudge-static" style="background: #475569; font-size: 0.8rem; padding: 6px 12px;">Clinical Disclaimer</button>
-                                    <a href="/learning.html" class="btn-nudge-static" style="background: #0e7490; font-size: 0.8rem; padding: 6px 12px; text-decoration: none;"><i class="fa-solid fa-graduation-cap"></i> Learning Hub</a>
-                                </div>
-                                <p style="font-size: 0.72rem; color: #94a3b8; margin-top: 14px;">
-                                    This application supports, and does not replace, the advice of your veterinary surgeon.
-                                </p>
-                            </div>
-                                <!-- ── MORE > HELP & FAQs ── -->
-                            <div x-show="isView('more') && moreSection === 'help'" x-cloak style="margin-top: 20px;">
-                                <div class="card" style="margin-top:16px">
-                                  <h2>FAQ &amp; Clinical Guidance</h2>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is a normal resting respiratory rate for a dog or cat?</summary>
-                                    <p>A normal sleeping or resting respiratory rate for both dogs and cats should consistently be under 30 breaths per minute. Rates between 30 and 40 are considered borderline (equivocal) and should be recounted and interpreted in light of typical normal values for your pet and the current level of concern for heart disease, while rates consistently over 40 require veterinary attention.</p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I count my pet's breathing rate?</summary>
-                                    <p>Wait until your pet is fully resting or in a deep sleep. Observe their chest moving in and out. One complete in-and-out motion counts as one breath. Count the number of breaths over 30 seconds and multiply by 2 to get the rate per minute. See <a href="/blog-posts/post2.html">our guide</a></p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Why is tracking my pet's sleeping breathing rate important?</summary>
-                                    <p>In dogs and cats with heart disease, a rising resting respiratory rate is often the first clinical sign of fluid building up in the lungs (congestive heart failure). Tracking this rate allows owners to detect failure early, often before the pet shows signs of coughing or distress. See <a href="/blog-posts/post16.html">our guide</a></p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What should I do if my pet's respiratory rate is over 40?</summary>
-                                    <p>If your pet is fully asleep (not dreaming or overly warm) and their breathing rate is consistently over 40 breaths per minute, this is a clinical emergency, especially if they have a known heart murmur or heart disease. You should contact your veterinary surgeon immediately.</p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is the difference between a sleeping and a resting respiratory rate?</summary>
-                                    <p>A sleeping respiratory rate (SRR) is measured while your pet is genuinely asleep and is the most reliable value, as it is unaffected by activity, excitement, or panting. A resting respiratory rate is taken while the pet is awake but calm and settled. Both should sit comfortably under 30 breaths per minute; where the two differ, the sleeping rate is considered the more dependable clinical indicator.</p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Can I track more than one pet in the tracker?</summary>
-                                    <p>Yes. The tracker supports multiple patient profiles, each storing its own species, breed, weight history, medication log, and respiratory rate readings. You can switch between pets at any time, and each profile keeps a fully independent clinical record.</p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Where is my pet's health data stored, and is it private?</summary>
-                                    <p>All information is stored locally on your own device, within your browser. No data is uploaded to a server or shared with any third party, so your pet's clinical records remain entirely private to you. Because the data lives on your device, we recommend using the backup feature periodically to avoid loss if you clear your browser or change devices.</p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Can I export my pet's records to share with my veterinary surgeon?</summary>
-                                    <p>Yes. Respiratory rate and medication logs can be exported as CSV files, and the tracker can generate a printable PDF summary complete with charts and history. A full JSON backup of every patient and record is also available for safekeeping or transfer to another device.</p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I choose the right respiratory rate alarm threshold for my pet?</summary>
-                                    <p>The tracker uses a default cut-off of 30 breaths per minute, which suits most dogs and cats. Each patient profile also allows a custom threshold, so if your veterinary surgeon has advised a different target based on your pet's individual baseline or condition, you can set it per patient and interpretations will update accordingly.</p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">My pet's breathing rate is normal but they are coughing — should I be concerned?</summary>
-                                    <p>A cough can arise from heart disease, airway disease, or both, and does not always accompany a raised respiratory rate. Logging cough frequency, character, and severity over time, alongside respiratory rate, helps your veterinary surgeon distinguish cardiac from respiratory causes. Any new, worsening, or persistent cough warrants veterinary assessment.</p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What do the ACVIM stages (A to D) mean?</summary>
-                                    <p>The ACVIM staging system describes the progression of heart disease. Stage A denotes a pet at risk but with no detectable disease; Stage B a murmur or structural change without clinical signs (B1 without, B2 with heart enlargement); Stage C current or previous signs of heart failure; and Stage D advanced disease that is refractory to standard treatment. The tracker records staging over time so trends are clear.</p>
-                                  </details></div>
-                                
-                                  <div class="faq-item"><details>
-                                    <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What is the difference between fainting (syncope) and a seizure?</summary>
-                                    <p>Syncope is a brief loss of consciousness caused by a temporary drop in blood flow to the brain, often triggered by exertion, excitement, or coughing, with rapid and complete recovery. A seizure is neurological in origin and more commonly involves limb paddling, chewing, or loss of bladder control, followed by a period of disorientation. The tracker's event diary captures the detail your veterinary surgeon needs to tell them apart.</p>
-                                  </details></div>
-                                </div>
-                            </div>
+                        
+                           
                         </div>
                     </div>
                     
