@@ -1156,6 +1156,25 @@
                         </button>
                     </div>
                 </div>
+                
+                
+                <!-- ******************************** -->
+                <!-- MORE VIEW — SUB-NAVIGATION       -->
+                <!-- ******************************** -->
+                <div x-show="isView('more')" x-cloak class="more-subnav" style="margin-top: 20px;">
+                    
+                    <div class="more-subnav__tabs">
+                        <template x-for="s in moreSections" :key="s.id">
+                            <button type="button"
+                                    @click="setMoreSection(s.id)"
+                                    class="more-tab"
+                                    :class="moreSection === s.id ? 'more-tab--active' : ''">
+                                <i class="fa-solid" :class="s.icon"></i>
+                                <span x-text="s.label"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
             </div>
             
             <div x-show="showPatientManager" class="summary-box" style="border: 2px solid #005f73; background: #f0fdfa;" x-transition>
@@ -3979,7 +3998,7 @@
                 <!-- MORE VIEW — SUB-NAVIGATION       -->
                 <!-- ******************************** -->
                 <div x-show="isView('more')" x-cloak class="more-subnav" style="margin-top: 20px;">
-                    <div class="more-subnav__label"><i class="fa-solid fa-gear"></i> Options</div>
+                    
                     <div class="more-subnav__tabs">
                         <template x-for="s in moreSections" :key="s.id">
                             <button type="button"
