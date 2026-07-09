@@ -475,12 +475,12 @@ get currentViewLabel() {
 
 // Focused tabs auto-expand their accordions; 'all' keeps the compact scroll
 _expandForView(v) {
-    if (v === 'meds')     { this.showMedLog = true; this.showDiagnosisLog = true; }
+    if (v === 'meds')     { this.showMedLog = true; this.showDiagnosisLog = true; this.showMedGraph = true; }
     if (v === 'wellness') { this.showSymptomLog = true; this.showWeightLogPanel = true;
                             this.showSyncopeLog = true; this.showVaccinationLogPanel = true;
                             this.showAntiparasiticPanel = true; }
     if (v === 'trends')   { this.showAnalytics = true; this.showMedGraph = true; this.$nextTick(() => this.renderWeightChart()); }
-    if (v === 'count')   { this.showLog = true; }
+    if (v === 'count')    { this.showLog = true; this.showAnalytics = true; }
 },
 
 setView(v) {

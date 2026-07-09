@@ -1127,7 +1127,7 @@
                                           : 'background:transparent; color:#64748b; border:1px dashed #cbd5e1;'">
                                     <i class="fa-solid"
                                        :class="activePatientProfile.modules[m.key] ? m.icon : 'fa-plus'"
-                                       style="font-size:0.6rem;"></i>
+                                       style="font-size:0.5rem;"></i>
                                     <span x-text="m.label"></span>
                                     <i x-show="activePatientProfile.modules[m.key]" class="fa-solid fa-check" style="font-size:0.55rem;"></i>
                                   </span>
@@ -3494,7 +3494,7 @@
                                     <!-- ******************************** -->
                                     <!-- SRR CHART and Analytics          -->
                                     <!-- ******************************** -->
-            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && isView('trends') && modOn('srr')" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: box-shadow 0.2s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && (isView('count') || isView('trends')) && modOn('srr')" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: box-shadow 0.2s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                     <button @click="showAnalytics = !showAnalytics" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F; transition: background 0.15s ease;" @mouseenter="$el.style.background='#dde6f3'" @mouseleave="$el.style.background='#e8eef7'">
                         <h3 style="margin: 0;">
@@ -3631,7 +3631,7 @@
                                     <!-- MED GRAPH                        -->
                                     <!-- ******************************** -->
             <template x-if="activePatientProfile?.modules?.medications">                                 
-                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && isView('trends') && modOn('medications')" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && (isView('meds') || isView('trends')) && modOn('medications')" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                         <button @click="showMedGraph = !showMedGraph" type="button" style="
                             width: 100%;
@@ -4057,7 +4057,7 @@
                                     <!-- ******************************** -->
                 
 
-                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && isView('more') && moreSection === 'data'" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 10px;" x-cloak>
+                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && ((isView('more') && moreSection === 'data') || activeView === 'trends')" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 10px;" x-cloak>
 
                     <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Vet Export</h3>
                     <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px;">
