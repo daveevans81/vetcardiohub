@@ -3995,24 +3995,10 @@
                 </template>
                 
                 <!-- ******************************** -->
-                <!-- MORE VIEW — SUB-NAVIGATION       -->
+                <!-- MORE VIEWS       -->
                 <!-- ******************************** -->
-                <div x-show="isView('more')" x-cloak class="more-subnav" style="margin-top: 20px;">
-                    
-                    <div class="more-subnav__tabs">
-                        <template x-for="s in moreSections" :key="s.id">
-                            <button type="button"
-                                    @click="setMoreSection(s.id)"
-                                    class="more-tab"
-                                    :class="moreSection === s.id ? 'more-tab--active' : ''">
-                                <i class="fa-solid" :class="s.icon"></i>
-                                <span x-text="s.label"></span>
-                            </button>
-                        </template>
-                    </div>
-                </div>
-                
-                
+
+                      
                 <!-- ── MORE > SETTINGS ── -->
                 <div class="module-card" x-show="isView('more') && moreSection === 'settings'" x-cloak style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
                     <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-sliders"></i> Settings</h3>
