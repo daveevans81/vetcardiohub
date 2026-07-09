@@ -5003,7 +5003,40 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
     display:none;
     }
 }
+@media (max-width: 600px) {
+    .vch-patient-banner { padding: 8px 10px !important; margin-bottom: 12px !important; }
+    .vch-patient-banner .flex-left { margin-bottom: 6px !important; }
+    .vch-patient-banner .fa-dog,
+    .vch-patient-banner .fa-cat { font-size: 1.2rem !important; }
+    .vch-patient-banner .module-pills-row { gap: 4px; }
+    .vch-patient-banner .module-pill { font-size: 0.62rem; padding: 2px 7px; }
+}
 
+.more-subnav__label {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: #94a3b8; font-weight: 700; margin-bottom: 8px;
+}
+.more-subnav__tabs {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    background: #f1f5f9; border: 1px solid #e2e8f0;
+    border-radius: 12px; padding: 6px;
+}
+.more-tab {
+    flex: 1 1 auto; min-width: 120px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 16px; border-radius: 9px;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    background: transparent; color: #475569; border: 1px solid transparent;
+    transition: background 0.15s, color 0.15s;
+}
+.more-tab:hover { background: #e2e8f0; }
+.more-tab--active {
+    background: #16325F; color: #fff; border-color: #16325F;
+    box-shadow: 0 2px 6px rgba(22, 50, 95, 0.25);
+}
+@media (max-width: 600px) {
+    .more-tab { min-width: calc(50% - 6px); padding: 12px 10px; font-size: 0.9rem; }
+}
 
 /*
 @media (max-width: 768px) {

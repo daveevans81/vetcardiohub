@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="/manifestrr.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="VCH Health Tracker">
+    <meta name="apple-mobile-web-app-title" content="VCH Vitals">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
@@ -25,11 +25,12 @@
    
     <link rel="stylesheet" href="styles.css">
 
-    <title>Veterinary Cardiac Health Tracker | VetCardioHub</title>
+    <title>VetCardioHub Vitals — Veterinary Cardiac Health Tracker | VetCardioHub</title>
     <meta name="description" content="Free interactive clinical health tracker for dogs and cats. Monitor sleeping respiratory rates (SRR) for congestive heart failure, log medication changes, and track seizure/syncope events.">
     <meta name="keywords" content="Medication log, seizure diary, syncope diary, Sleeping respiratory rate, SRR counter, congestive heart failure dog, congestive heart failure cat, veterinary cardiology tracker, VetCardioHub">
     
-    <meta property="og:title" content="Veterinary Cardiac Health Tracker | VetCardioHub">
+    <meta property="og:title" content="VetCardioHub Vitals — Veterinary Cardiac Health Tracker">
+
     <meta property="og:description" content="Free interactive health tracker. Monitor respiratory rates for congestive heart failure, map medication changes, and maintain a clinical syncope diary for your pet.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://vetcardiohub.com/health-tracker.html">
@@ -39,7 +40,7 @@
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta property="og:image" content="https://vetcardiohub.com/images/og-health-tracker.png">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Veterinary Cardiac Health Tracker | VetCardioHub">
+    <meta name="twitter:title" content="VetCardioHub Vitals — Veterinary Cardiac Health Tracker">
     <meta name="twitter:description" content="Free interactive health tracker. Monitor respiratory rates for congestive heart failure, map medication changes, and maintain a clinical syncope diary for your pet.">
     <meta name="twitter:image" content="https://vetcardiohub.com/images/og-health-tracker.png">
     
@@ -63,7 +64,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "VetCardioHub Cardiac Health Tracker",
+  "name": "VetCardioHub Vitals",
   "description": "A comprehensive clinical web application designed for pet owners and veterinarians to measure sleeping respiratory rates (SRR), chart medication changes, track ACVIM staging, and log syncopal events in cardiac patients.",
   "url": "https://vetcardiohub.com/health-tracker.html",
   "applicationCategory": "HealthApplication",
@@ -168,7 +169,7 @@
 
     /* 5. Custom Branding Header */
     .paginatedHistory::before {
-        content: "VETCARDIOHUB SRR TRACKER";
+        content: "VETCARDIOHUB VITALS";
         display: block;
         font-size: 10px;
         letter-spacing: 2px;
@@ -326,7 +327,7 @@
             </div>
             
             
-            <header class="hero-header card">
+            <header class="hero-header card" x-show="activeView === 'all'" x-cloak>
         
             <!-- Collapsed mini-title: always visible -->
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -553,7 +554,7 @@
                                     class="brand-logo">
                                 <div>
                                     <div style="font-size: 1rem; font-weight: bold; color: #1e293b; line-height: 1.2;">VetCardioHub</div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">Cardiac Health Tracker</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Vitals · Cardiac Health Tracker</div>
                                 </div>
                             </div>
                         
@@ -1081,9 +1082,9 @@
                                 <!-- ******************************** -->
             
             <div class="summary-box" x-show="patients.length > 0 && !showPatientManager">
-                <div class="flex-between" style="background: white; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                <div class="flex-between vch-patient-banner" style="background: white; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
                     <div style="display: flex; flex-direction: column; text-align: left;">
-                        <div class="flex-left" style="gap: 10px; margin-bottom: 20px;">
+                        <div class="flex-left" style="gap: 10px; margin-bottom: 10px;">
                             <i class="fa-solid" :class="speciesIcon(activePatientProfile)"
                              style="font-size: 1.5rem; color: #64748b;"></i>
                             
@@ -1092,21 +1093,22 @@
                                     <option :value="patient.id" x-text="`${toTitleCase(patient.name)} ${patient.ownerName ? '('+toTitleCase(patient.ownerName)+')' : ''}`"></option>
                                 </template>
                             </select>
-                        </div>
-                        <div class="text-sm text-muted mt-0">
-                            <span x-text="computedAgeText"></span> | 
-                            <span x-text="toTitleCase(activePatientProfile?.breed) || 'Mixed'"></span> | 
-                            <span x-text="latestWeightText"></span>
-                            <template x-if="primaryCardiacDiagnosis && primaryCardiacDiagnosis !== 'N/A'">
-                                <span style="font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">
-                                    <span x-text="primaryCardiacDiagnosis"></span>
-                                </span>
-                            </template>
-                            <template x-if="currentClinicalStatus && currentClinicalStatus.acvimStage !== 'N/A'">
-                                <span style="font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">
-                                    <span x-text="currentClinicalStatus.acvimStage"></span>
-                                </span>
-                            </template>
+                        
+                            <span class="text-sm text-muted mt-0">
+                                <span x-text="computedAgeText"></span> | 
+                                <span x-text="toTitleCase(activePatientProfile?.breed) || 'Mixed'"></span> | 
+                                <span x-text="latestWeightText"></span>
+                                <template x-if="primaryCardiacDiagnosis && primaryCardiacDiagnosis !== 'N/A'">
+                                    <span style="font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">
+                                        <span x-text="primaryCardiacDiagnosis"></span>
+                                    </span>
+                                </template>
+                                <template x-if="currentClinicalStatus && currentClinicalStatus.acvimStage !== 'N/A'">
+                                    <span style="font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">
+                                        <span x-text="currentClinicalStatus.acvimStage"></span>
+                                    </span>
+                                </template>
+                            </span>
                         </div>
                         <template x-if="activePatientProfile?.modules">
                         <!-- Module status pills -->
@@ -3976,18 +3978,19 @@
                 <!-- ******************************** -->
                 <!-- MORE VIEW — SUB-NAVIGATION       -->
                 <!-- ******************************** -->
-                <div x-show="isView('more')" x-cloak style="margin-top: 20px; display: flex; gap: 6px; flex-wrap: wrap;">
-                    <template x-for="s in moreSections" :key="s.id">
-                        <button type="button"
-                                @click="setMoreSection(s.id)"
-                                :style="moreSection === s.id
-                                    ? 'background: #16325F; color: white; border: 1px solid #16325F;'
-                                    : 'background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;'"
-                                style="padding: 8px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid" :class="s.icon"></i>
-                            <span x-text="s.label"></span>
-                        </button>
-                    </template>
+                <div x-show="isView('more')" x-cloak class="more-subnav" style="margin-top: 20px;">
+                    <div class="more-subnav__label"><i class="fa-solid fa-gear"></i> Options</div>
+                    <div class="more-subnav__tabs">
+                        <template x-for="s in moreSections" :key="s.id">
+                            <button type="button"
+                                    @click="setMoreSection(s.id)"
+                                    class="more-tab"
+                                    :class="moreSection === s.id ? 'more-tab--active' : ''">
+                                <i class="fa-solid" :class="s.icon"></i>
+                                <span x-text="s.label"></span>
+                            </button>
+                        </template>
+                    </div>
                 </div>
                 
                 
@@ -4272,7 +4275,7 @@
                 
                 <!-- ── MORE > ABOUT ── -->
                 <div class="module-card" x-show="isView('more') && moreSection === 'about'" x-cloak style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
-                    <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-circle-info"></i> About VetCardioHub Health Tracker</h3>
+                    <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-circle-info"></i> About VetCardioHub Vitals</h3>
                     <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;">
                         A free, private, browser-based monitoring tool for pets, those who are healthy, and those at risk of heart disease.
                         All data is stored locally on your device and never uploaded to a server.
