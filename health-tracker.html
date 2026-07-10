@@ -4352,143 +4352,145 @@
                     </div>
                 
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-envelope-open-text" style="color: #7c3aed;"></i>
-                            Cardalis App Email Import<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('cardalis_import')"></i>
-                        </h4>
-                        <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 10px;">
-                            Paste the body of a Cardalis export email to bulk-import readings.
-                        </p>
-                    
-                        <button @click="showCardalisImport = !showCardalisImport" 
-                                class="btn-nudge-static" 
-                                style="background: #7c3aed; font-size: 0.8rem; padding: 6px 12px; width: 100%;">
-                            <i class="fa-solid fa-paste"></i>
-                            <span x-text="showCardalisImport ? 'Cancel' : 'Paste & Import Email'"></span>
-                        </button>
-                    
-                        <div x-show="showCardalisImport" x-transition style="margin-top: 12px;">
-                            <textarea 
-                                x-model="cardalisEmailText"
-                                rows="8"
-                                placeholder="In the Cardalis App, go to 'Breathing Rate Graph' > 'Email' to generate an export dataset email. You may need to add a 'vet email' in under settings, this could be your own for ease.
-                                
-                                Paste the full Cardalis export email here...
-                    
-                    Example:
-                    Dear Vet:Please find attached breathing rate for Bella
-                    BreathCount: 26
-                    Date & Time: 2025-12-21 11:54:38
-                    ..."
-                                style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; 
-                                       font-size: 0.8rem; font-family: monospace; resize: vertical; 
-                                       box-sizing: border-box; color: #334155; line-height: 1.5;">
-                            </textarea>
-                            <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">
-                                <button @click="cardalisEmailText = ''" 
-                                        style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; 
-                                               background: white; cursor: pointer; font-size: 0.8rem; color: #475569;">
-                                    Clear
-                                </button>
-                                <button @click="importCardalisEmail()" 
-                                        class="btn-nudge-static"
-                                        style="background: #7c3aed; font-size: 0.8rem; padding: 6px 14px;">
-                                    <i class="fa-solid fa-file-import"></i> Import Readings
-                                </button>
-                            </div>
-                            <p style="font-size: 0.72rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
-                                <i class="fa-solid fa-circle-info"></i>
-                                Pet name is read from the email header. A new profile is created automatically if needed. 
-                                Duplicate readings (within 60 seconds of an existing entry) are skipped silently.
-                            </p>
-                            <p style="font-size: 0.7rem; color: #94a3b8; margin: -4px 0 10px; font-style: italic;">
-                                Cardalis&reg; is a trademark of Ceva Sant&eacute; Animale. VetCardioHub is an independent
-                                tool and is not affiliated with, endorsed by, or sponsored by Ceva. This feature parses
-                                only the export text you choose to paste.
-                            </p>
-                        </div>
-                    </div>
-                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-heart-pulse" style="color: #e11d48;"></i>
-                            Heart2Heart App Import<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('heart2heart_import')"></i>
-                        </h4>
-                        <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 10px;">
-                            Paste text copied directly from a Heart2Heart PDF export table to import to the <strong>active patient</strong>.
-                        </p>
-                    
-                        <button @click="showHeart2HeartImport = !showHeart2HeartImport" 
-                                class="btn-nudge-static" 
-                                style="background: #e11d48; font-size: 0.8rem; padding: 6px 12px; width: 100%;">
-                            <i class="fa-solid fa-paste"></i>
-                            <span x-text="showHeart2HeartImport ? 'Cancel' : 'Paste & Import Data'"></span>
-                        </button>
-                    
-                        <div x-show="showHeart2HeartImport" x-transition style="margin-top: 12px;">
-                            <textarea 
-                                x-model="heart2HeartText"
-                                rows="8"
-                                placeholder="Ensure you have the correct patient selected in VetCardioHub first!
-                                
-                    Open your Heart2Heart PDF, highlight the table, copy it, and paste it here.
-                    
-                    Example:
-                    Date BPM Comments
-                    19 Jun 2026, 18:55 36
-                    20 Jun 2026, 09:29 44
-                    23 Jun 2026, 18:48 26 test comment"
-                                style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; 
-                                       font-size: 0.8rem; font-family: monospace; resize: vertical; 
-                                       box-sizing: border-box; color: #334155; line-height: 1.5;">
-                            </textarea>
-                            <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">
-                                <button @click="heart2HeartText = ''" 
-                                        style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; 
-                                               background: white; cursor: pointer; font-size: 0.8rem; color: #475569;">
-                                    Clear
-                                </button>
-                                <button @click="importHeart2HeartData()" 
-                                        class="btn-nudge-static"
-                                        style="background: #e11d48; font-size: 0.8rem; padding: 6px 14px;">
-                                    <i class="fa-solid fa-file-import"></i> Import Readings
-                                </button>
-                            </div>
-                            <p style="font-size: 0.72rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
-                                <i class="fa-solid fa-triangle-exclamation" style="color: #fbbf24;"></i>
-                                <strong>Warning:</strong> Heart2Heart exports do not contain the pet's name. The data will be imported into the currently active profile in the app header.
-                            </p>
-                            <p style="font-size: 0.7rem; color: #94a3b8; margin: -4px 0 10px; font-style: italic;">
-                                Heart2Heart&trade; is a trademark of Boehringer Ingelheim. VetCardioHub is an independent
-                                tool and is not affiliated with, endorsed by, or sponsored by Boehringer Ingelheim. This feature parses only the export text you choose to paste.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
                 <div class="summary-box" x-show="isView('more') && moreSection === 'data'" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
-                        <button @click="showImportExport = !showImportExport" type="button" style="
-                            width: 100%;
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            padding: 12px 16px;
-                            background: #e8eef7;
-                            border: 1px solid #c8d6eb;
-                            border-radius: 6px;
-                            cursor: pointer;
-                            font-weight: bold;
-                            color: #16325F;
-                            transition: background 0.15s ease;
-                        " @mouseenter="$el.style.background='#dde6f3'"
-                           @mouseleave="$el.style.background='#e8eef7'">
-                            
-                            <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Section Import / Exports</h3>
-                            <i class="fa-solid" :class="showImportExport ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                        </button>
-                                               
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-envelope-open-text" style="color: #7c3aed;"></i>
+                                Cardalis App Email Import<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('cardalis_import')"></i>
+                            </h4>
+                            <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 10px;">
+                                Paste the body of a Cardalis export email to bulk-import readings.
+                            </p>
+                        
+                            <button @click="showCardalisImport = !showCardalisImport" 
+                                    class="btn-nudge-static" 
+                                    style="background: #7c3aed; font-size: 0.8rem; padding: 6px 12px; width: 100%;">
+                                <i class="fa-solid fa-paste"></i>
+                                <span x-text="showCardalisImport ? 'Cancel' : 'Paste & Import Email'"></span>
+                            </button>
+                        
+                            <div x-show="showCardalisImport" x-transition style="margin-top: 12px;">
+                                <textarea 
+                                    x-model="cardalisEmailText"
+                                    rows="8"
+                                    placeholder="In the Cardalis App, go to 'Breathing Rate Graph' > 'Email' to generate an export dataset email. You may need to add a 'vet email' in under settings, this could be your own for ease.
+                                    
+                                    Paste the full Cardalis export email here...
+                        
+                        Example:
+                        Dear Vet:Please find attached breathing rate for Bella
+                        BreathCount: 26
+                        Date & Time: 2025-12-21 11:54:38
+                        ..."
+                                    style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                           font-size: 0.8rem; font-family: monospace; resize: vertical; 
+                                           box-sizing: border-box; color: #334155; line-height: 1.5;">
+                                </textarea>
+                                <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">
+                                    <button @click="cardalisEmailText = ''" 
+                                            style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                                   background: white; cursor: pointer; font-size: 0.8rem; color: #475569;">
+                                        Clear
+                                    </button>
+                                    <button @click="importCardalisEmail()" 
+                                            class="btn-nudge-static"
+                                            style="background: #7c3aed; font-size: 0.8rem; padding: 6px 14px;">
+                                        <i class="fa-solid fa-file-import"></i> Import Readings
+                                    </button>
+                                </div>
+                                <p style="font-size: 0.72rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                    Pet name is read from the email header. A new profile is created automatically if needed. 
+                                    Duplicate readings (within 60 seconds of an existing entry) are skipped silently.
+                                </p>
+                                <p style="font-size: 0.7rem; color: #94a3b8; margin: -4px 0 10px; font-style: italic;">
+                                    Cardalis&reg; is a trademark of Ceva Sant&eacute; Animale. VetCardioHub is an independent
+                                    tool and is not affiliated with, endorsed by, or sponsored by Ceva. This feature parses
+                                    only the export text you choose to paste.
+                                </p>
+                            </div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-heart-pulse" style="color: #e11d48;"></i>
+                                Heart2Heart App Import<i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click="openGlossary('heart2heart_import')"></i>
+                            </h4>
+                            <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 10px;">
+                                Paste text copied directly from a Heart2Heart PDF export table to import to the <strong>active patient</strong>.
+                            </p>
+                        
+                            <button @click="showHeart2HeartImport = !showHeart2HeartImport" 
+                                    class="btn-nudge-static" 
+                                    style="background: #e11d48; font-size: 0.8rem; padding: 6px 12px; width: 100%;">
+                                <i class="fa-solid fa-paste"></i>
+                                <span x-text="showHeart2HeartImport ? 'Cancel' : 'Paste & Import Data'"></span>
+                            </button>
+                        
+                            <div x-show="showHeart2HeartImport" x-transition style="margin-top: 12px;">
+                                <textarea 
+                                    x-model="heart2HeartText"
+                                    rows="8"
+                                    placeholder="Ensure you have the correct patient selected in VetCardioHub first!
+                                    
+                        Open your Heart2Heart PDF, highlight the table, copy it, and paste it here.
+                        
+                        Example:
+                        Date BPM Comments
+                        19 Jun 2026, 18:55 36
+                        20 Jun 2026, 09:29 44
+                        23 Jun 2026, 18:48 26 test comment"
+                                    style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                           font-size: 0.8rem; font-family: monospace; resize: vertical; 
+                                           box-sizing: border-box; color: #334155; line-height: 1.5;">
+                                </textarea>
+                                <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">
+                                    <button @click="heart2HeartText = ''" 
+                                            style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; 
+                                                   background: white; cursor: pointer; font-size: 0.8rem; color: #475569;">
+                                        Clear
+                                    </button>
+                                    <button @click="importHeart2HeartData()" 
+                                            class="btn-nudge-static"
+                                            style="background: #e11d48; font-size: 0.8rem; padding: 6px 14px;">
+                                        <i class="fa-solid fa-file-import"></i> Import Readings
+                                    </button>
+                                </div>
+                                <p style="font-size: 0.72rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
+                                    <i class="fa-solid fa-triangle-exclamation" style="color: #fbbf24;"></i>
+                                    <strong>Warning:</strong> Heart2Heart exports do not contain the pet's name. The data will be imported into the currently active profile in the app header.
+                                </p>
+                                <p style="font-size: 0.7rem; color: #94a3b8; margin: -4px 0 10px; font-style: italic;">
+                                    Heart2Heart&trade; is a trademark of Boehringer Ingelheim. VetCardioHub is an independent
+                                    tool and is not affiliated with, endorsed by, or sponsored by Boehringer Ingelheim. This feature parses only the export text you choose to paste.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-box" x-show="isView('more') && moreSection === 'data'" style="margin-top: 40px; border-color: #cbd5e1; background: #f8fafc; text-align: left;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
+                            <button @click="showImportExport = !showImportExport" type="button" style="
+                                width: 100%;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                padding: 12px 16px;
+                                background: #e8eef7;
+                                border: 1px solid #c8d6eb;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-weight: bold;
+                                color: #16325F;
+                                transition: background 0.15s ease;
+                            " @mouseenter="$el.style.background='#dde6f3'"
+                               @mouseleave="$el.style.background='#e8eef7'">
+                                
+                                <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Section Import / Exports</h3>
+                                <i class="fa-solid" :class="showImportExport ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </button>
+                                                   
+                        </div>
                     </div>
                    
                     
