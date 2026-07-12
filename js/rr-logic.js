@@ -5939,12 +5939,12 @@ importHeart2HeartData() {
     // Strategy: capture the two mandatory fields, then optionally consume
     // the four clinical fields that follow before the next BreathCount.
 
-    const entryRegex = new RegExp(
+const entryRegex = new RegExp(
         'BreathCount:\\s*(\\d+)' +                              // [1] rate
         '[\\s\\S]*?' +
         'Date\\s*&\\s*Time:\\s*(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2})' + // [2] datetime
         '(?:[\\s\\S]*?Breathing\\s*Effort:\\s*([^\\n]*))?'  +  // [3] effort (optional)
-        '(?:[\\s\\S]*?Exercise\\s*Abilit?y:\\s*([^\\n]*))?'  + // [4] exercise (optional, handles typo)
+        '(?:[\\s\\S]*?Exercise\\s*Abili?ty:\\s*([^\\n]*))?'  + // [4] exercise (optional, handles "Abilty" typo)
         '(?:[\\s\\S]*?Alertness:\\s*([^\\n]*))?'             +  // [5] alertness (optional)
         '(?:[\\s\\S]*?Comments?:\\s*([^\\n]*))?',               // [6] comment (optional)
         'gi'
