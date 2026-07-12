@@ -1733,8 +1733,8 @@
                                                 <input type="number" x-model="newActivity.durationMins" placeholder="e.g. 45" class="form-input">
                                             </div>
                                             <div>
-                                                <label class="form-label">Distance:</label>
-                                                <input type="text" x-model="newActivity.distance" placeholder="e.g. 2 miles" class="form-input">
+                                                <label class="form-label">Distance (<span x-text="distanceLabel(appSettings.distanceUnit)"></span>):</label>
+                                                <input type="number" step="0.01" min="0" x-model.number="newActivity.distanceValue" placeholder="e.g. 2" class="form-input">
                                             </div>
                                         </div>
                                         
@@ -1758,10 +1758,10 @@
                                                 <div>
                                                     <strong x-text="a.date" style="color: #1e293b;"></strong> - 
                                                     <span :class="['Reduced', 'Lethargic'].includes(a.status) ? 'text-danger font-bold' : 'text-info'" x-text="a.status"></span><br>
-                                                    <span style="color: #475569;" x-show="a.durationMins || a.distance">
+                                                    <span style="color: #475569;" x-show="a.durationMins || (a.distanceValue !== '' && a.distanceValue != null)">
                                                         <span x-show="a.durationMins" x-text="`${a.durationMins}m`"></span>
-                                                        <span x-show="a.durationMins && a.distance" style="color: #cbd5e1;"> | </span>
-                                                        <span x-show="a.distance" x-text="a.distance"></span>
+                                                        <span x-show="a.durationMins && a.distanceValue !== '' && a.distanceValue != null" style="color: #cbd5e1;"> | </span>
+                                                        <span x-show="a.distanceValue !== '' && a.distanceValue != null" x-text="`${a.distanceValue} ${distanceLabel(a.distanceUnit || appSettings.distanceUnit)}`"></span>
                                                     </span>
                                                 </div>
                                                 <div style="display: flex; gap: 8px;">
@@ -4028,6 +4028,18 @@
                                 <input type="number" min="10" max="60" x-model.number="appSettings.defaultSrrCutoff" @change="saveAppSettings()" class="border rounded p-2 text-sm" style="flex: 1;" title="Default SRR alarm cutoff (breaths/min)">
                             </div>
                             <p style="font-size: 0.7rem; color: #94a3b8; margin: 6px 0 0;">Unit &middot; SRR alarm cutoff (breaths/min)</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <h4 style="margin-top: 0; font-size: 0.95rem; color: #334155;">Activity distance unit</h4>
+                            <p style="font-size: 0.75rem; color: #64748b;">Unit for logged walk distances. Changing this converts every existing entry.</p>
+                            <select :value="appSettings.distanceUnit" @change="setDistanceUnit($event.target.value)" class="border rounded p-2 text-sm bg-white" style="width: 100%;">
+                                <option value="miles">Miles</option>
+                                <option value="km">Kilometres</option>
+                                <option value="metres">Metres</option>
+                                <option value="feet">Feet</option>
+                            </select>
+                            <p style="font-size: 0.7rem; color: #94a3b8; margin: 6px 0 0;">Metres/feet are useful for patients that can only manage short distances.</p>
                         </div>
                         
                         <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">

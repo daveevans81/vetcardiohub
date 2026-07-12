@@ -147,7 +147,8 @@ vetExportModules: {
             date: new Date().toISOString().split('T')[0],
             status: 'Normal', 
             durationMins: '', 
-            distance: '', // e.g., "2 miles", "3 km"
+            distanceValue: '',      // numeric, in appSettings.distanceUnit
+            distanceUnit: null,     // resolved to appSettings.distanceUnit when the form opens
             notes: ''
         },
 
@@ -498,14 +499,18 @@ appSettings: {
     defaultWeightUnit: 'kg',          // pre-fills new patient profiles
     defaultSrrCutoff: 30,             // pre-fills new patient profiles
     countDuration: 30,                // preferred SRR count window (seconds): 15, 30 or 60
-    backupWarnDays: 14                // backup staleness threshold
+    backupWarnDays: 14,                // backup staleness threshold
+    distanceUnit: null                // 'miles'|'feet'|'km'|'metres' — derived from locale on first run
 },
+
 loadAppSettings() {
     try {
         const saved = JSON.parse(localStorage.getItem('vch_appSettings'));
-        if (saved && typeof saved === 'object') Object.assign(this.appSettings, saved);
+if (saved && typeof saved === 'object') Object.assign(this.appSettings, saved);
     } catch (e) {}
+    if (!this.appSettings.distanceUnit) this.appSettings.distanceUnit = this._defaultDistanceUnit();
 },
+
 saveAppSettings() {
     this.saveToStorage('vch_appSettings', this.appSettings);
 },
@@ -825,6 +830,7 @@ init() {
         // Restore last-used view
     try {
         this.loadAppSettings();
+        this.migrateActivityDistances();
         let savedView = localStorage.getItem('vch_activeView');
         if (savedView === 'data') savedView = 'more';          // legacy id migration
         if (this.appSettings.defaultLandingView !== 'remember')
@@ -1294,6 +1300,78 @@ get filteredStats() {
 
 _defaultRegion() {
     return 'uk';   // project home base; could later derive from locale
+},
+
+_defaultDistanceUnit() {
+    try {
+        const loc = navigator.language || 'en-GB';
+        const region = ((new Intl.Locale(loc).region) || loc.split('-')[1] || '').toUpperCase();
+        return (region === 'GB' || region === 'US') ? 'miles' : 'km';
+    } catch (e) { return 'miles'; }
+},
+
+// metres per unit — canonical conversion table
+_distanceMetres: { miles: 1609.344, feet: 0.3048, km: 1000, metres: 1 },
+
+// short unit label for display
+distanceLabel(unit) {
+    return ({ miles: 'miles', feet: 'ft', km: 'km', metres: 'm' })[unit] || unit || '';
+},
+
+// convert a numeric value between units (returns Number to 3 dp, or null if not numeric)
+convertDistance(value, fromUnit, toUnit) {
+    const v = parseFloat(value);
+    if (isNaN(v)) return null;
+    const f = this._distanceMetres[fromUnit], t = this._distanceMetres[toUnit];
+    if (!f || !t) return v;
+    return Math.round((v * f / t) * 1000) / 1000;
+},
+
+// parse a legacy free-text distance ("2 miles", "500m", "3") into {value, unit}
+_parseDistanceText(txt, fallbackUnit) {
+    const s = String(txt == null ? '' : txt).trim();
+    if (!s) return { value: '', unit: fallbackUnit };
+    const num = parseFloat(s.replace(/[^0-9.]/g, ''));
+    let unit = fallbackUnit;
+    if (/mile/i.test(s))                 unit = 'miles';
+    else if (/(km|kilomet)/i.test(s))    unit = 'km';
+    else if (/(feet|foot|\bft\b)/i.test(s)) unit = 'feet';
+    else if (/(metre|meter|\bm\b)/i.test(s)) unit = 'metres';
+    return { value: isNaN(num) ? '' : num, unit };
+},
+
+// one-time migration of legacy text `distance` -> distanceValue + distanceUnit
+migrateActivityDistances() {
+    if (!Array.isArray(this.activityLog)) return;
+    let changed = false;
+    this.activityLog.forEach(a => {
+        if (a.distanceValue === undefined) {
+            const { value, unit } = this._parseDistanceText(a.distance, this.appSettings.distanceUnit);
+            a.distanceValue = value;
+            a.distanceUnit  = value === '' ? null : unit;
+            delete a.distance;
+            changed = true;
+        }
+    });
+    if (changed) this.saveToStorage('vch_activityLog', this.activityLog);
+},
+
+// change the global unit AND back-convert every stored entry
+setDistanceUnit(newUnit) {
+    const oldUnit = this.appSettings.distanceUnit;
+    if (!newUnit || newUnit === oldUnit) return;
+    (this.activityLog || []).forEach(a => {
+        if (a.distanceValue !== '' && a.distanceValue != null) {
+            const conv = this.convertDistance(a.distanceValue, a.distanceUnit || oldUnit, newUnit);
+            if (conv !== null) { a.distanceValue = conv; a.distanceUnit = newUnit; }
+        } else {
+            a.distanceUnit = newUnit;
+        }
+    });
+    this.appSettings.distanceUnit = newUnit;
+    this.saveAppSettings();
+    this.saveToStorage('vch_activityLog', this.activityLog);
+    if (typeof this.renderChart === 'function') this.$nextTick(() => this.renderChart());
 },
 
 get antiparasiticRegion() {
@@ -3035,7 +3113,9 @@ loadActivityForDate() {
             } else {
                 this.newActivity = {
                     date: this.newActivity.date,
-                    status: 'Normal', durationMins: '', distance: '', notes: ''
+                    status: 'Normal', durationMins: '',
+                    distanceValue: '', distanceUnit: this.appSettings.distanceUnit,
+                    notes: ''
                 };
             }
         },
@@ -3053,7 +3133,12 @@ closeActivityForm() {
 
 saveActivity() {
             if (!this.activePatientId) return alert("Select a patient first.");
-            
+
+            if (!this.newActivity.distanceUnit) this.newActivity.distanceUnit = this.appSettings.distanceUnit;
+            this.newActivity.distanceValue =
+                (this.newActivity.distanceValue === '' || this.newActivity.distanceValue == null)
+                    ? '' : parseFloat(this.newActivity.distanceValue);
+
             const existingIndex = this.activityLog.findIndex(a => a.patientId === this.activePatientId && a.date === this.newActivity.date);
             
             if (existingIndex > -1) {
@@ -4233,7 +4318,9 @@ get compiledTimeline() {
             if (this.showActivityOverlay && Array.isArray(this.activityLog)) {
                 this.activityLog.filter(a => a.patientId === this.activePatientId).forEach(a => {
                     if (isWithinRange(safeTimestamp(a.date))) {
-                        let metric = a.durationMins ? `${a.durationMins}m` : (a.distance || '');
+                        let metric = a.durationMins ? `${a.durationMins}m`
+                            : ((a.distanceValue !== '' && a.distanceValue != null)
+                                ? `${a.distanceValue} ${this.distanceLabel(a.distanceUnit || this.appSettings.distanceUnit)}` : '');
                         combinedEvents.push({ type: 'Activity', dateObj: new Date(a.date), displayDate: new Date(a.date).toLocaleDateString(), summary: `${a.status} ${metric ? '('+metric+')' : ''}`, notes: a.notes || '' });
                     }
                 });
@@ -4529,13 +4616,14 @@ renderChart() {
                 const a = ev.data;
                 let actVal = null;
                 if (this.activityPlotType === 'durationMins' && a.durationMins) actVal = parseFloat(a.durationMins);
-                else if (this.activityPlotType === 'distance' && a.distance) {
-                    const parsed = parseFloat(a.distance.replace(/[^\d.]/g, ''));
-                    if (!isNaN(parsed)) actVal = parsed;
+                else if (this.activityPlotType === 'distance' && a.distanceValue !== '' && a.distanceValue != null) {
+                    // normalise every point to the current global unit before plotting
+                    const parsed = this.convertDistance(a.distanceValue, a.distanceUnit || this.appSettings.distanceUnit, this.appSettings.distanceUnit);
+                    if (parsed !== null) actVal = parsed;
                 }
                 if (actVal !== null) {
                     activityDataPoints[i] = actVal;
-                    activityTooltips[i] = `Activity (${a.status}): ${this.activityPlotType === 'durationMins' ? a.durationMins + 'm' : a.distance}`;
+                    activityTooltips[i] = `Activity (${a.status}): ${this.activityPlotType === 'durationMins' ? a.durationMins + 'm' : (a.distanceValue + ' ' + this.distanceLabel(a.distanceUnit || this.appSettings.distanceUnit))}`;
                 }
             }
         });
@@ -6236,7 +6324,7 @@ importCoughCSV(event) {
 exportActivityCSV() {
     if (!this.activityLog || this.activityLog.length === 0) return alert("No activity data to export.");
 
-    const headers = "Date,PatientName,Status,DurationMins,Distance,Notes\n";
+    const headers = "Date,PatientName,Status,DurationMins,DistanceValue,DistanceUnit,Notes\n";
     const rows = this.activityLog.map(a => {
         const patient = this.patients.find(p => p.id === a.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
@@ -6245,7 +6333,8 @@ exportActivityCSV() {
             `"${patientName}"`,
             `"${this.sanitiseCSV(a.status || '')}"`,
             `"${this.sanitiseCSV(a.durationMins || '')}"`,
-            `"${this.sanitiseCSV(a.distance || '')}"`,
+            `"${this.sanitiseCSV(a.distanceValue ?? '')}"`,
+            `"${this.sanitiseCSV(a.distanceUnit || '')}"`,
             `"${this.sanitiseCSV(a.notes || '')}"`
         ].join(',');
     }).join("\n");
@@ -6281,15 +6370,24 @@ importActivityCSV(event) {
                 const patient = this.patients.find(p => p.name.toLowerCase() === patientName.toLowerCase());
                 if (!patient) { skipped++; continue; }
 
-                this.activityLog.push({
+               const rec = {
                     id: this.generateId(),
                     patientId: patient.id,
                     date: clean(parts[0]),
                     status: clean(parts[2]),
                     durationMins: clean(parts[3]),
-                    distance: clean(parts[4]),
-                    notes: clean(parts[5])
-                });
+                    notes: clean(parts[parts.length - 1])
+                };
+                if (parts.length >= 7) {                     // new format: value + unit
+                    const v = parseFloat(clean(parts[4]));
+                    rec.distanceValue = isNaN(v) ? '' : v;
+                    rec.distanceUnit  = clean(parts[5]) || this.appSettings.distanceUnit;
+                } else {                                     // legacy format: single text column
+                    const { value, unit } = this._parseDistanceText(clean(parts[4]), this.appSettings.distanceUnit);
+                    rec.distanceValue = value;
+                    rec.distanceUnit  = value === '' ? null : unit;
+                }
+                this.activityLog.push(rec);
                 importedCount++;
             }
 
@@ -7357,7 +7455,8 @@ async generatePDF() {
                     a.date,
                     a.status || '—',
                     a.durationMins || '—',
-                    a.distance || '—',
+                    (a.distanceValue !== '' && a.distanceValue != null)
+                        ? `${a.distanceValue} ${this.distanceLabel(a.distanceUnit || this.appSettings.distanceUnit)}` : '—',
                     a.notes || '—'
                 ]),
                 theme: 'striped',
@@ -7664,13 +7763,14 @@ generateCSV() {
  
     if (actData.length > 0) {
         csv += 'ACTIVITY LOG\n';
-        csv += 'Date,Status,Duration (mins),Distance,Notes\n';
+        csv += 'Date,Status,Duration (mins),Distance Value,Distance Unit,Notes\n';
         actData.forEach(a => {
             csv += [
                 q(a.date),
                 q(a.status || ''),
                 a.durationMins || '',
-                q(a.distance || ''),
+                (a.distanceValue ?? ''),
+                q(a.distanceUnit || ''),
                 q(a.notes || '')
             ].join(',') + '\n';
         });
@@ -7982,7 +8082,8 @@ _buildReportText() {
             actData.forEach(a => {
                 out += `${a.date}  |  ${a.status || ''}`;
                 if (a.durationMins) out += `  |  ${a.durationMins}m`;
-                if (a.distance)     out += `  |  ${a.distance}`;
+                if (a.distanceValue !== '' && a.distanceValue != null)
+                    out += `  |  ${a.distanceValue} ${this.distanceLabel(a.distanceUnit || this.appSettings.distanceUnit)}`;
                 if (a.notes)        out += `${nl}${indent}Notes: ${a.notes}`;
                 out += nl;
             });
