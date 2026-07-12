@@ -6834,6 +6834,7 @@ importDiagnosisCSV(event) {
 exportCompleteBackup(patientId = null) {
     const scoped = arr => patientId ? (arr || []).filter(e => e.patientId === patientId) : (arr || []);
     const patients = patientId ? this.patients.filter(p => p.id === patientId) : this.patients;
+    
     if (patientId && patients.length === 0) return alert("Patient not found.");
 
     const backupData = {
@@ -6853,19 +6854,66 @@ exportCompleteBackup(patientId = null) {
     };
 
     const label = patientId ? patients[0].name.replace(/[^a-z0-9]/gi, '') : 'Master';
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-    const link = document.createElement("a");
-    link.setAttribute("href", dataStr);
-    link.setAttribute("download", `VCH_${label}Backup_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    if (!patientId) {
-        this.lastBackupAt = Date.now();
-        try { localStorage.setItem('vch_lastBackupAt', String(this.lastBackupAt)); } catch (e) {}
+    const fileName = `VCH_${label}Backup_${new Date().toISOString().split('T')[0]}.json`;
+    const jsonStr = JSON.stringify(backupData, null, 2);
+
+    // 1. Convert payload to a Blob to bypass data URI string length limitations
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+
+    // 2. iOS/Mobile PWA Route: Utilize the Native Web Share API
+    if (navigator.canShare && navigator.share) {
+        const file = new File([blob], fileName, { type: 'application/json' });
+        
+        // Verify the system permits sharing this specific file type
+        if (navigator.canShare({ files: [file] })) {
+            navigator.share({
+                title: 'VetCardioHub Clinical Backup',
+                files: [file]
+            }).then(() => {
+                this._updateBackupTimestamp(patientId);
+            }).catch(err => {
+                // If the user dismisses the share sheet, do nothing. 
+                // If it fails for environmental reasons, fall back to the anchor method.
+                if (err.name !== 'AbortError') {
+                    this._fallbackAnchorDownload(blob, fileName, patientId);
+                }
+            });
+            return; // Halt execution so we don't trigger the desktop fallback
+        }
     }
+
+    // 3. Desktop/Legacy Route: Standard Object URL Anchor Drop
+    this._fallbackAnchorDownload(blob, fileName, patientId);
 },
 
+// Helper method to keep code DRY and handle desktop routing
+_fallbackAnchorDownload(blob, fileName, patientId) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up DOM and release memory
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url); 
+    
+    this._updateBackupTimestamp(patientId);
+},
+
+// Helper method for timestamp management
+_updateBackupTimestamp(patientId) {
+    if (!patientId) {
+        this.lastBackupAt = Date.now();
+        try { 
+            localStorage.setItem('vch_lastBackupAt', String(this.lastBackupAt)); 
+        } catch (e) {
+            console.warn("Storage quota exceeded when saving backup timestamp.");
+        }
+    }
+},
 
 importCompleteBackup(event) {
     const file = event.target.files[0];
