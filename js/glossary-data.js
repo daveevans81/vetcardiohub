@@ -1,3 +1,8 @@
+// Bump this whenever the glossary content changes. The iOS apps (VCH Vitals, EchoCalc) adopt a
+// fetched glossary only when this date is NEWER than the copy they already hold (ISO yyyy-MM-dd, so
+// plain string comparison is chronological). Same mechanism as med-data's VCH_FORMULARY_REVIEWED.
+const VET_GLOSSARY_REVIEWED = "2026-07-13";
+
 
 const VET_GLOSSARY_DB = {
     

@@ -5956,172 +5956,133 @@ importHeart2HeartData() {
 
 importCardalisEmail() {
     const text = this.cardalisEmailText;
-    if (!text || !text.trim()) 
+    if (!text || !text.trim())
         return alert("Please paste the Cardalis export content first.");
 
-    // --- 1. CONTEXT-AWARE PATIENT RESOLUTION ---
+    // ── 1. PATIENT RESOLUTION (name label → active patient fallback) ───────────────────────────
     let petName = null;
-    let resolvedPatientId = null;
-
-    // Search for known name patterns anywhere in the text (Legacy or New)
     const nameRegexes = [
-        /breathing\s+rate\s+for\s+([A-Za-z0-9 _'\-]+)/i, // Legacy header
-        /Name\s*:\s*([A-Za-z0-9 _'\-]+)/i,              // Explicit New
-        /Patient\s*:\s*([A-Za-z0-9 _'\-]+)/i            // Generic fallback
+        /breathing\s+rate\s+for\s+([A-Za-z0-9 _'\-]+?)(?:\s+More\b|\n|$)/i, // Legacy header (stops at "More")
+        /Name\s*:\s*([A-Za-z0-9 _'\-]+)/i,                                  // Reworked app: explicit label
+        /Patient\s*:\s*([A-Za-z0-9 _'\-]+)/i                                // Generic fallback
     ];
-
-    for (const regex of nameRegexes) {
-        const match = text.match(regex);
-        if (match) {
-            petName = match[1].trim();
-            break;
-        }
+    for (const rx of nameRegexes) {
+        const match = text.match(rx);
+        if (match && match[1].trim()) { petName = match[1].trim(); break; }
     }
 
-    // Auto-resolve or create patient based on parsed name
+    let resolvedPatientId = null;
     if (petName) {
-        let existingPet = this.patients.find(p => p.name.toLowerCase() === petName.toLowerCase());
-        if (!existingPet) {
-            existingPet = {
-                id: this.generateId(),
-                name: petName,
-                species: 'dog',
-                age: null,
-                weight: null,
-                weightUnit: 'kg',
-                customSrrCutoff: 30,
+        let pet = this.patients.find(p => p.name.toLowerCase() === petName.toLowerCase());
+        if (!pet) {
+            pet = {
+                id: this.generateId(), name: petName, species: 'dog', age: null,
+                weight: null, weightUnit: 'kg', customSrrCutoff: 30,
                 modules: { ...this.defaultModules }
             };
-            this.patients.push(existingPet);
+            this.patients.push(pet);
             this.saveToStorage('vch_patients', this.patients);
         }
-        resolvedPatientId = existingPet.id;
+        resolvedPatientId = pet.id;
+    } else if (this.activePatientId) {
+        resolvedPatientId = this.activePatientId;
+        const activePet = this.patients.find(p => p.id === resolvedPatientId);
+        petName = activePet ? activePet.name : "the active patient";
+        if (!confirm(`Could not detect a clear patient name label.\n\nScan this text and import any valid readings for your currently active patient (${petName})?`))
+            return;
     } else {
-        // FLEXIBILITY UPGRADE: Fallback to the active patient profile if name is inline/missing
-        if (this.activePatientId) {
-            resolvedPatientId = this.activePatientId;
-            const activePet = this.patients.find(p => p.id === resolvedPatientId);
-            petName = activePet ? activePet.name : "the active patient";
-            
-            // Block the thread to ask the clinician for confirmation
-            const confirmImport = confirm(`Could not detect a clear patient name label.\n\nScan this text and import any valid readings for your currently active patient (${petName})?`);
-            if (!confirmImport) return;
-        } else {
-            return alert("Could not identify a patient name in the text, and no patient is selected. Please select a patient first.");
+        return alert("Could not identify a patient name in the text, and no patient is selected. Please select a patient first.");
+    }
+
+    // ── 2. PARSE — dispatch on format ──────────────────────────────────────────────────────────
+    let skippedInvalid = 0;
+    const parsedEntries = [];
+
+    const roundRate = (v) => Math.round(parseFloat(v));
+    const buildContext = (block) => {
+        const parts = [];
+        const state  = block.match(/State:\s*([^\n]+)/i);
+        const effort = block.match(/Effort:\s*([^\n]+)/i);
+        if (state  && state[1].trim().toUpperCase()  !== 'N/A') parts.push(`State: ${state[1].trim()}`);
+        if (effort && effort[1].trim().toUpperCase() !== 'N/A') parts.push(`Effort: ${effort[1].trim()}`);
+        return parts.length ? parts.join(' | ') : "Imported from Cardalis";
+    };
+
+    if (/BreathCount/i.test(text)) {
+        // ── LEGACY EMAIL: "BreathCount: N … Date & Time: YYYY-MM-DD HH:mm:ss" blocks ──
+        // Pair each count with ITS OWN date (the date-chunking engine would mis-pair these,
+        // because the rate line precedes the date line).
+        const rx = /BreathCount:\s*(\d+)[\s\S]*?Date\s*&\s*Time:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})(?:[\s\S]*?Breathing\s*Effort:\s*([^\n]*))?(?:[\s\S]*?Exercise\s*Abil\w*y:\s*([^\n]*))?(?:[\s\S]*?Alertness:\s*([^\n]*))?(?:[\s\S]*?Comments?:\s*([^\n]*))?/gi;
+        let m;
+        while ((m = rx.exec(text)) !== null) {
+            const rate = roundRate(m[1]);
+            const dateObj = new Date(m[2].replace(' ', 'T'));
+            if (isNaN(dateObj.getTime()) || !(rate > 0) || rate > 150) { skippedInvalid++; continue; }
+            const usable = (s) => (s && s.trim() && s.trim().toUpperCase() !== 'N/A') ? s.trim() : null;
+            const parts = [];
+            if (usable(m[3])) parts.push(`Effort: ${m[3].trim()}`);
+            if (usable(m[4])) parts.push(`Exercise: ${m[4].trim()}`);
+            if (usable(m[5])) parts.push(`Alertness: ${m[5].trim()}`);
+            if (usable(m[6])) parts.push(m[6].trim());
+            parsedEntries.push({ dateObj, rate, comment: parts.length ? parts.join(' | ') : "Imported from Cardalis" });
+        }
+    } else {
+        // ── REWORKED APP: flat "Date: … / Respiratory rate: … / State: …" records ──
+        // Split immediately before each date so each reading is isolated.
+        const dateLookahead = /(?=\b(?:\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{4}[-/]\d{1,2}[-/]\d{1,2})\b)/;
+        for (const block of text.split(dateLookahead)) {
+            if (!block.trim()) continue;
+
+            const dm = block.match(/\b(\d{1,4})[-/](\d{1,2})[-/](\d{1,4})\b/);
+            if (!dm) continue;
+            const [p1, p2, p3] = [dm[1], dm[2], dm[3]];
+            let year, month, day;
+            if (p1.length === 4)      { year = p1; month = p2; day = p3; }
+            else if (p3.length === 4) { if (+p2 > 12) { month = p1; day = p2; } else { day = p1; month = p2; } year = p3; }
+            else                      { if (+p2 > 12) { month = p1; day = p2; } else { day = p1; month = p2; } year = `20${p3}`; }
+
+            let timeString = "12:00:00";
+            const tm = block.match(/\b(\d{2}):(\d{2})(?::(\d{2}))?\b/);
+            if (tm) timeString = tm[0].length === 5 ? `${tm[0]}:00` : tm[0];
+
+            const dateObj = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timeString}`);
+            if (isNaN(dateObj.getTime())) continue;
+
+            // Rate: labelled value first, else the single plausible bare number.
+            let rate = null;
+            const labelled = block.match(/(?:Respiratory\s+rate|BreathCount|Rate|BPM|Breaths)[\s:]*([\d.]+)/i);
+            if (labelled) {
+                rate = roundRate(labelled[1]);
+            } else {
+                const stripped = block.replace(dm[0], ' ').replace(tm ? tm[0] : '', ' ');
+                const nums = [...stripped.matchAll(/\b(\d{1,3}(?:\.\d+)?)\b/g)].map(x => parseFloat(x[1])).filter(n => n > 5 && n <= 120);
+                if (nums.length === 1) rate = Math.round(nums[0]);
+                else if (nums.length > 1) {
+                    const bpm = stripped.match(/\b(\d{1,3}(?:\.\d+)?)\s*(?:bpm|br\/m|rpm|breaths)\b/i);
+                    if (bpm) rate = roundRate(bpm[1]);
+                }
+            }
+            if (rate === null || !(rate > 0) || rate > 150) { skippedInvalid++; continue; }
+
+            parsedEntries.push({ dateObj, rate, comment: buildContext(block) });
         }
     }
 
-    // --- 2. DATE-BOUNDARY CHUNKING ENGINE ---
-    let importedCount     = 0;
-    let skippedDuplicates = 0;
-    let skippedInvalid    = 0;
-    const parsedEntries   = [];
-
-    // Split text immediately before any standard date format to isolate individual readings
-    const dateLookaheadRegex = /(?=\b(?:\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{4}[-/]\d{1,2}[-/]\d{1,2})\b)/;
-    const blocks = text.split(dateLookaheadRegex);
-
-    blocks.forEach(block => {
-        if (!block.trim()) return;
-
-        // A. Extract Date (Handles DD/MM/YYYY, MM/DD/YYYY, and YYYY-MM-DD)
-        const dateMatch = block.match(/\b(\d{1,4})[-/](\d{1,2})[-/](\d{1,4})\b/);
-        if (!dateMatch) return; // Skip chunks that don't actually contain a date
-
-        const p1 = dateMatch[1], p2 = dateMatch[2], p3 = dateMatch[3];
-        let year, month, day;
-        
-        if (p1.length === 4) { 
-            year = p1; month = p2; day = p3;
-        } else if (p3.length === 4) { 
-            if (parseInt(p2) > 12) { month = p1; day = p2; year = p3; } 
-            else { day = p1; month = p2; year = p3; }                   
-        } else {
-            if (parseInt(p2) > 12) { month = p1; day = p2; year = `20${p3}`; } 
-            else { day = p1; month = p2; year = `20${p3}`; }
-        }
-
-        // B. Extract Time (Defaults to noon if omitted to map perfectly onto Chart.js)
-        let timeString = "12:00:00";
-        const timeMatch = block.match(/\b(\d{2}):(\d{2})(?::(\d{2}))?\b/);
-        if (timeMatch) {
-            timeString = timeMatch[0];
-            if (timeString.length === 5) timeString += ":00";
-        }
-
-        const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timeString}`;
-        const dateObj = new Date(isoString);
-
-        if (isNaN(dateObj.getTime())) return;
-
-        // C. Extract Rate via Dual-Heuristic Strategy
-        let rate = null;
-        
-        // Strategy 1: Look for explicit labels
-        const labeledRateMatch = block.match(/(?:Respiratory\s+rate|BreathCount|Rate|BPM|Breaths)[\s:]*([\d.]+)/i);
-        if (labeledRateMatch) {
-            rate = Math.round(parseFloat(labeledRateMatch[1]));
-        } else {
-            // Strategy 2: Infer from naked numbers (handles flat layouts)
-            const sanitizedBlock = block.replace(dateMatch[0], '').replace(timeMatch ? timeMatch[0] : '', '');
-            const numberMatches = [...sanitizedBlock.matchAll(/\b(\d{1,3}(?:\.\d+)?)\b/g)];
-            const validRates = numberMatches.map(m => parseFloat(m[1])).filter(n => n > 5 && n <= 120);
-            
-            if (validRates.length === 1) {
-                rate = Math.round(validRates[0]); // Only one plausible mammalian rate found
-            } else if (validRates.length > 1) {
-                // If multiple numbers exist (e.g. weight and rate), hunt for a clinical unit
-                const bpmMatch = sanitizedBlock.match(/\b(\d{1,3}(?:\.\d+)?)\s*(?:bpm|br\/m|rpm|breaths)\b/i);
-                if (bpmMatch) rate = Math.round(parseFloat(bpmMatch[1]));
-            }
-        }
-
-        if (rate === null || rate <= 0 || rate > 150) {
-            skippedInvalid++;
-            return;
-        }
-
-        // D. Extract Clinical Context
-        const commentParts = [];
-        const stateMatch = block.match(/State:\s*([^\n]+)/i);
-        const effortMatch = block.match(/Effort:\s*([^\n]+)/i);
-        
-        if (stateMatch && stateMatch[1].trim().toUpperCase() !== 'N/A') commentParts.push(`State: ${stateMatch[1].trim()}`);
-        if (effortMatch && effortMatch[1].trim().toUpperCase() !== 'N/A') commentParts.push(`Effort: ${effortMatch[1].trim()}`);
-        
-        const comment = commentParts.length > 0 ? commentParts.join(' | ') : "Imported from Cardalis";
-
-        parsedEntries.push({ dateObj, rate, comment });
-    });
-
-    // --- 3. TEMPORAL DEDUPLICATION & COMMIT LOGIC ---
-    for (const entry of parsedEntries) {
-        const { rate, dateObj, comment } = entry;
-
-        // 60-second temporal window block for accidental multi-imports
-        const isDuplicate = this.srrHistory.some(h =>
+    // ── 3. DEDUP (60-second window) & COMMIT ───────────────────────────────────────────────────
+    let importedCount = 0, skippedDuplicates = 0;
+    for (const { rate, dateObj, comment } of parsedEntries) {
+        const isDup = this.srrHistory.some(h =>
             h.patientId === resolvedPatientId &&
             Math.abs(new Date(h.date).getTime() - dateObj.getTime()) < 60000
         );
-        
-        if (isDuplicate) { 
-            skippedDuplicates++; 
-            continue; 
-        }
-
-        const isEquivocal = rate >= 30 && rate < 40;
+        if (isDup) { skippedDuplicates++; continue; }
 
         this.srrHistory.push({
-            id:          this.generateId(),
-            date:        dateObj.toISOString(),
-            time:        dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            rate,
-            patientId:   resolvedPatientId,
-            isEquivocal,
-            comment,
-            isManual:    false
+            id: this.generateId(), date: dateObj.toISOString(),
+            time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            rate, patientId: resolvedPatientId,
+            isEquivocal: rate >= 30 && rate < 40, comment, isManual: false
         });
-
         importedCount++;
     }
 
@@ -6132,19 +6093,15 @@ importCardalisEmail() {
         return alert(`No new readings imported.\n\n${detail}`);
     }
 
-    // Sort to maintain descending clinical chronological order before saving
     this.srrHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
     this.saveToStorage('vch_srrHistory', this.srrHistory);
-    
-    // Clean up UI state
+
     this.activePatientId    = resolvedPatientId;
     this.cardalisEmailText  = '';
     this.showCardalisImport = false;
     this.currentPage        = 1;
-
     this.$nextTick(() => { this.renderChart(); });
 
-    // Output final sync report
     const dupNote = skippedDuplicates > 0 ? `\n- ${skippedDuplicates} duplicate(s) skipped` : '';
     const invNote = skippedInvalid > 0 ? `\n- ${skippedInvalid} invalid entry/entries ignored` : '';
     alert(`Successfully imported ${importedCount} reading(s) for ${petName}.${dupNote}${invNote}`);
