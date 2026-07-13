@@ -252,7 +252,12 @@
   </url>
   <url>
     <loc>https://vetcardiohub.com/privacy</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-13</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/privacy-ios</loc>
+    <lastmod>2026-07-13</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -268,6 +273,11 @@
   <url>
     <loc>https://vetcardiohub.com/support</loc>
     <lastmod>2026-05-04</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/terms-ios</loc>
+    <lastmod>2026-07-13</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
