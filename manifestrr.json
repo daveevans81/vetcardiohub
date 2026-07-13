@@ -1,6 +1,6 @@
 {
-  "short_name": "Health Tracker",
-  "name": "VetCardioHub Cardiac Health Tracker",
+  "short_name": "VCH Vitals",
+  "name": "VetCardioHub Vitals - Health Tracker",
   "icons": [
     {
       "src": "/apple-touch-icon.png",
