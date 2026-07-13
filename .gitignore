@@ -2,3 +2,5 @@
 js/generate-med-data-json.js
 .DS_Store
 js/Regenerate med-data.json.command
+js/generate-glossary-json.js
+js/Regenerate glossary-data.json.command
