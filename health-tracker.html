@@ -2313,7 +2313,7 @@
                         <div x-show="showConcurrentForm" x-cloak class="vch-modal">
                             <div class="diagnosis-panel vch-modal-card" style="border-color: #bbf7d0;">
                                 <h4 style="margin-top: 0; color: #14532d; font-size: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
-                                    <i class="fa-solid fa-notes-medical" style="color: #0d9488; margin-right: 5px;"></i> Concurrent Conditions
+                                    <i class="fa-solid fa-notes-medical" style="color: #0d9488; margin-right: 5px;"></i> Other Diagnoses
                                 </h4>
                                 
                                 <div style="margin-bottom: 15px;">
@@ -2323,8 +2323,7 @@
                     
                                 <div style="margin-bottom: 15px;">
                                     <label class="form-label">Non-Cardiac Diagnoses</label>
-                                    <textarea x-model="newConcurrentDiagnosis" placeholder="One condition per line, e.g.:&#10;Chronic Kidney Disease&#10;Osteoarthritis" class="form-textarea"></textarea>
-                                    <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">Enter each condition on a new line.</div>
+                                    <input x-model="newConcurrentDiagnosis" placeholder="e.g.:&#10;Chronic Kidney Disease&#10;Osteoarthritis" class="form-textarea"></input>
                                 </div>
                     
                                 <div>

@@ -756,6 +756,7 @@ init() {
     
     this.initInstallNudge();
     this.initStorageHealth();
+    this.migrateDiagnosisEqualisation();
     
     this.itpWarnDismissedAt = parseInt(localStorage.getItem('vch_itpWarnSeen'), 10) || 0;
     
@@ -2395,25 +2396,94 @@ sortedDiagnosisLog() {
         
         //Methods for syncope and Diagnosis data
 saveCardiacDiagnosis() {
-            if (!this.newDiagnosis.diagnosis) return alert("Primary Cardiac Diagnosis is required.");
-            this._saveDiagnosisLogEntry();
-            this.showCardiacForm = false;
-        },
+    if (!this.newDiagnosis.diagnosis) return alert("Primary Cardiac Diagnosis is required.");
+    this.newDiagnosis.concurrentDiagnoses = [];   
+    this._saveDiagnosisLogEntry();
+    this.showCardiacForm = false;
+},
+        
+// Human-facing name for a diagnosis row. Non-cardiac (sentinel) rows show their
+// condition; cardiac "Other" rows show the free-text. Mirrors iOS ClinicalCSV.
+diagDisplayName(d) {
+    if (d.diagnosis === 'Concurrent Conditions Only') {
+        const c = (d.concurrentDiagnoses || []).join(', ');
+        return c || 'Non-cardiac diagnosis';
+    }
+    return d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '—');
+},
+
+migrateDiagnosisEqualisation() {
+    if (!Array.isArray(this.diagnosisLog)) return;
+    const spawned = [];
+    let changed = false;
+
+    this.diagnosisLog.forEach(d => {
+        const conditions = (d.concurrentDiagnoses || [])
+            .map(s => (s || '').trim()).filter(Boolean);
+
+        if (d.diagnosis === 'Concurrent Conditions Only') {
+            // Multi-condition sentinel → keep first here, spawn the rest (copy date AND notes).
+            if (conditions.length > 1) {
+                d.concurrentDiagnoses = [conditions[0]];
+                conditions.slice(1).forEach(c => spawned.push({
+                    id: this.generateId(), patientId: d.patientId, date: d.date,
+                    diagnosis: 'Concurrent Conditions Only',
+                    customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
+                    concurrentDiagnoses: [c], notes: d.notes || '', timestamp: Date.now()
+                }));
+                changed = true;
+            }
+        } else if (conditions.length > 0) {
+            // Cardiac record carrying a concurrent list → empty it, spawn one sentinel per
+            // condition (copy date, NOT notes — notes belong to the cardiac diagnosis).
+            d.concurrentDiagnoses = [];
+            conditions.forEach(c => spawned.push({
+                id: this.generateId(), patientId: d.patientId, date: d.date,
+                diagnosis: 'Concurrent Conditions Only',
+                customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
+                concurrentDiagnoses: [c], notes: '', timestamp: Date.now()
+            }));
+            changed = true;
+        }
+    });
+
+    if (spawned.length) this.diagnosisLog.push(...spawned);
+    if (changed) this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+},
         
 saveConcurrentDiagnosis() {
-    // Parse textarea: split on newlines, trim, drop blanks
     const lines = (this.newConcurrentDiagnosis || '')
-        .split('\n')
-        .map(s => s.trim())
-        .filter(Boolean);
+        .split('\n').map(s => s.trim()).filter(Boolean);
 
     if (lines.length === 0 && !this.newDiagnosis.notes) {
         return alert("Please add at least one condition or a clinical note.");
     }
 
-    this.newDiagnosis.concurrentDiagnoses = lines;
-    this.newDiagnosis.diagnosis = 'Concurrent Conditions Only';
-    this._saveDiagnosisLogEntry();
+    // EDIT MODE: a sentinel record being edited stays a single record (first line wins).
+    if (this.editingDiagnosisId) {
+        this.newDiagnosis.diagnosis = 'Concurrent Conditions Only';
+        this.newDiagnosis.concurrentDiagnoses = lines.slice(0, 1);
+        this.newDiagnosis.murmurGrade = 'N/A';
+        this.newDiagnosis.acvimStage  = 'N/A';
+        this._saveDiagnosisLogEntry();
+        this.showConcurrentForm = false;
+        return;
+    }
+
+    // ADD MODE: push one record per line.
+    (lines.length ? lines : ['']).forEach(line => {
+        this.diagnosisLog.push({
+            id: this.generateId(),
+            patientId: this.activePatientId,
+            date: this.newDiagnosis.date,
+            diagnosis: 'Concurrent Conditions Only',
+            customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
+            concurrentDiagnoses: line ? [line] : [],
+            notes: this.newDiagnosis.notes || '',
+            timestamp: Date.now()
+        });
+    });
+    this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
     this.showConcurrentForm = false;
 },
         
@@ -2482,7 +2552,7 @@ openConcurrentForm(logEntry = null) {
         this.newDiagnosis = { ...logEntry, concurrentDiagnoses: [...(logEntry.concurrentDiagnoses || [])] };
         this.editingDiagnosisId = logEntry.id;
         // Rehydrate textarea from saved array
-        this.newConcurrentDiagnosis = (logEntry.concurrentDiagnoses || []).join('\n');
+        this.newConcurrentDiagnosis = logEntry ? (logEntry.concurrentDiagnoses || [])[0] || '' : '';
     } else {
         const history = this.sortedDiagnosisLog();
         const recentConc = history.find(d => d.concurrentDiagnoses && d.concurrentDiagnoses.length > 0);
@@ -6987,6 +7057,7 @@ importCompleteBackup(event) {
         }
         event.target.value = '';
     };
+    this.migrateDiagnosisEqualisation();
     reader.readAsText(file);
 },
 
@@ -7455,10 +7526,11 @@ async generatePDF() {
                 head: [['Date', 'Diagnosis', 'ACVIM Stage', 'Murmur Grade', 'Concurrent Conditions', 'Notes']],
                 body: diagData.map(d => [
                     d.date,
-                    d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '—'),
+                    this.diagDisplayName(d),                                                  // was: d.diagnosis === 'Other' ? ...
                     d.acvimStage || '—',
                     d.murmurGrade || '—',
-                    (d.concurrentDiagnoses || []).join(', ') || '—',
+                    d.diagnosis === 'Concurrent Conditions Only' ? '—'                        // sentinel: condition already in col 2
+                        : ((d.concurrentDiagnoses || []).join(', ') || '—'),
                     d.notes || '—'
                 ]),
                 theme: 'striped',
@@ -7791,15 +7863,16 @@ generateCSV() {
         csv += 'DIAGNOSIS & STAGING LOG\n';
         csv += 'Date,Diagnosis,ACVIM Stage,Murmur Grade,Concurrent Conditions,Notes\n';
         diagData.forEach(d => {
-            csv += [
-                q(d.date),
-                q(d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '')),
-                q(d.acvimStage || ''),
-                q(d.murmurGrade || ''),
-                q((d.concurrentDiagnoses || []).join('; ')),
-                q(d.notes || '')
-            ].join(',') + '\n';
-        });
+        csv += [
+            q(d.date),
+            q(this.diagDisplayName(d)),                                           // was: d.diagnosis === 'Other' ? ...
+            q(d.acvimStage || ''),
+            q(d.murmurGrade || ''),
+            q(d.diagnosis === 'Concurrent Conditions Only' ? ''                   // sentinel: blank, condition is in col 2
+                : (d.concurrentDiagnoses || []).join('; ')),
+            q(d.notes || '')
+        ].join(',') + '\n';
+    });
         csv += '\n';
     }
  
@@ -8110,11 +8183,13 @@ _buildReportText() {
             out += `DIAGNOSIS & STAGING LOG (${diagData.length} entr${diagData.length !== 1 ? 'ies' : 'y'}) — Complete History${nl}`;
             out += rule() + nl;
             diagData.forEach(d => {
-                const diagName = d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '');
+                const diagName = this.diagDisplayName(d);                                 // was: d.diagnosis === 'Other' ? ...
                 out += `${d.date}  |  ${diagName}`;
                 if (d.acvimStage && d.acvimStage !== 'N/A') out += `  |  ACVIM: ${d.acvimStage}`;
                 if (d.murmurGrade && d.murmurGrade !== 'N/A') out += `  |  Murmur: ${d.murmurGrade}`;
-                if ((d.concurrentDiagnoses || []).length > 0) out += `${nl}${indent}Concurrent: ${d.concurrentDiagnoses.join(', ')}`;
+                // Only print a separate "Concurrent:" line for CARDIAC rows that (legacy) still carry a list.
+                if (d.diagnosis !== 'Concurrent Conditions Only' && (d.concurrentDiagnoses || []).length > 0)
+                    out += `${nl}${indent}Concurrent: ${d.concurrentDiagnoses.join(', ')}`;
                 if (d.notes) out += `${nl}${indent}Notes: ${d.notes}`;
                 out += nl;
             });
