@@ -5887,137 +5887,148 @@ importHeart2HeartData() {
 importCardalisEmail() {
     const text = this.cardalisEmailText;
     if (!text || !text.trim()) 
-        return alert("Please paste the Cardalis email content first.");
+        return alert("Please paste the Cardalis export content first.");
 
-    // --- 1. EXTRACT PATIENT NAME (Dual-Format Support) ---
+    // --- 1. CONTEXT-AWARE PATIENT RESOLUTION ---
     let petName = null;
-    
-    // Legacy Format: "breathing rate for Bella More details..."
-    const legacyNameMatch = text.match(/breathing\s+rate\s+for\s+([A-Za-z0-9 _'\-]+?)(?:\s*More|\s*\n|\s*$)/i);
-    if (legacyNameMatch) {
-        petName = legacyNameMatch[1].trim();
+    let resolvedPatientId = null;
+
+    // Search for known name patterns anywhere in the text (Legacy or New)
+    const nameRegexes = [
+        /breathing\s+rate\s+for\s+([A-Za-z0-9 _'\-]+)/i, // Legacy header
+        /Name\s*:\s*([A-Za-z0-9 _'\-]+)/i,              // Explicit New
+        /Patient\s*:\s*([A-Za-z0-9 _'\-]+)/i            // Generic fallback
+    ];
+
+    for (const regex of nameRegexes) {
+        const match = text.match(regex);
+        if (match) {
+            petName = match[1].trim();
+            break;
+        }
+    }
+
+    // Auto-resolve or create patient based on parsed name
+    if (petName) {
+        let existingPet = this.patients.find(p => p.name.toLowerCase() === petName.toLowerCase());
+        if (!existingPet) {
+            existingPet = {
+                id: this.generateId(),
+                name: petName,
+                species: 'dog',
+                age: null,
+                weight: null,
+                weightUnit: 'kg',
+                customSrrCutoff: 30,
+                modules: { ...this.defaultModules }
+            };
+            this.patients.push(existingPet);
+            this.saveToStorage('vch_patients', this.patients);
+        }
+        resolvedPatientId = existingPet.id;
     } else {
-        // New Format: "Name: Jeff"
-        const newNameMatch = text.match(/Name:\s*([A-Za-z0-9 _'\-]+)/i);
-        if (newNameMatch) petName = newNameMatch[1].trim();
+        // FLEXIBILITY UPGRADE: Fallback to the active patient profile if name is inline/missing
+        if (this.activePatientId) {
+            resolvedPatientId = this.activePatientId;
+            const activePet = this.patients.find(p => p.id === resolvedPatientId);
+            petName = activePet ? activePet.name : "the active patient";
+            
+            // Block the thread to ask the clinician for confirmation
+            const confirmImport = confirm(`Could not detect a clear patient name label.\n\nScan this text and import any valid readings for your currently active patient (${petName})?`);
+            if (!confirmImport) return;
+        } else {
+            return alert("Could not identify a patient name in the text, and no patient is selected. Please select a patient first.");
+        }
     }
 
-    if (!petName) {
-        return alert(
-            "Could not identify a patient name from the email.\n\n" +
-            "Expected formats:\n" +
-            "- 'breathing rate for [Name]'\n" +
-            "- 'Name: [Name]'\n\n" +
-            "Please verify that you have pasted the full email body."
-        );
-    }
-
-    // --- 2. RESOLVE OR AUTO-CREATE PATIENT PROFILE ---
-    let existingPet = this.patients.find(
-        p => p.name.toLowerCase() === petName.toLowerCase()
-    );
-    
-    if (!existingPet) {
-        existingPet = {
-            id: this.generateId(),
-            name: petName,
-            species: 'dog',
-            age: null,
-            weight: null,
-            weightUnit: 'kg',
-            customSrrCutoff: 30,
-            modules: { ...this.defaultModules }
-        };
-        this.patients.push(existingPet);
-        this.saveToStorage('vch_patients', this.patients);
-    }
-
-    const resolvedPatientId = existingPet.id;
-
-    // --- 3. PARSE ENTRY BLOCKS ---
+    // --- 2. DATE-BOUNDARY CHUNKING ENGINE ---
     let importedCount     = 0;
     let skippedDuplicates = 0;
     let skippedInvalid    = 0;
+    const parsedEntries   = [];
 
-    const parsedEntries = [];
+    // Split text immediately before any standard date format to isolate individual readings
+    const dateLookaheadRegex = /(?=\b(?:\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{4}[-/]\d{1,2}[-/]\d{1,2})\b)/;
+    const blocks = text.split(dateLookaheadRegex);
 
-    // REGEX: Legacy Format
-    const legacyEntryRegex = new RegExp(
-        'BreathCount:\\s*(\\d+)' +
-        '[\\s\\S]*?' +
-        'Date\\s*&\\s*Time:\\s*(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2})' +
-        '(?:[\\s\\S]*?Breathing\\s*Effort:\\s*([^\\n]*))?'  +
-        '(?:[\\s\\S]*?Exercise\\s*Abilit?y:\\s*([^\\n]*))?'  +
-        '(?:[\\s\\S]*?Alertness:\\s*([^\\n]*))?'             +
-        '(?:[\\s\\S]*?Comments?:\\s*([^\\n]*))?',
-        'gi'
-    );
+    blocks.forEach(block => {
+        if (!block.trim()) return;
 
-    // REGEX: New Format (Mean Daily Reading)
-    const newEntryRegex = new RegExp(
-        'Date:\\s*(\\d{2}/\\d{2}/\\d{4})[\\s\\S]*?' +
-        'Respiratory\\s+rate:\\s*([\\d.]+)' +
-        '(?:[\\s\\S]*?State:\\s*([^\\n]*))?',
-        'gi'
-    );
+        // A. Extract Date (Handles DD/MM/YYYY, MM/DD/YYYY, and YYYY-MM-DD)
+        const dateMatch = block.match(/\b(\d{1,4})[-/](\d{1,2})[-/](\d{1,4})\b/);
+        if (!dateMatch) return; // Skip chunks that don't actually contain a date
 
-    let match;
-    let isLegacyFormat = false;
-    
-    // Attempt Legacy Parsing First
-    while ((match = legacyEntryRegex.exec(text)) !== null) {
-        isLegacyFormat = true;
-        const rate = parseInt(match[1], 10);
-        const dateObj = new Date(match[2].trim().replace(' ', 'T'));
+        const p1 = dateMatch[1], p2 = dateMatch[2], p3 = dateMatch[3];
+        let year, month, day;
         
-        const isUsable = (s) => s && s.trim() && s.trim().toUpperCase() !== 'N/A';
-        const clinicalParts = [];
-        if (isUsable(match[3])) clinicalParts.push(`Effort: ${match[3].trim()}`);
-        if (isUsable(match[4])) clinicalParts.push(`Exercise: ${match[4].trim()}`);
-        if (isUsable(match[5])) clinicalParts.push(`Alertness: ${match[5].trim()}`);
-        if (isUsable(match[6])) clinicalParts.push(match[6].trim());
+        if (p1.length === 4) { 
+            year = p1; month = p2; day = p3;
+        } else if (p3.length === 4) { 
+            if (parseInt(p2) > 12) { month = p1; day = p2; year = p3; } 
+            else { day = p1; month = p2; year = p3; }                   
+        } else {
+            if (parseInt(p2) > 12) { month = p1; day = p2; year = `20${p3}`; } 
+            else { day = p1; month = p2; year = `20${p3}`; }
+        }
 
-        parsedEntries.push({
-            rate,
-            dateObj,
-            comment: clinicalParts.length > 0 ? clinicalParts.join(' | ') : 'Imported from Cardalis app (Legacy)'
-        });
-    }
+        // B. Extract Time (Defaults to noon if omitted to map perfectly onto Chart.js)
+        let timeString = "12:00:00";
+        const timeMatch = block.match(/\b(\d{2}):(\d{2})(?::(\d{2}))?\b/);
+        if (timeMatch) {
+            timeString = timeMatch[0];
+            if (timeString.length === 5) timeString += ":00";
+        }
 
-    // Attempt New Format Parsing (if legacy fails)
-    if (!isLegacyFormat) {
-        while ((match = newEntryRegex.exec(text)) !== null) {
-            const rawDate = match[1].trim(); // DD/MM/YYYY
-            const rate = Math.round(parseFloat(match[2].trim()));
-            const state = match[3] ? match[3].trim() : null;
+        const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timeString}`;
+        const dateObj = new Date(isoString);
+
+        if (isNaN(dateObj.getTime())) return;
+
+        // C. Extract Rate via Dual-Heuristic Strategy
+        let rate = null;
+        
+        // Strategy 1: Look for explicit labels
+        const labeledRateMatch = block.match(/(?:Respiratory\s+rate|BreathCount|Rate|BPM|Breaths)[\s:]*([\d.]+)/i);
+        if (labeledRateMatch) {
+            rate = Math.round(parseFloat(labeledRateMatch[1]));
+        } else {
+            // Strategy 2: Infer from naked numbers (handles flat layouts)
+            const sanitizedBlock = block.replace(dateMatch[0], '').replace(timeMatch ? timeMatch[0] : '', '');
+            const numberMatches = [...sanitizedBlock.matchAll(/\b(\d{1,3}(?:\.\d+)?)\b/g)];
+            const validRates = numberMatches.map(m => parseFloat(m[1])).filter(n => n > 5 && n <= 120);
             
-            // Convert DD/MM/YYYY to standardized ISO Date at 12:00:00 (Noon)
-            const dateParts = rawDate.split('/');
-            if (dateParts.length === 3) {
-                const isoString = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}T12:00:00`;
-                const dateObj = new Date(isoString);
-                
-                const comment = state && state.toUpperCase() !== 'N/A' 
-                    ? `State: ${state} | Cardalis Daily Mean` 
-                    : 'Cardalis Daily Mean';
-
-                parsedEntries.push({ rate, dateObj, comment });
-            } else {
-                skippedInvalid++;
+            if (validRates.length === 1) {
+                rate = Math.round(validRates[0]); // Only one plausible mammalian rate found
+            } else if (validRates.length > 1) {
+                // If multiple numbers exist (e.g. weight and rate), hunt for a clinical unit
+                const bpmMatch = sanitizedBlock.match(/\b(\d{1,3}(?:\.\d+)?)\s*(?:bpm|br\/m|rpm|breaths)\b/i);
+                if (bpmMatch) rate = Math.round(parseFloat(bpmMatch[1]));
             }
         }
-    }
 
-    // --- 4. SANITIZE & PUSH TO HISTORY ---
+        if (rate === null || rate <= 0 || rate > 150) {
+            skippedInvalid++;
+            return;
+        }
+
+        // D. Extract Clinical Context
+        const commentParts = [];
+        const stateMatch = block.match(/State:\s*([^\n]+)/i);
+        const effortMatch = block.match(/Effort:\s*([^\n]+)/i);
+        
+        if (stateMatch && stateMatch[1].trim().toUpperCase() !== 'N/A') commentParts.push(`State: ${stateMatch[1].trim()}`);
+        if (effortMatch && effortMatch[1].trim().toUpperCase() !== 'N/A') commentParts.push(`Effort: ${effortMatch[1].trim()}`);
+        
+        const comment = commentParts.length > 0 ? commentParts.join(' | ') : "Imported from Cardalis";
+
+        parsedEntries.push({ dateObj, rate, comment });
+    });
+
+    // --- 3. TEMPORAL DEDUPLICATION & COMMIT LOGIC ---
     for (const entry of parsedEntries) {
         const { rate, dateObj, comment } = entry;
 
-        if (isNaN(dateObj.getTime()) || isNaN(rate) || rate <= 0 || rate > 120) {
-            skippedInvalid++;
-            continue;
-        }
-
-        // DUPLICATE DETECTION (60-second temporal window)
+        // 60-second temporal window block for accidental multi-imports
         const isDuplicate = this.srrHistory.some(h =>
             h.patientId === resolvedPatientId &&
             Math.abs(new Date(h.date).getTime() - dateObj.getTime()) < 60000
@@ -6044,20 +6055,18 @@ importCardalisEmail() {
         importedCount++;
     }
 
-    // --- 5. COMMIT & REFRESH ---
     if (importedCount === 0) {
         const detail = skippedDuplicates > 0
             ? `${skippedDuplicates} duplicate(s) were already in the clinical log.`
-            : skippedInvalid > 0
-                ? `${skippedInvalid} entry/entries contained invalid data.`
-                : "No compatible Cardalis data formats were detected. Please check the email format.";
+            : "Could not detect any valid date and respiratory rate combinations in the pasted text.";
         return alert(`No new readings imported.\n\n${detail}`);
     }
 
-    // Ensure array order is maintained before local storage serialization
+    // Sort to maintain descending clinical chronological order before saving
     this.srrHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
     this.saveToStorage('vch_srrHistory', this.srrHistory);
     
+    // Clean up UI state
     this.activePatientId    = resolvedPatientId;
     this.cardalisEmailText  = '';
     this.showCardalisImport = false;
@@ -6065,10 +6074,10 @@ importCardalisEmail() {
 
     this.$nextTick(() => { this.renderChart(); });
 
-    const dupNote     = skippedDuplicates > 0 ? `, ${skippedDuplicates} duplicate(s) skipped` : '';
-    const invalidNote = skippedInvalid > 0    ? `, ${skippedInvalid} invalid entry/entries ignored` : '';
-    
-    alert(`Successfully imported ${importedCount} reading(s) for ${petName}${dupNote}${invalidNote}.`);
+    // Output final sync report
+    const dupNote = skippedDuplicates > 0 ? `\n- ${skippedDuplicates} duplicate(s) skipped` : '';
+    const invNote = skippedInvalid > 0 ? `\n- ${skippedInvalid} invalid entry/entries ignored` : '';
+    alert(`Successfully imported ${importedCount} reading(s) for ${petName}.${dupNote}${invNote}`);
 },
 
 // ==========================================
