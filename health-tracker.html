@@ -1343,6 +1343,27 @@
                                 <label class="form-label">Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" class="form-control"></label>
                                 <label class="form-label">Date / Time: <input type="datetime-local" x-model="manualSrrDate" class="form-control"></label>
                             </div>
+                                                    <!-- Optional breathing-effort (1–5) -->
+                            <div x-show="!hasSavedCurrentCount" style="margin:16px 0; text-align:left;">
+                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                                    <span style="font-weight:600;">Breathing effort</span>
+                                    <i class="fa-solid fa-circle-info" style="color:#94a3b8; cursor:pointer;"
+                                       @click="openGlossary('breathing_effort')"></i>
+                                    <button x-show="currentEffort !== null" @click="currentEffort = null"
+                                            style="margin-left:auto; font-size:0.8rem; background:none; border:none; color:#2563eb; cursor:pointer;">Clear</button>
+                                </div>
+                                <div style="display:flex; gap:6px;">
+                                    <template x-for="n in [1,2,3,4,5]" :key="n">
+                                        <button type="button" @click="currentEffort = n"
+                                                :style="currentEffort === n
+                                                    ? 'flex:1; padding:8px 0; border-radius:6px; border:1px solid #0d9488; background:#0d9488; color:#fff; font-weight:700; cursor:pointer;'
+                                                    : 'flex:1; padding:8px 0; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#334155; cursor:pointer;'"
+                                                x-text="n"></button>
+                                    </template>
+                                </div>
+                                <p class="text-sm text-muted" style="margin:6px 0 0;" x-text="breathingEffortDescription(currentEffort)"></p>
+                            </div>
+                            
                             <button @click="saveManualSrr()" class="btn btn-primary" style="width: 100%; max-width: 300px;">Save Reading</button>
                             <button @click="showManualSrr = false" class="btn btn-outline mt-0" style="background:transparent; border:none;">Cancel</button>
                         </div>
@@ -1416,6 +1437,28 @@
                                 </template>
                             </div>
                         </template>
+                        
+                        <!-- Optional breathing-effort (1–5) -->
+                        <div x-show="!hasSavedCurrentCount" style="margin:16px 0; text-align:left;">
+                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                                <span style="font-weight:600;">Breathing effort</span>
+                                <i class="fa-solid fa-circle-info" style="color:#94a3b8; cursor:pointer;"
+                                   @click="openGlossary('breathing_effort')"></i>
+                                <button x-show="currentEffort !== null" @click="currentEffort = null"
+                                        style="margin-left:auto; font-size:0.8rem; background:none; border:none; color:#2563eb; cursor:pointer;">Clear</button>
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                <template x-for="n in [1,2,3,4,5]" :key="n">
+                                    <button type="button" @click="currentEffort = n"
+                                            :style="currentEffort === n
+                                                ? 'flex:1; padding:8px 0; border-radius:6px; border:1px solid #0d9488; background:#0d9488; color:#fff; font-weight:700; cursor:pointer;'
+                                                : 'flex:1; padding:8px 0; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#334155; cursor:pointer;'"
+                                            x-text="n"></button>
+                                </template>
+                            </div>
+                            <p class="text-sm text-muted" style="margin:6px 0 0;" x-text="breathingEffortDescription(currentEffort)"></p>
+                        </div>
+
                 
                         <div x-show="!hasSavedCurrentCount">
                             <div style="display: flex; gap: 10px; flex-direction: column;">
@@ -1494,11 +1537,17 @@
                                                     <i class="fa-solid fa-comment-dots"></i>
                                                 </span>
                                             </template>
+                                            
                                         </div>
                                         <div class="flex-center gap-10">
                                             <strong style="font-size: 1.1rem;" :class="{'text-danger': log.rate >= 40, 'text-warning': log.isEquivocal && log.rate < 40, 'text-success': !log.isEquivocal && log.rate < 40}">
                                                 <span x-text="log.rate"></span> bpm
                                             </strong>
+                                            <template x-if="log.breathingEffort">
+                                                <span style="margin-left:8px; font-size:0.8rem; color:#0d9488; background:#0d948814; padding:2px 6px; border-radius:9999px; font-weight:600;">
+                                                    <i class="fa-solid fa-lungs"></i> <span x-text="log.breathingEffort"></span>
+                                                </span>
+                                            </template>
                                             
                                             <button @click="openCommentEditor(log)" class="action-icon-btn text-primary" :title="log.comment ? 'Edit note' : 'Add note'">
                                                 <i class="fa-solid" :class="log.comment ? 'fa-comment-dots' : 'fa-comment-medical'"></i>

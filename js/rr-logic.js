@@ -286,6 +286,7 @@ showCardiacForm: false,
         editingCommentId: null,
 		commentDraft: '',
 		expandedCommentId: null,
+		currentEffort: null,   // 1–5 for the count on the result card; null = not recorded
 		
 		// Cardalis Import State
 cardalisEmailText: '',
@@ -3345,6 +3346,7 @@ startCount() {
     clearInterval(this.timerInterval);   // ← guard: restarting mid-count must kill the old timer
     const duration = this.countWindow(); // 15, 30 or 60s from settings
     this.isCounting = true;
+    this.currentEffort = null;
     this.tapCount = 0;
     this.timeLeft = duration;
     this.finalRate = null;
@@ -3409,6 +3411,7 @@ nudgeToSymptom(type) {
 closeResult() {
             // Manually closes the results panel and returns to the start screen
             this.finalRate = null;
+            this.currentEffort = null;
             this.tapCount = 0;
             this.hasSavedCurrentCount = false;
         },
@@ -4087,7 +4090,8 @@ saveToHistory(manualRate = null, manualDate = null) {
                 rate: rate,
                 isManual: isManual,
                 isEquivocal: isEquivocal,
-                comment: isManual ? 'Manually recorded' : ''
+                comment: isManual ? 'Manually recorded' : '',
+                breathingEffort: this.currentEffort ?? null,      //  1–5 or null
             };
 
             this.srrHistory.unshift(newLog); 
@@ -4102,9 +4106,19 @@ saveToHistory(manualRate = null, manualDate = null) {
             } else {
                 this.closeResult(); // Manual modal can close itself normally
             }
-        },
+},
+
+breathingEffortDescription(n) {
+    return ({
+        1: 'Imperceptible — barely any movement.',
+        2: 'Very gentle — soft, shallow, effortless.',
+        3: 'Normal — easy, regular rise and fall.',
+        4: 'Mildly increased — deeper/faster, more visible movement.',
+        5: 'Marked effort — deep movements with obvious abdominal push.'
+    })[n] || 'Optional — how hard is your pet working to breathe?';
+},
         
-        saveManualSrr() {
+saveManualSrr() {
             const rate = parseFloat(this.manualSrrInput);
             if (isNaN(rate) || rate < 0) return alert("Invalid respiratory rate.");
             if (rate > 120 && !confirm('That is an unusually high rate — save anyway?')) return;
@@ -4145,10 +4159,10 @@ get clinicalInterpretation() {
                 title: 'Normal Range', 
                 text: `Resting respiratory rate is within normal expected limits (< ${cutoff} bpm).` 
             };
-        },
+},
         
         // Unified Date Range Calculator
-        getDateRange() {
+getDateRange() {
             const now = new Date();
             const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
             const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -5744,14 +5758,14 @@ exportData() {
 exportCSV() {
     if (!this.srrHistory || this.srrHistory.length === 0) return alert("No clinical data to export.");
 
-    const headers = "Date,Time,Rate(bpm),PatientName,Species,Comment\n";
+    const headers = "Date,Time,Rate(bpm),PatientName,Species,Comment,Effort\n";
     const rows = this.srrHistory.map(log => {
         const targetPatient = this.patients.find(p => p.id === log.patientId);
         const pName = targetPatient ? targetPatient.name : 'Unknown';
         const pSpecies = targetPatient ? targetPatient.species : 'dog';
         const comment = (log.comment || '').replace(/"/g, '""'); 
         
-        return `${log.date},${log.time},${log.rate},"${pName}",${pSpecies},"${comment}"`;
+        return `${log.date},${log.time},${log.rate},"${pName}",${pSpecies},"${comment}",${log.breathingEffort ?? ''}`;
     }).join("\n");
 
             const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + rows);
