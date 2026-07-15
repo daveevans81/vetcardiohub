@@ -280,13 +280,15 @@ showCardiacForm: false,
             notes: ''
         },
         
-        // --- PAGINATION STATE ---
+        // --- PAGINATION STATE and COUNTING ---
         currentPage: 1,
         itemsPerPage: 20,
         editingCommentId: null,
 		commentDraft: '',
 		expandedCommentId: null,
 		currentEffort: null,   // 1–5 for the count on the result card; null = not recorded
+		currentRestState: 'asleep',   // 'asleep' | 'resting'
+
 		
 		// Cardalis Import State
 cardalisEmailText: '',
@@ -325,6 +327,7 @@ newMed: {
     tabletStrengthMg: '',     // tablet: mg/tablet   | liquid: mg/ml (concentration)
     tabletsPerDose: '',       // tablet: tablets/dose | liquid: ml/dose
     frequency: 'q12h',
+    doseTimes: [],   // ['08:00','20:00'] local wall-clock; [] = no schedule
     tabletsInStock: '',       // tablet: tablets      | liquid: total ml
     stockDate: new Date().toISOString().split('T')[0]
 },
@@ -501,7 +504,8 @@ appSettings: {
     defaultSrrCutoff: 30,             // pre-fills new patient profiles
     countDuration: 30,                // preferred SRR count window (seconds): 15, 30 or 60
     backupWarnDays: 14,                // backup staleness threshold
-    distanceUnit: null                // 'miles'|'feet'|'km'|'metres' — derived from locale on first run
+    distanceUnit: null,                // 'miles'|'feet'|'km'|'metres' — derived from locale on first run
+    careProviders: [],   // [{ id, name, role, email, phone, notes }]
 },
 
 loadAppSettings() {
@@ -528,7 +532,9 @@ recordTermsAcceptance() {
   this.termsAgreed = true;
   this.showTermsGate = false;
 },
-
+addCareProvider(p)    { this.appSettings.careProviders.push({ id: this.generateId(), ...p }); this.saveAppSettings(); },
+updateCareProvider(p) { const i = this.appSettings.careProviders.findIndex(x => x.id === p.id); if (i > -1) this.appSettings.careProviders[i] = p; this.saveAppSettings(); },
+deleteCareProvider(id){ this.appSettings.careProviders = this.appSettings.careProviders.filter(x => x.id !== id); this.saveAppSettings(); },
 
 
     
@@ -750,6 +756,7 @@ init() {
     this.activityLog      = loadKey('vch_activityLog');
     this.vaccinationLog   = loadKey('vch_vaccinationLog');
     this.antiparasiticLog = loadKey('vch_antiparasiticLog');
+    this.medDoseLog = loadKey('vch_medDoseLog') || [];
 
     // Backfill module flags for legacy / restored profiles
     this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
@@ -2488,7 +2495,7 @@ saveConcurrentDiagnosis() {
     this.showConcurrentForm = false;
 },
         
-        _saveDiagnosisLogEntry() {
+_saveDiagnosisLogEntry() {
             const entryToSave = {
                 id: this.editingDiagnosisId || this.generateId(),
                 patientId: this.activePatientId, 
@@ -3351,6 +3358,7 @@ startCount() {
     this.timeLeft = duration;
     this.finalRate = null;
     this.hasSavedCurrentCount = false; // Reset the save state
+    this._acquireWakeLock();
     this._countStart = Date.now();     // ← anchor the count window to wall-clock time
     this.timerInterval = setInterval(() => {
         this.timeLeft = Math.max(0, duration - Math.round((Date.now() - this._countStart) / 1000));
@@ -3365,6 +3373,7 @@ cancelCount() {
     this.tapCount = 0;
     this.timeLeft = this.countWindow();
     this.finalRate = null;
+    this._releaseWakeLock();
     this.hasSavedCurrentCount = false;
 },        
         
@@ -3380,6 +3389,7 @@ registerTap() {
 
 finishCount() {
             clearInterval(this.timerInterval);
+            this._releaseWakeLock();
             this.isCounting = false;
             // Extrapolate the tap count to a full minute (×4 for 15s, ×2 for 30s, ×1 for 60s)
             this.finalRate = Math.round(this.tapCount * (60 / this.countWindow()));
@@ -3476,6 +3486,7 @@ addMedication() {
         discardDays: this.newMed.isStopped ? null : (this.newMed.discardDays === '' ? null : parseFloat(this.newMed.discardDays)),
         tabletStrengthMg: this.newMed.isStopped ? null : parseFloat(this.newMed.tabletStrengthMg),
         tabletsInStock: this.newMed.isStopped ? null : (this.newMed.tabletsInStock === '' ? null : parseFloat(this.newMed.tabletsInStock)),
+        doseTimes: (newMed.isStopped || newMed.frequency === 'PRN') ? [] : [...new Set(newMed.doseTimes)].sort(),
         stockDate:      this.newMed.isStopped ? null : (this.newMed.stockDate || this.newMed.eventDate),
     };
 
@@ -3704,6 +3715,31 @@ deleteMedication(id) {
         this.saveToStorage('vch_medLedger', this.medLedger);
         this.renderMedChart();
     }
+},
+
+medDisplayName(m) { return m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId); },
+medScheduleDefaults(freq) { return ({ q24h:['08:00'], q12h:['08:00','20:00'], q8h:['06:00','14:00','22:00'] })[freq] || []; },
+_dayKey(d = new Date()) { const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; },
+
+doseSlots(dayDate = new Date()) {
+    const pid = this.activePatientId, slotDay = this._dayKey(dayDate), latest = {};
+    (this.medLedger || []).filter(m => m.patientId === pid)
+        .sort((a,b) => new Date(a.eventDate) - new Date(b.eventDate))
+        .forEach(m => { latest[this._drugKey(m)] = m; });
+    const slots = [];
+    Object.entries(latest).forEach(([key, m]) => {
+        if (m.isStopped || !(m.doseTimes && m.doseTimes.length)) return;
+        const name = this.medDisplayName(m);
+        m.doseTimes.forEach(t => { if (/^\d{2}:\d{2}$/.test(t)) slots.push({ drugKey:key, name, time:t, slotDay }); });
+    });
+    return slots.sort((a,b) => a.time.localeCompare(b.time) || a.name.localeCompare(b.name));
+},
+isDoseGiven(s) { return (this.medDoseLog || []).some(r => r.drugKey===s.drugKey && r.slotDay===s.slotDay && r.slotTime===s.time); },
+toggleDose(s) {
+    const i = (this.medDoseLog || []).findIndex(r => r.drugKey===s.drugKey && r.slotDay===s.slotDay && r.slotTime===s.time);
+    if (i > -1) this.medDoseLog.splice(i,1);
+    else this.medDoseLog.push({ id:this.generateId(), patientId:this.activePatientId, drugKey:s.drugKey, slotDay:s.slotDay, slotTime:s.time, givenAt:new Date().toISOString() });
+    this.saveToStorage('vch_medDoseLog', this.medDoseLog);
 },
 
 // ── SUPPLEMENT MODULE ──────────────────────────────────────────────
@@ -4092,6 +4128,7 @@ saveToHistory(manualRate = null, manualDate = null) {
                 isEquivocal: isEquivocal,
                 comment: isManual ? 'Manually recorded' : '',
                 breathingEffort: this.currentEffort ?? null,      //  1–5 or null
+                restState: this.currentRestState || null,   // NEW — 'asleep' | 'resting'
             };
 
             this.srrHistory.unshift(newLog); 
@@ -4108,6 +4145,20 @@ saveToHistory(manualRate = null, manualDate = null) {
             }
 },
 
+get liveEstimate() {
+    if (!this._countStart || this.tapCount < 1) return 'Estimating…';
+    const elapsed = (Date.now() - this._countStart) / 1000;
+    if (elapsed < 3) return 'Estimating…';
+    return '≈ ' + Math.round(this.tapCount * 60 / elapsed) + ' bpm so far';
+},
+
+get countProgress() {                 // 1 → 0
+    return this.countWindow() ? Math.max(0, this.timeLeft / this.countWindow()) : 0;
+},
+
+async _acquireWakeLock() { try { this._wakeLock = await navigator.wakeLock?.request('screen'); } catch (_) {} },
+_releaseWakeLock() { this._wakeLock?.release?.(); this._wakeLock = null; },
+
 breathingEffortDescription(n) {
     return ({
         1: 'Imperceptible — barely any movement.',
@@ -4117,6 +4168,8 @@ breathingEffortDescription(n) {
         5: 'Marked effort — deep movements with obvious abdominal push.'
     })[n] || 'Optional — how hard is your pet working to breathe?';
 },
+
+breathingEffortName(n) { return ({1:'Imperceptible',2:'Very gentle',3:'Normal',4:'Mildly increased',5:'Marked effort'})[n] || ''; },
         
 saveManualSrr() {
             const rate = parseFloat(this.manualSrrInput);
@@ -4294,12 +4347,12 @@ resetData() {
 
     const keys = ['vch_patients','vch_weightLog','vch_srrHistory','vch_medLedger','vch_suppLedger',
                   'vch_diagnosisLog','vch_syncopeLog','vch_coughLog','vch_activityLog',
-                  'vch_vaccinationLog','vch_antiparasiticLog'];
+                  'vch_vaccinationLog','vch_antiparasiticLog',  'vch_medDoseLog'];
     keys.forEach(k => localStorage.removeItem(k));
 
     this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = []; this.suppLedger = [];
     this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.activityLog = [];
-    this.vaccinationLog = []; this.antiparasiticLog = [];
+    this.vaccinationLog = []; this.antiparasiticLog = []; this.medDoseLog = [];
     this.activePatientId = null;
 
     [this.$refs.rrrChartCanvas, this.$refs.medChartCanvas, this.$refs.weightChartCanvas]
@@ -6934,6 +6987,7 @@ exportCompleteBackup(patientId = null) {
         vch_activityLog: scoped(this.activityLog),
         vch_vaccinationLog: scoped(this.vaccinationLog),
         vch_antiparasiticLog: scoped(this.antiparasiticLog),
+        vch_medDoseLog: scoped(this.medDoseLog),
         exportDate: new Date().toISOString(),
         exportScope: patientId ? 'single' : 'all'
     };
@@ -7038,7 +7092,7 @@ backupLogCount(pid) {
     if (!d) return 0;
     return ['vch_srrHistory', 'vch_medLedger', 'vch_suppLedger', 'vch_diagnosisLog', 'vch_syncopeLog',
             'vch_coughLog', 'vch_activityLog', 'vch_weightLog', 'vch_vaccinationLog',
-            'vch_antiparasiticLog']
+            'vch_antiparasiticLog','vch_medDoseLog']
         .reduce((n, k) => n + (d[k] || []).filter(e => e.patientId === pid).length, 0);
 },
 
@@ -7363,17 +7417,18 @@ async generatePDF() {
         sectionHeader('Sleeping Respiratory Rate Log', 14, 116, 144);
         doc.autoTable({
             startY: Y,
-            head: [['Date', 'Time', 'Rate (bpm)', 'Manual', 'Clinical Notes']],
+            head: [['Date', 'Time', 'Rate (bpm)', 'Effort', 'Manual', 'Clinical Notes']],
             body: srrData.map(r => [
                 new Date(r.date).toLocaleDateString('en-GB'),
                 r.time || new Date(r.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 r.rate,
+                r.breathingEffort != null ? String(r.breathingEffort) : '—',
                 r.isManual ? 'Yes' : 'No',
                 r.comment || '—'
             ]),
             theme: 'striped',
             headStyles: { fillColor: [14, 116, 144] },
-            columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 20 }, 2: { cellWidth: 24 }, 3: { cellWidth: 18 }, 4: { cellWidth: 'auto' } },
+            columnStyles: { 0:{cellWidth:26}, 1:{cellWidth:20}, 2:{cellWidth:24}, 3:{cellWidth:18}, 4:{cellWidth:18}, 5:{cellWidth:'auto'} },
             styles: { fontSize: 8 }
         });
         Y = doc.lastAutoTable.finalY + 12;
@@ -7737,7 +7792,7 @@ generateCSV() {
         : [];
     if (srrData.length > 0) {
         csv += 'SRR LOG\n';
-        csv += 'Date,Time,Rate (bpm),Manual,Clinical Notes\n';
+        csv += 'Date,Time,Rate (bpm),Manual,Clinical Notes,Effort\n';
         srrData.forEach(r => {
             csv += [
                 q(new Date(r.date).toLocaleDateString('en-GB')),
@@ -8001,6 +8056,26 @@ generateCSV() {
     URL.revokeObjectURL(url);
 },
 
+`CareProviderLogic.mailSubject` / `mailBody`:
+```js
+emailReportTo(provider) {
+    const pet = this.activePatientProfile?.name || 'my pet';
+    const subject = `${pet} — VetCardioHub health report`;
+    const body =
+`Dear ${provider.name || 'Dr'},
+
+Please find a home-monitoring health report for ${pet}, generated with the VetCardioHub Vitals app.
+
+${this._buildReportText()}
+
+Kind regards,
+${this.activePatientProfile?.ownerName || ''}
+
+—
+This report summarises observations recorded at home by the owner and is intended to support, not replace, veterinary assessment.`;
+    window.location.href = `mailto:${encodeURIComponent(provider.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+},
+
 toTitleCase(str) {
   if (!str) return '';
   return String(str)
@@ -8072,6 +8147,7 @@ _buildReportText() {
                 const dateStr = new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
                 const time    = r.time || new Date(r.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 out += `${dateStr}  ${time}  |  ${r.rate} bpm${r.isManual ? '  [manual]' : ''}`;
+                if (r.breathingEffort != null) out += `  |  effort ${r.breathingEffort} — ${this.breathingEffortName(r.breathingEffort)}`;
                 if (r.comment) out += `${nl}${indent}${r.comment}`;
                 out += nl;
             });
@@ -8351,7 +8427,23 @@ async shareReport() {
     }
 },
 
+emailReportTo(provider) {
+    const pet = this.activePatientProfile?.name || 'my pet';
+    const subject = `${pet} — VetCardioHub health report`;
+    const body =
+`Dear ${provider.name || 'Dr'},
 
+Please find a home-monitoring health report for ${pet}, generated with the VetCardioHub Vitals app.
+
+${this._buildReportText()}
+
+Kind regards,
+${this.activePatientProfile?.ownerName || ''}
+
+—
+This report summarises observations recorded at home by the owner and is intended to support, not replace, veterinary assessment.`;
+    window.location.href = `mailto:${encodeURIComponent(provider.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+},
         
         exportPDF() {
             // Web-native PDF generation using the browser's print dialog.

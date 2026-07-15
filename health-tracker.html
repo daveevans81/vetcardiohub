@@ -1324,7 +1324,17 @@
                            <a href="#" @click.prevent="openGlossary('rrr_guidelines')" class="text-primary">
                              <i class="fa-solid fa-circle-question"></i> How to count
                            </a>
-                        </p>               
+                        </p>   
+                        <div style="display:flex; gap:6px; margin:10px 0;">
+                            <template x-for="s in [{k:'asleep',l:'Asleep',i:'fa-moon'},{k:'resting',l:'Resting',i:'fa-couch'}]" :key="s.k">
+                                <button type="button" @click="currentRestState = s.k"
+                                        :style="currentRestState === s.k
+                                            ? 'flex:1; padding:8px 0; border-radius:6px; border:1px solid #4f46e5; background:#4f46e5; color:#fff; font-weight:600; cursor:pointer;'
+                                            : 'flex:1; padding:8px 0; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#334155; cursor:pointer;'">
+                                    <i class="fa-solid" :class="s.i"></i> <span x-text="s.l"></span>
+                                </button>
+                            </template>
+                        </div>            
                         <div class="grid-2col mb-15">
                             <button @click="startCount()" class="btn-srr-primary" style="min-height: 80px; background: #0f766e; color: white; border-radius: 8px; border: none; cursor: pointer;">
                                 <i class="fa-solid fa-stopwatch" style="font-size: 2rem;"></i> Count SRR Now
@@ -1342,6 +1352,16 @@
                             <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 300px; margin: 0 auto 15px auto;">
                                 <label class="form-label">Breaths per minute: <input type="number" x-model="manualSrrInput" placeholder="e.g. 24" class="form-control"></label>
                                 <label class="form-label">Date / Time: <input type="datetime-local" x-model="manualSrrDate" class="form-control"></label>
+                            </div>
+                            <div style="display:flex; gap:6px; margin:10px 0;">
+                                <template x-for="s in [{k:'asleep',l:'Asleep',i:'fa-moon'},{k:'resting',l:'Resting',i:'fa-couch'}]" :key="s.k">
+                                    <button type="button" @click="currentRestState = s.k"
+                                            :style="currentRestState === s.k
+                                                ? 'flex:1; padding:8px 0; border-radius:6px; border:1px solid #4f46e5; background:#4f46e5; color:#fff; font-weight:600; cursor:pointer;'
+                                                : 'flex:1; padding:8px 0; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#334155; cursor:pointer;'">
+                                        <i class="fa-solid" :class="s.i"></i> <span x-text="s.l"></span>
+                                    </button>
+                                </template>
                             </div>
                                                     <!-- Optional breathing-effort (1–5) -->
                             <div x-show="!hasSavedCurrentCount" style="margin:16px 0; text-align:left;">
@@ -1392,7 +1412,18 @@
                             </template>
                         </div>
                         <p class="text-center" style="margin: 0 0 10px; font-size: 0.7rem; color: #94a3b8;">Tap to switch — restarts the count</p>
-                        <div class="timer-pulse" x-text="timeLeft + 's'"></div>
+                        <p class="text-center" style="color:#94a3b8; font-size:0.85rem; margin:0 0 6px;" x-text="liveEstimate"></p>
+                        <div style="position:relative; width:120px; height:120px; margin:0 auto;">
+                            <svg width="120" height="120" viewBox="0 0 120 120" style="transform:rotate(-90deg);">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" stroke-width="8"></circle>
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#0ea5e9" stroke-width="8" stroke-linecap="round"
+                                        stroke-dasharray="339.29"
+                                        :stroke-dashoffset="339.29 * (1 - countProgress)"
+                                        style="transition: stroke-dashoffset 0.25s linear;"></circle>
+                            </svg>
+                            <div class="timer-pulse" x-text="timeLeft + 's'"
+                                 style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;"></div>
+                        </div>
                         <p class="text-center mb-20">Time Remaining</p>
 
                         <button @click="registerTap()" class="btn-massive-tap">
@@ -1437,7 +1468,7 @@
                                 </template>
                             </div>
                         </template>
-                        
+
                         <!-- Optional breathing-effort (1–5) -->
                         <div x-show="!hasSavedCurrentCount" style="margin:16px 0; text-align:left;">
                             <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
@@ -1547,6 +1578,11 @@
                                                 <span style="margin-left:8px; font-size:0.8rem; color:#0d9488; background:#0d948814; padding:2px 6px; border-radius:9999px; font-weight:600;">
                                                     <i class="fa-solid fa-lungs"></i> <span x-text="log.breathingEffort"></span>
                                                 </span>
+                                            </template>
+                                            <template x-if="log.restState">
+                                                <i class="fa-solid" :class="log.restState === 'asleep' ? 'fa-moon' : 'fa-couch'"
+                                                   :style="log.restState === 'asleep' ? 'color:#6366f1; margin-left:6px;' : 'color:#94a3b8; margin-left:6px;'"
+                                                   :title="log.restState === 'asleep' ? 'Asleep' : 'Resting'"></i>
                                             </template>
                                             
                                             <button @click="openCommentEditor(log)" class="action-icon-btn text-primary" :title="log.comment ? 'Edit note' : 'Add note'">
@@ -1937,6 +1973,28 @@
                                                 <option value="PRN">PRN (As Needed)</option>
                                             </select>
                                         </div>  
+                                        
+                                        <div x-show="newMed.frequency !== 'PRN' && !newMed.isStopped" style="grid-column: 1 / -1;">
+                                            <label class="form-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                                <input type="checkbox" :checked="newMed.doseTimes.length > 0"
+                                                       @change="newMed.doseTimes = $event.target.checked ? (medScheduleDefaults(newMed.frequency).length ? [...medScheduleDefaults(newMed.frequency)] : ['08:00']) : []"
+                                                       style="width:16px; height:16px; accent-color:#2563eb; cursor:pointer;">
+                                                Set daily dose times
+                                            </label>
+                                            <template x-if="newMed.doseTimes.length">
+                                                <div style="margin-top:8px;">
+                                                    <template x-for="(t, i) in newMed.doseTimes" :key="i">
+                                                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                                                            <input type="time" x-model="newMed.doseTimes[i]" class="form-input" style="max-width:150px;">
+                                                            <button type="button" @click="newMed.doseTimes.splice(i,1)" style="background:none;border:none;color:#ef4444;cursor:pointer;" title="Remove"><i class="fa-solid fa-xmark"></i></button>
+                                                        </div>
+                                                    </template>
+                                                    <button type="button" x-show="newMed.doseTimes.length < 6" @click="newMed.doseTimes.push('12:00')"
+                                                            style="background:none; border:1px dashed #cbd5e1; border-radius:6px; padding:6px 10px; color:#2563eb; cursor:pointer; font-size:0.85rem;"><i class="fa-solid fa-plus"></i> Add a time</button>
+                                                </div>
+                                            </template>
+                                            <p class="text-sm text-muted" style="margin:6px 0 0;">Optional. Adds this medication to today's schedule so you can tick off each dose. (No reminders on the web.)</p>
+                                        </div>
     
                                         <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
                                             <label class="form-label" x-text="medUnits(newMed.form).stockLabel"></label>
@@ -2134,6 +2192,25 @@
                                 </div>
                             </div>
                         </div> <!-- /vch-modal (supplement) -->
+                        
+                        <template x-if="doseSlots().length">
+                            <div class="module-card" style="margin-bottom:16px;">
+                                <h3 class="mb-0 mt-0" style="display:flex; align-items:center; gap:8px;">
+                                    <i class="fa-solid fa-list-check" style="color:#2563eb;"></i> Today's medication schedule
+                                    <span class="text-muted" style="font-weight:normal; margin-left:auto; font-size:0.85rem;"
+                                          x-text="doseSlots().filter(s => isDoseGiven(s)).length + ' / ' + doseSlots().length + ' given'"></span>
+                                </h3>
+                                <template x-for="slot in doseSlots()" :key="slot.drugKey + slot.slotDay + slot.time">
+                                    <button type="button" @click="toggleDose(slot)"
+                                            style="display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:12px 6px; background:none; border:none; border-bottom:1px solid #eef2f7; cursor:pointer;">
+                                        <i class="fa-solid" :class="isDoseGiven(slot) ? 'fa-circle-check' : 'fa-circle'" :style="isDoseGiven(slot) ? 'color:#16a34a; font-size:1.2rem;' : 'color:#cbd5e1; font-size:1.2rem;'"></i>
+                                        <span :style="isDoseGiven(slot) ? 'text-decoration:line-through; color:#94a3b8;' : 'color:#334155; font-weight:600;'" x-text="slot.name"></span>
+                                        <span style="margin-left:auto; color:#64748b; font-variant-numeric:tabular-nums;" x-text="slot.time"></span>
+                                    </button>
+                                </template>
+                                <p class="text-sm text-muted" style="margin-top:10px;">Tick each dose as it's given. Checklist only — the web app doesn't send reminders.</p>
+                            </div>
+                        </template>
                         
                         <div style="border-radius: 6px; border: 1px solid #c8d6eb; overflow-x: auto; -webkit-overflow-scrolling: touch; background: white;">
                             <table class="data-table">
@@ -4360,6 +4437,48 @@
                         <button @click="shareReport()" style="padding: 8px 16px; background: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 6px;">
                             <i class="fa-solid fa-share-nodes"></i> Share
                         </button>
+                    </div>
+                </div>
+                
+                <div class="module-card" x-show="isView('more') && moreSection === 'data'" x-cloak
+                     x-data="{ editing:null, form:{ name:'', role:'Primary vet', email:'', phone:'', notes:'' },
+                               reset(){ this.editing=null; this.form={ name:'', role:'Primary vet', email:'', phone:'', notes:'' }; },
+                               get valid(){ return this.form.name.trim() && ((this.form.email && /.+@.+\..+/.test(this.form.email)) || (this.form.phone||'').replace(/\D/g,'').length>=5); } }"
+                     style="margin-top:20px; border:1px solid #adc1ed; background:#fcfdff; border-radius:4px; padding:20px;">
+                    <h3 style="margin-top:0; color:#475569; font-size:1.1rem;"><i class="fa-solid fa-user-doctor"></i> Care providers</h3>
+                    <p style="font-size:0.85rem; color:#64748b;">Your vet, cardiologist or emergency clinic — for quick contact and to email reports. Stored on this device only; never included in pet backups.</p>
+                
+                    <template x-for="p in appSettings.careProviders" :key="p.id">
+                        <div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #eef2f7;">
+                            <div style="flex:1;">
+                                <div style="font-weight:600; color:#334155;" x-text="p.name"></div>
+                                <div style="font-size:0.8rem; color:#64748b;">
+                                    <span x-text="p.role"></span>
+                                    <template x-if="p.email"><span> · <a :href="'mailto:'+p.email" x-text="p.email" style="color:#2563eb;"></a></span></template>
+                                    <template x-if="p.phone"><span> · <a :href="'tel:'+p.phone" x-text="p.phone" style="color:#2563eb;"></a></span></template>
+                                </div>
+                            </div>
+                            <button type="button" x-show="p.email" @click="emailReportTo(p)" class="btn-add-blue" style="padding:6px 10px; font-size:0.8rem;" title="Email report"><i class="fa-solid fa-envelope"></i></button>
+                            <button type="button" @click="editing=p.id; form={...p}" style="background:none;border:none;color:#64748b;cursor:pointer;" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                            <button type="button" @click="if(confirm('Delete '+p.name+'?')) deleteCareProvider(p.id)" style="background:none;border:none;color:#ef4444;cursor:pointer;" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </template>
+                    <template x-if="!appSettings.careProviders.length"><p style="font-size:0.85rem; color:#94a3b8; padding:8px 0;">No care providers yet.</p></template>
+                
+                    <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <input class="form-input" placeholder="Name (clinic or vet)" x-model="form.name">
+                        <select class="form-select" x-model="form.role">
+                            <template x-for="r in ['Primary vet','Cardiologist','Emergency vet','Referral hospital','Specialist','Other']" :key="r"><option x-text="r"></option></template>
+                        </select>
+                        <input class="form-input" placeholder="Email" type="email" x-model="form.email">
+                        <input class="form-input" placeholder="Phone" type="tel" x-model="form.phone">
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:8px;">
+                        <button type="button" class="btn-add-blue" :disabled="!valid"
+                                @click="editing ? updateCareProvider({...form, id:editing}) : addCareProvider(form); reset();">
+                            <i class="fa-solid" :class="editing ? 'fa-check' : 'fa-plus'"></i> <span x-text="editing ? 'Save changes' : 'Add provider'"></span>
+                        </button>
+                        <button type="button" x-show="editing" class="btn-cancel" @click="reset()">Cancel</button>
                     </div>
                 </div>
                 
