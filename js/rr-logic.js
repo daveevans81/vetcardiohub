@@ -8056,8 +8056,6 @@ generateCSV() {
     URL.revokeObjectURL(url);
 },
 
-`CareProviderLogic.mailSubject` / `mailBody`:
-```js
 emailReportTo(provider) {
     const pet = this.activePatientProfile?.name || 'my pet';
     const subject = `${pet} — VetCardioHub health report`;
