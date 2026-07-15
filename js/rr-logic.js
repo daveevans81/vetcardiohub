@@ -3486,7 +3486,7 @@ addMedication() {
         discardDays: this.newMed.isStopped ? null : (this.newMed.discardDays === '' ? null : parseFloat(this.newMed.discardDays)),
         tabletStrengthMg: this.newMed.isStopped ? null : parseFloat(this.newMed.tabletStrengthMg),
         tabletsInStock: this.newMed.isStopped ? null : (this.newMed.tabletsInStock === '' ? null : parseFloat(this.newMed.tabletsInStock)),
-        doseTimes: (newMed.isStopped || newMed.frequency === 'PRN') ? [] : [...new Set(newMed.doseTimes)].sort(),
+        doseTimes: (this.newMed.isStopped || this.newMed.frequency === 'PRN') ? [] : [...new Set(this.newMed.doseTimes)].sort(),
         stockDate:      this.newMed.isStopped ? null : (this.newMed.stockDate || this.newMed.eventDate),
     };
 
