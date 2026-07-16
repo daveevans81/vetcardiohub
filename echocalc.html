@@ -308,6 +308,7 @@
     rpamin: '';  
     rpamax: '';   
     lvidd2:'';
+    cvc:'';
     patientName: '';
     ownerName: '';
     breed: '';
@@ -323,7 +324,7 @@
                       </div>
                       <div class="input-group" style="margin-bottom: 20px; flex: 1;">
                         <label style="font-weight: bold; font-size: 0.9em;">Species/Breed Reference Model:</label>
-                        <select x-model="selectedModel" class="form-select">
+                        <select x-model="selectedModel" >
                           <template x-for="(model, key) in allometricModels" :key="key">
                             <option :value="key" x-text="model.label"></option>
                           </template>
@@ -565,7 +566,7 @@
                         <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-size: 0.8rem;"><i class="fa-solid fa-heart-circle-bolt" style="color: #0ea5e9;"></i> Right Heart Model Analysis</span>
                             
-                              <select x-model="selectedRightModel" style="font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: #fff;">
+                              <select x-model="selectedRightModel" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: #fff;">
                                  <template x-for="model in availableRightModels" :key="model.id">
                                    <option :value="model.id" x-text="model.label"></option>
                                  </template>
