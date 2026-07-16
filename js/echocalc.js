@@ -880,10 +880,10 @@ get rightAllometricResults() {
             lower = Math.pow(10, logMean - (1.96 * see));
             upper = Math.pow(10, logMean + (1.96 * see));
         } else if (formula.type === 'norm'){
-            const bwPower2 = Math.pow(this.weight, model.b);
-            mean = model.a * bwPower2;
-            lower = (model.normMin || model.a) * bwPower2;
-            upper = (model.normMax || model.a) * bwPower2;
+            const bwPower2 = Math.pow(this.weight, formula.b);
+            mean = formula.a * bwPower2;
+            lower = (formula.normMin || formula.a) * bwPower2;
+            upper = (formula.normMax || formula.a) * bwPower2;
         } else {    
         // VISSER & GENTILE MATH
             mean = formula.a * Math.pow(this.weight, formula.b);
