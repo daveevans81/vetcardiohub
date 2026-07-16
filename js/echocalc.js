@@ -45,7 +45,8 @@ function advancedEchoSuite() {
     rpamin: '',    // Right Pulmonary Artery min
     rpamax: '',    // Right Pulmonary Artery max
     lvidd2:'',
-    selectedRightModel: 'feldhutter_2022', // Default right heart validation framework
+    cvc: '',
+    selectedRightModel: 'gentile_solomon_2016', // Default right heart validation framework
     selectedMineModel: 'mine_1',
     showVolumes: false,
     showDoppler: false,
@@ -849,7 +850,7 @@ get availableRightModels() {
 get rightAllometricResults() {
     const results = {};
     // List all possible right heart parameters
-    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rvedv', 'rvesv', 'rvSPrime','mpamin', 'rpamax', 'rpamin'];
+    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rvedv', 'rvesv', 'rvSPrime','mpamin', 'rpamax', 'rpamin', 'cvc'];
 
     // 1. PRE-FILL SAFE DEFAULTS (This prevents the HTML crash!)
     targets.forEach(t => {
@@ -878,12 +879,18 @@ get rightAllometricResults() {
             const see = formula.see || 0; 
             lower = Math.pow(10, logMean - (1.96 * see));
             upper = Math.pow(10, logMean + (1.96 * see));
-        } else {
-            // VISSER & GENTILE MATH
+        } else if (formula.type === 'norm'){
+            const bwPower2 = Math.pow(this.weight, model.b);
+            mean = model.a * bwPower2;
+            lower = (model.normMin || model.a) * bwPower2;
+            upper = (model.normMax || model.a) * bwPower2;
+        } else {    
+        // VISSER & GENTILE MATH
             mean = formula.a * Math.pow(this.weight, formula.b);
             lower = formula.minMultiplier ? formula.minMultiplier * mean : mean - (1.96 * (formula.see || 0));
             upper = formula.maxMultiplier ? formula.maxMultiplier * mean : mean + (1.96 * (formula.see || 0));
         }
+    
 
         const scale = formula.multiplier || 1;
         mean *= scale;

@@ -759,6 +759,21 @@ const rightHeartModels = {
         params: {
             tapse: { a: 3.98, b: 0.352, see: 1.08 },
             rvwt:  { a: 0.22, b: 0.284, see: 0.05, multiplier: 10 }, // cm -> mm
+            pv: { a: 6.68, b: 0.301, normMin: 5.74, normMax: 7.78, type: "norm" },
+            ao: { a: 6.64, b: 0.356, normMin: 5.79, normMax: 7.62, type: "norm" },
+            rvWdApicalDiastole: { a: 3.15, b: 0.25, normMin: 2.58, normMax: 3.86, type: "norm" },
+            rvWsApicalSystole: { a: 3.30, b: 0.29, normMin: 2.67, normMax: 4.10, type: "norm" },
+            rvd1: { a: 7.02, b: 0.33, normMin: 5.27, normMax: 9.35, type: "norm" },
+            rvMinorSystole: { a: 5.44, b: 0.31, normMin: 3.86, normMax: 7.68, type: "norm" },
+            tvAnnulusD: { a: 5.11, b: 0.35, normMin: 3.97, normMax: 6.57, type: "norm" },
+            tvAnnulusS: { a: 4.88, b: 0.32, normMin: 3.78, normMax: 6.33, type: "norm" },
+            rvMajorDiastole: { a: 14.26, b: 0.30, normMin: 11.30, normMax: 18.00, type: "norm" },
+            rveda: { a: 91.60, b: 0.62, normMin: 63.13, normMax: 132.90, type: "norm" },
+            rvesv: { a: 52.90, b: 0.63, normMin: 33.54, normMax: 83.42, type: "norm" },
+            raMajor: { a: 9.49, b: 0.32, normMin: 8.09, normMax: 11.12, type: "norm" },
+            rad: { a: 7.43, b: 0.39, normMin: 6.12, normMax: 9.02, type: "norm" },
+            raArea: { a: 58.63, b: 0.71, normMin: 45.07, normMax: 76.27, type: "norm" },
+            cvc: { a: 3.90, b: 0.25, normMin: 3.02, normMax: 5.04, type: "norm" },
 
             //  (Grosso 2023)
             mpamin: { type: 'log_direct', a: -0.084, b: 0.306, see: 0.042, multiplier: 10 },
