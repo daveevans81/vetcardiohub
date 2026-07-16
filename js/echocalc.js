@@ -850,7 +850,7 @@ get availableRightModels() {
 get rightAllometricResults() {
     const results = {};
     // List all possible right heart parameters
-    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rvedv', 'rvesv', 'rvSPrime','mpamin', 'rpamax', 'rpamin', 'cvc'];
+    const targets = ['tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rad', 'rad2', 'rvedv', 'rvesv', 'rvSPrime','mpamin', 'rpamax', 'rpamin', 'cvc'];
 
     // 1. PRE-FILL SAFE DEFAULTS (This prevents the HTML crash!)
     targets.forEach(t => {
