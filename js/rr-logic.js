@@ -2405,9 +2405,48 @@ sortedDiagnosisLog() {
         //Methods for syncope and Diagnosis data
 saveCardiacDiagnosis() {
     if (!this.newDiagnosis.diagnosis) return alert("Primary Cardiac Diagnosis is required.");
-    this.newDiagnosis.concurrentDiagnoses = [];   
+    this.newDiagnosis.concurrentDiagnoses = [];   // <-- add: cardiac records hold no concurrent list
     this._saveDiagnosisLogEntry();
     this.showCardiacForm = false;
+},
+
+migrateDiagnosisEqualisation() {
+    if (!Array.isArray(this.diagnosisLog)) return;
+    const spawned = [];
+    let changed = false;
+
+    this.diagnosisLog.forEach(d => {
+        const conditions = (d.concurrentDiagnoses || [])
+            .map(s => (s || '').trim()).filter(Boolean);
+
+        if (d.diagnosis === 'Concurrent Conditions Only') {
+            // Multi-condition sentinel → keep first here, spawn the rest (copy date AND notes).
+            if (conditions.length > 1) {
+                d.concurrentDiagnoses = [conditions[0]];
+                conditions.slice(1).forEach(c => spawned.push({
+                    id: this.generateId(), patientId: d.patientId, date: d.date,
+                    diagnosis: 'Concurrent Conditions Only',
+                    customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
+                    concurrentDiagnoses: [c], notes: d.notes || '', timestamp: Date.now()
+                }));
+                changed = true;
+            }
+        } else if (conditions.length > 0) {
+            // Cardiac record carrying a concurrent list → empty it, spawn one sentinel per
+            // condition (copy date, NOT notes — notes belong to the cardiac diagnosis).
+            d.concurrentDiagnoses = [];
+            conditions.forEach(c => spawned.push({
+                id: this.generateId(), patientId: d.patientId, date: d.date,
+                diagnosis: 'Concurrent Conditions Only',
+                customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
+                concurrentDiagnoses: [c], notes: '', timestamp: Date.now()
+            }));
+            changed = true;
+        }
+    });
+
+    if (spawned.length) this.diagnosisLog.push(...spawned);
+    if (changed) this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
 },
         
 // Human-facing name for a diagnosis row. Non-cardiac (sentinel) rows show their
@@ -2791,7 +2830,51 @@ get isStagingApplicable() {
 
 
 
+// Human-facing name for a diagnosis row. Non-cardiac (sentinel) rows show their
+// condition; cardiac "Other" rows show the free-text. Mirrors iOS ClinicalCSV.
+diagDisplayName(d) {
+    if (d.diagnosis === 'Concurrent Conditions Only') {
+        const c = (d.concurrentDiagnoses || []).join(', ');
+        return c || 'Non-cardiac diagnosis';
+    }
+    return d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '—');
+},
 
+saveConcurrentDiagnosis() {
+    const lines = (this.newConcurrentDiagnosis || '')
+        .split('\n').map(s => s.trim()).filter(Boolean);
+
+    if (lines.length === 0 && !this.newDiagnosis.notes) {
+        return alert("Please add at least one condition or a clinical note.");
+    }
+
+    // EDIT MODE: a sentinel record being edited stays a single record (first line wins).
+    if (this.editingDiagnosisId) {
+        this.newDiagnosis.diagnosis = 'Concurrent Conditions Only';
+        this.newDiagnosis.concurrentDiagnoses = lines.slice(0, 1);
+        this.newDiagnosis.murmurGrade = 'N/A';
+        this.newDiagnosis.acvimStage  = 'N/A';
+        this._saveDiagnosisLogEntry();
+        this.showConcurrentForm = false;
+        return;
+    }
+
+    // ADD MODE: push one record per line.
+    (lines.length ? lines : ['']).forEach(line => {
+        this.diagnosisLog.push({
+            id: this.generateId(),
+            patientId: this.activePatientId,
+            date: this.newDiagnosis.date,
+            diagnosis: 'Concurrent Conditions Only',
+            customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
+            concurrentDiagnoses: line ? [line] : [],
+            notes: this.newDiagnosis.notes || '',
+            timestamp: Date.now()
+        });
+    });
+    this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
+    this.showConcurrentForm = false;
+},
 
 
 get stageProgression() {
