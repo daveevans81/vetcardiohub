@@ -265,6 +265,23 @@ showCardiacForm: false,
         },
         
 
+injectionLog: [],
+showInjectionPanel: false,
+showInjectionForm: false,
+editingInjectionId: null,
+injectionChartRenderTimeout: null,
+newInjection: {
+    date: new Date().toISOString().split('T')[0],   // day-level yyyy-MM-dd
+    customName: '',        // product name (custom-only)
+    dose: '',              // optional free text: "40 mg" / "1 vial"
+    intervalDays: 30,
+    intervalLabel: 'Monthly',
+    nextDueDate: '',       // filled by _calcInjectionDue
+    batchNumber: '',
+    administeredBy: '',
+    notes: ''
+},
+
 
         newSyncope: {
             date: new Date().toISOString().split('T')[0],
@@ -434,7 +451,7 @@ activeView: 'all',            // ← default to the full scroll
 
 navItems: [
     { id: 'all',      label: 'All',      icon: 'fa-layer-group', modules: null },
-    { id: 'count',    label: 'Count',    icon: 'fa-lungs',       modules: ['srr'] },
+    { id: 'count',    label: 'SRR',      icon: 'fa-lungs',       modules: ['srr'] },
     { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line',  modules: ['srr','medications','acvimStaging','weightDiet','antiparasitics','vaccinations'] },
     { id: 'meds',     label: 'Meds',     icon: 'fa-pills',       modules: ['medications','acvimStaging'] },
     { id: 'wellness', label: 'Wellness', icon: 'fa-heart-pulse', modules: ['coughLog','activityLog','weightDiet','syncopeLog','vaccinations','antiparasitics'] },
@@ -480,7 +497,7 @@ get currentViewLabel() {
 
 // Focused tabs auto-expand their accordions; 'all' keeps the compact scroll
 _expandForView(v) {
-    if (v === 'meds')     { this.showMedLog = true; this.showDiagnosisLog = true; this.showMedGraph = true; }
+    if (v === 'meds')     { this.showMedLog = true; this.showDiagnosisLog = true; this.showMedGraph = true; this.$nextTick(() => this.renderInjectionChart()); }
     if (v === 'wellness') { this.showSymptomLog = true; this.showWeightLogPanel = true;
                             this.showSyncopeLog = true; this.showVaccinationLogPanel = true;
                             this.showAntiparasiticPanel = true; }
@@ -756,6 +773,7 @@ init() {
     this.activityLog      = loadKey('vch_activityLog');
     this.vaccinationLog   = loadKey('vch_vaccinationLog');
     this.antiparasiticLog = loadKey('vch_antiparasiticLog');
+    this.injectionLog = loadKey('vch_injectionLog');
     this.medDoseLog = loadKey('vch_medDoseLog') || [];
 
     // Backfill module flags for legacy / restored profiles
@@ -809,9 +827,12 @@ init() {
     this.$watch('showWeightLogPanel', (isVisible) => {
     if (isVisible) this.$nextTick(() => { this.renderWeightChart(); });
 });
+    this.$watch('showMedLog', (isVisible) => {
+        if (isVisible) this.$nextTick(() => { this.renderInjectionChart(); });
+    });
 
     // Existing watchers
-    this.$watch('activePatientId', () => { if (this.activePatientId) { try { localStorage.setItem('vch_lastPatientId', this.activePatientId); } catch (e) {} } this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all'; this._syncVetExportModules(); });
+    this.$watch('activePatientId', () => { if (this.activePatientId) { try { localStorage.setItem('vch_lastPatientId', this.activePatientId); } catch (e) {} } this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); this.renderInjectionChart(); if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all'; this._syncVetExportModules(); });
     this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); });
     this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
     this.$watch('showCoughOverlay', () => { this.renderChart(); });
@@ -1016,7 +1037,8 @@ deletePatient(patientId) {
             this.coughLog = this.coughLog.filter(s => s.patientId !== patientId);
             this.activityLog = this.activityLog.filter(s => s.patientId !== patientId);
             this.vaccinationLog = this.vaccinationLog.filter(v => v.patientId !== patientId);   
-            this.antiparasiticLog = this.antiparasiticLog.filter(a => a.patientId !== patientId);                   
+            this.antiparasiticLog = this.antiparasiticLog.filter(a => a.patientId !== patientId);      
+            this.injectionLog = this.injectionLog.filter(a => a.patientId !== patientId);              
   
 
             // 2. Persist the flushed arrays to local storage
@@ -1031,6 +1053,7 @@ deletePatient(patientId) {
             this.saveToStorage('vch_activityLog', this.activityLog);
             this.saveToStorage('vch_vaccinationLog', this.vaccinationLog); 
             this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog); 
+            this.saveToStorage('vch_injectionLog', this.injectionLog);
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -1074,9 +1097,8 @@ get computedAgeText() {
         
 get latestWeightText() {
     if (!this.activePatientId) return '';
-    const weights = this.weightLog
-        .filter(w => w.patientId === this.activePatientId)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Skip diet-only days (null weight) — show the most recent day with an actual weigh-in.
+    const weights = this.sortedWeighedLog;
     if (weights.length === 0) return 'No weight logged';
     const unit = this.activePatientProfile?.weightUnit || 'kg';
     return `${weights[0].weightValue} ${unit}`;
@@ -1124,6 +1146,7 @@ savePatient() {
             const factor = previousUnit === 'kg' ? 2.2046 : (1 / 2.2046);
             this.weightLog = this.weightLog.map(w => {
                 if (w.patientId !== patientIdToSave) return w;
+                if (w.weightValue == null || isNaN(parseFloat(w.weightValue))) return w; // diet-only day
                 return {
                     ...w,
                     weightValue: Math.round(parseFloat(w.weightValue) * factor * 1000) / 1000
@@ -1190,6 +1213,7 @@ mergePatients(targetId, sourceId) {
             this.activityLog = this.activityLog.map(c => c.patientId === sourceId ? { ...c, patientId: targetId } : c);
             this.vaccinationLog = this.vaccinationLog.map(v => v.patientId === sourceId ? { ...v, patientId: targetId } : v);
             this.antiparasiticLog = this.antiparasiticLog.map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
+            this.injectionLog = this.injectionLog.map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
 
             // Dedupe identical SRR readings created by merging an imported copy
             const seen = new Set();
@@ -1216,6 +1240,7 @@ mergePatients(targetId, sourceId) {
             this.saveToStorage('vch_vaccinationLog', this.vaccinationLog);
             this.saveToStorage('vch_patients', this.patients);
             this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
+            this.saveToStorage('vch_injectionLog', this.injectionLog);
             
             
 
@@ -2316,12 +2341,18 @@ get sortedWeightLog() {
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 },
 
+// Only the days that actually have a weigh-in (weight is optional — a diet-only day has
+// weightValue === null). Weight trends/summaries must ignore diet-only days, never treat
+// their missing weight as 0.
+get sortedWeighedLog() {
+    return this.sortedWeightLog.filter(w => w.weightValue != null && !isNaN(parseFloat(w.weightValue)));
+},
+
 openWeightForm(logEntry = null) {
     if (logEntry) {
-        this.newWeightEntry = { ...logEntry };
+        // Format ISO date to standard YYYY-MM-DD for the HTML input.
+        this.newWeightEntry = { ...logEntry, date: logEntry.date.split('T')[0] };
         this.editingWeightId = logEntry.id;
-        // Format ISO date to standard YYYY-MM-DD for the HTML input
-        this.newWeightEntry.date = logEntry.date.split('T')[0]; 
     } else {
         this.newWeightEntry = {
             date: new Date().toISOString().split('T')[0],
@@ -2334,38 +2365,86 @@ openWeightForm(logEntry = null) {
             notes: ''
         };
         this.editingWeightId = null;
+        // ONE RECORD PER DAY: if today already has an entry, load it so the user updates that
+        // record (and can add diet to it) instead of blanking it out with a fresh form.
+        this.loadWeightEntryForPickedDate();
     }
     this.showWeightForm = true;
 },
 
+// Called when the date field in the weight form changes: load that day's existing entry (edit
+// it in place), or reset to a blank record for a day with no entry yet. Keeps the form in step
+// with the one-record-per-day rule so changing the date never silently overwrites another day.
+loadWeightEntryForPickedDate() {
+    const dateStr = this.newWeightEntry.date;
+    if (!dateStr || !this.activePatientId) return;
+    const dayKey = dateStr.split('T')[0];
+    const existing = this.weightLog.find(w =>
+        w.patientId === this.activePatientId && w.date.split('T')[0] === dayKey);
+    if (existing) {
+        this.newWeightEntry = { ...existing, date: existing.date.split('T')[0] };
+        this.editingWeightId = existing.id;
+    } else {
+        this.newWeightEntry = {
+            date: dayKey, weightValue: '', bcs: '', appetite: 'Normal',
+            foodBrand: '', portionSize: '', supplements: '', notes: ''
+        };
+        this.editingWeightId = null;
+    }
+},
+
 saveWeightEntry() {
     if (!this.activePatientId) return alert("Select a patient first.");
-    const val = parseFloat(this.newWeightEntry.weightValue);
-    if (isNaN(val) || val <= 0) return alert("A valid weight is required.");
+
+    // Weight is OPTIONAL — a diet-only day (no weigh-in) is valid. A blank or non-positive
+    // weight is stored as null (NOT 0, which would poison charts and mg/kg dosing).
+    const parsed = parseFloat(this.newWeightEntry.weightValue);
+    const val = (!isNaN(parsed) && parsed > 0) ? parsed : null;
 
     const bcsVal = parseInt(this.newWeightEntry.bcs, 10);
+    const bcs = (Number.isInteger(bcsVal) && bcsVal >= 1 && bcsVal <= 9) ? bcsVal : null;
+    const appetite = this.newWeightEntry.appetite || 'Normal';
+    const foodBrand = (this.newWeightEntry.foodBrand || '').trim();
+    const portionSize = (this.newWeightEntry.portionSize || '').trim();
+    const notes = (this.newWeightEntry.notes || '').trim();
+
+    // Need at least one meaningful field — a weight, a body condition, or some diet detail.
+    if (val === null && bcs === null && appetite === 'Normal' && !foodBrand && !portionSize && !notes) {
+        return alert("Enter a weight, or some diet detail (food, appetite, body condition or notes), to save.");
+    }
+
+    // Day-level date → UTC noon (the T12:00Z storage convention).
+    const dateStr = this.newWeightEntry.date.includes('T')
+        ? this.newWeightEntry.date
+        : `${this.newWeightEntry.date}T12:00:00.000Z`;
+    const dayKey = dateStr.split('T')[0];
+
+    // ONE RECORD PER DAY: saving for a day that already has an entry UPDATES it rather than
+    // adding a confusing duplicate (matches the iOS app). When editing, keep that entry's id.
+    const existingOnDay = this.weightLog.find(w =>
+        w.patientId === this.activePatientId &&
+        w.id !== this.editingWeightId &&
+        w.date.split('T')[0] === dayKey);
+    const targetId = this.editingWeightId || (existingOnDay && existingOnDay.id) || this.generateId();
+
     const entryToSave = {
         ...this.newWeightEntry,
-        bcs: (Number.isInteger(bcsVal) && bcsVal >= 1 && bcsVal <= 9) ? bcsVal : null,
-        id: this.editingWeightId || this.generateId(),
+        id: targetId,
         patientId: this.activePatientId,
         weightValue: val,
-        // Ensure date is stored cleanly
-        date: this.newWeightEntry.date.includes('T') ? this.newWeightEntry.date : `${this.newWeightEntry.date}T12:00:00.000Z` 
+        bcs, appetite, foodBrand, portionSize, notes,
+        date: dateStr
     };
 
-    if (this.editingWeightId) {
-        const index = this.weightLog.findIndex(w => w.id === this.editingWeightId);
-        if (index !== -1) this.weightLog[index] = entryToSave;
-    } else {
-        this.weightLog.push(entryToSave);
-    }
+    const index = this.weightLog.findIndex(w => w.id === targetId);
+    if (index !== -1) this.weightLog[index] = entryToSave;
+    else this.weightLog.push(entryToSave);
 
     this.saveToStorage('vch_weightLog', this.weightLog);
     this.showWeightForm = false;
-    
+
     // Force a chart re-render as historical mg/kg calculations may have changed
-    this.$nextTick(() => { this.renderMedChart(); this.renderWeightChart(); }); 
+    this.$nextTick(() => { this.renderMedChart(); this.renderWeightChart(); });
 },
 
 deleteWeightEntry(id) {
@@ -2459,45 +2538,6 @@ diagDisplayName(d) {
     return d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '—');
 },
 
-migrateDiagnosisEqualisation() {
-    if (!Array.isArray(this.diagnosisLog)) return;
-    const spawned = [];
-    let changed = false;
-
-    this.diagnosisLog.forEach(d => {
-        const conditions = (d.concurrentDiagnoses || [])
-            .map(s => (s || '').trim()).filter(Boolean);
-
-        if (d.diagnosis === 'Concurrent Conditions Only') {
-            // Multi-condition sentinel → keep first here, spawn the rest (copy date AND notes).
-            if (conditions.length > 1) {
-                d.concurrentDiagnoses = [conditions[0]];
-                conditions.slice(1).forEach(c => spawned.push({
-                    id: this.generateId(), patientId: d.patientId, date: d.date,
-                    diagnosis: 'Concurrent Conditions Only',
-                    customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
-                    concurrentDiagnoses: [c], notes: d.notes || '', timestamp: Date.now()
-                }));
-                changed = true;
-            }
-        } else if (conditions.length > 0) {
-            // Cardiac record carrying a concurrent list → empty it, spawn one sentinel per
-            // condition (copy date, NOT notes — notes belong to the cardiac diagnosis).
-            d.concurrentDiagnoses = [];
-            conditions.forEach(c => spawned.push({
-                id: this.generateId(), patientId: d.patientId, date: d.date,
-                diagnosis: 'Concurrent Conditions Only',
-                customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
-                concurrentDiagnoses: [c], notes: '', timestamp: Date.now()
-            }));
-            changed = true;
-        }
-    });
-
-    if (spawned.length) this.diagnosisLog.push(...spawned);
-    if (changed) this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
-},
-        
 saveConcurrentDiagnosis() {
     const lines = (this.newConcurrentDiagnosis || '')
         .split('\n').map(s => s.trim()).filter(Boolean);
@@ -2827,54 +2867,6 @@ get isStagingApplicable() {
             const diag = this.newDiagnosis.diagnosis?.toLowerCase() || '';
             return diag.includes('mmvd') || diag.includes('mitral') || diag.includes('hcm') || diag.includes('dcm');
         },
-
-
-
-// Human-facing name for a diagnosis row. Non-cardiac (sentinel) rows show their
-// condition; cardiac "Other" rows show the free-text. Mirrors iOS ClinicalCSV.
-diagDisplayName(d) {
-    if (d.diagnosis === 'Concurrent Conditions Only') {
-        const c = (d.concurrentDiagnoses || []).join(', ');
-        return c || 'Non-cardiac diagnosis';
-    }
-    return d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '—');
-},
-
-saveConcurrentDiagnosis() {
-    const lines = (this.newConcurrentDiagnosis || '')
-        .split('\n').map(s => s.trim()).filter(Boolean);
-
-    if (lines.length === 0 && !this.newDiagnosis.notes) {
-        return alert("Please add at least one condition or a clinical note.");
-    }
-
-    // EDIT MODE: a sentinel record being edited stays a single record (first line wins).
-    if (this.editingDiagnosisId) {
-        this.newDiagnosis.diagnosis = 'Concurrent Conditions Only';
-        this.newDiagnosis.concurrentDiagnoses = lines.slice(0, 1);
-        this.newDiagnosis.murmurGrade = 'N/A';
-        this.newDiagnosis.acvimStage  = 'N/A';
-        this._saveDiagnosisLogEntry();
-        this.showConcurrentForm = false;
-        return;
-    }
-
-    // ADD MODE: push one record per line.
-    (lines.length ? lines : ['']).forEach(line => {
-        this.diagnosisLog.push({
-            id: this.generateId(),
-            patientId: this.activePatientId,
-            date: this.newDiagnosis.date,
-            diagnosis: 'Concurrent Conditions Only',
-            customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
-            concurrentDiagnoses: line ? [line] : [],
-            notes: this.newDiagnosis.notes || '',
-            timestamp: Date.now()
-        });
-    });
-    this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
-    this.showConcurrentForm = false;
-},
 
 
 get stageProgression() {
@@ -3352,6 +3344,262 @@ editCough(dateStr) {
             return options.sort((a, b) => a.label.localeCompare(b.label));
         },
         
+        //Injection Log helpers
+        
+         
+_calcInjectionDue(dateStr, intervalDays) {          // = _calcParasiticDue
+    if (!dateStr || !intervalDays) return '';
+    const d = new Date(dateStr + 'T12:00:00');
+    d.setDate(d.getDate() + Number(intervalDays));
+    return d.toISOString().split('T')[0];
+},
+
+// Owner-facing cadence label derived from the interval in days.
+_injectionCadenceLabel(intervalDays) {
+    const n = Number(intervalDays);
+    if (!n) return '';
+    if (n >= 28 && n <= 31) return 'Monthly';
+    if (n === 7)  return 'Weekly';
+    if (n === 14) return 'Every 2 weeks';
+    if (n === 21) return 'Every 3 weeks';
+    if (n === 56) return 'Every 8 weeks';
+    if (n >= 88 && n <= 92) return 'Quarterly';
+    return `Every ${n} days`;
+},
+
+// Re-derive next-due date AND cadence label whenever date/interval change.
+_refreshInjectionDue() {
+    this.newInjection.intervalLabel = this._injectionCadenceLabel(this.newInjection.intervalDays);
+    this.newInjection.nextDueDate =
+        this._calcInjectionDue(this.newInjection.date, this.newInjection.intervalDays);
+},
+
+// A blank injectable ready for entry.
+_freshInjection() {
+    return {
+        date: new Date().toISOString().split('T')[0],
+        customName: '', dose: '', intervalDays: 30, intervalLabel: 'Monthly',
+        nextDueDate: '', batchNumber: '', administeredBy: '', notes: ''
+    };
+},
+
+// Opens the medication form in Injectable mode. Pass a log entry to edit it,
+// or null for a fresh injectable. (Repeat uses this with a today-dated copy.)
+openInjectionForm(entry = null) {
+    this.editingMedId = null;
+    this.newMed = {
+        eventDate: new Date().toISOString().split('T')[0],
+        drugId: '', customName: '', isStopped: false,
+        openedDate: '', discardDays: '', form: 'injectable',
+        tabletStrengthMg: '', tabletsPerDose: '',
+        frequency: 'q12h', doseTimes: [],
+        tabletsInStock: '',
+        stockDate: new Date().toISOString().split('T')[0]
+    };
+    if (entry && entry.id) {
+        this.newInjection = {
+            date: entry.date || new Date().toISOString().split('T')[0],
+            customName: entry.customName || '',
+            dose: entry.dose || '',
+            intervalDays: entry.intervalDays || 30,
+            intervalLabel: entry.intervalLabel || 'Monthly',
+            nextDueDate: entry.nextDueDate || '',
+            batchNumber: entry.batchNumber || '',
+            administeredBy: entry.administeredBy || '',
+            notes: entry.notes || ''
+        };
+        this.editingInjectionId = entry.id;
+    } else {
+        this.newInjection = this._freshInjection();
+        // Allow a partial hydrate (used by repeatInjection) while staying a NEW record.
+        if (entry) Object.assign(this.newInjection, {
+            customName: entry.customName || '',
+            dose: entry.dose || '',
+            intervalDays: entry.intervalDays || 30,
+            batchNumber: '', administeredBy: entry.administeredBy || ''
+        });
+        this.editingInjectionId = null;
+    }
+    this._refreshInjectionDue();
+    this.showMedForm = true;
+},
+
+// One-tap re-dose: pre-fill from an existing record but date it TODAY as a new entry.
+repeatInjection(id) {
+    const e = this.injectionLog.find(x => x.id === id);
+    if (!e) return;
+    this.openInjectionForm({
+        customName: e.customName, dose: e.dose,
+        intervalDays: e.intervalDays, administeredBy: e.administeredBy
+    });
+},
+
+saveInjection() {
+    if (!this.activePatientId) return alert('Select a patient first.');
+    if (!this.newInjection.customName || !this.newInjection.customName.trim()) {
+        return alert('Please enter the injectable product name.');
+    }
+    this._refreshInjectionDue();
+
+    const entryToSave = {
+        id:        this.editingInjectionId || this.generateId(),
+        patientId: this.activePatientId,
+        date:          this.newInjection.date,
+        customName:    this.newInjection.customName.trim(),
+        dose:          (this.newInjection.dose || '').trim(),
+        intervalDays:  Number(this.newInjection.intervalDays) || 0,
+        intervalLabel: this.newInjection.intervalLabel || this._injectionCadenceLabel(this.newInjection.intervalDays),
+        nextDueDate:   this.newInjection.nextDueDate,
+        batchNumber:   (this.newInjection.batchNumber || '').trim(),
+        administeredBy:(this.newInjection.administeredBy || '').trim(),
+        notes:         (this.newInjection.notes || '').trim()
+    };
+
+    if (this.editingInjectionId) {
+        const idx = this.injectionLog.findIndex(e => e.id === this.editingInjectionId);
+        if (idx !== -1) this.injectionLog.splice(idx, 1, entryToSave);
+        else this.injectionLog.push(entryToSave);
+    } else {
+        this.injectionLog.push(entryToSave);
+    }
+
+    // Conversion: an existing tablet/liquid med was switched to Injectable → drop the med.
+    if (this.editingMedId) {
+        this.medLedger = this.medLedger.filter(m => m.id !== this.editingMedId);
+        this.saveToStorage('vch_medLedger', this.medLedger);
+        this.editingMedId = null;
+    }
+
+    this.saveToStorage('vch_injectionLog', this.injectionLog);
+    this.editingInjectionId = null;
+    this.newInjection = this._freshInjection();
+    if (typeof this.renderInjectionChart === 'function') this.renderInjectionChart();
+    this.showMedForm = false;
+    this.showInjectionForm = false;
+},
+
+deleteInjection(id) {
+    if (confirm('Delete this injectable record?')) {
+        this.injectionLog = this.injectionLog.filter(e => e.id !== id);
+        this.saveToStorage('vch_injectionLog', this.injectionLog);
+        if (typeof this.renderInjectionChart === 'function') this.renderInjectionChart();
+    }
+},
+
+sortedInjectionLog() {
+    if (!this.activePatientId) return [];
+    return this.injectionLog
+        .filter(e => e.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+},
+
+// Reuse the vaccine/antiparasitic due-date colour engine — identical semantics.
+getInjectionStatus(nextDueDate) {
+    return this.getVaccineStatus(nextDueDate);
+},
+
+// Ids of the most-recent (live) dose per product name — the only rows that show a due pill.
+liveInjectionIds() {
+    const seen = new Set();
+    const live = new Set();
+    for (const e of this.sortedInjectionLog()) {          // newest first
+        const key = (e.customName || '').trim().toLowerCase();
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        live.add(e.id);
+    }
+    return live;
+},
+
+// Consecutive-dose day gaps for one product (mirrors iOS InjectionLogic.administrationGaps).
+injectionAdminGaps(customName) {
+    const key = (customName || '').trim().toLowerCase();
+    const dates = this.injectionLog
+        .filter(e => e.patientId === this.activePatientId && (e.customName || '').trim().toLowerCase() === key)
+        .map(e => new Date(e.date + 'T12:00:00'))
+        .sort((a, b) => a - b);
+    const gaps = [];
+    for (let i = 1; i < dates.length; i++) {
+        gaps.push(Math.round((dates[i] - dates[i - 1]) / 86400000));
+    }
+    return gaps;
+},
+
+// 12-month timeline of each product's administrations — surfaces interval drift.
+renderInjectionChart() {
+    if (this.injectionChartRenderTimeout) clearTimeout(this.injectionChartRenderTimeout);
+    this.injectionChartRenderTimeout = setTimeout(() => {
+        const canvas = this.$refs.injectionChartCanvas;
+        if (!canvas || typeof Chart === 'undefined') return;
+        // GATEKEEPER: don't draw into a hidden canvas (accordion collapsed / other view)
+        if (canvas.offsetParent === null) return;
+
+        const existing = Chart.getChart(canvas);
+        if (existing) existing.destroy();
+
+        const now = new Date();
+        const start = new Date(now); start.setMonth(start.getMonth() - 12);
+
+        // Group this pet's doses by product name, keeping only the last 12 months.
+        const groups = {};
+        this.sortedInjectionLog().forEach(e => {
+            const label = (e.customName || 'Injectable').trim();
+            const key = label.toLowerCase();
+            const d = new Date((e.date || '') + 'T12:00:00');
+            if (isNaN(d.getTime()) || d < start) return;
+            (groups[key] = groups[key] || { label, dates: [], intervalDays: e.intervalDays })
+                .dates.push(d);
+        });
+        const keys = Object.keys(groups);
+        if (keys.length === 0) return;
+
+        const palette = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+        const datasets = keys.map((key, i) => {
+            const g = groups[key];
+            const gaps = this.injectionAdminGaps(g.label);
+            const avg = gaps.length ? Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) : null;
+            const suffix = avg
+                ? `  (avg ${avg}d${g.intervalDays ? ` vs label ${g.intervalDays}d` : ''})`
+                : '';
+            const color = palette[i % palette.length];
+            return {
+                label: g.label + suffix,
+                data: g.dates.map(d => ({ x: d, y: g.label })),
+                backgroundColor: color,
+                borderColor: color,
+                showLine: true,
+                borderWidth: 1,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            };
+        });
+
+        new Chart(canvas.getContext('2d'), {
+            type: 'scatter',
+            data: { datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                    title: { display: true, text: 'Injectable administrations — last 12 months', font: { size: 12 } },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw.y}: ${new Date(ctx.raw.x).toLocaleDateString('en-GB')}` } }
+                },
+                scales: {
+                    x: { type: 'time', min: start, max: now, time: { unit: 'month' }, ticks: { font: { size: 9 } } },
+                    y: { type: 'category', labels: keys.map(k => groups[k].label), offset: true, ticks: { font: { size: 9 } } }
+                }
+            }
+        });
+    }, 60);
+},
+        
+        
+        
+        
+        
+        
+        
         // Helper function to calculate mg/kg dynamically in the UI
       
       
@@ -3369,10 +3617,9 @@ calculatedMgPerKg() {
     const profile = this.activePatientProfile;  
     if (!profile) return null;
 
-    const weights = this.weightLog
-        .filter(w => w.patientId === this.activePatientId)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+    // Diet-only days (null weight) are skipped — use the most recent actual weigh-in.
+    const weights = this.sortedWeighedLog;
+
     const latestWeight = weights.length > 0 ? parseFloat(weights[0].weightValue) : null;
     const dose = this.newMedDoseMg();
     if (!latestWeight || dose == null || latestWeight <= 0 || isNaN(latestWeight)) return null;
@@ -3386,8 +3633,11 @@ getWeightAtDate(patientId, dateStr) {
     const targetDate = new Date(dateStr);
     if (isNaN(targetDate.getTime())) return null;
 
+    // Only weighed days count — a diet-only day (null weight) must not mask an earlier weigh-in.
     const sorted = this.weightLog
-        .filter(w => w.patientId === patientId && new Date(w.date) <= targetDate)
+        .filter(w => w.patientId === patientId
+            && w.weightValue != null && !isNaN(parseFloat(w.weightValue))
+            && new Date(w.date) <= targetDate)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     return sorted.length > 0 ? sorted[0].weightValue : null;
@@ -3511,6 +3761,8 @@ closeResult() {
         
 openMedForm() {
     this.editingMedId = null;
+    this.editingInjectionId = null;
+    this.newInjection = this._freshInjection();
     this.newMed = {
         eventDate: new Date().toISOString().split('T')[0],
         drugId: '', customName: '', isStopped: false,
@@ -3540,12 +3792,16 @@ editMedication(id) {
         stockDate: m.stockDate || m.eventDate
     };
     this.editingMedId = id;
+    this.editingInjectionId = null;
+    this.newInjection = this._freshInjection();
     this.showMedForm = true;
 },
 
         // Save function for the Ledger
 addMedication() {
     if (!this.activePatientId) return alert("Clinical Entry Error: No patient selected.");
+    // Injectable preparation → routes to its own array (§Feature 4).
+    if (this.newMed.form === 'injectable') return this.saveInjection();
     if (!this.newMed.drugId) return alert("Clinical Entry Error: Please select a medication.");
     
     // Explicit null/empty check that works regardless of type
@@ -3584,7 +3840,14 @@ addMedication() {
     } else {
         this.medLedger.push(entry);
     }
-    
+
+    // Conversion: an existing injectable was switched to a tablet/liquid med → drop the injection.
+    if (this.editingInjectionId) {
+        this.injectionLog = this.injectionLog.filter(e => e.id !== this.editingInjectionId);
+        this.saveToStorage('vch_injectionLog', this.injectionLog);
+        this.editingInjectionId = null;
+    }
+
     this.saveToStorage('vch_medLedger', this.medLedger);
     this.renderMedChart();
 
@@ -4430,15 +4693,15 @@ resetData() {
 
     const keys = ['vch_patients','vch_weightLog','vch_srrHistory','vch_medLedger','vch_suppLedger',
                   'vch_diagnosisLog','vch_syncopeLog','vch_coughLog','vch_activityLog',
-                  'vch_vaccinationLog','vch_antiparasiticLog',  'vch_medDoseLog'];
+                  'vch_vaccinationLog','vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog'];
     keys.forEach(k => localStorage.removeItem(k));
 
     this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = []; this.suppLedger = [];
     this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.activityLog = [];
-    this.vaccinationLog = []; this.antiparasiticLog = []; this.medDoseLog = [];
+    this.vaccinationLog = []; this.antiparasiticLog = []; this.injectionLog = []; this.medDoseLog = [];
     this.activePatientId = null;
 
-    [this.$refs.rrrChartCanvas, this.$refs.medChartCanvas, this.$refs.weightChartCanvas]
+    [this.$refs.rrrChartCanvas, this.$refs.medChartCanvas, this.$refs.weightChartCanvas, this.$refs.injectionChartCanvas]
         .forEach(c => { const ch = c && Chart.getChart(c); if (ch) ch.destroy(); });
 
     alert("Database completely flushed.");
@@ -4630,6 +4893,7 @@ _weightChartExportDataUrl(startDate, endDate) {
     const data = this.weightLog
         .filter(w => {
             if (w.patientId !== this.activePatientId) return false;
+            if (w.weightValue == null || isNaN(parseFloat(w.weightValue))) return false; // diet-only day
             if (!startDate) return true;
             const d = this.parseDateSafe(w.date);
             return d >= startDate && d <= endDate;
@@ -5044,7 +5308,8 @@ renderWeightChart() {
         if (!canvases.length) return;
 
         const data = this.weightLog
-            .filter(w => w.patientId === this.activePatientId)
+            .filter(w => w.patientId === this.activePatientId
+                && w.weightValue != null && !isNaN(parseFloat(w.weightValue))) // skip diet-only days
             .sort((a, b) => new Date(a.date) - new Date(b.date));
         if (data.length < 2) return;
 
@@ -5891,16 +6156,26 @@ exportData() {
         },
         
 // Updated Export to include Pet Name
+// Filename fragment for the selected pet, e.g. "_Bella" (per-pet CSV exports). Empty if no name.
+_csvPetSuffix(pet) {
+    const raw = (pet && pet.name) ? pet.name : '';
+    const safe = raw.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '');
+    return safe ? `_${safe}` : '';
+},
+
 exportCSV() {
-    if (!this.srrHistory || this.srrHistory.length === 0) return alert("No clinical data to export.");
+    const pid = this.activePatientId;
+    if (!pid) return alert("Select a patient first.");
+    const pet = this.patients.find(p => p.id === pid);
+    const source = (this.srrHistory || []).filter(log => log.patientId === pid);
+    if (source.length === 0) return alert("No respiratory-rate data to export for this pet.");
 
     const headers = "Date,Time,Rate(bpm),PatientName,Species,Comment,Effort\n";
-    const rows = this.srrHistory.map(log => {
-        const targetPatient = this.patients.find(p => p.id === log.patientId);
-        const pName = targetPatient ? targetPatient.name : 'Unknown';
-        const pSpecies = targetPatient ? targetPatient.species : 'dog';
-        const comment = (log.comment || '').replace(/"/g, '""'); 
-        
+    const rows = source.map(log => {
+        const pName = pet ? pet.name : 'Unknown';
+        const pSpecies = pet ? pet.species : 'dog';
+        const comment = (log.comment || '').replace(/"/g, '""');
+
         return `${log.date},${log.time},${log.rate},"${pName}",${pSpecies},"${comment}",${log.breathingEffort ?? ''}`;
     }).join("\n");
 
@@ -5908,7 +6183,7 @@ exportCSV() {
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `SRR_Export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", `SRR_Export${this._csvPetSuffix(pet)}_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -6263,13 +6538,18 @@ importCardalisEmail() {
         
         // --- MEDICATION CSV MANAGEMENT ---
 exportMedicationsCSV() {
-    if ((!this.medLedger || this.medLedger.length === 0) && (!this.suppLedger || this.suppLedger.length === 0))
-        return alert("No medication or supplement data to export.");
+    const pid = this.activePatientId;
+    if (!pid) return alert("Select a patient first.");
+    const pet = this.patients.find(p => p.id === pid);
+    const meds = (this.medLedger || []).filter(m => m.patientId === pid);
+    const supps = (this.suppLedger || []).filter(s => s.patientId === pid);
+    if (meds.length === 0 && supps.length === 0)
+        return alert("No medication or supplement data to export for this pet.");
 
-    
+
     const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletStrengthMg,TabletsPerDose,TabletsInStock,StockDate,Form,OpenedDate,DiscardDays,DoseUnit,Constituents\n";
-    
-    const rows = this.medLedger.map(med => {
+
+    const rows = meds.map(med => {
         const patient = this.patients.find(p => p.id === med.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
         const genericName = med.drugId === 'other'
@@ -6297,7 +6577,7 @@ exportMedicationsCSV() {
         ].join(',');
     }).join("\n");
 
-    const suppRows = (this.suppLedger || []).map(s => {
+    const suppRows = supps.map(s => {
         const patient = this.patients.find(p => p.id === s.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
         const brand = s.productId === 'other'
@@ -6328,7 +6608,7 @@ exportMedicationsCSV() {
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + body);
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
-    link.setAttribute("download", `VCH_Medications_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `VCH_Medications${this._csvPetSuffix(pet)}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -6458,12 +6738,15 @@ importMedicationsCSV(event) {
 // ==========================================
 
 exportCoughCSV() {
-    if (!this.coughLog || this.coughLog.length === 0) 
-        return alert("No cough data to export.");
+    const pid = this.activePatientId;
+    if (!pid) return alert("Select a patient first.");
+    const pet = this.patients.find(p => p.id === pid);
+    const source = (this.coughLog || []).filter(c => c.patientId === pid);
+    if (source.length === 0) return alert("No cough data to export for this pet.");
 
     const headers = "Date,PatientName,Severity,FrequencyCount,FrequencyPeriod,Description,Context,Notes\n";
-    
-    const rows = this.coughLog.map(c => {
+
+    const rows = source.map(c => {
         const patient = this.patients.find(p => p.id === c.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
 
@@ -6483,7 +6766,7 @@ exportCoughCSV() {
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
-    link.setAttribute("download", `VCH_CoughLog_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `VCH_CoughLog${this._csvPetSuffix(pet)}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -6543,10 +6826,14 @@ importCoughCSV(event) {
 // ==========================================
 
 exportActivityCSV() {
-    if (!this.activityLog || this.activityLog.length === 0) return alert("No activity data to export.");
+    const pid = this.activePatientId;
+    if (!pid) return alert("Select a patient first.");
+    const pet = this.patients.find(p => p.id === pid);
+    const source = (this.activityLog || []).filter(a => a.patientId === pid);
+    if (source.length === 0) return alert("No activity data to export for this pet.");
 
     const headers = "Date,PatientName,Status,DurationMins,DistanceValue,DistanceUnit,Notes\n";
-    const rows = this.activityLog.map(a => {
+    const rows = source.map(a => {
         const patient = this.patients.find(p => p.id === a.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
         return [
@@ -6564,7 +6851,7 @@ exportActivityCSV() {
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
-    link.setAttribute("download", `VCH_ActivityLog_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `VCH_ActivityLog${this._csvPetSuffix(pet)}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -6627,10 +6914,14 @@ importActivityCSV(event) {
 // ==========================================
 
 exportSyncopeCSV() {
-    if (!this.syncopeLog || this.syncopeLog.length === 0) return alert("No syncope data to export.");
+    const pid = this.activePatientId;
+    if (!pid) return alert("Select a patient first.");
+    const pet = this.patients.find(p => p.id === pid);
+    const source = (this.syncopeLog || []).filter(s => s.patientId === pid);
+    if (source.length === 0) return alert("No syncope data to export for this pet.");
 
     const headers = "Date,Time,PatientName,Type,Duration,LOC,MuscleTone,ActivityBefore,MMColour,HR,RR,Notes\n";
-    const rows = this.syncopeLog.map(s => {
+    const rows = source.map(s => {
         const patient = this.patients.find(p => p.id === s.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
         return [
@@ -6653,7 +6944,7 @@ exportSyncopeCSV() {
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
-    link.setAttribute("download", `VCH_SyncopeLog_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `VCH_SyncopeLog${this._csvPetSuffix(pet)}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -6713,9 +7004,13 @@ importSyncopeCSV(event) {
 // ==========================================
 
 exportWeightCSV() {
-    if (!this.weightLog || this.weightLog.length === 0) return alert("No weight data to export.");
+    const pid = this.activePatientId;
+    if (!pid) return alert("Select a patient first.");
+    const pet = this.patients.find(p => p.id === pid);
+    const source = (this.weightLog || []).filter(w => w.patientId === pid);
+    if (source.length === 0) return alert("No weight data to export for this pet.");
     const headers = "Date,PatientName,Weight,Unit,Appetite,FoodBrand,PortionSize,Supplements,Notes\n";
-    const rows = this.weightLog.map(w => {
+    const rows = source.map(w => {
         const patient = this.patients.find(p => p.id === w.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
         const unit = patient?.weightUnit || 'kg';
@@ -6735,7 +7030,7 @@ exportWeightCSV() {
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
-    link.setAttribute("download", `VCH_WeightLog_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `VCH_WeightLog${this._csvPetSuffix(pet)}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -6757,18 +7052,27 @@ importWeightCSV(event) {
                 const patientName = clean(parts[1]);
                 const patient = this.patients.find(p => p.name.toLowerCase() === patientName.toLowerCase());
                 if (!patient) { skipped++; continue; }
-                const weightValue = parseFloat(clean(parts[2]));
-                if (isNaN(weightValue) || weightValue <= 0) { skipped++; continue; }
+                // Weight is optional (diet-only day). A blank/invalid weight imports as null,
+                // never 0. Skip only a genuinely empty row (no weight and nothing diet-related).
+                const parsedW = parseFloat(clean(parts[2]));
+                const weightValue = (!isNaN(parsedW) && parsedW > 0) ? parsedW : null;
+                const appetite = clean(parts[4]) || 'Normal';
+                const foodBrand = clean(parts[5]) || '';
+                const portionSize = clean(parts[6]) || '';
+                const notes = clean(parts[8]) || '';
+                if (weightValue === null && appetite === 'Normal' && !foodBrand && !portionSize && !notes) {
+                    skipped++; continue;
+                }
                 this.weightLog.push({
                     id: this.generateId(),
                     patientId: patient.id,
                     date: clean(parts[0]),
                     weightValue,
-                    appetite: clean(parts[4]) || 'Normal',
-                    foodBrand: clean(parts[5]) || '',
-                    portionSize: clean(parts[6]) || '',
+                    appetite,
+                    foodBrand,
+                    portionSize,
                     supplements: clean(parts[7]) || '',
-                    notes: clean(parts[8]) || ''
+                    notes
                 });
                 importedCount++;
             }
@@ -6787,9 +7091,13 @@ importWeightCSV(event) {
 // ==========================================
 
 exportVaccinationCSV() {
-    if (!this.vaccinationLog || this.vaccinationLog.length === 0) return alert("No vaccination data to export.");
+    const pid = this.activePatientId;
+    if (!pid) return alert("Select a patient first.");
+    const pet = this.patients.find(p => p.id === pid);
+    const source = (this.vaccinationLog || []).filter(v => v.patientId === pid);
+    if (source.length === 0) return alert("No vaccination data to export for this pet.");
     const headers = "Date,PatientName,VaccineType,Components,BatchNumber,AdministeredBy,NextDueDate,Additionals,Notes\n";
-    const rows = this.vaccinationLog.map(v => {
+    const rows = source.map(v => {
         const patient = this.patients.find(p => p.id === v.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
         const components = (v.components || []).join('; ');
@@ -6810,7 +7118,7 @@ exportVaccinationCSV() {
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
-    link.setAttribute("download", `VCH_VaccinationLog_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `VCH_VaccinationLog${this._csvPetSuffix(pet)}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -6873,9 +7181,13 @@ importVaccinationCSV(event) {
 // ==========================================
 
 exportAntiparasiticCSV() {
-    if (!this.antiparasiticLog || this.antiparasiticLog.length === 0) return alert("No antiparasitic data to export.");
+    const pid = this.activePatientId;
+    if (!pid) return alert("Select a patient first.");
+    const pet = this.patients.find(p => p.id === pid);
+    const source = (this.antiparasiticLog || []).filter(a => a.patientId === pid);
+    if (source.length === 0) return alert("No antiparasitic data to export for this pet.");
     const headers = "Date,PatientName,Product,IntervalDays,IntervalLabel,Covers,Partial,BatchNumber,AdministeredBy,NextDueDate,Notes\n";
-    const rows = this.antiparasiticLog.map(a => {
+    const rows = source.map(a => {
         const patient = this.patients.find(p => p.id === a.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
         const product = a.productId === 'other' ? (a.productLabel || a.customName || 'Custom') : (a.productLabel || a.productId);
@@ -6899,7 +7211,7 @@ exportAntiparasiticCSV() {
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
-    link.setAttribute("download", `VCH_AntiparasiticLog_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `VCH_AntiparasiticLog${this._csvPetSuffix(pet)}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -6957,10 +7269,14 @@ importAntiparasiticCSV(event) {
 // ==========================================
 
 exportDiagnosisCSV() {
-    if (!this.diagnosisLog || this.diagnosisLog.length === 0) return alert("No diagnosis data to export.");
+    const pid = this.activePatientId;
+    if (!pid) return alert("Select a patient first.");
+    const pet = this.patients.find(p => p.id === pid);
+    const source = (this.diagnosisLog || []).filter(d => d.patientId === pid);
+    if (source.length === 0) return alert("No diagnosis data to export for this pet.");
 
     const headers = "Date,PatientName,Diagnosis,CustomDiagnosis,MurmurGrade,ACVIMStage,ConcurrentDiagnoses,Notes\n";
-    const rows = this.diagnosisLog.map(d => {
+    const rows = source.map(d => {
         const patient = this.patients.find(p => p.id === d.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
         // Join concurrent array with a semicolon so it stays in one CSV column
@@ -6982,7 +7298,7 @@ exportDiagnosisCSV() {
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(BOM + headers + rows);
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
-    link.setAttribute("download", `VCH_DiagnosisLog_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `VCH_DiagnosisLog${this._csvPetSuffix(pet)}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -7070,6 +7386,7 @@ exportCompleteBackup(patientId = null) {
         vch_activityLog: scoped(this.activityLog),
         vch_vaccinationLog: scoped(this.vaccinationLog),
         vch_antiparasiticLog: scoped(this.antiparasiticLog),
+        vch_injectionLog: scoped(this.injectionLog),
         vch_medDoseLog: scoped(this.medDoseLog),
         exportDate: new Date().toISOString(),
         exportScope: patientId ? 'single' : 'all'
@@ -7175,7 +7492,7 @@ backupLogCount(pid) {
     if (!d) return 0;
     return ['vch_srrHistory', 'vch_medLedger', 'vch_suppLedger', 'vch_diagnosisLog', 'vch_syncopeLog',
             'vch_coughLog', 'vch_activityLog', 'vch_weightLog', 'vch_vaccinationLog',
-            'vch_antiparasiticLog','vch_medDoseLog']
+            'vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog']
         .reduce((n, k) => n + (d[k] || []).filter(e => e.patientId === pid).length, 0);
 },
 
@@ -7214,7 +7531,7 @@ confirmBackupImport() {
 
     // Append log entries for selected patients — fresh entry IDs, remapped patient IDs
     const logKeys = ['weightLog', 'srrHistory', 'medLedger', 'suppLedger', 'diagnosisLog', 'syncopeLog',
-                     'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog'];
+                     'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog', 'injectionLog'];
     logKeys.forEach(key => {
         const incoming = (data['vch_' + key] || [])
             .filter(e => idMap[e.patientId] !== undefined)
@@ -7585,7 +7902,36 @@ async generatePDF() {
             Y = doc.lastAutoTable.finalY + 12;
         }
     }
-    
+
+    // ── 6a. Injectable Medications Table ──────────────────────────────────
+    if (mods.medications) {
+        const injData = (this.injectionLog || [])
+            .filter(e => e.patientId === this.activePatientId && inRange(e.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if (injData.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Injectable Medications', 99, 102, 241);
+            doc.autoTable({
+                startY: Y,
+                head: [['Date', 'Product', 'Dose', 'Interval', 'Next Due', 'Given By']],
+                body: injData.map(e => [
+                    e.date,
+                    e.customName || 'Injectable',
+                    e.dose || '—',
+                    e.intervalLabel || (e.intervalDays ? e.intervalDays + 'd' : '—'),
+                    e.nextDueDate || '—',
+                    e.administeredBy || '—'
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [99, 102, 241] },
+                columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 38 }, 2: { cellWidth: 24 }, 3: { cellWidth: 24 }, 4: { cellWidth: 24 }, 5: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
+    }
+
     // ── 6b. Supplement Log Table ──────────────────────────────────────────
     if (mods.medications) {
         const suppData = (this.suppLedger || [])
@@ -7938,7 +8284,30 @@ generateCSV() {
         });
         csv += '\n';
     }
-    
+
+    // ── Injectable Medications ────────────────────────────────────────────
+    const injData = !mods.medications ? [] : (this.injectionLog || [])
+        .filter(e => e.patientId === this.activePatientId && inRange(e.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (injData.length > 0) {
+        csv += 'INJECTABLE MEDICATIONS\n';
+        csv += 'Date,Product,Dose,Interval,NextDue,Batch,GivenBy,Notes\n';
+        injData.forEach(e => {
+            csv += [
+                q(e.date),
+                q(e.customName || ''),
+                q(e.dose || ''),
+                q(e.intervalLabel || (e.intervalDays ? e.intervalDays + 'd' : '')),
+                q(e.nextDueDate || ''),
+                q(e.batchNumber || ''),
+                q(e.administeredBy || ''),
+                q(e.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+
     // ── Supplement Log ────────────────────────────────────────────────────
     const suppData = !mods.medications ? [] : (this.suppLedger || [])
         .filter(s => s.patientId === this.activePatientId && inRange(s.eventDate))
@@ -8296,6 +8665,26 @@ _buildReportText() {
                 if (m.doseMg) out += `  |  ${m.doseMg}mg ${m.frequency || ''}`;
                 if (mgPerKg)  out += `  (${mgPerKg} mg/kg)`;
                 if (m.notes)  out += `${nl}${indent}Notes: ${m.notes}`;
+                out += nl;
+            });
+            out += nl;
+        }
+
+        // ── Injectable Medications (below the med log) ─────────────────────
+        const injData = this.injectionLog
+            .filter(e => e.patientId === this.activePatientId && inRange(e.date))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (injData.length > 0) {
+            out += `INJECTABLE MEDICATIONS (${injData.length} entr${injData.length !== 1 ? 'ies' : 'y'})${nl}`;
+            out += rule() + nl;
+            injData.forEach(e => {
+                out += `${e.date}  |  ${e.customName || 'Injectable'}`;
+                if (e.dose)          out += `  |  ${e.dose}`;
+                if (e.intervalLabel || e.intervalDays) out += `  |  ${e.intervalLabel || (e.intervalDays + 'd')}`;
+                if (e.nextDueDate)   out += `  |  Next due: ${e.nextDueDate}`;
+                if (e.batchNumber)    out += `${nl}${indent}Batch: ${e.batchNumber}`;
+                if (e.administeredBy) out += `${e.batchNumber ? '  |  ' : nl + indent}Given by: ${e.administeredBy}`;
+                if (e.notes)          out += `${nl}${indent}Notes: ${e.notes}`;
                 out += nl;
             });
             out += nl;

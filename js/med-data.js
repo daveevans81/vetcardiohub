@@ -3,7 +3,29 @@
 // ── Clinical data review date ─────────────────────────────────────────────
 // Bump whenever the medication formulary, vaccine catalogue, or antiparasitic
 // product data is reviewed against current licensed-product information.
-const VCH_FORMULARY_REVIEWED = '2026-07-02';
+const VCH_FORMULARY_REVIEWED = '2026-07-23';
+
+const INJECTABLE_FORMULARY = {
+  cytopoint: {
+    id: 'cytopoint', brand: 'Cytopoint', generic: 'Lokivetmab',
+    species: ['dog'], intervalDays: 30, intervalLabel: 'Monthly',
+    class: 'Anti-IL-31 monoclonal antibody', indication: 'Atopic dermatitis / itch',
+    note: 'Interval may extend to 4–8 weeks in some dogs based on response.'
+  },
+  librela: {
+    id: 'librela', brand: 'Librela', generic: 'Bedinvetmab',
+    species: ['dog'], intervalDays: 28, intervalLabel: 'Monthly',
+    class: 'Anti-NGF monoclonal antibody', indication: 'Osteoarthritis pain'
+  },
+  solensia: {
+    id: 'solensia', brand: 'Solensia', generic: 'Frunevetmab',
+    species: ['cat'], intervalDays: 28, intervalLabel: 'Monthly',
+    class: 'Anti-NGF monoclonal antibody', indication: 'Osteoarthritis pain'
+  },
+  // Candidates to consider: adequan/cartrophen (polysulfated GAG courses),
+  // methylprednisolone depot, B12/cobalamin, lantus/insulin is NOT monthly (exclude),
+  // recuvyra/long-acting analgesics — vet review each interval before listing.
+};
 
 const VET_FORMULARY = {
     // --- DIURETICS (Blues) ---

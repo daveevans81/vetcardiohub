@@ -1906,7 +1906,7 @@
                         <div x-show="showMedForm" x-cloak class="vch-modal">
                             <div class="form-panel vch-modal-card" style="border: none;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px;">
-                                    <h4 style="margin: 0; color: #16325F; font-size: 0.95rem;" x-text="editingMedId ? 'Edit Medication Entry' : 'Log Medication Change'"></h4>
+                                    <h4 style="margin: 0; color: #16325F; font-size: 0.95rem;" x-text="newMed.form === 'injectable' ? (editingInjectionId ? 'Edit Injectable' : 'Log Injectable') : (editingMedId ? 'Edit Medication Entry' : 'Log Medication Change')"></h4>
                                     <button @click="showMedForm = false" type="button" style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">
                                         <i class="fa-solid fa-xmark"></i>
                                     </button>
@@ -1914,12 +1914,12 @@
                                 <div>
                                 
                                     <div class="med-form-grid">
-                                        <div>
+                                        <div x-show="newMed.form !== 'injectable'">
                                             <label class="form-label">Event Date</label>
                                             <input type="date" x-model="newMed.eventDate" class="form-input">
                                         </div>
-                        
-                                        <div>
+
+                                        <div x-show="newMed.form !== 'injectable'">
                                             <label class="form-label">Medication</label>
                                             <select x-model="newMed.drugId" class="form-select">
                                                 <option value="" disabled>Select Drug...</option>
@@ -1928,13 +1928,13 @@
                                                 </template>
                                             </select>
                                         </div>
-                        
-                                        <div x-show="newMed.drugId === 'other'" x-cloak>
+
+                                        <div x-show="newMed.drugId === 'other' && newMed.form !== 'injectable'" x-cloak>
                                             <label class="form-label">Custom Name</label>
                                             <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" class="form-input">
                                         </div>
-                        
-                                        <div style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
+
+                                        <div x-show="newMed.form !== 'injectable'" style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
                                             <input type="checkbox" id="stoppedCheck" x-model="newMed.isStopped" style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
                                             <label for="stoppedCheck" class="text-danger font-bold" style="font-size: 0.85rem; cursor: pointer; user-select: none;">
                                                 Stopped
@@ -1942,29 +1942,77 @@
                                         </div>
                                         <div style="grid-column: 1 / -1;" :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
                                             <label class="form-label">Preparation</label>
-                                            <div style="display:flex; gap:8px;">
+                                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
                                                 <button type="button" @click="newMed.form='tablet'"
-                                                        :style="`flex:1; padding:8px; border-radius:6px; cursor:pointer; font-weight:600; border:1px solid ${newMed.form==='tablet' ? '#2563eb' : '#cbd5e1'}; background:${newMed.form==='tablet' ? '#dbeafe' : '#fff'}; color:${newMed.form==='tablet' ? '#1e3a8a' : '#64748b'};`">
+                                                        :style="`flex:1; min-width:120px; padding:8px; border-radius:6px; cursor:pointer; font-weight:600; border:1px solid ${newMed.form==='tablet' ? '#2563eb' : '#cbd5e1'}; background:${newMed.form==='tablet' ? '#dbeafe' : '#fff'}; color:${newMed.form==='tablet' ? '#1e3a8a' : '#64748b'};`">
                                                     <i class="fa-solid fa-tablets"></i> Tablet / Capsule
                                                 </button>
                                                 <button type="button" @click="newMed.form='liquid'"
-                                                        :style="`flex:1; padding:8px; border-radius:6px; cursor:pointer; font-weight:600; border:1px solid ${newMed.form==='liquid' ? '#2563eb' : '#cbd5e1'}; background:${newMed.form==='liquid' ? '#dbeafe' : '#fff'}; color:${newMed.form==='liquid' ? '#1e3a8a' : '#64748b'};`">
+                                                        :style="`flex:1; min-width:120px; padding:8px; border-radius:6px; cursor:pointer; font-weight:600; border:1px solid ${newMed.form==='liquid' ? '#2563eb' : '#cbd5e1'}; background:${newMed.form==='liquid' ? '#dbeafe' : '#fff'}; color:${newMed.form==='liquid' ? '#1e3a8a' : '#64748b'};`">
                                                     <i class="fa-solid fa-bottle-droplet"></i> Liquid
                                                 </button>
+                                                <button type="button" @click="newMed.form='injectable'; _refreshInjectionDue()"
+                                                        :style="`flex:1; min-width:120px; padding:8px; border-radius:6px; cursor:pointer; font-weight:600; border:1px solid ${newMed.form==='injectable' ? '#2563eb' : '#cbd5e1'}; background:${newMed.form==='injectable' ? '#dbeafe' : '#fff'}; color:${newMed.form==='injectable' ? '#1e3a8a' : '#64748b'};`">
+                                                    <i class="fa-solid fa-syringe"></i> Injectable
+                                                </button>
                                             </div>
+                                            <p x-show="newMed.form==='injectable'" style="font-size:0.75rem; color:#64748b; margin:6px 0 0;">Long-acting injectables (e.g. Cytopoint, Librela, Solensia). Logged by interval &amp; next-due rather than daily dose.</p>
                                         </div>
-                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+
+                                        <!-- INJECTABLE fields (Feature 4) — shown only when the injectable preparation is chosen -->
+                                        <template x-if="newMed.form === 'injectable'">
+                                            <div style="display:contents">
+                                                <div>
+                                                    <label class="form-label">Date Given</label>
+                                                    <input type="date" x-model="newInjection.date" @change="_refreshInjectionDue()" class="form-input">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Product Name</label>
+                                                    <input type="text" x-model="newInjection.customName" placeholder="e.g., Cytopoint" class="form-input">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Dose <span style="color:#94a3b8;">(optional)</span></label>
+                                                    <input type="text" x-model="newInjection.dose" placeholder="e.g., 40 mg / 1 vial" class="form-input">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Repeat Every (days)</label>
+                                                    <input type="number" min="1" step="1" x-model.number="newInjection.intervalDays" @change="_refreshInjectionDue()" class="form-input">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Cadence</label>
+                                                    <input type="text" :value="newInjection.intervalLabel || '—'" readonly class="form-input" style="background:#f8fafc; color:#64748b;">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Next Due</label>
+                                                    <input type="text" :value="newInjection.nextDueDate ? new Date(newInjection.nextDueDate + 'T12:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '—'" readonly class="form-input" style="background:#f8fafc; color:#64748b;">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Batch No. <span style="color:#94a3b8;">(optional)</span></label>
+                                                    <input type="text" x-model="newInjection.batchNumber" class="form-input">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Administered By <span style="color:#94a3b8;">(optional)</span></label>
+                                                    <input type="text" x-model="newInjection.administeredBy" placeholder="e.g., vet / clinic" class="form-input">
+                                                </div>
+                                                <div style="grid-column: 1 / -1;">
+                                                    <label class="form-label">Notes <span style="color:#94a3b8;">(optional)</span></label>
+                                                    <input type="text" x-model="newInjection.notes" class="form-input">
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <div x-show="newMed.form !== 'injectable'" :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
                                             <label class="form-label" x-text="medUnits(newMed.form).strengthLabel"></label>
                                             <input type="number" step="0.1" min="0" x-model="newMed.tabletStrengthMg" :disabled="newMed.isStopped"
                                                    :placeholder="newMed.form==='liquid' ? 'e.g., 2.5' : 'e.g., 20'" class="form-input">
                                         </div>
-                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                        <div x-show="newMed.form !== 'injectable'" :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
                                             <label class="form-label" x-text="medUnits(newMed.form).doseLabel"></label>
                                             <input type="number" :step="newMed.form==='liquid' ? '0.1' : '0.25'" min="0" x-model="newMed.tabletsPerDose" :disabled="newMed.isStopped"
                                                    :placeholder="newMed.form==='liquid' ? 'e.g., 1.2' : 'e.g., 1.5'" class="form-input">
                                         </div>
-                                        
-                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+
+                                        <div x-show="newMed.form !== 'injectable'" :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
                                             <label class="form-label">Frequency</label>
                                             <select x-model="newMed.frequency" :disabled="newMed.isStopped" class="form-select">
                                                 <option value="q24h">q24h (SID)</option>
@@ -1974,7 +2022,7 @@
                                             </select>
                                         </div>  
                                         
-                                        <div x-show="newMed.frequency !== 'PRN' && !newMed.isStopped" style="grid-column: 1 / -1;">
+                                        <div x-show="newMed.frequency !== 'PRN' && !newMed.isStopped && newMed.form !== 'injectable'" style="grid-column: 1 / -1;">
                                             <label class="form-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                                                 <input type="checkbox" :checked="newMed.doseTimes.length > 0"
                                                        @change="newMed.doseTimes = $event.target.checked ? (medScheduleDefaults(newMed.frequency).length ? [...medScheduleDefaults(newMed.frequency)] : ['08:00']) : []"
@@ -1996,11 +2044,11 @@
                                             <p class="text-sm text-muted" style="margin:6px 0 0;">Optional. Adds this medication to today's schedule so you can tick off each dose. (No reminders on the web.)</p>
                                         </div>
     
-                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                        <div x-show="newMed.form !== 'injectable'" :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
                                             <label class="form-label" x-text="medUnits(newMed.form).stockLabel"></label>
                                             <input type="number" :step="newMed.form==='liquid' ? '0.5' : '1'" min="0" x-model="newMed.tabletsInStock" :disabled="newMed.isStopped" class="form-input">
                                         </div>
-                                        <div :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
+                                        <div x-show="newMed.form !== 'injectable'" :style="newMed.isStopped ? 'opacity: 0.4; pointer-events: none;' : ''">
                                             <label class="form-label">Stock Counted On</label>
                                             <input type="date" x-model="newMed.stockDate" :disabled="newMed.isStopped" class="form-input">
                                         </div>         
@@ -2019,11 +2067,11 @@
                                     </div>
                                     <div  class="flex-gap-10" style="display: flex; gap: 8px; padding-top: 20px;">
                                         
-                                        <button @click="showMedForm = false; editingMedId = null" type="button" class="btn-cancel" style="margin-bottom: 12px;">
+                                        <button @click="showMedForm = false; editingMedId = null; editingInjectionId = null" type="button" class="btn-cancel" style="margin-bottom: 12px;">
                                             <i class="fa-solid fa-xmark"></i> Cancel
                                         </button>
                                         <button @click="addMedication()" type="button" class="btn-add-blue" style="padding-top: 20px;">
-                                            <i class="fa-solid fa-plus"></i> Save Entry
+                                            <i class="fa-solid fa-plus"></i> <span x-text="newMed.form === 'injectable' ? 'Save Injectable' : 'Save Entry'"></span>
                                         </button>
                                     </div>
                                 </div>
@@ -2271,6 +2319,74 @@
                         </div>
                     
                     
+                        <!-- INJECTABLE MEDICATIONS ledger (Feature 4) — long-acting injectables, kept in their own array -->
+                        <div style="margin-top: 16px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="font-weight: bold; color: #16325F; font-size: 0.9rem;">
+                                    <i class="fa-solid fa-syringe" style="color: #6366f1;"></i> Injectable Medications
+                                </div>
+                                <button @click="openInjectionForm()" type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">
+                                    <i class="fa-solid fa-plus"></i> Log injectable
+                                </button>
+                            </div>
+                            <div style="border-radius: 6px; border: 1px solid #c8d6eb; overflow-x: auto; -webkit-overflow-scrolling: touch; background: white;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Product</th>
+                                            <th>Dose</th>
+                                            <th>Interval</th>
+                                            <th>Next due</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="inj in sortedInjectionLog()" :key="inj.id">
+                                            <tr>
+                                                <td style="font-weight: bold; color: #334155;" x-text="inj.date"></td>
+                                                <td x-text="inj.customName"></td>
+                                                <td style="color: #64748b;">
+                                                    <span x-show="inj.dose" x-text="inj.dose"></span>
+                                                    <span x-show="!inj.dose" class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
+                                                </td>
+                                                <td style="color: #64748b;" x-text="inj.intervalLabel || (inj.intervalDays + 'd')"></td>
+                                                <td>
+                                                    <template x-if="liveInjectionIds().has(inj.id) && getInjectionStatus(inj.nextDueDate)">
+                                                        <span :style="`background: ${getInjectionStatus(inj.nextDueDate).bg}; color: ${getInjectionStatus(inj.nextDueDate).color}; border: 1px solid ${getInjectionStatus(inj.nextDueDate).border}; border-radius: 999px; padding: 1px 8px; font-size: 0.7rem; font-weight: 600; white-space: nowrap;`"
+                                                              x-text="getInjectionStatus(inj.nextDueDate).label"></span>
+                                                    </template>
+                                                    <template x-if="!liveInjectionIds().has(inj.id)">
+                                                        <span class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
+                                                    </template>
+                                                </td>
+                                                <td style="text-align: right; white-space: nowrap;">
+                                                    <button @click="repeatInjection(inj.id)" style="background: none; border: none; color: #16a34a; cursor: pointer; padding: 4px;" title="Repeat this dose today">
+                                                        <i class="fa-solid fa-rotate-right"></i>
+                                                    </button>
+                                                    <button @click="openInjectionForm(inj)" style="background: none; border: none; color: #0ea5e9; cursor: pointer; padding: 4px;" title="Edit entry">
+                                                        <i class="fa-solid fa-pen-to-square"></i>
+                                                    </button>
+                                                    <button @click="deleteInjection(inj.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;" title="Delete entry">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                        <tr x-show="sortedInjectionLog().length === 0">
+                                            <td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
+                                                No injectable medications recorded.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- 12-month administration / interval-drift chart -->
+                            <div x-show="sortedInjectionLog().length > 0" style="margin-top: 12px;">
+                                <canvas x-ref="injectionChartCanvas" id="injectionHomeChart" height="140"></canvas>
+                            </div>
+                        </div>
+
                         <div style="margin-top: 16px;">
                             <div style="font-weight: bold; color: #16325F; font-size: 0.9rem; margin-bottom: 8px;">
                                 <i class="fa-solid fa-seedling" style="color: #10b981;"></i> Supplement Log
@@ -2546,14 +2662,17 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700">Date</label>
-                                        <input type="date" x-model="newWeightEntry.date" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
+                                        <input type="date" x-model="newWeightEntry.date" @change="loadWeightEntryForPickedDate()" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-semibold text-gray-700">Weight (<span x-text="activePatientProfile?.weightUnit || 'kg'"></span>)</label>
+                                        <label class="block text-sm font-semibold text-gray-700">Weight (<span x-text="activePatientProfile?.weightUnit || 'kg'"></span>) <span class="font-normal text-gray-400">— optional</span></label>
                                         <input type="number" step="0.01" x-model="newWeightEntry.weightValue" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
                                     </div>
                                 </div>
-                                
+                                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: -4px; font-style: italic;">
+                                    One record per day — saving for a day you've already logged updates it. Leave the weight blank to record just the day's diet.
+                                </p>
+
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700">Appetite</label>
                                     <select x-model="newWeightEntry.appetite" class="mt-1 w-full border rounded p-2 focus:ring focus:ring-blue-200">
@@ -2603,7 +2722,7 @@
                                 
                                 <div class="flex justify-end pt-2 gap-3">
                                     <button @click="showWeightForm = false" class="btn-secondary">Cancel</button>
-                                    <button @click="saveWeightEntry()" class="btn-primary" style="background: #0f766e;">Save Record</button>
+                                    <button @click="saveWeightEntry()" class="btn-primary" style="background: #0f766e;" x-text="editingWeightId ? 'Update Record' : 'Save Record'"></button>
                                 </div>
                             </div>
                         </div>
@@ -2613,12 +2732,12 @@
                     <div x-show="showWeightLogPanel && !showWeightForm" x-transition>
             
                         <!-- Trend summary bar (only shows with 2+ entries) -->
-                        <template x-if="sortedWeightLog.length >= 2">
+                        <template x-if="sortedWeighedLog.length >= 2">
                             <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;
                                         padding: 10px 14px; margin-bottom: 14px; font-size: 0.85rem; color: #0369a1;">
                                 <i class="fa-solid fa-chart-line"></i>
                                 <span x-text="(() => {
-                                    const log = sortedWeightLog;
+                                    const log = sortedWeighedLog;
                                     const unit = activePatientProfile?.weightUnit || 'kg';
                                     const latest  = parseFloat(log[0].weightValue);
                                     const oldest  = parseFloat(log[log.length - 1].weightValue);
@@ -2631,9 +2750,9 @@
                                 })()"></span>
                             </div>
                         </template>
-                        
+
                         <!-- Weight Trend Chart -->
-                        <div x-show="sortedWeightLog.length >= 2"
+                        <div x-show="sortedWeighedLog.length >= 2"
                              style="margin-bottom: 14px; background: white; border-radius: 8px; border: 1px solid #d1fae5; padding: 14px;">
                             <div style="font-size: 0.8rem; font-weight: 600; color: #0f766e; margin-bottom: 8px;">
                                 <i class="fa-solid fa-chart-line"></i> Weight Trend
@@ -2664,7 +2783,8 @@
             
                                     <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;">
                                         <span style="font-weight: bold; color: #1e293b; font-size: 1.1rem;"
-                                              x-text="entry.weightValue + ' ' + (activePatientProfile?.weightUnit || 'kg')"></span>
+                                              x-text="entry.weightValue != null ? (entry.weightValue + ' ' + (activePatientProfile?.weightUnit || 'kg')) : 'Diet only'"
+                                              :style="entry.weightValue != null ? 'font-weight: bold; color: #1e293b; font-size: 1.1rem;' : 'font-weight: bold; color: #64748b; font-size: 1.1rem;'"></span>
                                         <span style="font-size: 0.82rem; background: #f1f5f9; color: #475569;
                                                      border-radius: 999px; padding: 1px 8px;"
                                               x-text="entry.appetite"></span>
@@ -3939,12 +4059,12 @@
                             <i class="fa-solid fa-weight-scale" style="color: #0f766e;"></i>
                             Weight Trend
                         </h2>
-                        <template x-if="sortedWeightLog.length >= 2">
+                        <template x-if="sortedWeighedLog.length >= 2">
                             <div>
                                 <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.85rem; color: #0369a1;">
                                     <i class="fa-solid fa-chart-line"></i>
                                     <span x-text="(() => {
-                                        const log = sortedWeightLog;
+                                        const log = sortedWeighedLog;
                                         const unit = activePatientProfile?.weightUnit || 'kg';
                                         const latest = parseFloat(log[0].weightValue);
                                         const oldest = parseFloat(log[log.length - 1].weightValue);
@@ -3958,7 +4078,7 @@
                                 </div>
                             </div>
                         </template>
-                        <div x-show="sortedWeightLog.length < 2" class="flex flex-col items-center justify-center h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
+                        <div x-show="sortedWeighedLog.length < 2" class="flex flex-col items-center justify-center h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg text-slate-400" x-cloak>
                             <i class="fa-solid fa-weight-scale text-3xl mb-2"></i>
                             <p>Log at least 2 weigh-ins to generate a weight trend.</p>
                         </div>

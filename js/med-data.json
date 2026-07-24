@@ -4,7 +4,46 @@
     "generator": "generate-med-data-json.js",
     "note": "GENERATED FILE — do not edit by hand. Regenerate from med-data.js."
   },
-  "VCH_FORMULARY_REVIEWED": "2026-07-02",
+  "VCH_FORMULARY_REVIEWED": "2026-07-23",
+  "INJECTABLE_FORMULARY": {
+    "cytopoint": {
+      "id": "cytopoint",
+      "brand": "Cytopoint",
+      "generic": "Lokivetmab",
+      "species": [
+        "dog"
+      ],
+      "intervalDays": 30,
+      "intervalLabel": "Monthly",
+      "class": "Anti-IL-31 monoclonal antibody",
+      "indication": "Atopic dermatitis / itch",
+      "note": "Interval may extend to 4–8 weeks in some dogs based on response."
+    },
+    "librela": {
+      "id": "librela",
+      "brand": "Librela",
+      "generic": "Bedinvetmab",
+      "species": [
+        "dog"
+      ],
+      "intervalDays": 28,
+      "intervalLabel": "Monthly",
+      "class": "Anti-NGF monoclonal antibody",
+      "indication": "Osteoarthritis pain"
+    },
+    "solensia": {
+      "id": "solensia",
+      "brand": "Solensia",
+      "generic": "Frunevetmab",
+      "species": [
+        "cat"
+      ],
+      "intervalDays": 28,
+      "intervalLabel": "Monthly",
+      "class": "Anti-NGF monoclonal antibody",
+      "indication": "Osteoarthritis pain"
+    }
+  },
   "VET_FORMULARY": {
     "furosemide": {
       "id": "furosemide",
