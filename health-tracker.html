@@ -2799,12 +2799,12 @@
                                     </div>
             
                                     <div style="font-size: 0.85rem; color: #475569; margin-top: 6px; line-height: 1.5;">
-                                        <template x-if="entry.foodBrand">
+                                        <template x-if="entry.foodBrand || entry.portionSize">
                                             <span>
                                                 <strong>Diet:</strong>
-                                                <span x-text="entry.foodBrand"></span>
-                                                <span x-show="entry.portionSize"
-                                                      x-text="' — ' + entry.portionSize"></span><br>
+                                                <span x-show="entry.foodBrand" x-text="entry.foodBrand"></span>
+                                                <span x-show="entry.foodBrand && entry.portionSize"> — </span>
+                                                <span x-show="entry.portionSize" x-text="entry.portionSize"></span><br>
                                             </span>
                                         </template>
                                 

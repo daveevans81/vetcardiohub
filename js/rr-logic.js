@@ -8790,6 +8790,7 @@ _buildReportText() {
                 if (w.weightValue != null) out += `  |  ${w.weightValue} ${wUnit}`;
                 if (w.appetite && w.appetite !== 'Normal') out += `  |  Appetite: ${w.appetite}`;
                 if (w.foodBrand) out += `  |  ${w.foodBrand}`;
+                if (w.portionSize) out += `  |  ${w.portionSize}`;
                 if (w.supplements) out += `${nl}${indent}Supplements: ${w.supplements}`;
                 if (w.notes) out += `${nl}${indent}Notes: ${w.notes}`;
                 out += nl;
