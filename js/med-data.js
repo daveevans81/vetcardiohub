@@ -3,7 +3,51 @@
 // ── Clinical data review date ─────────────────────────────────────────────
 // Bump whenever the medication formulary, vaccine catalogue, or antiparasitic
 // product data is reviewed against current licensed-product information.
-const VCH_FORMULARY_REVIEWED = '2026-07-23';
+const VCH_FORMULARY_REVIEWED = '2026-07-28';
+
+// Class → chart/legend colour. Grouped by body system; tweak freely (pure presentation).
+const DRUG_CLASS_COLORS = {
+  // ── Cardiac ──────────────────────────────────────────────
+  "Loop Diuretic":            "#3b82f6",
+  "Thiazide Diuretic":        "#1d4ed8",
+  "Inodilator":               "#ef4444",
+  "ACE-i":                    "#8b5cf6",
+  "ARB":                      "#7c3aed",
+  "Aldosterone Antagonist":   "#a855f7",
+  "Anti-thrombotic":          "#f59e0b",
+  "Calcium Channel Blocker":  "#10b981",
+  "Cardiac Glycoside":        "#047857",
+  "Beta Blocker":             "#34d399",
+  "Anti-arrhythmic":          "#14b8a6",
+  "Vasodilator":              "#ec4899",
+  "PDE5 Inhibitor":           "#f43f5e",
+  // ── Endocrine ────────────────────────────────────────────
+  "Thyroid Hormone":          "#06b6d4",
+  "Anti-thyroid":             "#0e7490",
+  "Adrenal Inhibitor":        "#6366f1",
+  "Corticosteroid":           "#eab308",
+  // ── Renal ────────────────────────────────────────────────
+  "Phosphate Binder":         "#78716c",
+  // ── Analgesia ────────────────────────────────────────────
+  "NSAID":                    "#f97316",
+  "Opioid":                   "#9a3412",
+  "Gabapentinoid":            "#ca8a04",
+  "NMDA Antagonist":          "#7c2d12",
+  // ── Gastrointestinal ─────────────────────────────────────
+  "Antiemetic":               "#84cc16",
+  "Prokinetic":               "#4d7c0f",
+  "Antacid":                  "#a3e635",
+  "Gastroprotectant":         "#365314",
+  "Laxative":                 "#bef264",
+  // ── Atopy / immune ───────────────────────────────────────
+  "JAK Inhibitor":            "#d946ef",
+  "Calcineurin Inhibitor":    "#c026d3",
+  "Antihistamine":            "#e879f9",
+  // ── Neurological ─────────────────────────────────────────
+  "Anticonvulsant":           "#4f46e5",
+  // ── Appetite ─────────────────────────────────────────────
+  "Appetite Stimulant":       "#fb7185",
+};
 
 const INJECTABLE_FORMULARY = {
   cytopoint: {
@@ -28,34 +72,87 @@ const INJECTABLE_FORMULARY = {
 };
 
 const VET_FORMULARY = {
-    // --- DIURETICS (Blues) ---
-    furosemide: { id: 'furosemide', generic: 'Furosemide', brands: ['Lasix', 'Salix', 'Dimazon', 'Libeo', 'Frusedale', 'Frusol'], classes: ['Loop Diuretic'], color: '#3b82f6' },
-    torasemide: { id: 'torasemide', generic: 'Torasemide', brands: ['UpCard', 'Isemid', 'Demadex'], classes: ['Loop Diuretic'], color: '#2563eb' },
+    
+  // ══ DIURETICS ══════════════════════════════════════════════════════════════════════════════
+  furosemide:  { id:'furosemide',  generic:'Furosemide',   brands:['Lasix','Salix','Dimazon','Libeo','Frusedale','Frusol'], classes:['Loop Diuretic'],        color:'#3b82f6', defaultFrequency:'q12h' },
+  torasemide:  { id:'torasemide',  generic:'Torasemide',   brands:['UpCard','Isemid','Demadex'],                            classes:['Loop Diuretic'],        color:'#3b82f6', defaultFrequency:'q24h' },
+  hydrochlorothiazide: { id:'hydrochlorothiazide', generic:'Hydrochlorothiazide', brands:['Dichlotride','Esidrex'],        classes:['Thiazide Diuretic'],    color:'#1d4ed8', defaultFrequency:'q12h' },
     
     // --- INODILATORS (Reds) ---
-    pimobendan: { id: 'pimobendan', generic: 'Pimobendan', brands: ['Vetmedin', 'Cardisure', 'Zelys'], classes: ['Inodilator'], color: '#ef4444' },
+     pimobendan:  { id:'pimobendan',  generic:'Pimobendan',   brands:['Vetmedin','Cardisure','Zelys','Fortekor-Plus (with benazepril)'], classes:['Inodilator'], color:'#ef4444', defaultFrequency:'q12h' },
     
     // --- RAAS SYSTEM (Purples) ---
-    cardalis:   { id: 'cardalis', generic: 'Spironolactone + Benazepril', brands: ['Cardalis'], classes: ['ACE-i', 'Aldosterone Antagonist'], color: '#8b5cf6' },
-    benazepril: { id: 'benazepril', generic: 'Benazepril', brands: ['Lotensin', 'Nelio', 'Fortekor', 'Benefortin'],  classes: ['ACE-i'], color: '#8b5cf6'},
-    enalapril:  { id: 'enalapril', generic: 'Enalapril', brands: ['Enacard', 'Vasotec'], classes: ['ACE-i'], color: '#8b5cf6'},
-    prilactone: { id: 'prilactone', generic: 'Spironolactone', brands: ['Prilactone', 'Aldactone'], classes: ['Aldosterone Antagonist'], color: '#a855f7' },
-    
-    // --- ANTI-THROMBOTICS (Ambers) ---
-    clopidogrel:{ id: 'clopidogrel', generic: 'Clopidogrel', brands: ['Plavix'],  classes: ['Anti-thrombotic'], color: '#f59e0b'},
-    rivaroxaban:{ id: 'rivaroxaban', generic: 'Rivaroxaban', brands: ['Xarelto'],  classes: ['Anti-thrombotic'], color: '#f59e0b'},
+      cardalis:    { id:'cardalis',    generic:'Spironolactone + Benazepril', brands:['Cardalis'],                             classes:['ACE-i','Aldosterone Antagonist'], color:'#8b5cf6', defaultFrequency:'q24h' },
+  benazepril:  { id:'benazepril',  generic:'Benazepril',   brands:['Lotensin','Nelio','Fortekor','Benefortin','Prilben'],  classes:['ACE-i'],                color:'#8b5cf6', defaultFrequency:'q24h' },
+  enalapril:   { id:'enalapril',   generic:'Enalapril',    brands:['Enacard','Vasotec'],                                   classes:['ACE-i'],                color:'#8b5cf6', defaultFrequency:'q12h' },
+  ramipril:    { id:'ramipril',    generic:'Ramipril',     brands:['Vasotop'],                                             classes:['ACE-i'],                color:'#8b5cf6', defaultFrequency:'q24h' },
+  imidapril:   { id:'imidapril',   generic:'Imidapril',    brands:['Prilium'],                                             classes:['ACE-i'],                color:'#8b5cf6', defaultFrequency:'q24h' },
+  telmisartan: { id:'telmisartan', generic:'Telmisartan',  brands:['Semintra','Micardis'],                                 classes:['ARB'],                  color:'#7c3aed', defaultFrequency:'q24h' }, // cats: hypertension/proteinuria
+  prilactone:  { id:'prilactone',  generic:'Spironolactone',brands:['Prilactone','Aldactone'],                             classes:['Aldosterone Antagonist'], color:'#a855f7', defaultFrequency:'q24h' },
+  
+    // ══ ANTI-THROMBOTICS ═══════════════════════════════════════════════════════════════════════
+  clopidogrel: { id:'clopidogrel', generic:'Clopidogrel',  brands:['Plavix'],                                              classes:['Anti-thrombotic'],      color:'#f59e0b', defaultFrequency:'q24h' },
+  rivaroxaban: { id:'rivaroxaban', generic:'Rivaroxaban',  brands:['Xarelto'],                                             classes:['Anti-thrombotic'],      color:'#f59e0b', defaultFrequency:'q24h' },
+  aspirin:     { id:'aspirin',     generic:'Aspirin (low-dose)', brands:['Aspirin'],                                       classes:['Anti-thrombotic'],      color:'#f59e0b', defaultFrequency:'q72h' },
     
     // --- ANTI-ARRHYTHMICS (Greens) ---
-    diltiazem:  { id: 'diltiazem', generic: 'Diltiazem', brands: ['Cardizem', 'Hypercard', 'Dilacor'], classes: ['Calcium Channel Blocker', 'Anti-arrhythmic'], color: '#10b981' },
-    digoxin:    { id: 'digoxin', generic: 'Digoxin', brands: ['Lanoxin', 'Cardoxin'], classes: ['Cardiac Glycoside', 'Anti-arrhythmic'], color: '#059669' },
-    sotalol:    { id: 'sotalol', generic: 'Sotalol', brands: ['Betapace'], classes: ['Beta Blocker', 'Anti-arrhythmic'], color: '#34d399' },
+ diltiazem:   { id:'diltiazem',   generic:'Diltiazem',    brands:['Cardizem','Hypercard','Dilacor'],                      classes:['Calcium Channel Blocker','Anti-arrhythmic'], color:'#10b981', defaultFrequency:'q8h' },
+  digoxin:     { id:'digoxin',     generic:'Digoxin',      brands:['Lanoxin','Cardoxin'],                                  classes:['Cardiac Glycoside','Anti-arrhythmic'],       color:'#047857', defaultFrequency:'q12h' },
+  sotalol:     { id:'sotalol',     generic:'Sotalol',      brands:['Betapace','Sotacor'],                                  classes:['Beta Blocker','Anti-arrhythmic'],            color:'#34d399', defaultFrequency:'q12h' },
+  atenolol:    { id:'atenolol',    generic:'Atenolol',     brands:['Tenormin'],                                            classes:['Beta Blocker','Anti-arrhythmic'],            color:'#34d399', defaultFrequency:'q12h' },
+  mexiletine:  { id:'mexiletine',  generic:'Mexiletine',   brands:['Mexitil'],                                             classes:['Anti-arrhythmic'],      color:'#14b8a6', defaultFrequency:'q12h' },
 
     // --- VASODILATORS & BP (Pinks) ---
-    amlodipine: { id: 'amlodipine', generic: 'Amlodipine', brands: ['Norvasc', 'Amodip'], classes: ['Calcium Channel Blocker', 'Vasodilator'], color: '#ec4899' },
-    sildenafil: { id: 'sildenafil', generic: 'Sildenafil', brands: ['Viagra', 'Revatio'], classes: ['PDE5 Inhibitor', 'Vasodilator'], color: '#f43f5e' },
+  amlodipine:  { id:'amlodipine',  generic:'Amlodipine',   brands:['Norvasc','Amodip','Istin'],                            classes:['Vasodilator','Calcium Channel Blocker'], color:'#ec4899', defaultFrequency:'q24h' },
+  sildenafil:  { id:'sildenafil',  generic:'Sildenafil',   brands:['Viagra','Revatio'],                                    classes:['PDE5 Inhibitor','Vasodilator'],          color:'#f43f5e', defaultFrequency:'q12h' },
 
-    // --- FALLBACK (Slate) ---
-    other:      { id: 'other', generic: 'Custom Medication', brands: [], classes: ['Other/Unspecified'], color: '#64748b' }
+  // ══ THYROID ════════════════════════════════════════════════════════════════════════════════
+  levothyroxine: { id:'levothyroxine', generic:'Levothyroxine', brands:['Thyforon','Forthyron','Leventa','Soloxine','Thyro-Tabs'], classes:['Thyroid Hormone'], color:'#06b6d4', defaultFrequency:'q12h' },
+  methimazole:  { id:'methimazole', generic:'Methimazole (Thiamazole)', brands:['Felimazole','Thiafeline'],               classes:['Anti-thyroid'],         color:'#0e7490', defaultFrequency:'q12h' },
+  carbimazole:  { id:'carbimazole', generic:'Carbimazole', brands:['Vidalta'],                                            classes:['Anti-thyroid'],         color:'#0e7490', defaultFrequency:'q24h' }, // Vidalta is controlled-release, once daily
+  
+  // ══ ADRENAL (Cushing's) ════════════════════════════════════════════════════════════════════
+  trilostane:  { id:'trilostane',  generic:'Trilostane',   brands:['Vetoryl'],                                             classes:['Adrenal Inhibitor'],    color:'#6366f1', defaultFrequency:'q12h' }, 
+  
+  // ══ RENAL ══════════════════════════════════════════════════════════════════════════════════
+  aluminium_hydroxide: { id:'aluminium_hydroxide', generic:'Aluminium hydroxide', brands:['Alu-Cap','AlternaGEL','Amphojel'], classes:['Phosphate Binder'], color:'#78716c', defaultFrequency:'q12h' }, // with food. +US: AlternaGEL, Amphojel
+  lanthanum:   { id:'lanthanum',   generic:'Lanthanum carbonate', brands:['Renalzin','Lantharenol','Fosrenol'],           classes:['Phosphate Binder'],     color:'#78716c', defaultFrequency:'q12h' },
+  
+  // ══ ANALGESIA ══════════════════════════════════════════════════════════════════════════════
+   meloxicam:   { id:'meloxicam',   generic:'Meloxicam',    brands:['Metacam','Loxicom','Meloxidyl','Inflacam','OroCAM'],   classes:['NSAID'],                color:'#f97316', defaultFrequency:'q24h' }, 
+  carprofen:   { id:'carprofen',   generic:'Carprofen',    brands:['Rimadyl','Carprieve','Norocarp','Rimifin','Canidryl','Novox','Vetprofen','Quellin'], classes:['NSAID'], color:'#f97316', defaultFrequency:'q12h' },
+  robenacoxib: { id:'robenacoxib', generic:'Robenacoxib',  brands:['Onsior'],                                             classes:['NSAID'],                color:'#f97316', defaultFrequency:'q24h' },
+  firocoxib:   { id:'firocoxib',   generic:'Firocoxib',    brands:['Previcox','Equioxx'],                                 classes:['NSAID'],                color:'#f97316', defaultFrequency:'q24h' }, 
+  grapiprant:  { id:'grapiprant',  generic:'Grapiprant',   brands:['Galliprant'],                                         classes:['Piprant'],              color:'#fdba74', defaultFrequency:'q24h' }, 
+  gabapentin:  { id:'gabapentin',  generic:'Gabapentin',   brands:['Neurontin','Gralise','Horizant'],                     classes:['Gabapentinoid'],        color:'#ca8a04', defaultFrequency:'q12h' }, 
+  pregabalin:  { id:'pregabalin',  generic:'Pregabalin',   brands:['Lyrica','Bonqat'],                                    classes:['Gabapentinoid'],        color:'#ca8a04', defaultFrequency:'q12h' },
+  tramadol:    { id:'tramadol',    generic:'Tramadol',     brands:['Ultram','ConZip','Qdolo'],                            classes:['Opioid'],               color:'#9a3412', defaultFrequency:'q8h' }, 
+  amantadine:  { id:'amantadine',  generic:'Amantadine',   brands:['Symmetrel','Gocovri'],                                classes:['NMDA Antagonist'],      color:'#7c2d12', defaultFrequency:'q24h' },
+  
+  // ══ GASTROINTESTINAL ═══════════════════════════════════════════════════════════════════════
+  maropitant:  { id:'maropitant',  generic:'Maropitant',   brands:['Cerenia'],                                            classes:['Antiemetic'],           color:'#84cc16', defaultFrequency:'q24h' },
+  ondansetron: { id:'ondansetron', generic:'Ondansetron',  brands:['Zofran'],                                             classes:['Antiemetic'],           color:'#84cc16', defaultFrequency:'q12h' },
+  metoclopramide:{ id:'metoclopramide', generic:'Metoclopramide', brands:['Emeprid','Vomend','Metomotyl','Reglan'],               classes:['Prokinetic'],           color:'#4d7c0f', defaultFrequency:'q8h' },
+  omeprazole:  { id:'omeprazole',  generic:'Omeprazole',   brands:['Gastrogard','Losec','Mepradec','Prilosec'],                      classes:['Antacid'],              color:'#a3e635', defaultFrequency:'q24h' },
+  famotidine:  { id:'famotidine',  generic:'Famotidine',   brands:['Pepcid'],                                             classes:['Antacid'],              color:'#a3e635', defaultFrequency:'q24h' },
+  sucralfate:  { id:'sucralfate',  generic:'Sucralfate',   brands:['Antepsin','Carafate'],                                classes:['Gastroprotectant'],     color:'#365314', defaultFrequency:'q8h' },
+  lactulose:   { id:'lactulose',   generic:'Lactulose',    brands:['Duphalac','Lactugal','Kristalose','Enulose'],                                classes:['Laxative'],             color:'#bef264', defaultFrequency:'q12h' },
+  
+  // ══ ATOPY / IMMUNE ═════════════════════════════════════════════════════════════════════════
+  oclacitinib: { id:'oclacitinib', generic:'Oclacitinib',  brands:['Apoquel'],                                            classes:['JAK Inhibitor'],        color:'#d946ef', defaultFrequency:'q24h' }, // q12h induction (14d) → q24h maintenance
+  ciclosporin: { id:'ciclosporin', generic:'Ciclosporin',  brands:['Atopica','Cyclavance','Sporimune','Modulis'],         classes:['Calcineurin Inhibitor'],color:'#c026d3', defaultFrequency:'q24h' },
+  prednisolone:{ id:'prednisolone',generic:'Prednisolone', brands:['Prednicare','Prednidale','Pred','Prednis-Tab','Pediapred','Orapred'],                     classes:['Corticosteroid'],       color:'#eab308', defaultFrequency:'q24h' }, // often tapered / q48h — REVIEW
+  chlorphenamine:{ id:'chlorphenamine', generic:'Chlorphenamine', brands:['Piriton','Chlor-Trimeton','Aller-Chlor'],                                   classes:['Antihistamine'],        color:'#e879f9', defaultFrequency:'q12h' },
+  
+  // ══ NEUROLOGICAL (common long-term) ════════════════════════════════════════════════════════
+   phenobarbital:{ id:'phenobarbital', generic:'Phenobarbital', brands:['Epiphen','Phenoleptil','Luminal'],               classes:['Anticonvulsant'],       color:'#4f46e5', defaultFrequency:'q12h' }, // +US: Luminal
+  levetiracetam:{ id:'levetiracetam', generic:'Levetiracetam', brands:['Keppra','Elepsia','Spritam'],                     classes:['Anticonvulsant'],       color:'#4f46e5', defaultFrequency:'q8h' },
+  
+  // ══ APPETITE / CKD support ═════════════════════════════════════════════════════════════════
+  mirtazapine: { id:'mirtazapine', generic:'Mirtazapine',  brands:['Mirataz','Remeron'],                                  classes:['Appetite Stimulant'],   color:'#fb7185', defaultFrequency:'q24h' }, 
+  
+  // ══ FALLBACK ═══════════════════════════════════════════════════════════════════════════════
+  other:       { id:'other',       generic:'Custom Medication', brands:[],                                                classes:['Other/Unspecified'],    color:'#64748b', defaultFrequency:'q12h' }
 };
 
 
