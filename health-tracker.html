@@ -1919,19 +1919,46 @@
                                             <input type="date" x-model="newMed.eventDate" class="form-input">
                                         </div>
 
-                                        <div x-show="newMed.form !== 'injectable'">
+                                        <!-- Type-ahead medication search (replaces the dropdown): matches generic AND brand
+                                             names, presenting the generic; anything unmatched saves as a custom product.
+                                             Mirrors the iOS DrugSearchField. -->
+                                        <div x-show="newMed.form !== 'injectable'" style="position: relative;">
                                             <label class="form-label">Medication</label>
-                                            <select x-model="newMed.drugId" class="form-select">
-                                                <option value="" disabled>Select Drug...</option>
-                                                <template x-for="opt in medicationOptions" :key="opt.value">
-                                                    <option :value="opt.value" x-text="opt.label"></option>
+                                            <input type="text" x-model="medSearch"
+                                                   @input="applyMedSearch()"
+                                                   @focus="medSearchFocused = true; applyMedSearch()"
+                                                   @blur="setTimeout(() => { medSearchFocused = false; medSearchOpen = false; }, 150)"
+                                                   autocomplete="off" placeholder="Search or type a medication" class="form-input">
+
+                                            <div x-show="medSearchOpen" x-cloak
+                                                 style="position:absolute; z-index:30; left:0; right:0; background:#fff; border:1px solid #e2e8f0; border-radius:8px; margin-top:2px; box-shadow:0 4px 12px rgba(0,0,0,0.08); max-height:240px; overflow-y:auto;">
+                                                <template x-for="m in drugSearchMatches(medSearch)" :key="m.id">
+                                                    <div @mousedown.prevent="selectMedSearch(m)"
+                                                         style="padding:8px 12px; cursor:pointer; display:flex; gap:6px; align-items:center;"
+                                                         onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+                                                        <span x-text="m.generic" style="color:#1e293b;"></span>
+                                                        <span x-show="m.matchedBrand" x-text="'· ' + m.matchedBrand" style="color:#94a3b8; font-size:0.85rem;"></span>
+                                                    </div>
                                                 </template>
-                                            </select>
+                                            </div>
+
+                                            <template x-if="medSearch && drugResolveWithBrand(medSearch) && drugResolveWithBrand(medSearch).brand">
+                                                <div style="color:#16a34a; font-size:0.8rem; margin-top:4px;">
+                                                    ✓ Recognised as <span x-text="formulary[drugResolveWithBrand(medSearch).id]?.generic"></span>
+                                                </div>
+                                            </template>
+                                            <template x-if="medSearch && newMed.drugId === 'other'">
+                                                <div style="color:#94a3b8; font-size:0.8rem; margin-top:4px;">
+                                                    “<span x-text="medSearch"></span>” will be saved as a custom medication
+                                                </div>
+                                            </template>
                                         </div>
 
-                                        <div x-show="newMed.drugId === 'other' && newMed.form !== 'injectable'" x-cloak>
-                                            <label class="form-label">Custom Name</label>
-                                            <input type="text" x-model="newMed.customName" placeholder="e.g., Sildenafil" class="form-input">
+                                        <!-- Trade / brand name — optional for a formulary drug, the second half of a custom product.
+                                             Stored in `brand`; shown as "Brand (Generic)". Mirrors the iOS med form. -->
+                                        <div x-show="newMed.drugId && newMed.drugId !== '' && newMed.form !== 'injectable'" x-cloak>
+                                            <label class="form-label" x-text="newMed.drugId === 'other' ? 'Trade / brand name (optional)' : 'Brand (optional)'"></label>
+                                            <input type="text" x-model="newMed.brand" placeholder="e.g., Vetmedin" class="form-input">
                                         </div>
 
                                         <div x-show="newMed.form !== 'injectable'" style="display: flex; align-items: center; gap: 8px; padding-top: 22px;">
@@ -2280,7 +2307,7 @@
                                                 <span :class="med.isMajorChange ? 'text-danger font-bold' : 'text-warning font-bold'" x-text="med.action"></span>
                                             </td>
                                             <td>
-                                                <span x-text="med.drugId === 'other' ? med.customName : (formulary[med.drugId]?.generic || med.drugId)"></span>
+                                                <span x-text="medDisplayName(med)"></span>
                                             </td>
                                             <td style="color: #64748b;">
                                                 <span x-show="!med.isStopped" x-text="med.doseMg + 'mg ' + med.frequency"></span>
@@ -2300,7 +2327,13 @@
                                                 </template>
                                             </td>
                                             <td style="text-align: right; white-space: nowrap;">
-                                                <button @click="editMedication(med.id)" style="background: none; border: none; color: #0ea5e9; cursor: pointer; padding: 4px;" title="Edit entry">
+                                                <button @click="logMedChange(med.id)" style="background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;" title="Log a change (new entry, today)">
+                                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                                </button>
+                                                <button x-show="!med.isStopped" @click="stopMedToday(med.id)" style="background: none; border: none; color: #f59e0b; cursor: pointer; padding: 4px;" title="Stop this med (today)">
+                                                    <i class="fa-solid fa-ban"></i>
+                                                </button>
+                                                <button @click="editMedication(med.id)" style="background: none; border: none; color: #0ea5e9; cursor: pointer; padding: 4px;" title="Edit this entry">
                                                     <i class="fa-solid fa-pen-to-square"></i>
                                                 </button>
                                                 <button @click="deleteMedication(med.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;" title="Delete entry">

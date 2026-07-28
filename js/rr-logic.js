@@ -333,10 +333,16 @@ weightChartRenderTimeout: null,
 showMedLog: false, // Accordion toggle state
 showMedForm: false, // Overlay form visibility
 formulary: VET_FORMULARY, // Expose the global object to Alpine
+drugClassColors: (typeof DRUG_CLASS_COLORS !== 'undefined' ? DRUG_CLASS_COLORS : {}), // class → colour (colour-by-class)
+// Type-ahead medication search state (replaces the fixed dropdown — mirrors iOS DrugSearchField).
+medSearch: '',            // the visible text in the medication search box
+medSearchFocused: false,
+medSearchOpen: false,     // whether the suggestion list is shown
 newMed: {
     eventDate: new Date().toISOString().split('T')[0],
     drugId: '',
     customName: '',
+    brand: '',            // trade name (formulary optional / custom trade) — "Brand (Generic)"
     isStopped: false,
         openedDate: '',     // NEW — date liquid bottle was opened
     discardDays: '', 
@@ -3765,22 +3771,27 @@ openMedForm() {
     this.newInjection = this._freshInjection();
     this.newMed = {
         eventDate: new Date().toISOString().split('T')[0],
-        drugId: '', customName: '', isStopped: false,
+        drugId: '', customName: '', brand: '', isStopped: false,
         openedDate: '', discardDays: '', form: 'tablet',
         tabletStrengthMg: '', tabletsPerDose: '',
         frequency: 'q12h',
         tabletsInStock: '',
         stockDate: new Date().toISOString().split('T')[0]
     };
+    this.medSearch = '';
+    this.medSearchOpen = false;
     this.showMedForm = true;
 },
 editMedication(id) {
     const m = this.medLedger.find(x => x.id === id);
     if (!m) return;
+    this.medSearch = this.medSearchTextFor(m);
+    this.medSearchOpen = false;
     this.newMed = {
         eventDate: m.eventDate,
         drugId: m.drugId,
         customName: m.customName || '',
+        brand: m.brand || '',
         isStopped: !!m.isStopped,
         openedDate: m.openedDate || '',
         discardDays: m.discardDays != null ? m.discardDays : '',
@@ -3795,6 +3806,70 @@ editMedication(id) {
     this.editingInjectionId = null;
     this.newInjection = this._freshInjection();
     this.showMedForm = true;
+},
+
+// "Log a change (today)": open the med form seeded from an existing entry (drug identity + dose)
+// but as a NEW record dated today, so a dose change keeps the history accurate rather than
+// back-dating the original. Mirrors iOS MedsView "Log a change (today)".
+logMedChange(id) {
+    const m = this.medLedger.find(x => x.id === id);
+    if (!m) return;
+    this.newMed = {
+        eventDate: new Date().toISOString().split('T')[0],   // today, NOT the original date
+        drugId: m.drugId,
+        customName: m.customName || '',
+        brand: m.brand || '',
+        isStopped: false,                                    // a change starts a fresh active run
+        openedDate: '', discardDays: '',                     // stock is not carried over
+        form: m.form || 'tablet',
+        tabletStrengthMg: m.tabletStrengthMg != null ? m.tabletStrengthMg : '',
+        tabletsPerDose: m.tabletsPerDose != null ? m.tabletsPerDose : '',
+        frequency: m.frequency || 'q12h',
+        doseTimes: Array.isArray(m.doseTimes) ? [...m.doseTimes] : [],
+        tabletsInStock: '',
+        stockDate: new Date().toISOString().split('T')[0]
+    };
+    this.medSearch = this.medSearchTextFor(m);   // seed the search box from the source entry
+    this.medSearchOpen = false;
+    this.editingMedId = null;          // NEW entry, not an edit
+    this.editingInjectionId = null;
+    this.newInjection = this._freshInjection();
+    this.showMedForm = true;
+},
+
+// "Stop this med (today)": append a NEW stopped entry dated today for the same drug, instead of
+// back-dating the tapped entry to stopped. Mirrors iOS stopMedToday.
+stopMedToday(id) {
+    const m = this.medLedger.find(x => x.id === id);
+    if (!m) return;
+    const today = new Date().toISOString().split('T')[0];
+    const key = this._drugKey(m);
+    // One entry per day: if this drug already has an entry today, convert THAT to the stop rather
+    // than pushing a duplicate; otherwise add a fresh stopped entry dated today.
+    const sameDay = this.medLedger.find(e => e.patientId === (m.patientId || this.activePatientId)
+        && e.eventDate === today && this._drugKey(e) === key);
+    if (sameDay) {
+        Object.assign(sameDay, {
+            isStopped: true, doseMg: null, frequency: null, mgPerKg: null, tabletsPerDose: null,
+            tabletStrengthMg: null, tabletsInStock: null, doseTimes: [], stockDate: null
+        });
+    } else {
+        this.medLedger.push({
+            id: this.generateId(),
+            patientId: m.patientId || this.activePatientId,
+            eventDate: today,
+            drugId: m.drugId,
+            customName: m.drugId === 'other' ? (m.customName || '') : null,
+            brand: m.brand || null,
+            isStopped: true,
+            doseMg: null, frequency: null, mgPerKg: null, tabletsPerDose: null,
+            form: m.form || 'tablet',
+            openedDate: null, discardDays: null, tabletStrengthMg: null,
+            tabletsInStock: null, doseTimes: [], stockDate: null
+        });
+    }
+    this.saveToStorage('vch_medLedger', this.medLedger);
+    this.renderMedChart();
 },
 
         // Save function for the Ledger
@@ -3815,6 +3890,7 @@ addMedication() {
         eventDate: this.newMed.eventDate,
         drugId: this.newMed.drugId,
         customName: this.newMed.drugId === 'other' ? this.newMed.customName : null,
+        brand: (this.newMed.brand || '').trim() || null,                     // trade name (formulary or custom)
         isStopped: this.newMed.isStopped,                                    // raw intent stored
         doseMg:           this.newMed.isStopped ? null : this.newMedDoseMg(),   // ← derived
         frequency:        this.newMed.isStopped ? null : this.newMed.frequency,
@@ -3829,12 +3905,28 @@ addMedication() {
         stockDate:      this.newMed.isStopped ? null : (this.newMed.stockDate || this.newMed.eventDate),
     };
 
+    // One entry per (drug, day): if a DIFFERENT entry for this drug already exists on this date,
+    // confirm before replacing it so the ledger never holds ambiguous same-day duplicates.
+    const newKey = this._drugKey(entry);
+    const clash = this.medLedger.find(m => m.patientId === entry.patientId
+        && m.id !== this.editingMedId
+        && m.eventDate === entry.eventDate
+        && this._drugKey(m) === newKey);
+    if (clash) {
+        if (!confirm(`There's already an entry for ${this.medDisplayName(clash)} on ${entry.eventDate}. Replace it so each day keeps a single record?`)) {
+            return;   // abort — keep the form open
+        }
+        this.medLedger = this.medLedger.filter(m => m.id !== clash.id);
+    }
+
     if (this.editingMedId) {
         const idx = this.medLedger.findIndex(m => m.id === this.editingMedId);
         if (idx !== -1) {
             entry.id = this.editingMedId;
             entry.patientId = this.medLedger[idx].patientId;
             this.medLedger.splice(idx, 1, entry);
+        } else {
+            this.medLedger.push(entry);   // edited entry was the one we just removed as a clash
         }
         this.editingMedId = null;
     } else {
@@ -3853,13 +3945,15 @@ addMedication() {
 
     this.newMed = {
         eventDate: this.newMed.eventDate,
-        drugId: '', customName: '', isStopped: false,
+        drugId: '', customName: '', brand: '', isStopped: false,
         tabletStrengthMg: '', tabletsPerDose: '',
         frequency: 'q12h',
         form: 'tablet',
-        tabletsInStock: '', 
+        tabletsInStock: '',
         stockDate: new Date().toISOString().split('T')[0]
     };
+    this.medSearch = '';
+    this.medSearchOpen = false;
     this.showMedForm = false;
 },
 
@@ -4017,7 +4111,7 @@ currentMedStock() {
     return Object.values(latestByDrug)
         .filter(m => !m.isStopped)
         .map(m => {
-            const name = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+            const name = this.medDisplayName(m);
             const projection = this.medStockProjection(m);
             const isLiquid = m.form === 'liquid';
             return { entry: m, name, projection,
@@ -4063,7 +4157,111 @@ deleteMedication(id) {
     }
 },
 
-medDisplayName(m) { return m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId); },
+// ── Medication type-ahead (mirrors the tested iOS DrugSearch) ───────────────────────────────
+// Owners think in brand names, so search matches the generic AND every brand synonym, presenting
+// the canonical generic. The 'other' sentinel is never a search result (custom = free text).
+_drugNorm(s) { return (s || '').trim().toLowerCase(); },
+
+// Chart/legend colour for a formulary drug: its FIRST class's palette colour (colour-by-class),
+// falling back to the drug's own `color`. Mirrors iOS CatalogueData.color(for:).
+drugColor(d) {
+    if (!d) return '#64748b';
+    const cls = (d.classes || [])[0];
+    return (cls && this.drugClassColors[cls]) || d.color || '#64748b';
+},
+
+// Exact (case/space-insensitive) resolution → { id, brand } or null. brand is '' when the query
+// matched the generic name, or the canonical brand spelling when it matched a brand.
+drugResolveWithBrand(q) {
+    const n = this._drugNorm(q);
+    if (!n) return null;
+    for (const [id, d] of Object.entries(this.formulary)) {
+        if (id === 'other') continue;
+        if (this._drugNorm(d.generic) === n) return { id, brand: '' };
+        const b = (d.brands || []).find(x => this._drugNorm(x) === n);
+        if (b) return { id, brand: b };
+    }
+    return null;
+},
+
+// Ranked partial suggestions: 0 generic-exact · 1 generic-prefix · 2 brand-prefix · 3 generic-substr
+// · 4 brand-substr, alphabetical within a rank; empty for a blank/exact query. Max 8.
+drugSearchMatches(q) {
+    const n = this._drugNorm(q);
+    if (!n || this.drugResolveWithBrand(q)) return [];
+    const scored = [];
+    for (const [id, d] of Object.entries(this.formulary)) {
+        if (id === 'other') continue;
+        const g = this._drugNorm(d.generic);
+        let rank = null, mBrand = null;
+        if (g === n) rank = 0;
+        else if (g.startsWith(n)) rank = 1;
+        else {
+            const bp = (d.brands || []).find(x => this._drugNorm(x).startsWith(n));
+            if (bp) { rank = 2; mBrand = bp; }
+            else if (g.includes(n)) rank = 3;
+            else { const bc = (d.brands || []).find(x => this._drugNorm(x).includes(n)); if (bc) { rank = 4; mBrand = bc; } }
+        }
+        if (rank !== null) scored.push({ id, generic: d.generic, matchedBrand: mBrand, rank });
+    }
+    scored.sort((a, b) => a.rank !== b.rank ? a.rank - b.rank : a.generic.localeCompare(b.generic));
+    return scored.slice(0, 8);
+},
+
+// The visible search text for an existing entry (brand for a formulary drug carrying one, else the
+// generic; the custom name for an 'other' product). Mirrors iOS DrugSearchField.onAppear.
+medSearchTextFor(m) {
+    if (!m || !m.drugId) return '';
+    if (m.drugId === 'other') return m.customName || '';
+    if ((m.brand || '').trim()) return m.brand;
+    return this.formulary[m.drugId]?.generic || m.drugId;
+},
+
+// Keep newMed.drugId / brand / customName in step with the typed text (called on every input). An
+// exact brand match records the brand; a generic match sets the drug; anything else → custom.
+applyMedSearch() {
+    const q = (this.medSearch || '').trim();
+    const prevId = this.newMed.drugId;
+    const r = this.drugResolveWithBrand(q);
+    if (r) {
+        this.newMed.drugId = r.id;
+        this.newMed.customName = '';
+        if (r.brand) this.newMed.brand = r.brand;   // a typed brand fills the brand field
+        // Prefill the typical cadence when the drug CHANGES (still user-editable).
+        if (r.id !== prevId) {
+            const def = this.formulary[r.id]?.defaultFrequency;
+            if (def) this.newMed.frequency = def;
+        }
+    } else if (!q) {
+        this.newMed.drugId = ''; this.newMed.customName = '';
+    } else {
+        this.newMed.drugId = 'other'; this.newMed.customName = q;   // brand field left for the trade name
+    }
+    this.medSearchOpen = this.medSearchFocused && this.drugSearchMatches(q).length > 0;
+},
+
+// Pick a suggestion: set the text to the matched brand (or generic), then resolve identity.
+selectMedSearch(m) {
+    this.medSearch = m.matchedBrand || m.generic;
+    this.applyMedSearch();
+    this.medSearchOpen = false;
+},
+
+// Display name for a med entry — "Brand (Generic)" when a trade name is recorded, else the generic
+// (or the custom name for an 'other' product). Mirrors iOS FormularyDrug.displayName.
+medDisplayName(m) {
+    const brand = (m.brand || '').trim();
+    let generic;
+    if (m.drugId === 'other') {
+        generic = (m.customName || '').trim();
+        if (!brand && !generic) return 'Custom';
+    } else {
+        generic = (this.formulary[m.drugId]?.generic) || m.drugId;
+    }
+    if (!brand)   return generic;
+    if (!generic) return brand;
+    return `${brand} (${generic})`;
+},
 medScheduleDefaults(freq) { return ({ q24h:['08:00'], q12h:['08:00','20:00'], q8h:['06:00','14:00','22:00'] })[freq] || []; },
 _dayKey(d = new Date()) { const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; },
 
@@ -4773,7 +4971,7 @@ get compiledTimeline() {
             if (this.showMedications && Array.isArray(this.medLedger)) {
                 this.medLedger.filter(m => m.patientId === this.activePatientId).forEach(m => {
                     if (isWithinRange(safeTimestamp(m.eventDate))) {
-                        const drugName = m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId);
+                        const drugName = this.medDisplayName(m);
                         combinedEvents.push({ type: 'Medication', dateObj: new Date(m.eventDate), displayDate: new Date(m.eventDate).toLocaleDateString(), summary: `${m.action.toUpperCase()}: ${drugName} (${m.doseMg ? m.doseMg+'mg' : '?'})`, notes: m.notes || '' });
                     }
                 });
@@ -5068,7 +5266,7 @@ renderChart() {
             else if (ev.type === 'med') {
                 medDataPoints[i] = lastSrrRate !== null ? lastSrrRate : 30;
                 medColors[i] = this.formulary[ev.data[0].drugId]?.color || '#f59e0b';
-                medTooltips[i] = ev.data.map(m => `💊 ${m.action}: ${m.drugId === 'other' ? m.customName : (this.formulary[m.drugId]?.generic || m.drugId)} (${m.doseMg ? m.doseMg + 'mg' : '?'})`);
+                medTooltips[i] = ev.data.map(m => `💊 ${m.action}: ${this.medDisplayName(m)} (${m.doseMg ? m.doseMg + 'mg' : '?'})`);
             }
             else if (ev.type === 'syncope') {
                 syncDataPoints[i] = lastSrrRate !== null ? lastSrrRate : 30;
@@ -5723,7 +5921,7 @@ medResponsePanel() {
         if (pre.length < 3 || post.length < 3) return;
         const preM = this._meanOf(pre), postM = this._meanOf(post);
         const delta = postM - preM;
-        const name = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+        const name = this.medDisplayName(m);
         out.push({
             id: m.id,
             dateLabel: new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }),
@@ -5833,17 +6031,17 @@ getMedDateRange() {
     const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
     const getEarliestFallback = () => {
-        const petMeds = this.medLedger.filter(m => m.patientId === this.activePatientId);
-        if(petMeds.length > 0) {
-             const earliest = petMeds.reduce((min, p) => 
-                 this.parseDateSafe(p.eventDate) < this.parseDateSafe(min.eventDate) ? p : min
-             , petMeds[0]);
-             
-             const safeTimestamp = this.parseDateSafe(earliest.eventDate).getTime();
-             
-             if (!isNaN(safeTimestamp)) {
-                 return new Date(safeTimestamp - (14 * 24 * 60 * 60 * 1000));
-             }
+        // Earliest of the pet's meds AND injectables, so an injectables-only patient still gets a
+        // sensible range instead of the epoch (1970).
+        const petMedDates = this.medLedger
+            .filter(m => m.patientId === this.activePatientId)
+            .map(m => this.parseDateSafe(m.eventDate).getTime());
+        const petInjDates = this.injectionLog
+            .filter(a => a.patientId === this.activePatientId)
+            .map(a => this.parseDateSafe(a.date).getTime());
+        const stamps = [...petMedDates, ...petInjDates].filter(t => !isNaN(t));
+        if (stamps.length > 0) {
+            return new Date(Math.min(...stamps) - (14 * 24 * 60 * 60 * 1000));
         }
         return new Date(0);
     };
@@ -5930,6 +6128,7 @@ generateMedEpochs() {
                     activeMeds[drugKey] = {
                         drugId: med.drugId,
                         customName: med.customName,
+                        brand: med.brand,        // carried so the chart tooltip can show "Brand (Generic)"
                         doseMg: med.doseMg,
                         frequency: med.frequency,
                         mgPerKg: med.mgPerKg,
@@ -5977,7 +6176,20 @@ renderMedChart() {
 
         const epochs = this.generateMedEpochs();
         const suppEpochs = this.generateSuppEpochs();
-        if (epochs.length === 0 && suppEpochs.length === 0) return;
+
+        // --- Long-acting injectables: one row per product, a coverage bar of length intervalDays
+        //     from each administration (gaps show missed re-doses) + a "given" dot per dose. Mirrors
+        //     the iOS MedTimelineView. ---
+        const injectableColor = '#0d9488';
+        const injToMs = (d) => new Date((d || '').length <= 10 ? (d + 'T12:00:00') : d).getTime();
+        const injGroups = {};
+        this.injectionLog
+            .filter(a => a.patientId === this.activePatientId && (a.customName || '').trim())
+            .forEach(a => { const k = a.customName.trim(); (injGroups[k] = injGroups[k] || []).push(a); });
+        const injNames = Object.keys(injGroups).sort((x, y) =>
+            Math.min(...injGroups[x].map(a => injToMs(a.date))) - Math.min(...injGroups[y].map(a => injToMs(a.date))));
+
+        if (epochs.length === 0 && suppEpochs.length === 0 && injNames.length === 0) return;
 
         const { startDate, endDate } = this.getMedDateRange();
         const uniqueDrugs = [...new Set(epochs.map(e => e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId)))];
@@ -6010,7 +6222,7 @@ renderMedChart() {
         const dynamicDatasets = epochs.map((e, index) => {
             const genericName = e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
             const isDiuretic = ['furosemide', 'torasemide'].includes(e.drugId);
-            const baseColor = this.formulary[e.drugId]?.color || '#64748b';
+            const baseColor = this.drugColor(this.formulary[e.drugId]);   // colour-by-class
             const rgb = hex2rgb(baseColor);
             
             const key = e.drugId === 'other' ? e.customName : e.drugId;
@@ -6063,8 +6275,46 @@ renderMedChart() {
             };
         });
         
+        // Injectable coverage bars (one per administration) + a solid "given" tick at each dose.
+        // Both use the same bar mechanism as the drug epochs (proven to render on this category axis).
+        const injRgb = hex2rgb(injectableColor);
+        const injDatasets = [];
+        injNames.forEach(name => {
+            const evs = injGroups[name].slice().sort((a, b) => injToMs(a.date) - injToMs(b.date));
+            evs.forEach((a, i) => {
+                const start = injToMs(a.date);
+                const days = Number(a.intervalDays) || 30;
+                const end = start + days * 86400000;
+                // Coverage: translucent bar of length intervalDays — a longer real gap leaves a blank.
+                injDatasets.push({
+                    label: `Inj_${name}_${i}`,
+                    data: [{ x: [start, end], y: name,
+                             _rawEpoch: { _isInjectable: true, name, startTime: start, endTime: end, intervalDays: days, dose: a.dose } }],
+                    backgroundColor: `rgba(${injRgb[0]}, ${injRgb[1]}, ${injRgb[2]}, 0.28)`,
+                    borderColor: injectableColor,
+                    borderWidth: 1.5,
+                    borderSkipped: false,
+                    borderRadius: 4,
+                    barThickness: 10
+                });
+                // "Given" tick: a short solid, thicker bar at the administration date, so each dose
+                // actually given stands out from the faded coverage span.
+                injDatasets.push({
+                    label: `InjMark_${name}_${i}`,
+                    data: [{ x: [start, start + 2 * 86400000], y: name,
+                             _rawEpoch: { _isInjectable: true, _isMarker: true, name, startTime: start, dose: a.dose } }],
+                    backgroundColor: injectableColor,
+                    borderColor: injectableColor,
+                    borderWidth: 0,
+                    borderSkipped: false,
+                    borderRadius: 2,
+                    barThickness: 16
+                });
+            });
+        });
+
         const rowHeight = 72; // px per unique drug
-        const chartHeight = Math.max(180, (uniqueDrugs.length + uniqueSupps.length * 0.6) * rowHeight + 60);
+        const chartHeight = Math.max(180, (uniqueDrugs.length + (uniqueSupps.length + injNames.length) * 0.6) * rowHeight + 60);
         if (canvas.parentElement) {
             canvas.parentElement.style.height = chartHeight + 'px';
         }
@@ -6072,7 +6322,7 @@ renderMedChart() {
         this.medChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                datasets: [...dynamicDatasets, ...suppDatasets]
+                datasets: [...dynamicDatasets, ...suppDatasets, ...injDatasets]
             },
             options: {
                 indexAxis: 'y', 
@@ -6084,15 +6334,29 @@ renderMedChart() {
                         callbacks: {
                             title: (context) => {
                                 const e = context[0].raw._rawEpoch;
+                                if (e._isInjectable) return `${e.name} (injectable)`;
                                 if (e._isSupp) return `${e.name} (supplement)`;
-                                return e.drugId === 'other' ? e.customName : (this.formulary[e.drugId]?.generic || e.drugId);
+                                return this.medDisplayName(e);
                             },
                             label: (context) => {
                                 const e = context.raw._rawEpoch;
-                                const sDate = new Date(e.startTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                                const fmt = (t) => new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                                const sDate = fmt(e.startTime);
+
+                                if (e._isInjectable) {
+                                    if (e._isMarker) {
+                                        return [`Given: ${sDate}`, e.dose ? `Dose: ${e.dose}` : null].filter(Boolean);
+                                    }
+                                    return [
+                                        `Given: ${sDate}`,
+                                        `Covers ~${e.intervalDays} days (to ${fmt(e.endTime)})`,
+                                        e.dose ? `Dose: ${e.dose}` : null
+                                    ].filter(Boolean);
+                                }
+
                                 const todayTs = new Date().getTime();
                                 const diff = Math.abs(e.endTime - todayTs);
-                                const eDate = diff < 1000 ? 'Present' : new Date(e.endTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                                const eDate = diff < 1000 ? 'Present' : fmt(e.endTime);
 
                                 if (e._isSupp) {
                                     return [
@@ -6124,8 +6388,8 @@ renderMedChart() {
                     },
                     y: {
                         type: 'category',
-                        stacked: true, 
-                        labels: [...uniqueDrugs, ...uniqueSupps],
+                        stacked: true,
+                        labels: [...uniqueDrugs, ...uniqueSupps, ...injNames],
                         grid: { display: false }
                     }
                 }
@@ -6547,13 +6811,14 @@ exportMedicationsCSV() {
         return alert("No medication or supplement data to export for this pet.");
 
 
-    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletStrengthMg,TabletsPerDose,TabletsInStock,StockDate,Form,OpenedDate,DiscardDays,DoseUnit,Constituents\n";
+    const headers = "Date,PatientName,DrugId,GenericName,CustomName,Dose(mg),Frequency,mg/kg,isStopped,TabletStrengthMg,TabletsPerDose,TabletsInStock,StockDate,Form,OpenedDate,DiscardDays,DoseUnit,Constituents,Brand\n";
 
     const rows = meds.map(med => {
         const patient = this.patients.find(p => p.id === med.patientId);
         const patientName = this.sanitiseCSV(patient ? patient.name : 'Unknown');
+        // The generic: the formulary generic, or the owner's own name for a custom product.
         const genericName = med.drugId === 'other'
-            ? 'Other'
+            ? (med.customName || 'Custom')
             : (this.formulary[med.drugId]?.generic || med.drugId);
 
         return [
@@ -6573,7 +6838,8 @@ exportMedicationsCSV() {
             med.form || 'tablet',
             med.openedDate || '',
             med.discardDays != null ? med.discardDays : '',
-            '', ''
+            '', '',                                        // DoseUnit, Constituents — n/a for meds
+            `"${this.sanitiseCSV(med.brand || '')}"`       // Brand (trade name)
         ].join(',');
     }).join("\n");
 
@@ -6600,7 +6866,8 @@ exportMedicationsCSV() {
             s.isStopped ? 'true' : 'false',
             '', '', '', '', '', '', '',      // tablet/stock/form/opened/discard — n/a
             `"${this.sanitiseCSV(s.doseUnit || '')}"`,
-            `"${this.sanitiseCSV(constituents)}"`
+            `"${this.sanitiseCSV(constituents)}"`,
+            ''                                             // Brand — n/a for supplements
         ].join(',');
     }).join("\n");
 
@@ -6683,6 +6950,8 @@ importMedicationsCSV(event) {
                 const form = parts[13] && clean(parts[13]).toLowerCase() === 'liquid' ? 'liquid' : 'tablet';
                 const openedDate  = parts[14] ? clean(parts[14]) : '';
                 const discardDays = parts[15] ? parseFloat(clean(parts[15])) : NaN;
+                // parts[16] = DoseUnit, parts[17] = Constituents (supplement columns, n/a here)
+                const brand       = parts[18] ? clean(parts[18]) : '';   // absent in pre-Brand files → ''
                 const derivedDose = (!isNaN(tabletStrengthMg) && !isNaN(tabletsPerDose))
                     ? Math.round(tabletStrengthMg * tabletsPerDose * 1000) / 1000
                     : doseMg;   // fall back to the Dose(mg) column
@@ -6702,6 +6971,7 @@ importMedicationsCSV(event) {
                     patientId:  patient.id,
                     drugId,
                     customName: customName || '',
+                    brand: brand || '',
                     frequency:  isStopped ? null : (frequency || 'q12h'),
                     mgPerKg:    isStopped ? null : (isNaN(mgPerKg) ? null : mgPerKg),
                     isStopped,
@@ -7881,7 +8151,7 @@ async generatePDF() {
                 head: [['Date', 'Drug', 'Action', 'Dose (mg)', 'Frequency', 'mg/kg']],
                 body: medData.map(m => {
                     const action  = this.getComputedAction(m);
-                    const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+                    const name    = this.medDisplayName(m);
                     const mgPerKg = (!m.isStopped && m.doseMg)
                         ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate)
                         : null;
@@ -8269,7 +8539,7 @@ generateCSV() {
         csv += 'Date,Drug,Action,Dose (mg),Frequency,mg/kg\n';
         medData.forEach(m => {
             const action  = this.getComputedAction(m);
-            const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+            const name    = this.medDisplayName(m);
             const mgPerKg = (!m.isStopped && m.doseMg)
                 ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate)
                 : '';
@@ -8659,7 +8929,7 @@ _buildReportText() {
             out += rule() + nl;
             medData.forEach(m => {
                 const action  = this.getComputedAction(m);
-                const name    = m.drugId === 'other' ? (m.customName || 'Custom') : (this.formulary[m.drugId]?.generic || m.drugId);
+                const name    = this.medDisplayName(m);
                 const mgPerKg = (!m.isStopped && m.doseMg) ? this.computeHistoricMgPerKg(m.doseMg, m.patientId, m.eventDate) : '';
                 out += `${m.eventDate}  |  ${action}: ${name}`;
                 if (m.doseMg) out += `  |  ${m.doseMg}mg ${m.frequency || ''}`;
