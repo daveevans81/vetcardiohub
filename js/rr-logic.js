@@ -334,6 +334,8 @@ showMedLog: false, // Accordion toggle state
 showMedForm: false, // Overlay form visibility
 formulary: VET_FORMULARY, // Expose the global object to Alpine
 drugClassColors: (typeof DRUG_CLASS_COLORS !== 'undefined' ? DRUG_CLASS_COLORS : {}), // class → colour (colour-by-class)
+injectableFormulary: (typeof INJECTABLE_FORMULARY !== 'undefined' ? INJECTABLE_FORMULARY : {}), // Cytopoint/Librela/Solensia…
+injSearchOpen: false,   // injectable name suggestion list visibility
 // Type-ahead medication search state (replaces the fixed dropdown — mirrors iOS DrugSearchField).
 medSearch: '',            // the visible text in the medication search box
 medSearchFocused: false,
@@ -3837,6 +3839,22 @@ logMedChange(id) {
     this.showMedForm = true;
 },
 
+// Quick stock update: set the current count + re-anchor to today, editing the entry IN PLACE (no
+// new ledger row — stock is a running count, not a dose change). Mirrors iOS StockUpdateButton.
+updateStock(id) {
+    const m = this.medLedger.find(x => x.id === id);
+    if (!m || m.isStopped) return;
+    const unit = m.form === 'liquid' ? 'ml' : 'tablets';
+    const current = m.tabletsInStock != null ? m.tabletsInStock : '';
+    const val = prompt(`Current ${unit} in stock — updates the count as of today, without adding a new entry:`, current);
+    if (val === null) return;                       // cancelled
+    const n = parseFloat(val);
+    m.tabletsInStock = isNaN(n) ? null : n;
+    if (!isNaN(n)) m.stockDate = new Date().toISOString().split('T')[0];
+    this.saveToStorage('vch_medLedger', this.medLedger);
+    this.renderMedChart();
+},
+
 // "Stop this med (today)": append a NEW stopped entry dated today for the same drug, instead of
 // back-dating the tapped entry to stopped. Mirrors iOS stopMedToday.
 stopMedToday(id) {
@@ -4245,6 +4263,26 @@ selectMedSearch(m) {
     this.medSearch = m.matchedBrand || m.generic;
     this.applyMedSearch();
     this.medSearchOpen = false;
+},
+
+// ── Injectable type-ahead (INJECTABLE_FORMULARY: Cytopoint/Librela/Solensia…) ────────────────
+// Matches the curated products by brand OR generic; picking one fills the name + label interval.
+injectableMatches(q) {
+    const n = (q || '').trim().toLowerCase();
+    if (!n) return [];
+    const out = [];
+    for (const p of Object.values(this.injectableFormulary)) {
+        const b = (p.brand || '').toLowerCase(), g = (p.generic || '').toLowerCase();
+        if (b === n) continue;                          // already an exact match — nothing to suggest
+        if (b.includes(n) || g.includes(n)) out.push(p);
+    }
+    return out.slice(0, 8);
+},
+selectInjectable(p) {
+    this.newInjection.customName = p.brand;
+    if (p.intervalDays) this.newInjection.intervalDays = p.intervalDays;
+    this._refreshInjectionDue();
+    this.injSearchOpen = false;
 },
 
 // Display name for a med entry — "Brand (Generic)" when a trade name is recorded, else the generic

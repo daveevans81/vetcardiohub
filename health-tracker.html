@@ -1993,9 +1993,24 @@
                                                     <label class="form-label">Date Given</label>
                                                     <input type="date" x-model="newInjection.date" @change="_refreshInjectionDue()" class="form-input">
                                                 </div>
-                                                <div>
+                                                <div style="position: relative;">
                                                     <label class="form-label">Product Name</label>
-                                                    <input type="text" x-model="newInjection.customName" placeholder="e.g., Cytopoint" class="form-input">
+                                                    <input type="text" x-model="newInjection.customName"
+                                                           @input="injSearchOpen = injectableMatches(newInjection.customName).length > 0"
+                                                           @focus="injSearchOpen = injectableMatches(newInjection.customName).length > 0"
+                                                           @blur="setTimeout(() => injSearchOpen = false, 150)"
+                                                           autocomplete="off" placeholder="e.g., Cytopoint" class="form-input">
+                                                    <div x-show="injSearchOpen" x-cloak
+                                                         style="position:absolute; z-index:30; left:0; right:0; background:#fff; border:1px solid #e2e8f0; border-radius:8px; margin-top:2px; box-shadow:0 4px 12px rgba(0,0,0,0.08); max-height:220px; overflow-y:auto;">
+                                                        <template x-for="p in injectableMatches(newInjection.customName)" :key="p.id">
+                                                            <div @mousedown.prevent="selectInjectable(p)"
+                                                                 style="padding:8px 12px; cursor:pointer;"
+                                                                 onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+                                                                <span x-text="p.brand" style="color:#1e293b; font-weight:600;"></span>
+                                                                <span x-text="(p.generic ? p.generic + ' · ' : '') + 'every ' + p.intervalDays + ' days'" style="color:#94a3b8; font-size:0.8rem; margin-left:6px;"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <label class="form-label">Dose <span style="color:#94a3b8;">(optional)</span></label>
@@ -2318,13 +2333,19 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <template x-if="!med.isStopped && medStockProjection(med)">
-                                                    <span :style="`background: ${getStockStatus(medStockProjection(med).emptyDate).bg}; color: ${getStockStatus(medStockProjection(med).emptyDate).color}; border: 1px solid ${getStockStatus(medStockProjection(med).emptyDate).border}; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: bold; white-space: nowrap;`"
-                                                          x-text="getStockStatus(medStockProjection(med).emptyDate).label"></span>
-                                                </template>
-                                                <template x-if="med.isStopped || !medStockProjection(med)">
-                                                    <span class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
-                                                </template>
+                                                <div style="display:flex; align-items:center; gap:6px;">
+                                                    <template x-if="!med.isStopped && medStockProjection(med)">
+                                                        <span :style="`background: ${getStockStatus(medStockProjection(med).emptyDate).bg}; color: ${getStockStatus(medStockProjection(med).emptyDate).color}; border: 1px solid ${getStockStatus(medStockProjection(med).emptyDate).border}; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: bold; white-space: nowrap;`"
+                                                              x-text="getStockStatus(medStockProjection(med).emptyDate).label"></span>
+                                                    </template>
+                                                    <template x-if="med.isStopped || !medStockProjection(med)">
+                                                        <span class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
+                                                    </template>
+                                                    <button x-show="!med.isStopped" @click="updateStock(med.id)" title="Update stock level"
+                                                            style="background:none; border:none; color:#0ea5e9; cursor:pointer; padding:2px;">
+                                                        <i class="fa-solid fa-box"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                             <td style="text-align: right; white-space: nowrap;">
                                                 <button @click="logMedChange(med.id)" style="background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;" title="Log a change (new entry, today)">
