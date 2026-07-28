@@ -2335,10 +2335,7 @@
                                             <tr>
                                                 <td x-text="medDisplayName(m)"></td>
                                                 <td x-text="(m.tabletsInStock != null && m.tabletsInStock !== '') ? (m.tabletsInStock + (m.form==='liquid' ? ' ml' : ' tab')) : '—'"></td>
-                                                <td>
-                                                    <template x-if="medStockProjection(m)"><span x-text="medStockProjection(m).daysLeft + 'd'"></span></template>
-                                                    <template x-if="!medStockProjection(m)"><span class="text-muted">—</span></template>
-                                                </td>
+                                                <td x-text="stockDaysLabel(medStockProjection(m))"></td>
                                                 <td>
                                                     <template x-if="medStockProjection(m)"><span x-text="medStockProjection(m).emptyDate"></span></template>
                                                     <template x-if="!medStockProjection(m)"><span class="text-muted">—</span></template>

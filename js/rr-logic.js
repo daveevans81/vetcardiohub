@@ -4115,7 +4115,17 @@ getStockStatus(emptyDate, reason) {
     if (days === 0) return { status: 'empty',    days, label: exp ? 'Discard today!' : 'Empty today!',            color:'#dc2626', bg:'#fef2f2', border:'#fecaca' };
     if (days <= 7)  return { status: 'low',      days, label: `${days}d ${exp ? 'until discard' : 'of stock left'}`, color:'#d97706', bg:'#fffbeb', border:'#fde68a' };
     if (days <= 14) return { status: 'upcoming', days, label: `${days}d left`,                                     color:'#0369a1', bg:'#f0f9ff', border:'#bae6fd' };
-    return          { status: 'ok',              days, label: `~${days}d left`,                                    color:'#15803d', bg:'#f0fdf4', border:'#bbf7d0' };
+    return          { status: 'ok',              days, label: `${days}d left`,                                     color:'#15803d', bg:'#f0fdf4', border:'#bbf7d0' };
+},
+
+// Human "days left" for a stock projection — guards negatives ("Ran out 3d ago") and drops the
+// tilde, which reads like a minus sign. `p` is a medStockProjection result (or null).
+stockDaysLabel(p) {
+    if (!p || p.daysLeft == null) return '—';
+    const d = p.daysLeft, exp = p.reason === 'expiry';
+    if (d < 0)   return `${exp ? 'Expired' : 'Ran out'} ${Math.abs(d)}d ago`;
+    if (d === 0) return exp ? 'Discard today' : 'Out today';
+    return `${d}d left`;
 },
 
 get allAlerts() {
@@ -8598,7 +8608,7 @@ async generatePDF() {
                         `${r.entry.doseMg != null ? r.entry.doseMg + 'mg ' : ''}${r.entry.frequency || ''}`.trim(),
                         r.entry.tabletsPerDose != null ? `${r.entry.tabletsPerDose} ${r.doseUnit}` : '—',
                         r.entry.tabletsInStock != null ? `${r.entry.tabletsInStock} ${r.doseUnit}` : '—',
-                        p ? `${p.daysLeft} d` : '—',
+                        this.stockDaysLabel(p),
                         limit
                     ];
                 }),
@@ -9363,7 +9373,7 @@ _buildReportText() {
                 if (r.entry.tabletsPerDose != null) out += `  |  ${r.entry.tabletsPerDose} ${r.doseUnit}/dose`;
                 if (r.entry.tabletsInStock != null) out += `  |  ${r.entry.tabletsInStock} ${r.doseUnit} in stock`;
                 if (p) {
-                    out += `${nl}${indent}~${p.daysLeft}d left → ${p.reason === 'expiry' ? 'discard' : 'empty'} ${p.emptyDate}`;
+                    out += `${nl}${indent}${this.stockDaysLabel(p)} → ${p.reason === 'expiry' ? 'discard' : 'empty'} ${p.emptyDate}`;
                     if (p.runOutDate && p.discardDate) out += ` (runs out ${p.runOutDate}; discard ${p.discardDate})`;
                     if (r.status && r.status.status !== 'ok') out += `  [${r.status.label}]`;
                 } else if (r.entry.frequency === 'PRN') {
