@@ -1654,11 +1654,11 @@
                                         </div>
                                         <div class="stat-card">
                                             <div class="stat-label">Mean SRR</div>
-                                            <div class="stat-value" :class="filteredStats.mean >= 30 ? 'text-danger' : 'text-success'" x-text="filteredStats.mean.toFixed(1) + ' bpm'"></div>
+                                            <div class="stat-value" :class="filteredStats.mean >= (parseInt(activePatientProfile?.customSrrCutoff) || 30) ? 'text-danger' : 'text-success'" x-text="filteredStats.mean.toFixed(1) + ' bpm'"></div>
                                         </div>
                                         <div class="stat-card">
                                             <div class="stat-label">Upper Ref (mean+2SD)</div>
-                                            <div class="stat-value" :class="filteredStats.upperCI >= 30 ? 'text-danger' : 'text-success'" x-text="filteredStats.upperCI.toFixed(1) + ' bpm'"></div>
+                                            <div class="stat-value" :class="filteredStats.upperRef >= (parseInt(activePatientProfile?.customSrrCutoff) || 30) ? 'text-danger' : 'text-success'" x-text="filteredStats.upperRef.toFixed(1) + ' bpm'"></div>
                                         </div>
                                         <div class="stat-card" x-show="getFilteredReadings().length >= 2">
                                             <div class="stat-label">Range</div>
@@ -2302,6 +2302,57 @@
                             </div>
                         </template>
                         
+                        <!-- Current medications — a snapshot of what the pet is on right now (mirrors iOS). -->
+                        <template x-if="currentMedsList.length > 0">
+                            <div style="border-radius:6px; border:1px solid #c8d6eb; background:white; padding:12px; margin-bottom:12px;">
+                                <strong style="color:#16325F; font-size:0.9rem;">Current medications</strong>
+                                <div style="margin-top:6px; display:flex; flex-direction:column;">
+                                    <template x-for="m in currentMedsList" :key="'cur-'+m.id">
+                                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; border-top:1px solid #f1f5f9; padding:8px 0;">
+                                            <div>
+                                                <span x-text="medDisplayName(m)" style="font-weight:600; color:#1e293b;"></span>
+                                                <span x-show="medStrengthLabel(m)" x-text="medStrengthLabel(m)" style="color:#64748b; font-size:0.85rem; margin-left:4px;"></span>
+                                                <div style="color:#64748b; font-size:0.8rem;" x-text="medRegimenText(m) + (m.mgPerKg ? ' · ' + m.mgPerKg + ' mg/kg' : '')"></div>
+                                            </div>
+                                            <template x-if="medStockProjection(m)">
+                                                <span :style="`background:${getStockStatus(medStockProjection(m).emptyDate).bg}; color:${getStockStatus(medStockProjection(m).emptyDate).color}; border:1px solid ${getStockStatus(medStockProjection(m).emptyDate).border}; border-radius:999px; padding:2px 10px; font-size:0.7rem; font-weight:bold; white-space:nowrap;`"
+                                                      x-text="getStockStatus(medStockProjection(m).emptyDate).label"></span>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Medication stock — its own list, so multiple dose changes don't clutter it. -->
+                        <template x-if="currentMedsList.length > 0">
+                            <div style="border-radius:6px; border:1px solid #c8d6eb; background:white; overflow-x:auto; margin-bottom:12px;">
+                                <div style="padding:12px 12px 0;"><strong style="color:#16325F; font-size:0.9rem;">Medication stock</strong></div>
+                                <table class="data-table">
+                                    <thead><tr><th>Medication</th><th>In stock</th><th>Days left</th><th>Runs out / discard</th><th></th></tr></thead>
+                                    <tbody>
+                                        <template x-for="m in currentMedsList" :key="'stk-'+m.id">
+                                            <tr>
+                                                <td x-text="medDisplayName(m)"></td>
+                                                <td x-text="(m.tabletsInStock != null && m.tabletsInStock !== '') ? (m.tabletsInStock + (m.form==='liquid' ? ' ml' : ' tab')) : '—'"></td>
+                                                <td>
+                                                    <template x-if="medStockProjection(m)"><span x-text="medStockProjection(m).daysLeft + 'd'"></span></template>
+                                                    <template x-if="!medStockProjection(m)"><span class="text-muted">—</span></template>
+                                                </td>
+                                                <td>
+                                                    <template x-if="medStockProjection(m)"><span x-text="medStockProjection(m).emptyDate"></span></template>
+                                                    <template x-if="!medStockProjection(m)"><span class="text-muted">—</span></template>
+                                                </td>
+                                                <td style="text-align:right;">
+                                                    <button @click="updateStock(m.id)" title="Update stock level" style="background:none; border:none; color:#0ea5e9; cursor:pointer; padding:4px;"><i class="fa-solid fa-box"></i></button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+
                         <div style="border-radius: 6px; border: 1px solid #c8d6eb; overflow-x: auto; -webkit-overflow-scrolling: touch; background: white;">
                             <table class="data-table">
                                 <thead>
@@ -2310,7 +2361,6 @@
                                         <th>Action</th>
                                         <th>Medication</th>
                                         <th>Regimen</th>
-                                        <th>Stock</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -2332,21 +2382,6 @@
                                                     <span x-show="med.weightChanged" title="Patient weight changed since entry" style="color: #f59e0b; cursor: help;">⚠</span>)
                                                 </span>
                                             </td>
-                                            <td>
-                                                <div style="display:flex; align-items:center; gap:6px;">
-                                                    <template x-if="!med.isStopped && medStockProjection(med)">
-                                                        <span :style="`background: ${getStockStatus(medStockProjection(med).emptyDate).bg}; color: ${getStockStatus(medStockProjection(med).emptyDate).color}; border: 1px solid ${getStockStatus(medStockProjection(med).emptyDate).border}; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: bold; white-space: nowrap;`"
-                                                              x-text="getStockStatus(medStockProjection(med).emptyDate).label"></span>
-                                                    </template>
-                                                    <template x-if="med.isStopped || !medStockProjection(med)">
-                                                        <span class="text-muted" style="font-size: 0.75rem; font-style: italic;">—</span>
-                                                    </template>
-                                                    <button x-show="!med.isStopped" @click="updateStock(med.id)" title="Update stock level"
-                                                            style="background:none; border:none; color:#0ea5e9; cursor:pointer; padding:2px;">
-                                                        <i class="fa-solid fa-box"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
                                             <td style="text-align: right; white-space: nowrap;">
                                                 <button @click="logMedChange(med.id)" style="background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;" title="Log a change (new entry, today)">
                                                     <i class="fa-solid fa-clock-rotate-left"></i>
@@ -2364,7 +2399,7 @@
                                         </tr>
                                     </template>
                                     <tr x-show="medLedger.length === 0">
-                                        <td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
+                                        <td colspan="5" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">
                                             No pharmacologic history recorded.
                                         </td>
                                     </tr>
@@ -3755,6 +3790,30 @@
             </template>
             
                                     <!-- ******************************** -->
+                                    <!-- TRENDS: WEEK IN REVIEW           -->
+                                    <!-- ******************************** -->
+            <div class="module-card summary-box" x-show="patients.length > 0 && activeView === 'trends'" x-cloak style="margin-top: 20px;">
+                <template x-if="trendsWeeklyDigest()">
+                    <div>
+                        <h2 style="margin: 0 0 12px 0; font-size: 1.25rem;">
+                            <i class="fa-solid fa-calendar-week" style="color: #2563eb;"></i>
+                            <span x-text="trendsWeeklyDigest().headline"></span>
+                        </h2>
+                        <template x-for="(line, i) in trendsWeeklyDigest().lines" :key="i">
+                            <div style="display: flex; gap: 10px; align-items: flex-start; padding: 5px 0;">
+                                <i class="fa-solid" :class="line.icon" :style="line.css + 'width: 18px; text-align: center; margin-top: 3px;'"></i>
+                                <span class="text-sm" style="color: #475569;" x-text="line.text"></span>
+                            </div>
+                        </template>
+                        <p class="text-xs text-muted" style="margin: 10px 0 0 0; font-style: italic;">
+                            The last seven days compared with the week before. This summary describes what you have
+                            logged — it is not a diagnosis. Discuss anything that concerns you with your veterinary surgeon.
+                        </p>
+                    </div>
+                </template>
+            </div>
+
+                                    <!-- ******************************** -->
                                     <!-- TRENDS: PATIENT SNAPSHOT         -->
                                     <!-- ******************************** -->
             <div class="module-card summary-box" x-show="patients.length > 0 && activeView === 'trends'" x-cloak style="margin-top: 20px;">
@@ -3764,9 +3823,15 @@
                 </h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
                     <template x-for="tile in trendsSnapshot()" :key="tile.label">
-                        <div :style="'border: 1px solid; border-radius: 8px; padding: 10px 12px; ' + tile.css">
+                        <div :style="'border: 1px solid; border-radius: 8px; padding: 10px 12px; ' + tile.css + (tile.view ? ' cursor: pointer;' : '')"
+                             :role="tile.view ? 'button' : null" :tabindex="tile.view ? 0 : null"
+                             :title="tile.view ? 'Open ' + tile.label : null"
+                             @click="tile.view && setView(tile.view)"
+                             @keydown.enter="tile.view && setView(tile.view)"
+                             @keydown.space.prevent="tile.view && setView(tile.view)">
                             <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.8;">
                                 <i class="fa-solid" :class="tile.icon"></i> <span x-text="tile.label"></span>
+                                <i class="fa-solid fa-chevron-right" x-show="tile.view" style="float: right; opacity: 0.5; font-size: 0.65rem; margin-top: 2px;"></i>
                             </div>
                             <div style="font-size: 1.25rem; font-weight: 800; margin-top: 2px;" x-text="tile.value"></div>
                             <div style="font-size: 0.72rem; opacity: 0.85;" x-text="tile.sub"></div>
@@ -3915,7 +3980,7 @@
                             </div>
                             <div class="stat-card">
                                 <div class="stat-label">Upper Ref (mean+2SD)</div>
-                                <div class="stat-value" :class="filteredStats.upperCI >= (parseInt(activePatientProfile?.customSrrCutoff) || 30) ? 'text-danger' : 'text-success'" x-text="filteredStats.upperCI.toFixed(1) + ' bpm'"></div>
+                                <div class="stat-value" :class="filteredStats.upperRef >= (parseInt(activePatientProfile?.customSrrCutoff) || 30) ? 'text-danger' : 'text-success'" x-text="filteredStats.upperRef.toFixed(1) + ' bpm'"></div>
                             </div>
                             <div class="stat-card" x-show="getFilteredReadings().length >= 2">
                                 <div class="stat-label">Range</div>
@@ -3925,6 +3990,24 @@
                                 <div class="stat-label">Alarm Cutoff</div>
                                 <div class="stat-value" style="color: #dc2626;" x-text="(parseInt(activePatientProfile?.customSrrCutoff) || 30) + ' bpm'"></div>
                             </div>
+                            <template x-if="srrPeriodStats">
+                                <div class="stat-card">
+                                    <div class="stat-label">Spread (SD)</div>
+                                    <div class="stat-value" x-text="'\u00b1 ' + srrPeriodStats.sd.toFixed(1)"></div>
+                                </div>
+                            </template>
+                            <template x-if="srrPeriodStats">
+                                <div class="stat-card">
+                                    <div class="stat-label">Below Cutoff</div>
+                                    <div class="stat-value" :class="srrPeriodStats.belowPct >= 90 ? 'text-success' : srrPeriodStats.belowPct >= 70 ? '' : 'text-danger'" x-text="srrPeriodStats.belowPct + '%'"></div>
+                                </div>
+                            </template>
+                            <template x-if="srrPeriodStats?.latestRolling !== null && srrPeriodStats">
+                                <div class="stat-card">
+                                    <div class="stat-label">Latest 7-day Mean</div>
+                                    <div class="stat-value" :class="srrPeriodStats.latestRolling >= srrPeriodStats.cutoff ? 'text-danger' : 'text-success'" x-text="srrPeriodStats.latestRolling.toFixed(1) + ' bpm'"></div>
+                                </div>
+                            </template>
                         </div>
                     </template>
                 </div>

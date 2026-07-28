@@ -1336,7 +1336,40 @@ get filteredStats() {
     const data = this.getFilteredReadings();
     if (data.length < 2) return null;
     return this.calculateStats(data);
-},  
+},
+
+// Descriptive statistics for the SELECTED period — the numbers behind the chart's reference
+// lines, plus the cutoff split the histogram summarises. Needs 2+ readings, same as
+// filteredStats (a single reading has no meaningful spread).
+get srrPeriodStats() {
+    const data = this.getFilteredReadings();
+    if (data.length < 2) return null;
+
+    const cutoff = parseInt(this.activePatientProfile?.customSrrCutoff) || 30;
+    const rates  = data.map(r => r.rate);
+    const s      = this.calculateStats(data);
+    const below  = rates.filter(r => r < cutoff).length;
+
+    // Latest 7-day rolling mean — same trailing window and 3-reading minimum as the chart overlay.
+    const rows = data.map(r => ({ t: this.parseDateSafe(r.date).getTime(), rate: r.rate }));
+    const lastT = rows[rows.length - 1].t;
+    const win = rows.filter(r => r.t > lastT - 7 * 86400000 && r.t <= lastT).map(r => r.rate);
+    const latestRolling = win.length >= 3 ? Math.round(this._meanOf(win) * 10) / 10 : null;
+
+    return {
+        n: rates.length,
+        mean: s.mean,
+        sd: s.sd,
+        upperRef: s.upperRef,
+        belowCutoff: below,
+        atOrAbove: rates.length - below,
+        belowPct: Math.round((below / rates.length) * 100),
+        latestRolling,
+        min: Math.min(...rates),
+        max: Math.max(...rates),
+        cutoff
+    };
+},
         
         // ===================== ANTIPARASITIC LOGIC =====================
 
@@ -4301,6 +4334,32 @@ medDisplayName(m) {
     return `${brand} (${generic})`;
 },
 medScheduleDefaults(freq) { return ({ q24h:['08:00'], q12h:['08:00','20:00'], q8h:['06:00','14:00','22:00'] })[freq] || []; },
+
+// Currently-active meds: the latest non-stopped entry per drug, alphabetical by display name.
+// Powers the "Current medications" + "Medication stock" panels (mirrors iOS CurrentMeds).
+get currentMedsList() {
+    const latest = {};
+    this.medLedger.filter(m => m.patientId === this.activePatientId)
+        .slice().sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
+        .forEach(m => { latest[this._drugKey(m)] = m; });
+    return Object.values(latest).filter(m => !m.isStopped)
+        .sort((a, b) => this.medDisplayName(a).localeCompare(this.medDisplayName(b)));
+},
+// Strength label: "20mg" tablet / "5mg/ml" liquid; '' when not recorded.
+medStrengthLabel(m) {
+    if (m.tabletStrengthMg == null || m.tabletStrengthMg === '') return '';
+    return m.form === 'liquid' ? `${m.tabletStrengthMg}mg/ml` : `${m.tabletStrengthMg}mg`;
+},
+// Regimen line: "0.5 tab · 10 mg · q12h" — per-dose count, total dose, frequency.
+medRegimenText(m) {
+    if (m.isStopped) return 'Discontinued';
+    const unit = m.form === 'liquid' ? 'ml' : 'tab';
+    const parts = [];
+    if (m.tabletsPerDose != null && m.tabletsPerDose !== '') parts.push(`${m.tabletsPerDose} ${unit}`);
+    if (m.doseMg != null && m.doseMg !== '') parts.push(`${m.doseMg} mg`);
+    if (m.frequency) parts.push(m.frequency);
+    return parts.join(' · ');
+},
 _dayKey(d = new Date()) { const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; },
 
 doseSlots(dayDate = new Date()) {
@@ -5620,6 +5679,38 @@ _sdOf(arr) {
     return Math.sqrt(arr.reduce((s, v) => s + (v - m) ** 2, 0) / (arr.length - 1));
 },
 
+// Full SRR rows for the active patient — keeps the fields the plain _srrForPatient() drops
+// (breathing effort, rest state), which the effort/conditions insights need.
+_srrRowsFull() {
+    if (!Array.isArray(this.srrHistory) || !this.activePatientId) return [];
+    return this.srrHistory
+        .filter(r => r.patientId === this.activePatientId)
+        .map(r => ({
+            t: this.parseDateSafe(r.date).getTime(),
+            rate: r.rate,
+            effort: r.breathingEffort ?? null,
+            restState: r.restState || null
+        }))
+        .sort((a, b) => a.t - b.t);
+},
+
+// Daily-mean SRR series, one point per UTC calendar day (day = UTC noon), ascending.
+// Same aggregation renderChart() does inline; extracted so the consecutive-days insight can
+// reason about DAYS rather than individual readings.
+_srrDailyMeans(rows) {
+    const src = rows || this._srrForPatient();
+    const byDay = {};
+    src.forEach(r => {
+        const d = new Date(r.t);
+        const key = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12);
+        (byDay[key] = byDay[key] || []).push(r.rate);
+    });
+    return Object.keys(byDay)
+        .map(k => parseInt(k))
+        .sort((a, b) => a - b)
+        .map(t => ({ t, mean: Math.round(this._meanOf(byDay[t]) * 10) / 10, count: byDay[t].length }));
+},
+
 // Combined daily symptom burden: cough severity + reduced activity + collapse events
 _dailyBurdenMap() {
     const sevMap = { Mild: 1, Moderate: 2, Severe: 3 };
@@ -5657,7 +5748,7 @@ trendsSnapshot() {
     if (this.modOn('srr') && rows.length) {
         const last = rows[rows.length - 1];
         tiles.push({
-            icon: 'fa-lungs', label: 'Latest SRR', value: last.rate + ' bpm',
+            icon: 'fa-lungs', view: 'count', label: 'Latest SRR', value: last.rate + ' bpm',
             sub: new Date(last.t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
             state: last.rate >= cutoff + 10 ? 'danger' : last.rate >= cutoff ? 'warn' : 'ok'
         });
@@ -5669,7 +5760,7 @@ trendsSnapshot() {
         const m7 = this._meanOf(m7v), m30 = this._meanOf(m30v);
         const pct = m30 > 0 ? ((m7 - m30) / m30) * 100 : 0;
         tiles.push({
-            icon: 'fa-chart-line', label: '7d vs 30d mean',
+            icon: 'fa-chart-line', view: 'count', label: '7d vs 30d mean',
             value: `${m7.toFixed(1)} / ${m30.toFixed(1)}`,
             sub: (pct > 2 ? '▲ ' : pct < -2 ? '▼ ' : '→ ') + Math.abs(pct).toFixed(0) + '%',
             state: pct >= 20 ? 'danger' : pct >= 10 ? 'warn' : 'ok'
@@ -5689,7 +5780,7 @@ trendsSnapshot() {
             const lv = parseFloat(latest.weightValue), rv = parseFloat(ref.weightValue);
             const pct = rv > 0 ? ((lv - rv) / rv) * 100 : 0;
             tiles.push({
-                icon: 'fa-weight-scale', label: 'Weight', value: `${lv} ${unit}`,
+                icon: 'fa-weight-scale', view: 'wellness', label: 'Weight', value: `${lv} ${unit}`,
                 sub: (pct > 0 ? '▲ ' : pct < 0 ? '▼ ' : '→ ') + Math.abs(pct).toFixed(1) + '% vs '
                      + new Date(ref.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
                 state: pct <= -5 ? 'danger' : Math.abs(pct) >= 5 ? 'warn' : 'ok'
@@ -5703,20 +5794,20 @@ trendsSnapshot() {
             const lastT = Math.max(...sl.map(s => this.parseDateSafe(s.date).getTime()));
             const days = Math.floor((now - lastT) / day);
             tiles.push({
-                icon: 'fa-heart-crack', label: 'Last collapse event',
+                icon: 'fa-heart-crack', view: 'wellness', label: 'Last collapse event',
                 value: days === 0 ? 'Today' : days + 'd ago',
                 sub: sl.length + ' logged',
                 state: days < 7 ? 'danger' : days < 30 ? 'warn' : 'ok'
             });
         } else {
-            tiles.push({ icon: 'fa-heart-crack', label: 'Collapse events', value: 'None', sub: 'logged', state: 'neutral' });
+            tiles.push({ icon: 'fa-heart-crack', view: 'wellness', label: 'Collapse events', value: 'None', sub: 'logged', state: 'neutral' });
         }
     }
 
     if (this.modOn('acvimStaging') && this.currentClinicalStatus) {
         const s = this.currentClinicalStatus;
         tiles.push({
-            icon: 'fa-stethoscope', label: s.diagnosis || 'Diagnosis',
+            icon: 'fa-stethoscope', view: 'meds', label: s.diagnosis || 'Diagnosis',
             value: s.acvimStage && s.acvimStage !== 'N/A' ? s.acvimStage : '—',
             sub: new Date(s.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }),
             state: ['Stage C', 'Stage D'].includes(s.acvimStage) ? 'warn' : 'neutral'
@@ -5730,14 +5821,14 @@ trendsSnapshot() {
             const next = [...stock].sort((a, b) => a.status.days - b.status.days)[0];
             const d = next.status.days;
             tiles.push({
-                icon: 'fa-prescription-bottle-medical', label: 'Next med top-up',
+                icon: 'fa-prescription-bottle-medical', view: 'meds', label: 'Next med top-up',
                 value: d < 0 ? Math.abs(d) + 'd ago' : d === 0 ? 'Today' : d + 'd',
                 sub: next.name + (next.projection?.reason === 'expiry' ? ' (in-use expiry)' : '')
                      + ' · ' + new Date(next.projection.emptyDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
                 state: d <= 0 ? 'danger' : d <= 7 ? 'warn' : 'ok'
             });
         } else if (this.hasAnyMedData()) {
-            tiles.push({ icon: 'fa-prescription-bottle-medical', label: 'Next med top-up', value: '—', sub: 'no stock data logged', state: 'neutral' });
+            tiles.push({ icon: 'fa-prescription-bottle-medical', view: 'meds', label: 'Next med top-up', value: '—', sub: 'no stock data logged', state: 'neutral' });
         }
     }
 
@@ -5760,7 +5851,7 @@ trendsSnapshot() {
         if (soonest) {
             const st = this.getVaccineStatus(soonest.due);
             tiles.push({
-                icon: 'fa-syringe', label: 'Next vaccine',
+                icon: 'fa-syringe', view: 'wellness', label: 'Next vaccine',
                 value: st.days < 0 ? Math.abs(st.days) + 'd overdue'
                      : st.days === 0 ? 'Due today'
                      : st.days <= 42 ? st.days + 'd'
@@ -5769,7 +5860,7 @@ trendsSnapshot() {
                 state: st.days < 0 ? 'danger' : st.days <= 14 ? 'warn' : 'ok'
             });
         } else {
-            tiles.push({ icon: 'fa-syringe', label: 'Next vaccine', value: '—', sub: 'no due date logged', state: 'neutral' });
+            tiles.push({ icon: 'fa-syringe', view: 'wellness', label: 'Next vaccine', value: '—', sub: 'no due date logged', state: 'neutral' });
         }
     }
 
@@ -5786,7 +5877,7 @@ trendsSnapshot() {
         const soonest = Object.values(byProduct).sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate))[0];
         const st = soonest ? this.getParasiticStatus(soonest.nextDueDate) : null;
         tiles.push({
-            icon: 'fa-shield-dog', label: 'Parasite cover',
+            icon: 'fa-shield-dog', view: 'wellness', label: 'Parasite cover',
             value: alerts.length === 0 ? 'Covered' : alerts.length + (alerts.length === 1 ? ' gap' : ' gaps'),
             sub: st ? ('Next: ' + (soonest.productLabel || soonest.productId) + ' '
                       + (st.days < 0 ? Math.abs(st.days) + 'd overdue' : st.days === 0 ? 'due today' : 'in ' + st.days + 'd'))
@@ -5815,6 +5906,9 @@ trendsInsights() {
     };
     const recent = win(now - 7 * day, now + day);
     const prior  = win(now - 14 * day, now - 7 * day);
+    // Set by rule 4 so rule 18 stays quiet — "weight stable" must never sit next to a
+    // weight-loss or fluid-gain warning.
+    let weightFlagged = false;
 
     // 1. Week-on-week SRR trend (a sustained rise is the classic pre-CHF signal)
     if (recent && prior && prior.mean > 0) {
@@ -5856,6 +5950,7 @@ trendsInsights() {
             const rv = parseFloat(ref.weightValue);
             if (rv > 0 && ref !== latest) {
                 const pct = ((lv - rv) / rv) * 100;
+                if (pct <= -5) weightFlagged = true;
                 if (pct <= -5) out.push({ severity: 'warn', icon: 'fa-weight-scale', title: 'Progressive weight loss',
                     text: `${petName} has lost ${Math.abs(pct).toFixed(1)}% of body weight since ${new Date(ref.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}. In cardiac patients this pattern raises the possibility of cardiac cachexia; discuss nutrition at your next visit.` });
             }
@@ -5866,6 +5961,7 @@ trendsInsights() {
             if (recentRef) {
                 const rrv = parseFloat(recentRef.weightValue);
                 const gpct = rrv > 0 ? ((lv - rrv) / rrv) * 100 : 0;
+                if (gpct >= 5) weightFlagged = true;
                 if (gpct >= 5) out.push({ severity: 'warn', icon: 'fa-droplet', title: 'Rapid weight gain',
                     text: `Body weight has increased ${gpct.toFixed(1)}% in under two weeks. Rapid gain in a cardiac patient can reflect fluid retention rather than true tissue gain; mention this to your veterinary surgeon, particularly if the breathing rate is also rising.` });
             }
@@ -5918,7 +6014,161 @@ trendsInsights() {
             text: `Only ${n14} resting rate ${n14 === 1 ? 'reading has' : 'readings have'} been logged in the last fortnight. Trends are far more reliable with regular counts — ideally once daily during settled sleep.` });
     }
 
-    // 9. All clear
+    // ── Rules 10+ ───────────────────────────────────────────────────────────
+    // Ported from the iOS app. Rules 1–9 compare weekly AVERAGES; these add day-level
+    // patterns, mine fields already captured but never analysed (breathing effort, rest
+    // state, activity minutes, cough context), and give the panel something positive to say
+    // when the owner is doing everything right. Descriptive throughout — never diagnostic.
+
+    // 10. Consecutive DAYS with the daily mean at/above cutoff. The classic action point:
+    // a two-day run can hide inside a weekly average that still looks acceptable.
+    if (this.modOn('srr')) {
+        const daily = this._srrDailyMeans(rows);
+        const lastDay = daily[daily.length - 1];
+        if (lastDay && lastDay.t >= now - 3 * day) {
+            let streak = 0, expected = lastDay.t;
+            for (let i = daily.length - 1; i >= 0; i--) {
+                if (daily[i].mean < cutoff || Math.abs(daily[i].t - expected) > day / 2) break;
+                streak++;
+                expected -= day;
+            }
+            if (streak >= 2) out.push({ severity: 'danger', icon: 'fa-calendar-xmark',
+                title: `${streak} consecutive days at or above cutoff`,
+                text: `The daily average resting rate has been at or above ${cutoff} bpm for ${streak} days in a row. Two or more consecutive days above the threshold is the standard point at which to contact your veterinary surgeon, even if ${petName} seems otherwise well.` });
+        }
+    }
+
+    // 11. Intermittent highs despite an acceptable average (a wide upper tail).
+    if (this.modOn('srr')) {
+        const v30 = rows.filter(r => r.t >= now - 30 * day).map(r => r.rate);
+        if (v30.length >= 8) {
+            const m = this._meanOf(v30);
+            const above = v30.filter(r => r >= cutoff).length;
+            if (m < cutoff && above / v30.length >= 0.25) out.push({ severity: 'info', icon: 'fa-chart-scatter',
+                title: 'Intermittent readings above cutoff',
+                text: `The average rate is within target, but ${above} of the last ${v30.length} readings (${Math.round((above / v30.length) * 100)}%) reached ${cutoff} bpm or more. Occasional highs can reflect dreaming, warmth or excitement — note the circumstances of high counts so genuine change stands out.` });
+        }
+    }
+
+    // 12. Activity level, fortnight vs preceding fortnight (mean minutes per LOGGED day).
+    if (this.modOn('activityLog')) {
+        const actDays = (this.activityLog || [])
+            .filter(a => a.patientId === this.activePatientId && parseFloat(a.durationMins) > 0)
+            .map(a => ({ t: this.parseDateSafe(a.date).getTime(), mins: parseFloat(a.durationMins) }));
+        const actWindow = (from, to) => {
+            const byDay = {};
+            actDays.filter(a => a.t >= from && a.t < to)
+                   .forEach(a => { byDay[a.t] = (byDay[a.t] || 0) + a.mins; });
+            return Object.values(byDay);
+        };
+        const aRecent = actWindow(now - 14 * day, now + day);
+        const aPrior  = actWindow(now - 28 * day, now - 14 * day);
+        if (aRecent.length >= 3 && aPrior.length >= 3) {
+            const rm = this._meanOf(aRecent), pm = this._meanOf(aPrior);
+            if (pm > 0) {
+                const pct = ((rm - pm) / pm) * 100;
+                if (pct <= -30) out.push({ severity: 'warn', icon: 'fa-person-walking-arrow-right',
+                    title: 'Falling activity levels',
+                    text: `Average logged activity has fallen ${Math.abs(pct).toFixed(0)}% fortnight-on-fortnight (${pm.toFixed(0)} → ${rm.toFixed(0)} min per logged day). Reduced exercise tolerance is an important observation in cardiac patients — mention it at your next visit, particularly alongside any breathing changes.` });
+                else if (pct >= 30) out.push({ severity: 'ok', icon: 'fa-person-walking',
+                    title: 'Rising activity levels',
+                    text: `Average logged activity is up ${pct.toFixed(0)}% fortnight-on-fortnight (${pm.toFixed(0)} → ${rm.toFixed(0)} min per logged day) — an encouraging sign of exercise tolerance and quality of life.` });
+            }
+        }
+    }
+
+    // 13. Breathing effort drifting upward (the 1–5 score saved with a count).
+    if (this.modOn('srr')) {
+        const full = this._srrRowsFull().filter(r => r.effort != null);
+        const eRecent = full.filter(r => r.t >= now - 7 * day).map(r => r.effort);
+        const ePrior  = full.filter(r => r.t >= now - 14 * day && r.t < now - 7 * day).map(r => r.effort);
+        if (eRecent.length >= 3 && ePrior.length >= 3) {
+            const rm = this._meanOf(eRecent), pm = this._meanOf(ePrior);
+            if (rm - pm >= 0.8) out.push({ severity: 'warn', icon: 'fa-lungs',
+                title: 'Breathing appears more effortful',
+                text: `The average breathing-effort score has risen from ${pm.toFixed(1)} to ${rm.toFixed(1)} out of 5 week-on-week. Increased visible effort matters as much as the rate itself — if this persists, arrange a veterinary check.` });
+        }
+    }
+
+    // 14. Counting-condition shift (asleep vs merely resting) that could explain a moved trend.
+    if (this.modOn('srr')) {
+        const full = this._srrRowsFull().filter(r => r.restState);
+        const sRecent = full.filter(r => r.t >= now - 7 * day);
+        const sPrior  = full.filter(r => r.t >= now - 14 * day && r.t < now - 7 * day);
+        if (sRecent.length >= 3 && sPrior.length >= 3) {
+            const share = arr => arr.filter(r => r.restState === 'asleep').length / arr.length;
+            const rShare = share(sRecent), pShare = share(sPrior);
+            if (Math.abs(rShare - pShare) >= 0.4) out.push({ severity: 'info', icon: 'fa-moon',
+                title: 'Change in counting conditions',
+                text: `${Math.round(rShare * 100)}% of this week's counts were taken during sleep, compared with ${Math.round(pShare * 100)}% the week before. Rates counted while merely resting typically run a little higher than true sleeping rates, so a shift like this can move the trend without any real change in ${petName}.` });
+        }
+    }
+
+    // 15. More coughing at rest / overnight — a more meaningful pattern than excitement cough.
+    if (this.modOn('coughLog')) {
+        const atRest = (this.coughLog || [])
+            .filter(c => c.patientId === this.activePatientId && /rest|night/i.test(c.context || ''))
+            .map(c => this.parseDateSafe(c.date).getTime());
+        const cRecent = atRest.filter(t => t >= now - 14 * day && t < now + day).length;
+        const cPrior  = atRest.filter(t => t >= now - 28 * day && t < now - 14 * day).length;
+        if (cRecent >= 3 && cRecent >= Math.max(cPrior, 1) * 2) out.push({ severity: 'info', icon: 'fa-bed',
+            title: 'More coughing at rest',
+            text: `${cRecent} coughing entries at rest or overnight have been logged this fortnight, up from ${cPrior} in the previous one. Cough occurring at rest is a more useful observation than cough on excitement — keep noting the context and share this pattern with your veterinary surgeon.` });
+    }
+
+    // 16. Response to the most recent medication change (7 days either side).
+    if (this.modOn('medications') && this.modOn('srr')) {
+        const changes = (this.medLedger || [])
+            .filter(m => m.patientId === this.activePatientId && !m.isStopped)
+            .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
+        const last = changes[changes.length - 1];
+        const t = last ? this.parseDateSafe(last.eventDate).getTime() : null;
+        if (t && t <= now - 7 * day && t >= now - 35 * day) {
+            const pre  = rows.filter(r => r.t >= t - 7 * day && r.t < t).map(r => r.rate);
+            const post = rows.filter(r => r.t > t && r.t <= t + 7 * day).map(r => r.rate);
+            if (pre.length >= 3 && post.length >= 3) {
+                const preM = this._meanOf(pre), postM = this._meanOf(post);
+                const delta = postM - preM;
+                const name = this.medDisplayName(last);
+                const when = new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                if (delta <= -2) out.push({ severity: 'ok', icon: 'fa-pills',
+                    title: 'Favourable response to medication change',
+                    text: `Since ${name} was changed on ${when}, the mean resting rate has fallen from ${preM.toFixed(1)} to ${postM.toFixed(1)} bpm — consistent with a favourable response to the adjustment.` });
+                else if (delta >= 2) out.push({ severity: 'info', icon: 'fa-pills',
+                    title: 'No fall in breathing rate since medication change',
+                    text: `The mean resting rate has moved from ${preM.toFixed(1)} to ${postM.toFixed(1)} bpm since ${name} was changed on ${when}. Responses can take time and doses often need titration — this before/after comparison is exactly what your veterinary surgeon will want to see at review.` });
+            }
+        }
+    }
+
+    // 17. Monitoring-consistency praise (the inverse of rule 8's nudge).
+    if (this.modOn('srr')) {
+        const daysLogged = new Set(rows.filter(r => r.t >= now - 14 * day)
+            .map(r => { const d = new Date(r.t); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()); })).size;
+        if (daysLogged >= 10) out.push({ severity: 'ok', icon: 'fa-award',
+            title: 'Excellent monitoring consistency',
+            text: `Readings have been logged on ${daysLogged} of the last 14 days. Regular counts like this are what make every trend on this screen trustworthy — keep it up.` });
+    }
+
+    // 18. Stable weight — only when neither weight warning above fired.
+    if (this.modOn('weightDiet') && !weightFlagged) {
+        const wl = (this.weightLog || []).filter(w => w.patientId === this.activePatientId)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+        const first = wl[0], latest = wl[wl.length - 1];
+        if (first && latest && parseFloat(first.weightValue) > 0 &&
+            new Date(latest.date).getTime() - new Date(first.date).getTime() >= 42 * day) {
+            const latestT = new Date(latest.date).getTime();
+            let ref = first;
+            wl.forEach(w => { if (new Date(w.date).getTime() <= latestT - 42 * day) ref = w; });
+            const rv = parseFloat(ref.weightValue), lv = parseFloat(latest.weightValue);
+            const pct = rv > 0 ? ((lv - rv) / rv) * 100 : 0;
+            if (rv > 0 && Math.abs(pct) < 2) out.push({ severity: 'ok', icon: 'fa-weight-scale',
+                title: 'Weight stable',
+                text: `${petName}'s weight has held within 2% since ${new Date(ref.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — a reassuring sign for appetite and nutrition, and a solid baseline for spotting future change.` });
+        }
+    }
+
+    // 9. All clear — runs last so every rule above has had its say.
     if (!out.some(o => o.severity === 'danger' || o.severity === 'warn')) {
         out.unshift({ severity: 'ok', icon: 'fa-circle-check', title: 'No adverse trends detected',
             text: 'The current data show no concerning patterns in respiratory rate, weight, medication burden or symptom scores. Continue routine monitoring.' });
@@ -5936,6 +6186,193 @@ trendsInsights() {
     return out;
 },
 
+
+// ── Week in review ──────────────────────────────────────────────────────
+// A plain-English summary of the last 7 days, compared with the week before it. Ported from
+// the iOS app, where it doubles as the body of a weekly notification; here it is the card at
+// the top of the Trends screen. Descriptive, never diagnostic — same rule as trendsInsights.
+trendsWeeklyDigest() {
+    if (!this.activePatientId) return null;
+    const day = 86400000, now = Date.now();
+    const weekAgo = now - 7 * day, fortnightAgo = now - 14 * day;
+    const cutoff = parseInt(this.activePatientProfile?.customSrrCutoff) || 30;
+    const petName = this.activePatientProfile?.name || 'your pet';
+    const gb = t => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const lines = [];
+    // Ignore wobble smaller than `deadband` so trivial change doesn't read as a trend.
+    const dir = (delta, deadband) => Math.abs(delta) < deadband ? null : (delta > 0 ? 'up' : 'down');
+    let anyData = false;
+
+    // ── Breathing rate ──
+    if (this.modOn('srr')) {
+        const rows = this._srrForPatient();
+        const week  = rows.filter(r => r.t >= weekAgo);
+        const prior = rows.filter(r => r.t >= fortnightAgo && r.t < weekAgo);
+        if (week.length) {
+            anyData = true;
+            const mean = this._meanOf(week.map(r => r.rate));
+            const above = week.filter(r => r.rate >= cutoff).length;
+            let text = `${week.length} breathing count${week.length === 1 ? '' : 's'} logged, averaging ${mean.toFixed(1)} bpm`;
+            if (prior.length >= 3) {
+                const pm = this._meanOf(prior.map(r => r.rate));
+                const d = dir(mean - pm, 1);
+                text += d ? ` — ${d} ${Math.abs(mean - pm).toFixed(1)} on last week's ${pm.toFixed(1)}`
+                          : ' — in line with last week';
+            }
+            lines.push({ icon: 'fa-lungs', text: text + '.', tone: above > 0 ? 'caution' : 'good' });
+            if (above > 0) lines.push({ icon: 'fa-triangle-exclamation',
+                text: `${above} of those ${above === 1 ? 'was' : 'were'} at or above the ${cutoff} bpm cutoff — worth mentioning to your vet if it continues.`,
+                tone: 'caution' });
+        } else {
+            lines.push({ icon: 'fa-lungs',
+                text: 'No breathing counts logged this week. A count during settled sleep, most days, is what makes every trend here reliable.',
+                tone: 'neutral' });
+        }
+    }
+
+    // ── Weight ──
+    if (this.modOn('weightDiet')) {
+        const wl = (this.weightLog || []).filter(w => w.patientId === this.activePatientId)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+        const latest = [...wl].reverse().find(w => new Date(w.date).getTime() >= weekAgo);
+        if (latest) {
+            anyData = true;
+            const unit = this.activePatientProfile?.weightUnit || 'kg';
+            const lv = parseFloat(latest.weightValue);
+            let text = `Weight ${lv} ${unit}`, tone = 'neutral';
+            const ref = [...wl].reverse().find(w => new Date(w.date).getTime() < weekAgo);
+            if (ref && parseFloat(ref.weightValue) > 0) {
+                const pct = ((lv - parseFloat(ref.weightValue)) / parseFloat(ref.weightValue)) * 100;
+                const d = dir(pct, 1);
+                if (d) { text += `, ${d} ${Math.abs(pct).toFixed(1)}% on ${gb(new Date(ref.date).getTime())}`;
+                         tone = Math.abs(pct) >= 5 ? 'caution' : 'neutral'; }
+                else   { text += `, steady since ${gb(new Date(ref.date).getTime())}`; tone = 'good'; }
+            }
+            lines.push({ icon: 'fa-weight-scale', text: text + '.', tone });
+        }
+    }
+
+    // ── Activity (mean minutes per logged day) ──
+    if (this.modOn('activityLog')) {
+        const sumDays = (from, to) => {
+            const byDay = {};
+            (this.activityLog || [])
+                .filter(a => a.patientId === this.activePatientId && parseFloat(a.durationMins) > 0)
+                .forEach(a => {
+                    const t = this.parseDateSafe(a.date).getTime();
+                    if (t >= from && t < to) byDay[a.date] = (byDay[a.date] || 0) + parseFloat(a.durationMins);
+                });
+            return Object.values(byDay);
+        };
+        const week = sumDays(weekAgo, now + day);
+        if (week.length) {
+            anyData = true;
+            const avg = this._meanOf(week);
+            let text = `Active on ${week.length} day${week.length === 1 ? '' : 's'}, averaging ${avg.toFixed(0)} minutes`;
+            let tone = 'good';
+            const prior = sumDays(fortnightAgo, weekAgo);
+            if (prior.length >= 2 && week.length >= 2) {
+                const pm = this._meanOf(prior);
+                const d = pm > 0 ? dir(((avg - pm) / pm) * 100, 10) : null;
+                if (d) { text += ` — ${d} ${Math.abs(((avg - pm) / pm) * 100).toFixed(0)}% on last week`;
+                         tone = d === 'down' ? 'caution' : 'good'; }
+            }
+            lines.push({ icon: 'fa-person-walking', text: text + '.', tone });
+        }
+    }
+
+    // ── Symptoms ──
+    if (this.modOn('coughLog')) {
+        const coughs = (this.coughLog || []).filter(c => c.patientId === this.activePatientId)
+            .map(c => this.parseDateSafe(c.date).getTime());
+        const week  = coughs.filter(t => t >= weekAgo).length;
+        const prior = coughs.filter(t => t >= fortnightAgo && t < weekAgo).length;
+        if (week > 0 || prior > 0) {
+            anyData = true;
+            lines.push({ icon: 'fa-head-side-cough',
+                text: week === 0 ? `No coughing logged this week (${prior} last week).`
+                                 : `${week} coughing ${week === 1 ? 'entry' : 'entries'} logged` +
+                                   (prior > 0 ? ` (${prior} last week).` : ' this week.'),
+                tone: week === 0 ? 'good' : week > prior ? 'caution' : 'neutral' });
+        }
+    }
+
+    if (this.modOn('syncopeLog')) {
+        const week = (this.syncopeLog || [])
+            .filter(s => s.patientId === this.activePatientId && this.parseDateSafe(s.date).getTime() >= weekAgo).length;
+        if (week > 0) {
+            anyData = true;
+            lines.push({ icon: 'fa-heart-crack',
+                text: `${week} collapse ${week === 1 ? 'event' : 'events'} logged this week. Collapse episodes always merit prompt veterinary assessment.`,
+                tone: 'caution' });
+        }
+    }
+
+    // ── Coming up (soonest two within a fortnight) ──
+    const due = [];
+    if (this.modOn('medications')) {
+        this.currentMedStock().filter(r => r.status).forEach(r => {
+            due.push({ label: r.name, days: r.status.days, kind: 'stock' });
+        });
+    }
+    if (this.modOn('vaccinations')) {
+        const byKey = {};
+        [...(this.vaccinationLog || [])]
+            .filter(v => v.patientId === this.activePatientId)
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .forEach(v => {
+                if (v.nextDueDate) {
+                    const key = v.vaccineId || v.type;
+                    if (!byKey[key]) byKey[key] = { label: v.type || v.vaccineId, due: v.nextDueDate };
+                }
+                (v.additionals || []).forEach(a => {
+                    if (a.nextDueDate && !byKey['addon_' + a.id]) byKey['addon_' + a.id] = { label: a.label, due: a.nextDueDate };
+                });
+            });
+        Object.values(byKey).forEach(v => {
+            const st = this.getVaccineStatus(v.due);
+            if (st) due.push({ label: v.label, days: st.days, kind: 'due' });
+        });
+    }
+    if (this.modOn('antiparasitics')) {
+        const byProduct = {};
+        this.sortedAntiparasiticLog().filter(e => e.nextDueDate).forEach(e => {
+            const key = e.productId === 'other' ? (e.productLabel || e.id) : e.productId;
+            if (!byProduct[key]) byProduct[key] = e;
+        });
+        Object.values(byProduct).forEach(e => {
+            const st = this.getParasiticStatus(e.nextDueDate);
+            if (st) due.push({ label: e.productLabel || e.productId, days: st.days, kind: 'due' });
+        });
+    }
+    due.filter(d => d.days <= 14).sort((a, b) => a.days - b.days).slice(0, 2).forEach(item => {
+        const n = Math.abs(item.days), plural = n === 1 ? '' : 's';
+        const text = item.kind === 'stock'
+            ? (item.days < 0 ? `${item.label} ran out ${n} day${plural} ago.`
+               : item.days === 0 ? `${item.label} runs out today.` : `${item.label} runs out in ${n} day${plural}.`)
+            : (item.days < 0 ? `${item.label} is overdue by ${n} day${plural}.`
+               : item.days === 0 ? `${item.label} is due today.` : `${item.label} is due in ${n} day${plural}.`);
+        lines.push({ icon: item.kind === 'stock' ? 'fa-prescription-bottle-medical' : 'fa-calendar-day',
+                     text, tone: item.days <= 0 ? 'caution' : 'neutral' });
+    });
+
+    if (!lines.length) lines.push({ icon: 'fa-pen-to-square',
+        text: 'Nothing logged this week yet — a breathing count during settled sleep is the single most useful thing to record.',
+        tone: 'neutral' });
+
+    const toneCss = {
+        good:    'color:#15803d;',
+        caution: 'color:#b45309;',
+        neutral: 'color:#64748b;'
+    };
+    lines.forEach(l => l.css = toneCss[l.tone] || toneCss.neutral);
+
+    return {
+        headline: `${petName}'s week · ${gb(weekAgo)}–${gb(now)}`,
+        lines,
+        hasData: anyData
+    };
+},
 
 
 // ── Medication Response panel ───────────────────────────────────────────
