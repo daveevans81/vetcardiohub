@@ -1045,9 +1045,11 @@ deletePatient(patientId) {
             this.coughLog = this.coughLog.filter(s => s.patientId !== patientId);
             this.activityLog = this.activityLog.filter(s => s.patientId !== patientId);
             this.vaccinationLog = this.vaccinationLog.filter(v => v.patientId !== patientId);   
-            this.antiparasiticLog = this.antiparasiticLog.filter(a => a.patientId !== patientId);      
-            this.injectionLog = this.injectionLog.filter(a => a.patientId !== patientId);              
-  
+            this.antiparasiticLog = this.antiparasiticLog.filter(a => a.patientId !== patientId);
+            this.injectionLog = this.injectionLog.filter(a => a.patientId !== patientId);
+            // Dose ticks cascade like every other log. Left behind they linger in localStorage for
+            // ever, and would re-attach to a stranger if an import ever re-issued this UUID.
+            this.medDoseLog = (this.medDoseLog || []).filter(r => r.patientId !== patientId);
 
             // 2. Persist the flushed arrays to local storage
             this.saveToStorage('vch_patients', this.patients);
@@ -1060,8 +1062,9 @@ deletePatient(patientId) {
             this.saveToStorage('vch_coughLog', this.coughLog);
             this.saveToStorage('vch_activityLog', this.activityLog);
             this.saveToStorage('vch_vaccinationLog', this.vaccinationLog); 
-            this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog); 
+            this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
             this.saveToStorage('vch_injectionLog', this.injectionLog);
+            this.saveToStorage('vch_medDoseLog', this.medDoseLog);
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -1222,6 +1225,7 @@ mergePatients(targetId, sourceId) {
             this.vaccinationLog = this.vaccinationLog.map(v => v.patientId === sourceId ? { ...v, patientId: targetId } : v);
             this.antiparasiticLog = this.antiparasiticLog.map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
             this.injectionLog = this.injectionLog.map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
+            this.medDoseLog = (this.medDoseLog || []).map(r => r.patientId === sourceId ? { ...r, patientId: targetId } : r);
 
             // Dedupe identical SRR readings created by merging an imported copy
             const seen = new Set();
@@ -1232,7 +1236,20 @@ mergePatients(targetId, sourceId) {
                 seen.add(sig);
                 return true;
             });
-            
+
+            // Same for dose ticks, which the reassignment above can genuinely duplicate: two profiles
+            // for the same animal both ticked the 08:00 furosemide, and a tick is identified by
+            // drugKey + slotDay + slotTime, not by its id. Left duplicated, `isDoseGiven` still reads
+            // "given" but `toggleDose` splices only ONE row, so unticking would appear to do nothing.
+            const seenDose = new Set();
+            this.medDoseLog = this.medDoseLog.filter(r => {
+                if (r.patientId !== targetId) return true;
+                const sig = `${r.drugKey}|${r.slotDay}|${r.slotTime}`;
+                if (seenDose.has(sig)) return false;
+                seenDose.add(sig);
+                return true;
+            });
+
             // Delete Source Patient
             this.patients = this.patients.filter(p => p.id !== sourceId);
 
@@ -1249,8 +1266,7 @@ mergePatients(targetId, sourceId) {
             this.saveToStorage('vch_patients', this.patients);
             this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
             this.saveToStorage('vch_injectionLog', this.injectionLog);
-            
-            
+            this.saveToStorage('vch_medDoseLog', this.medDoseLog);
 
             this.activePatientId = targetId;
             alert("Patient records successfully merged.");
@@ -8284,9 +8300,14 @@ confirmBackupImport() {
         importedNames.push(incoming.name);
     });
 
-    // Append log entries for selected patients — fresh entry IDs, remapped patient IDs
+    // Append log entries for selected patients — fresh entry IDs, remapped patient IDs.
+    // KEEP IN STEP with `backupLogCount` (the import preview counts these same keys) and with
+    // `exportCompleteBackup`. `medDoseLog` was previously missing here while still being counted in
+    // the preview and written to the export, so restoring a backup silently discarded every dose
+    // tick after promising the user it would import them.
     const logKeys = ['weightLog', 'srrHistory', 'medLedger', 'suppLedger', 'diagnosisLog', 'syncopeLog',
-                     'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog', 'injectionLog'];
+                     'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog', 'injectionLog',
+                     'medDoseLog'];
     logKeys.forEach(key => {
         const incoming = (data['vch_' + key] || [])
             .filter(e => idMap[e.patientId] !== undefined)
