@@ -81,6 +81,14 @@ showProgressionBanner: false,
     weight: null,
     weightUnit: 'kg',
     customSrrCutoff: 30,
+    // Identification + insurance (see PET_ID_KINDS). Kept literal here because this initial state
+    // object is evaluated before `_blankIdentity()` is callable; the other two templates use it.
+    microchipNumber: '',
+    identifiers: [],
+    insuranceCompany: '',
+    insurancePolicyNumber: '',
+    insuranceLimit: '',
+    insuranceNotes: '',
     modules: {
         srr: false,
         medications: false,
@@ -92,7 +100,7 @@ showProgressionBanner: false,
         vaccinations: true,
         antiparasitics: true
     }
-}, 
+},
         manualSrrInput: null,
         manualSrrDate: '',
 
@@ -681,7 +689,191 @@ normalisePatientText(p) {
   p.ownerName = this.toTitleCase(p.ownerName);
   p.breed     = this.toTitleCase(p.breed);
   if (p.species === 'other') p.speciesOther = this.toTitleCase(p.speciesOther);
+  this.normalisePatientIdentity(p);
   return p;
+},
+
+// ===================== PET IDENTIFICATION & INSURANCE =====================
+// Mirrors iOS `Logic/PetIdentifiers.swift` + `Logic/PetInsurance.swift` 1:1 — same kind ids, same
+// labels, same microchip rules, same report lines — so a backup crosses web↔iOS unchanged.
+//
+// The MICROCHIP has a field of its own (`microchipNumber`) because every country uses one: legally
+// required for dogs and cats in the UK and in every Australian state, and required in ISO
+// 11784/11785 form for EU/UK travel. Everything else is a LIST (`identifiers`), because which number
+// is mandatory is country-specific:
+//   UK        Kennel Club registration, pet passport / travel paperwork
+//   US        county or city pet licence, rabies tag, AKC registration
+//   Australia council registration (NSW Pet Registry, Victorian council registration …)
+//   Europe    EU pet passport (mandatory for movement between member states from 22 April 2026),
+//             national registers such as France's I-CAD, and tattoos on older animals
+// A column per jurisdiction ages badly and leaves an owner who moved country nowhere to put the old
+// number, so region only ORDERS the picker — every kind stays selectable everywhere.
+//
+// INSURANCE is its own set of fields, not a kind in that list: an insurer, a policy number, a cover
+// limit and the small print are four facts, and an owner needs all four at once at an emergency
+// appointment.
+
+// `id` is PERSISTED in every saved record — never rename one, add a kind instead.
+PET_ID_KINDS: [
+    { id: 'kennelClub',          label: 'Kennel Club registration', placeholder: 'e.g. AS01234567',                regions: ['uk'] },
+    { id: 'petPassport',         label: 'Pet passport',             placeholder: 'Number on the front page',       regions: ['uk', 'europe'] },
+    { id: 'councilRegistration', label: 'Council registration',     placeholder: 'e.g. NSW Pet Registry number',   regions: ['oceania'] },
+    { id: 'petLicence',          label: 'Pet licence',              placeholder: 'County or city licence number',  regions: ['us'] },
+    { id: 'rabiesTag',           label: 'Rabies tag',               placeholder: 'Number stamped on the tag',      regions: ['us'] },
+    { id: 'nationalRegister',    label: 'National pet register',    placeholder: 'e.g. Petlog, I-CAD, Anibase',    regions: ['uk', 'europe', 'asia', 'row'] },
+    { id: 'pedigree',            label: 'Pedigree registration',    placeholder: 'e.g. AKC, ANKC, FCI',            regions: ['us', 'oceania', 'europe', 'asia', 'row'] },
+    { id: 'tattoo',              label: 'Tattoo',                   placeholder: 'Ear or inner-thigh tattoo',      regions: ['europe', 'row'] },
+    { id: 'other',               label: 'Other',                    placeholder: 'Number or reference',            regions: [] }
+],
+
+petIdKind(id) {
+    return this.PET_ID_KINDS.find(k => k.id === id) || null;
+},
+
+/// Picker order: numbers issued in `region` first, then the rest, with "Other" always last.
+petIdKinds(region) {
+    const local = this.PET_ID_KINDS.filter(k => k.regions.includes(region));
+    const rest  = this.PET_ID_KINDS.filter(k => !k.regions.includes(region) && k.id !== 'other');
+    const other = this.PET_ID_KINDS.filter(k => k.id === 'other');
+    return [...local, ...rest, ...other];
+},
+
+/// What to print for a stored identifier. Falls back to the raw kind for a record written by a
+/// newer build (a restored backup from a later version) so nothing is ever shown unlabelled.
+petIdLabel(kind, customLabel) {
+    const custom = (customLabel || '').trim();
+    if (kind === 'other') return custom || 'Other';
+    const known = this.petIdKind(kind);
+    if (known) return known.label;
+    return custom || kind || 'Other';
+},
+
+/// Region used only to ORDER the picker for the patient being edited.
+petIdRegion(p) {
+    return (p && p.parasiteRegion) || this._defaultRegion();
+},
+
+/// Strips the spaces, dashes and dots owners copy off a vet's printout and upper-cases the letters
+/// used by older American chips. Never rejects anything: a number we don't recognise is still the
+/// number in the pet.
+normaliseMicrochip(raw) {
+    return String(raw == null ? '' : raw).toUpperCase().replace(/[^0-9A-Z]/g, '');
+},
+
+/// 'empty' | 'iso' (15 digits, ISO 11784/11785) | 'legacy' (9–10 chars, pre-ISO US chips —
+/// AVID/Trovan/Destron, still in plenty of older pets and perfectly valid) | 'unrecognised'.
+microchipCheck(raw) {
+    const s = this.normaliseMicrochip(raw);
+    if (!s) return 'empty';
+    if (s.length === 15 && /^[0-9]+$/.test(s)) return 'iso';
+    if (s.length === 9 || s.length === 10) return 'legacy';
+    return 'unrecognised';
+},
+
+/// Advisory only — NOTHING here ever blocks a save.
+microchipNote(raw) {
+    switch (this.microchipCheck(raw)) {
+        case 'legacy':
+            return "That's the shorter format used by some older American microchips.";
+        case 'unrecognised':
+            return 'Most microchips are 15 digits. Older American chips can be 9 or 10 characters — '
+                 + "it's worth double-checking this one.";
+        default:
+            return '';
+    }
+},
+
+/// Groups an ISO number as vets and databases print it (3-3-3-3-3) so 15 digits can be read back
+/// aloud without losing your place. Anything else is returned unchanged.
+formatMicrochip(raw) {
+    const s = this.normaliseMicrochip(raw);
+    if (s.length !== 15 || !/^[0-9]+$/.test(s)) return s;
+    return s.match(/.{1,3}/g).join(' ');
+},
+
+/// Report lines: microchip first, then each number in the order the owner added it. Blank values
+/// are dropped — an empty result means "print nothing", not "print a row of dashes".
+patientIdLines(p) {
+    if (!p) return [];
+    const lines = [];
+    const chip = this.formatMicrochip(p.microchipNumber);
+    if (chip) lines.push({ label: 'Microchip', value: chip });
+    (p.identifiers || []).forEach(row => {
+        const value = (row && row.value ? String(row.value) : '').trim();
+        if (!value) return;
+        lines.push({ label: this.petIdLabel(row.kind, row.customLabel), value });
+    });
+    return lines;
+},
+
+/// Insurance lines, in the order a practice asks for them. Blank fields are dropped, so a
+/// half-filled record prints only what's there and a pet with no policy prints no block at all.
+patientInsuranceLines(p) {
+    if (!p) return [];
+    return [
+        ['Insurer',       p.insuranceCompany],
+        ['Policy number', p.insurancePolicyNumber],
+        ['Cover limit',   p.insuranceLimit],
+        ['Policy notes',  p.insuranceNotes]
+    ].map(([label, v]) => ({ label, value: (v == null ? '' : String(v)).trim() }))
+     .filter(l => l.value !== '');
+},
+
+/// The identification + insurance fields as a blank patient starts life with. Kept in one place so
+/// the three `editingPatient` templates can't drift apart.
+_blankIdentity() {
+    return {
+        microchipNumber: '',
+        identifiers: [],
+        insuranceCompany: '',
+        insurancePolicyNumber: '',
+        insuranceLimit: '',
+        insuranceNotes: ''
+    };
+},
+
+/// Backfills the fields on a record written before they existed (a legacy profile at load, or an
+/// older/web backup at import). Without this, `identifiers` is undefined and the x-for throws.
+_backfillPatientIdentity(p) {
+    if (!p) return p;
+    const blank = this._blankIdentity();
+    Object.keys(blank).forEach(k => { if (p[k] == null) p[k] = blank[k]; });
+    if (!Array.isArray(p.identifiers)) p.identifiers = [];
+    return p;
+},
+
+/// Save-time tidy-up: normalise the chip, trim everything, and drop identifier rows the owner
+/// added but never filled in (an empty row is not a record of anything, and it would otherwise
+/// print as a labelled blank on every vet report).
+normalisePatientIdentity(p) {
+    if (!p) return p;
+    this._backfillPatientIdentity(p);
+    p.microchipNumber = this.normaliseMicrochip(p.microchipNumber);
+    p.identifiers = (p.identifiers || [])
+        .map(row => ({
+            id:          row.id || this.generateId(),
+            kind:        row.kind || 'other',
+            customLabel: (row.customLabel || '').trim(),
+            value:       (row.value || '').trim()
+        }))
+        .filter(row => row.value !== '');
+    ['insuranceCompany', 'insurancePolicyNumber', 'insuranceLimit', 'insuranceNotes']
+        .forEach(k => { p[k] = (p[k] || '').trim(); });
+    return p;
+},
+
+addPatientIdentifier() {
+    if (!Array.isArray(this.editingPatient.identifiers)) this.editingPatient.identifiers = [];
+    const used = this.editingPatient.identifiers.map(r => r.kind);
+    const next = this.petIdKinds(this.petIdRegion(this.editingPatient))
+        .find(k => !used.includes(k.id));
+    this.editingPatient.identifiers.push({
+        id: this.generateId(), kind: next ? next.id : 'other', customLabel: '', value: ''
+    });
+},
+
+removePatientIdentifier(index) {
+    this.editingPatient.identifiers.splice(index, 1);
 },
 
 sanitiseCSV(val) {
@@ -786,6 +978,9 @@ init() {
 
     // Backfill module flags for legacy / restored profiles
     this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
+    // Same for identification + insurance (profiles saved before those fields existed) — otherwise
+    // `identifiers` is undefined and the patient-form x-for throws on open.
+    this.patients.forEach(p => this._backfillPatientIdentity(p));
     this._syncVetExportModules();
     
     this.initInstallNudge();
@@ -910,6 +1105,7 @@ startNewPatientOnboarding() {
     this.editingPatient = {
         id: this.generateId(),
         name: '', ownerName: '', species: 'dog', breed: '', sex: '', dob: '', weight: '', weightUnit: this.appSettings.defaultWeightUnit, customSrrCutoff: this.appSettings.defaultSrrCutoff,
+        ...this._blankIdentity(),
         modules: { ...this.defaultModules }
     };
     
@@ -1287,6 +1483,7 @@ mergePatients(targetId, sourceId) {
             weight: null,
             weightUnit: 'kg',
             customSrrCutoff: 30,
+            ...this._blankIdentity(),
             modules: { ...this.defaultModules }
         };
     } else {
@@ -1295,13 +1492,16 @@ mergePatients(targetId, sourceId) {
             .filter(w => w.patientId === patientId)
             .sort((a, b) => new Date(b.date) - new Date(a.date));
         this.editingPatient = {
-            ...target,
+            ...this._blankIdentity(),   // defaults first, so a legacy profile gains the new keys…
+            ...target,                  // …and a saved value always wins
             weight: null,
             // CRITICAL FIX: backfill modules for patients created before this feature
             modules: target.modules
                 ? { ...this.defaultModules, ...target.modules }  // merge: defaults fill any new keys
                 : { ...this.defaultModules }
         };
+        // Editing a COPY of the array, so cancelling doesn't mutate the stored record.
+        this.editingPatient.identifiers = (target.identifiers || []).map(r => ({ ...r }));
     }
 },
 
@@ -8283,7 +8483,10 @@ confirmBackupImport() {
 
     data.vch_patients.forEach(p => {
         if (!this.backupSelection.includes(p.id)) return;
-        const incoming = { ...p, modules: { ...this.defaultModules, ...(p.modules || {}) } };
+        // Backfill identification + insurance so a backup from an older build (or from the iOS app
+        // before the web adopted these keys) imports as "not recorded" rather than undefined.
+        const incoming = this._backfillPatientIdentity(
+            { ...p, modules: { ...this.defaultModules, ...(p.modules || {}) } });
 
         // Never overwrite: re-issue the UUID if it already exists locally
         idMap[p.id] = this.patients.some(x => x.id === p.id) ? this.generateId() : p.id;
@@ -8989,7 +9192,20 @@ generateCSV() {
     csv += `${q('Generated')},${q(new Date().toLocaleDateString('en-GB'))}\n`;
     csv += `${q('Period')},${q(this.vetExportTimeScaleLabel)}\n`;
     csv += `${q('Species')},${q(this.speciesLabel(profile))}  ${q('Breed')},${q(this.toTitleCase(profile.breed))}  ${q('Owner')},${q(this.toTitleCase(profile.ownerName))}\n`;
+    // Identification (microchip + any registrations) — line omitted when nothing is recorded.
+    const csvIdLines = this.patientIdLines(profile);
+    if (csvIdLines.length > 0) {
+        csv += csvIdLines.map(l => `${q(l.label)},${q(this.sanitiseCSV(l.value))}`).join('  ') + '\n';
+    }
     csv += '\n';
+
+    // Insurance sits in its own titled block: a practice making a claim reads all four fields
+    // together, and the notes are too long for the preamble's paired-column line.
+    const csvInsLines = this.patientInsuranceLines(profile);
+    if (csvInsLines.length > 0) {
+        csv += 'INSURANCE\n';
+        csv += csvInsLines.map(l => `${q(l.label)},${q(this.sanitiseCSV(l.value))}`).join('\n') + '\n\n';
+    }
  
     // ── SRR Log ───────────────────────────────────────────────────────────
     const srrData = mods.srr
@@ -9359,7 +9575,23 @@ _buildReportText() {
     out += `Period    : ${this.vetExportTimeScaleLabel}${nl}`;
     out += `Species   : ${this.speciesLabel(profile)}  |  Breed: ${this.toTitleCase(profile.breed) || 'N/A'}  |  Age: ${this.computedAgeText}${nl}`;
     out += `Owner     : ${this.toTitleCase(profile.ownerName) || 'N/A'}${nl}`;
+    // Identification — omitted entirely when nothing is recorded, so a pet with no chip number
+    // never gains a line of blanks in front of a vet.
+    const idLines = this.patientIdLines(profile);
+    if (idLines.length > 0) {
+        out += `ID        : ${idLines.map(l => `${l.label}: ${l.value}`).join('  |  ')}${nl}`;
+    }
     out += rule('═') + nl + nl;
+
+    // ── Insurance ─────────────────────────────────────────────────────────
+    // Its own block, before the clinical sections, because it's what a practice asks for first.
+    const insLines = this.patientInsuranceLines(profile);
+    if (insLines.length > 0) {
+        out += `INSURANCE${nl}`;
+        out += rule() + nl;
+        insLines.forEach(l => { out += `${l.label}: ${l.value}${nl}`; });
+        out += nl;
+    }
 
     // ── SRR Log ───────────────────────────────────────────────────────────
     if (mods.srr) {

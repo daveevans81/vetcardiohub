@@ -755,15 +755,77 @@
                             <!-- Weight (Full Width) -->
                             <div class="flex-between gap-10" style="grid-column: span 2;">
                                 <label class="form-label" style="flex-grow: 1;">Current Weight: <input type="number" step="0.1" x-model="editingPatient.weight" class="form-control mt-0"></label>
-                                <label class="form-label" style="width: 80px;">Unit: 
+                                <label class="form-label" style="width: 80px;">Unit:
                                     <select x-model="editingPatient.weightUnit" class="form-control mt-0">
                                         <option value="kg">kg</option>
                                         <option value="lbs">lbs</option>
                                     </select>
                                 </label>
                             </div>
+
+                            <!-- ── Identification (optional) ─────────────────────────────
+                                 Microchip is the one number every country uses; the rest depends
+                                 on where you are (see PET_ID_KINDS in rr-logic.js). -->
+                            <div style="grid-column: span 2; border-top: 1px solid #cbd5e1; padding-top: 12px; margin-top: 4px;">
+                                <h4 style="color: #0f766e; margin: 0 0 4px;"><i class="fa-solid fa-fingerprint"></i> Identification <span class="text-sm text-muted">(optional)</span></h4>
+                                <label class="form-label">Microchip Number:
+                                    <input type="text" x-model="editingPatient.microchipNumber" class="form-control mt-0"
+                                           autocomplete="off" autocapitalize="characters" spellcheck="false"
+                                           placeholder="Usually 15 digits">
+                                </label>
+                                <p class="text-sm text-muted mt-0" x-show="microchipNote(editingPatient.microchipNumber)"
+                                   x-text="microchipNote(editingPatient.microchipNumber)"></p>
+
+                                <template x-for="(row, i) in editingPatient.identifiers" :key="row.id || i">
+                                    <div style="display: flex; gap: 8px; align-items: flex-end; margin-top: 8px;">
+                                        <div style="flex: 1;">
+                                            <select x-model="row.kind" class="form-control mt-0">
+                                                <template x-for="k in petIdKinds(petIdRegion(editingPatient))" :key="k.id">
+                                                    <option :value="k.id" x-text="k.label"></option>
+                                                </template>
+                                            </select>
+                                            <input x-show="row.kind === 'other'" type="text" x-model="row.customLabel"
+                                                   class="form-control mt-2" placeholder="Label (e.g. breeder reference)">
+                                            <input type="text" x-model="row.value" class="form-control mt-2"
+                                                   autocomplete="off" spellcheck="false"
+                                                   :placeholder="(petIdKind(row.kind) || {}).placeholder || 'Number'">
+                                        </div>
+                                        <button type="button" @click="removePatientIdentifier(i)"
+                                                class="btn-action-delete" style="flex: 0 0 auto;"
+                                                :aria-label="'Remove ' + petIdLabel(row.kind, row.customLabel)">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <button type="button" @click="addPatientIdentifier()" class="btn btn-cancel mt-10"
+                                        style="background-color: #f1f5f9 !important;">
+                                    <i class="fa-solid fa-plus"></i> Add another number
+                                </button>
+                            </div>
+
+                            <!-- ── Insurance (optional) ──────────────────────────────────── -->
+                            <div style="grid-column: span 2; border-top: 1px solid #cbd5e1; padding-top: 12px; margin-top: 4px;">
+                                <h4 style="color: #0f766e; margin: 0 0 4px;"><i class="fa-solid fa-shield-heart"></i> Insurance <span class="text-sm text-muted">(optional)</span></h4>
+                                <p class="text-sm text-muted mt-0 mb-10">Practices usually ask for the insurer and policy number before treatment starts.</p>
+                                <label class="form-label">Insurance Company:
+                                    <input type="text" x-model="editingPatient.insuranceCompany" class="form-control mt-0">
+                                </label>
+                                <label class="form-label">Policy Number:
+                                    <input type="text" x-model="editingPatient.insurancePolicyNumber" class="form-control mt-0"
+                                           autocomplete="off" autocapitalize="characters" spellcheck="false">
+                                </label>
+                                <label class="form-label">Cover Limit:
+                                    <input type="text" x-model="editingPatient.insuranceLimit" class="form-control mt-0"
+                                           placeholder="e.g. £7,000 per condition per year">
+                                </label>
+                                <label class="form-label">Policy Notes:
+                                    <textarea x-model="editingPatient.insuranceNotes" class="form-control mt-0" rows="2"
+                                              placeholder="Excess, exclusions, renewal date …"></textarea>
+                                </label>
+                            </div>
                         </div>
-                    
+
                         <div class="flex-between" style="justify-content: flex-end; gap: 10px;">
                             <button @click="patients.length === 0 ? onboardingStep = 0 : showOnboarding = false" class="btn btn-cancel" style="background-color: #f1f5f9 !important;">Cancel</button>
                             <button @click="onboardingStep = 2" class="btn btn-primary" :disabled="!editingPatient.name">Continue <i class="fa-solid fa-arrow-right"></i></button>
@@ -1225,8 +1287,77 @@
                         </label>
                     </div>
             
+                    <!-- ── Identification ──────────────────────────────────────────────────
+                         Microchip has a field of its own (every country uses one); everything else
+                         is a list, because which registration is mandatory depends on the country.
+                         See PET_ID_KINDS in rr-logic.js. -->
+                    <div style="margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 15px;">
+                        <h4 style="color: #0f766e; margin-top: 0; margin-bottom: 5px;"><i class="fa-solid fa-fingerprint"></i> Identification</h4>
+                        <p class="text-sm text-muted mt-0 mb-10">Optional, but worth having to hand. Printed on reports for your vet.</p>
+
+                        <label class="form-label">Microchip Number:
+                            <input type="text" x-model="editingPatient.microchipNumber" class="form-control"
+                                   autocomplete="off" autocapitalize="characters" spellcheck="false"
+                                   placeholder="Usually 15 digits">
+                        </label>
+                        <p class="text-sm text-muted mt-0" x-show="microchipNote(editingPatient.microchipNumber)"
+                           x-text="microchipNote(editingPatient.microchipNumber)"></p>
+
+                        <template x-for="(row, i) in editingPatient.identifiers" :key="row.id || i">
+                            <div style="display: flex; gap: 8px; align-items: flex-end; margin-top: 8px;">
+                                <div style="flex: 1;">
+                                    <select x-model="row.kind" class="form-control mt-0">
+                                        <template x-for="k in petIdKinds(petIdRegion(editingPatient))" :key="k.id">
+                                            <option :value="k.id" x-text="k.label"></option>
+                                        </template>
+                                    </select>
+                                    <input x-show="row.kind === 'other'" type="text" x-model="row.customLabel"
+                                           class="form-control mt-2" placeholder="Label (e.g. breeder reference)">
+                                    <input type="text" x-model="row.value" class="form-control mt-2"
+                                           autocomplete="off" spellcheck="false"
+                                           :placeholder="(petIdKind(row.kind) || {}).placeholder || 'Number'">
+                                </div>
+                                <button type="button" @click="removePatientIdentifier(i)"
+                                        class="btn-action-delete" style="flex: 0 0 auto;"
+                                        :aria-label="'Remove ' + petIdLabel(row.kind, row.customLabel)">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </template>
+
+                        <button type="button" @click="addPatientIdentifier()" class="btn btn-cancel mt-10"
+                                style="background-color: #f1f5f9 !important;">
+                            <i class="fa-solid fa-plus"></i> Add another number
+                        </button>
+                    </div>
+
+                    <!-- ── Insurance ───────────────────────────────────────────────────────
+                         All four together: practices ask for the insurer and policy number before
+                         treatment starts. The cover limit is free text on purpose — currency and
+                         basis (per condition / annual / lifetime) vary by market. -->
+                    <div style="margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 15px;">
+                        <h4 style="color: #0f766e; margin-top: 0; margin-bottom: 5px;"><i class="fa-solid fa-shield-heart"></i> Insurance</h4>
+                        <p class="text-sm text-muted mt-0 mb-10">Kept here so it's to hand at the vet. Included on reports you share.</p>
+
+                        <label class="form-label">Insurance Company:
+                            <input type="text" x-model="editingPatient.insuranceCompany" class="form-control">
+                        </label>
+                        <label class="form-label">Policy Number:
+                            <input type="text" x-model="editingPatient.insurancePolicyNumber" class="form-control"
+                                   autocomplete="off" autocapitalize="characters" spellcheck="false">
+                        </label>
+                        <label class="form-label">Cover Limit:
+                            <input type="text" x-model="editingPatient.insuranceLimit" class="form-control"
+                                   placeholder="e.g. £7,000 per condition per year">
+                        </label>
+                        <label class="form-label">Policy Notes:
+                            <textarea x-model="editingPatient.insuranceNotes" class="form-control" rows="2"
+                                      placeholder="Excess, exclusions, renewal date …"></textarea>
+                        </label>
+                    </div>
+
                     <label class="form-label">Custom Alarm Cutoff (bpm): <input type="number" x-model="editingPatient.customSrrCutoff" placeholder="Default: 30" class="form-control"></label>
-                    
+
                     <div  id="edit-patient-modules-section" style="margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 15px;" x-show="isEditingExistingPatient && editingPatient.modules">
                         <h4 style="color: #0f766e; margin-top: 0; margin-bottom: 5px;"><i class="fa-solid fa-layer-group"></i> Active Tracking Modules</h4>
                         <p class="text-sm text-muted mt-0 mb-10">Toggle sections on or off for your dashboard.</p>
