@@ -1,3 +1,143 @@
+// ============================================================================
+// BLOOD MARKER CATALOGUE  (parity with iOS Logic/BloodMarkers.swift — keep in step)
+// ============================================================================
+// Deliberately SHORT: the markers that change management in a cardiac patient, plus the ones an
+// owner of such a patient is most often handed a number for. A short whitelist is what makes the
+// entry form a picker rather than a spelling test, and what lets a report importer FIND known names
+// instead of trying to understand a whole page layout.
+//
+// `typicalRange` is a data-entry PREFILL ONLY and is never used to judge a result — each stored
+// result carries the range printed on its own report. `synonyms` are the spellings real UK labs
+// print, used by the picker's search and the paste-a-report parser.
+//
+// TODO (BACKLOG §2): move this to med-data.json so new lab spellings ship without a release; iOS
+// currently holds an identical copy in Swift.
+const BLOOD_MARKERS = [
+    // Kidney
+    { id: 'creatinine', label: 'Creatinine', group: 'Kidney', units: ['µmol/L', 'mg/dL'], typicalRange: [44, 159],
+      synonyms: ['creatinine', 'crea', 'creat', 'cre'],
+      blurb: 'A waste product cleared by the kidneys. Watched closely when a pet takes diuretics, because dehydration pushes it up.' },
+    { id: 'urea', label: 'Urea', group: 'Kidney', units: ['mmol/L', 'mg/dL'], typicalRange: [2.5, 9.6],
+      synonyms: ['urea', 'blood urea'],
+      blurb: 'Another waste product the kidneys clear. Reported as urea in the UK and as BUN in the US — the two are not the same number, so keep them apart.' },
+    { id: 'bun', label: 'BUN (blood urea nitrogen)', group: 'Kidney', units: ['mg/dL', 'mmol/L'], typicalRange: [7, 27],
+      synonyms: ['bun', 'blood urea nitrogen', 'urea nitrogen'],
+      blurb: 'The US way of reporting urea. Roughly urea divided by 2.14 — recorded separately so the two are never mixed on one graph.' },
+    { id: 'sdma', label: 'SDMA', group: 'Kidney', units: ['µg/dL'], typicalRange: [null, 14],
+      synonyms: ['sdma', 'idexx sdma', 'symmetric dimethylarginine'],
+      blurb: 'An earlier marker of kidney function than creatinine — it can rise before creatinine does.' },
+    { id: 'phosphate', label: 'Phosphate', group: 'Kidney', units: ['mmol/L', 'mg/dL'], typicalRange: [0.8, 1.6],
+      synonyms: ['phosphate', 'phosphorus', 'phos', 'po4'],
+      blurb: 'A mineral that tends to build up when the kidneys are struggling.' },
+    { id: 'usg', label: 'Urine specific gravity', group: 'Kidney', units: ['', 'SG'], typicalRange: null,
+      synonyms: ['usg', 'urine specific gravity', 'specific gravity', 'sg'],
+      blurb: 'How concentrated the urine is — it tells your vet how well the kidneys are holding on to water.' },
+    // Electrolytes
+    { id: 'potassium', label: 'Potassium', group: 'Electrolytes', units: ['mmol/L', 'mEq/L'], typicalRange: [3.5, 5.8],
+      synonyms: ['potassium', 'k', 'k+'],
+      blurb: 'Important for heart rhythm and muscle function. Both diuretics and some heart medicines can shift it, so it is often rechecked after a dose change.' },
+    { id: 'sodium', label: 'Sodium', group: 'Electrolytes', units: ['mmol/L', 'mEq/L'], typicalRange: [144, 160],
+      synonyms: ['sodium', 'na', 'na+'],
+      blurb: 'The main salt in blood, tied to how much water the body holds on to.' },
+    { id: 'chloride', label: 'Chloride', group: 'Electrolytes', units: ['mmol/L', 'mEq/L'], typicalRange: [109, 122],
+      synonyms: ['chloride', 'cl', 'cl-'],
+      blurb: 'A salt measured alongside sodium; diuretics commonly lower it.' },
+    { id: 'calcium', label: 'Calcium', group: 'Electrolytes', units: ['mmol/L', 'mg/dL'], typicalRange: [2.3, 3.0],
+      synonyms: ['calcium', 'ca', 'ca2+', 'total calcium'],
+      blurb: 'A mineral needed for muscle and nerve function, including the heart.' },
+    { id: 'magnesium', label: 'Magnesium', group: 'Electrolytes', units: ['mmol/L', 'mg/dL'], typicalRange: [0.7, 1.1],
+      synonyms: ['magnesium', 'mg', 'mg2+'],
+      blurb: 'A mineral that supports steady heart rhythm; it can fall alongside potassium.' },
+    // Cardiac
+    { id: 'ntprobnp', label: 'NT-proBNP', group: 'Cardiac', units: ['pmol/L'], typicalRange: null,
+      synonyms: ['nt-probnp', 'ntprobnp', 'nt probnp', 'probnp', 'bnp'],
+      blurb: 'A substance released when heart muscle is stretched. Used to help judge whether the heart is under strain.' },
+    { id: 'troponin', label: 'Troponin I', group: 'Cardiac', units: ['ng/mL', 'µg/L'], typicalRange: null,
+      synonyms: ['troponin', 'troponin i', 'ctni', 'tnl'],
+      blurb: 'Released when heart muscle cells are damaged.' },
+    // Blood count
+    { id: 'pcv', label: 'PCV / haematocrit', group: 'Blood count', units: ['%', 'L/L'], typicalRange: [37, 55],
+      synonyms: ['pcv', 'haematocrit', 'hematocrit', 'hct', 'packed cell volume'],
+      blurb: 'The proportion of blood made up of red cells — the practical measure of anaemia.' },
+    { id: 'haemoglobin', label: 'Haemoglobin', group: 'Blood count', units: ['g/L', 'g/dL'], typicalRange: [120, 180],
+      synonyms: ['haemoglobin', 'hemoglobin', 'hb', 'hgb'],
+      blurb: 'The protein in red cells that carries oxygen.' },
+    { id: 'wbc', label: 'White cell count', group: 'Blood count', units: ['×10⁹/L', '/µL'], typicalRange: [6, 17],
+      synonyms: ['wbc', 'white blood cells', 'white cell count', 'leucocytes', 'leukocytes'],
+      blurb: "The immune system's cells — often raised with infection or inflammation." },
+    { id: 'platelets', label: 'Platelets', group: 'Blood count', units: ['×10⁹/L', '/µL'], typicalRange: [200, 500],
+      synonyms: ['platelets', 'plt', 'thrombocytes'],
+      blurb: 'Cells that help blood clot. Relevant for cats on clot-prevention medicines.' },
+    // Liver / protein
+    { id: 'alt', label: 'ALT', group: 'Liver', units: ['U/L', 'IU/L'], typicalRange: [10, 125],
+      synonyms: ['alt', 'alanine aminotransferase', 'sgpt'],
+      blurb: 'A liver enzyme. It can rise when the liver is congested by a struggling heart.' },
+    { id: 'alkp', label: 'ALKP', group: 'Liver', units: ['U/L', 'IU/L'], typicalRange: [23, 212],
+      synonyms: ['alkp', 'alp', 'alkaline phosphatase', 'sap'],
+      blurb: 'Another liver enzyme, also affected by some medicines.' },
+    { id: 'albumin', label: 'Albumin', group: 'Liver', units: ['g/L', 'g/dL'], typicalRange: [23, 40],
+      synonyms: ['albumin', 'alb'],
+      blurb: 'The main protein in blood; it helps keep fluid inside the blood vessels.' },
+    { id: 'totalProtein', label: 'Total protein', group: 'Liver', units: ['g/L', 'g/dL'], typicalRange: [52, 82],
+      synonyms: ['total protein', 'tp', 'protein total'],
+      blurb: 'All the protein in blood, albumin included.' },
+    { id: 'glucose', label: 'Glucose', group: 'Liver', units: ['mmol/L', 'mg/dL'], typicalRange: [3.3, 6.8],
+      synonyms: ['glucose', 'glu', 'blood sugar', 'bg'],
+      blurb: 'Blood sugar.' },
+    // Thyroid
+    { id: 't4', label: 'Total T4', group: 'Thyroid', units: ['nmol/L', 'µg/dL'], typicalRange: [13, 51],
+      synonyms: ['t4', 'tt4', 'total t4', 'thyroxine'],
+      blurb: 'The main thyroid hormone. An overactive thyroid in cats speeds the heart and can look like heart disease.' },
+    { id: 'tsh', label: 'TSH', group: 'Thyroid', units: ['ng/mL', 'mU/L'], typicalRange: null,
+      synonyms: ['tsh', 'thyroid stimulating hormone', 'ctsh'],
+      blurb: 'The hormone that tells the thyroid to work; measured alongside T4.' },
+];
+
+const BLOOD_MARKER_GROUPS = ['Kidney', 'Electrolytes', 'Cardiac', 'Blood count', 'Liver', 'Thyroid', 'Other'];
+const BLOOD_OTHER_ID = 'other';
+
+// ============================================================================
+// ECHO MEASUREMENTS  (parity with iOS Logic/EchoMeasures.swift + EchoCalc.swift — keep in step)
+// ============================================================================
+// A very short list on purpose. Echo reports diverge far more between centres than lab reports do,
+// and a full study can carry fifty measurements — but only a handful are worth WATCHING over time.
+//
+// The allometric formulas below are the same ones the public VetCardioHub echo calculator uses
+// (echocalc.html), so the tracker and the calculator can never disagree:
+//     LVIDDN = LVIDd (cm) / weight (kg) ^ 0.294      "Cornell"
+//     LADN   = LAD   (cm) / weight (kg) ^ 0.309
+//     LVEDV/BW = LVEDV (mL) / weight (kg)
+//
+// NOTE the one place this app converts units at all: the formulas are defined in CENTIMETRES, so a
+// millimetre measurement MUST be converted or the index comes out ten times too large — straight
+// across the 1.7 threshold that says "enlarged". Conversion happens for the derivation only; the
+// stored measurement keeps the unit it was reported in. An unrecognised unit yields NO index rather
+// than a guess.
+const ECHO_MEASURES = [
+    { id: 'lad', label: 'Left atrial diameter (LAD)', short: 'LAD', units: ['cm', 'mm'],
+      synonyms: ['lad', 'la diameter', 'left atrial diameter', 'la long axis', 'ladiam'],
+      blurb: 'The width of the left atrium measured in the long-axis view. Scaled to your pet\'s weight it is one of the clearest signs of whether the left atrium has enlarged.' },
+    { id: 'la', label: 'Left atrium (LA)', short: 'LA', units: ['cm', 'mm'],
+      synonyms: ['la', 'left atrium', 'la dimension', 'la diam'],
+      blurb: 'The size of the left atrium, the chamber that fills the main pumping chamber.' },
+    { id: 'ao', label: 'Aorta (Ao)', short: 'Ao', units: ['cm', 'mm'],
+      synonyms: ['ao', 'aorta', 'aortic root', 'aortic diameter'],
+      blurb: 'The width of the aorta. It changes very little with disease, which is why the left atrium is compared against it.' },
+    { id: 'laao', label: 'LA:Ao ratio', short: 'LA:Ao', units: [''],
+      synonyms: ['la/ao', 'la:ao', 'la ao', 'la to ao', 'laao', 'la:ao ratio', 'la/ao ratio'],
+      blurb: 'The left atrium measured against the aorta. Being a ratio it needs no units.' },
+    { id: 'lvidd', label: 'LVIDd', short: 'LVIDd', units: ['cm', 'mm'],
+      synonyms: ['lvidd', 'lvid d', 'lvid diastole', 'lv internal diameter diastole', 'lvedd'],
+      blurb: 'The width of the main pumping chamber when it is full. Scaled to weight, it shows whether that chamber has stretched.' },
+    { id: 'lvedv', label: 'LV end-diastolic volume (LVEDV)', short: 'LVEDV', units: ['ml', 'mL'],
+      synonyms: ['lvedv', 'edv', 'end diastolic volume', 'lv edv', 'ved'],
+      blurb: 'How much blood the main pumping chamber holds when full. Divided by weight it can be compared between visits.' },
+];
+
+const ECHO_OTHER_ID = 'other';
+const ECHO_LVIDD_EXPONENT = 0.294;
+const ECHO_LAD_EXPONENT = 0.309;
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('rrTracker', () => ({
         // Absorb the Glossary Engine for tooltips 
@@ -162,6 +302,50 @@ vetExportModules: {
 
         // --- Syncope and Diagnosis objects ---
         showDiagnosisLog: false,
+
+// --- BLOOD TEST RESULTS (parity with iOS schema V8; see BACKLOG §3j) ---
+// One row per analyte per sample. Two rules are load-bearing and must not be "improved":
+//   1. The reference range stored is the one PRINTED ON THAT REPORT. Ranges are lab-, analyser-,
+//      species- and unit-specific, so the app only ever says "inside/outside the range this lab
+//      gave" and says nothing at all when none was given.
+//   2. Units are NEVER converted and never mixed on one chart. Urea vs BUN differ ~2.14x and
+//      SI vs conventional creatinine ~88x; a silent conversion here is a clinical safety bug.
+bloodResults: [],
+echoMeasurements: [],
+// Alpine templates can only see component properties, not module globals — same reason
+// `antiparasiticFormulary` is exposed below.
+ECHO_MEASURES_LIST: ECHO_MEASURES,
+showEchoPanel: false,
+showEchoForm: false,
+editingEchoKey: null,          // "studyDate|centre" of the study being edited
+newEchoStudy: {
+    studyDate: new Date().toISOString().split('T')[0],
+    centreName: '',
+    notes: '',
+    values: {}                 // measureId -> { value, unit }
+},
+showBloodPanel: false,
+showBloodForm: false,
+showBloodImport: false,
+bloodViewMode: 'latest',          // 'latest' | 'visits'
+editingBloodId: null,
+expandedBloodMarker: null,
+bloodPasteText: '',
+bloodParseRows: [],               // review rows from a pasted report, before anything is saved
+bloodParseMeta: { sampleDate: '', labName: '' },
+newBloodResult: {
+    id: null,
+    sampleDate: new Date().toISOString().split('T')[0],
+    markerId: '',
+    customName: '',
+    value: '',
+    unit: '',
+    refLow: '',
+    refHigh: '',
+    labName: '',
+    notes: ''
+},
+
         showSyncopeLog: false,
         showSyncopeOverlay: false,
         showDiagnosisOverlay: true,
@@ -269,7 +453,8 @@ showCardiacForm: false,
             murmurGrade: 'N/A',  
             acvimStage: 'N/A',
             concurrentDiagnoses: [],
-            notes: ''
+            notes: '',
+            resolvedDate: ''        // '' = ongoing (iOS schema V8 parity; BACKLOG §3j)
         },
         
 
@@ -975,6 +1160,8 @@ init() {
     this.antiparasiticLog = loadKey('vch_antiparasiticLog');
     this.injectionLog = loadKey('vch_injectionLog');
     this.medDoseLog = loadKey('vch_medDoseLog') || [];
+    this.bloodResults = loadKey('vch_bloodResults') || [];
+    this.echoMeasurements = loadKey('vch_echoMeasurements') || [];
 
     // Backfill module flags for legacy / restored profiles
     this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
@@ -1246,6 +1433,8 @@ deletePatient(patientId) {
             // Dose ticks cascade like every other log. Left behind they linger in localStorage for
             // ever, and would re-attach to a stranger if an import ever re-issued this UUID.
             this.medDoseLog = (this.medDoseLog || []).filter(r => r.patientId !== patientId);
+            this.bloodResults = (this.bloodResults || []).filter(b => b.patientId !== patientId);
+            this.echoMeasurements = (this.echoMeasurements || []).filter(e => e.patientId !== patientId);
 
             // 2. Persist the flushed arrays to local storage
             this.saveToStorage('vch_patients', this.patients);
@@ -1261,6 +1450,8 @@ deletePatient(patientId) {
             this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
             this.saveToStorage('vch_injectionLog', this.injectionLog);
             this.saveToStorage('vch_medDoseLog', this.medDoseLog);
+            this.saveToStorage('vch_bloodResults', this.bloodResults);
+            this.saveToStorage('vch_echoMeasurements', this.echoMeasurements);
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -1422,6 +1613,8 @@ mergePatients(targetId, sourceId) {
             this.antiparasiticLog = this.antiparasiticLog.map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
             this.injectionLog = this.injectionLog.map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
             this.medDoseLog = (this.medDoseLog || []).map(r => r.patientId === sourceId ? { ...r, patientId: targetId } : r);
+            this.bloodResults = (this.bloodResults || []).map(b => b.patientId === sourceId ? { ...b, patientId: targetId } : b);
+            this.echoMeasurements = (this.echoMeasurements || []).map(e => e.patientId === sourceId ? { ...e, patientId: targetId } : e);
 
             // Dedupe identical SRR readings created by merging an imported copy
             const seen = new Set();
@@ -1463,6 +1656,8 @@ mergePatients(targetId, sourceId) {
             this.saveToStorage('vch_antiparasiticLog', this.antiparasiticLog);
             this.saveToStorage('vch_injectionLog', this.injectionLog);
             this.saveToStorage('vch_medDoseLog', this.medDoseLog);
+            this.saveToStorage('vch_bloodResults', this.bloodResults);
+            this.saveToStorage('vch_echoMeasurements', this.echoMeasurements);
 
             this.activePatientId = targetId;
             alert("Patient records successfully merged.");
@@ -2792,8 +2987,17 @@ diagDisplayName(d) {
         const c = (d.concurrentDiagnoses || []).join(', ');
         return c || 'Non-cardiac diagnosis';
     }
-    return d.diagnosis === 'Other' ? (d.customDiagnosis || 'Other') : (d.diagnosis || '—');
+    // "Other" resolves to the detail alone (a bare "Other" says nothing); a congenital defect KEEPS
+    // its category because that is clinically informative — "Congenital Defect — Subaortic stenosis".
+    // Before this, a congenital defect's detail was dropped from all three reports entirely.
+    const detail = (d.customDiagnosis || '').trim();
+    if (d.diagnosis === 'Other') return detail || 'Other';
+    if (d.diagnosis === 'Congenital Defect' && detail) return `Congenital Defect — ${detail}`;
+    return d.diagnosis || '—';
 },
+
+// A condition the owner has marked resolved (iOS schema V8 `resolvedDate`; BACKLOG §3j).
+isDiagnosisResolved(d) { return !!(d && d.resolvedDate); },
 
 saveConcurrentDiagnosis() {
     const lines = (this.newConcurrentDiagnosis || '')
@@ -2824,6 +3028,9 @@ saveConcurrentDiagnosis() {
             customDiagnosis: '', murmurGrade: 'N/A', acvimStage: 'N/A',
             concurrentDiagnoses: line ? [line] : [],
             notes: this.newDiagnosis.notes || '',
+            // The ADD path builds records inline rather than via _saveDiagnosisLogEntry, so the
+            // resolved date has to be carried here too or it is silently dropped on new entries.
+            resolvedDate: this.newDiagnosis.resolvedDate || null,
             timestamp: Date.now()
         });
     });
@@ -2842,6 +3049,8 @@ _saveDiagnosisLogEntry() {
                 acvimStage: this.newDiagnosis.acvimStage,
                 concurrentDiagnoses: [...(this.newDiagnosis.concurrentDiagnoses || [])],
                 notes: this.newDiagnosis.notes,
+                // '' → null so "ongoing" is one value on the wire, matching iOS (absent/null).
+                resolvedDate: this.newDiagnosis.resolvedDate || null,
                 timestamp: Date.now()
             };
 
@@ -2860,6 +3069,9 @@ _saveDiagnosisLogEntry() {
 checkProgressionTrigger(newStage) {
     if (!this.activePatientProfile) return;
     const currentModules = this.activePatientProfile.modules || {};
+    // The stored values are "Stage C"/"Stage D" (see the <select> options), so comparing the raw
+    // value against ['C','D'] never matched and this banner has never fired for any web user.
+    newStage = String(newStage || '').replace(/^Stage\s+/i, '');
     if (['C', 'D'].includes(newStage) &&
         (!currentModules.medications || !currentModules.coughLog || !currentModules.activityLog)) {
         this.showProgressionBanner = true;
@@ -2883,7 +3095,8 @@ openCardiacForm(logEntry = null) {
                     murmurGrade: recent ? (recent.murmurGrade || 'N/A') : 'N/A',
                     acvimStage: recent ? recent.acvimStage : 'N/A',
                     concurrentDiagnoses: [],
-                    notes: ''
+                    notes: '',
+                    resolvedDate: ''      // a NEW record is never resolved — you are recording something current
                 };
                 this.editingDiagnosisId = null;
             }
@@ -2945,13 +3158,775 @@ openDiagnosisForm(logEntry = null) {
 get currentClinicalStatus() {
             if (!this.activePatientId) return null;
             const history = this.sortedDiagnosisLog();
-            // Get the most recent primary cardiac diagnosis (ignoring concurrent-only logs)
-            return history.find(d => d.diagnosis && d.diagnosis !== 'Concurrent Conditions Only') || null;
+            // Most recent primary cardiac diagnosis, ignoring concurrent-only logs AND anything
+            // marked resolved — the banner/stage state what the pet has NOW.
+            return history.find(d => d.diagnosis
+                && d.diagnosis !== 'Concurrent Conditions Only'
+                && !this.isDiagnosisResolved(d)) || null;
         },
         
 get primaryCardiacDiagnosis() {
             return this.currentClinicalStatus?.diagnosis || '';
         },
+
+// ============================================================================
+// BLOOD TEST RESULTS  (parity with iOS Logic/BloodResults.swift + LabReportParser.swift)
+// ============================================================================
+// Nothing here interprets a result. Every judgement is "inside or outside the interval THIS report
+// printed", and where no interval was printed the answer is "unknown" — never a guess.
+
+bloodMarker(id) { return BLOOD_MARKERS.find(m => m.id === id) || null; },
+
+bloodMarkerGroups() { return BLOOD_MARKER_GROUPS; },
+
+bloodGroupOf(markerId) {
+    const m = this.bloodMarker(markerId);
+    return m ? m.group : 'Other';
+},
+
+// Human-facing name: the catalogue label, or the owner's own text for an "other" marker. Falls back
+// to the raw id so an unknown id from a newer app version never renders as a blank row.
+bloodDisplayName(r) {
+    const m = this.bloodMarker(r.markerId);
+    if (m) return m.label;
+    const custom = (r.customName || '').trim();
+    if (custom) return custom;
+    return r.markerId === BLOOD_OTHER_ID ? 'Other marker' : (r.markerId || 'Marker');
+},
+
+// Lower-case, collapse whitespace, and drop a trailing bracket ONLY when it holds a unit.
+// A bracket holding a QUALIFIER is kept so it fails to match: ionised calcium is not total calcium,
+// and free T4 is not total T4 — mapping either onto the catalogue would silently corrupt a series.
+bloodNormalise(raw) {
+    let s = (raw || '').toLowerCase();
+    const open = s.indexOf('('), close = s.lastIndexOf(')');
+    if (open !== -1 && close > open) {
+        const inner = s.slice(open + 1, close).trim();
+        const knownUnits = new Set(BLOOD_MARKERS.flatMap(m => m.units).map(u => u.toLowerCase()).filter(Boolean).concat(['%', 'sg', 'ratio']));
+        const unitLike = knownUnits.has(inner) || (inner.includes('/') && !inner.includes(' '));
+        if (unitLike) s = s.slice(0, open);
+    }
+    return s.replace(/[:*]/g, ' ').split(/\s+/).filter(Boolean).join(' ');
+},
+
+// Exact / synonym match only — never fuzzy. A near-miss returning null (so the owner picks) is
+// always safer than a confident wrong marker.
+bloodMatchMarker(printedName) {
+    const needle = this.bloodNormalise(printedName);
+    if (!needle) return null;
+    return BLOOD_MARKERS.find(m =>
+        this.bloodNormalise(m.label) === needle ||
+        (m.synonyms || []).some(sy => this.bloodNormalise(sy) === needle)) || null;
+},
+
+bloodMarkerSearch(query) {
+    const needle = this.bloodNormalise(query);
+    if (!needle) return BLOOD_MARKERS;
+    return BLOOD_MARKERS.filter(m =>
+        this.bloodNormalise(m.label).includes(needle) ||
+        (m.synonyms || []).some(sy => this.bloodNormalise(sy).includes(needle)));
+},
+
+// Where a value sits relative to the lab's printed interval. A one-sided interval is honoured;
+// no interval at all gives 'unknown'.
+bloodStatus(r) {
+    const v = Number(r.value);
+    const lo = (r.refLow === '' || r.refLow === null || r.refLow === undefined) ? null : Number(r.refLow);
+    const hi = (r.refHigh === '' || r.refHigh === null || r.refHigh === undefined) ? null : Number(r.refHigh);
+    if (!isFinite(v)) return 'unknown';
+    if (hi !== null && v > hi) return 'above';
+    if (lo !== null && v < lo) return 'below';
+    if (lo === null && hi === null) return 'unknown';
+    return 'within';
+},
+
+bloodStatusLabel(status) {
+    return { below: "Below the lab's range", above: "Above the lab's range",
+             within: "Within the lab's range", unknown: 'No range given' }[status] || '';
+},
+bloodStatusShort(status) {
+    return { below: 'Low', above: 'High', within: 'In range', unknown: '—' }[status] || '';
+},
+// Amber for outside the range, not red: outside a lab interval is a talking point for the vet,
+// not an emergency, and the UI must not imply otherwise.
+bloodStatusColour(status) {
+    return { below: '#d97706', above: '#d97706', within: '#16a34a', unknown: '#94a3b8' }[status] || '#94a3b8';
+},
+
+// 0 = the low limit, 1 = the high limit, clamped to -0.5..1.5 so one wild result cannot blow up a
+// bar. THIS is what lets markers in different units be compared: everything becomes "how far
+// through its own lab range". Null unless both limits are known and the interval has width.
+bloodPositionInRange(r) {
+    const v = Number(r.value);
+    const lo = (r.refLow === '' || r.refLow === null || r.refLow === undefined) ? null : Number(r.refLow);
+    const hi = (r.refHigh === '' || r.refHigh === null || r.refHigh === undefined) ? null : Number(r.refHigh);
+    if (!isFinite(v) || lo === null || hi === null || !(hi > lo)) return null;
+    return Math.min(Math.max((v - lo) / (hi - lo), -0.5), 1.5);
+},
+
+// Percentage offsets for the little in-range bar (band occupies the middle half).
+bloodBarLeft(r) {
+    const pos = this.bloodPositionInRange(r);
+    return pos === null ? null : Math.min(Math.max(((pos + 0.5) / 2) * 100, 0), 100);
+},
+
+bloodValueText(r) {
+    const v = this.trimBloodNumber(r.value);
+    return r.unit ? `${v} ${r.unit}` : v;
+},
+
+// The lab's interval as printed: "44–159 µmol/L", "< 14 µg/dL", "> 23 g/L", or '' when none.
+bloodRefText(r) {
+    const suffix = r.unit ? ` ${r.unit}` : '';
+    const lo = (r.refLow === '' || r.refLow === null || r.refLow === undefined) ? null : Number(r.refLow);
+    const hi = (r.refHigh === '' || r.refHigh === null || r.refHigh === undefined) ? null : Number(r.refHigh);
+    if (lo !== null && hi !== null) return `${this.trimBloodNumber(lo)}–${this.trimBloodNumber(hi)}${suffix}`;
+    if (hi !== null) return `< ${this.trimBloodNumber(hi)}${suffix}`;
+    if (lo !== null) return `> ${this.trimBloodNumber(lo)}${suffix}`;
+    return '';
+},
+
+trimBloodNumber(v) {
+    const n = Number(v);
+    if (!isFinite(n)) return '';
+    return String(parseFloat(n.toFixed(3)));
+},
+
+// This patient's rows, newest sample first.
+patientBloodResults() {
+    return (this.bloodResults || [])
+        .filter(b => b.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.sampleDate) - new Date(a.sampleDate));
+},
+
+// Clinical display order: group order, then catalogue order, then name.
+sortBloodForDisplay(rows) {
+    const groupRank = Object.fromEntries(BLOOD_MARKER_GROUPS.map((g, i) => [g, i]));
+    const markerRank = Object.fromEntries(BLOOD_MARKERS.map((m, i) => [m.id, i]));
+    return [...rows].sort((a, b) => {
+        const ga = groupRank[this.bloodGroupOf(a.markerId)] ?? 99;
+        const gb = groupRank[this.bloodGroupOf(b.markerId)] ?? 99;
+        if (ga !== gb) return ga - gb;
+        const ma = markerRank[a.markerId] ?? 999;
+        const mb = markerRank[b.markerId] ?? 999;
+        if (ma !== mb) return ma - mb;
+        return this.bloodDisplayName(a).localeCompare(this.bloodDisplayName(b));
+    });
+},
+
+// Rows grouped back into the visits they came from (sampleDate + lab), newest first. Two labs on
+// one day stay separate panels — their reference ranges differ.
+bloodPanels() {
+    const groups = {};
+    this.patientBloodResults().forEach(r => {
+        const key = `${r.sampleDate}|${r.labName || ''}`;
+        (groups[key] = groups[key] || []).push(r);
+    });
+    return Object.entries(groups).map(([key, rows]) => ({
+        key,
+        sampleDate: rows[0].sampleDate,
+        labName: rows[0].labName || '',
+        rows: this.sortBloodForDisplay(rows),
+        outOfRangeCount: rows.filter(r => ['above', 'below'].includes(this.bloodStatus(r))).length,
+        lacksAnyRange: rows.every(r => this.bloodStatus(r) === 'unknown')
+    })).sort((a, b) => new Date(b.sampleDate) - new Date(a.sampleDate) || a.labName.localeCompare(b.labName));
+},
+
+// One marker's history in ONE unit, oldest first. The unit of the most recent result wins and the
+// others are declared, never silently plotted together: a creatinine history switching µmol/L to
+// mg/dL (~88x) would otherwise show a cliff that looks like a clinical collapse.
+bloodSeriesFor(markerId, customName = '') {
+    const mine = this.patientBloodResults()
+        .filter(r => r.markerId === markerId)
+        .filter(r => markerId !== BLOOD_OTHER_ID || !customName ||
+                     (r.customName || '').toLowerCase() === customName.toLowerCase())
+        .sort((a, b) => new Date(a.sampleDate) - new Date(b.sampleDate));
+    if (!mine.length) return null;
+    const newest = mine[mine.length - 1];
+    const unit = newest.unit || '';
+    const points = mine.filter(r => (r.unit || '') === unit);
+    const excludedUnits = [...new Set(mine.map(r => r.unit || '').filter(u => u !== unit))].sort();
+    const rangeSigs = new Set(points.map(r => `${r.refLow ?? '-'}|${r.refHigh ?? '-'}`));
+    return {
+        markerId, unit, points, excludedUnits,
+        displayName: this.bloodDisplayName(customName ? { markerId, customName } : newest),
+        referenceRangeVaries: rangeSigs.size > 1,
+        latest: points[points.length - 1] || null,
+        previous: points.length >= 2 ? points[points.length - 2] : null
+    };
+},
+
+// Every marker this pet has ever had measured, in clinical order — the screen's backbone.
+allBloodSeries() {
+    const seen = new Set();
+    const out = [];
+    this.sortBloodForDisplay(this.patientBloodResults()).forEach(r => {
+        const custom = r.markerId === BLOOD_OTHER_ID ? (r.customName || '') : '';
+        const key = `${r.markerId}|${custom.toLowerCase()}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        const s = this.bloodSeriesFor(r.markerId, custom);
+        if (s) out.push(s);
+    });
+    return out;
+},
+
+// Plain arithmetic between consecutive results. Direction only — no clinical reading of it, and
+// deliberately no better/worse, since for different markers either direction can be either.
+bloodChangeVsPrevious(series) {
+    if (!series || !series.latest || !series.previous) return null;
+    const delta = Number(series.latest.value) - Number(series.previous.value);
+    const days = Math.abs(Math.round(
+        (new Date(series.latest.sampleDate) - new Date(series.previous.sampleDate)) / 86400000));
+    const span = days === 1 ? '1 day' : `${days} days`;
+    if (delta === 0) return { delta, days, summary: `unchanged over ${span}` };
+    const sign = delta > 0 ? '+' : '−';
+    const unitSuffix = series.unit ? ` ${series.unit}` : '';
+    return { delta, days, summary: `${sign}${this.trimBloodNumber(Math.abs(delta))}${unitSuffix} in ${span}` };
+},
+
+// --- Form ---
+
+openBloodForm(existing = null) {
+    const lastPanel = this.bloodPanels()[0];
+    if (existing) {
+        this.newBloodResult = { ...existing };
+        this.editingBloodId = existing.id;
+    } else {
+        this.newBloodResult = {
+            id: null,
+            sampleDate: lastPanel ? String(lastPanel.sampleDate).split('T')[0]
+                                  : new Date().toISOString().split('T')[0],
+            markerId: '', customName: '', value: '', unit: '', refLow: '', refHigh: '',
+            labName: lastPanel ? lastPanel.labName : '', notes: ''
+        };
+        this.editingBloodId = null;
+    }
+    this.showBloodForm = true;
+},
+
+// On picking a marker: carry the unit + range + lab from that marker's last result if there is one
+// (a recheck is nearly always the same lab and range), else the catalogue's first unit and typical
+// range as an OVERWRITABLE prefill. Always applied on an explicit pick — an earlier iOS build
+// guarded this and ended up keeping the previous marker's unit.
+onBloodMarkerChange() {
+    const chosen = this.newBloodResult.markerId;
+    const previous = this.patientBloodResults().filter(r => r.markerId === chosen)[0];
+    if (previous) {
+        this.newBloodResult.unit = previous.unit || '';
+        this.newBloodResult.refLow = previous.refLow ?? '';
+        this.newBloodResult.refHigh = previous.refHigh ?? '';
+        if (!this.newBloodResult.labName) this.newBloodResult.labName = previous.labName || '';
+        return;
+    }
+    const m = this.bloodMarker(chosen);
+    if (!m) { this.newBloodResult.unit = ''; this.newBloodResult.refLow = ''; this.newBloodResult.refHigh = ''; return; }
+    this.newBloodResult.unit = m.units[0] || '';
+    this.newBloodResult.refLow = m.typicalRange && m.typicalRange[0] !== null ? m.typicalRange[0] : '';
+    this.newBloodResult.refHigh = m.typicalRange && m.typicalRange[1] !== null ? m.typicalRange[1] : '';
+},
+
+canSaveBloodResult() {
+    const r = this.newBloodResult;
+    if (!r.markerId || r.value === '' || !isFinite(Number(r.value))) return false;
+    if (r.markerId === BLOOD_OTHER_ID && !(r.customName || '').trim()) return false;
+    const lo = r.refLow === '' ? null : Number(r.refLow);
+    const hi = r.refHigh === '' ? null : Number(r.refHigh);
+    if (lo !== null && hi !== null && lo > hi) return false;   // a reversed range inverts every judgement
+    return true;
+},
+
+saveBloodResult() {
+    if (!this.canSaveBloodResult()) return alert('Enter a marker and a numeric result.');
+    const r = this.newBloodResult;
+    const entry = {
+        id: this.editingBloodId || this.generateId(),
+        patientId: this.activePatientId,
+        sampleDate: r.sampleDate,
+        markerId: r.markerId,
+        customName: r.markerId === BLOOD_OTHER_ID ? (r.customName || '').trim() : '',
+        value: Number(r.value),
+        unit: (r.unit || '').trim(),
+        refLow: r.refLow === '' ? null : Number(r.refLow),
+        refHigh: r.refHigh === '' ? null : Number(r.refHigh),
+        labName: (r.labName || '').trim(),
+        notes: r.notes || ''
+    };
+    if (this.editingBloodId) {
+        this.bloodResults = this.bloodResults.map(b => b.id === this.editingBloodId ? entry : b);
+    } else {
+        this.bloodResults.push(entry);
+    }
+    this.saveToStorage('vch_bloodResults', this.bloodResults);
+    this.showBloodForm = false;
+    this.editingBloodId = null;
+},
+
+deleteBloodResult(id) {
+    if (!confirm('Delete this blood result?')) return;
+    this.bloodResults = this.bloodResults.filter(b => b.id !== id);
+    this.saveToStorage('vch_bloodResults', this.bloodResults);
+},
+
+// ============================================================================
+// ECHO MEASUREMENTS  (parity with iOS EchoCalc.swift / EchoStudiesView.swift)
+// ============================================================================
+// Nothing here diagnoses. The bands DESCRIBE a value against published criteria and the copy says
+// so; staging and treatment remain the vet's.
+
+echoMeasure(id) { return ECHO_MEASURES.find(m => m.id === id) || null; },
+
+echoDisplayName(r) {
+    const m = this.echoMeasure(r.measureId);
+    if (m) return m.label;
+    const custom = (r.customName || '').trim();
+    return custom || (r.measureId === ECHO_OTHER_ID ? 'Other measurement' : (r.measureId || 'Measurement'));
+},
+
+echoShortName(measureId) {
+    const m = this.echoMeasure(measureId);
+    return m ? m.short : measureId;
+},
+
+// Centimetres for the allometric formulas. Returns null for anything not positively recognised —
+// an unlabelled number could be cm or mm, and guessing is a factor-of-ten error in the index.
+echoCentimetres(value, unit) {
+    const u = String(unit || '').trim().toLowerCase();
+    const v = Number(value);
+    if (!isFinite(v)) return null;
+    if (['cm', 'cms', 'centimetre', 'centimetres', 'centimeter', 'centimeters'].includes(u)) return v;
+    if (['mm', 'mms', 'millimetre', 'millimetres', 'millimeter', 'millimeters'].includes(u)) return v / 10;
+    return null;
+},
+
+echoMillilitres(value, unit) {
+    const u = String(unit || '').trim().toLowerCase();
+    const v = Number(value);
+    if (!isFinite(v)) return null;
+    if (['ml', 'mls', 'millilitre', 'millilitres', 'milliliter', 'milliliters', 'cc'].includes(u)) return v;
+    if (['l', 'litre', 'litres', 'liter', 'liters'].includes(u)) return v * 1000;
+    return null;
+},
+
+// This patient's echo rows, newest study first.
+patientEchoMeasurements() {
+    return (this.echoMeasurements || [])
+        .filter(e => e.patientId === this.activePatientId)
+        .sort((a, b) => new Date(b.studyDate) - new Date(a.studyDate));
+},
+
+// Rows grouped back into the studies they came from.
+echoStudies() {
+    const groups = {};
+    this.patientEchoMeasurements().forEach(r => {
+        const key = `${r.studyDate}|${r.centreName || ''}`;
+        (groups[key] = groups[key] || []).push(r);
+    });
+    const order = Object.fromEntries(ECHO_MEASURES.map((m, i) => [m.id, i]));
+    return Object.entries(groups).map(([key, rows]) => ({
+        key,
+        studyDate: rows[0].studyDate,
+        centreName: rows[0].centreName || '',
+        rows: [...rows].sort((a, b) => (order[a.measureId] ?? 99) - (order[b.measureId] ?? 99))
+    })).sort((a, b) => new Date(b.studyDate) - new Date(a.studyDate));
+},
+
+// Body weight in KILOGRAMS on or before a study date. Patients can be stored in pounds, so this
+// converts — the formulas take kg and nothing else.
+echoWeightKgAt(dateStr) {
+    const target = new Date(dateStr);
+    const mine = (this.weightLog || [])
+        .filter(w => w.patientId === this.activePatientId && w.weightValue !== '' && w.weightValue !== null && isFinite(Number(w.weightValue)))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (!mine.length) return null;
+    const before = mine.filter(w => new Date(w.date) <= target);
+    const chosen = before.length ? before[before.length - 1] : mine[mine.length - 1];
+    const raw = Number(chosen.weightValue);
+    const unit = (this.activePatientProfile && this.activePatientProfile.weightUnit) || 'kg';
+    return { kg: unit === 'lbs' ? raw / 2.20462 : raw, date: chosen.date };
+},
+
+// Everything derivable from one study, including the reason an index could NOT be worked out —
+// "add a weight" and "the units are missing" are different problems with different fixes.
+echoDerived(study) {
+    const val = id => {
+        const row = study.rows.find(r => r.measureId === id);
+        return row ? { value: Number(row.value), unit: row.unit || '' } : null;
+    };
+    const w = this.echoWeightKgAt(study.studyDate);
+    const kg = w ? w.kg : null;
+    const out = [];
+
+    // LA:Ao — printed if the report gave it, else computed from LA and Ao.
+    const printed = val('laao');
+    let ratio = printed ? printed.value : null;
+    let computed = false;
+    if (ratio === null) {
+        const la = val('la'), ao = val('ao');
+        if (la && ao) {
+            const laCm = this.echoCentimetres(la.value, la.unit), aoCm = this.echoCentimetres(ao.value, ao.unit);
+            if (laCm && aoCm > 0) { ratio = laCm / aoCm; computed = true; }
+        }
+    }
+    out.push({ id: 'laao', label: 'LA:Ao', value: ratio, computed,
+               band: this.echoBand('laao', ratio), formula: 'LA ÷ Ao',
+               reason: ratio === null ? 'Record LA:Ao, or both LA and Ao in the same units.' : null });
+
+    const scaled = (id, label, measure, formula, convert, unitHint) => {
+        const m = val(measure);
+        if (!m) return { id, label, value: null, band: 'unknown', formula,
+                         reason: `Record ${this.echoShortName(measure)} for this study.` };
+        if (!kg || kg <= 0) return { id, label, value: null, band: 'unknown', formula,
+                         reason: 'Add a weight on or before the study date — this index is scaled to body weight.' };
+        const base = convert(m.value, m.unit);
+        if (base === null) return { id, label, value: null, band: 'unknown', formula,
+                         reason: `The units recorded for ${this.echoShortName(measure)} (${m.unit || 'none'}) can't be scaled from — set them to ${unitHint}.` };
+        const v = id === 'lvedvPerKg' ? base / kg
+                : base / Math.pow(kg, id === 'lviddn' ? ECHO_LVIDD_EXPONENT : ECHO_LAD_EXPONENT);
+        return { id, label, value: v, band: this.echoBand(id, v), formula, reason: null };
+    };
+
+    out.push(scaled('ladn', 'LADN (weight-scaled LAD)', 'lad',
+                    `LAD (cm) ÷ weight (kg)^${ECHO_LAD_EXPONENT}`, (v, u) => this.echoCentimetres(v, u), 'cm or mm'));
+    out.push(scaled('lviddn', 'LVIDDN (weight-scaled LVIDd)', 'lvidd',
+                    `LVIDd (cm) ÷ weight (kg)^${ECHO_LVIDD_EXPONENT}`, (v, u) => this.echoCentimetres(v, u), 'cm or mm'));
+    out.push(scaled('lvedvPerKg', 'LVEDV per kg', 'lvedv',
+                    'LVEDV (mL) ÷ weight (kg)', (v, u) => this.echoMillilitres(v, u), 'mL'));
+    return out;
+},
+
+// Published bands — the same numbers as the echo calculator.
+echoBand(id, v) {
+    if (v === null || v === undefined || !isFinite(v) || v <= 0) return 'unknown';
+    if (id === 'lviddn') {
+        if (v >= 1.85) return 'enlarged';
+        if (v >= 1.7) return 'borderline';
+        if (v >= 1.27) return 'normal';
+        return 'underfilled';
+    }
+    if (id === 'ladn') return v > 1.6 ? 'enlarged' : 'normal';
+    if (id === 'laao') return v >= 1.6 ? 'enlarged' : 'normal';
+    if (id === 'lvedvPerKg') {
+        const sight = this.echoIsSighthound();
+        const low = sight ? 1.92 : 1.25, high = sight ? 4.17 : 3.27;
+        if (v >= high) return 'enlarged';
+        if (v < low) return 'underfilled';
+        return 'normal';
+    }
+    return 'unknown';
+},
+
+// Sighthounds have a genuinely different normal LVEDV/kg range — checked against an explicit list,
+// and only for that one band.
+echoIsSighthound() {
+    const b = ((this.activePatientProfile && this.activePatientProfile.breed) || '').toLowerCase();
+    return ['greyhound', 'whippet', 'saluki', 'borzoi', 'deerhound', 'wolfhound', 'afghan', 'lurcher', 'sighthound']
+        .some(x => b.includes(x));
+},
+
+echoBandLabel(band) {
+    return { underfilled: 'Small', normal: 'Normal', borderline: 'Borderline', enlarged: 'Enlarged', unknown: '—' }[band] || '';
+},
+// Amber for noteworthy, not red — an enlarged chamber is a conversation with the vet.
+echoBandColour(band) {
+    return { underfilled: '#d97706', normal: '#16a34a', borderline: '#ca8a04', enlarged: '#d97706', unknown: '#94a3b8' }[band] || '#94a3b8';
+},
+echoFormatIndex(v) { return (v === null || v === undefined || !isFinite(v)) ? '' : Number(v).toFixed(2); },
+
+// The EPIC trial's echocardiographic criteria for stage B2: a murmur of at least grade 3/6 WITH
+// LA:Ao >= 1.6 AND LVIDDN >= 1.7. Reported as "meets the criteria the EPIC trial used", never as a
+// stage — a missing input gives null (unknown), which must never read as "does not meet".
+echoEpic(study) {
+    const d = this.echoDerived(study);
+    const laao = d.find(x => x.id === 'laao')?.value ?? null;
+    const lviddn = d.find(x => x.id === 'lviddn')?.value ?? null;
+    const murmur = this.echoLatestMurmurGrade();
+    const flags = [
+        laao === null ? null : laao >= 1.6,
+        lviddn === null ? null : lviddn >= 1.7,
+        murmur === null ? null : murmur >= 3
+    ];
+    const missing = [];
+    if (flags[0] === null) missing.push('LA:Ao');
+    if (flags[1] === null) missing.push('LVIDDN (needs LVIDd, its units, and a weight)');
+    if (flags[2] === null) missing.push('a recorded murmur grade');
+    let meets = null;
+    if (flags.some(f => f === false)) meets = false;
+    else if (!flags.some(f => f === null)) meets = true;
+    return { meets, missing };
+},
+
+echoLatestMurmurGrade() {
+    const entry = this.sortedDiagnosisLog()
+        .filter(d => d.diagnosis !== 'Concurrent Conditions Only')
+        .find(d => d.murmurGrade && parseInt(d.murmurGrade, 10) >= 0 && !isNaN(parseInt(d.murmurGrade, 10)));
+    if (!entry) return null;
+    const n = parseInt(entry.murmurGrade, 10);
+    return isNaN(n) ? null : n;
+},
+
+// --- Form (a whole study at a time: an echo report always carries the same handful of numbers) ---
+
+openEchoForm(study = null) {
+    const values = {};
+    ECHO_MEASURES.forEach(m => { values[m.id] = { value: '', unit: m.units[0] || '' }; });
+    if (study) {
+        study.rows.forEach(r => { values[r.measureId] = { value: r.value, unit: r.unit || '' }; });
+        this.newEchoStudy = {
+            studyDate: String(study.studyDate).split('T')[0],
+            centreName: study.centreName || '',
+            notes: (study.rows.find(r => r.notes) || {}).notes || '',
+            values
+        };
+        this.editingEchoKey = study.key;
+    } else {
+        this.newEchoStudy = {
+            studyDate: new Date().toISOString().split('T')[0],
+            centreName: '', notes: '', values
+        };
+        this.editingEchoKey = null;
+    }
+    this.showEchoForm = true;
+},
+
+echoFormEnteredCount() {
+    return Object.values(this.newEchoStudy.values || {}).filter(v => v.value !== '' && isFinite(Number(v.value))).length;
+},
+
+// Live preview so the owner sees the consequence of a unit choice BEFORE saving — the cm/mm mistake
+// shows up here as an absurd index.
+echoFormPreview() {
+    const rows = ECHO_MEASURES
+        .filter(m => { const v = this.newEchoStudy.values[m.id]; return v && v.value !== '' && isFinite(Number(v.value)); })
+        .map(m => ({ measureId: m.id, value: Number(this.newEchoStudy.values[m.id].value),
+                     unit: this.newEchoStudy.values[m.id].unit || '' }));
+    return this.echoDerived({ studyDate: this.newEchoStudy.studyDate, rows }).filter(d => d.value !== null);
+},
+
+saveEchoStudy() {
+    if (this.echoFormEnteredCount() === 0) return alert('Enter at least one measurement.');
+    const date = this.newEchoStudy.studyDate;
+    const centre = (this.newEchoStudy.centreName || '').trim();
+
+    // Editing replaces the study's rows wholesale, so a value cleared to blank disappears — an
+    // update-in-place loop would silently keep it.
+    if (this.editingEchoKey) {
+        this.echoMeasurements = this.echoMeasurements.filter(
+            e => `${e.studyDate}|${e.centreName || ''}` !== this.editingEchoKey || e.patientId !== this.activePatientId);
+    }
+    ECHO_MEASURES.forEach(m => {
+        const entry = this.newEchoStudy.values[m.id];
+        if (!entry || entry.value === '' || !isFinite(Number(entry.value))) return;
+        this.echoMeasurements.push({
+            id: this.generateId(),
+            patientId: this.activePatientId,
+            studyDate: date,
+            measureId: m.id,
+            customName: '',
+            value: Number(entry.value),
+            unit: entry.unit || '',
+            refLow: null,
+            refHigh: null,
+            centreName: centre,
+            notes: this.newEchoStudy.notes || ''
+        });
+    });
+    this.saveToStorage('vch_echoMeasurements', this.echoMeasurements);
+    this.showEchoForm = false;
+    this.editingEchoKey = null;
+},
+
+deleteEchoStudy(key) {
+    if (!confirm('Delete this echo study and all its measurements?')) return;
+    this.echoMeasurements = this.echoMeasurements.filter(
+        e => `${e.studyDate}|${e.centreName || ''}` !== key || e.patientId !== this.activePatientId);
+    this.saveToStorage('vch_echoMeasurements', this.echoMeasurements);
+},
+
+// --- Paste a report (the web's equivalent of the iOS PDF import) ---
+//
+// The browser cannot read an image-only PDF the way iOS can (that needs OCR), so the web path is:
+// the owner selects the text of their report — or opens the PDF and copies it — and pastes it here.
+// The GRAMMAR below is the same one iOS uses on PDF text, so both platforms read the same reports
+// the same way. See BACKLOG §3j.
+
+// The lines of the two biggest UK labs disagree about column order:
+//   VPG    "Creatinine 74 umol/L 40 - 125"           name, value, UNIT, range
+//   IDEXX  "Creatinine | 80.0 | 44.0 - 133.0 umol/L" name, value, range, UNIT
+// so this reads name → number → (range and unit in either order).
+parseBloodLine(raw) {
+    const line = String(raw).replace(/\|/g, ' ').trim();
+    if (line.length < 3) return null;
+    const lower = line.toLowerCase();
+    const skip = ['page', 'lab number', 'submission', 'order id', 'account', 'telephone', 'microchip',
+                  'animal ref', 'patient id', 'date of', 'collection date', 'generated by',
+                  'reference value', 'last updated', 'order received', 'serum interferences', 'comment'];
+    if (skip.some(k => lower.includes(k))) return null;
+
+    const tokens = line.split(/\s+/).filter(Boolean);
+    const startsNumeric = t => /^[0-9]/.test(t) || (/^[<>≤≥.]/.test(t) && /[0-9]/.test(t));
+    const firstNum = tokens.findIndex(startsNumeric);
+    if (firstNum <= 0) return null;
+    // More than four words and the "name" has swallowed a sentence — which is what happens when the
+    // RESULT ITSELF was words ("Glucose No OXF received mmol/L 3.5 - 6.5"). The first number found is
+    // then the range's LOW end, so parsing on would record a result for a test never run.
+    if (firstNum > 4) return null;
+
+    const name = tokens.slice(0, firstNum).join(' ').replace(/^[\s:;•*-]+|[\s:;•*-]+$/g, '');
+    if (!name || !/[a-z]/i.test(name)) return null;
+
+    // Re-separate what tight typesetting glued together: "26.3-38.2g/L" → "26.3 - 38.2 g/L".
+    const rest = tokens.slice(firstNum).join(' ')
+        .replace(/[–—]/g, '-')
+        .replace(/(\d)\s*-\s*(\d)/g, '$1 - $2')
+        .replace(/(\d)([a-zA-Zµ%])/g, '$1 $2');
+    const restTokens = rest.split(/\s+/).filter(Boolean);
+    const num = t => {
+        const m = String(t).replace(/,/g, '.').match(/[0-9]*\.?[0-9]+/);
+        return m ? parseFloat(m[0]) : null;
+    };
+    const value = num(restTokens[0]);
+    if (value === null) return null;
+
+    let tail = restTokens.slice(1);
+    const flagSet = ['high', 'low', 'h', 'l', 'hh', 'll', 'abnormal'];
+    let flag = '';
+    tail = tail.filter(t => {
+        const c = t.toLowerCase().replace(/[*(),]/g, '');
+        if (flagSet.includes(c)) { if (!flag) flag = c.toUpperCase(); return false; }
+        return true;
+    });
+
+    let refLow = null, refHigh = null;
+    const dash = tail.indexOf('-');
+    if (dash > 0 && dash + 1 < tail.length && num(tail[dash - 1]) !== null && num(tail[dash + 1]) !== null) {
+        const a = num(tail[dash - 1]), b = num(tail[dash + 1]);
+        refLow = Math.min(a, b); refHigh = Math.max(a, b);
+        tail.splice(dash - 1, 3);
+    } else {
+        const i = tail.findIndex(t => /^[<>≤≥]/.test(t));
+        if (i !== -1) {
+            const upper = /^[<≤]/.test(tail[i]);
+            let n = num(tail[i]);
+            if (n !== null) { tail.splice(i, 1); }
+            else if (i + 1 < tail.length && num(tail[i + 1]) !== null) { n = num(tail[i + 1]); tail.splice(i, 2); }
+            if (n !== null) { if (upper) refHigh = n; else refLow = n; }
+        }
+    }
+    if (refLow !== null && refHigh !== null && refLow === refHigh) { refLow = null; refHigh = null; }
+
+    const unit = tail.filter(t => !['-', 'to', 'ref', 'range'].includes(t.toLowerCase()))
+                     .join(' ').replace(/^[\s.,;:()]+|[\s.,;:()]+$/g, '');
+    const matched = this.bloodMatchMarker(name);
+    return { printedName: name, value, unit, refLow, refHigh, flag,
+             markerId: matched ? matched.id : null, rawLine: String(raw) };
+},
+
+parseBloodPaste() {
+    const lines = (this.bloodPasteText || '').split(/\r?\n/);
+    let rows = lines.map(l => this.parseBloodLine(l)).filter(Boolean)
+        // A row survives if the catalogue knew its name OR the report printed a range beside it.
+        // With neither it is indistinguishable from address/footer noise ("WEST YORKSHIRE LS 22 7DN").
+        .filter(r => r.markerId || r.refLow !== null || r.refHigh !== null);
+
+    // First occurrence wins for a repeated name+value (a header read twice).
+    const seen = new Set();
+    rows = rows.filter(r => {
+        const k = `${this.bloodNormalise(r.printedName)}|${r.value}`;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+    });
+    // A lab prints each analyte once: a SECOND match for the same marker is far more likely a wrapped
+    // table row than a repeat. IDEXX's two-line "Albumin: / Globulin Ratio" label is the real case —
+    // it parses as Albumin = 1.10 beside the genuine Albumin = 35.9 g/L. Demote it so it arrives
+    // unticked instead of corrupting the albumin series.
+    const claimed = new Set();
+    rows.forEach(r => {
+        if (!r.markerId) return;
+        if (claimed.has(r.markerId)) { r.markerId = null; return; }
+        claimed.add(r.markerId);
+    });
+
+    this.bloodParseRows = rows.map(r => ({ ...r, include: !!r.markerId }));
+    this.bloodParseMeta = {
+        sampleDate: this.parseBloodReportDate(lines) || new Date().toISOString().split('T')[0],
+        labName: this.parseBloodReportLab(lines)
+    };
+    if (!rows.length) alert('No results could be read from that text. Check you pasted the results table, or add the values by hand.');
+},
+
+// UK date order (dd/MM/yyyy). A US-order date is refused rather than silently read three months out.
+parseBloodReportDate(lines) {
+    const pick = keys => {
+        for (const line of lines) {
+            const lower = String(line).toLowerCase();
+            if (!keys.some(k => lower.includes(k))) continue;
+            let m = String(line).match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})\b/);
+            if (m) {
+                const d = +m[1], mo = +m[2];
+                let y = +m[3]; if (y < 100) y += 2000;
+                if (d >= 1 && d <= 31 && mo >= 1 && mo <= 12) {
+                    const iso = `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    if (new Date(iso) <= new Date()) return iso;
+                }
+            }
+            m = String(line).match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
+            if (m) return `${m[1]}-${String(+m[2]).padStart(2, '0')}-${String(+m[3]).padStart(2, '0')}`;
+        }
+        return null;
+    };
+    return pick(['collection date', 'sample date', 'date sampled', 'date collected', 'date taken'])
+        || pick(['date of receipt', 'date:', 'received', 'date of result', 'reported']);
+},
+
+parseBloodReportLab(lines) {
+    const blob = lines.join(' ').toLowerCase();
+    const known = [['idexx', 'IDEXX'], ['thevpg', 'VPG'], ['veterinary pathology group', 'VPG'],
+                   ['nationwide laboratories', 'Nationwide Laboratories'], ['axiom', 'Axiom Veterinary Laboratories'],
+                   ['langford', 'Langford Vets']];
+    for (const [needle, name] of known) if (blob.includes(needle)) return name;
+    return '';
+},
+
+bloodParseSelectedCount() {
+    return (this.bloodParseRows || []).filter(r => r.include && isFinite(Number(r.value))).length;
+},
+
+// Marker names appearing more than once among the SELECTED rows — usually a wrapped label.
+bloodParseDuplicateNames() {
+    const counts = {};
+    (this.bloodParseRows || []).filter(r => r.include).forEach(r => {
+        const n = r.markerId ? this.bloodDisplayName(r) : r.printedName;
+        counts[n] = (counts[n] || 0) + 1;
+    });
+    return Object.keys(counts).filter(k => counts[k] > 1);
+},
+
+confirmBloodImport() {
+    const rows = (this.bloodParseRows || []).filter(r => r.include && isFinite(Number(r.value)));
+    if (!rows.length) return alert('Tick at least one result to import.');
+    rows.forEach(r => {
+        this.bloodResults.push({
+            id: this.generateId(),
+            patientId: this.activePatientId,
+            sampleDate: this.bloodParseMeta.sampleDate,
+            markerId: r.markerId || BLOOD_OTHER_ID,
+            customName: r.markerId ? '' : r.printedName,
+            value: Number(r.value),
+            unit: (r.unit || '').trim(),
+            refLow: r.refLow,
+            refHigh: r.refHigh,
+            labName: (this.bloodParseMeta.labName || '').trim(),
+            notes: ''
+        });
+    });
+    this.saveToStorage('vch_bloodResults', this.bloodResults);
+    this.showBloodImport = false;
+    this.bloodPasteText = '';
+    this.bloodParseRows = [];
+    alert(`${rows.length} result${rows.length === 1 ? '' : 's'} added.`);
+},
 
 deleteDiagnosis(id) {
             if (confirm("Are you sure you want to delete this diagnosis entry?")) {
@@ -3165,8 +4140,14 @@ get activePathway() {
         },
 
 get currentStage() {
-
-    const history = this.stageProgression;
+    // RESOLVED records are excluded — a ligated PDA or a corrected diagnosis should not keep
+    // advertising a stage — while `stageProgression` KEEPS them so the chart still shows the
+    // history that led there. Mirrors iOS DiagnosisLogic.currentStage.
+    const resolvedIds = new Set(this.diagnosisLog
+        .filter(d => this.isDiagnosisResolved(d))
+        .map(d => `${d.acvimStage}|${d.date}`));
+    const history = this.stageProgression.filter(e => !resolvedIds.has(`Stage ${e.stage}|${e.date}`)
+                                                   && !resolvedIds.has(`${e.stage}|${e.date}`));
 
     if (!history.length) return null;
 
@@ -5214,12 +6195,14 @@ resetData() {
 
     const keys = ['vch_patients','vch_weightLog','vch_srrHistory','vch_medLedger','vch_suppLedger',
                   'vch_diagnosisLog','vch_syncopeLog','vch_coughLog','vch_activityLog',
-                  'vch_vaccinationLog','vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog'];
+                  'vch_vaccinationLog','vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog',
+                  'vch_bloodResults', 'vch_echoMeasurements'];
     keys.forEach(k => localStorage.removeItem(k));
 
     this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = []; this.suppLedger = [];
     this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.activityLog = [];
     this.vaccinationLog = []; this.antiparasiticLog = []; this.injectionLog = []; this.medDoseLog = [];
+    this.bloodResults = []; this.echoMeasurements = [];
     this.activePatientId = null;
 
     [this.$refs.rrrChartCanvas, this.$refs.medChartCanvas, this.$refs.weightChartCanvas, this.$refs.injectionChartCanvas]
@@ -8359,6 +9342,8 @@ exportCompleteBackup(patientId = null) {
         vch_antiparasiticLog: scoped(this.antiparasiticLog),
         vch_injectionLog: scoped(this.injectionLog),
         vch_medDoseLog: scoped(this.medDoseLog),
+        vch_bloodResults: scoped(this.bloodResults),
+        vch_echoMeasurements: scoped(this.echoMeasurements),
         exportDate: new Date().toISOString(),
         exportScope: patientId ? 'single' : 'all'
     };
@@ -8463,7 +9448,7 @@ backupLogCount(pid) {
     if (!d) return 0;
     return ['vch_srrHistory', 'vch_medLedger', 'vch_suppLedger', 'vch_diagnosisLog', 'vch_syncopeLog',
             'vch_coughLog', 'vch_activityLog', 'vch_weightLog', 'vch_vaccinationLog',
-            'vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog']
+            'vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog','vch_bloodResults','vch_echoMeasurements']
         .reduce((n, k) => n + (d[k] || []).filter(e => e.patientId === pid).length, 0);
 },
 
@@ -8510,7 +9495,7 @@ confirmBackupImport() {
     // tick after promising the user it would import them.
     const logKeys = ['weightLog', 'srrHistory', 'medLedger', 'suppLedger', 'diagnosisLog', 'syncopeLog',
                      'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog', 'injectionLog',
-                     'medDoseLog'];
+                     'medDoseLog', 'bloodResults', 'echoMeasurements'];
     logKeys.forEach(key => {
         const incoming = (data['vch_' + key] || [])
             .filter(e => idMap[e.patientId] !== undefined)
@@ -8976,6 +9961,35 @@ async generatePDF() {
         }
     }
  
+    // ── 7b. Blood Test Results ────────────────────────────────────────────
+    {
+        const bloodData = this.patientBloodResults();
+        if (bloodData.length > 0) {
+            if (Y > 240) { doc.addPage(); Y = 20; }
+            sectionHeader('Blood Test Results', 15, 118, 110);
+            doc.autoTable({
+                startY: Y,
+                head: [['Sampled', 'Marker', 'Result', 'Lab range', 'vs range', 'Laboratory']],
+                body: bloodData.map(b => {
+                    const st = this.bloodStatus(b);
+                    return [
+                        b.sampleDate,
+                        this.bloodDisplayName(b),
+                        this.trimBloodNumber(b.value) + (b.unit ? ' ' + b.unit : ''),
+                        this.bloodRefText(b) || '—',
+                        st === 'unknown' ? '—' : this.bloodStatusShort(st),
+                        b.labName || '—'
+                    ];
+                }),
+                theme: 'striped',
+                headStyles: { fillColor: [15, 118, 110] },
+                columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 36 }, 2: { cellWidth: 28 }, 3: { cellWidth: 32 }, 4: { cellWidth: 18 }, 5: { cellWidth: 'auto' } },
+                styles: { fontSize: 8 }
+            });
+            Y = doc.lastAutoTable.finalY + 12;
+        }
+    }
+
     // ── 8. Syncope / Collapse Log ─────────────────────────────────────────
     if (mods.syncopeLog) {
             const syncData = this.syncopeLog
@@ -9346,6 +10360,29 @@ generateCSV() {
         csv += '\n';
     }
  
+    // ── Blood Test Results (always complete history, like diagnosis) ──────
+    // Not module-gated: there is no per-pet toggle for lab results. Status is always relative to
+    // the range THAT report printed.
+    const bloodData = this.patientBloodResults();
+    if (bloodData.length > 0) {
+        csv += 'BLOOD TEST RESULTS\n';
+        csv += 'Sample Date,Marker,Result,Units,Lab Reference Range,vs Range,Laboratory,Notes\n';
+        bloodData.forEach(b => {
+            const st = this.bloodStatus(b);
+            csv += [
+                q(b.sampleDate),
+                q(this.bloodDisplayName(b)),
+                q(this.trimBloodNumber(b.value)),
+                q(b.unit || ''),
+                q(this.bloodRefText(b)),
+                q(st === 'unknown' ? '' : this.bloodStatusShort(st)),
+                q(b.labName || ''),
+                q(b.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+
     // ── Syncope / Collapse Log ────────────────────────────────────────────
         const syncData = !mods.syncopeLog ? [] : this.syncopeLog
         .filter(s => s.patientId === this.activePatientId && inRange(s.date))
@@ -9716,6 +10753,27 @@ _buildReportText() {
                 if (d.diagnosis !== 'Concurrent Conditions Only' && (d.concurrentDiagnoses || []).length > 0)
                     out += `${nl}${indent}Concurrent: ${d.concurrentDiagnoses.join(', ')}`;
                 if (d.notes) out += `${nl}${indent}Notes: ${d.notes}`;
+                out += nl;
+            });
+            out += nl;
+        }
+    }
+
+    // ── Blood Test Results (ALWAYS full history — no date filter) ─────────
+    {
+        const bloodData = this.patientBloodResults();
+        if (bloodData.length > 0) {
+            out += `BLOOD TEST RESULTS (${bloodData.length} result${bloodData.length !== 1 ? 's' : ''})${nl}`;
+            out += rule() + nl;
+            bloodData.forEach(b => {
+                const st = this.bloodStatus(b);
+                out += `${b.sampleDate}  |  ${this.bloodDisplayName(b)}: ${this.trimBloodNumber(b.value)}`;
+                if (b.unit) out += ` ${b.unit}`;
+                const ref = this.bloodRefText(b);
+                if (ref) out += `  |  Lab range: ${ref}`;
+                if (st !== 'unknown') out += `  |  ${this.bloodStatusShort(st)}`;
+                if (b.labName) out += `  |  ${b.labName}`;
+                if (b.notes) out += `${nl}${indent}Notes: ${b.notes}`;
                 out += nl;
             });
             out += nl;

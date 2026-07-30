@@ -2760,7 +2760,24 @@
                                     <textarea x-model="newDiagnosis.notes" placeholder="Any additional veterinary notes..." class="form-textarea"></textarea>
                                 </div>
                     
-                                <div class="flex-gap-10" style="margin-top: 20px;">
+                                
+                                <div class="info-box" style="margin-top: 12px; background: #f0fdf4; border-color: #bbf7d0;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; color: #14532d; cursor: pointer;">
+                                        <input type="checkbox" :checked="!!newDiagnosis.resolvedDate"
+                                               @change="newDiagnosis.resolvedDate = $event.target.checked ? new Date().toISOString().split('T')[0] : ''">
+                                        Resolved
+                                    </label>
+                                    <div x-show="newDiagnosis.resolvedDate" x-transition style="margin-top: 8px;">
+                                        <label class="form-label">Date resolved</label>
+                                        <input type="date" x-model="newDiagnosis.resolvedDate"
+                                               :min="newDiagnosis.date" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                    </div>
+                                    <p style="font-size: 0.75rem; color: #166534; margin-top: 6px;">
+                                        Mark a condition resolved when it no longer applies — a corrected diagnosis, a repaired defect, or a problem that has cleared.
+                                        It stays in the history and in your vet report, but stops counting as your pet's current status.
+                                    </p>
+                                </div>
+                                    <div class="flex-gap-10" style="margin-top: 20px;">
                                     <button @click="saveCardiacDiagnosis()" class="btn-primary" style="background: #0284c7;">
                                         <i class="fa-solid fa-check"></i> Save Cardiac Status
                                     </button>
@@ -2790,7 +2807,24 @@
                                     <textarea x-model="newDiagnosis.notes" placeholder="Notes regarding concurrent conditions..." class="form-textarea"></textarea>
                                 </div>
                     
-                                <div class="flex-gap-10" style="margin-top: 20px;">
+                                
+                                <div class="info-box" style="margin-top: 12px; background: #f0fdf4; border-color: #bbf7d0;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; color: #14532d; cursor: pointer;">
+                                        <input type="checkbox" :checked="!!newDiagnosis.resolvedDate"
+                                               @change="newDiagnosis.resolvedDate = $event.target.checked ? new Date().toISOString().split('T')[0] : ''">
+                                        Resolved
+                                    </label>
+                                    <div x-show="newDiagnosis.resolvedDate" x-transition style="margin-top: 8px;">
+                                        <label class="form-label">Date resolved</label>
+                                        <input type="date" x-model="newDiagnosis.resolvedDate"
+                                               :min="newDiagnosis.date" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                    </div>
+                                    <p style="font-size: 0.75rem; color: #166534; margin-top: 6px;">
+                                        Mark a condition resolved when it no longer applies — a corrected diagnosis, a repaired defect, or a problem that has cleared.
+                                        It stays in the history and in your vet report, but stops counting as your pet's current status.
+                                    </p>
+                                </div>
+                                    <div class="flex-gap-10" style="margin-top: 20px;">
                                     <button @click="saveConcurrentDiagnosis()" class="btn-primary" style="background: #0f766e;">
                                         <i class="fa-solid fa-check"></i> Save Concurrent Issue
                                     </button>
@@ -2835,6 +2869,11 @@
                                         </div>
                                     </template>
                                     
+                                    <div x-show="diag.resolvedDate" style="margin-top: 8px; font-size: 0.8rem; color: #16a34a; font-weight: 600;">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                        Resolved <span x-text="diag.resolvedDate ? new Date(diag.resolvedDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : ''"></span>
+                                    </div>
+
                                     <div x-show="diag.notes" style="font-size: 0.85rem; color: #475569; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-style: italic;" x-text="diag.notes"></div>
                                     
                                     <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 12px;">
@@ -2850,6 +2889,447 @@
                     </div>
                 </div>
             </template>
+                                    <!-- ******************************** -->
+                                    <!-- BLOOD TEST RESULTS               -->
+                                    <!-- ******************************** -->
+            <template x-if="activePatientProfile?.modules?.acvimStaging">
+                <div class="module-card" x-show="patients.length > 0 && isView('meds') && modOn('acvimStaging')" x-cloak>
+
+                    <div style="margin-bottom: 15px;">
+                        <button @click="showBloodPanel = !showBloodPanel" :aria-expanded="showBloodPanel.toString()" type="button" class="btn-accordion">
+                            <h3><i class="fa-solid fa-vial"></i>
+                                <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Blood Test Results' : 'Blood Test Results'"></span>
+                                <span x-show="patientBloodResults().length > 0" style="font-size: 0.8rem; font-weight: 400; color: #64748b; margin-left: 8px;"
+                                      x-text="'(' + bloodPanels().length + ' test' + (bloodPanels().length === 1 ? '' : 's') + ')'"></span>
+                            </h3>
+                            <i class="fa-solid" :class="showBloodPanel ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+
+                    <div x-show="showBloodPanel" x-transition>
+
+                        <div class="flex-gap-10" style="margin-bottom: 15px;" x-show="!showBloodForm && !showBloodImport">
+                            <button @click="openBloodForm()" type="button" style="flex: 1; padding: 10px; background: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                                <i class="fa-solid fa-square-pen"></i> Add a result
+                            </button>
+                            <button @click="showBloodImport = true; bloodParseRows = []; bloodPasteText = '';" type="button" style="flex: 1; padding: 10px; background: #f0fdf4; color: #14532d; border: 1px solid #bbf7d0; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                                <i class="fa-solid fa-paste"></i> Paste a report
+                            </button>
+                        </div>
+
+                        <!-- ADD / EDIT ONE RESULT -->
+                        <div x-show="showBloodForm" x-cloak class="vch-modal">
+                            <h4 style="margin-bottom: 12px;" x-text="editingBloodId ? 'Edit blood result' : 'Add blood result'"></h4>
+
+                            <label class="form-label">Marker</label>
+                            <select x-model="newBloodResult.markerId" @change="onBloodMarkerChange()" class="form-select">
+                                <option value="">Select…</option>
+                                <template x-for="g in bloodMarkerGroups().filter(g => g !== 'Other')" :key="g">
+                                    <optgroup :label="g">
+                                        <template x-for="m in bloodMarkerSearch('').filter(m => m.group === g)" :key="m.id">
+                                            <option :value="m.id" x-text="m.label + ' (' + m.units.join(' · ') + ')'"></option>
+                                        </template>
+                                    </optgroup>
+                                </template>
+                                <option value="other">Other marker…</option>
+                            </select>
+
+                            <div x-show="newBloodResult.markerId === 'other'" x-transition style="margin-top: 10px;">
+                                <label class="form-label">Marker name (as printed on the report)</label>
+                                <input type="text" x-model="newBloodResult.customName" class="form-control" placeholder="e.g. Bile acids">
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                <div>
+                                    <label class="form-label">Sample date</label>
+                                    <input type="date" x-model="newBloodResult.sampleDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                </div>
+                                <div>
+                                    <label class="form-label">Laboratory</label>
+                                    <input type="text" x-model="newBloodResult.labName" class="form-control" placeholder="e.g. IDEXX">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                <div>
+                                    <label class="form-label">Result</label>
+                                    <input type="number" step="any" x-model="newBloodResult.value" class="form-control">
+                                </div>
+                                <div>
+                                    <label class="form-label">Units</label>
+                                    <input type="text" x-model="newBloodResult.unit" class="form-control" placeholder="e.g. µmol/L">
+                                </div>
+                            </div>
+                            <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                Enter the value and units exactly as your report gives them. The app never converts between units — it keeps each result as measured.
+                            </p>
+
+                            <div class="info-box info-box-amber" style="margin-top: 12px;">
+                                <label class="form-label text-warning">Reference range from your report</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="number" step="any" x-model="newBloodResult.refLow" class="form-control" placeholder="low" style="flex: 1;">
+                                    <span style="color: #64748b;">–</span>
+                                    <input type="number" step="any" x-model="newBloodResult.refHigh" class="form-control" placeholder="high" style="flex: 1;">
+                                    <span x-show="newBloodResult.unit" x-text="newBloodResult.unit" style="font-size: 0.8rem; color: #64748b;"></span>
+                                </div>
+                                <p style="font-size: 0.75rem; color: #92400e; margin-top: 6px;">
+                                    Copy the range printed beside the result. Laboratories differ, so every result is judged against the range you enter here — never one of the app's own. Leave a box empty for a one-sided range such as "less than 14".
+                                </p>
+                                <div x-show="newBloodResult.value !== '' && isFinite(Number(newBloodResult.value))" style="margin-top: 8px; font-size: 0.85rem; font-weight: 600;"
+                                     :style="'color:' + bloodStatusColour(bloodStatus(newBloodResult))"
+                                     x-text="bloodStatusLabel(bloodStatus(newBloodResult))"></div>
+                            </div>
+
+                            <label class="form-label" style="margin-top: 10px;">Notes</label>
+                            <textarea x-model="newBloodResult.notes" class="form-control" rows="2" placeholder="Anything your vet mentioned about this result"></textarea>
+
+                            <div class="flex-gap-10" style="margin-top: 15px;">
+                                <button @click="saveBloodResult()" :disabled="!canSaveBloodResult()" class="btn-primary" style="background: #0f766e;">Save result</button>
+                                <button @click="showBloodForm = false; editingBloodId = null;" class="btn-secondary">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- PASTE A REPORT -->
+                        <div x-show="showBloodImport" x-cloak class="vch-modal">
+                            <h4 style="margin-bottom: 8px;">Paste a laboratory report</h4>
+                            <p style="font-size: 0.85rem; color: #475569; margin-bottom: 10px;">
+                                Open the PDF your vet sent, select the results table, copy it, and paste it below. Nothing is saved until you have checked it.
+                            </p>
+                            <textarea x-model="bloodPasteText" class="form-control" rows="8" placeholder="Creatinine 74 umol/L 40 - 125&#10;Urea 7.8 mmol/L 2.5 - 9&#10;…"></textarea>
+                            <div class="flex-gap-10" style="margin-top: 10px;">
+                                <button @click="parseBloodPaste()" class="btn-primary" style="background: #0f766e;">Read the report</button>
+                                <button @click="showBloodImport = false; bloodParseRows = [];" class="btn-secondary">Cancel</button>
+                            </div>
+
+                            <div x-show="bloodParseRows.length > 0" style="margin-top: 16px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div>
+                                        <label class="form-label">Sample date</label>
+                                        <input type="date" x-model="bloodParseMeta.sampleDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Laboratory</label>
+                                        <input type="text" x-model="bloodParseMeta.labName" class="form-control">
+                                    </div>
+                                </div>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                    The sample date is the day the blood was taken — often different from the date the results were issued. Check it against the report.
+                                </p>
+
+                                <div x-show="bloodParseDuplicateNames().length > 0" class="info-box info-box-amber" style="margin-top: 10px; font-size: 0.8rem;">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    The same marker appears more than once (<span x-text="bloodParseDuplicateNames().join(', ')"></span>).
+                                    Laboratory tables sometimes wrap onto two lines — check which row is the real result and untick the other.
+                                </div>
+
+                                <div style="margin-top: 12px; max-height: 420px; overflow-y: auto;">
+                                    <template x-for="(row, idx) in bloodParseRows" :key="idx">
+                                        <div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+                                            <input type="checkbox" x-model="row.include" style="margin-top: 4px;">
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 600; color: #1e293b;">
+                                                    <span x-text="row.markerId ? bloodDisplayName(row) : row.printedName"></span>
+                                                    <span x-show="!row.markerId" style="font-size: 0.7rem; font-weight: 400; color: #92400e; margin-left: 6px;">not recognised</span>
+                                                </div>
+                                                <div style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
+                                                    <input type="number" step="any" x-model="row.value" class="form-control" style="width: 90px; padding: 4px 6px; font-size: 0.8rem;">
+                                                    <input type="text" x-model="row.unit" class="form-control" style="width: 90px; padding: 4px 6px; font-size: 0.8rem;" placeholder="units">
+                                                    <input type="number" step="any" x-model="row.refLow" class="form-control" style="width: 70px; padding: 4px 6px; font-size: 0.8rem;" placeholder="low">
+                                                    <input type="number" step="any" x-model="row.refHigh" class="form-control" style="width: 70px; padding: 4px 6px; font-size: 0.8rem;" placeholder="high">
+                                                </div>
+                                                <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 3px;" x-text="row.rawLine"></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <button @click="confirmBloodImport()" :disabled="bloodParseSelectedCount() === 0" class="btn-primary" style="background: #0f766e; margin-top: 12px;">
+                                    Import <span x-text="bloodParseSelectedCount()"></span> result<span x-show="bloodParseSelectedCount() !== 1">s</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- VIEW TOGGLE -->
+                        <div x-show="patientBloodResults().length > 0 && !showBloodForm && !showBloodImport" style="display: flex; gap: 6px; margin-bottom: 12px;">
+                            <button @click="bloodViewMode = 'latest'" type="button"
+                                    :style="bloodViewMode === 'latest' ? 'background:#0f766e;color:white;' : 'background:#f1f5f9;color:#475569;'"
+                                    style="flex: 1; padding: 6px; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">Latest</button>
+                            <button @click="bloodViewMode = 'visits'" type="button"
+                                    :style="bloodViewMode === 'visits' ? 'background:#0f766e;color:white;' : 'background:#f1f5f9;color:#475569;'"
+                                    style="flex: 1; padding: 6px; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">By visit</button>
+                        </div>
+
+                        <!-- LATEST: one row per marker, with a bar showing where it sits in the lab's own range -->
+                        <div x-show="bloodViewMode === 'latest' && !showBloodForm && !showBloodImport">
+                            <template x-for="series in allBloodSeries()" :key="series.markerId + '|' + series.displayName">
+                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                                    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+                                        <div style="font-weight: bold; color: #1e293b;" x-text="series.displayName"></div>
+                                        <div style="display: flex; align-items: baseline; gap: 8px;">
+                                            <span style="font-weight: 600;" x-text="bloodValueText(series.latest)"></span>
+                                            <span style="font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 999px;"
+                                                  :style="'color:' + bloodStatusColour(bloodStatus(series.latest)) + ';background:' + bloodStatusColour(bloodStatus(series.latest)) + '22;'"
+                                                  x-text="bloodStatusShort(bloodStatus(series.latest))"></span>
+                                        </div>
+                                    </div>
+
+                                    <div x-show="bloodBarLeft(series.latest) !== null" style="position: relative; height: 8px; margin: 8px 0 6px;">
+                                        <div style="position: absolute; inset: 0; background: #e2e8f0; border-radius: 999px;"></div>
+                                        <div style="position: absolute; top: 0; bottom: 0; left: 25%; width: 50%; background: #bbf7d0; border-radius: 999px;"></div>
+                                        <div style="position: absolute; top: -2px; width: 12px; height: 12px; border-radius: 999px;"
+                                             :style="'left: calc(' + bloodBarLeft(series.latest) + '% - 6px); background:' + bloodStatusColour(bloodStatus(series.latest))"></div>
+                                    </div>
+
+                                    <div style="font-size: 0.75rem; color: #64748b; display: flex; gap: 10px; flex-wrap: wrap;">
+                                        <span x-text="new Date(series.latest.sampleDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: '2-digit' })"></span>
+                                        <span x-show="bloodRefText(series.latest)" x-text="'range ' + bloodRefText(series.latest)"></span>
+                                        <span x-show="bloodChangeVsPrevious(series)" x-text="bloodChangeVsPrevious(series)?.summary"></span>
+                                        <button @click="expandedBloodMarker = (expandedBloodMarker === series.markerId + '|' + series.displayName) ? null : series.markerId + '|' + series.displayName"
+                                                style="background: none; border: none; color: #0f766e; cursor: pointer; padding: 0; font-size: 0.75rem; text-decoration: underline;">
+                                            <span x-text="expandedBloodMarker === series.markerId + '|' + series.displayName ? 'Hide history' : 'History'"></span>
+                                        </button>
+                                    </div>
+
+                                    <div x-show="expandedBloodMarker === series.markerId + '|' + series.displayName" x-transition style="margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
+                                        <template x-for="p in [...series.points].reverse()" :key="p.id">
+                                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding: 3px 0;">
+                                                <span style="color: #64748b;" x-text="new Date(p.sampleDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                                <span>
+                                                    <span x-text="bloodValueText(p)"></span>
+                                                    <span style="font-size: 0.7rem; font-weight: 700; margin-left: 6px;"
+                                                          :style="'color:' + bloodStatusColour(bloodStatus(p))" x-text="bloodStatusShort(bloodStatus(p))"></span>
+                                                </span>
+                                            </div>
+                                        </template>
+                                        <div x-show="series.excludedUnits.length > 0" class="info-box info-box-amber" style="margin-top: 8px; font-size: 0.75rem;">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                            Some results for this marker were recorded in <span x-text="series.excludedUnits.join(', ')"></span> and are not listed above.
+                                            Different units cannot be compared on one scale, so only <span x-text="series.unit"></span> results are shown.
+                                        </div>
+                                        <div x-show="series.referenceRangeVaries" style="margin-top: 8px; font-size: 0.75rem; color: #64748b;">
+                                            <i class="fa-solid fa-circle-info"></i> The reference range has not been the same for every result — laboratories differ.
+                                        </div>
+                                        <div x-show="bloodMarker(series.markerId)" style="margin-top: 8px; font-size: 0.8rem; color: #475569; font-style: italic;"
+                                             x-text="bloodMarker(series.markerId)?.blurb"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- BY VISIT: the panels as they arrived -->
+                        <div x-show="bloodViewMode === 'visits' && !showBloodForm && !showBloodImport">
+                            <template x-for="panel in bloodPanels()" :key="panel.key">
+                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                                        <div style="font-size: 0.85rem; color: #64748b; font-weight: bold;">
+                                            <span x-text="new Date(panel.sampleDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                            <span x-show="panel.labName" x-text="' · ' + panel.labName"></span>
+                                        </div>
+                                        <div x-show="panel.outOfRangeCount > 0" style="font-size: 0.75rem; color: #d97706;"
+                                             x-text="panel.outOfRangeCount + ' outside range'"></div>
+                                    </div>
+                                    <template x-for="r in panel.rows" :key="r.id">
+                                        <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid #f8fafc;">
+                                            <div>
+                                                <div style="font-size: 0.9rem;" x-text="bloodDisplayName(r)"></div>
+                                                <div x-show="bloodRefText(r)" style="font-size: 0.7rem; color: #94a3b8;" x-text="'range ' + bloodRefText(r)"></div>
+                                            </div>
+                                            <div style="display: flex; align-items: baseline; gap: 8px;">
+                                                <span style="font-weight: 600;" x-text="bloodValueText(r)"></span>
+                                                <span style="font-size: 0.7rem; font-weight: 700;"
+                                                      :style="'color:' + bloodStatusColour(bloodStatus(r))" x-text="bloodStatusShort(bloodStatus(r))"></span>
+                                                <button @click="openBloodForm(r)" style="background: none; border: none; color: #64748b; cursor: pointer;"><i class="fa-solid fa-pen"></i></button>
+                                                <button @click="deleteBloodResult(r.id)" style="background: none; border: none; color: #ef4444; cursor: pointer;"><i class="fa-solid fa-trash-can"></i></button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div x-show="panel.lacksAnyRange" style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px; font-style: italic;">
+                                        No reference range was recorded for this visit, so these values can be stored but not compared to a range.
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div x-show="patientBloodResults().length === 0 && !showBloodForm && !showBloodImport"
+                             style="padding: 30px 20px; text-align: center; color: #94a3b8; font-style: italic; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                            No blood results recorded.<br>Add the markers your vet has shared with you, and this panel builds a running comparison of each one over time.
+                        </div>
+
+                        <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                            <i class="fa-solid fa-circle-info"></i>
+                            These values are a record of what your laboratory reported, compared only against the reference range printed on that same report.
+                            What they mean for your pet is a discussion for your veterinary surgeon — the app does not interpret results.
+                        </p>
+                    </div>
+                </div>
+            </template>
+
+                                    <!-- ******************************** -->
+                                    <!-- ECHO RESULTS                     -->
+                                    <!-- ******************************** -->
+            <template x-if="activePatientProfile?.modules?.acvimStaging">
+                <div class="module-card" x-show="patients.length > 0 && isView('meds') && modOn('acvimStaging')" x-cloak>
+
+                    <div style="margin-bottom: 15px;">
+                        <button @click="showEchoPanel = !showEchoPanel" :aria-expanded="showEchoPanel.toString()" type="button" class="btn-accordion">
+                            <h3><i class="fa-solid fa-wave-square"></i>
+                                <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Echo Results' : 'Echo Results'"></span>
+                                <span x-show="echoStudies().length > 0" style="font-size: 0.8rem; font-weight: 400; color: #64748b; margin-left: 8px;"
+                                      x-text="'(' + echoStudies().length + ' scan' + (echoStudies().length === 1 ? '' : 's') + ')'"></span>
+                            </h3>
+                            <i class="fa-solid" :class="showEchoPanel ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+
+                    <div x-show="showEchoPanel" x-transition>
+
+                        <div style="margin-bottom: 15px;" x-show="!showEchoForm">
+                            <button @click="openEchoForm()" type="button" style="width: 100%; padding: 10px; background: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                                <i class="fa-solid fa-square-plus"></i> Add echo results
+                            </button>
+                        </div>
+
+                        <!-- ADD / EDIT A STUDY -->
+                        <div x-show="showEchoForm" x-cloak class="vch-modal">
+                            <h4 style="margin-bottom: 12px;" x-text="editingEchoKey ? 'Edit echo results' : 'Add echo results'"></h4>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label class="form-label">Study date</label>
+                                    <input type="date" x-model="newEchoStudy.studyDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                </div>
+                                <div>
+                                    <label class="form-label">Centre / cardiologist</label>
+                                    <input type="text" x-model="newEchoStudy.centreName" class="form-control" placeholder="optional">
+                                </div>
+                            </div>
+                            <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;"
+                               x-text="echoWeightKgAt(newEchoStudy.studyDate)
+                                        ? 'Measurements will be scaled to ' + echoWeightKgAt(newEchoStudy.studyDate).kg.toFixed(1) + ' kg — the most recent weight on or before this date.'
+                                        : 'No weight recorded yet. The measurements will be saved, but the weight-scaled indices cannot be worked out without one.'"></p>
+
+                            <div class="info-box info-box-amber" style="margin-top: 12px;">
+                                <label class="form-label text-warning">Measurements</label>
+                                <template x-for="m in ECHO_MEASURES_LIST" :key="m.id">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 600; font-size: 0.9rem;" x-text="m.short"></div>
+                                            <div style="font-size: 0.7rem; color: #64748b;" x-text="m.label"></div>
+                                        </div>
+                                        <input type="number" step="any" x-model="newEchoStudy.values[m.id].value"
+                                               class="form-control" style="width: 90px;" placeholder="—">
+                                        <select x-show="m.units.length > 1" x-model="newEchoStudy.values[m.id].unit" class="form-select" style="width: 80px;">
+                                            <template x-for="u in m.units" :key="u"><option :value="u" x-text="u"></option></template>
+                                        </select>
+                                        <span x-show="m.units.length <= 1" style="width: 80px; font-size: 0.8rem; color: #64748b;" x-text="m.units[0]"></span>
+                                    </div>
+                                </template>
+                                <p style="font-size: 0.75rem; color: #92400e; margin-top: 6px;">
+                                    Enter only what your report gives. Units matter: a measurement in millimetres entered as centimetres would make the heart look ten times larger than it is.
+                                </p>
+                            </div>
+
+                            <div x-show="echoFormPreview().length > 0" class="info-box" style="margin-top: 12px; background: #f0fdf4; border-color: #bbf7d0;">
+                                <label class="form-label" style="color: #14532d;">Works out as</label>
+                                <template x-for="d in echoFormPreview()" :key="d.id">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 2px 0;">
+                                        <span x-text="d.label"></span>
+                                        <span>
+                                            <strong x-text="echoFormatIndex(d.value)"></strong>
+                                            <span style="font-size: 0.75rem; font-weight: 700; margin-left: 6px;"
+                                                  :style="'color:' + echoBandColour(d.band)" x-text="echoBandLabel(d.band)"></span>
+                                        </span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <label class="form-label" style="margin-top: 10px;">Notes</label>
+                            <textarea x-model="newEchoStudy.notes" class="form-control" rows="2" placeholder="Anything your vet said about this scan"></textarea>
+
+                            <div class="flex-gap-10" style="margin-top: 15px;">
+                                <button @click="saveEchoStudy()" :disabled="echoFormEnteredCount() === 0" class="btn-primary" style="background: #0f766e;">Save results</button>
+                                <button @click="showEchoForm = false; editingEchoKey = null;" class="btn-secondary">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- STUDIES -->
+                        <div x-show="!showEchoForm">
+                            <template x-for="study in echoStudies()" :key="study.key">
+                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; position: relative;">
+                                    <div style="font-size: 0.85rem; color: #64748b; font-weight: bold; margin-bottom: 10px;">
+                                        <span x-text="new Date(study.studyDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                        <span x-show="study.centreName" x-text="' · ' + study.centreName"></span>
+                                    </div>
+
+                                    <!-- Derived indices first: they are what the measurements are FOR -->
+                                    <template x-for="d in echoDerived(study)" :key="d.id">
+                                        <div style="padding: 4px 0; border-bottom: 1px solid #f8fafc;">
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                                                <span style="font-size: 0.9rem; font-weight: 600;">
+                                                    <span x-text="d.label"></span>
+                                                    <span x-show="d.computed" style="font-size: 0.65rem; font-weight: 400; color: #64748b; background: #f1f5f9; padding: 1px 5px; border-radius: 999px;">calculated</span>
+                                                </span>
+                                                <span x-show="d.value !== null">
+                                                    <strong x-text="echoFormatIndex(d.value)"></strong>
+                                                    <span style="font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 999px; margin-left: 6px;"
+                                                          :style="'color:' + echoBandColour(d.band) + ';background:' + echoBandColour(d.band) + '22;'"
+                                                          x-text="echoBandLabel(d.band)"></span>
+                                                </span>
+                                            </div>
+                                            <div x-show="d.reason" style="font-size: 0.7rem; color: #d97706;" x-text="d.reason"></div>
+                                            <div x-show="!d.reason" style="font-size: 0.7rem; color: #94a3b8;" x-text="d.formula"></div>
+                                        </div>
+                                    </template>
+
+                                    <div x-show="echoWeightKgAt(study.studyDate)" style="font-size: 0.75rem; color: #64748b; margin-top: 8px;">
+                                        <i class="fa-solid fa-weight-scale"></i>
+                                        Scaled to <span x-text="echoWeightKgAt(study.studyDate)?.kg.toFixed(1)"></span> kg
+                                        (weighed <span x-text="echoWeightKgAt(study.studyDate) ? new Date(echoWeightKgAt(study.studyDate).date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: '2-digit' }) : ''"></span>)
+                                    </div>
+
+                                    <div x-show="echoEpic(study).meets !== null" style="margin-top: 10px; font-size: 0.8rem;"
+                                         :style="'color:' + (echoEpic(study).meets ? '#b45309' : '#64748b')">
+                                        <i class="fa-solid" :class="echoEpic(study).meets ? 'fa-certificate' : 'fa-circle'"></i>
+                                        <span x-text="echoEpic(study).meets ? 'Meets the EPIC trial\'s echo criteria' : 'Does not meet the EPIC trial\'s echo criteria'"></span>
+                                        <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">
+                                            The EPIC trial used a murmur of grade 3/6 or louder with LA:Ao ≥ 1.6 and LVIDDN ≥ 1.7. This describes the measurements — it is not a stage or a treatment decision.
+                                        </div>
+                                    </div>
+                                    <div x-show="echoEpic(study).meets === null && echoEpic(study).missing.length > 0"
+                                         style="margin-top: 10px; font-size: 0.7rem; color: #94a3b8;"
+                                         x-text="'EPIC criteria can\'t be checked yet — still needed: ' + echoEpic(study).missing.join(', ') + '.'"></div>
+
+                                    <details style="margin-top: 10px;">
+                                        <summary style="font-size: 0.8rem; color: #475569; cursor: pointer;">Measurements as reported</summary>
+                                        <template x-for="r in study.rows" :key="r.id">
+                                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding: 3px 0;">
+                                                <span x-text="echoDisplayName(r)"></span>
+                                                <span><span x-text="r.value"></span> <span x-text="r.unit"></span></span>
+                                            </div>
+                                        </template>
+                                    </details>
+
+                                    <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 12px;">
+                                        <button @click="openEchoForm(study)" style="background: none; border: none; color: #64748b; cursor: pointer;"><i class="fa-solid fa-pen"></i></button>
+                                        <button @click="deleteEchoStudy(study.key)" style="background: none; border: none; color: #ef4444; cursor: pointer;"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div x-show="echoStudies().length === 0" style="padding: 30px 20px; text-align: center; color: #94a3b8; font-style: italic; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                                No echo results recorded.<br>Record LAD, LA:Ao, LVIDd and LVEDV from your pet's scan and they will be scaled to their body weight.
+                            </div>
+                        </div>
+
+                        <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                            <i class="fa-solid fa-circle-info"></i>
+                            Scaling to body weight is what makes these numbers comparable — the same measurement means very different things in a Chihuahua and a Labrador.
+                            The reference bands are published criteria and describe the measurements only; what they mean for your pet is a discussion for your veterinary surgeon.
+                        </p>
+                    </div>
+                </div>
+            </template>
+
                                     <!-- ******************************** -->
                                     <!-- WEIGHT  SECTION                  -->
                                     <!-- ******************************** -->                
