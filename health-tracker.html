@@ -1998,7 +1998,66 @@
                                     <!-- ******************************** -->
              <template x-if="activePatientProfile?.modules?.medications"> 
                 <div class="module-card" x-show="patients.length > 0 && isView('meds') && modOn('medications')" x-cloak>
-                    
+
+                    <!-- ALLERGIES — see ALLERGY_TYPES in rr-logic.js for the three load-bearing
+                         rules. Placed ABOVE everything else in this module on purpose: it is the
+                         one thing here that changes what may safely be given, so it is read BEFORE
+                         the thing it warns about, not after it. -->
+                    <div style="border: 1px solid #fecaca; background: #fef2f2; border-radius: 8px; padding: 12px 14px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                            <div style="font-weight: bold; font-size: 0.85rem;"
+                                 :style="hasSevereAllergy(medicationAllergies()) ? 'color:#b91c1c' : 'color:#7f1d1d'">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Medication reactions &amp; allergies
+                                <span x-show="medicationAllergies().length > 0" style="font-weight: 400; color: #64748b;"
+                                      x-text="'(' + medicationAllergies().length + ')'"></span>
+                            </div>
+                            <button @click="openAllergyForm('medication')" type="button"
+                                    style="background: #fff; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; padding: 4px 10px; font-size: 0.8rem; font-weight: bold; cursor: pointer; white-space: nowrap;">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </div>
+                        <p x-show="medicationAllergies().length === 0" style="font-size: 0.8rem; color: #64748b; margin: 8px 0 0;">
+                            No medication reactions recorded. Anything you add here appears at the top of every report you send to a vet.
+                        </p>
+                        <template x-for="a in medicationAllergies()" :key="a.id">
+                            <div style="border-top: 1px solid #fecaca; padding-top: 8px; margin-top: 8px;">
+                                <button @click="toggleAllergyDetail(a.id)" type="button"
+                                        style="width: 100%; text-align: left; background: none; border: none; padding: 0; cursor: pointer;">
+                                    <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                        <span :style="`color:${allergyDotColour(a.severity)}`" style="margin-top: 2px;">
+                                            <i class="fa-solid" :class="a.severity === 'severe' ? 'fa-circle-exclamation' : 'fa-circle'"
+                                               :style="a.severity === 'severe' ? '' : 'font-size:0.6rem'"></i>
+                                        </span>
+                                        <span style="flex: 1;">
+                                            <span style="font-weight: bold; color: #1e293b;" x-text="allergyDisplayName(a)"></span>
+                                            <span style="display: block; font-size: 0.8rem; color: #475569;" x-text="allergySummaryLine(a)"></span>
+                                        </span>
+                                        <i class="fa-solid" :class="viewingAllergyId === a.id ? 'fa-chevron-up' : 'fa-chevron-down'"
+                                           style="color: #94a3b8; font-size: 0.75rem; margin-top: 3px;"></i>
+                                    </div>
+                                </button>
+                                <div x-show="viewingAllergyId === a.id" x-transition x-cloak
+                                     style="margin-top: 8px; background: #fff; border: 1px solid #fecaca; border-radius: 6px; padding: 10px; font-size: 0.85rem; color: #334155;">
+                                    <div><strong>Severity:</strong> <span x-text="allergySeverityLabel(a.severity)"></span></div>
+                                    <div><strong>How it&apos;s known:</strong> <span x-text="allergyCertaintyLabel(a.certainty)"></span></div>
+                                    <div><strong>Diagnosed:</strong> <span x-text="a.date ? allergyDayText(a.date) : 'Not recorded'"></span></div>
+                                    <div x-show="a.reaction"><strong>Reaction:</strong> <span x-text="a.reaction"></span></div>
+                                    <div x-show="a.notes" style="margin-top: 6px; white-space: pre-wrap;" x-text="a.notes"></div>
+                                    <div style="margin-top: 10px; display: flex; gap: 8px;">
+                                        <button @click="openAllergyForm(a.type, a.id)" type="button" class="btn-secondary"
+                                                style="padding: 4px 10px; font-size: 0.8rem;">
+                                            <i class="fa-solid fa-pen"></i> Edit
+                                        </button>
+                                        <button @click="deleteAllergy(a.id)" type="button"
+                                                style="padding: 4px 10px; font-size: 0.8rem; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer;">
+                                            <i class="fa-solid fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
                     <div style="margin-bottom: 15px;">
                         <button @click="showMedLog = !showMedLog" :aria-expanded="showMedLog.toString()" type="button" class="btn-accordion">
                             <h3><i class="fa-solid fa-pills"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Medication and Supplement Ledger' : 'Medication and Supplement Ledger'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_medications')"></i></h3> 
@@ -2890,6 +2949,246 @@
                 </div>
             </template>
                                     <!-- ******************************** -->
+                                    <!-- SURGERIES, DENTALS & PROCEDURES  -->
+                                    <!-- ******************************** -->
+                                    <!-- Sits beside the two diagnosis lists: what has been DONE to a pet
+                                         belongs next to what the pet HAS. Deliberately NOT module-gated —
+                                         a surgical history is part of the record, not an opt-in tracker. -->
+            <div class="module-card" x-show="patients.length > 0 && isView('meds')" x-cloak>
+
+                <div style="margin-bottom: 15px;">
+                    <button @click="showProcedurePanel = !showProcedurePanel" :aria-expanded="showProcedurePanel.toString()" type="button" class="btn-accordion">
+                        <h3><i class="fa-solid fa-scissors"></i>
+                            <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Surgeries &amp; Procedures' : 'Surgeries &amp; Procedures'"></span>
+                            <span x-show="patientProcedures().length > 0" style="font-size: 0.8rem; font-weight: 400; color: #64748b; margin-left: 8px;"
+                                  x-text="'(' + patientProcedures().length + ')'"></span>
+                        </h3>
+                        <i class="fa-solid" :class="showProcedurePanel ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                    </button>
+                </div>
+
+                <div x-show="showProcedurePanel" x-transition>
+
+                    <!-- ANAESTHETIC RECORD — the question this whole module exists to answer -->
+                    <div x-show="procedureAnaestheticHistory().count > 0" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; color: #1e3a8a;">
+                            <i class="fa-solid fa-bed"></i>
+                            <span x-text="procedureAnaestheticHistory().count === 1 ? '1 anaesthetic on record' : procedureAnaestheticHistory().count + ' anaesthetics on record'"></span>
+                        </div>
+                        <div x-show="procedureAnaestheticHistory().mostRecent" style="font-size: 0.85rem; color: #475569; margin-top: 4px;">
+                            Most recent: <span x-text="procedureAnaestheticHistory().mostRecent ? new Date(procedureAnaestheticHistory().mostRecent).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : ''"></span>
+                        </div>
+                        <div x-show="procedureAnaestheticHistory().mostRecentRecovery" style="font-size: 0.85rem; color: #475569;" x-text="procedureAnaestheticHistory().mostRecentRecovery"></div>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px;">
+                            Take this to any appointment where an anaesthetic is being discussed — how your pet coped last time is evidence your vet cannot get anywhere else.
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;" x-show="!showProcedureForm">
+                        <button @click="openProcedureForm()" type="button" style="width: 100%; padding: 10px; background: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                            <i class="fa-solid fa-square-plus"></i> Add a procedure
+                        </button>
+                    </div>
+
+                    <!-- ADD / EDIT -->
+                    <div x-show="showProcedureForm" x-cloak class="vch-modal">
+                        <h4 style="margin-bottom: 12px;" x-text="editingProcedureId ? 'Edit procedure' : 'Add a procedure'"></h4>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label class="form-label">Type</label>
+                                <select x-model="newProcedure.category" @change="onProcedureCategoryChange()" class="form-control">
+                                    <template x-for="c in PROCEDURE_CATEGORIES_LIST" :key="c.id">
+                                        <option :value="c.id" x-text="c.label"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Area</label>
+                                <select x-model="newProcedure.area" class="form-control">
+                                    <option value="">Not sure</option>
+                                    <template x-for="a in PROCEDURE_AREAS_LIST" :key="a.id">
+                                        <option :value="a.id" x-text="a.label"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label class="form-label" style="margin-top: 10px;">What was done</label>
+                        <input type="text" x-model="newProcedure.name" class="form-control" placeholder="e.g. Dental with extractions">
+                        <div x-show="!newProcedure.name" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                            <template x-for="s in procedureSuggestions(newProcedure.area)" :key="s">
+                                <button type="button" @click="newProcedure.name = s"
+                                        style="padding: 4px 8px; font-size: 0.75rem; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 999px; cursor: pointer;"
+                                        x-text="s"></button>
+                            </template>
+                        </div>
+                        <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                            Use the words on your pet's discharge notes — they are what the next vet will recognise.
+                        </p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                            <div>
+                                <label class="form-label">Status</label>
+                                <select x-model="newProcedure.status" class="form-control">
+                                    <option value="completed">Already happened</option>
+                                    <option value="scheduled">Booked in</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label" x-text="newProcedure.status === 'scheduled' ? 'Booked for' : 'Date'"></label>
+                                <input type="date" x-model="newProcedure.date"
+                                       :max="newProcedure.status === 'scheduled' ? '' : new Date().toISOString().split('T')[0]"
+                                       class="form-control">
+                            </div>
+                        </div>
+                        <p x-show="newProcedure.status === 'scheduled'" style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                            Booked procedures stay on the list as plans until you mark them done, so a date that slips never turns into a record of something that happened.
+                        </p>
+
+                        <label class="form-label" style="margin-top: 10px;">Practice or vet (optional)</label>
+                        <input type="text" x-model="newProcedure.performedBy" class="form-control" placeholder="e.g. Oakwood Vets">
+
+                        <!-- ANAESTHETIC (completed only — a booking has no outcome yet) -->
+                        <div x-show="newProcedure.status !== 'scheduled'" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155;">
+                                <input type="checkbox" x-model="newProcedure.hadGA"> General anaesthetic
+                            </label>
+                            <div x-show="newProcedure.hadGA" style="margin-top: 8px;">
+                                <label class="form-label">How your pet coped</label>
+                                <input type="text" x-model="newProcedure.recoveryNotes" class="form-control" placeholder="e.g. uneventful, home same day">
+                                <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                    One of the most useful things you can record for a heart patient. When a vet is weighing up the next anaesthetic, knowing how the last one went is real evidence — and only you have it.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- TOOTH CHART (dental only) -->
+                        <div x-show="usesExtractions(newProcedure.category)" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                            <label class="form-label">Teeth removed</label>
+                            <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px;">
+                                Tap the numbers from the dental chart your vet gave you. Leave blank if it was only a scale and polish.
+                            </p>
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; margin-bottom: 8px;">
+                                <input type="checkbox" x-model="showDeciduousTeeth"> Baby (deciduous) teeth
+                            </label>
+                            <template x-for="q in dentalChartQuadrants()" :key="q.id">
+                                <div style="margin-bottom: 10px;">
+                                    <div style="font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 4px;" x-text="q.label"></div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                        <template x-for="t in dentalChartQuadrantTeeth(activePatientProfile?.species, q.id, showDeciduousTeeth)" :key="t.triadan">
+                                            <button type="button" @click="toggleTooth(t.triadan)"
+                                                    :title="toothLabel(t.triadan, activePatientProfile?.species)"
+                                                    :style="isToothSelected(t.triadan)
+                                                        ? 'background:#0f766e;color:white;border:1px solid #0f766e;font-weight:bold;'
+                                                        : ('background:#f8fafc;color:#334155;border:1px solid ' + ((t.isCarnassial || t.type === 'canine') ? '#94a3b8' : '#e2e8f0') + ';')"
+                                                    style="min-width: 42px; padding: 6px 4px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;"
+                                                    x-text="t.triadan"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Chosen teeth, spelled out — where the owner checks they picked the tooth they meant -->
+                            <div x-show="newProcedure.extractions.length > 0" style="margin-top: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
+                                <div style="font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 6px;"
+                                     x-text="newProcedure.extractions.length === 1 ? '1 tooth extracted' : newProcedure.extractions.length + ' teeth extracted'"></div>
+                                <template x-for="t in newProcedure.extractions" :key="t.tooth">
+                                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                                        <div style="flex: 1; font-size: 0.85rem; color: #1e293b;" x-text="toothLabel(t.tooth, activePatientProfile?.species)"></div>
+                                        <input type="text" x-model="t.note" class="form-control" style="width: 45%; padding: 4px 6px; font-size: 0.8rem;" placeholder="reason (optional)">
+                                        <button type="button" @click="toggleTooth(t.tooth)" style="background: none; border: none; color: #ef4444; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- HISTOPATHOLOGY (completed only) -->
+                        <div x-show="newProcedure.status !== 'scheduled'" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155;">
+                                <input type="checkbox" x-model="newProcedure.histopathSent"> A sample was sent to a laboratory
+                            </label>
+                            <div x-show="newProcedure.histopathSent" style="margin-top: 8px;">
+                                <label class="form-label">Result, once you have it</label>
+                                <input type="text" x-model="newProcedure.histopathResult" class="form-control" placeholder="e.g. Grade II mast cell tumour, margins complete">
+                                <label class="form-label" style="margin-top: 8px;">Result date</label>
+                                <input type="date" x-model="newProcedure.histopathDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                    For lumps and biopsies. Recording the result word for word is worth doing — it is often the single most important line in a pet's history.
+                                </p>
+                            </div>
+                        </div>
+
+                        <label class="form-label" style="margin-top: 10px;">Notes</label>
+                        <input type="text" x-model="newProcedure.notes" class="form-control" placeholder="Anything else your vet told you">
+
+                        <div style="display: flex; gap: 8px; margin-top: 14px;">
+                            <button @click="saveProcedure()" type="button" class="btn-primary" style="background: #0f766e;">Save</button>
+                            <button @click="closeProcedureForm()" type="button" class="btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- BOOKED -->
+                    <div x-show="scheduledProcedures().length > 0 && !showProcedureForm" style="margin-bottom: 15px;">
+                        <div style="font-size: 0.8rem; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Booked in</div>
+                        <template x-for="pr in scheduledProcedures()" :key="pr.id">
+                            <div style="position: relative; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                                <div style="font-weight: bold; color: #1e293b;" x-text="procedureTitle(pr)"></div>
+                                <div style="font-size: 0.8rem; color: #b45309; font-weight: 600; margin-top: 2px;">
+                                    BOOKED — <span x-text="new Date(pr.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                </div>
+                                <div x-show="procedureSubtitle(pr)" style="font-size: 0.85rem; color: #475569; margin-top: 2px;" x-text="procedureSubtitle(pr)"></div>
+                                <div x-show="procedureNeedsOutcome(pr)" style="font-size: 0.8rem; color: #b45309; margin-top: 6px;">
+                                    <i class="fa-solid fa-circle-question"></i> This date has passed — did it go ahead?
+                                    <button type="button" @click="markProcedureDone(pr.id)" style="margin-left: 6px; padding: 2px 8px; font-size: 0.75rem; background: #16a34a; color: white; border: none; border-radius: 4px; cursor: pointer;">Mark done</button>
+                                </div>
+                                <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 12px;">
+                                    <button @click="openProcedureForm(pr.id)" style="background: none; border: none; color: #64748b; cursor: pointer;"><i class="fa-solid fa-pen"></i></button>
+                                    <button @click="deleteProcedure(pr.id)" style="background: none; border: none; color: #ef4444; cursor: pointer;"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- HISTORY -->
+                    <div x-show="!showProcedureForm">
+                        <div x-show="completedProcedures().length > 0" style="font-size: 0.8rem; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">History</div>
+                        <template x-for="pr in completedProcedures()" :key="pr.id">
+                            <div style="position: relative; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                                <div style="display: flex; align-items: baseline; gap: 8px;">
+                                    <div style="font-weight: bold; color: #1e293b;" x-text="procedureTitle(pr)"></div>
+                                    <div style="font-size: 0.8rem; color: #64748b;" x-text="new Date(pr.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></div>
+                                </div>
+                                <div x-show="procedureSubtitle(pr)" style="font-size: 0.85rem; color: #475569; margin-top: 2px;" x-text="procedureSubtitle(pr)"></div>
+                                <div x-show="pr.hadGA" style="font-size: 0.8rem; color: #1e3a8a; margin-top: 4px;">
+                                    <i class="fa-solid fa-bed"></i> <span x-text="procedureAnaestheticLine(pr)"></span>
+                                </div>
+                                <div x-show="pr.extractions && pr.extractions.length > 0" style="font-size: 0.8rem; color: #475569; margin-top: 4px;"
+                                     x-text="extractionSummary(pr.extractions, activePatientProfile?.species)"></div>
+                                <template x-if="procedureHistopathLine(pr)">
+                                    <div style="font-size: 0.8rem; margin-top: 4px;"
+                                         :style="pr.histopathResult ? 'color:#475569;' : 'color:#b45309;'">
+                                        <span x-text="procedureHistopathLine(pr)"></span>
+                                        <span x-show="pr.histopathDate" x-text="' (' + pr.histopathDate + ')'"></span>
+                                    </div>
+                                </template>
+                                <div x-show="pr.notes" style="font-size: 0.85rem; color: #475569; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e2e8f0; font-style: italic;" x-text="pr.notes"></div>
+                                <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 12px;">
+                                    <button @click="openProcedureForm(pr.id)" style="background: none; border: none; color: #64748b; cursor: pointer;"><i class="fa-solid fa-pen"></i></button>
+                                    <button @click="deleteProcedure(pr.id)" style="background: none; border: none; color: #ef4444; cursor: pointer;"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div x-show="patientProcedures().length === 0" style="padding: 20px; text-align: center; color: #94a3b8; font-size: 0.9rem; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                            No surgeries, dentals or procedures recorded yet.<br>
+                            <span style="font-size: 0.8rem;">Worth adding even from years ago — a spay, a dental, a lump removal.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                                    <!-- ******************************** -->
                                     <!-- BLOOD TEST RESULTS               -->
                                     <!-- ******************************** -->
             <template x-if="activePatientProfile?.modules?.acvimStaging">
@@ -3299,15 +3598,24 @@
                                          style="margin-top: 10px; font-size: 0.7rem; color: #94a3b8;"
                                          x-text="'EPIC criteria can\'t be checked yet — still needed: ' + echoEpic(study).missing.join(', ') + '.'"></div>
 
-                                    <details style="margin-top: 10px;">
-                                        <summary style="font-size: 0.8rem; color: #475569; cursor: pointer;">Measurements as reported</summary>
+                                    <!-- Measured values, shown in full rather than hidden behind a disclosure.
+                                         The indices answer "is this big for this dog"; these answer "has it
+                                         changed since last time" — the question actually asked between visits.
+                                         NO reference range is shown against them on purpose: a raw LAD has no
+                                         meaningful normal without the body weight behind it. -->
+                                    <div style="margin-top: 12px; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+                                        <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px;">AS MEASURED</div>
                                         <template x-for="r in study.rows" :key="r.id">
-                                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding: 3px 0;">
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.85rem; padding: 3px 0;">
                                                 <span x-text="echoDisplayName(r)"></span>
-                                                <span><span x-text="r.value"></span> <span x-text="r.unit"></span></span>
+                                                <span>
+                                                    <span x-show="echoChangeSincePrevious(r)" style="font-size: 0.7rem; color: #94a3b8; margin-right: 8px;"
+                                                          x-text="echoChangeSincePrevious(r)"></span>
+                                                    <strong x-text="r.value"></strong> <span x-text="r.unit"></span>
+                                                </span>
                                             </div>
                                         </template>
-                                    </details>
+                                    </div>
 
                                     <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 12px;">
                                         <button @click="openEchoForm(study)" style="background: none; border: none; color: #64748b; cursor: pointer;"><i class="fa-solid fa-pen"></i></button>
@@ -3335,7 +3643,66 @@
                                     <!-- ******************************** -->                
             <template x-if="activePatientProfile?.modules?.weightDiet">
                 <div class="module-card" x-show="patients.length > 0 && isView('wellness') && modOn('weightDiet')" x-cloak>
-            
+
+                    <!-- ALLERGIES — see ALLERGY_TYPES in rr-logic.js for the three load-bearing
+                         rules. Placed ABOVE everything else in this module on purpose: it is the
+                         one thing here that changes what may safely be given, so it is read BEFORE
+                         the thing it warns about, not after it. -->
+                    <div style="border: 1px solid #fecaca; background: #fef2f2; border-radius: 8px; padding: 12px 14px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                            <div style="font-weight: bold; font-size: 0.85rem;"
+                                 :style="hasSevereAllergy(foodAllergies()) ? 'color:#b91c1c' : 'color:#7f1d1d'">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Food allergies
+                                <span x-show="foodAllergies().length > 0" style="font-weight: 400; color: #64748b;"
+                                      x-text="'(' + foodAllergies().length + ')'"></span>
+                            </div>
+                            <button @click="openAllergyForm('food')" type="button"
+                                    style="background: #fff; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; padding: 4px 10px; font-size: 0.8rem; font-weight: bold; cursor: pointer; white-space: nowrap;">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </div>
+                        <p x-show="foodAllergies().length === 0" style="font-size: 0.8rem; color: #64748b; margin: 8px 0 0;">
+                            No food allergies recorded. Anything you add here appears at the top of every report you send to a vet.
+                        </p>
+                        <template x-for="a in foodAllergies()" :key="a.id">
+                            <div style="border-top: 1px solid #fecaca; padding-top: 8px; margin-top: 8px;">
+                                <button @click="toggleAllergyDetail(a.id)" type="button"
+                                        style="width: 100%; text-align: left; background: none; border: none; padding: 0; cursor: pointer;">
+                                    <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                        <span :style="`color:${allergyDotColour(a.severity)}`" style="margin-top: 2px;">
+                                            <i class="fa-solid" :class="a.severity === 'severe' ? 'fa-circle-exclamation' : 'fa-circle'"
+                                               :style="a.severity === 'severe' ? '' : 'font-size:0.6rem'"></i>
+                                        </span>
+                                        <span style="flex: 1;">
+                                            <span style="font-weight: bold; color: #1e293b;" x-text="allergyDisplayName(a)"></span>
+                                            <span style="display: block; font-size: 0.8rem; color: #475569;" x-text="allergySummaryLine(a)"></span>
+                                        </span>
+                                        <i class="fa-solid" :class="viewingAllergyId === a.id ? 'fa-chevron-up' : 'fa-chevron-down'"
+                                           style="color: #94a3b8; font-size: 0.75rem; margin-top: 3px;"></i>
+                                    </div>
+                                </button>
+                                <div x-show="viewingAllergyId === a.id" x-transition x-cloak
+                                     style="margin-top: 8px; background: #fff; border: 1px solid #fecaca; border-radius: 6px; padding: 10px; font-size: 0.85rem; color: #334155;">
+                                    <div><strong>Severity:</strong> <span x-text="allergySeverityLabel(a.severity)"></span></div>
+                                    <div><strong>How it&apos;s known:</strong> <span x-text="allergyCertaintyLabel(a.certainty)"></span></div>
+                                    <div><strong>Diagnosed:</strong> <span x-text="a.date ? allergyDayText(a.date) : 'Not recorded'"></span></div>
+                                    <div x-show="a.reaction"><strong>Reaction:</strong> <span x-text="a.reaction"></span></div>
+                                    <div x-show="a.notes" style="margin-top: 6px; white-space: pre-wrap;" x-text="a.notes"></div>
+                                    <div style="margin-top: 10px; display: flex; gap: 8px;">
+                                        <button @click="openAllergyForm(a.type, a.id)" type="button" class="btn-secondary"
+                                                style="padding: 4px 10px; font-size: 0.8rem;">
+                                            <i class="fa-solid fa-pen"></i> Edit
+                                        </button>
+                                        <button @click="deleteAllergy(a.id)" type="button"
+                                                style="padding: 4px 10px; font-size: 0.8rem; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer;">
+                                            <i class="fa-solid fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
                     <div style="margin-bottom: 15px;">
                         <button @click="showWeightLogPanel = !showWeightLogPanel"
                                 :aria-expanded="showWeightLogPanel.toString()"
@@ -5752,6 +6119,96 @@
             </div>
             
             
+        <!-- ALLERGY ADD / EDIT — ONE shared form for both panels. It lives here, outside every
+             view-gated container, because a modal nested inside the medication card would be
+             display:none while the owner is on the Wellness view adding a food allergy. -->
+        <div x-show="showAllergyForm" x-cloak class="vch-modal">
+            <div class="form-panel vch-modal-card" style="border: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px;">
+                    <h4 style="margin: 0; color: #16325F; font-size: 0.95rem;"
+                        x-text="editingAllergyId ? 'Edit record' : 'Add ' + allergyTypeNoun(newAllergy.type)"></h4>
+                    <button @click="closeAllergyForm()" type="button"
+                            style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <label class="form-label">Type</label>
+                <select x-model="newAllergy.type" class="form-control">
+                    <template x-for="t in ALLERGY_TYPES_LIST" :key="t.id">
+                        <option :value="t.id" x-text="t.label"></option>
+                    </template>
+                </select>
+
+                <label class="form-label" style="margin-top: 10px;"
+                       x-text="newAllergy.type === 'medication' ? 'Medication' : 'Food or ingredient'"></label>
+                <input type="text" x-model="newAllergy.allergen" class="form-control"
+                       :placeholder="newAllergy.type === 'medication' ? 'e.g. Amoxicillin' : 'e.g. Chicken'">
+                <div x-show="!newAllergy.allergen" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                    <template x-for="sugg in allergenSuggestions(newAllergy.type)" :key="sugg">
+                        <button type="button" @click="newAllergy.allergen = sugg"
+                                style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 999px; padding: 3px 10px; font-size: 0.78rem; cursor: pointer;"
+                                x-text="sugg"></button>
+                    </template>
+                </div>
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 6px;">
+                    One food or medication per record, so each can carry its own reaction and notes.
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
+                    <div>
+                        <label class="form-label">How bad was it</label>
+                        <select x-model="newAllergy.severity" class="form-control">
+                            <template x-for="sev in ALLERGY_SEVERITIES_LIST" :key="sev.id">
+                                <option :value="sev.id" x-text="sev.label"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">How it&apos;s known</label>
+                        <select x-model="newAllergy.certainty" class="form-control">
+                            <template x-for="c in ALLERGY_CERTAINTIES_LIST" :key="c.id">
+                                <option :value="c.id" x-text="c.label"></option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;"
+                   x-text="allergySeverityHint(newAllergy.severity)"></p>
+
+                <label class="form-label" style="margin-top: 12px;">The reaction</label>
+                <input type="text" x-model="newAllergy.reaction" class="form-control"
+                       placeholder="What your pet did">
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                    <template x-for="sign in allergyReactionSigns(newAllergy.type)" :key="sign">
+                        <button type="button" @click="toggleAllergySign(sign)"
+                                :style="isAllergySignSelected(sign)
+                                    ? 'background:#0f766e;color:#fff;border:1px solid #0f766e;border-radius:999px;padding:3px 10px;font-size:0.78rem;cursor:pointer;'
+                                    : 'background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;border-radius:999px;padding:3px 10px;font-size:0.78rem;cursor:pointer;'"
+                                x-text="sign"></button>
+                    </template>
+                </div>
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 6px;">
+                    Tap any that apply, or write your own. This is what appears beside the name on a vet report.
+                </p>
+
+                <label class="form-label" style="margin-top: 12px;">When it was diagnosed <span style="font-weight: 400; color: #94a3b8;">— optional</span></label>
+                <input type="date" x-model="newAllergy.date" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                    Leave this blank if you&apos;re not sure — a rough guess is worse than no date at all.
+                </p>
+
+                <label class="form-label" style="margin-top: 12px;">Notes</label>
+                <input type="text" x-model="newAllergy.notes" class="form-control"
+                       placeholder="What was given, how soon the reaction started, what treatment was needed">
+
+                <div style="display: flex; gap: 8px; margin-top: 16px;">
+                    <button @click="saveAllergy()" type="button" class="btn-primary" style="background: #0f766e;">Save</button>
+                    <button @click="closeAllergyForm()" type="button" class="btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <div id="glossary-container"></div>
         
     

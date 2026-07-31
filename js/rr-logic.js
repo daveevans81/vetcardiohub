@@ -117,21 +117,178 @@ const ECHO_MEASURES = [
     { id: 'lad', label: 'Left atrial diameter (LAD)', short: 'LAD', units: ['cm', 'mm'],
       synonyms: ['lad', 'la diameter', 'left atrial diameter', 'la long axis', 'ladiam'],
       blurb: 'The width of the left atrium measured in the long-axis view. Scaled to your pet\'s weight it is one of the clearest signs of whether the left atrium has enlarged.' },
-    { id: 'la', label: 'Left atrium (LA)', short: 'LA', units: ['cm', 'mm'],
-      synonyms: ['la', 'left atrium', 'la dimension', 'la diam'],
+    { id: 'la', label: 'Left atrium, short axis (LA)', short: 'LA', units: ['cm', 'mm'],
+      synonyms: ['la', 'left atrium', 'la dimension', 'la diam', 'la sax', 'la short axis'],
       blurb: 'The size of the left atrium, the chamber that fills the main pumping chamber.' },
     { id: 'ao', label: 'Aorta (Ao)', short: 'Ao', units: ['cm', 'mm'],
-      synonyms: ['ao', 'aorta', 'aortic root', 'aortic diameter'],
+      synonyms: ['ao', 'aorta', 'aortic root', 'aortic diameter', 'ao diam', 'aortic diam', 'ao dia'],
       blurb: 'The width of the aorta. It changes very little with disease, which is why the left atrium is compared against it.' },
     { id: 'laao', label: 'LA:Ao ratio', short: 'LA:Ao', units: [''],
       synonyms: ['la/ao', 'la:ao', 'la ao', 'la to ao', 'laao', 'la:ao ratio', 'la/ao ratio'],
       blurb: 'The left atrium measured against the aorta. Being a ratio it needs no units.' },
     { id: 'lvidd', label: 'LVIDd', short: 'LVIDd', units: ['cm', 'mm'],
-      synonyms: ['lvidd', 'lvid d', 'lvid diastole', 'lv internal diameter diastole', 'lvedd'],
+      synonyms: ['lvidd', 'lvid d', 'lvid diastole', 'lv internal diameter diastole', 'lvedd', 'lvid'],
       blurb: 'The width of the main pumping chamber when it is full. Scaled to weight, it shows whether that chamber has stretched.' },
     { id: 'lvedv', label: 'LV end-diastolic volume (LVEDV)', short: 'LVEDV', units: ['ml', 'mL'],
-      synonyms: ['lvedv', 'edv', 'end diastolic volume', 'lv edv', 'ved'],
+      synonyms: ['lvedv', 'edv', 'end diastolic volume', 'lv edv', 'ved', 'lv edv mod', 'edv mod'],
       blurb: 'How much blood the main pumping chamber holds when full. Divided by weight it can be compared between visits.' },
+];
+
+// --- SURGERIES, DENTALS & PROCEDURES (parity with iOS schema V12; see BACKLOG §3l) -----------
+// What has been DONE to a pet, as opposed to what the pet HAS. For a cardiac patient this is not
+// background: a documented, uneventful general anaesthetic is one of the strongest reassurances a
+// vet has when weighing up the next one, and a PDA ligation or balloon valvuloplasty IS the cardiac
+// history.
+//
+// TWO RULES ARE LOAD-BEARING and must not be "improved":
+//   1. `status` ('completed' | 'scheduled') is STORED, never derived from whether the date has
+//      passed. A booked procedure that slipped has not happened; inferring otherwise would put a
+//      cancelled dental into the vet report as a procedure the pet went through.
+//   2. `performedBy` is free text, not a link to a saved contact. Contacts live in appSettings,
+//      outside the clinical export, so a reference would mean nothing after a restore or on iOS.
+//
+// Ids below are PERSISTED — add new ones, never rename. Hand-kept identical with
+// `ProcedureCatalogue.swift` / `DentalChart.swift`; change both together.
+const PROCEDURE_CATEGORIES = [
+    { id: 'surgery',    label: 'Surgery' },
+    { id: 'dental',     label: 'Dental' },
+    { id: 'cardiac',    label: 'Cardiac procedure' },
+    { id: 'diagnostic', label: 'Diagnostic procedure' },
+    { id: 'other',      label: 'Other' },
+];
+
+const PROCEDURE_AREAS = [
+    { id: 'mouth',       label: 'Mouth and teeth' },
+    { id: 'abdomen',     label: 'Abdomen (tummy)' },
+    { id: 'chest',       label: 'Chest' },
+    { id: 'heart',       label: 'Heart and blood vessels' },
+    { id: 'skin',        label: 'Skin or lump' },
+    { id: 'orthopaedic', label: 'Bones and joints' },
+    { id: 'spine',       label: 'Spine and nerves' },
+    { id: 'eye',         label: 'Eye' },
+    { id: 'ear_nose',    label: 'Ears, nose and throat' },
+    { id: 'urogenital',  label: 'Urinary and reproductive' },
+    { id: 'other',       label: 'Other / not sure' },
+];
+
+// Prefills only — every field they feed also takes free text. No list of operations is ever
+// complete, and one that refused the unusual case would push the interesting histories out.
+const PROCEDURE_SUGGESTIONS = {
+    mouth:       ['Dental scale and polish', 'Dental with extractions', 'Dental x-rays',
+                  'Tooth root abscess treatment', 'Gum (oral) mass removal'],
+    abdomen:     ['Neutering — spay (ovariohysterectomy)', 'Exploratory laparotomy',
+                  'Removal of a swallowed object (foreign body)', 'Spleen removal (splenectomy)',
+                  'Bladder stone removal (cystotomy)', 'Gastric dilatation-volvulus (GDV) surgery',
+                  'Liver or intestinal biopsy'],
+    chest:       ['Chest drain placement', 'Lung lobe removal (lobectomy)',
+                  'Diaphragmatic hernia repair', 'Thoracoscopy',
+                  'Pericardectomy (removing the sac around the heart)'],
+    heart:       ['PDA closure (occlusion or ligation)', 'Balloon valvuloplasty',
+                  'Pacemaker implantation', 'Mitral valve repair',
+                  'Pericardiocentesis (draining fluid from around the heart)',
+                  'Balloon dilation for cor triatriatum'],
+    skin:        ['Lump (mass) removal', 'Skin biopsy', 'Wound repair', 'Abscess treatment',
+                  'Removal of a skin tumour with wide margins'],
+    orthopaedic: ['Cruciate ligament surgery (TPLO or lateral suture)', 'Fracture repair',
+                  'Patella (kneecap) stabilisation', 'Hip surgery (FHO or replacement)',
+                  'Joint arthroscopy', 'Amputation'],
+    spine:       ['Spinal decompression surgery (hemilaminectomy)',
+                  'MRI or CT scan under anaesthetic', 'Spinal tap (CSF sample)'],
+    eye:         ['Cataract surgery', 'Cherry eye correction', 'Entropion correction',
+                  'Eye removal (enucleation)', 'Corneal ulcer surgery'],
+    ear_nose:    ['Ear flush under anaesthetic', 'Total ear canal ablation (TECA)',
+                  'BOAS surgery (soft palate and nostrils)', 'Aural haematoma repair',
+                  'Rhinoscopy (looking up the nose)'],
+    urogenital:  ['Neutering — castration', 'Neutering — spay (ovariohysterectomy)',
+                  'Caesarean section', 'Urethrostomy', 'Kidney or bladder biopsy'],
+    other:       ['Endoscopy', 'Biopsy under anaesthetic', 'Imaging under anaesthetic (CT or MRI)',
+                  'Wound repair', 'Lump (mass) removal'],
+};
+
+// --- FOOD ALLERGIES & ADVERSE DRUG REACTIONS (parity with iOS schema V13; see BACKLOG §3m) ----
+// Everything else in this app is a LOG — a series of observations read for a trend. An allergy is
+// not that. It is a standing fact about the animal that changes what may safely be put into it, and
+// it stays true whether or not anything was recorded this month.
+//
+// THREE RULES ARE LOAD-BEARING and must not be "improved":
+//   1. Allergies are NEVER date-filtered and NEVER module-gated in an export. A pet does not stop
+//      being allergic to chicken because the report covers the last three months.
+//   2. `severity` and `certainty` are separate stored fields. Severity is "how bad was it";
+//      certainty is "how do we know". Collapsing them either overstates a hunch or buries a
+//      diagnosis, and neither can be inferred from the free-text reaction without a regular
+//      expression making a clinical judgement.
+//   3. Nothing anywhere prints "no known allergies". An empty list means nobody recorded one, which
+//      is not the same claim, and a vet reading it as a clearance would be misled.
+//
+// Ids below are PERSISTED — add new ones, never rename. Hand-kept identical with
+// `AllergyCatalogue.swift`; change both together.
+const ALLERGY_TYPES = [
+    { id: 'food',       label: 'Food allergy' },
+    { id: 'medication', label: 'Medication reaction' },
+];
+
+// Worst first, so a dropdown reads in the order that matters.
+const ALLERGY_SEVERITIES = [
+    { id: 'severe',   label: 'Severe',       rank: 3,
+      hint: 'Needed urgent treatment, or was life-threatening — collapse, swelling of the face or throat, difficulty breathing.' },
+    { id: 'moderate', label: 'Moderate',     rank: 2,
+      hint: 'Clearly unwell and needed treatment, but not an emergency.' },
+    { id: 'mild',     label: 'Mild',         rank: 1,
+      hint: 'Noticeable but settled on its own, or with simple treatment.' },
+    // Unknown ranks BELOW mild, not above it: an unfilled field is not evidence of a bad reaction,
+    // and floating it to the top would push a recorded anaphylaxis down the list.
+    { id: 'unknown',  label: 'Not recorded', rank: 0,
+      hint: "Leave as not recorded if you're unsure how bad it was." },
+];
+
+const ALLERGY_CERTAINTIES = [
+    { id: 'confirmed', label: 'Diagnosed by a vet', short: 'confirmed' },
+    { id: 'suspected', label: 'Suspected',          short: 'suspected' },
+];
+
+// Prefills only — every field they feed also takes free text. Protein sources lead the food list
+// because that is what an elimination diet is actually built around.
+const ALLERGEN_SUGGESTIONS = {
+    food: ['Chicken', 'Beef', 'Dairy', 'Egg', 'Lamb', 'Pork', 'Fish', 'Turkey',
+           'Wheat / gluten', 'Soya', 'Maize / corn', 'Rice', 'Additives or preservatives'],
+    medication: ['Penicillin / amoxicillin', 'Cephalosporin', 'Potentiated sulfonamide',
+                 'Metronidazole', 'NSAID (e.g. meloxicam, carprofen)', 'Vaccine reaction',
+                 'Flea or worm treatment', 'Anaesthetic or sedative', 'Steroid'],
+};
+
+const ALLERGY_COMMON_SIGNS = ['Itching or scratching', 'Skin rash or hives', 'Vomiting', 'Diarrhoea',
+                              'Swelling of the face or muzzle', 'Difficulty breathing', 'Collapse',
+                              'Lethargy'];
+
+const ALLERGY_REACTION_SIGNS = {
+    food: ALLERGY_COMMON_SIGNS.concat(['Recurrent ear infections', 'Licking or chewing paws',
+                                       'Wind or gurgling gut', 'Poor coat']),
+    medication: ALLERGY_COMMON_SIGNS.concat(['Off food', 'Wobbliness or unsteadiness',
+                                             'Blood in stool', 'Yellow gums (jaundice)']),
+};
+
+// --- MODIFIED TRIADAN DENTAL CHART ------------------------------------------------------------
+// Three digits. The FIRST is the quadrant seen from the front of the animal:
+//     1 = upper right   2 = upper left   3 = lower left   4 = lower right   (permanent)
+//     5 = upper right   6 = upper left   7 = lower left   8 = lower right   (deciduous)
+// The LAST TWO are the position counting back from the midline, on the fixed rule that the canine
+// is ALWAYS 04 and the first molar ALWAYS 09. Positions a species lacks are simply absent — which
+// is why a cat has no x05 and its lower arcade jumps from 304 to 307.
+//
+// Counts this table must produce (asserted by DentalChartTests on iOS):
+//     Dog permanent 42 · Cat permanent 30 · Dog deciduous 28 · Cat deciduous 26
+const DENTAL_POSITIONS = {
+    dog: { upper: [1,2,3,4,5,6,7,8,9,10], lower: [1,2,3,4,5,6,7,8,9,10,11] },
+    cat: { upper: [1,2,3,4,6,7,8,9],      lower: [1,2,3,4,7,8,9] },
+    dogDeciduous: { upper: [1,2,3,4,6,7,8], lower: [1,2,3,4,6,7,8] },
+    catDeciduous: { upper: [1,2,3,4,6,7,8], lower: [1,2,3,4,7,8] },
+};
+
+const DENTAL_QUADRANTS = [
+    { id: 'upperRight', label: 'Upper right', upper: true,  digit: 1, deciduousDigit: 5 },
+    { id: 'upperLeft',  label: 'Upper left',  upper: true,  digit: 2, deciduousDigit: 6 },
+    { id: 'lowerLeft',  label: 'Lower left',  upper: false, digit: 3, deciduousDigit: 7 },
+    { id: 'lowerRight', label: 'Lower right', upper: false, digit: 4, deciduousDigit: 8 },
 ];
 
 const ECHO_OTHER_ID = 'other';
@@ -312,6 +469,49 @@ vetExportModules: {
 //      SI vs conventional creatinine ~88x; a silent conversion here is a clinical safety bug.
 bloodResults: [],
 echoMeasurements: [],
+// Surgeries, dentals & procedures — see PROCEDURE_CATEGORIES above for the two load-bearing rules.
+procedureLog: [],
+PROCEDURE_CATEGORIES_LIST: PROCEDURE_CATEGORIES,
+PROCEDURE_AREAS_LIST: PROCEDURE_AREAS,
+showProcedurePanel: false,
+showProcedureForm: false,
+editingProcedureId: null,
+newProcedure: {
+    date: new Date().toISOString().split('T')[0],
+    status: 'completed',
+    category: 'surgery',
+    name: '',
+    area: '',
+    performedBy: '',
+    hadGA: true,
+    recoveryNotes: '',
+    extractions: [],           // [{ tooth: '104', note: 'FORL' }]
+    histopathSent: false,
+    histopathResult: '',
+    histopathDate: '',
+    notes: '',
+    reminderEnabled: true
+},
+showDeciduousTeeth: false,
+// Food allergies & adverse drug reactions — see ALLERGY_TYPES above for the three load-bearing
+// rules. One list holds both kinds; the two panels filter on `type`.
+allergyLog: [],
+ALLERGY_TYPES_LIST: ALLERGY_TYPES,
+ALLERGY_SEVERITIES_LIST: ALLERGY_SEVERITIES,
+ALLERGY_CERTAINTIES_LIST: ALLERGY_CERTAINTIES,
+showAllergyForm: false,
+editingAllergyId: null,
+viewingAllergyId: null,        // the record whose full detail card is open
+newAllergy: {
+    type: 'food',
+    allergen: '',
+    drugId: '',
+    severity: 'unknown',
+    certainty: 'confirmed',
+    reaction: '',
+    date: '',                  // '' = the owner does not know when it started; never today
+    notes: ''
+},
 // Alpine templates can only see component properties, not module globals — same reason
 // `antiparasiticFormulary` is exposed below.
 ECHO_MEASURES_LIST: ECHO_MEASURES,
@@ -1162,6 +1362,8 @@ init() {
     this.medDoseLog = loadKey('vch_medDoseLog') || [];
     this.bloodResults = loadKey('vch_bloodResults') || [];
     this.echoMeasurements = loadKey('vch_echoMeasurements') || [];
+    this.procedureLog = loadKey('vch_procedureLog') || [];
+    this.allergyLog = loadKey('vch_allergyLog') || [];
 
     // Backfill module flags for legacy / restored profiles
     this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
@@ -1435,6 +1637,8 @@ deletePatient(patientId) {
             this.medDoseLog = (this.medDoseLog || []).filter(r => r.patientId !== patientId);
             this.bloodResults = (this.bloodResults || []).filter(b => b.patientId !== patientId);
             this.echoMeasurements = (this.echoMeasurements || []).filter(e => e.patientId !== patientId);
+            this.procedureLog = (this.procedureLog || []).filter(p => p.patientId !== patientId);
+            this.allergyLog = (this.allergyLog || []).filter(a => a.patientId !== patientId);
 
             // 2. Persist the flushed arrays to local storage
             this.saveToStorage('vch_patients', this.patients);
@@ -1452,6 +1656,8 @@ deletePatient(patientId) {
             this.saveToStorage('vch_medDoseLog', this.medDoseLog);
             this.saveToStorage('vch_bloodResults', this.bloodResults);
             this.saveToStorage('vch_echoMeasurements', this.echoMeasurements);
+            this.saveToStorage('vch_procedureLog', this.procedureLog);
+            this.saveToStorage('vch_allergyLog', this.allergyLog);
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -1615,6 +1821,8 @@ mergePatients(targetId, sourceId) {
             this.medDoseLog = (this.medDoseLog || []).map(r => r.patientId === sourceId ? { ...r, patientId: targetId } : r);
             this.bloodResults = (this.bloodResults || []).map(b => b.patientId === sourceId ? { ...b, patientId: targetId } : b);
             this.echoMeasurements = (this.echoMeasurements || []).map(e => e.patientId === sourceId ? { ...e, patientId: targetId } : e);
+            this.procedureLog = (this.procedureLog || []).map(p => p.patientId === sourceId ? { ...p, patientId: targetId } : p);
+            this.allergyLog = (this.allergyLog || []).map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
 
             // Dedupe identical SRR readings created by merging an imported copy
             const seen = new Set();
@@ -1658,6 +1866,8 @@ mergePatients(targetId, sourceId) {
             this.saveToStorage('vch_medDoseLog', this.medDoseLog);
             this.saveToStorage('vch_bloodResults', this.bloodResults);
             this.saveToStorage('vch_echoMeasurements', this.echoMeasurements);
+            this.saveToStorage('vch_procedureLog', this.procedureLog);
+            this.saveToStorage('vch_allergyLog', this.allergyLog);
 
             this.activePatientId = targetId;
             alert("Patient records successfully merged.");
@@ -3476,6 +3686,557 @@ deleteBloodResult(id) {
 
 echoMeasure(id) { return ECHO_MEASURES.find(m => m.id === id) || null; },
 
+// Fragments marking a name as the report's OWN DERIVED INDEX rather than a raw measurement.
+// The safety rule that matters most here: a real echo report prints its normalised values right
+// beside the measurements they came from ("LVIDd 38.19 mm" / "LVDDN 2D 1.822", "LVEDV MOD A4C 47 ml"
+// / "LVEDV RPLA/BW 3.790"). Strip qualifiers carelessly and "LVEDV RPLA/BW" collapses to "lvedv",
+// filing an index of 3.79 as a 3.79 mL volume — which the app would then scale AGAIN.
+echoDerivedNameMarkers: ['/bw', 'cornell', 'lvddn', 'lvdsn', 'lviddn', 'lvidsn', 'ladn', 'nla', '-n', 'index', '/kg'],
+// Method qualifiers describing HOW a measurement was taken — no clinical meaning here, and they
+// differ between machines, so they are dropped before matching: "LVEDV MOD A4C" is still an LVEDV.
+echoMethodQualifiers: ['2d', '3d', 'mod', 'a4c', 'a2c', 'rpla', 'lax', 'sax', 'mmode', 'm-mode',
+                       'biplane', 'simpson', 'teich', 'teichholz', 'avg', 'mean'],
+
+echoNormaliseName(raw) {
+    const base = this.bloodNormalise(raw);
+    if (this.echoDerivedNameMarkers.some(k => base.includes(k))) return base;
+    const kept = base.split(' ').filter(t => !this.echoMethodQualifiers.includes(t));
+    return kept.length ? kept.join(' ') : base;
+},
+
+// Exact / synonym match only, never fuzzy — a near-miss returning null is safer than a wrong measure.
+echoMatchMeasure(printedName) {
+    const needle = this.echoNormaliseName(printedName);
+    if (!needle) return null;
+    return ECHO_MEASURES.find(m =>
+        this.echoNormaliseName(m.label) === needle ||
+        this.echoNormaliseName(m.short) === needle ||
+        (m.synonyms || []).some(sy => this.echoNormaliseName(sy) === needle)) || null;
+},
+
+// ── SURGERIES, DENTALS & PROCEDURES ───────────────────────────────────────────────────────────
+// Mirrors iOS `ProcedureLogic.swift` + `DentalChart.swift`. Every consumer — the on-screen list,
+// the CSV and the vet report — formats a procedure through THESE helpers, so a dental cannot read
+// one way on screen and another way in the report a vet acts on.
+
+_usesDogChart(species) {
+    return String(species || '').trim().toLowerCase() !== 'cat';
+},
+
+// Type + ordinal for a Triadan position, on the fixed rule "canine = 04, first molar = 09".
+_toothAnatomy(position) {
+    if (position <= 3) return { type: 'incisor', ordinal: position };
+    if (position === 4) return { type: 'canine', ordinal: null };
+    if (position <= 8) return { type: 'premolar', ordinal: position - 4 };
+    return { type: 'molar', ordinal: position - 8 };
+},
+
+_ordinalWord(n) {
+    return n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`;
+},
+
+// Every tooth for a species, in chart order. `deciduous` swaps to the 5–8 quadrants.
+dentalChartTeeth(species, deciduous = false) {
+    const dog = this._usesDogChart(species);
+    const key = deciduous ? (dog ? 'dogDeciduous' : 'catDeciduous') : (dog ? 'dog' : 'cat');
+    const table = DENTAL_POSITIONS[key];
+    const out = [];
+    DENTAL_QUADRANTS.forEach(q => {
+        const digit = deciduous ? q.deciduousDigit : q.digit;
+        (q.upper ? table.upper : table.lower).forEach(position => {
+            const a = this._toothAnatomy(position);
+            // The carnassials — upper PM4 and lower M1 — are the extractions that most change how a
+            // mouth works, and the one bit of dental anatomy owners have usually heard of.
+            const carnassial = !deciduous && (q.upper ? position === 8 : position === 9);
+            out.push({
+                triadan: `${digit}${String(position).padStart(2, '0')}`,
+                quadrant: q.id, quadrantLabel: q.label,
+                type: a.type, ordinal: a.ordinal,
+                isCarnassial: carnassial, isDeciduous: deciduous
+            });
+        });
+    });
+    return out;
+},
+
+dentalChartQuadrants() { return DENTAL_QUADRANTS; },
+
+// Teeth of one quadrant, for the picker grid.
+dentalChartQuadrantTeeth(species, quadrantId, deciduous = false) {
+    return this.dentalChartTeeth(species, deciduous).filter(t => t.quadrant === quadrantId);
+},
+
+_allTeeth(species) {
+    return this.dentalChartTeeth(species, false).concat(this.dentalChartTeeth(species, true));
+},
+
+// "Upper right canine (104)" · "Lower left 1st molar — carnassial (309)". A code the species does
+// not have falls back to the bare number rather than borrowing another species' name for it.
+toothLabel(triadan, species) {
+    const t = this._allTeeth(species || this.activePatient?.species).find(x => x.triadan === triadan);
+    if (!t) return triadan;
+    let name = `${t.quadrantLabel} ${t.ordinal ? this._ordinalWord(t.ordinal) + ' ' : ''}${t.type}`;
+    if (t.isDeciduous) name += ' (baby)';
+    if (t.isCarnassial) name += ' — carnassial';
+    return `${name} (${t.triadan})`;
+},
+
+// Chart order for stored codes, so a report never lists 409 before 104. Unknown codes sort last.
+sortTeeth(codes, species) {
+    const order = {};
+    this._allTeeth(species || this.activePatient?.species).forEach((t, i) => { order[t.triadan] = i; });
+    return [...codes].sort((a, b) => {
+        const ia = order[a] ?? Number.MAX_SAFE_INTEGER, ib = order[b] ?? Number.MAX_SAFE_INTEGER;
+        return ia === ib ? String(a).localeCompare(String(b)) : ia - ib;
+    });
+},
+
+// --- Filtering & ordering (status-driven, NEVER date-driven) ---
+
+patientProcedures() {
+    return (this.procedureLog || []).filter(p => p.patientId === this.activePatientId);
+},
+
+// Procedures that have happened, newest first.
+completedProcedures() {
+    return this.patientProcedures()
+        .filter(p => p.status !== 'scheduled')
+        .sort((a, b) => new Date(b.date) - new Date(a.date) || String(a.id).localeCompare(String(b.id)));
+},
+
+// Booked procedures, soonest first. A booking whose date has slipped past is STILL a booking.
+scheduledProcedures() {
+    return this.patientProcedures()
+        .filter(p => p.status === 'scheduled')
+        .sort((a, b) => new Date(a.date) - new Date(b.date) || String(a.id).localeCompare(String(b.id)));
+},
+
+// Bookings whose day has gone. These get ASKED about — "did it go ahead?" — never assumed either way.
+procedureNeedsOutcome(p) {
+    if (p.status !== 'scheduled') return false;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const d = new Date(p.date); d.setHours(0, 0, 0, 0);
+    return d < today;
+},
+
+// --- Anaesthetic history: the reason this module exists ---
+// A vet weighing up a dental in a stage-C dog wants to know whether this animal has been under
+// before, when, and how it went. Only COMPLETED procedures count — an anaesthetic that has not
+// happened is not a track record.
+procedureAnaestheticHistory() {
+    const gas = this.completedProcedures().filter(p => p.hadGA);
+    return {
+        count: gas.length,
+        mostRecent: gas.length ? gas[0].date : null,
+        mostRecentRecovery: gas.length ? (gas[0].recoveryNotes || '').trim() : ''
+    };
+},
+
+// --- Wording ---
+
+procedureCategoryLabel(id) {
+    const c = PROCEDURE_CATEGORIES.find(x => x.id === id);
+    if (c) return c.label;
+    return id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Procedure';
+},
+
+procedureAreaLabel(id) {
+    const a = PROCEDURE_AREAS.find(x => x.id === id);
+    return a ? a.label : (id || '');
+},
+
+// Falls back to the category so a row is never blank — "Dental" beats an empty line on a report.
+procedureTitle(p) {
+    const name = (p.name || '').trim();
+    return name || this.procedureCategoryLabel(p.category);
+},
+
+// "Mouth and teeth · Oakwood Vets" — joined only when both are present.
+procedureSubtitle(p) {
+    return [this.procedureAreaLabel(p.area), (p.performedBy || '').trim()]
+        .filter(Boolean).join(' · ');
+},
+
+procedureSuggestions(area) {
+    return PROCEDURE_SUGGESTIONS[area] || PROCEDURE_SUGGESTIONS.other;
+},
+
+usesExtractions(category) { return category === 'dental'; },
+
+// "4 teeth extracted: 104, 108, 307, 409" — empty when there were none.
+extractionSummary(extractions, species) {
+    const list = extractions || [];
+    if (!list.length) return '';
+    const codes = this.sortTeeth(list.map(t => t.tooth), species).join(', ');
+    return `${list.length === 1 ? '1 tooth' : list.length + ' teeth'} extracted: ${codes}`;
+},
+
+// One readable line per tooth — the form a vet reads, spelling the tooth out.
+extractionLines(extractions, species) {
+    const list = extractions || [];
+    return this.sortTeeth(list.map(t => t.tooth), species).map(code => {
+        const entry = list.find(t => t.tooth === code);
+        const note = ((entry && entry.note) || '').trim();
+        const label = this.toothLabel(code, species);
+        return note ? `${label} — ${note}` : label;
+    });
+},
+
+// A procedure done conscious says NOTHING rather than "no anaesthetic", which would read as a
+// warning it is not.
+procedureAnaestheticLine(p) {
+    if (!p.hadGA) return '';
+    const recovery = (p.recoveryNotes || '').trim();
+    return recovery ? `General anaesthetic — ${recovery}` : 'General anaesthetic';
+},
+
+// An un-ticked "sample sent" hides any leftover text: a stale result must never print on a vet
+// report as though a laboratory had reported it.
+procedureHistopathLine(p) {
+    if (!p.histopathSent) return '';
+    const result = (p.histopathResult || '').trim();
+    return result ? `Histopathology: ${result}` : 'Sample sent for histopathology — result awaited';
+},
+
+// --- Form & CRUD ---
+
+openProcedureForm(id = null) {
+    const existing = id ? (this.procedureLog || []).find(p => p.id === id) : null;
+    this.editingProcedureId = id;
+    this.showDeciduousTeeth = false;
+    this.newProcedure = existing
+        ? { ...existing, extractions: (existing.extractions || []).map(t => ({ ...t })) }
+        : {
+            date: new Date().toISOString().split('T')[0],
+            status: 'completed', category: 'surgery', name: '', area: '',
+            performedBy: '', hadGA: true, recoveryNotes: '', extractions: [],
+            histopathSent: false, histopathResult: '', histopathDate: '',
+            notes: '', reminderEnabled: true
+          };
+    this.showProcedureForm = true;
+},
+
+closeProcedureForm() {
+    this.showProcedureForm = false;
+    this.editingProcedureId = null;
+},
+
+// Preselect the obvious body region on a category change, but never overwrite a chosen one.
+onProcedureCategoryChange() {
+    if (this.newProcedure.area) return;
+    if (this.newProcedure.category === 'dental') this.newProcedure.area = 'mouth';
+    else if (this.newProcedure.category === 'cardiac') this.newProcedure.area = 'heart';
+},
+
+isToothSelected(triadan) {
+    return (this.newProcedure.extractions || []).some(t => t.tooth === triadan);
+},
+
+toggleTooth(triadan) {
+    const list = this.newProcedure.extractions || [];
+    const i = list.findIndex(t => t.tooth === triadan);
+    if (i >= 0) list.splice(i, 1);
+    else list.push({ tooth: triadan, note: '' });
+    this.newProcedure.extractions = list;
+},
+
+saveProcedure() {
+    const p = this.newProcedure;
+    const name = (p.name || '').trim();
+    if (!name && !p.area) { alert('Please say what was done, or pick an area.'); return; }
+
+    // A non-dental must not carry teeth (switching the type after picking them would leave
+    // extractions attached to a spay), and a BOOKING has no outcome yet — carrying an anaesthetic
+    // or a lab result on something that has not happened would put both into the report as fact.
+    const isDental = this.usesExtractions(p.category);
+    const happened = p.status !== 'scheduled';
+
+    const record = {
+        id: this.editingProcedureId || this.generateId(),
+        patientId: this.activePatientId,
+        date: p.date,
+        status: p.status === 'scheduled' ? 'scheduled' : 'completed',
+        category: p.category,
+        name,
+        area: p.area || '',
+        performedBy: (p.performedBy || '').trim(),
+        hadGA: happened && !!p.hadGA,
+        recoveryNotes: happened && p.hadGA ? (p.recoveryNotes || '') : '',
+        extractions: isDental
+            ? (p.extractions || [])
+                .filter(t => (t.tooth || '').trim())
+                .map(t => ({ tooth: t.tooth.trim(), note: t.note || '' }))
+            : [],
+        histopathSent: happened && !!p.histopathSent,
+        histopathResult: happened && p.histopathSent ? (p.histopathResult || '') : '',
+        histopathDate: happened && p.histopathSent ? (p.histopathDate || '') : '',
+        notes: p.notes || '',
+        reminderEnabled: p.reminderEnabled !== false
+    };
+
+    this.procedureLog = this.editingProcedureId
+        ? this.procedureLog.map(x => x.id === this.editingProcedureId ? record : x)
+        : [...(this.procedureLog || []), record];
+    this.saveToStorage('vch_procedureLog', this.procedureLog);
+    this.closeProcedureForm();
+},
+
+// Turn a booking into history once it has gone ahead — the owner's call, never the date's.
+markProcedureDone(id) {
+    this.procedureLog = (this.procedureLog || [])
+        .map(p => p.id === id ? { ...p, status: 'completed' } : p);
+    this.saveToStorage('vch_procedureLog', this.procedureLog);
+},
+
+deleteProcedure(id) {
+    if (!window.confirm('Delete this procedure? This cannot be undone.')) return;
+    this.procedureLog = (this.procedureLog || []).filter(p => p.id !== id);
+    this.saveToStorage('vch_procedureLog', this.procedureLog);
+},
+
+// ── FOOD ALLERGIES & ADVERSE DRUG REACTIONS ──────────────────────────────────────────────────
+// See ALLERGY_TYPES at the top of this file for the three load-bearing rules. Every consumer —
+// the panel at the top of the diet log, the panel at the top of the medication ledger, the CSV,
+// the report text and the PDF — words an allergy through the helpers below, so a severe reaction
+// cannot read one way on screen and another way in the report a vet acts on.
+
+// --- Filtering & ordering (severity-driven, NOT date-driven) ---
+//
+// Everywhere else the newest record leads, because the question is "what is happening now". This
+// list answers a different question: "what must not be given to this animal". A collapse after
+// amoxicillin in 2019 outranks a bit of itching after a new treat last week.
+
+patientAllergies() {
+    return (this.allergyLog || []).filter(a => a.patientId === this.activePatientId);
+},
+
+allergySeverityRank(id) {
+    const s = ALLERGY_SEVERITIES.find(x => x.id === id);
+    return s ? s.rank : 0;
+},
+
+// Worst first; within a severity the most recently dated first, undated last; then the allergen
+// name, with the id as the final tie-break so the order is stable between page loads.
+sortAllergies(list) {
+    return [...(list || [])].sort((a, b) => {
+        const ra = this.allergySeverityRank(a.severity), rb = this.allergySeverityRank(b.severity);
+        if (ra !== rb) return rb - ra;
+        if (a.date && b.date && a.date !== b.date) return new Date(b.date) - new Date(a.date);
+        if (!a.date && b.date) return 1;        // undated sinks below dated
+        if (a.date && !b.date) return -1;
+        const na = this.allergyDisplayName(a), nb = this.allergyDisplayName(b);
+        if (na !== nb) return na.localeCompare(nb);
+        return String(a.id).localeCompare(String(b.id));
+    });
+},
+
+foodAllergies() {
+    return this.sortAllergies(this.patientAllergies().filter(a => a.type !== 'medication'));
+},
+
+medicationAllergies() {
+    return this.sortAllergies(this.patientAllergies().filter(a => a.type === 'medication'));
+},
+
+allergiesOfType(type) {
+    return type === 'medication' ? this.medicationAllergies() : this.foodAllergies();
+},
+
+hasSevereAllergy(list) {
+    return (list || this.patientAllergies()).some(a => a.severity === 'severe');
+},
+
+// Export order: medication reactions first — they are the ones that change what a vet does in the
+// next five minutes — each group worst-first.
+allergyExportOrder() {
+    return this.medicationAllergies().concat(this.foodAllergies());
+},
+
+// --- Wording ---
+
+allergyTypeLabel(id) {
+    const t = ALLERGY_TYPES.find(x => x.id === id);
+    return t ? t.label : (id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Allergy');
+},
+
+allergyTypeNoun(id) { return id === 'medication' ? 'medication reaction' : 'food allergy'; },
+
+allergySeverityLabel(id) {
+    const s = ALLERGY_SEVERITIES.find(x => x.id === id);
+    return s ? s.label : (id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Not recorded');
+},
+
+allergySeverityHint(id) {
+    const s = ALLERGY_SEVERITIES.find(x => x.id === id);
+    return s ? s.hint : '';
+},
+
+allergyCertaintyLabel(id) {
+    const c = ALLERGY_CERTAINTIES.find(x => x.id === id);
+    return c ? c.label : 'Suspected';
+},
+
+allergyCertaintyShort(id) { return id === 'confirmed' ? 'confirmed' : 'suspected'; },
+
+// One colour per severity, shared by both panels so a "moderate" never reads red in one place and
+// amber in the other.
+allergyDotColour(severity) {
+    switch (severity) {
+        case 'severe':   return '#b91c1c';
+        case 'moderate': return '#ea580c';
+        case 'mild':     return '#ca8a04';
+        default:         return '#94a3b8';
+    }
+},
+
+// Falls back to a placeholder rather than an empty string — a nameless warning still tells a vet
+// to ask the question.
+allergyDisplayName(a) {
+    const name = ((a && a.allergen) || '').trim();
+    if (name) return name;
+    return (a && a.type === 'medication') ? 'Unnamed medication' : 'Unnamed food';
+},
+
+// "Severe · Confirmed". The severity is dropped when it was never recorded, so the line does not
+// claim a judgement nobody made.
+allergyQualifier(a) {
+    const parts = [];
+    if (this.allergySeverityRank(a.severity) > 0) parts.push(this.allergySeverityLabel(a.severity));
+    const cert = this.allergyCertaintyShort(a.certainty);
+    parts.push(cert.charAt(0).toUpperCase() + cert.slice(1));
+    return parts.join(' · ');
+},
+
+// "4 Mar 2024" — day-level dates are stored as bare 'yyyy-MM-dd', read in UTC so they name the
+// day the owner picked wherever the browser is set.
+allergyDayText(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+},
+
+// The one-line subtitle under an allergen on screen.
+allergySummaryLine(a) {
+    const parts = [this.allergyQualifier(a)];
+    const reaction = (a.reaction || '').trim();
+    if (reaction) parts.push(reaction);
+    if (a.date) parts.push(this.allergyDayText(a.date));
+    return parts.join(' — ');
+},
+
+// "Chicken (Severe · Confirmed) — vomiting, hives — diagnosed 4 Mar 2024 — <notes>"
+allergyReportLine(a) {
+    let line = `${this.allergyDisplayName(a)} (${this.allergyQualifier(a)})`;
+    const reaction = (a.reaction || '').trim();
+    if (reaction) line += ` — ${reaction}`;
+    if (a.date) line += ` — diagnosed ${this.allergyDayText(a.date)}`;
+    const notes = (a.notes || '').trim();
+    if (notes) line += ` — ${notes}`;
+    return line;
+},
+
+// The kind leads, because a vet scanning the block needs to know which list they are reading
+// before they read the name — the two carry different consequences.
+allergyExportLine(a) {
+    const kind = a.type === 'medication' ? 'MEDICATION REACTION' : 'FOOD ALLERGY';
+    return `${kind} — ${this.allergyReportLine(a)}`;
+},
+
+// "2 medication reactions · 1 food allergy". Empty when there are none.
+allergyCountSummary() {
+    const meds = this.medicationAllergies().length, foods = this.foodAllergies().length;
+    const parts = [];
+    if (meds) parts.push(`${meds} medication reaction${meds === 1 ? '' : 's'}`);
+    if (foods) parts.push(`${foods} food allerg${foods === 1 ? 'y' : 'ies'}`);
+    return parts.join(' · ');
+},
+
+// --- Form & CRUD ---
+
+allergenSuggestions(type) {
+    return ALLERGEN_SUGGESTIONS[type === 'medication' ? 'medication' : 'food'];
+},
+
+allergyReactionSigns(type) {
+    return ALLERGY_REACTION_SIGNS[type === 'medication' ? 'medication' : 'food'];
+},
+
+// Sign chips APPEND rather than replace — a reaction is usually several things at once
+// ("vomiting, hives"), and replacing would make the owner retype the ones already chosen.
+_allergySignList() {
+    return (this.newAllergy.reaction || '').split(',').map(s => s.trim()).filter(Boolean);
+},
+
+isAllergySignSelected(sign) {
+    return this._allergySignList().some(s => s.toLowerCase() === sign.toLowerCase());
+},
+
+toggleAllergySign(sign) {
+    const list = this._allergySignList();
+    const i = list.findIndex(s => s.toLowerCase() === sign.toLowerCase());
+    if (i >= 0) list.splice(i, 1); else list.push(sign);
+    this.newAllergy.reaction = list.join(', ');
+},
+
+openAllergyForm(type, id = null) {
+    const existing = id ? (this.allergyLog || []).find(a => a.id === id) : null;
+    this.editingAllergyId = id;
+    this.viewingAllergyId = null;
+    this.newAllergy = existing
+        ? { ...existing }
+        : { type: type || 'food', allergen: '', drugId: '', severity: 'unknown',
+            certainty: 'confirmed', reaction: '', date: '', notes: '' };
+    this.showAllergyForm = true;
+},
+
+closeAllergyForm() {
+    this.showAllergyForm = false;
+    this.editingAllergyId = null;
+},
+
+// Tapping a row opens the full record; tapping it again closes it.
+toggleAllergyDetail(id) {
+    this.viewingAllergyId = this.viewingAllergyId === id ? null : id;
+},
+
+saveAllergy() {
+    const a = this.newAllergy;
+    const allergen = (a.allergen || '').trim();
+    if (!allergen) { alert('Please say what your pet reacts to.'); return; }
+
+    const record = {
+        id: this.editingAllergyId || this.generateId(),
+        patientId: this.activePatientId,
+        type: a.type === 'medication' ? 'medication' : 'food',
+        allergen,
+        // A food record must never keep a drug id behind from a type switch.
+        drugId: a.type === 'medication' ? (a.drugId || '') : '',
+        severity: ALLERGY_SEVERITIES.some(s => s.id === a.severity) ? a.severity : 'unknown',
+        certainty: a.certainty === 'suspected' ? 'suspected' : 'confirmed',
+        reaction: (a.reaction || '').trim(),
+        // '' stays '' — a blank date means the owner does not know when this started, and
+        // defaulting it to today would fabricate a diagnosis date on every future vet report.
+        date: a.date || '',
+        notes: (a.notes || '').trim(),
+        createdAt: (this.editingAllergyId && (this.allergyLog.find(x => x.id === this.editingAllergyId) || {}).createdAt)
+                   || new Date().toISOString()
+    };
+
+    this.allergyLog = this.editingAllergyId
+        ? this.allergyLog.map(x => x.id === this.editingAllergyId ? record : x)
+        : [...(this.allergyLog || []), record];
+    this.saveToStorage('vch_allergyLog', this.allergyLog);
+    this.closeAllergyForm();
+},
+
+deleteAllergy(id) {
+    if (!window.confirm('Delete this allergy record? It will no longer appear on any report.')) return;
+    this.allergyLog = (this.allergyLog || []).filter(a => a.id !== id);
+    this.saveToStorage('vch_allergyLog', this.allergyLog);
+    if (this.viewingAllergyId === id) this.viewingAllergyId = null;
+},
+
 echoDisplayName(r) {
     const m = this.echoMeasure(r.measureId);
     if (m) return m.label;
@@ -3624,6 +4385,26 @@ echoIsSighthound() {
         .some(x => b.includes(x));
 },
 
+// Change in the RAW measurement since the previous study, e.g. "+1.4 mm". Only when the two were
+// reported in the SAME unit — a mm→cm switch between centres would otherwise read as a collapse.
+// Direction only; no interpretation.
+echoChangeSincePrevious(row) {
+    const history = (this.echoMeasurements || [])
+        .filter(e => e.patientId === this.activePatientId
+                  && e.measureId === row.measureId
+                  && (e.customName || '') === (row.customName || ''))
+        .sort((a, b) => new Date(a.studyDate) - new Date(b.studyDate));
+    const idx = history.findIndex(e => e.id === row.id);
+    if (idx <= 0) return '';
+    const prev = history[idx - 1];
+    if ((prev.unit || '') !== (row.unit || '')) return '';
+    const delta = Number(row.value) - Number(prev.value);
+    if (!isFinite(delta)) return '';
+    if (Math.abs(delta) < 0.0001) return 'no change';
+    const sign = delta > 0 ? '+' : '−';
+    return `${sign}${this.trimBloodNumber(Math.abs(delta))}${row.unit ? ' ' + row.unit : ''}`;
+},
+
 echoBandLabel(band) {
     return { underfilled: 'Small', normal: 'Normal', borderline: 'Borderline', enlarged: 'Enlarged', unknown: '—' }[band] || '';
 },
@@ -3764,7 +4545,18 @@ parseBloodLine(raw) {
     if (skip.some(k => lower.includes(k))) return null;
 
     const tokens = line.split(/\s+/).filter(Boolean);
-    const startsNumeric = t => /^[0-9]/.test(t) || (/^[<>≤≥.]/.test(t) && /[0-9]/.test(t));
+    // A token starting with a digit is usually the value — EXCEPT on echo reports, where the method
+    // is written into the name: "LVDDN 2D 1.822", "LVEDV MOD A4C 47 ml". Reading "2D" as the value
+    // gives a result of 2.0 and buries the real number in the unit. A short digits-then-letters
+    // token with no decimal point and no slash is therefore part of the name.
+    const isValueLike = t => {
+        const c = String(t).replace(/[(),;]/g, '');
+        if (/[./^]/.test(c)) return true;
+        const m = c.match(/^(\d+)([A-Za-z]*)$/);
+        if (!m) return true;
+        return !(m[1].length <= 2 && m[2].length > 0 && m[2].length <= 2);
+    };
+    const startsNumeric = t => (/^[0-9]/.test(t) ? isValueLike(t) : (/^[<>≤≥.]/.test(t) && /[0-9]/.test(t)));
     const firstNum = tokens.findIndex(startsNumeric);
     if (firstNum <= 0) return null;
     // More than four words and the "name" has swallowed a sentence — which is what happens when the
@@ -3789,7 +4581,7 @@ parseBloodLine(raw) {
     if (value === null) return null;
 
     let tail = restTokens.slice(1);
-    const flagSet = ['high', 'low', 'h', 'l', 'hh', 'll', 'abnormal'];
+    const flagSet = ['high', 'low', 'h', 'l', 'hh', 'll', 'abnormal', '!', '!!'];
     let flag = '';
     tail = tail.filter(t => {
         const c = t.toLowerCase().replace(/[*(),]/g, '');
@@ -3804,10 +4596,12 @@ parseBloodLine(raw) {
         refLow = Math.min(a, b); refHigh = Math.max(a, b);
         tail.splice(dash - 1, 3);
     } else {
-        const i = tail.findIndex(t => /^[<>≤≥]/.test(t));
+        // The comparator may be wrapped in a bracket — how echo reports print a single limit.
+        const bare = t => String(t).replace(/^[([]+|[)\]]+$/g, '');
+        const i = tail.findIndex(t => /^[<>≤≥]/.test(bare(t)));
         if (i !== -1) {
-            const upper = /^[<≤]/.test(tail[i]);
-            let n = num(tail[i]);
+            const upper = /^[<≤]/.test(bare(tail[i]));
+            let n = /[0-9]/.test(bare(tail[i]).slice(1)) ? num(bare(tail[i])) : null;
             if (n !== null) { tail.splice(i, 1); }
             else if (i + 1 < tail.length && num(tail[i + 1]) !== null) { n = num(tail[i + 1]); tail.splice(i, 2); }
             if (n !== null) { if (upper) refHigh = n; else refLow = n; }
@@ -3858,10 +4652,11 @@ parseBloodPaste() {
 
 // UK date order (dd/MM/yyyy). A US-order date is refused rather than silently read three months out.
 parseBloodReportDate(lines) {
-    const pick = keys => {
+    const pick = (keys, excludePrint = false) => {
         for (const line of lines) {
             const lower = String(line).toLowerCase();
             if (!keys.some(k => lower.includes(k))) continue;
+            if (excludePrint && (lower.includes('print') || lower.includes('printed'))) continue;
             let m = String(line).match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})\b/);
             if (m) {
                 const d = +m[1], mo = +m[2];
@@ -3876,8 +4671,20 @@ parseBloodReportDate(lines) {
         }
         return null;
     };
-    return pick(['collection date', 'sample date', 'date sampled', 'date collected', 'date taken'])
-        || pick(['date of receipt', 'date:', 'received', 'date of result', 'reported']);
+    // Most specific first. A PRINT date is the last resort: a report reprinted months later would
+    // otherwise be filed under the day it was printed rather than the day of the study.
+    const tiers = [
+        ['collection date', 'sample date', 'date sampled', 'date collected', 'date taken',
+         'study date', 'scan date', 'exam date', 'date of study', 'date of exam'],
+        ['date'],                                  // a bare "Date 31/07/2026" line
+        ['date of receipt', 'received', 'date of result', 'reported'],
+        ['print date', 'printed'],
+    ];
+    for (let t = 0; t < tiers.length; t++) {
+        const found = pick(tiers[t], t === 1);     // tier 1 must not swallow the print date
+        if (found) return found;
+    }
+    return null;
 },
 
 parseBloodReportLab(lines) {
@@ -6196,13 +7003,13 @@ resetData() {
     const keys = ['vch_patients','vch_weightLog','vch_srrHistory','vch_medLedger','vch_suppLedger',
                   'vch_diagnosisLog','vch_syncopeLog','vch_coughLog','vch_activityLog',
                   'vch_vaccinationLog','vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog',
-                  'vch_bloodResults', 'vch_echoMeasurements'];
+                  'vch_bloodResults', 'vch_echoMeasurements', 'vch_procedureLog', 'vch_allergyLog'];
     keys.forEach(k => localStorage.removeItem(k));
 
     this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = []; this.suppLedger = [];
     this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.activityLog = [];
     this.vaccinationLog = []; this.antiparasiticLog = []; this.injectionLog = []; this.medDoseLog = [];
-    this.bloodResults = []; this.echoMeasurements = [];
+    this.bloodResults = []; this.echoMeasurements = []; this.procedureLog = []; this.allergyLog = [];
     this.activePatientId = null;
 
     [this.$refs.rrrChartCanvas, this.$refs.medChartCanvas, this.$refs.weightChartCanvas, this.$refs.injectionChartCanvas]
@@ -9344,6 +10151,8 @@ exportCompleteBackup(patientId = null) {
         vch_medDoseLog: scoped(this.medDoseLog),
         vch_bloodResults: scoped(this.bloodResults),
         vch_echoMeasurements: scoped(this.echoMeasurements),
+        vch_procedureLog: scoped(this.procedureLog),
+        vch_allergyLog: scoped(this.allergyLog),
         exportDate: new Date().toISOString(),
         exportScope: patientId ? 'single' : 'all'
     };
@@ -9448,7 +10257,8 @@ backupLogCount(pid) {
     if (!d) return 0;
     return ['vch_srrHistory', 'vch_medLedger', 'vch_suppLedger', 'vch_diagnosisLog', 'vch_syncopeLog',
             'vch_coughLog', 'vch_activityLog', 'vch_weightLog', 'vch_vaccinationLog',
-            'vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog','vch_bloodResults','vch_echoMeasurements']
+            'vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog','vch_bloodResults','vch_echoMeasurements',
+            'vch_procedureLog', 'vch_allergyLog']
         .reduce((n, k) => n + (d[k] || []).filter(e => e.patientId === pid).length, 0);
 },
 
@@ -9495,7 +10305,7 @@ confirmBackupImport() {
     // tick after promising the user it would import them.
     const logKeys = ['weightLog', 'srrHistory', 'medLedger', 'suppLedger', 'diagnosisLog', 'syncopeLog',
                      'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog', 'injectionLog',
-                     'medDoseLog', 'bloodResults', 'echoMeasurements'];
+                     'medDoseLog', 'bloodResults', 'echoMeasurements', 'procedureLog', 'allergyLog'];
     logKeys.forEach(key => {
         const incoming = (data['vch_' + key] || [])
             .filter(e => idMap[e.patientId] !== undefined)
@@ -9684,7 +10494,44 @@ async generatePDF() {
     doc.line(14, 37, 196, 37);
  
     let Y = 45; // Flowing Y cursor
- 
+
+    // ── 1b. Allergies & adverse reactions ─────────────────────────────────
+    // A boxed banner at the top of page one rather than a section further down. Everything else in
+    // this document is history a vet reads at their own pace; this is the one part that has to be
+    // seen BEFORE they act, so it gets a red rule rather than the brand navy. Omitted entirely when
+    // nothing is recorded — an empty box reading "none" would be a claim the owner never made.
+    const pdfAllergies = this.allergyExportOrder();
+    if (pdfAllergies.length > 0) {
+        const severe = this.hasSevereAllergy(pdfAllergies);
+        const wrapped = pdfAllergies.map(a => ({
+            severe: a.severity === 'severe',
+            lines: doc.splitTextToSize(this.allergyExportLine(a), 172)
+        }));
+        const bodyH = wrapped.reduce((n, w) => n + w.lines.length, 0) * 4.4 + 5;
+
+        doc.setFillColor(179, 26, 26);
+        doc.rect(14, Y, 182, 7, 'F');
+        doc.setFontSize(10);
+        doc.setTextColor(255, 255, 255);
+        doc.text(`ALLERGIES & ADVERSE REACTIONS${severe ? '  —  INCLUDES A SEVERE REACTION' : ''}`, 17, Y + 5);
+        Y += 7;
+
+        doc.setFillColor(252, 226, 226);
+        doc.rect(14, Y, 182, bodyH, 'F');
+        doc.setDrawColor(179, 26, 26);
+        doc.rect(14, Y - 7, 182, bodyH + 7, 'S');
+        doc.setFontSize(9);
+        doc.setTextColor(20, 20, 20);
+        let aY = Y + 5;
+        wrapped.forEach(w => {
+            doc.setFont(undefined, w.severe ? 'bold' : 'normal');
+            w.lines.forEach(line => { doc.text(line, 17, aY); aY += 4.4; });
+        });
+        doc.setFont(undefined, 'normal');
+        doc.setDrawColor(200);
+        Y += bodyH + 10;
+    }
+
     // Utility: section header with auto page-break
     const sectionHeader = (title, r, g, b) => {
         if (Y > 262) { doc.addPage(); Y = 20; }
@@ -10221,6 +11068,28 @@ generateCSV() {
         csv += csvInsLines.map(l => `${q(l.label)},${q(this.sanitiseCSV(l.value))}`).join('\n') + '\n\n';
     }
  
+    // ── Allergies & adverse reactions ─────────────────────────────────────
+    // Leads every clinical section, and is deliberately NOT date-filtered and NOT module-gated: a
+    // spreadsheet gets skim-read from the top, and a pet does not stop being allergic to chicken
+    // because the report covers the last three months.
+    const allergyRows = this.allergyExportOrder();
+    if (allergyRows.length > 0) {
+        csv += 'ALLERGIES & ADVERSE REACTIONS\n';
+        csv += 'Type,Allergen,Severity,How known,Reaction,Diagnosed,Notes\n';
+        allergyRows.forEach(a => {
+            csv += [
+                q(this.allergyTypeLabel(a.type)),
+                q(this.sanitiseCSV(this.allergyDisplayName(a))),
+                q(this.allergySeverityLabel(a.severity)),
+                q(this.allergyCertaintyLabel(a.certainty)),
+                q(this.sanitiseCSV(a.reaction || '')),
+                q(this.allergyDayText(a.date)),
+                q(this.sanitiseCSV(a.notes || ''))
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+
     // ── SRR Log ───────────────────────────────────────────────────────────
     const srrData = mods.srr
         ? this.srrHistory.filter(r => r.patientId === this.activePatientId && inRange(r.date)).sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -10378,6 +11247,33 @@ generateCSV() {
                 q(st === 'unknown' ? '' : this.bloodStatusShort(st)),
                 q(b.labName || ''),
                 q(b.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+
+    // ── Surgeries & Procedures (always complete history — a spay from six years ago still
+    // matters). Not module-gated, like bloods and echo. BOOKINGS ARE LISTED FIRST AND LABELLED,
+    // so a vet reading this meets them as plans rather than as history.
+    const procData = this.scheduledProcedures().concat(this.completedProcedures());
+    if (procData.length > 0) {
+        const species = this.activePatient?.species;
+        csv += 'SURGERIES & PROCEDURES\n';
+        csv += 'Date,Status,Type,Procedure,Area,Performed By,Anaesthetic,Recovery,Teeth Extracted,Histopathology,Result Date,Notes\n';
+        procData.forEach(pr => {
+            csv += [
+                q(pr.date),
+                q(pr.status === 'scheduled' ? 'Scheduled' : 'Completed'),
+                q(this.procedureCategoryLabel(pr.category)),
+                q(this.procedureTitle(pr)),
+                q(this.procedureAreaLabel(pr.area)),
+                q(pr.performedBy || ''),
+                q(pr.hadGA ? 'General anaesthetic' : ''),
+                q(pr.recoveryNotes || ''),
+                q(this.extractionSummary(pr.extractions, species)),
+                q(this.procedureHistopathLine(pr)),
+                q(pr.histopathDate || ''),
+                q(pr.notes || '')
             ].join(',') + '\n';
         });
         csv += '\n';
@@ -10620,6 +11516,24 @@ _buildReportText() {
     }
     out += rule('═') + nl + nl;
 
+    // ── Allergies & adverse reactions ─────────────────────────────────────
+    // FIRST — before insurance, before every log. This is the only block in the report that changes
+    // what a vet is about to put into the animal, so it is placed where it cannot be scrolled past,
+    // boxed rather than ruled so it does not read as one more section. Omitted entirely when nothing
+    // is recorded: silence is honest, whereas printing "no known allergies" would be a clinical
+    // claim the app is in no position to make for the owner.
+    const allergyLines = this.allergyExportOrder();
+    if (allergyLines.length > 0) {
+        out += rule('!') + nl;
+        out += 'ALLERGIES & ADVERSE REACTIONS';
+        out += this.hasSevereAllergy(allergyLines) ? `  —  INCLUDES A SEVERE REACTION${nl}` : nl;
+        out += rule('!') + nl;
+        allergyLines.forEach(a => {
+            out += `${a.severity === 'severe' ? '** ' : indent}${this.allergyExportLine(a)}${nl}`;
+        });
+        out += rule('!') + nl + nl;
+    }
+
     // ── Insurance ─────────────────────────────────────────────────────────
     // Its own block, before the clinical sections, because it's what a practice asks for first.
     const insLines = this.patientInsuranceLines(profile);
@@ -10774,6 +11688,37 @@ _buildReportText() {
                 if (st !== 'unknown') out += `  |  ${this.bloodStatusShort(st)}`;
                 if (b.labName) out += `  |  ${b.labName}`;
                 if (b.notes) out += `${nl}${indent}Notes: ${b.notes}`;
+                out += nl;
+            });
+            out += nl;
+        }
+    }
+
+    // ── Surgeries & Procedures (ALWAYS full history — no date filter) ─────
+    {
+        const procData = this.scheduledProcedures().concat(this.completedProcedures());
+        if (procData.length > 0) {
+            const species = this.activePatient?.species;
+            out += `SURGERIES & PROCEDURES (${procData.length} procedure${procData.length !== 1 ? 's' : ''})${nl}`;
+            out += rule() + nl;
+            procData.forEach(pr => {
+                // SCHEDULED is stated before the procedure name, so a booking can never be
+                // skim-read as something the pet has already been through.
+                out += `${pr.date}  |  ${pr.status === 'scheduled' ? 'SCHEDULED' : 'COMPLETED'}  |  ${this.procedureTitle(pr)}`;
+                const area = this.procedureAreaLabel(pr.area);
+                if (area) out += `  |  ${area}`;
+                if (pr.performedBy) out += `  |  ${pr.performedBy}`;
+                const ga = this.procedureAnaestheticLine(pr);
+                if (ga) out += `${nl}${indent}${ga}`;
+                this.extractionLines(pr.extractions, species).forEach(line => {
+                    out += `${nl}${indent}${line}`;
+                });
+                const histo = this.procedureHistopathLine(pr);
+                if (histo) {
+                    out += `${nl}${indent}${histo}`;
+                    if (pr.histopathDate) out += ` (${pr.histopathDate})`;
+                }
+                if (pr.notes) out += `${nl}${indent}Notes: ${pr.notes}`;
                 out += nl;
             });
             out += nl;
