@@ -515,6 +515,7 @@ newAllergy: {
 // Alpine templates can only see component properties, not module globals — same reason
 // `antiparasiticFormulary` is exposed below.
 ECHO_MEASURES_LIST: ECHO_MEASURES,
+copiedInsuranceField: null,
 showEchoPanel: false,
 showEchoForm: false,
 editingEchoKey: null,          // "studyDate|centre" of the study being edited
@@ -861,11 +862,44 @@ navItems: [
 // ── More view sub-navigation ──
 moreSection: 'data',
 moreSections: [
-    { id: 'settings', label: 'Settings',       icon: 'fa-sliders' },
-    { id: 'data',     label: 'Data & Backup',  icon: 'fa-database' },
+    { id: 'settings',  label: 'Settings',       icon: 'fa-sliders' },
+    { id: 'insurance', label: 'Insurance',      icon: 'fa-shield-halved' },
+    { id: 'data',      label: 'Data & Backup',  icon: 'fa-database' },
     { id: 'help',     label: 'Help & FAQs',    icon: 'fa-circle-question' },
     { id: 'about',    label: 'About',          icon: 'fa-circle-info' }
 ],
+// Whether this pet has anything worth showing in the insurance panel.
+hasInsuranceDetails(p) {
+    const pet = p || this.activePatientProfile;
+    if (!pet) return false;
+    return !!((pet.insuranceCompany || '').trim() || (pet.insurancePolicyNumber || '').trim());
+},
+
+// Copy a value to the clipboard. The moment an owner needs a policy number is at a reception desk,
+// and pasting it beats reading it aloud off a screen — the same reasoning as the iOS screen.
+copyInsuranceValue(value, label) {
+    const text = String(value == null ? '' : value).trim();
+    if (!text) return;
+    const done = () => {
+        this.copiedInsuranceField = label;
+        setTimeout(() => { if (this.copiedInsuranceField === label) this.copiedInsuranceField = null; }, 2000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => {});
+    } else {
+        // Older Safari on iOS: the execCommand path still works from a user gesture.
+        try {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            done();
+        } catch (e) {}
+    }
+},
+
 setMoreSection(s) {
     this.moreSection = s;
     try { localStorage.setItem('vch_moreSection', s); } catch (e) {}

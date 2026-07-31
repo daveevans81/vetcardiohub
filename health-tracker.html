@@ -5360,6 +5360,69 @@
 
                       
                 <!-- ── MORE > SETTINGS ── -->
+                <!-- ******************************** -->
+                <!-- INSURANCE (read-first)           -->
+                <!-- ******************************** -->
+                <!-- The insurance fields already live on the patient record, but only inside the
+                     EDIT form and in printed reports. That is the wrong shape for the moment they
+                     are actually needed: an emergency reception desk asking for insurer and policy
+                     number before treatment starts. So this panel is read-first and tap-to-copy.
+                     Mirrors the iOS "Insurance & paperwork" screen (BACKLOG §3m). -->
+                <div class="module-card" x-show="isView('more') && moreSection === 'insurance'" x-cloak
+                     style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
+
+                    <h3 class="mt-0" style="color: #0f766e;">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Insurance' : 'Insurance'"></span>
+                    </h3>
+
+                    <template x-if="!activePatientProfile">
+                        <p style="color: #64748b; font-style: italic;">Select a pet to see their insurance details.</p>
+                    </template>
+
+                    <template x-if="activePatientProfile && !hasInsuranceDetails()">
+                        <div style="padding: 24px 16px; text-align: center; color: #94a3b8; font-style: italic; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                            No insurance details recorded yet.<br>
+                            Add them in the pet's profile and they will show here, ready to read out or copy.
+                        </div>
+                    </template>
+
+                    <template x-if="activePatientProfile && hasInsuranceDetails()">
+                        <div>
+                            <template x-for="line in patientInsuranceLines(activePatientProfile)" :key="line.label">
+                                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                                    <span style="color: #475569; font-size: 0.9rem;" x-text="line.label"></span>
+                                    <span style="display: flex; align-items: baseline; gap: 8px; text-align: right;">
+                                        <strong style="color: #1e293b; user-select: all;" x-text="line.value"></strong>
+                                        <button type="button"
+                                                @click="copyInsuranceValue(line.value, line.label)"
+                                                :title="'Copy ' + line.label"
+                                                style="background: none; border: none; cursor: pointer; padding: 2px 4px;"
+                                                :style="copiedInsuranceField === line.label ? 'color:#16a34a;' : 'color:#0f766e;'">
+                                            <i class="fa-solid" :class="copiedInsuranceField === line.label ? 'fa-check' : 'fa-copy'"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </template>
+
+                            <p style="font-size: 0.8rem; color: #64748b; margin-top: 12px;">
+                                Tap the copy icon beside the insurer or policy number — those are the two things a practice
+                                asks for before treatment starts.
+                            </p>
+
+                            <button @click="openPatientManager(false, activePatientId)" type="button" class="btn-secondary" style="margin-top: 8px;">
+                                <i class="fa-solid fa-pen"></i> Edit these details
+                            </button>
+                        </div>
+                    </template>
+
+                    <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 16px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                        <i class="fa-solid fa-circle-info"></i>
+                        Insurance details travel with your backup file, so they move between this website and the iOS app.
+                        Policy DOCUMENTS (PDFs) can be stored in the iOS app only — a browser page cannot hold files this way.
+                    </p>
+                </div>
+
                 <div class="module-card" x-show="isView('more') && moreSection === 'settings'" x-cloak style="margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;">
                     <h3 style="margin-top: 0; color: #475569; font-size: 1.1rem;"><i class="fa-solid fa-sliders"></i> Settings</h3>
                     <p style="font-size: 0.85rem; color: #64748b;">Preferences apply to this device. Patient-specific values (alarm cutoff, units) can still be overridden per profile.</p>
