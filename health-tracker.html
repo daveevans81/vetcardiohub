@@ -5735,9 +5735,273 @@
                     </div>
                 </div>
                 
+                                    <!-- ******************************** -->
+                                    <!-- APPOINTMENTS                     -->
+                                    <!-- ******************************** -->
+                <!-- The diary: health checks, boosters, post-op checks, cardiology and other
+                     specialist visits. Deliberately NOT module-gated — an appointment record is
+                     part of the record, not an opt-in tracker. Booked SURGERIES appear in the
+                     "coming up" list too (see upcomingCare()), so the diary is one list even
+                     though the storage stays split. -->
+                <div class="module-card" x-show="isView('more') && moreSection === 'appointments' && patients.length > 0" x-cloak>
+
+                    <h3 style="margin-top:0; color:#475569; font-size:1.1rem;">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s appointments' : 'Appointments'"></span>
+                    </h3>
+                    <p style="font-size:0.85rem; color:#64748b;">
+                        Everything you have booked, and everywhere you have been. Add old appointments as you remember them — when your pet was last checked, and by whom, is the sort of thing nobody can recall at the moment they are asked.
+                    </p>
+
+                    <div style="display:flex; gap:8px; margin-bottom:15px;" x-show="!showAppointmentForm">
+                        <button @click="openAppointmentForm()" type="button" style="flex:1; padding:10px; background:#eff6ff; color:#1e3a8a; border:1px solid #bfdbfe; border-radius:6px; font-weight:bold; cursor:pointer;">
+                            <i class="fa-solid fa-square-plus"></i> Add an appointment
+                        </button>
+                        <button @click="downloadAppointmentIcs()" type="button" x-show="upcomingAppointments().length > 0" class="btn-secondary" style="padding:10px 14px;">
+                            <i class="fa-solid fa-calendar-plus"></i> Add to calendar
+                        </button>
+                    </div>
+
+                    <!-- ADD / EDIT -->
+                    <div x-show="showAppointmentForm" x-cloak class="vch-modal">
+                        <h4 style="margin-bottom:12px;" x-text="editingAppointmentId ? 'Edit appointment' : 'Add an appointment'"></h4>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div>
+                                <label class="form-label">Type</label>
+                                <select x-model="newAppointment.type" @change="onAppointmentTypeChange()" class="form-control">
+                                    <template x-for="t in APPOINTMENT_TYPES_LIST" :key="t.id">
+                                        <option :value="t.id" x-text="t.label"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Status</label>
+                                <select x-model="newAppointment.status" class="form-control">
+                                    <template x-for="st in APPOINTMENT_STATUSES_LIST" :key="st.id">
+                                        <option :value="st.id" x-text="st.label"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label class="form-label" style="margin-top:10px;">What it is for</label>
+                        <input type="text" x-model="newAppointment.title" class="form-control" placeholder="e.g. six-month recheck">
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                            <div>
+                                <label class="form-label">Date</label>
+                                <input type="date" x-model="newAppointment.date" class="form-control">
+                            </div>
+                            <div>
+                                <label class="form-label">Time <span style="font-weight:400; color:#94a3b8;">(leave blank if not given one)</span></label>
+                                <input type="time" x-model="newAppointment.time" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- WHERE — the branch address is the whole reason this feature exists -->
+                        <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
+                            <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Where</div>
+
+                            <template x-if="careProviderOptions().length > 0">
+                                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+                                    <template x-for="opt in careProviderOptions()" :key="opt.key">
+                                        <button type="button" @click="applyCareProviderToAppointment(opt)"
+                                                style="text-align:left; padding:6px 10px; font-size:0.8rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer;">
+                                            <span style="font-weight:600; color:#334155;" x-text="opt.label"></span>
+                                            <template x-if="opt.detail"><span style="display:block; color:#94a3b8; font-size:0.75rem;" x-text="opt.detail"></span></template>
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                <input type="text" x-model="newAppointment.providerName" class="form-control" placeholder="Practice or clinician">
+                                <input type="text" x-model="newAppointment.locationLabel" class="form-control" placeholder="Branch (optional)">
+                            </div>
+                            <textarea x-model="newAppointment.address" class="form-control" rows="3" style="margin-top:10px;" placeholder="Address"></textarea>
+                            <input type="tel" x-model="newAppointment.phone" class="form-control" style="margin-top:10px;" placeholder="Phone">
+                            <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Add your regular vets under Data &amp; Backup → Care providers, with a branch for each site, and they will show up here to tap.</p>
+                        </div>
+
+                        <!-- BEFORE YOU GO -->
+                        <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
+                            <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Before you go</div>
+                            <input type="text" x-model="newAppointment.preparation" class="form-control" placeholder="e.g. no food after 8pm, bring the tablet box">
+                            <template x-if="!newAppointment.preparation && appointmentType(newAppointment.type)?.preparationHint">
+                                <button type="button" @click="newAppointment.preparation = appointmentType(newAppointment.type).preparationHint"
+                                        style="margin-top:6px; padding:4px 10px; font-size:0.8rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; text-align:left;">
+                                    <i class="fa-solid fa-plus" style="color:#2563eb;"></i>
+                                    <span x-text="appointmentType(newAppointment.type).preparationHint"></span>
+                                </button>
+                            </template>
+
+                            <label class="form-label" style="margin-top:10px;">Questions to ask <span style="font-weight:400; color:#94a3b8;">(one per line)</span></label>
+                            <textarea x-model="newAppointment.questionsToAsk" class="form-control" rows="3" placeholder="Is the cough worse?&#10;Should we change the dose?"></textarea>
+                            <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Add questions as they occur to you between now and the appointment. Almost everyone remembers what they meant to ask on the way home. Check any fasting instructions with your practice — only they know what this appointment needs.</p>
+                        </div>
+
+                        <!-- REMINDERS (only while it is still booked) -->
+                        <template x-if="newAppointment.status === 'booked'">
+                            <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
+                                <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Calendar reminders</div>
+                                <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155;">
+                                    <input type="checkbox" x-model="newAppointment.reminderEnabled"> Add reminders to the calendar file
+                                </label>
+                                <template x-if="newAppointment.reminderEnabled">
+                                    <div style="margin-top:8px;">
+                                        <label class="form-label">Advance notice</label>
+                                        <select x-model.number="newAppointment.reminderLeadDays" class="form-control">
+                                            <option :value="0">None</option>
+                                            <option :value="1">1 day</option>
+                                            <option :value="2">2 days</option>
+                                            <option :value="3">3 days</option>
+                                            <option :value="7">1 week</option>
+                                            <option :value="14">2 weeks</option>
+                                            <option :value="30">1 month</option>
+                                        </select>
+                                        <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155; margin-top:8px;">
+                                            <input type="checkbox" x-model="newAppointment.remindDayBefore"> Also remind me shortly before
+                                        </label>
+                                        <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Anything under “before you go” is included in each reminder, so it reaches you while there is still time to act on it.</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- OUTCOME (only once it is no longer booked) -->
+                        <template x-if="newAppointment.status !== 'booked'">
+                            <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
+                                <label class="form-label">Outcome</label>
+                                <input type="text" x-model="newAppointment.outcome" class="form-control" placeholder="e.g. murmur unchanged, recheck in six months">
+                                <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">One line is enough. This is the part you will be glad of later, and the part nobody remembers unless they wrote it down.</p>
+                            </div>
+                        </template>
+
+                        <label class="form-label" style="margin-top:10px;">Notes</label>
+                        <input type="text" x-model="newAppointment.notes" class="form-control" placeholder="Anything else worth remembering">
+
+                        <div style="display:flex; gap:8px; margin-top:14px;">
+                            <button @click="saveAppointment()" type="button" class="btn-primary" style="background:#0f766e;">Save</button>
+                            <button @click="closeAppointmentForm()" type="button" class="btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- DID THESE GO AHEAD? -->
+                    <div x-show="careAwaitingOutcome().length > 0 && !showAppointmentForm" style="margin-bottom:15px;">
+                        <div style="font-size:0.8rem; font-weight:bold; color:#b45309; text-transform:uppercase; margin-bottom:6px;">Did these go ahead?</div>
+                        <template x-for="item in careAwaitingOutcome()" :key="item.id">
+                            <div style="position:relative; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:12px; margin-bottom:8px;">
+                                <div style="font-weight:bold; color:#1e293b;" x-text="item.title"></div>
+                                <div style="font-size:0.8rem; color:#b45309; font-weight:600; margin-top:2px;">
+                                    <span x-text="new Date(item.date + 'T12:00:00Z').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                    <template x-if="item.time"><span x-text="' · ' + item.time"></span></template>
+                                    — this date has passed
+                                </div>
+                                <div x-show="item.subtitle" style="font-size:0.85rem; color:#475569; margin-top:2px;" x-text="item.subtitle"></div>
+                                <div style="margin-top:8px; display:flex; gap:8px;">
+                                    <button type="button" @click="markCareItemDone(item)" style="padding:2px 8px; font-size:0.75rem; background:#16a34a; color:white; border:none; border-radius:4px; cursor:pointer;">Mark attended</button>
+                                    <button type="button" @click="openCareItem(item)" style="padding:2px 8px; font-size:0.75rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer;">Change the date</button>
+                                </div>
+                            </div>
+                        </template>
+                        <p style="font-size:0.75rem; color:#94a3b8;">Nothing is recorded as having happened until you say so.</p>
+                    </div>
+
+                    <!-- COMING UP (appointments + booked surgeries, one list) -->
+                    <div x-show="futureCare().length > 0 && !showAppointmentForm" style="margin-bottom:15px;">
+                        <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Coming up</div>
+                        <template x-for="item in futureCare()" :key="item.id">
+                            <div style="position:relative; background:#f0fdfa; border:1px solid #99f6e4; border-radius:8px; padding:12px; margin-bottom:8px;">
+                                <div style="font-weight:bold; color:#1e293b;" x-text="item.title"></div>
+                                <div style="font-size:0.8rem; color:#0f766e; font-weight:600; margin-top:2px;">
+                                    <span x-text="new Date(item.date + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                    <template x-if="item.time"><span x-text="' at ' + item.time"></span></template>
+                                </div>
+                                <div x-show="item.subtitle" style="font-size:0.85rem; color:#475569; margin-top:2px;" x-text="item.subtitle"></div>
+                                <div x-show="item.kind === 'procedure'" style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">
+                                    <i class="fa-solid fa-scissors"></i> From surgeries &amp; procedures
+                                </div>
+                                <div style="position:absolute; top:12px; right:12px; display:flex; gap:12px;">
+                                    <button @click="openCareItem(item)" style="background:none; border:none; color:#64748b; cursor:pointer;" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                    <button x-show="item.kind === 'appointment'" @click="deleteAppointment(item.sourceId)" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- THE NEXT ONE, IN FULL -->
+                    <template x-if="!showAppointmentForm && upcomingAppointments().filter(a => !appointmentNeedsOutcome(a))[0]">
+                        <div x-data="{ get next(){ return upcomingAppointments().filter(a => !appointmentNeedsOutcome(a))[0]; } }"
+                             style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:15px;">
+                            <div style="font-size:0.8rem; font-weight:bold; color:#1e3a8a; text-transform:uppercase;">Next appointment</div>
+                            <div style="font-weight:bold; color:#1e293b; margin-top:4px;" x-text="appointmentWhenText(next)"></div>
+                            <div x-show="appointmentPlaceName(next)" style="font-size:0.85rem; color:#475569; margin-top:4px;" x-text="appointmentPlaceName(next)"></div>
+                            <div x-show="next.address" style="font-size:0.85rem; color:#475569; white-space:pre-line;" x-text="next.address"></div>
+                            <div style="display:flex; gap:8px; margin-top:8px;">
+                                <template x-if="next.address">
+                                    <a :href="'https://maps.google.com/?q=' + encodeURIComponent(appointmentAddressOneLine(next))" target="_blank" rel="noopener"
+                                       style="padding:4px 10px; font-size:0.8rem; background:white; border:1px solid #cbd5e1; border-radius:6px; color:#2563eb; text-decoration:none;">
+                                        <i class="fa-solid fa-map-location-dot"></i> Directions
+                                    </a>
+                                </template>
+                                <template x-if="next.phone">
+                                    <a :href="'tel:' + next.phone"
+                                       style="padding:4px 10px; font-size:0.8rem; background:white; border:1px solid #cbd5e1; border-radius:6px; color:#2563eb; text-decoration:none;">
+                                        <i class="fa-solid fa-phone"></i> Call
+                                    </a>
+                                </template>
+                            </div>
+                            <div x-show="next.preparation" style="font-size:0.85rem; color:#b45309; margin-top:8px;">
+                                <i class="fa-solid fa-circle-exclamation"></i> <span x-text="next.preparation"></span>
+                            </div>
+                            <template x-if="appointmentQuestionLines(next).length > 0">
+                                <div style="margin-top:8px;">
+                                    <div style="font-size:0.75rem; font-weight:bold; color:#64748b; text-transform:uppercase;">To ask</div>
+                                    <template x-for="qn in appointmentQuestionLines(next)" :key="qn">
+                                        <div style="font-size:0.85rem; color:#475569;" x-text="'• ' + qn"></div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- HISTORY -->
+                    <div x-show="!showAppointmentForm">
+                        <div x-show="appointmentHistory().length > 0" style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">History</div>
+                        <template x-for="a in appointmentHistory()" :key="a.id">
+                            <div style="position:relative; background:white; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:8px;">
+                                <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;">
+                                    <div style="font-weight:bold; color:#1e293b;" x-text="appointmentTitle(a)"></div>
+                                    <div style="font-size:0.8rem; color:#64748b;">
+                                        <span x-text="new Date(a.date + 'T12:00:00Z').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                        <template x-if="a.time"><span x-text="' · ' + a.time"></span></template>
+                                    </div>
+                                </div>
+                                <div x-show="appointmentSubtitle(a)" style="font-size:0.85rem; color:#475569; margin-top:2px;" x-text="appointmentSubtitle(a)"></div>
+                                <!-- A cancelled or missed visit is flagged: it is in the history
+                                     precisely because it did NOT happen, and a row that looks like
+                                     every other one would misread as care given. -->
+                                <div x-show="a.status !== 'attended'" style="font-size:0.8rem; color:#b45309; font-weight:600; margin-top:4px;" x-text="appointmentStatusLabel(a.status)"></div>
+                                <div x-show="a.outcome" style="font-size:0.85rem; color:#475569; margin-top:4px;" x-text="a.outcome"></div>
+                                <div x-show="a.notes" style="font-size:0.85rem; color:#475569; margin-top:8px; padding-top:8px; border-top:1px dashed #e2e8f0; font-style:italic;" x-text="a.notes"></div>
+                                <div style="position:absolute; top:12px; right:12px; display:flex; gap:12px;">
+                                    <button @click="openAppointmentForm(a.id)" style="background:none; border:none; color:#64748b; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
+                                    <button @click="deleteAppointment(a.id)" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div x-show="patientAppointments().length === 0 && futureCare().length === 0" style="padding:20px; text-align:center; color:#94a3b8; font-size:0.9rem; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;">
+                            No appointments recorded yet.<br>
+                            <span style="font-size:0.8rem;">Add the ones already in the diary, and old ones as you remember them.</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="module-card" x-show="isView('more') && moreSection === 'data'" x-cloak
-                     x-data="{ editing:null, form:{ name:'', role:'Primary vet', email:'', phone:'', notes:'' },
-                               reset(){ this.editing=null; this.form={ name:'', role:'Primary vet', email:'', phone:'', notes:'' }; },
+                     x-data="{ editing:null, form:{ name:'', role:'Primary vet', email:'', phone:'', notes:'', locations:[] },
+                               reset(){ this.editing=null; this.form={ name:'', role:'Primary vet', email:'', phone:'', notes:'', locations:[] }; },
                                get valid(){ return this.form.name.trim() && ((this.form.email && /.+@.+\..+/.test(this.form.email)) || (this.form.phone||'').replace(/\D/g,'').length>=5); } }"
                      style="margin-top:20px; border:1px solid #adc1ed; background:#fcfdff; border-radius:4px; padding:20px;">
                     <h3 style="margin-top:0; color:#475569; font-size:1.1rem;"><i class="fa-solid fa-user-doctor"></i> Care providers</h3>
@@ -5752,9 +6016,18 @@
                                     <template x-if="p.email"><span> · <a :href="'mailto:'+p.email" x-text="p.email" style="color:#2563eb;"></a></span></template>
                                     <template x-if="p.phone"><span> · <a :href="'tel:'+p.phone" x-text="p.phone" style="color:#2563eb;"></a></span></template>
                                 </div>
+                                <template x-if="(p.locations || []).length">
+                                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        <span x-text="p.locations.length === 1 ? (p.locations[0].label || '1 address') : p.locations.length + ' branches'"></span>
+                                    </div>
+                                </template>
                             </div>
                             <button type="button" x-show="p.email" @click="emailReportTo(p)" class="btn-add-blue" style="padding:6px 10px; font-size:0.8rem;" title="Email report"><i class="fa-solid fa-envelope"></i></button>
-                            <button type="button" @click="editing=p.id; form={...p}" style="background:none;border:none;color:#64748b;cursor:pointer;" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                            <!-- The branches are copied, not referenced: a shallow spread would
+                                 have every keystroke in the branch fields mutate the stored
+                                 provider live, so Cancel would not cancel. -->
+                            <button type="button" @click="editing=p.id; form={...p, locations:(p.locations||[]).map(l => ({...l}))}" style="background:none;border:none;color:#64748b;cursor:pointer;" title="Edit"><i class="fa-solid fa-pen"></i></button>
                             <button type="button" @click="if(confirm('Delete '+p.name+'?')) deleteCareProvider(p.id)" style="background:none;border:none;color:#ef4444;cursor:pointer;" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </template>
@@ -5768,6 +6041,31 @@
                         <input class="form-input" placeholder="Email" type="email" x-model="form.email">
                         <input class="form-input" placeholder="Phone" type="tel" x-model="form.phone">
                     </div>
+
+                    <!-- BRANCHES. A practice group is one contact with several front doors: the
+                         owner books with "Oakwood Vets" but is told to attend Taunton this time and
+                         Exeter the next. Booking an appointment picks a branch and copies its
+                         address in, so on the day the owner knows exactly where to go. -->
+                    <div style="margin-top:12px;">
+                        <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Addresses &amp; branches</div>
+                        <template x-for="(loc, i) in form.locations" :key="i">
+                            <div style="border:1px solid #e2e8f0; border-radius:6px; padding:10px; margin-bottom:8px; background:#f8fafc;">
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input class="form-input" style="flex:1;" placeholder="Branch name — e.g. Exeter branch" x-model="loc.label">
+                                    <button type="button" @click="form.locations.splice(i, 1)" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Remove branch"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                                <textarea class="form-input" rows="3" style="margin-top:6px; width:100%;" placeholder="Address" x-model="loc.address"></textarea>
+                                <input class="form-input" style="margin-top:6px; width:100%;" placeholder="Direct line (optional)" type="tel" x-model="loc.phone">
+                            </div>
+                        </template>
+                        <button type="button" class="btn-secondary" style="font-size:0.85rem; padding:6px 12px;"
+                                @click="form.locations.push({ id: generateId(), label:'', address:'', phone:'' })">
+                            <i class="fa-solid fa-plus"></i>
+                            <span x-text="form.locations.length ? 'Add another branch' : 'Add an address'"></span>
+                        </button>
+                        <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Add each site you might be asked to attend. When you book an appointment you pick the branch, and its address travels with the appointment.</p>
+                    </div>
+
                     <div style="display:flex; gap:8px; margin-top:8px;">
                         <button type="button" class="btn-add-blue" :disabled="!valid"
                                 @click="editing ? updateCareProvider({...form, id:editing}) : addCareProvider(form); reset();">

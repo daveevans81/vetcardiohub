@@ -205,6 +205,71 @@ const PROCEDURE_SUGGESTIONS = {
                   'Wound repair', 'Lump (mass) removal'],
 };
 
+// --- VETERINARY APPOINTMENTS (parity with iOS schema V15; see appointments-web-patch.md) ------
+// The diary: health checks, boosters, post-op checks, cardiology and other specialist visits, and
+// emergencies — booked, attended, cancelled or missed.
+//
+// Kept SEPARATE from procedureLog on purpose. `procedureLog` is a surgical history, the thing a vet
+// reads before an anaesthetic; filling it with consultations would bury the signal it exists for.
+// The two are merged only for DISPLAY, in `upcomingCare()`, because the owner does not think in
+// storage models — on a Tuesday morning they want to know what is in the diary, and having to check
+// two lists is how a dental gets missed.
+//
+// THREE RULES ARE LOAD-BEARING and must not be "improved":
+//   1. `status` is STORED, never derived from whether the date has passed — same rule as
+//      procedureLog. An appointment the practice cancelled keeps its old date until someone moves
+//      it, and a date-based rule would record a visit that never happened.
+//   2. `time` is a SEPARATE wall-clock 'HH:mm' string, not folded into `date`. A 2:30pm slot is a
+//      wall-clock time at a practice, not an instant, and merging them makes it drift across time
+//      zones. '' means "not been told the slot yet", which is a real state.
+//   3. The provider details are DENORMALISED — name, branch, address and phone as TEXT. Contacts
+//      live in appSettings, outside the clinical export, so a stored reference would arrive
+//      dangling on iOS or after a restore. `providerId`/`locationId` are a soft hint only.
+//
+// Ids below are PERSISTED — add new ones, never rename. Hand-kept identical with
+// `AppointmentCatalogue.swift`; change both together.
+//
+// `defaultLeadDays` varies by type because the useful notice period does: a week suits a booster
+// you might need to rearrange, and is useless for a post-op check booked three days after surgery —
+// the reminder would fall due before the operation.
+const APPOINTMENT_TYPES = [
+    { id: 'checkup',     label: 'Health check',             defaultTitle: 'Health check',
+      defaultLeadDays: 7,  preparationHint: '' },
+    { id: 'cardiology',  label: 'Cardiology appointment',   defaultTitle: 'Cardiology recheck',
+      defaultLeadDays: 7,  preparationHint: 'Take a week of sleeping breathing rates and the current medication list.' },
+    { id: 'vaccination', label: 'Vaccination / booster',    defaultTitle: 'Annual booster',
+      defaultLeadDays: 7,  preparationHint: 'Bring the vaccination card.' },
+    { id: 'postop',      label: 'Post-op check',            defaultTitle: 'Post-operative check',
+      defaultLeadDays: 2,  preparationHint: 'Keep the wound dry and the buster collar on until seen.' },
+    { id: 'specialist',  label: 'Specialist referral',      defaultTitle: 'Specialist appointment',
+      defaultLeadDays: 7,  preparationHint: 'Take any referral letter, previous reports and scans.' },
+    { id: 'bloods',      label: 'Blood test / monitoring',  defaultTitle: 'Blood test',
+      defaultLeadDays: 3,  preparationHint: 'Check whether food should be withheld beforehand.' },
+    { id: 'imaging',     label: 'Scan or x-ray',            defaultTitle: 'Imaging appointment',
+      defaultLeadDays: 3,  preparationHint: 'Check whether food should be withheld beforehand.' },
+    { id: 'dental',      label: 'Dental appointment',       defaultTitle: 'Dental appointment',
+      defaultLeadDays: 7,  preparationHint: 'Confirm the fasting instructions and the drop-off time.' },
+    { id: 'physio',      label: 'Physiotherapy / rehab',    defaultTitle: 'Physiotherapy session',
+      defaultLeadDays: 2,  preparationHint: '' },
+    // An emergency is logged after the fact far more often than it is booked ahead; there is
+    // nothing to give notice of.
+    { id: 'emergency',   label: 'Emergency / out-of-hours', defaultTitle: 'Emergency visit',
+      defaultLeadDays: 0,  preparationHint: '' },
+    { id: 'other',       label: 'Other',                    defaultTitle: '',
+      defaultLeadDays: 7,  preparationHint: '' },
+];
+
+// Only 'booked' is open. Everything else belongs to the history — including 'cancelled', which is
+// kept on purpose: "we cancelled because she was too unwell to travel" is a clinical fact.
+const APPOINTMENT_STATUSES = [
+    { id: 'booked',    label: 'Booked' },
+    { id: 'attended',  label: 'Attended' },
+    { id: 'cancelled', label: 'Cancelled' },
+    // "Missed", not "did not attend" — this is the owner's own record, and clinical shorthand
+    // aimed at them reads as a reprimand.
+    { id: 'missed',    label: 'Missed' },
+];
+
 // --- FOOD ALLERGIES & ADVERSE DRUG REACTIONS (parity with iOS schema V13; see BACKLOG §3m) ----
 // Everything else in this app is a LOG — a series of observations read for a trend. An allergy is
 // not that. It is a standing fact about the animal that changes what may safely be put into it, and
@@ -493,6 +558,36 @@ newProcedure: {
     reminderEnabled: true
 },
 showDeciduousTeeth: false,
+// Veterinary appointments — see APPOINTMENT_TYPES above for the three load-bearing rules.
+appointmentLog: [],
+APPOINTMENT_TYPES_LIST: APPOINTMENT_TYPES,
+APPOINTMENT_STATUSES_LIST: APPOINTMENT_STATUSES,
+showAppointmentPanel: false,
+showAppointmentForm: false,
+editingAppointmentId: null,
+// The type the form was showing before the owner changed it — see `onAppointmentTypeChange`.
+_appointmentPrevType: 'checkup',
+newAppointment: {
+    date: new Date().toISOString().split('T')[0],
+    time: '',                 // '' or 'HH:mm' LOCAL WALL-CLOCK — never folded into `date`
+    type: 'checkup',
+    status: 'booked',
+    title: '',
+    providerName: '',         // copied from appSettings.careProviders — NOT a reference
+    locationLabel: '',
+    address: '',
+    phone: '',
+    providerId: null,         // soft hint into the device-local contacts book; may dangle
+    locationId: null,
+    preparation: '',          // 'no food after 8pm' — the part worth being reminded of
+    questionsToAsk: '',       // one per line
+    outcome: '',
+    notes: '',
+    reminderEnabled: true,
+    reminderLeadDays: 7,
+    remindDayBefore: true,
+    createdAt: ''
+},
 // Food allergies & adverse drug reactions — see ALLERGY_TYPES above for the three load-bearing
 // rules. One list holds both kinds; the two panels filter on `type`.
 allergyLog: [],
@@ -863,6 +958,7 @@ navItems: [
 moreSection: 'data',
 moreSections: [
     { id: 'settings',  label: 'Settings',       icon: 'fa-sliders' },
+    { id: 'appointments', label: 'Appointments', icon: 'fa-calendar-check' },
     { id: 'insurance', label: 'Insurance',      icon: 'fa-shield-halved' },
     { id: 'data',      label: 'Data & Backup',  icon: 'fa-database' },
     { id: 'help',     label: 'Help & FAQs',    icon: 'fa-circle-question' },
@@ -957,7 +1053,16 @@ appSettings: {
     countDuration: 30,                // preferred SRR count window (seconds): 15, 30 or 60
     backupWarnDays: 14,                // backup staleness threshold
     distanceUnit: null,                // 'miles'|'feet'|'km'|'metres' — derived from locale on first run
-    careProviders: [],   // [{ id, name, role, email, phone, notes }]
+    // [{ id, name, role, email, phone, notes, locations: [{ id, label, address, phone }] }]
+    //
+    // `locations` are BRANCHES. A practice group is one contact with several front doors: the owner
+    // books with "Oakwood Vets" but is told to attend Taunton this time and Exeter the next. An
+    // appointment picks a branch and copies its address in, so on the day the owner knows exactly
+    // where to go. `address` is one multi-line string on purpose — structured fields buy nothing
+    // here and are wrong the moment a referral centre writes its address in another shape.
+    //
+    // Absent on every contacts book saved before branches existed, hence `normaliseCareProviders`.
+    careProviders: [],
 },
 
 loadAppSettings() {
@@ -966,6 +1071,33 @@ loadAppSettings() {
 if (saved && typeof saved === 'object') Object.assign(this.appSettings, saved);
     } catch (e) {}
     if (!this.appSettings.distanceUnit) this.appSettings.distanceUnit = this._defaultDistanceUnit();
+    this.normaliseCareProviders();
+},
+
+// Every contacts book saved before branches existed lacks `locations`. Backfilling it here means
+// nothing downstream has to guard, and — the part that matters — the owner's vet, cardiologist and
+// emergency clinic survive the upgrade untouched.
+normaliseCareProviders() {
+    this.appSettings.careProviders = (this.appSettings.careProviders || []).map(p => ({
+        ...p,
+        locations: (p.locations || []).map(l => ({
+            id: l.id || this.generateId(),
+            label: l.label || '', address: l.address || '', phone: l.phone || ''
+        }))
+    }));
+},
+
+// Drop branch rows the owner added but never filled in — an empty one would show up as a
+// nameless option in the appointment picker.
+cleanCareProviderLocations(list) {
+    return (list || [])
+        .filter(l => (l.label || '').trim() || (l.address || '').trim())
+        .map(l => ({
+            id: l.id || this.generateId(),
+            label: (l.label || '').trim(),
+            address: (l.address || '').trim(),
+            phone: (l.phone || '').trim()
+        }));
 },
 
 saveAppSettings() {
@@ -984,8 +1116,8 @@ recordTermsAcceptance() {
   this.termsAgreed = true;
   this.showTermsGate = false;
 },
-addCareProvider(p)    { this.appSettings.careProviders.push({ id: this.generateId(), ...p }); this.saveAppSettings(); },
-updateCareProvider(p) { const i = this.appSettings.careProviders.findIndex(x => x.id === p.id); if (i > -1) this.appSettings.careProviders[i] = p; this.saveAppSettings(); },
+addCareProvider(p)    { this.appSettings.careProviders.push({ id: this.generateId(), ...p, locations: this.cleanCareProviderLocations(p.locations) }); this.saveAppSettings(); },
+updateCareProvider(p) { const i = this.appSettings.careProviders.findIndex(x => x.id === p.id); if (i > -1) this.appSettings.careProviders[i] = { ...p, locations: this.cleanCareProviderLocations(p.locations) }; this.saveAppSettings(); },
 deleteCareProvider(id){ this.appSettings.careProviders = this.appSettings.careProviders.filter(x => x.id !== id); this.saveAppSettings(); },
 
 
@@ -1398,6 +1530,7 @@ init() {
     this.echoMeasurements = loadKey('vch_echoMeasurements') || [];
     this.procedureLog = loadKey('vch_procedureLog') || [];
     this.allergyLog = loadKey('vch_allergyLog') || [];
+    this.appointmentLog = loadKey('vch_appointmentLog') || [];
 
     // Backfill module flags for legacy / restored profiles
     this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
@@ -1673,6 +1806,7 @@ deletePatient(patientId) {
             this.echoMeasurements = (this.echoMeasurements || []).filter(e => e.patientId !== patientId);
             this.procedureLog = (this.procedureLog || []).filter(p => p.patientId !== patientId);
             this.allergyLog = (this.allergyLog || []).filter(a => a.patientId !== patientId);
+            this.appointmentLog = (this.appointmentLog || []).filter(a => a.patientId !== patientId);
 
             // 2. Persist the flushed arrays to local storage
             this.saveToStorage('vch_patients', this.patients);
@@ -1692,6 +1826,7 @@ deletePatient(patientId) {
             this.saveToStorage('vch_echoMeasurements', this.echoMeasurements);
             this.saveToStorage('vch_procedureLog', this.procedureLog);
             this.saveToStorage('vch_allergyLog', this.allergyLog);
+            this.saveToStorage('vch_appointmentLog', this.appointmentLog);
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -1857,6 +1992,7 @@ mergePatients(targetId, sourceId) {
             this.echoMeasurements = (this.echoMeasurements || []).map(e => e.patientId === sourceId ? { ...e, patientId: targetId } : e);
             this.procedureLog = (this.procedureLog || []).map(p => p.patientId === sourceId ? { ...p, patientId: targetId } : p);
             this.allergyLog = (this.allergyLog || []).map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
+            this.appointmentLog = (this.appointmentLog || []).map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
 
             // Dedupe identical SRR readings created by merging an imported copy
             const seen = new Set();
@@ -1902,6 +2038,7 @@ mergePatients(targetId, sourceId) {
             this.saveToStorage('vch_echoMeasurements', this.echoMeasurements);
             this.saveToStorage('vch_procedureLog', this.procedureLog);
             this.saveToStorage('vch_allergyLog', this.allergyLog);
+            this.saveToStorage('vch_appointmentLog', this.appointmentLog);
 
             this.activePatientId = targetId;
             alert("Patient records successfully merged.");
@@ -4026,6 +4163,371 @@ deleteProcedure(id) {
     if (!window.confirm('Delete this procedure? This cannot be undone.')) return;
     this.procedureLog = (this.procedureLog || []).filter(p => p.id !== id);
     this.saveToStorage('vch_procedureLog', this.procedureLog);
+},
+
+// ── VETERINARY APPOINTMENTS ──────────────────────────────────────────────────────────────────
+// See APPOINTMENT_TYPES at the top of this file for the three load-bearing rules. Every consumer —
+// the diary card, the .ics export, the CSV and the report text — words an appointment through the
+// helpers below, so a booking cannot read one way on screen and another way in the report a vet
+// acts on. Parity with iOS `Logic/AppointmentLogic.swift` — change both together.
+
+appointmentType(id) {
+    return APPOINTMENT_TYPES.find(t => t.id === id) || null;
+},
+
+// An unknown id (a record from a newer build, or from iOS) still reads as something rather than
+// leaving a blank row.
+appointmentTypeLabel(id) {
+    const t = this.appointmentType(id);
+    if (t) return t.label;
+    return id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Appointment';
+},
+
+appointmentStatusLabel(status) {
+    const s = APPOINTMENT_STATUSES.find(x => x.id === status);
+    return s ? s.label : 'Booked';
+},
+
+appointmentIsOpen(a) { return (a?.status || 'booked') === 'booked'; },
+
+// --- Filtering & ordering (status-driven, NEVER date-driven) ---
+
+patientAppointments() {
+    return (this.appointmentLog || []).filter(a => a.patientId === this.activePatientId);
+},
+
+// A sortable key: date, then clock time (an unknown time sorts LAST within its day, since a
+// booked slot is more certain than one still to be confirmed), then entry order.
+_appointmentSortKey(a) {
+    return `${a.date || ''} ${a.time || '99:99'} ${a.createdAt || ''} ${a.id || ''}`;
+},
+
+// Still ahead of the owner, soonest first. A booking whose date has slipped is STILL a booking.
+upcomingAppointments() {
+    return this.patientAppointments()
+        .filter(a => this.appointmentIsOpen(a))
+        .sort((x, y) => this._appointmentSortKey(x).localeCompare(this._appointmentSortKey(y)));
+},
+
+// Everything closed — attended, cancelled or missed — newest first.
+appointmentHistory() {
+    return this.patientAppointments()
+        .filter(a => !this.appointmentIsOpen(a))
+        .sort((x, y) => this._appointmentSortKey(y).localeCompare(this._appointmentSortKey(x)));
+},
+
+// Booked, but the day has gone. These get ASKED about — "did you go?" — never assumed either way.
+appointmentNeedsOutcome(a) {
+    if (!this.appointmentIsOpen(a)) return false;
+    return (a.date || '') < new Date().toISOString().split('T')[0];
+},
+
+appointmentsNeedingOutcome() {
+    return this.upcomingAppointments().filter(a => this.appointmentNeedsOutcome(a));
+},
+
+// The merged diary: appointments PLUS booked procedures, so "what is coming up" is one list.
+// The storage stays split (a surgical history must not fill up with consultations) and only the
+// DISPLAY is joined — parity with iOS `Logic/UpcomingCare.swift`.
+//
+// Anything whose day has passed leads the list whatever its date: a slipped booking sorting into
+// the past, below today where nobody scrolls, is exactly how it stops being dealt with.
+upcomingCare() {
+    const items = this.upcomingAppointments().map(a => ({
+        id: 'appointment.' + a.id, kind: 'appointment', sourceId: a.id,
+        date: a.date, time: a.time || '',
+        title: this.appointmentTitle(a), subtitle: this.appointmentSubtitle(a),
+        needsOutcome: this.appointmentNeedsOutcome(a)
+    })).concat(this.scheduledProcedures().map(pr => ({
+        id: 'procedure.' + pr.id, kind: 'procedure', sourceId: pr.id,
+        date: pr.date, time: '',
+        title: this.procedureTitle(pr), subtitle: this.procedureSubtitle(pr),
+        needsOutcome: !!this.procedureNeedsOutcome(pr)
+    })));
+    return items.sort((a, b) => {
+        if (a.needsOutcome !== b.needsOutcome) return a.needsOutcome ? -1 : 1;
+        const ka = `${a.date} ${a.time || '99:99'} ${a.id}`;
+        const kb = `${b.date} ${b.time || '99:99'} ${b.id}`;
+        return ka.localeCompare(kb);
+    });
+},
+
+futureCare()          { return this.upcomingCare().filter(i => !i.needsOutcome); },
+careAwaitingOutcome() { return this.upcomingCare().filter(i => i.needsOutcome); },
+
+// --- Wording ---
+
+// Falls back to the type's default title, then to the type label, so a row is never blank.
+appointmentTitle(a) {
+    const typed = (a.title || '').trim();
+    if (typed) return typed;
+    const t = this.appointmentType(a.type);
+    return (t && t.defaultTitle) ? t.defaultTitle : this.appointmentTypeLabel(a.type);
+},
+
+// "Oakwood Vets — Exeter branch", or whichever part exists.
+appointmentPlaceName(a) {
+    const provider = (a.providerName || '').trim();
+    const branch = (a.locationLabel || '').trim();
+    if (!provider) return branch;
+    if (!branch) return provider;
+    return `${provider} — ${branch}`;
+},
+
+// "12 Mill Lane, Exeter, EX1 2AB" — the multi-line address on one line for a row subtitle.
+appointmentAddressOneLine(a) {
+    return (a.address || '').split('\n').map(l => l.trim()).filter(Boolean).join(', ');
+},
+
+appointmentSubtitle(a) {
+    return [this.appointmentPlaceName(a), this.appointmentAddressOneLine(a)].filter(Boolean).join(' · ');
+},
+
+// Questions are stored as one text field because that is how owners type them; split for display.
+appointmentQuestionLines(a) {
+    return (a.questionsToAsk || '').split('\n').map(l => l.trim()).filter(Boolean);
+},
+
+// "Tuesday 12 August at 14:30" — the one string that answers "when is it".
+appointmentWhenText(a) {
+    if (!a.date) return '';
+    const day = new Date(a.date + 'T12:00:00Z').toLocaleDateString(undefined,
+        { weekday: 'long', day: 'numeric', month: 'long' });
+    return a.time ? `${day} at ${a.time}` : day;
+},
+
+// --- Form & CRUD ---
+
+openAppointmentForm(id = null) {
+    const existing = id ? (this.appointmentLog || []).find(a => a.id === id) : null;
+    this.editingAppointmentId = id;
+    this._appointmentPrevType = existing ? existing.type : 'checkup';
+    this.newAppointment = existing
+        ? { ...existing }
+        : {
+            date: new Date().toISOString().split('T')[0],
+            time: '', type: 'checkup', status: 'booked', title: 'Health check',
+            providerName: '', locationLabel: '', address: '', phone: '',
+            providerId: null, locationId: null,
+            preparation: '', questionsToAsk: '', outcome: '', notes: '',
+            reminderEnabled: true, reminderLeadDays: 7, remindDayBefore: true,
+            createdAt: ''
+          };
+    this.showAppointmentForm = true;
+},
+
+closeAppointmentForm() {
+    this.showAppointmentForm = false;
+    this.editingAppointmentId = null;
+},
+
+// Fill in the obvious title and notice period on a type change, but never overwrite what the
+// owner has already typed or chosen.
+//
+// The previous type is tracked on the COMPONENT, not on the <select> element: `x-init` runs once,
+// so an element-held value goes stale the moment the form is reopened for an existing appointment
+// — and a stale "previous" is what would let this quietly rewrite a title the owner chose.
+onAppointmentTypeChange() {
+    const was = this.appointmentType(this._appointmentPrevType);
+    const now = this.appointmentType(this.newAppointment.type);
+    this._appointmentPrevType = this.newAppointment.type;
+    if (!now) return;
+    const title = (this.newAppointment.title || '').trim();
+    if (!title || (was && title === was.defaultTitle)) this.newAppointment.title = now.defaultTitle;
+    if (!was || this.newAppointment.reminderLeadDays === was.defaultLeadDays) {
+        this.newAppointment.reminderLeadDays = now.defaultLeadDays;
+    }
+    // An emergency visit is nearly always entered after the event, not booked ahead.
+    if (now.id === 'emergency' && !this.editingAppointmentId) this.newAppointment.status = 'attended';
+},
+
+// Every provider/branch pair the owner could be attending, flattened for the picker. A practice
+// with branches offers one row each: "which building" is the whole question this answers.
+careProviderOptions() {
+    const out = [];
+    (this.appSettings.careProviders || []).forEach(p => {
+        const locations = p.locations || [];
+        if (!locations.length) {
+            out.push({ key: p.id, label: p.name, detail: p.role || '', provider: p, location: null });
+        } else {
+            locations.forEach(l => out.push({
+                key: `${p.id}.${l.id}`,
+                label: l.label ? `${p.name} — ${l.label}` : p.name,
+                detail: (l.address || '').split('\n').map(s => s.trim()).filter(Boolean).join(', '),
+                provider: p, location: l
+            }));
+        }
+    });
+    return out;
+},
+
+// Copy a contact into the appointment. The branch's direct line wins over the practice's main
+// number — it is the one that gets answered on the day.
+applyCareProviderToAppointment(option) {
+    const p = option.provider, l = option.location;
+    Object.assign(this.newAppointment, {
+        providerName: p.name || '',
+        providerId: p.id || null,
+        locationLabel: l ? (l.label || '') : '',
+        locationId: l ? (l.id || null) : null,
+        address: l ? (l.address || '') : '',
+        phone: (l && (l.phone || '').trim()) ? l.phone.trim() : (p.phone || '')
+    });
+},
+
+saveAppointment() {
+    const a = this.newAppointment;
+    const open = (a.status || 'booked') === 'booked';
+    // Only a well-formed HH:mm survives. Junk here would reach the reminder wording, where an
+    // unparseable time reads as "no time given" anyway — better to store that honestly.
+    const time = /^([01]\d|2[0-3]):([0-5]\d)$/.test(a.time || '') ? a.time : '';
+
+    const record = {
+        id: this.editingAppointmentId || this.generateId(),
+        patientId: this.activePatientId,
+        date: a.date,
+        time,
+        type: a.type || 'checkup',
+        status: APPOINTMENT_STATUSES.some(s => s.id === a.status) ? a.status : 'booked',
+        title: (a.title || '').trim(),
+        providerName: (a.providerName || '').trim(),
+        locationLabel: (a.locationLabel || '').trim(),
+        address: (a.address || '').trim(),
+        phone: (a.phone || '').trim(),
+        providerId: a.providerId || null,
+        locationId: a.locationId || null,
+        preparation: (a.preparation || '').trim(),
+        questionsToAsk: a.questionsToAsk || '',
+        // A still-open appointment has no outcome yet; carrying one across would put a claim in
+        // the record that nobody made.
+        outcome: open ? '' : (a.outcome || '').trim(),
+        notes: a.notes || '',
+        reminderEnabled: a.reminderEnabled !== false,
+        reminderLeadDays: Math.max(0, parseInt(a.reminderLeadDays, 10) || 0),
+        remindDayBefore: a.remindDayBefore !== false,
+        createdAt: a.createdAt || new Date().toISOString()
+    };
+
+    this.appointmentLog = this.editingAppointmentId
+        ? this.appointmentLog.map(x => x.id === this.editingAppointmentId ? record : x)
+        : [...(this.appointmentLog || []), record];
+    this.saveToStorage('vch_appointmentLog', this.appointmentLog);
+    this.closeAppointmentForm();
+},
+
+// Turn a booking into history once it has gone ahead — the owner's call, never the date's.
+markAppointmentAttended(id) {
+    this.appointmentLog = (this.appointmentLog || [])
+        .map(a => a.id === id ? { ...a, status: 'attended' } : a);
+    this.saveToStorage('vch_appointmentLog', this.appointmentLog);
+},
+
+// One-tap from the merged diary, whichever list the item came from.
+markCareItemDone(item) {
+    if (item.kind === 'procedure') this.markProcedureDone(item.sourceId);
+    else this.markAppointmentAttended(item.sourceId);
+},
+
+openCareItem(item) {
+    if (item.kind === 'procedure') { this.showProcedurePanel = true; this.openProcedureForm(item.sourceId); }
+    else this.openAppointmentForm(item.sourceId);
+},
+
+deleteAppointment(id) {
+    if (!window.confirm('Delete this appointment? This cannot be undone.')) return;
+    this.appointmentLog = (this.appointmentLog || []).filter(a => a.id !== id);
+    this.saveToStorage('vch_appointmentLog', this.appointmentLog);
+},
+
+// --- Calendar export ---
+//
+// A VEVENT of its own rather than a reuse of `_buildVevent`: that one is vaccine-shaped and
+// hardcodes the word "due", and an appointment described as due reads like a lapsed treatment —
+// the opposite of the truth. This one says "booked", and carries the real slot time when there is
+// one instead of pretending an all-day event.
+_buildAppointmentVevent(a, patientName) {
+    const title = this.appointmentTitle(a);
+    const pad = n => String(n).padStart(2, '0');
+    const ymd = a.date.replace(/-/g, '');
+
+    const now = new Date();
+    const dtstamp = now.getUTCFullYear() + pad(now.getUTCMonth() + 1) + pad(now.getUTCDate())
+        + 'T' + pad(now.getUTCHours()) + pad(now.getUTCMinutes()) + pad(now.getUTCSeconds()) + 'Z';
+
+    // With a known slot: a one-hour local-time event, so it lands in the right place in the day.
+    // Without one: an all-day event, which is the honest rendering of "we have not been told yet".
+    let dtstart, dtend;
+    if (a.time) {
+        const [h, m] = a.time.split(':').map(Number);
+        dtstart = `DTSTART:${ymd}T${pad(h)}${pad(m)}00`;
+        dtend   = `DTEND:${ymd}T${pad((h + 1) % 24)}${pad(m)}00`;
+    } else {
+        const next = new Date(a.date + 'T12:00:00Z');
+        next.setUTCDate(next.getUTCDate() + 1);
+        dtstart = `DTSTART;VALUE=DATE:${ymd}`;
+        dtend   = `DTEND;VALUE=DATE:${next.getUTCFullYear()}${pad(next.getUTCMonth() + 1)}${pad(next.getUTCDate())}`;
+    }
+
+    const desc = [
+        `Pet: ${patientName}`,
+        `Appointment: ${title}`,
+        `Booked: ${new Date(a.date + 'T12:00:00Z').toLocaleDateString('en-GB')}${a.time ? ' at ' + a.time : ''}`,
+    ];
+    const place = this.appointmentPlaceName(a);
+    if (place) desc.push(`Where: ${place}`);
+    const address = this.appointmentAddressOneLine(a);
+    if (address) desc.push(`Address: ${address}`);
+    if (a.phone) desc.push(`Phone: ${a.phone}`);
+    if (a.preparation) desc.push(`Before you go: ${a.preparation}`);
+    this.appointmentQuestionLines(a).forEach(q => desc.push(`Ask: ${q}`));
+    if (a.notes) desc.push(`Notes: ${a.notes}`);
+    desc.push('', 'Generated by VetCardioHub — vetcardiohub.com');
+
+    const lead = Math.max(0, parseInt(a.reminderLeadDays, 10) || 0);
+    const alarms = [];
+    if (lead > 0) {
+        alarms.push('BEGIN:VALARM', 'ACTION:DISPLAY',
+            `DESCRIPTION:${this._escapeIcs(`${patientName}'s ${title} is booked in ${lead} day${lead === 1 ? '' : 's'}`
+                + (a.preparation ? ` — ${a.preparation}` : ''))}`,
+            `TRIGGER:-P${lead}D`, 'END:VALARM');
+    }
+    if (a.remindDayBefore !== false) {
+        alarms.push('BEGIN:VALARM', 'ACTION:DISPLAY',
+            `DESCRIPTION:${this._escapeIcs(`${patientName}'s ${title} is tomorrow${a.time ? ' at ' + a.time : ''}`
+                + (a.preparation ? ` — ${a.preparation}` : ''))}`,
+            // 6pm the evening before an all-day event; two hours before a timed one.
+            a.time ? 'TRIGGER:-PT2H' : 'TRIGGER:-PT6H', 'END:VALARM');
+    }
+
+    return [
+        'BEGIN:VEVENT',
+        `UID:${this.generateId()}@vetcardiohub.com`,
+        `DTSTAMP:${dtstamp}`,
+        dtstart,
+        dtend,
+        `SUMMARY:${this._escapeIcs(`${patientName} – ${title} booked`)}`,
+        `DESCRIPTION:${this._escapeIcs(desc.join('\\n'))}`,
+        ...(address ? [`LOCATION:${this._escapeIcs(address)}`] : []),
+        ...alarms,
+        'END:VEVENT'
+    ];
+},
+
+downloadAppointmentIcs() {
+    const booked = this.upcomingAppointments().filter(a => a.date);
+    if (!booked.length) { alert('No booked appointments to add to your calendar.'); return; }
+    const patientName = this.activePatientProfile?.name || 'Pet';
+    const lines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//VetCardioHub//Appointment Reminders//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        ...booked.flatMap(a => this._buildAppointmentVevent(a, patientName)),
+        'END:VCALENDAR'
+    ];
+    this._downloadIcs(this._buildIcsString(lines),
+        `${patientName.replace(/\s+/g, '-')}-Appointments.ics`);
 },
 
 // ── FOOD ALLERGIES & ADVERSE DRUG REACTIONS ──────────────────────────────────────────────────
@@ -7037,13 +7539,15 @@ resetData() {
     const keys = ['vch_patients','vch_weightLog','vch_srrHistory','vch_medLedger','vch_suppLedger',
                   'vch_diagnosisLog','vch_syncopeLog','vch_coughLog','vch_activityLog',
                   'vch_vaccinationLog','vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog',
-                  'vch_bloodResults', 'vch_echoMeasurements', 'vch_procedureLog', 'vch_allergyLog'];
+                  'vch_bloodResults', 'vch_echoMeasurements', 'vch_procedureLog', 'vch_allergyLog',
+                  'vch_appointmentLog'];
     keys.forEach(k => localStorage.removeItem(k));
 
     this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = []; this.suppLedger = [];
     this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.activityLog = [];
     this.vaccinationLog = []; this.antiparasiticLog = []; this.injectionLog = []; this.medDoseLog = [];
     this.bloodResults = []; this.echoMeasurements = []; this.procedureLog = []; this.allergyLog = [];
+    this.appointmentLog = [];
     this.activePatientId = null;
 
     [this.$refs.rrrChartCanvas, this.$refs.medChartCanvas, this.$refs.weightChartCanvas, this.$refs.injectionChartCanvas]
@@ -10187,6 +10691,7 @@ exportCompleteBackup(patientId = null) {
         vch_echoMeasurements: scoped(this.echoMeasurements),
         vch_procedureLog: scoped(this.procedureLog),
         vch_allergyLog: scoped(this.allergyLog),
+        vch_appointmentLog: scoped(this.appointmentLog),
         exportDate: new Date().toISOString(),
         exportScope: patientId ? 'single' : 'all'
     };
@@ -10292,7 +10797,7 @@ backupLogCount(pid) {
     return ['vch_srrHistory', 'vch_medLedger', 'vch_suppLedger', 'vch_diagnosisLog', 'vch_syncopeLog',
             'vch_coughLog', 'vch_activityLog', 'vch_weightLog', 'vch_vaccinationLog',
             'vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog','vch_bloodResults','vch_echoMeasurements',
-            'vch_procedureLog', 'vch_allergyLog']
+            'vch_procedureLog', 'vch_allergyLog', 'vch_appointmentLog']
         .reduce((n, k) => n + (d[k] || []).filter(e => e.patientId === pid).length, 0);
 },
 
@@ -10339,7 +10844,8 @@ confirmBackupImport() {
     // tick after promising the user it would import them.
     const logKeys = ['weightLog', 'srrHistory', 'medLedger', 'suppLedger', 'diagnosisLog', 'syncopeLog',
                      'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog', 'injectionLog',
-                     'medDoseLog', 'bloodResults', 'echoMeasurements', 'procedureLog', 'allergyLog'];
+                     'medDoseLog', 'bloodResults', 'echoMeasurements', 'procedureLog', 'allergyLog',
+                     'appointmentLog'];
     logKeys.forEach(key => {
         const incoming = (data['vch_' + key] || [])
             .filter(e => idMap[e.patientId] !== undefined)
@@ -11313,6 +11819,36 @@ generateCSV() {
         csv += '\n';
     }
 
+    // ── Appointments (always complete history — "when was she last seen by cardiology, and
+    // where?" is not a question about the last three months). Not module-gated. Anything still
+    // BOOKED is listed FIRST and labelled, so a vet meets it as a plan rather than as a visit.
+    //
+    // Cancelled and missed slots are included rather than filtered out: "cancelled — too unwell to
+    // travel" is a clinical fact, and the Status column keeps it honest.
+    //
+    // The owner's own preparation notes and their list of questions are deliberately NOT exported.
+    // They are a private aide-mémoire for getting to the appointment; printing them into a clinical
+    // report would put half-formed worries in front of a vet as if they were findings.
+    const apptData = this.upcomingAppointments().concat(this.appointmentHistory());
+    if (apptData.length > 0) {
+        csv += 'APPOINTMENTS\n';
+        csv += 'Date,Time,Status,Type,Appointment,Practice,Address,Outcome,Notes\n';
+        apptData.forEach(a => {
+            csv += [
+                q(a.date),
+                q(a.time || ''),
+                q(this.appointmentStatusLabel(a.status)),
+                q(this.appointmentTypeLabel(a.type)),
+                q(this.appointmentTitle(a)),
+                q(this.appointmentPlaceName(a)),
+                q(this.appointmentAddressOneLine(a)),
+                q(a.outcome || ''),
+                q(a.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+
     // ── Syncope / Collapse Log ────────────────────────────────────────────
         const syncData = !mods.syncopeLog ? [] : this.syncopeLog
         .filter(s => s.patientId === this.activePatientId && inRange(s.date))
@@ -11753,6 +12289,31 @@ _buildReportText() {
                     if (pr.histopathDate) out += ` (${pr.histopathDate})`;
                 }
                 if (pr.notes) out += `${nl}${indent}Notes: ${pr.notes}`;
+                out += nl;
+            });
+            out += nl;
+        }
+    }
+
+    // ── Appointments (ALWAYS full history — no date filter) ───────────────
+    {
+        const apptData = this.upcomingAppointments().concat(this.appointmentHistory());
+        if (apptData.length > 0) {
+            out += `APPOINTMENTS (${apptData.length} appointment${apptData.length !== 1 ? 's' : ''}) — Complete History${nl}`;
+            out += rule() + nl;
+            apptData.forEach(a => {
+                // The status is stated before the reader takes in what the appointment was, so a
+                // booking never reads as a visit that happened and a cancellation never reads as
+                // care that was given.
+                out += a.date;
+                if (a.time) out += ` ${a.time}`;
+                out += `  |  ${this.appointmentStatusLabel(a.status).toUpperCase()}  |  ${this.appointmentTitle(a)}`;
+                const place = this.appointmentPlaceName(a);
+                if (place) out += `  |  ${place}`;
+                const address = this.appointmentAddressOneLine(a);
+                if (address) out += `${nl}${indent}${address}`;
+                if (a.outcome) out += `${nl}${indent}Outcome: ${a.outcome}`;
+                if (a.notes)   out += `${nl}${indent}Notes: ${a.notes}`;
                 out += nl;
             });
             out += nl;
