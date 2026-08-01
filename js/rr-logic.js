@@ -332,6 +332,220 @@ const ALLERGY_REACTION_SIGNS = {
                                              'Blood in stool', 'Yellow gums (jaundice)']),
 };
 
+// --- SKIN & ITCH ------------------------------------------------------------------------------
+// Ids below are PERSISTED — add new ones, never rename. Hand-kept identical with
+// `SkinCatalogue.swift`; change both together.
+//
+// Why a 0–10 score and not mild/moderate/severe: itch is continuous, it is scored on the SAME pet
+// week after week, and the whole point of recording it is to see it move. Three bands cannot show
+// a pet going from "scratching most evenings" to "scratching all evening and half the night", so a
+// seasonal rise would flatten into one word for months. The written ANCHORS are what keep one
+// owner's 6 comparable with the same owner's 6 a year later — never show the slider without them.
+const SKIN_SCORE_ANCHORS = [
+    'No itching at all — normal for them.',
+    'The odd scratch, no more than any dog or cat does.',
+    'A little more scratching than usual, easy to miss.',
+    "Noticeable scratching or licking, but it doesn't interrupt anything.",
+    'Scratching several times an hour when settled.',
+    'Regular scratching, licking or chewing — you notice it every evening.',
+    'Frequent enough to interrupt resting, eating or play.',
+    "Scratching or chewing most of the time they're awake.",
+    'Almost constant, and it disturbs their sleep.',
+    'Constant, distressing, and stops only when they’re distracted.',
+    'Cannot be stopped — self-harming, breaking the skin.',
+];
+
+// Ear disease is its own field rather than one more site chip: sore ears are what books the
+// appointment, they recur on their own rhythm, and "her ears flare every August" is precisely the
+// annual pattern this module exists to surface. Buried in a multi-select it could not be counted.
+const SKIN_EAR_STATES = [
+    { id: 'infected',  label: 'Sore or discharging', rank: 2,
+      hint: 'Red, smelly, waxy or discharging, or painful when touched. Worth a vet appointment.' },
+    { id: 'irritated', label: 'Itchy or head-shaking', rank: 1,
+      hint: 'Scratching at the ears or shaking the head, but the ears themselves look normal.' },
+    { id: 'none',      label: 'Ears fine', rank: 0,
+      hint: 'Clean, comfortable, no scratching or head-shaking.' },
+];
+
+const SKIN_SITES = [
+    { id: 'paws',     label: 'Paws' },
+    { id: 'ears',     label: 'Ears' },
+    { id: 'face',     label: 'Face or muzzle' },
+    { id: 'belly',    label: 'Tummy or groin' },
+    { id: 'armpits',  label: 'Armpits' },
+    { id: 'legs',     label: 'Legs' },
+    { id: 'back',     label: 'Back or flanks' },
+    { id: 'tailBase', label: 'Base of tail or bottom' },
+    { id: 'neck',     label: 'Neck or collar area' },
+    { id: 'allOver',  label: 'All over' },
+];
+
+const SKIN_SIGNS = [
+    { id: 'scratching',   label: 'Scratching' },
+    { id: 'licking',      label: 'Licking or chewing paws' },
+    { id: 'rubbing',      label: 'Rubbing face on furniture' },
+    { id: 'headShaking',  label: 'Shaking head' },
+    { id: 'overGrooming', label: 'Over-grooming' },
+    { id: 'hairLoss',     label: 'Hair loss or thin patches' },
+    { id: 'redSkin',      label: 'Red or inflamed skin' },
+    { id: 'spots',        label: 'Spots, scabs or crusts' },
+    { id: 'hotSpot',      label: 'Hot spot (sudden sore wet patch)' },
+    { id: 'smell',        label: 'Smelly skin or coat' },
+    { id: 'darkSkin',     label: 'Darkened or thickened skin' },
+    { id: 'restless',     label: 'Restless or disturbed sleep' },
+];
+
+// A record of what was USED, not a prescription and never a suggestion — nothing in the app
+// recommends any of these. The list exists so "she was on steroids that whole summer" is legible
+// on the chart instead of buried in free text.
+const SKIN_TREATMENTS = [
+    { id: 'none',          label: 'Nothing given' },
+    { id: 'oclacitinib',   label: 'Oclacitinib (Apoquel)' },
+    { id: 'lokivetmab',    label: 'Lokivetmab (Cytopoint)' },
+    { id: 'ciclosporin',   label: 'Ciclosporin (Atopica)' },
+    { id: 'steroid',       label: 'Steroid tablets or injection' },
+    { id: 'antihistamine', label: 'Antihistamine' },
+    { id: 'antibiotic',    label: 'Antibiotic' },
+    { id: 'antifungal',    label: 'Anti-fungal' },
+    { id: 'earDrops',      label: 'Ear drops' },
+    { id: 'shampoo',       label: 'Medicated shampoo or wash' },
+    { id: 'sprayCream',    label: 'Spray, cream or mousse' },
+    { id: 'omega',         label: 'Skin supplement or omega oils' },
+    { id: 'fleaTreatment', label: 'Flea treatment' },
+    { id: 'dietChange',    label: 'Diet change or elimination diet' },
+    { id: 'buster',        label: 'Buster collar or body suit' },
+    { id: 'other',         label: 'Something else' },
+];
+
+// The owner's hunch, recorded as a hunch. Never read as a cause by anything in the app, and the
+// seasonal analysis ignores it entirely.
+const SKIN_TRIGGERS = [
+    { id: 'unknown',     label: 'No idea' },
+    { id: 'grassPollen', label: 'Grass, pollen or being outdoors' },
+    { id: 'dustMites',   label: 'House dust' },
+    { id: 'fleas',       label: 'Fleas or insect bites' },
+    { id: 'food',        label: 'Something they ate' },
+    { id: 'contact',     label: 'Contact with something new' },
+    { id: 'grooming',    label: 'After grooming or bathing' },
+    { id: 'stress',      label: 'Stress or a change in routine' },
+    { id: 'weather',     label: 'Hot or humid weather' },
+    { id: 'heating',     label: 'Indoor heating' },
+];
+
+// Minimum evidence before the seasonal analysis will describe a shape at all. Not a significance
+// test — a floor below which any shape is noise. Mirrors `SkinLogic.SeasonalGate` exactly.
+const SKIN_SEASONAL_GATE = {
+    minScoredDays: 12,        // ~a year of monthly logging, or three months of weekly
+    minMonthsCovered: 6,      // half the year seen, or the "peak" is just the months logged
+    minAmplitude: 2.0,        // score points between best and worst month
+    peakTolerance: 1.0,       // months within this of the top count as part of the peak
+    minMonthsForYearPeak: 4,  // a year with two logged months has no peak, it has two months
+};
+
+// --- LUMPS ------------------------------------------------------------------------------------
+// THE RULE THIS WHOLE FEATURE IS BUILT AROUND: nothing here, and nothing in the lump functions
+// below, ever tells an owner a lump is fine. Not "probably benign", not "no concerning features",
+// not "no significant change". A soft, mobile, unchanging lump can be a mast cell tumour, and only
+// a needle and a microscope distinguish one lump from another. An app that offered reassurance
+// would be doing the one thing that could cost an animal its life.
+//
+// Ids are PERSISTED — hand-kept identical with `LumpCatalogue.swift`.
+const LUMP_SITES = [
+    { id: 'head',     label: 'Head or face' },
+    { id: 'ear',      label: 'Ear' },
+    { id: 'mouth',    label: 'Mouth, lip or gum' },
+    { id: 'neck',     label: 'Neck or throat' },
+    { id: 'shoulder', label: 'Shoulder' },
+    { id: 'chest',    label: 'Chest' },
+    { id: 'back',     label: 'Back' },
+    { id: 'flank',    label: 'Side or flank' },
+    { id: 'tummy',    label: 'Tummy' },
+    { id: 'mammary',  label: 'Mammary or nipple area' },
+    { id: 'groin',    label: 'Groin or inner thigh' },
+    { id: 'frontLeg', label: 'Front leg' },
+    { id: 'hindLeg',  label: 'Hind leg' },
+    { id: 'paw',      label: 'Paw or toe' },
+    { id: 'tail',     label: 'Tail' },
+    { id: 'other',    label: 'Somewhere else' },
+];
+
+const LUMP_SIDES = [
+    { id: 'left',    label: 'Left' },
+    { id: 'right',   label: 'Right' },
+    { id: 'midline', label: 'Middle' },
+    { id: '',        label: 'Not recorded' },
+];
+
+const LUMP_CONSISTENCIES = [
+    { id: 'soft',   label: 'Soft, squashy' },
+    { id: 'firm',   label: 'Firm, like a rubber' },
+    { id: 'hard',   label: 'Hard, like a pebble' },
+    { id: 'fluid',  label: 'Fluid-filled or squelchy' },
+    { id: 'unsure', label: 'Not sure' },
+];
+
+const LUMP_MOBILITIES = [
+    { id: 'free',     label: 'Moves freely under the skin' },
+    { id: 'inSkin',   label: 'In the skin itself, moves with it' },
+    { id: 'attached', label: "Feels stuck to what's underneath" },
+    { id: 'unsure',   label: 'Not sure' },
+];
+
+const LUMP_SIGNS = [
+    { id: 'ulcerated', label: 'Broken, open or ulcerated' },
+    { id: 'bleeding',  label: 'Bleeding' },
+    { id: 'weeping',   label: 'Weeping or discharging' },
+    { id: 'painful',   label: 'Sore when touched' },
+    { id: 'red',       label: 'Red or inflamed' },
+    { id: 'bruised',   label: 'Bruised-looking' },
+    { id: 'hairless',  label: 'Hair loss over it' },
+    { id: 'licking',   label: 'They keep licking or chewing it' },
+    { id: 'swollen',   label: 'Swollen around it' },
+];
+
+// The signs that always warrant a vet being told, whatever the measurements say.
+const LUMP_URGENT_SIGNS = ['ulcerated', 'bleeding', 'weeping', 'painful'];
+
+const LUMP_VET_STAGES = [
+    { id: 'notSeen', label: 'Not seen by a vet yet' },
+    { id: 'seen',    label: 'A vet has examined it' },
+    { id: 'sampled', label: 'Sampled or biopsied' },
+];
+
+const LUMP_STATUSES = [
+    { id: 'monitoring', label: 'Being monitored' },
+    { id: 'removed',    label: 'Removed' },
+    { id: 'resolved',   label: 'Went away on its own' },
+];
+
+// Everyday objects to size a lump against, for the owner with no ruler to hand. An approximate
+// number recorded today beats an exact one recorded never.
+const LUMP_SIZE_REFERENCES = [
+    { label: 'Grain of rice', mm: 5 },
+    { label: 'Pea', mm: 8 },
+    { label: 'Blueberry', mm: 12 },
+    { label: 'Grape', mm: 20 },
+    { label: 'Walnut', mm: 30 },
+    { label: 'Golf ball', mm: 43 },
+    { label: 'Plum', mm: 55 },
+    { label: 'Tennis ball', mm: 67 },
+];
+
+// An owner with a ruler, measuring a soft lump under a coat of fur, is comfortably ±2 mm. A change
+// must therefore clear BOTH an absolute floor and a relative one. Mirrors `LumpLogic.GrowthGate`.
+const LUMP_GROWTH_GATE = {
+    minAbsoluteMm: 3.0,
+    minRelative: 0.20,
+    fastMmPerMonth: 5.0,
+    staleDays: 90,
+};
+
+// Shown on every lump screen and under the lump table on the vet report, whether or not anything
+// has been flagged. It is the counterweight to an empty prompt list. Do not make it conditional.
+const LUMP_STANDING_NOTE = 'Measurements and photos help your vet see how a lump has changed, '
+    + "but they can't show what it is. Only your vet can tell you that, usually with a needle sample.";
+
+
 // --- MODIFIED TRIADAN DENTAL CHART ------------------------------------------------------------
 // Three digits. The FIRST is the quadrant seen from the front of the animal:
 //     1 = upper right   2 = upper left   3 = lower left   4 = lower right   (permanent)
@@ -407,7 +621,14 @@ defaultModules: {
     acvimStaging: true,
     weightDiet: true,  
     vaccinations: true,
-    antiparasitics: true
+    antiparasitics: true,
+    // Opt-in, so these default OFF where every other module defaults on. Most cardiac patients
+    // have neither a skin problem nor a lump, and two empty panels on the wellness view would be
+    // clutter for the majority to buy discoverability for the minority. iOS stores the same two
+    // flags on the patient itself (`skinLogEnabled` / `lumpTrackingEnabled`) but carries them
+    // here, under `modules`, in the backup — so the JSON shape matches on both platforms.
+    skinLog: false,
+    lumps: false
 },
 
 showProgressionBanner: false,
@@ -488,12 +709,15 @@ vetExportModules: {
     syncopeLog: true,
     acvimStaging: true,
     vaccinations: true,
-    antiparasitics: true
+    antiparasitics: true,
+    skinLog: true,
+    lumps: true
 },
 
 
 // --- SYMPTOM TRACKING STATE ---
-        showSymptomLog: false,
+        showSymptomLog: false,        // cough card (Monitor)
+        showActivityLog: false,       // activity card (Wellness) — split from the cough card in 2026-08
         coughLog: [],
         activityLog: [],
         showCoughForm: false,     
@@ -607,6 +831,87 @@ newAllergy: {
     date: '',                  // '' = the owner does not know when it started; never today
     notes: ''
 },
+// --- Skin & itch -----------------------------------------------------------------------
+// A DAILY SUMMARY: one entry per patient per day, upserted on the day like the cough log.
+// Itch is a state, not an event — "she scratched at three o'clock" is not a fact anyone acts
+// on, whereas "Tuesday was a 7" is. One row per day also stops a chatty week out-voting a
+// quiet month simply by having more rows in it.
+skinLog: [],
+SKIN_SITES_LIST: SKIN_SITES,
+SKIN_SIGNS_LIST: SKIN_SIGNS,
+SKIN_TREATMENTS_LIST: SKIN_TREATMENTS,
+SKIN_TRIGGERS_LIST: SKIN_TRIGGERS,
+SKIN_EAR_STATES_LIST: SKIN_EAR_STATES,
+showSkinLog: false,
+showSkinForm: false,
+showSkinPattern: false,
+newSkin: {
+    date: new Date().toISOString().split('T')[0],
+    // null = the day was logged WITHOUT a score, which is not the same as 0 (the pet was
+    // comfortable). Neither end may coerce one into the other — see `saveSkinEntry`.
+    itchScore: 3,
+    hasScore: true,
+    sites: [],
+    signs: [],
+    earStatus: 'none',
+    treatments: [],
+    treatmentNotes: '',
+    suspectedTrigger: 'unknown',
+    vetVisit: false,
+    notes: ''
+},
+
+// --- Lumps -----------------------------------------------------------------------------
+// A lump is an ENTITY with a log attached, not a flat series of dated rows: the thing being
+// tracked persists and the observations attach to it. Flattened into one table, "the lump on
+// her left shoulder" would exist only as a string repeated on every row — a typo would split
+// one lump into two, and there would be nowhere for the facts that belong to the lump rather
+// than to a Tuesday (when it was first noticed, whether a vet has seen it, whether it is out).
+lumpLog: [],
+lumpMeasurements: [],
+LUMP_SITES_LIST: LUMP_SITES,
+LUMP_SIDES_LIST: LUMP_SIDES,
+LUMP_CONSISTENCIES_LIST: LUMP_CONSISTENCIES,
+LUMP_MOBILITIES_LIST: LUMP_MOBILITIES,
+LUMP_SIGNS_LIST: LUMP_SIGNS,
+LUMP_VET_STAGES_LIST: LUMP_VET_STAGES,
+LUMP_STATUSES_LIST: LUMP_STATUSES,
+LUMP_SIZE_REFERENCES_LIST: LUMP_SIZE_REFERENCES,
+LUMP_STANDING_NOTE_TEXT: LUMP_STANDING_NOTE,
+showLumpLog: false,
+showLumpForm: false,
+showLumpMeasureForm: false,
+editingLumpId: null,
+editingMeasurementId: null,
+viewingLumpId: null,           // the lump whose measurement history is open
+measuringLumpId: null,         // the lump the measurement form is attached to
+newLump: {
+    label: '',
+    site: '',
+    side: '',
+    siteDetail: '',
+    firstNoticed: '',          // '' = the owner does not know; never today
+    status: 'monitoring',
+    vetStage: 'notSeen',
+    vetDiagnosis: '',
+    resolvedDate: '',
+    notes: ''
+},
+newLumpMeasurement: {
+    date: new Date().toISOString().split('T')[0],
+    // Typed in the owner's chosen unit; ALWAYS converted to millimetres on save. A table
+    // holding a number plus the unit it was written in is a table where "12" and "1.2"
+    // describe the same lump.
+    unit: 'mm',
+    length: '',
+    width: '',
+    depth: '',
+    consistency: 'unsure',
+    mobility: 'unsure',
+    signs: [],
+    notes: ''
+},
+
 // Alpine templates can only see component properties, not module globals — same reason
 // `antiparasiticFormulary` is exposed below.
 ECHO_MEASURES_LIST: ECHO_MEASURES,
@@ -900,6 +1205,13 @@ moduleMeta: [
     desc:'Keep a vaccination history and due dates.' },
   { key:'antiparasitics', label:'Anti-Parasitics',icon:'fa-bug-slash',       c:'#166534', bg:'#f0fdf4', bd:'#bbf7d0', glossary:'module_antiparasitics',
     desc:'Track flea, tick and worming protection.' },
+  // Skin and lumps sit at the end because they are opt-in and newer than the rest of this table.
+  // Amber for skin (the register the app uses for irritation) and a deliberately neutral slate for
+  // lumps — a lump chip must not look like a verdict. Kept identical with `ModuleCatalogue.all`.
+  { key:'skinLog',        label:'Skin',           icon:'fa-hand-dots',       c:'#b45309', bg:'#fffbeb', bd:'#fde68a', glossary:'',
+    desc:'Score itching day by day and spot a yearly pattern.' },
+  { key:'lumps',          label:'Lumps',          icon:'fa-circle-dot',      c:'#475569', bg:'#f8fafc', bd:'#e2e8f0', glossary:'',
+    desc:'Measure lumps over time and keep the history.' },
 ],
 
 moduleMetaByKey(key) {
@@ -940,20 +1252,39 @@ enableModuleFromPill(key) {
 learnModuleFromPill(key) {
   const g = this.moduleMetaByKey(key).glossary;
   this.modulePopover.open = false;
+  // Skin and lumps have no glossary entry yet, so their `glossary` is ''. Opening the glossary on
+  // an empty key would show an empty panel — better to do nothing than to open a blank drawer.
+  if (!g) return;
   this.openGlossary(g);
 },
         
         // ===================== VIEW NAVIGATION (activeView) =====================
-activeView: 'all',            // ← default to the full scroll
+activeView: 'monitor',        // ← first run lands on the counter (was the retired 'all' scroll)
 
+// Sections split by what the OWNER came to do, not by data type (2026-08 restructure; see
+// `navigation-restructure-2026-08.md`). Monitor = what you watch, Wellness = routine upkeep,
+// Medical = the vet-side record. Kept in step with the iOS tab bar, ids included.
+//
+// The old 'all' view — every section in one scroll — was retired in the same change: it was
+// already the longest page in the app, and a three-way split made it longer still.
 navItems: [
-    { id: 'all',      label: 'All',      icon: 'fa-layer-group', modules: null },
-    { id: 'count',    label: 'SRR',      icon: 'fa-lungs',       modules: ['srr'] },
-    { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line',  modules: ['srr','medications','acvimStaging','weightDiet','antiparasitics','vaccinations'] },
-    { id: 'meds',     label: 'Meds',     icon: 'fa-pills',       modules: ['medications','acvimStaging'] },
-    { id: 'wellness', label: 'Wellness', icon: 'fa-heart-pulse', modules: ['coughLog','activityLog','weightDiet','syncopeLog','vaccinations','antiparasitics'] },
-    { id: 'more',     label: 'More',     icon: 'fa-ellipsis',    modules: null }
+    { id: 'monitor',  label: 'Monitor',  icon: 'fa-heart-pulse',  modules: ['srr','coughLog','syncopeLog','skinLog','lumps'] },
+    { id: 'wellness', label: 'Wellness', icon: 'fa-paw',          modules: ['weightDiet','activityLog','vaccinations','antiparasitics'] },
+    { id: 'medical',  label: 'Medical',  icon: 'fa-stethoscope',  modules: null },
+    { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line',   modules: ['srr','medications','acvimStaging','weightDiet','antiparasitics','vaccinations'] },
+    { id: 'more',     label: 'More',     icon: 'fa-ellipsis',     modules: null }
 ],
+
+// Tab ids persisted before the restructure, mapped onto the current ones. `vch_activeView` and
+// `appSettings.defaultLandingView` both store a raw id, so without this an existing owner's saved
+// view silently stops resolving. Mirrors `AppTab.migrate` on iOS.
+_legacyViewIds: { count: 'monitor', meds: 'medical', all: 'monitor' },
+
+migrateViewId(stored) {
+    if (!stored) return stored;
+    if (this.navItems.some(n => n.id === stored)) return stored;
+    return this._legacyViewIds[stored] || stored;
+},
 // ── More view sub-navigation ──
 moreSection: 'data',
 moreSections: [
@@ -1010,10 +1341,10 @@ modOn(...keys) {
     return keys.some(k => mods[k]);
 },
 
-// 'all' shows every section; otherwise exact match
+// Exact match. This used to carry an `activeView === 'all'` branch so every section could show at
+// once; retiring the 'all' view removed the need for it.
 isView(v) {
-    if (v === 'more') return this.activeView === 'more';
-    return this.activeView === 'all' || this.activeView === v;
+    return this.activeView === v;
 },
 
 // Tabs whose required modules are all disabled get hidden
@@ -1026,14 +1357,16 @@ get currentViewLabel() {
     return (this.navItems.find(n => n.id === this.activeView) || {}).label || '';
 },
 
-// Focused tabs auto-expand their accordions; 'all' keeps the compact scroll
+// Opening a tab auto-expands the accordions that belong to it
 _expandForView(v) {
-    if (v === 'meds')     { this.showMedLog = true; this.showDiagnosisLog = true; this.showMedGraph = true; this.$nextTick(() => this.renderInjectionChart()); }
-    if (v === 'wellness') { this.showSymptomLog = true; this.showWeightLogPanel = true;
-                            this.showSyncopeLog = true; this.showVaccinationLogPanel = true;
+    if (v === 'medical')  { this.showMedLog = true; this.showDiagnosisLog = true; this.showMedGraph = true; this.$nextTick(() => this.renderInjectionChart()); }
+    if (v === 'monitor')  { this.showLog = true; this.showAnalytics = true;
+                            this.showSymptomLog = true; this.showSyncopeLog = true;
+                            this.showSkinLog = true; this.showLumpLog = true; }
+    if (v === 'wellness') { this.showActivityLog = true; this.showWeightLogPanel = true;
+                            this.showVaccinationLogPanel = true;
                             this.showAntiparasiticPanel = true; }
     if (v === 'trends')   { this.showAnalytics = true; this.showMedGraph = true; this.$nextTick(() => this.renderWeightChart()); }
-    if (v === 'count')    { this.showLog = true; this.showAnalytics = true; }
 },
 
 setView(v) {
@@ -1071,6 +1404,10 @@ loadAppSettings() {
 if (saved && typeof saved === 'object') Object.assign(this.appSettings, saved);
     } catch (e) {}
     if (!this.appSettings.distanceUnit) this.appSettings.distanceUnit = this._defaultDistanceUnit();
+    // A landing view saved before the 2026-08 rename matches no <option>, which would render the
+    // picker blank and lose the owner's choice the next time they touched it.
+    if (this.appSettings.defaultLandingView !== 'remember')
+        this.appSettings.defaultLandingView = this.migrateViewId(this.appSettings.defaultLandingView);
     this.normaliseCareProviders();
 },
 
@@ -1531,6 +1868,9 @@ init() {
     this.procedureLog = loadKey('vch_procedureLog') || [];
     this.allergyLog = loadKey('vch_allergyLog') || [];
     this.appointmentLog = loadKey('vch_appointmentLog') || [];
+    this.skinLog = loadKey('vch_skinLog') || [];
+    this.lumpLog = loadKey('vch_lumpLog') || [];
+    this.lumpMeasurements = loadKey('vch_lumpMeasurements') || [];
 
     // Backfill module flags for legacy / restored profiles
     this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
@@ -1591,7 +1931,7 @@ init() {
     });
 
     // Existing watchers
-    this.$watch('activePatientId', () => { if (this.activePatientId) { try { localStorage.setItem('vch_lastPatientId', this.activePatientId); } catch (e) {} } this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); this.renderInjectionChart(); if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all'; this._syncVetExportModules(); });
+    this.$watch('activePatientId', () => { if (this.activePatientId) { try { localStorage.setItem('vch_lastPatientId', this.activePatientId); } catch (e) {} } this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); this.renderInjectionChart(); if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = (this.visibleNavItems()[0] || {}).id || 'wellness'; this._syncVetExportModules(); });
     this.$watch('timeScale', () => { this.currentPage = 1; this.renderChart(); this.renderMedChart(); this.renderWeightChart(); });
     this.$watch('srrUseRelationalTime', () => { this.renderChart(); });
     this.$watch('showCoughOverlay', () => { this.renderChart(); });
@@ -1624,8 +1964,13 @@ init() {
         if (savedView === 'data') savedView = 'more';          // legacy id migration
         if (this.appSettings.defaultLandingView !== 'remember')
             savedView = this.appSettings.defaultLandingView;
+        // Pre-2026-08 ids ('count', 'meds', and the retired 'all') map onto the current sections.
+        savedView = this.migrateViewId(savedView);
         if (savedView) this.activeView = savedView;
-        if (!this.visibleNavItems().some(i => i.id === this.activeView)) this.activeView = 'all';
+        // The saved view may be module-gated off for this pet — fall back to the first tab that
+        // actually exists. This used to fall back to 'all', which no longer exists.
+        if (!this.visibleNavItems().some(i => i.id === this.activeView))
+            this.activeView = (this.visibleNavItems()[0] || {}).id || 'wellness';
         this._expandForView(this.activeView);
         this.moreSection = localStorage.getItem('vch_moreSection') || 'data';
     } catch (e) {}
@@ -1807,6 +2152,11 @@ deletePatient(patientId) {
             this.procedureLog = (this.procedureLog || []).filter(p => p.patientId !== patientId);
             this.allergyLog = (this.allergyLog || []).filter(a => a.patientId !== patientId);
             this.appointmentLog = (this.appointmentLog || []).filter(a => a.patientId !== patientId);
+            this.skinLog = (this.skinLog || []).filter(s => s.patientId !== patientId);
+            // Both lump tables go together: a measurement whose lump has been deleted is a size
+            // with nothing to be the size OF.
+            this.lumpMeasurements = (this.lumpMeasurements || []).filter(m => m.patientId !== patientId);
+            this.lumpLog = (this.lumpLog || []).filter(l => l.patientId !== patientId);
 
             // 2. Persist the flushed arrays to local storage
             this.saveToStorage('vch_patients', this.patients);
@@ -1827,6 +2177,9 @@ deletePatient(patientId) {
             this.saveToStorage('vch_procedureLog', this.procedureLog);
             this.saveToStorage('vch_allergyLog', this.allergyLog);
             this.saveToStorage('vch_appointmentLog', this.appointmentLog);
+            this.saveToStorage('vch_skinLog', this.skinLog);
+            this.saveToStorage('vch_lumpLog', this.lumpLog);
+            this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -1993,6 +2346,12 @@ mergePatients(targetId, sourceId) {
             this.procedureLog = (this.procedureLog || []).map(p => p.patientId === sourceId ? { ...p, patientId: targetId } : p);
             this.allergyLog = (this.allergyLog || []).map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
             this.appointmentLog = (this.appointmentLog || []).map(a => a.patientId === sourceId ? { ...a, patientId: targetId } : a);
+            this.skinLog = (this.skinLog || []).map(s => s.patientId === sourceId ? { ...s, patientId: targetId } : s);
+            // `lumpId` is deliberately untouched — the measurements follow their lump, and
+            // rewriting that link is the one change capable of attributing one animal's
+            // measurements to another animal's lump.
+            this.lumpLog = (this.lumpLog || []).map(l => l.patientId === sourceId ? { ...l, patientId: targetId } : l);
+            this.lumpMeasurements = (this.lumpMeasurements || []).map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
 
             // Dedupe identical SRR readings created by merging an imported copy
             const seen = new Set();
@@ -2039,6 +2398,9 @@ mergePatients(targetId, sourceId) {
             this.saveToStorage('vch_procedureLog', this.procedureLog);
             this.saveToStorage('vch_allergyLog', this.allergyLog);
             this.saveToStorage('vch_appointmentLog', this.appointmentLog);
+            this.saveToStorage('vch_skinLog', this.skinLog);
+            this.saveToStorage('vch_lumpLog', this.lumpLog);
+            this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
 
             this.activePatientId = targetId;
             alert("Patient records successfully merged.");
@@ -4773,6 +5135,914 @@ deleteAllergy(id) {
     if (this.viewingAllergyId === id) this.viewingAllergyId = null;
 },
 
+// =================================================================================================
+// SKIN & ITCH
+// =================================================================================================
+//
+// Ported 1:1 from `Logic/SkinLogic.swift` — every threshold, every sentence. If you change a
+// number or a phrase here, change it there too, or the same pet's records will read differently
+// on the two platforms.
+//
+// WHAT THE SEASONAL ANALYSIS IS ALLOWED TO SAY. An owner who can tell their vet "it's the same
+// every June" has changed the consultation. That is the value, and it is also the risk: a pattern
+// found in a handful of records, stated confidently, would send a vet down the wrong road. So:
+//   1. It never reports a pattern it cannot support — below the coverage floor it says how much
+//      more logging is needed and stops, rather than offering a tentative guess.
+//   2. It averages MONTHLY MEANS, not raw days. An owner who logged every day of one bad August
+//      and once a month otherwise would otherwise hand August the year on sample size alone.
+//   3. "Peaks in July" (one year) and "peaks in July, both years" get different words.
+//   4. It never names a cause. Pollen, mites and food all produce summer itch and this app cannot
+//      tell them apart. Every pattern sentence ends by handing the finding to the vet.
+//
+// Days logged WITHOUT a score are excluded from every mean. Reading a null as 0 would let a month
+// the owner forgot to score masquerade as the pet's most comfortable month of the year, which is
+// precisely the mistake that would invert a real pattern.
+//
+// Dates are day-level 'yyyy-MM-dd' strings here (localStorage convention); iOS stores the same day
+// at UTC noon and reads the month back in UTC, so the two agree on which bucket a record is in.
+
+patientSkinLog() {
+    return (this.skinLog || []).filter(s => s.patientId === this.activePatientId);
+},
+
+// Newest first — the opposite of the allergy list, and deliberately so. This log answers "what is
+// happening now".
+get sortedSkinLog() {
+    return this.patientSkinLog().slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+},
+
+skinScoreAnchor(score) {
+    const n = Math.max(0, Math.min(10, Number(score) || 0));
+    return SKIN_SCORE_ANCHORS[n];
+},
+
+// Derived from the score, never stored, so it cannot contradict it. The cut-points follow the
+// anchors: 1–3 is background scratching, 4–6 is clearly uncomfortable, 7+ is a day ruled by it.
+skinScoreBand(score) {
+    if (score === null || score === undefined || score === '') return '';
+    const n = Number(score);
+    if (n <= 0) return 'None';
+    if (n <= 3) return 'Mild';
+    if (n <= 6) return 'Moderate';
+    return 'Severe';
+},
+
+skinEarLabel(id) {
+    const e = SKIN_EAR_STATES.find(x => x.id === id);
+    return e ? e.label : 'Ears fine';
+},
+
+// An unrecognised id ranks 0 rather than throwing: a value written by a newer build must not break
+// an older one, and "fine" is the safe reading because it makes no claim.
+skinEarRank(id) {
+    const e = SKIN_EAR_STATES.find(x => x.id === id);
+    return e ? e.rank : 0;
+},
+
+skinEarHint(id) {
+    const e = SKIN_EAR_STATES.find(x => x.id === id);
+    return e ? e.hint : SKIN_EAR_STATES[SKIN_EAR_STATES.length - 1].hint;
+},
+
+skinSiteLabel(id) {
+    const s = SKIN_SITES.find(x => x.id === id);
+    return s ? s.label : id;   // unknown ids pass through — still belongs on the vet's copy
+},
+
+skinSignLabel(id) {
+    const s = SKIN_SIGNS.find(x => x.id === id);
+    return s ? s.label : id;
+},
+
+skinTreatmentLabel(id) {
+    const t = SKIN_TREATMENTS.find(x => x.id === id);
+    return t ? t.label : id;
+},
+
+skinTriggerLabel(id) {
+    const t = SKIN_TRIGGERS.find(x => x.id === id);
+    return t ? t.label : id;
+},
+
+// "Paws, Ears and Tummy or groin"
+skinSiteList(ids) {
+    const labels = (ids || []).map(id => this.skinSiteLabel(id)).filter(Boolean);
+    if (labels.length === 0) return '';
+    if (labels.length === 1) return labels[0];
+    return labels.slice(0, -1).join(', ') + ' and ' + labels[labels.length - 1];
+},
+
+// "Nothing given" is dropped when a real treatment is also selected — that can only happen if a
+// chip was left on by mistake.
+skinTreatmentList(ids) {
+    const real = (ids || []).filter(id => id !== 'none');
+    if (real.length === 0) return (ids || []).includes('none') ? 'Nothing given' : '';
+    return real.map(id => this.skinTreatmentLabel(id)).join(', ');
+},
+
+skinScoreText(entry) {
+    if (entry.itchScore === null || entry.itchScore === undefined) return 'Not scored';
+    return `${entry.itchScore}/10 · ${this.skinScoreBand(entry.itchScore)}`;
+},
+
+skinSummaryLine(entry) {
+    const parts = [];
+    const sites = this.skinSiteList(entry.sites);
+    if (sites) parts.push(sites);
+    if (this.skinEarRank(entry.earStatus) > 0) parts.push(this.skinEarLabel(entry.earStatus));
+    const treatments = this.skinTreatmentList((entry.treatments || []).filter(t => t !== 'none'));
+    if (treatments) parts.push(treatments);
+    if (entry.vetVisit) parts.push('Seen by a vet');
+    return parts.join(' · ');
+},
+
+// --- Form -------------------------------------------------------------------------------------
+
+hasSkinForDate() {
+    return this.patientSkinLog().some(s => s.date === this.newSkin.date);
+},
+
+loadSkinForDate() {
+    const existing = this.patientSkinLog().find(s => s.date === this.newSkin.date);
+    if (existing) {
+        this.newSkin = {
+            date: existing.date,
+            itchScore: existing.itchScore === null || existing.itchScore === undefined ? 3 : existing.itchScore,
+            hasScore: existing.itchScore !== null && existing.itchScore !== undefined,
+            sites: [...(existing.sites || [])],
+            signs: [...(existing.signs || [])],
+            earStatus: existing.earStatus || 'none',
+            treatments: [...(existing.treatments || [])],
+            treatmentNotes: existing.treatmentNotes || '',
+            suspectedTrigger: existing.suspectedTrigger || 'unknown',
+            vetVisit: !!existing.vetVisit,
+            notes: existing.notes || ''
+        };
+    } else {
+        const date = this.newSkin.date;
+        this.newSkin = { date, itchScore: 3, hasScore: true, sites: [], signs: [], earStatus: 'none',
+                         treatments: [], treatmentNotes: '', suspectedTrigger: 'unknown',
+                         vetVisit: false, notes: '' };
+    }
+},
+
+openSkinForm(date = null) {
+    this.newSkin.date = date || new Date().toISOString().split('T')[0];
+    this.loadSkinForDate();
+    this.showSkinForm = true;
+},
+
+closeSkinForm() { this.showSkinForm = false; },
+
+// Multi-select chips. `none` is exclusive — it is a statement, not one item among many.
+toggleSkinChip(field, id, exclusiveId = null) {
+    const list = this.newSkin[field] || [];
+    if (list.includes(id)) {
+        this.newSkin[field] = list.filter(x => x !== id);
+        return;
+    }
+    if (exclusiveId) {
+        if (id === exclusiveId) { this.newSkin[field] = [exclusiveId]; return; }
+        this.newSkin[field] = list.filter(x => x !== exclusiveId).concat(id);
+        return;
+    }
+    this.newSkin[field] = list.concat(id);
+},
+
+saveSkinEntry() {
+    const s = this.newSkin;
+    if (!this.activePatientId) return;
+    const existing = this.patientSkinLog().find(x => x.date === s.date);
+    const record = {
+        id: existing ? existing.id : this.generateId(),
+        patientId: this.activePatientId,
+        date: s.date,
+        // null, NOT 0 — a day logged without a score is not a comfortable day.
+        itchScore: s.hasScore ? Math.max(0, Math.min(10, Number(s.itchScore) || 0)) : null,
+        sites: [...(s.sites || [])],
+        signs: [...(s.signs || [])],
+        earStatus: SKIN_EAR_STATES.some(e => e.id === s.earStatus) ? s.earStatus : 'none',
+        treatments: [...(s.treatments || [])],
+        treatmentNotes: (s.treatmentNotes || '').trim(),
+        suspectedTrigger: s.suspectedTrigger || 'unknown',
+        vetVisit: !!s.vetVisit,
+        notes: (s.notes || '').trim(),
+        createdAt: (existing && existing.createdAt) || new Date().toISOString()
+    };
+    // One entry per day: saving for a day already logged REPLACES it.
+    this.skinLog = existing
+        ? this.skinLog.map(x => x.id === existing.id ? record : x)
+        : [...(this.skinLog || []), record];
+    this.saveToStorage('vch_skinLog', this.skinLog);
+    this.closeSkinForm();
+},
+
+deleteSkinEntry(id) {
+    if (!window.confirm('Delete this day from the skin log?')) return;
+    this.skinLog = (this.skinLog || []).filter(s => s.id !== id);
+    this.saveToStorage('vch_skinLog', this.skinLog);
+},
+
+// --- Seasonal analysis --------------------------------------------------------------------------
+
+_skinMonth(dateStr) { return Number((dateStr || '').split('-')[1]) || 0; },
+_skinYear(dateStr)  { return Number((dateStr || '').split('-')[0]) || 0; },
+
+_skinIsScored(e) { return e.itchScore !== null && e.itchScore !== undefined; },
+
+// Mean score for each calendar month WITHIN each year — the building block every aggregate is made
+// of, so sampling effort in one month of one year cannot dominate.
+skinMonthlyStatsByYear(entries) {
+    const buckets = {};
+    (entries || []).forEach(e => {
+        const y = this._skinYear(e.date), m = this._skinMonth(e.date);
+        if (!y || !m) return;
+        const key = `${y}-${m}`;
+        if (!buckets[key]) buckets[key] = { year: y, month: m, total: 0, days: 0, earDays: 0 };
+        if (this._skinIsScored(e)) { buckets[key].total += Number(e.itchScore); buckets[key].days += 1; }
+        if (this.skinEarRank(e.earStatus) > 0) buckets[key].earDays += 1;
+    });
+    return Object.values(buckets)
+        .filter(b => b.days > 0)
+        .map(b => ({ year: b.year, month: b.month, mean: b.total / b.days,
+                     scoredDays: b.days, earDays: b.earDays }))
+        .sort((a, b) => a.year - b.year || a.month - b.month);
+},
+
+// Every calendar month with at least one scored day, in month order. The mean is the mean of that
+// month's PER-YEAR means — see the header.
+skinMonthlyStats(entries) {
+    const byYear = this.skinMonthlyStatsByYear(entries);
+    const out = [];
+    for (let m = 1; m <= 12; m++) {
+        const rows = byYear.filter(r => r.month === m);
+        if (!rows.length) continue;
+        out.push({
+            month: m,
+            mean: rows.reduce((n, r) => n + r.mean, 0) / rows.length,
+            scoredDays: rows.reduce((n, r) => n + r.scoredDays, 0),
+            years: rows.map(r => r.year).sort(),
+            earDays: rows.reduce((n, r) => n + r.earDays, 0)
+        });
+    }
+    return out;
+},
+
+// Dec→Jan is 1 month apart, not 11. A naive abs(a - b) would split a winter peak spanning the year
+// end into two unrelated seasons.
+skinCircularMonthDistance(a, b) {
+    const raw = Math.abs(a - b);
+    return Math.min(raw, 12 - raw);
+},
+
+// Whether every WELL-COVERED year peaked at the same time of year, within one month. Needs at least
+// two such years — a single year cannot repeat. A thinly-logged year has no peak of its own to
+// disagree with and must not veto the finding.
+skinPeakRepeatsAcrossYears(entries) {
+    const byYear = this.skinMonthlyStatsByYear(entries);
+    const years = [...new Set(byYear.map(r => r.year))].sort();
+    const peaks = [];
+    years.forEach(y => {
+        const rows = byYear.filter(r => r.year === y);
+        if (rows.length < SKIN_SEASONAL_GATE.minMonthsForYearPeak) return;
+        let best = rows[0];
+        rows.forEach(r => { if (r.mean > best.mean) best = r; });
+        peaks.push(best.month);
+    });
+    if (peaks.length < 2) return false;
+    for (const a of peaks) {
+        for (const b of peaks) {
+            if (this.skinCircularMonthDistance(a, b) > 1) return false;
+        }
+    }
+    return true;
+},
+
+skinMonthName(m) {
+    return ['January','February','March','April','May','June','July','August','September',
+            'October','November','December'][m - 1] || '';
+},
+
+skinShortMonthName(m) {
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1] || '';
+},
+
+// "June", "June and July", or "June to August" when the peak months run consecutively.
+skinMonthPhrase(months) {
+    const sorted = (months || []).slice().sort((a, b) => a - b);
+    if (!sorted.length) return '';
+    if (sorted.length === 1) return this.skinMonthName(sorted[0]);
+    const isRun = sorted.every((m, i) => i === 0 || m === sorted[i - 1] + 1);
+    if (isRun) return `${this.skinMonthName(sorted[0])} to ${this.skinMonthName(sorted[sorted.length - 1])}`;
+    const names = sorted.map(m => this.skinMonthName(m));
+    return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+},
+
+// Memoised wrapper for the templates. `skinSeasonalPattern` walks the whole log, and a template
+// that called it directly would re-walk it for every binding on the panel. The cache key is the
+// patient plus the log's length and last-modified stamp, so an edit invalidates it.
+_skinPatternCache: null,
+
+skinPattern() {
+    const list = this.patientSkinLog();
+    const key = `${this.activePatientId}|${list.length}|${list.map(e => e.id + ':' + e.itchScore + ':' + e.date + ':' + e.earStatus).join(',')}`;
+    if (!this._skinPatternCache || this._skinPatternCache.key !== key) {
+        this._skinPatternCache = { key, value: this.skinSeasonalPattern(list) };
+    }
+    return this._skinPatternCache.value;
+},
+
+// The seasonal read. Mirrors `SkinLogic.seasonalPattern` exactly, including every sentence.
+skinSeasonalPattern(entries) {
+    const list = entries || this.patientSkinLog();
+    const monthly = this.skinMonthlyStats(list);
+    const scored = list.filter(e => this._skinIsScored(e));
+    const scoredDays = scored.length;
+    const yearsCovered = new Set(scored.map(e => this._skinYear(e.date))).size;
+    const monthsCovered = monthly.length;
+    const means = monthly.map(m => m.mean);
+    const amplitude = means.length ? Math.max(...means) - Math.min(...means) : 0;
+
+    const base = { monthly, peakMonths: [], quietMonths: [], yearsCovered, monthsCovered,
+                   scoredDays, amplitude, repeatsAcrossYears: false };
+
+    // 1. Coverage floor.
+    if (scoredDays < SKIN_SEASONAL_GATE.minScoredDays ||
+        monthsCovered < SKIN_SEASONAL_GATE.minMonthsCovered) {
+        return { ...base, confidence: 'insufficient',
+                 headline: 'Not enough recorded yet to look for a yearly pattern',
+                 detail: `You've scored ${scoredDays} day${scoredDays === 1 ? '' : 's'} across `
+                       + `${monthsCovered} month${monthsCovered === 1 ? '' : 's'}. A yearly pattern only `
+                       + 'becomes visible once there are records spread through the seasons — logging a '
+                       + 'score once a week, even on the good weeks, is what makes the chart worth reading.' };
+    }
+
+    // 2. Is there a shape at all?
+    if (amplitude < SKIN_SEASONAL_GATE.minAmplitude) {
+        return { ...base, confidence: 'noPattern',
+                 headline: 'No clear yearly pattern so far',
+                 detail: 'Itch scores have been broadly similar through the months you\'ve recorded, so '
+                       + 'nothing here points to one time of year being worse. Keep logging — patterns '
+                       + 'often take a couple of years to show.' };
+    }
+
+    const top = Math.max(...means), bottom = Math.min(...means);
+    const peakMonths = monthly.filter(m => m.mean >= top - SKIN_SEASONAL_GATE.peakTolerance)
+                              .map(m => m.month).sort((a, b) => a - b);
+    const quietMonths = monthly.filter(m => m.mean <= bottom + SKIN_SEASONAL_GATE.peakTolerance)
+                               .map(m => m.month).sort((a, b) => a - b);
+    const repeats = this.skinPeakRepeatsAcrossYears(list);
+
+    // 3. A repeat across years is the only thing that earns the word "each year".
+    if (yearsCovered >= 2 && repeats) {
+        let detail = `Scores have peaked in ${this.skinMonthPhrase(peakMonths)} in each of the `
+                   + `${yearsCovered} years recorded`;
+        if (quietMonths.length) detail += `, and have been at their lowest in ${this.skinMonthPhrase(quietMonths)}`;
+        detail += '. This is a pattern in your own records, not a diagnosis — there are several reasons '
+                + "a pet's skin can follow the seasons, and telling them apart needs a vet. It is worth "
+                + 'showing them this chart.';
+        return { ...base, confidence: 'established', peakMonths, quietMonths,
+                 repeatsAcrossYears: true,
+                 headline: 'Itching has peaked around the same time each year', detail };
+    }
+
+    let detail = `Across the records so far, scores have been highest in ${this.skinMonthPhrase(peakMonths)}`;
+    if (quietMonths.length) detail += ` and lowest in ${this.skinMonthPhrase(quietMonths)}`;
+    detail += '. ';
+    detail += yearsCovered >= 2
+        ? "The peaks haven't landed at the same time of year yet, so this may not be seasonal. "
+        : "That's one year of records, which isn't enough to call it seasonal — a single hot summer, "
+        + 'a house move or a course of treatment would look the same. ';
+    detail += 'Another year of logging will show whether it repeats.';
+    return { ...base, confidence: 'emerging', peakMonths, quietMonths,
+             headline: `Itching has been worst in ${this.skinMonthPhrase(peakMonths)}`, detail };
+},
+
+// Months where the ears were affected most often. Ear disease is counted separately because it
+// recurs on its own rhythm and is usually what prompts the appointment.
+skinEarMonths(entries) {
+    const counts = {};
+    (entries || []).forEach(e => {
+        if (this.skinEarRank(e.earStatus) > 0) {
+            const m = this._skinMonth(e.date);
+            counts[m] = (counts[m] || 0) + 1;
+        }
+    });
+    return Object.keys(counts).map(m => ({ month: Number(m), days: counts[m] }))
+        .sort((a, b) => b.days - a.days || a.month - b.month);
+},
+
+skinEarSummary(entries) {
+    const list = entries || this.patientSkinLog();
+    const affected = list.filter(e => this.skinEarRank(e.earStatus) > 0);
+    if (affected.length < 3) return '';
+    const infected = affected.filter(e => e.earStatus === 'infected').length;
+    let s = `Ears have been affected on ${affected.length} recorded day${affected.length === 1 ? '' : 's'}`;
+    if (infected > 0) s += `, sore or discharging on ${infected} of them`;
+    const months = this.skinEarMonths(list);
+    if (months.length > 1 && months[0].days >= 3) s += `. Most often in ${this.skinMonthName(months[0].month)}`;
+    return s + '.';
+},
+
+// The last month against the month before it — "is this getting worse?", answered without any claim
+// about why.
+skinRecentChange(entries) {
+    const list = entries || this.patientSkinLog();
+    const day = 86400000;
+    const now = Date.now();
+    const currentStart = now - 30 * day, previousStart = now - 60 * day;
+    const scoresIn = (from, to) => list
+        .filter(e => this._skinIsScored(e))
+        .filter(e => { const t = new Date(e.date + 'T12:00:00Z').getTime(); return t > from && t <= to; })
+        .map(e => Number(e.itchScore));
+    const current = scoresIn(currentStart, now), previous = scoresIn(previousStart, currentStart);
+    const mean = a => a.reduce((n, v) => n + v, 0) / a.length;
+    const oneDP = v => (Math.round(v * 10) / 10).toString();
+
+    if (!current.length) return 'Nothing scored in the last 30 days.';
+    const c = mean(current);
+    if (!previous.length) {
+        return `Average ${oneDP(c)} out of 10 over the last 30 days. Nothing scored the month before to compare with.`;
+    }
+    const p = mean(previous);
+    if (Math.abs(c - p) < 1) return `About the same as the month before (average ${oneDP(c)} out of 10).`;
+    return c > p
+        ? `Itchier than the month before — average ${oneDP(c)} out of 10, up from ${oneDP(p)}.`
+        : `More settled than the month before — average ${oneDP(c)} out of 10, down from ${oneDP(p)}.`;
+},
+
+// Days on which each treatment was recorded, most-used first.
+skinTreatmentDays(entries) {
+    const list = entries || this.patientSkinLog();
+    const counts = {};
+    list.forEach(e => {
+        [...new Set((e.treatments || []).filter(t => t !== 'none'))]
+            .forEach(t => { counts[t] = (counts[t] || 0) + 1; });
+    });
+    return Object.keys(counts).map(t => ({ treatment: t, days: counts[t] }))
+        .sort((a, b) => b.days - a.days || a.treatment.localeCompare(b.treatment));
+},
+
+// =================================================================================================
+// LUMPS
+// =================================================================================================
+//
+// Ported 1:1 from `Logic/LumpLogic.swift`.
+//
+// NOTHING HERE EVER REASSURES. There is no "benign", no "nothing to worry about", no "stable, no
+// action needed". The worst outcome this app could produce is an owner reading a soothing sentence
+// and cancelling an appointment: a lump that has not changed in six months can still be a mast cell
+// tumour, and no measurement distinguishes one lump from another — only a needle does. Change is
+// reported plainly and prompts a vet; ABSENCE of change is reported as an observation about the
+// NUMBERS ("no measurable change since 4 March"), never as a verdict about the lump. If a change to
+// this file makes it possible for the app to say a lump looks fine, that is a bug.
+//
+// The chart plots the GREATEST DIMENSION: it is what a vet records, and the most robust thing an
+// owner can produce — which axis they call "length" varies between people and between weeks, but
+// the longest way across a lump is the longest way across it. Area and volume were rejected;
+// multiplying two shaky numbers squares the error.
+
+patientLumps() {
+    return (this.lumpLog || []).filter(l => l.patientId === this.activePatientId);
+},
+
+patientLumpMeasurements() {
+    return (this.lumpMeasurements || []).filter(m => m.patientId === this.activePatientId);
+},
+
+lumpIsActive(status) { return status !== 'removed' && status !== 'resolved'; },
+
+// Active first, then by when they appeared (newest first). Deliberately NOT ordered by how alarming
+// the app thinks each one is — a ranking like that would be the app forming an opinion about which
+// lump matters. Prompts sit on the row instead, where they can be read against the actual lump.
+get sortedLumps() {
+    return this.patientLumps().slice().sort((a, b) => {
+        const aa = this.lumpIsActive(a.status), ba = this.lumpIsActive(b.status);
+        if (aa !== ba) return aa ? -1 : 1;
+        const da = (aa ? a.firstNoticed : a.resolvedDate) || a.createdAt || '';
+        const db = (ba ? b.firstNoticed : b.resolvedDate) || b.createdAt || '';
+        return db.localeCompare(da);
+    });
+},
+
+// Oldest first — chart order, and the order every comparison assumes. `createdAt` breaks ties so
+// two measurements on the same day keep the order they were taken in.
+lumpMeasurementsFor(lumpId) {
+    return (this.lumpMeasurements || [])
+        .filter(m => m.lumpId === lumpId)
+        .sort((a, b) => (a.date || '').localeCompare(b.date || '')
+                     || (a.createdAt || '').localeCompare(b.createdAt || ''));
+},
+
+// The longest way across. Zero and negative values are not measurements — a stray 0 left in a field
+// would otherwise draw a lump that vanished.
+lumpGreatestMm(m) {
+    const dims = [m.lengthMm, m.widthMm, m.depthMm]
+        .map(v => Number(v)).filter(v => Number.isFinite(v) && v > 0);
+    return dims.length ? Math.max(...dims) : null;
+},
+
+lumpNumberText(v) {
+    const r = Math.round(Number(v) * 10) / 10;
+    return Number.isInteger(r) ? String(r) : r.toFixed(1);
+},
+
+lumpMmText(mm) { return `${this.lumpNumberText(mm)} mm`; },
+
+lumpSizeText(m) {
+    const dims = [m.lengthMm, m.widthMm, m.depthMm]
+        .map(v => Number(v)).filter(v => Number.isFinite(v) && v > 0);
+    if (!dims.length) return 'Not measured';
+    return dims.map(v => this.lumpNumberText(v)).join(' × ') + ' mm';
+},
+
+lumpGreatestText(m) {
+    const mm = this.lumpGreatestMm(m);
+    return mm === null ? 'Not measured' : `${this.lumpMmText(mm)} across`;
+},
+
+lumpSiteLabel(id) {
+    const s = LUMP_SITES.find(x => x.id === id);
+    return s ? s.label : (id ? id : 'Not recorded');
+},
+
+lumpStatusLabel(id) {
+    const s = LUMP_STATUSES.find(x => x.id === id);
+    return s ? s.label : LUMP_STATUSES[0].label;
+},
+
+lumpVetStageLabel(id) {
+    const s = LUMP_VET_STAGES.find(x => x.id === id);
+    return s ? s.label : LUMP_VET_STAGES[0].label;
+},
+
+lumpConsistencyLabel(id) {
+    const c = LUMP_CONSISTENCIES.find(x => x.id === id);
+    return c ? c.label : 'Not sure';
+},
+
+lumpMobilityLabel(id) {
+    const m = LUMP_MOBILITIES.find(x => x.id === id);
+    return m ? m.label : 'Not sure';
+},
+
+lumpSignLabel(id) {
+    const s = LUMP_SIGNS.find(x => x.id === id);
+    return s ? s.label : id;
+},
+
+lumpSignList(ids) { return (ids || []).map(id => this.lumpSignLabel(id)).join(', '); },
+
+// "Left shoulder" — its own field rather than sixteen more site rows, and it matters: "the lump on
+// her shoulder" is two different lumps if there is one on each side.
+lumpLocationText(site, side) {
+    const siteText = this.lumpSiteLabel(site);
+    if (side === 'left')    return `Left ${siteText.toLowerCase()}`;
+    if (side === 'right')   return `Right ${siteText.toLowerCase()}`;
+    if (side === 'midline') return `${siteText} (middle)`;
+    return siteText;
+},
+
+lumpDisplayName(l) {
+    const label = (l.label || '').trim();
+    if (label) return label;
+    if (!l.site) return 'Unnamed lump';
+    return this.lumpLocationText(l.site, l.side);
+},
+
+lumpLocationLine(l) {
+    const parts = [];
+    if (l.site) parts.push(this.lumpLocationText(l.site, l.side));
+    const detail = (l.siteDetail || '').trim();
+    if (detail) parts.push(detail);
+    return parts.join(' · ');
+},
+
+lumpDaysBetween(a, b) {
+    return (new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 86400000;
+},
+
+// "3 months" / "6 weeks" / "9 days"
+lumpSpanText(days) {
+    const d = Math.abs(days);
+    if (d < 14) { const n = Math.round(d); return `${n} day${n === 1 ? '' : 's'}`; }
+    if (d < 60) { const n = Math.round(d / 7); return `${n} week${n === 1 ? '' : 's'}`; }
+    const n = Math.round(d / 30.44);
+    return `${n} month${n === 1 ? '' : 's'}`;
+},
+
+// Change between two measurements. A change must clear BOTH floors — an owner with a ruler on a
+// furry lump is comfortably ±2 mm, and 3 mm on a golf-ball-sized mass is not growth.
+lumpGrowth(earlier, later) {
+    const a = this.lumpGreatestMm(earlier), b = this.lumpGreatestMm(later);
+    if (a === null || b === null || a <= 0) return null;
+    const days = this.lumpDaysBetween(earlier.date, later.date);
+    const deltaMm = b - a;
+    const relative = deltaMm / a;
+    const meaningful = Math.abs(deltaMm) >= LUMP_GROWTH_GATE.minAbsoluteMm
+                    && Math.abs(relative) >= LUMP_GROWTH_GATE.minRelative;
+    const mmPerMonth = days > 0 ? deltaMm / days * 30 : null;
+    return {
+        fromDate: earlier.date, toDate: later.date, fromMm: a, toMm: b, deltaMm, relative, days,
+        mmPerMonth, isMeaningful: meaningful,
+        isGrowth: meaningful && deltaMm > 0,
+        isShrinkage: meaningful && deltaMm < 0,
+        isFast: meaningful && deltaMm > 0 && mmPerMonth !== null
+                && mmPerMonth >= LUMP_GROWTH_GATE.fastMmPerMonth
+    };
+},
+
+// First sized measurement to most recent. This is the headline figure: a lump gaining a millimetre
+// a month shows nothing month to month and a great deal over a year.
+lumpOverallGrowth(lumpId) {
+    const sized = this.lumpMeasurementsFor(lumpId).filter(m => this.lumpGreatestMm(m) !== null);
+    if (sized.length < 2) return null;
+    return this.lumpGrowth(sized[0], sized[sized.length - 1]);
+},
+
+lumpLatestGrowth(lumpId) {
+    const sized = this.lumpMeasurementsFor(lumpId).filter(m => this.lumpGreatestMm(m) !== null);
+    if (sized.length < 2) return null;
+    return this.lumpGrowth(sized[sized.length - 2], sized[sized.length - 1]);
+},
+
+// "grown 6 mm", "smaller by 4 mm", or "no measurable change" — note the third describes the
+// MEASUREMENTS, not the lump.
+lumpChangePhrase(g) {
+    if (!g) return '';
+    if (g.isGrowth) return `grown ${this.lumpMmText(g.deltaMm)}`;
+    if (g.isShrinkage) return `smaller by ${this.lumpMmText(Math.abs(g.deltaMm))}`;
+    return 'no measurable change';
+},
+
+lumpSummaryLine(l) {
+    const mine = this.lumpMeasurementsFor(l.id);
+    if (!mine.length) return 'No measurements yet';
+    const last = mine[mine.length - 1];
+    const parts = [];
+    if (this.lumpGreatestMm(last) !== null) parts.push(this.lumpGreatestText(last));
+    parts.push(this.allergyDayText(last.date));
+    const overall = this.lumpOverallGrowth(l.id);
+    if (overall) parts.push(this.lumpChangePhrase(overall));
+    return parts.join(' · ');
+},
+
+lumpChangeSummary(l) {
+    const sized = this.lumpMeasurementsFor(l.id).filter(m => this.lumpGreatestMm(m) !== null);
+    if (!sized.length) return 'No measurements recorded yet.';
+    if (sized.length < 2) {
+        return `One measurement so far: ${this.lumpGreatestText(sized[0])} on ${this.allergyDayText(sized[0].date)}.`;
+    }
+    const g = this.lumpOverallGrowth(l.id);
+    const span = this.lumpSpanText(g.days);
+    if (g.isGrowth) {
+        return `Grown from ${this.lumpMmText(g.fromMm)} to ${this.lumpMmText(g.toMm)} across over `
+             + `${span} — ${this.lumpMmText(g.deltaMm)} larger.`;
+    }
+    if (g.isShrinkage) {
+        return `Smaller over ${span} — from ${this.lumpMmText(g.fromMm)} to ${this.lumpMmText(g.toMm)} across.`;
+    }
+    return `Measured ${this.lumpMmText(g.toMm)} across on ${this.allergyDayText(g.toDate)}, against `
+         + `${this.lumpMmText(g.fromMm)} on ${this.allergyDayText(g.fromDate)} — no measurable change over ${span}.`;
+},
+
+// Whether what the lump FEELS like has changed. "Not sure" is skipped at both ends: an owner who
+// could not tell in March and could in June has discovered a ruler, not a change.
+lumpCharacterChange(lumpId) {
+    const mine = this.lumpMeasurementsFor(lumpId);
+    const firstAndLast = (get) => {
+        const known = mine.filter(m => get(m) && get(m) !== 'unsure');
+        if (known.length < 2) return null;
+        const from = get(known[0]), to = get(known[known.length - 1]);
+        return from === to ? null : { from, to };
+    };
+    const parts = [];
+    const c = firstAndLast(m => m.consistency);
+    if (c) parts.push(`from ${this.lumpConsistencyLabel(c.from).toLowerCase()} to ${this.lumpConsistencyLabel(c.to).toLowerCase()}`);
+    const mo = firstAndLast(m => m.mobility);
+    if (mo) parts.push(`from "${this.lumpMobilityLabel(mo.from).toLowerCase()}" to "${this.lumpMobilityLabel(mo.to).toLowerCase()}"`);
+    if (!parts.length) return '';
+    return 'What it feels like has changed — ' + parts.join(', and ')
+         + '. Worth mentioning at the next appointment.';
+},
+
+// Reasons to speak to a vet, and housekeeping nudges. An EMPTY list is not a verdict — every screen
+// that shows these also shows LUMP_STANDING_NOTE, unconditionally.
+lumpPrompts(l) {
+    if (!this.lumpIsActive(l.status)) return [];   // nothing left to act on
+    const out = [];
+    const mine = this.lumpMeasurementsFor(l.id);
+    const last = mine.length ? mine[mine.length - 1] : null;
+
+    if (last) {
+        const urgent = (last.signs || []).filter(s => LUMP_URGENT_SIGNS.includes(s));
+        if (urgent.length) {
+            out.push({ kind: 'urgentSign', clinical: true,
+                text: `You recorded that it was ${this.lumpSignList(urgent).toLowerCase()} on `
+                    + `${this.allergyDayText(last.date)}. That's worth a vet appointment rather than `
+                    + 'waiting for the next measurement.' });
+        }
+    }
+
+    const overall = this.lumpOverallGrowth(l.id);
+    if (overall && overall.isGrowth) {
+        out.push(overall.isFast
+            ? { kind: 'grownFast', clinical: true,
+                text: `It has grown ${this.lumpMmText(overall.deltaMm)} since `
+                    + `${this.allergyDayText(overall.fromDate)} — about `
+                    + `${this.lumpMmText(overall.mmPerMonth || 0)} a month. Let your vet know how quickly `
+                    + 'this is changing.' }
+            : { kind: 'grown', clinical: true,
+                text: `It has grown ${this.lumpMmText(overall.deltaMm)} since `
+                    + `${this.allergyDayText(overall.fromDate)} — from ${this.lumpMmText(overall.fromMm)} `
+                    + `to ${this.lumpMmText(overall.toMm)} across. Worth mentioning to your vet.` });
+    }
+
+    const character = this.lumpCharacterChange(l.id);
+    if (character) out.push({ kind: 'changedCharacter', clinical: true, text: character });
+
+    if (l.vetStage === 'notSeen') {
+        out.push({ kind: 'neverSeen', clinical: true,
+            text: 'No vet has examined this one yet. Any new lump is worth having checked — how it '
+                + "looks and feels can't tell you what it is." });
+    }
+
+    if (!mine.length) {
+        out.push({ kind: 'neverMeasured', clinical: false,
+            text: 'No measurements recorded yet. The first one is what everything afterwards gets '
+                + 'compared against.' });
+    } else if (last) {
+        const days = (Date.now() - new Date(last.date + 'T12:00:00Z').getTime()) / 86400000;
+        if (days >= LUMP_GROWTH_GATE.staleDays) {
+            out.push({ kind: 'overdue', clinical: false,
+                text: `Last measured ${this.allergyDayText(last.date)}, about ${this.lumpSpanText(days)} `
+                    + 'ago. A fresh measurement keeps the chart useful.' });
+        }
+    }
+    return out;
+},
+
+lumpCountSummary() {
+    const lumps = this.patientLumps();
+    if (!lumps.length) return '';
+    const active = lumps.filter(l => this.lumpIsActive(l.status)).length;
+    const inactive = lumps.length - active;
+    const parts = [];
+    if (active) parts.push(`${active} being monitored`);
+    if (inactive) parts.push(`${inactive} removed or resolved`);
+    return parts.join(' · ');
+},
+
+// --- Lump forms -----------------------------------------------------------------------------------
+
+openLumpForm(id = null) {
+    const existing = id ? this.patientLumps().find(l => l.id === id) : null;
+    this.editingLumpId = id;
+    this.newLump = existing
+        ? { label: existing.label || '', site: existing.site || '', side: existing.side || '',
+            siteDetail: existing.siteDetail || '', firstNoticed: existing.firstNoticed || '',
+            status: existing.status || 'monitoring', vetStage: existing.vetStage || 'notSeen',
+            vetDiagnosis: existing.vetDiagnosis || '', resolvedDate: existing.resolvedDate || '',
+            notes: existing.notes || '' }
+        : { label: '', site: '', side: '', siteDetail: '', firstNoticed: '', status: 'monitoring',
+            vetStage: 'notSeen', vetDiagnosis: '', resolvedDate: '', notes: '' };
+    this.showLumpForm = true;
+},
+
+closeLumpForm() { this.showLumpForm = false; this.editingLumpId = null; },
+
+saveLump() {
+    if (!this.activePatientId) return;
+    const l = this.newLump;
+    const existing = this.editingLumpId ? (this.lumpLog || []).find(x => x.id === this.editingLumpId) : null;
+    const active = this.lumpIsActive(l.status);
+    const record = {
+        id: this.editingLumpId || this.generateId(),
+        patientId: this.activePatientId,
+        label: (l.label || '').trim(),
+        site: l.site || '',
+        side: LUMP_SIDES.some(s => s.id === l.side) ? l.side : '',
+        siteDetail: (l.siteDetail || '').trim(),
+        // '' stays '' — "we don't know when it appeared" is the common answer, and defaulting to
+        // today would fabricate how long the lump has been there.
+        firstNoticed: l.firstNoticed || '',
+        status: LUMP_STATUSES.some(s => s.id === l.status) ? l.status : 'monitoring',
+        vetStage: LUMP_VET_STAGES.some(s => s.id === l.vetStage) ? l.vetStage : 'notSeen',
+        vetDiagnosis: (l.vetDiagnosis || '').trim(),
+        // A lump put back under observation must not keep the date it was removed.
+        resolvedDate: active ? '' : (l.resolvedDate || ''),
+        notes: (l.notes || '').trim(),
+        createdAt: (existing && existing.createdAt) || new Date().toISOString()
+    };
+    this.lumpLog = this.editingLumpId
+        ? this.lumpLog.map(x => x.id === this.editingLumpId ? record : x)
+        : [...(this.lumpLog || []), record];
+    this.saveToStorage('vch_lumpLog', this.lumpLog);
+    this.closeLumpForm();
+},
+
+deleteLump(id) {
+    if (!window.confirm('Delete this lump and all of its measurements? This cannot be undone.')) return;
+    // The measurements go with it: a measurement whose lump has been deleted is a size with nothing
+    // to be the size of.
+    this.lumpMeasurements = (this.lumpMeasurements || []).filter(m => m.lumpId !== id);
+    this.lumpLog = (this.lumpLog || []).filter(l => l.id !== id);
+    this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
+    this.saveToStorage('vch_lumpLog', this.lumpLog);
+    if (this.viewingLumpId === id) this.viewingLumpId = null;
+},
+
+toggleLumpDetail(id) { this.viewingLumpId = this.viewingLumpId === id ? null : id; },
+
+openLumpMeasureForm(lumpId, measurementId = null) {
+    const existing = measurementId
+        ? (this.lumpMeasurements || []).find(m => m.id === measurementId) : null;
+    this.measuringLumpId = lumpId;
+    this.editingMeasurementId = measurementId;
+    this.newLumpMeasurement = existing
+        ? { date: existing.date, unit: 'mm',
+            length: existing.lengthMm ?? '', width: existing.widthMm ?? '', depth: existing.depthMm ?? '',
+            consistency: existing.consistency || 'unsure', mobility: existing.mobility || 'unsure',
+            signs: [...(existing.signs || [])], notes: existing.notes || '' }
+        : { date: new Date().toISOString().split('T')[0], unit: 'mm', length: '', width: '', depth: '',
+            consistency: 'unsure', mobility: 'unsure', signs: [], notes: '' };
+    this.showLumpMeasureForm = true;
+},
+
+closeLumpMeasureForm() {
+    this.showLumpMeasureForm = false;
+    this.measuringLumpId = null;
+    this.editingMeasurementId = null;
+},
+
+toggleLumpSign(id) {
+    const list = this.newLumpMeasurement.signs || [];
+    this.newLumpMeasurement.signs = list.includes(id)
+        ? list.filter(x => x !== id) : list.concat(id);
+},
+
+// Switching mm↔cm RE-EXPRESSES what has been typed rather than reinterpreting it, so flipping to cm
+// and back cannot silently turn 24 mm into 24 cm.
+changeLumpUnit(unit) {
+    if (unit === this.newLumpMeasurement.unit) return;
+    const factor = unit === 'cm' ? 0.1 : 10;
+    ['length', 'width', 'depth'].forEach(k => {
+        const v = Number(this.newLumpMeasurement[k]);
+        if (Number.isFinite(v) && this.newLumpMeasurement[k] !== '') {
+            this.newLumpMeasurement[k] = Math.round(v * factor * 100) / 100;
+        }
+    });
+    this.newLumpMeasurement.unit = unit;
+},
+
+useLumpSizeReference(mm) {
+    const unit = this.newLumpMeasurement.unit;
+    this.newLumpMeasurement.length = unit === 'cm' ? mm / 10 : mm;
+},
+
+saveLumpMeasurement() {
+    if (!this.activePatientId || !this.measuringLumpId) return;
+    const m = this.newLumpMeasurement;
+    // Always stored in MILLIMETRES, whatever the owner typed in.
+    const toMm = v => {
+        const n = Number(v);
+        if (!Number.isFinite(n) || n <= 0) return null;
+        return m.unit === 'cm' ? n * 10 : n;
+    };
+    const existing = this.editingMeasurementId
+        ? (this.lumpMeasurements || []).find(x => x.id === this.editingMeasurementId) : null;
+    const record = {
+        id: this.editingMeasurementId || this.generateId(),
+        patientId: this.activePatientId,
+        lumpId: this.measuringLumpId,
+        date: m.date,
+        lengthMm: toMm(m.length),
+        widthMm: toMm(m.width),
+        depthMm: toMm(m.depth),
+        consistency: m.consistency || 'unsure',
+        mobility: m.mobility || 'unsure',
+        signs: [...(m.signs || [])],
+        // Photos are an iOS-only feature: the web app has nowhere device-local to keep them and
+        // they cannot ride in the JSON backup. The key exists so records round-trip unchanged.
+        photoFilename: (existing && existing.photoFilename) || '',
+        notes: (m.notes || '').trim(),
+        createdAt: (existing && existing.createdAt) || new Date().toISOString()
+    };
+    // Deliberately NO one-per-day upsert: measuring twice in a day happens (once before the vet,
+    // once after) and silently overwriting the first would destroy a reading.
+    this.lumpMeasurements = this.editingMeasurementId
+        ? this.lumpMeasurements.map(x => x.id === this.editingMeasurementId ? record : x)
+        : [...(this.lumpMeasurements || []), record];
+    this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
+    this.closeLumpMeasureForm();
+},
+
+deleteLumpMeasurement(id) {
+    if (!window.confirm('Delete this measurement?')) return;
+    this.lumpMeasurements = (this.lumpMeasurements || []).filter(m => m.id !== id);
+    this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
+},
+
 echoDisplayName(r) {
     const m = this.echoMeasure(r.measureId);
     if (m) return m.label;
@@ -6316,18 +7586,22 @@ setCountWindow(sec) {
     if (this.isCounting) this.startCount(); // restart cleanly with the new window
 },
         
+// Post-count nudge: "you've logged a rate, log the symptoms too". Cough shares the Monitor view
+// with the counter, but activity moved to Wellness in the 2026-08 restructure — so this now has to
+// cross views rather than just expand an accordion further down the same page.
 nudgeToSymptom(type) {
-            this.showSymptomLog = true;
             this.closeResult();
-            
+
             if (type === 'cough') {
+                this.showSymptomLog = true;
                 this.openCoughForm();
             } else if (type === 'activity') {
+                this.setView('wellness');          // also expands the activity card
                 this.openActivityForm();
             }
-            
+
             this.$nextTick(() => {
-                const el = document.getElementById('symptomSection');
+                const el = document.getElementById(type === 'activity' ? 'activitySection' : 'coughSection');
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         },
@@ -6672,7 +7946,7 @@ get allAlerts() {
     const list = [];
     const mods = this.activePatientProfile?.modules || {};
     if (mods.medications !== false) (this.medStockAlerts || []).forEach(a => list.push({
-        id: 'stock-' + a.id, kind: 'Medication stock', view: 'meds',
+        id: 'stock-' + a.id, kind: 'Medication stock', view: 'medical',
         label: a.drugName, statusLabel: a.stockStatus.label,
         color: a.stockStatus.color, bg: a.stockStatus.bg, border: a.stockStatus.border, days: a.stockStatus.days
     }));
@@ -7540,14 +8814,14 @@ resetData() {
                   'vch_diagnosisLog','vch_syncopeLog','vch_coughLog','vch_activityLog',
                   'vch_vaccinationLog','vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog',
                   'vch_bloodResults', 'vch_echoMeasurements', 'vch_procedureLog', 'vch_allergyLog',
-                  'vch_appointmentLog'];
+                  'vch_appointmentLog', 'vch_skinLog', 'vch_lumpLog', 'vch_lumpMeasurements'];
     keys.forEach(k => localStorage.removeItem(k));
 
     this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = []; this.suppLedger = [];
     this.diagnosisLog = []; this.syncopeLog = []; this.coughLog = []; this.activityLog = [];
     this.vaccinationLog = []; this.antiparasiticLog = []; this.injectionLog = []; this.medDoseLog = [];
     this.bloodResults = []; this.echoMeasurements = []; this.procedureLog = []; this.allergyLog = [];
-    this.appointmentLog = [];
+    this.appointmentLog = []; this.skinLog = []; this.lumpLog = []; this.lumpMeasurements = [];
     this.activePatientId = null;
 
     [this.$refs.rrrChartCanvas, this.$refs.medChartCanvas, this.$refs.weightChartCanvas, this.$refs.injectionChartCanvas]
@@ -8302,7 +9576,7 @@ trendsSnapshot() {
     if (this.modOn('srr') && rows.length) {
         const last = rows[rows.length - 1];
         tiles.push({
-            icon: 'fa-lungs', view: 'count', label: 'Latest SRR', value: last.rate + ' bpm',
+            icon: 'fa-lungs', view: 'monitor', label: 'Latest SRR', value: last.rate + ' bpm',
             sub: new Date(last.t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
             state: last.rate >= cutoff + 10 ? 'danger' : last.rate >= cutoff ? 'warn' : 'ok'
         });
@@ -8314,7 +9588,7 @@ trendsSnapshot() {
         const m7 = this._meanOf(m7v), m30 = this._meanOf(m30v);
         const pct = m30 > 0 ? ((m7 - m30) / m30) * 100 : 0;
         tiles.push({
-            icon: 'fa-chart-line', view: 'count', label: '7d vs 30d mean',
+            icon: 'fa-chart-line', view: 'monitor', label: '7d vs 30d mean',
             value: `${m7.toFixed(1)} / ${m30.toFixed(1)}`,
             sub: (pct > 2 ? '▲ ' : pct < -2 ? '▼ ' : '→ ') + Math.abs(pct).toFixed(0) + '%',
             state: pct >= 20 ? 'danger' : pct >= 10 ? 'warn' : 'ok'
@@ -8348,20 +9622,20 @@ trendsSnapshot() {
             const lastT = Math.max(...sl.map(s => this.parseDateSafe(s.date).getTime()));
             const days = Math.floor((now - lastT) / day);
             tiles.push({
-                icon: 'fa-heart-crack', view: 'wellness', label: 'Last collapse event',
+                icon: 'fa-heart-crack', view: 'monitor', label: 'Last collapse event',
                 value: days === 0 ? 'Today' : days + 'd ago',
                 sub: sl.length + ' logged',
                 state: days < 7 ? 'danger' : days < 30 ? 'warn' : 'ok'
             });
         } else {
-            tiles.push({ icon: 'fa-heart-crack', view: 'wellness', label: 'Collapse events', value: 'None', sub: 'logged', state: 'neutral' });
+            tiles.push({ icon: 'fa-heart-crack', view: 'monitor', label: 'Collapse events', value: 'None', sub: 'logged', state: 'neutral' });
         }
     }
 
     if (this.modOn('acvimStaging') && this.currentClinicalStatus) {
         const s = this.currentClinicalStatus;
         tiles.push({
-            icon: 'fa-stethoscope', view: 'meds', label: s.diagnosis || 'Diagnosis',
+            icon: 'fa-stethoscope', view: 'medical', label: s.diagnosis || 'Diagnosis',
             value: s.acvimStage && s.acvimStage !== 'N/A' ? s.acvimStage : '—',
             sub: new Date(s.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }),
             state: ['Stage C', 'Stage D'].includes(s.acvimStage) ? 'warn' : 'neutral'
@@ -8375,14 +9649,14 @@ trendsSnapshot() {
             const next = [...stock].sort((a, b) => a.status.days - b.status.days)[0];
             const d = next.status.days;
             tiles.push({
-                icon: 'fa-prescription-bottle-medical', view: 'meds', label: 'Next med top-up',
+                icon: 'fa-prescription-bottle-medical', view: 'medical', label: 'Next med top-up',
                 value: d < 0 ? Math.abs(d) + 'd ago' : d === 0 ? 'Today' : d + 'd',
                 sub: next.name + (next.projection?.reason === 'expiry' ? ' (in-use expiry)' : '')
                      + ' · ' + new Date(next.projection.emptyDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
                 state: d <= 0 ? 'danger' : d <= 7 ? 'warn' : 'ok'
             });
         } else if (this.hasAnyMedData()) {
-            tiles.push({ icon: 'fa-prescription-bottle-medical', view: 'meds', label: 'Next med top-up', value: '—', sub: 'no stock data logged', state: 'neutral' });
+            tiles.push({ icon: 'fa-prescription-bottle-medical', view: 'medical', label: 'Next med top-up', value: '—', sub: 'no stock data logged', state: 'neutral' });
         }
     }
 
@@ -10692,6 +11966,9 @@ exportCompleteBackup(patientId = null) {
         vch_procedureLog: scoped(this.procedureLog),
         vch_allergyLog: scoped(this.allergyLog),
         vch_appointmentLog: scoped(this.appointmentLog),
+        vch_skinLog: scoped(this.skinLog),
+        vch_lumpLog: scoped(this.lumpLog),
+        vch_lumpMeasurements: scoped(this.lumpMeasurements),
         exportDate: new Date().toISOString(),
         exportScope: patientId ? 'single' : 'all'
     };
@@ -10797,7 +12074,8 @@ backupLogCount(pid) {
     return ['vch_srrHistory', 'vch_medLedger', 'vch_suppLedger', 'vch_diagnosisLog', 'vch_syncopeLog',
             'vch_coughLog', 'vch_activityLog', 'vch_weightLog', 'vch_vaccinationLog',
             'vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog','vch_bloodResults','vch_echoMeasurements',
-            'vch_procedureLog', 'vch_allergyLog', 'vch_appointmentLog']
+            'vch_procedureLog', 'vch_allergyLog', 'vch_appointmentLog',
+            'vch_skinLog', 'vch_lumpLog', 'vch_lumpMeasurements']
         .reduce((n, k) => n + (d[k] || []).filter(e => e.patientId === pid).length, 0);
 },
 
@@ -10845,7 +12123,9 @@ confirmBackupImport() {
     const logKeys = ['weightLog', 'srrHistory', 'medLedger', 'suppLedger', 'diagnosisLog', 'syncopeLog',
                      'coughLog', 'activityLog', 'vaccinationLog', 'antiparasiticLog', 'injectionLog',
                      'medDoseLog', 'bloodResults', 'echoMeasurements', 'procedureLog', 'allergyLog',
-                     'appointmentLog'];
+                     'appointmentLog', 'skinLog'];
+    // `lumpLog` + `lumpMeasurements` are NOT in that list: the generic loop re-issues every id,
+    // which would break the `lumpId` join. They are imported below, together.'
     logKeys.forEach(key => {
         const incoming = (data['vch_' + key] || [])
             .filter(e => idMap[e.patientId] !== undefined)
@@ -10854,6 +12134,32 @@ confirmBackupImport() {
         if (key === 'diagnosisLog') this[key].sort((a, b) => new Date(b.date) - new Date(a.date));
         this.saveToStorage('vch_' + key, this[key]);
     });
+    // Lumps carry their measurements, so the join is rebuilt as they are inserted. Every record
+    // gets a fresh local id, and a measurement still holding the FILE's lump id would either
+    // dangle or — far worse — collide with an unrelated lump already in the store. A measurement
+    // whose lump is not in the map is DROPPED: attaching it to the wrong lump would corrupt that
+    // lump's growth history, which is the one number this feature exists to get right.
+    const lumpIdMap = {};
+    const incomingLumps = (data.vch_lumpLog || [])
+        .filter(l => idMap[l.patientId] !== undefined)
+        .map(l => {
+            const newId = this.generateId();
+            lumpIdMap[l.id] = newId;
+            return { ...l, id: newId, patientId: idMap[l.patientId] };
+        });
+    this.lumpLog = (this.lumpLog || []).concat(incomingLumps);
+    this.saveToStorage('vch_lumpLog', this.lumpLog);
+
+    const incomingMeasurements = (data.vch_lumpMeasurements || [])
+        .filter(m => idMap[m.patientId] !== undefined && lumpIdMap[m.lumpId] !== undefined)
+        .map(m => ({ ...m, id: this.generateId(), patientId: idMap[m.patientId],
+                     lumpId: lumpIdMap[m.lumpId],
+                     // Photos live on the device that took them and cannot ride in a JSON
+                     // backup, so an imported measurement never claims to have one.
+                     photoFilename: '' }));
+    this.lumpMeasurements = (this.lumpMeasurements || []).concat(incomingMeasurements);
+    this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
+
     this.saveToStorage('vch_patients', this.patients);
 
     this.showBackupImportModal = false;
@@ -11989,6 +13295,88 @@ generateCSV() {
         csv += '\n';
     }
  
+    // ── SKIN & ITCH ────────────────────────────────────────────────────────
+    // The per-day rows respect the date range like every other log. The YEARLY PATTERN block
+    // below deliberately does NOT: a seasonal read computed from three months of data is not a
+    // seasonal read, and the value of the finding is precisely that it spans years.
+    const skinAllCSV = !mods.skinLog ? [] : this.patientSkinLog();
+    const skinDataCSV = skinAllCSV.filter(e => inRange(e.date))
+        .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    if (skinDataCSV.length > 0) {
+        csv += 'SKIN & ITCH LOG\n';
+        csv += 'Date,Itch Score (0-10),Band,Where,Signs,Ears,Given,Owner Suspects,Seen By Vet,Notes\n';
+        skinDataCSV.forEach(e => {
+            csv += [
+                q(e.date),
+                // Empty, NOT "0", when the day was logged unscored — they are different answers
+                // and must stay different in a column a vet reads.
+                q(e.itchScore === null || e.itchScore === undefined ? '' : String(e.itchScore)),
+                q(this.skinScoreBand(e.itchScore)),
+                q(this.skinSiteList(e.sites)),
+                q((e.signs || []).map(id => this.skinSignLabel(id)).join('; ')),
+                q(this.skinEarLabel(e.earStatus)),
+                q(this.skinTreatmentList(e.treatments)),
+                q(e.suspectedTrigger && e.suspectedTrigger !== 'unknown' ? this.skinTriggerLabel(e.suspectedTrigger) : ''),
+                q(e.vetVisit ? 'Yes' : ''),
+                q(e.notes || '')
+            ].join(',') + '\n';
+        });
+        csv += '\n';
+    }
+
+    if (skinAllCSV.length > 0) {
+        const pattern = this.skinSeasonalPattern(skinAllCSV);
+        csv += 'SKIN — YEARLY PATTERN\n';
+        csv += `${q('Finding')},${q(pattern.headline)}\n`;
+        csv += `${q('Detail')},${q(pattern.detail)}\n`;
+        const ears = this.skinEarSummary(skinAllCSV);
+        if (ears) csv += `${q('Ears')},${q(ears)}\n`;
+        this.skinTreatmentDays(skinAllCSV).forEach(t => {
+            csv += `${q('Treatment')},${q(`${this.skinTreatmentLabel(t.treatment)} — ${t.days} day${t.days === 1 ? '' : 's'}`)}\n`;
+        });
+        csv += '\n';
+    }
+
+    // ── LUMPS ──────────────────────────────────────────────────────────────
+    // NOT date-filtered, for the same reason allergies are not: a lump the owner has watched for
+    // two years does not stop existing because the report covers the last three months, and a vet
+    // reading a report that omitted it would be missing the thing the owner most wants looked at.
+    const lumpDataCSV = !mods.lumps ? [] : this.sortedLumps;
+    if (lumpDataCSV.length > 0) {
+        csv += 'LUMPS\n';
+        csv += 'Lump,Location,Status,With The Vet,First Noticed,Latest Size,Change,Vet\'s Note,Measurement History,To Raise,Notes\n';
+        lumpDataCSV.forEach(l => {
+            const mine = this.lumpMeasurementsFor(l.id);
+            const last = mine.length ? mine[mine.length - 1] : null;
+            const history = mine.map(m => {
+                let line = `${this.allergyDayText(m.date)} — ${this.lumpSizeText(m)}`;
+                if (m.consistency && m.consistency !== 'unsure') line += ` — ${this.lumpConsistencyLabel(m.consistency)}`;
+                if (m.mobility && m.mobility !== 'unsure') line += ` — ${this.lumpMobilityLabel(m.mobility)}`;
+                if ((m.signs || []).length) line += ` — ${this.lumpSignList(m.signs)}`;
+                if (m.notes) line += ` — ${m.notes}`;
+                return line;
+            }).join(' | ');
+            csv += [
+                q(this.lumpDisplayName(l)),
+                q(this.lumpLocationLine(l)),
+                q(this.lumpStatusLabel(l.status)),
+                q(this.lumpVetStageLabel(l.vetStage)),
+                q(l.firstNoticed || ''),
+                q(last ? this.lumpSizeText(last) : ''),
+                q(this.lumpChangeSummary(l)),
+                q(l.vetDiagnosis || ''),
+                q(history),
+                q(this.lumpPrompts(l).filter(pr => pr.clinical).map(pr => pr.text).join(' ')),
+                q(l.notes || '')
+            ].join(',') + '\n';
+        });
+        // Printed under the table for the same reason it is on every lump screen: an empty
+        // "to raise" column is not a statement that a lump is fine.
+        csv += `${q('Note')},${q(LUMP_STANDING_NOTE)}\n`;
+        csv += '\n';
+    }
+
     if (!csv.trim()) return alert("No data to export for this patient in the selected date range.");
  
     const BOM  = '\uFEFF'; // UTF-8 BOM — Excel on Windows needs this to open without encoding errors
@@ -12447,6 +13835,73 @@ _buildReportText() {
                 out += nl;
             });
             out += nl;
+        }
+    }
+
+    // ── Skin & itch ────────────────────────────────────────────────────────
+    if (mods.skinLog) {
+        const skinAll = this.patientSkinLog();
+        const skinData = skinAll.filter(e => inRange(e.date))
+            .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        if (skinData.length > 0) {
+            out += `SKIN & ITCH LOG (${skinData.length} day${skinData.length !== 1 ? 's' : ''})${nl}`;
+            out += rule() + nl;
+            skinData.forEach(e => {
+                out += `${e.date}  |  ${this.skinScoreText(e)}`;
+                const sites = this.skinSiteList(e.sites);
+                if (sites) out += `  |  ${sites}`;
+                if (this.skinEarRank(e.earStatus) > 0) out += `  |  Ears: ${this.skinEarLabel(e.earStatus)}`;
+                const given = this.skinTreatmentList((e.treatments || []).filter(t => t !== 'none'));
+                if (given) out += `${nl}${indent}Given: ${given}`;
+                if (e.vetVisit) out += `${nl}${indent}Seen by a vet about the skin on this day`;
+                if (e.notes) out += `${nl}${indent}Notes: ${e.notes}`;
+                out += nl;
+            });
+            out += nl;
+        }
+        // The pattern block spans everything ever logged, not the report window — see the CSV.
+        if (skinAll.length > 0) {
+            const pattern = this.skinSeasonalPattern(skinAll);
+            out += `SKIN — YEARLY PATTERN${nl}`;
+            out += rule() + nl;
+            out += `${pattern.headline}${nl}`;
+            out += `${indent}${pattern.detail}${nl}`;
+            const ears = this.skinEarSummary(skinAll);
+            if (ears) out += `${indent}${ears}${nl}`;
+            this.skinTreatmentDays(skinAll).forEach(t => {
+                out += `${indent}${this.skinTreatmentLabel(t.treatment)} — ${t.days} day${t.days === 1 ? '' : 's'}${nl}`;
+            });
+            out += nl;
+        }
+    }
+
+    // ── Lumps (never date-filtered — see the CSV export) ───────────────────
+    if (mods.lumps) {
+        const lumps = this.sortedLumps;
+        if (lumps.length > 0) {
+            out += `LUMPS (${lumps.length})${nl}`;
+            out += rule() + nl;
+            lumps.forEach(l => {
+                out += `${this.lumpDisplayName(l)}`;
+                const location = this.lumpLocationLine(l);
+                if (location) out += `  |  ${location}`;
+                out += `  |  ${this.lumpStatusLabel(l.status)}  |  ${this.lumpVetStageLabel(l.vetStage)}${nl}`;
+                if (l.firstNoticed) out += `${indent}First noticed: ${this.allergyDayText(l.firstNoticed)}${nl}`;
+                out += `${indent}${this.lumpChangeSummary(l)}${nl}`;
+                this.lumpMeasurementsFor(l.id).forEach(m => {
+                    out += `${indent}${this.allergyDayText(m.date)} — ${this.lumpSizeText(m)}`;
+                    if ((m.signs || []).length) out += ` — ${this.lumpSignList(m.signs)}`;
+                    out += nl;
+                });
+                if (l.vetDiagnosis) out += `${indent}Vet's note: ${l.vetDiagnosis}${nl}`;
+                this.lumpPrompts(l).filter(pr => pr.clinical).forEach(pr => {
+                    out += `${indent}To raise: ${pr.text}${nl}`;
+                });
+                if (l.notes) out += `${indent}Notes: ${l.notes}${nl}`;
+                out += nl;
+            });
+            // Unconditional. An empty "to raise" list is not a verdict.
+            out += `${indent}${LUMP_STANDING_NOTE}${nl}${nl}`;
         }
     }
 

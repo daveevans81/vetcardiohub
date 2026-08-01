@@ -956,6 +956,28 @@
                                 <input type="checkbox" x-model="editingPatient.modules.activityLog" style="width: 20px; height: 20px; accent-color: #f43f5e;">
                             </label>
                     
+                            <label class="module-selector" :class="{'active-rose': editingPatient.modules.skinLog}">
+                                <div class="flex-center gap-10">
+                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-hand-dots" style="font-size: 1.4rem; color: #d97706;"></i></div>
+                                    <div>
+                                        <strong style="color: #1e293b; font-size: 0.95rem;">Skin &amp; Itch Log</strong>
+                                        <span class="text-muted text-sm block">Score itching day by day, record ear trouble and what was given, and see whether it follows the seasons</span>
+                                    </div>
+                                </div>
+                                <input type="checkbox" x-model="editingPatient.modules.skinLog" style="width: 20px; height: 20px; accent-color: #d97706;">
+                            </label>
+
+                            <label class="module-selector" :class="{'active-rose': editingPatient.modules.lumps}">
+                                <div class="flex-center gap-10">
+                                    <div style="width: 32px; text-align: center;"><i class="fa-regular fa-circle-dot" style="font-size: 1.4rem; color: #64748b;"></i></div>
+                                    <div>
+                                        <strong style="color: #1e293b; font-size: 0.95rem;">Lump Tracker</strong>
+                                        <span class="text-muted text-sm block">Measure lumps over time and keep a dated history alongside the numbers</span>
+                                    </div>
+                                </div>
+                                <input type="checkbox" x-model="editingPatient.modules.lumps" style="width: 20px; height: 20px; accent-color: #64748b;">
+                            </label>
+
                             <label class="module-selector" :class="{'active-sky': editingPatient.modules.acvimStaging}">
                                 <div class="flex-center gap-10">
                                     <div style="width: 32px; text-align: center;"><i class="fa-solid fa-stethoscope" style="font-size: 1.4rem; color: #0284c7;"></i></div>
@@ -1380,6 +1402,14 @@
                             <i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_activity')"></i></label>
                             
                             <label class="checkbox-label">
+                                <input type="checkbox" x-model="editingPatient.modules.skinLog"> Skin &amp; Itch Log
+                            </label>
+
+                            <label class="checkbox-label">
+                                <input type="checkbox" x-model="editingPatient.modules.lumps"> Lump Tracker
+                            </label>
+
+                            <label class="checkbox-label">
                                 <input type="checkbox" x-model="editingPatient.modules.weightDiet"> Weight and Diet Log
                             <i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_diet_weight')"></i></label>
                             
@@ -1448,7 +1478,7 @@
                                 <!-- ******************************** -->
                                 
             <template x-if="activePatientProfile?.modules?.srr">
-                <div x-show="isView('count') && modOn('srr')">
+                <div x-show="isView('monitor') && modOn('srr')">
                     <div x-show="!isCounting" class="summary-box">
                         <h2><span x-text="activePatientProfile?.name || 'Patient'"></span>'s Sleeping Respiratory Rate Tracker</h2>
                         <p>Ensure your pet is fully resting or sleeping. 
@@ -1580,7 +1610,7 @@
         
             <template x-if="activePatientProfile?.modules?.srr">
             
-                <div x-show="finalRate !== null && !isCounting && isView('count')" x-cloak class="vch-modal">
+                <div x-show="finalRate !== null && !isCounting && isView('monitor')" x-cloak class="vch-modal">
                     <div class="vch-modal-card" style="border: 1px solid #cbd5e1; text-align: center; padding: 20px; max-width: 26rem;">
                         <h1 style="font-size: 2.5rem; margin: 10px 0;"><span x-text="finalRate"></span> <span style="font-size: 1.2rem; color: #64748b;">bpm</span></h1>
                         
@@ -1668,7 +1698,7 @@
                                     <!-- SRR LOG history                  -->
                                     <!-- ******************************** -->
                 <template x-if="activePatientProfile?.modules?.srr">            
-                    <div class="paginatedHistory" x-show="patients.length > 0 && isView('count')" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
+                    <div class="paginatedHistory" x-show="patients.length > 0 && isView('monitor')" style="border: 1px solid #adc1ed; border-radius: 4px; background: #fcfdff; margin-top: 30px; padding: 20px;" x-cloak>
             
                         <div class="mb-15">
                             <button @click="showLog = !showLog" type="button" class="log-accordion-header">
@@ -1811,20 +1841,20 @@
             </template>
                 
                 <!-- ******************************** -->
-                <!-- QUALITY OF LIFE & SYMPTOMS       -->
+                <!-- COUGH DIARY  (Monitor)           -->
                 <!-- ******************************** -->
-            <template x-if="activePatientProfile?.modules?.activityLog || activePatientProfile?.modules?.coughLog">
-                <div id="symptomSection" class="module-card" x-show="patients.length > 0 && isView('wellness') && modOn('coughLog','activityLog')" x-cloak>
-                    
+            <template x-if="activePatientProfile?.modules?.coughLog">
+                <div id="coughSection" class="module-card" x-show="patients.length > 0 && isView('monitor') && modOn('coughLog')" x-cloak>
+
                     <div style="margin-bottom: 15px;">
                         <button @click="showSymptomLog = !showSymptomLog" :aria-expanded="showSymptomLog.toString()" type="button" class="btn-accordion">
-                            <h3><i class="fa-solid fa-heart-pulse text-rose-500"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Quality of Life (Daily Summaries of Cough and Activity)' : 'Quality of Life (Daily Summaries of Cough and Activity)'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_cough')"></i></h3> 
+                            <h3><i class="fa-solid fa-head-side-cough text-rose-500"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Cough Diary' : 'Cough Diary'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_cough')"></i></h3>
                             <i class="fa-solid" :class="showSymptomLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </button>
                     </div>
-            
+
                     <div x-show="showSymptomLog" x-transition style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 20px; align-items: start;">
-                        
+
                         <template x-if="activePatientProfile?.modules?.coughLog">
                             <div class="sub-module-card">
                                 <div class="section-header">
@@ -1918,7 +1948,25 @@
                                 </div>
                             </div>
                         </template>
-                
+                    </div>
+                </div>
+            </template>
+
+                <!-- ******************************** -->
+                <!-- ACTIVITY & EXERCISE  (Wellness)  -->
+                <!-- ******************************** -->
+            <template x-if="activePatientProfile?.modules?.activityLog">
+                <div id="activitySection" class="module-card" x-show="patients.length > 0 && isView('wellness') && modOn('activityLog')" x-cloak>
+
+                    <div style="margin-bottom: 15px;">
+                        <button @click="showActivityLog = !showActivityLog" :aria-expanded="showActivityLog.toString()" type="button" class="btn-accordion">
+                            <h3><i class="fa-solid fa-person-running text-rose-500"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Activity &amp; Exercise' : 'Activity &amp; Exercise'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_activity')"></i></h3>
+                            <i class="fa-solid" :class="showActivityLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+
+                    <div x-show="showActivityLog" x-transition style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 20px; align-items: start;">
+
                         <template x-if="activePatientProfile?.modules?.activityLog">
                             <div class="sub-module-card">
                                 <div class="section-header">
@@ -1992,12 +2040,515 @@
                         </template>
                     </div>
                 </div>
-             </template>               
+            </template>
+                                    <!-- ******************************** -->
+                                    <!-- SKIN & ITCH                      -->
+                                    <!-- ******************************** -->
+                                    <!-- Sits with the other symptom logs rather than under a heading of
+                                         its own: an owner looking for "where do I record the itching"
+                                         looks where the coughing is. Opt-in module (defaults OFF). -->
+            <template x-if="activePatientProfile?.modules?.skinLog">
+                <div id="skinSection" class="module-card" x-show="patients.length > 0 && isView('monitor')" x-cloak>
+
+                    <div style="margin-bottom: 15px;">
+                        <button @click="showSkinLog = !showSkinLog" :aria-expanded="showSkinLog.toString()" type="button" class="btn-accordion">
+                            <h3><i class="fa-solid fa-hand-dots" style="color:#d97706;"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Skin &amp; Itch' : 'Skin &amp; Itch'"></span></h3>
+                            <i class="fa-solid" :class="showSkinLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+
+                    <div x-show="showSkinLog" x-transition>
+
+                        <div class="section-header">
+                            <h4 class="section-title"><i class="fa-solid fa-calendar-day"></i> Daily record</h4>
+                            <button x-show="!showSkinForm" @click="openSkinForm()" class="btn-add">
+                                <i class="fa-solid fa-plus"></i> Log Today
+                            </button>
+                        </div>
+
+                        <p x-show="patientSkinLog().length > 0" style="font-size: 0.85rem; color: #475569; margin: 0 0 10px;"
+                           x-text="skinRecentChange()"></p>
+
+                        <!-- ── Entry form ─────────────────────────────────────────────────── -->
+                        <div x-show="showSkinForm" x-cloak class="vch-modal">
+                            <div class="form-panel vch-modal-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <strong style="color: #1e293b;">Skin &amp; itch</strong>
+                                    <input type="date" x-model="newSkin.date" @change="loadSkinForDate()" class="form-input" style="width: auto; padding: 4px 8px; font-size: 0.85rem;">
+                                </div>
+
+                                <!-- The written ANCHOR under the slider is what keeps one owner's 6
+                                     comparable with the same owner's 6 a year later. Never show the
+                                     number without it. -->
+                                <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" x-model="newSkin.hasScore"> Score today's itching
+                                </label>
+                                <div x-show="newSkin.hasScore" style="margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: baseline; gap: 8px;">
+                                        <strong style="font-size: 1.3rem; color: #1e293b;" x-text="newSkin.itchScore + '/10'"></strong>
+                                        <span style="font-size: 0.8rem; color: #64748b;" x-text="skinScoreBand(newSkin.itchScore)"></span>
+                                    </div>
+                                    <input type="range" min="0" max="10" step="1" x-model.number="newSkin.itchScore" style="width: 100%; accent-color: #d97706;">
+                                    <p style="font-size: 0.8rem; color: #64748b; margin: 4px 0 0;" x-text="skinScoreAnchor(newSkin.itchScore)"></p>
+                                </div>
+                                <p x-show="!newSkin.hasScore" style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Leaving this off records the day without a score — different from scoring it 0, which says they were comfortable.
+                                </p>
+
+                                <label class="form-label">Ears:</label>
+                                <select x-model="newSkin.earStatus" class="form-select" style="margin-bottom: 4px;">
+                                    <template x-for="e in SKIN_EAR_STATES_LIST" :key="e.id">
+                                        <option :value="e.id" x-text="e.label"></option>
+                                    </template>
+                                </select>
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;" x-text="skinEarHint(newSkin.earStatus)"></p>
+
+                                <label class="form-label">Where:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                                    <template x-for="s in SKIN_SITES_LIST" :key="s.id">
+                                        <button type="button" @click="toggleSkinChip('sites', s.id)"
+                                                :style="(newSkin.sites || []).includes(s.id)
+                                                    ? 'background:#fffbeb; color:#b45309; border:1px solid #fde68a;'
+                                                    : 'background:#f8fafc; color:#475569; border:1px solid #e2e8f0;'"
+                                                style="padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; cursor: pointer;"
+                                                x-text="s.label"></button>
+                                    </template>
+                                </div>
+
+                                <label class="form-label">What they're doing:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                                    <template x-for="s in SKIN_SIGNS_LIST" :key="s.id">
+                                        <button type="button" @click="toggleSkinChip('signs', s.id)"
+                                                :style="(newSkin.signs || []).includes(s.id)
+                                                    ? 'background:#fffbeb; color:#b45309; border:1px solid #fde68a;'
+                                                    : 'background:#f8fafc; color:#475569; border:1px solid #e2e8f0;'"
+                                                style="padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; cursor: pointer;"
+                                                x-text="s.label"></button>
+                                    </template>
+                                </div>
+
+                                <label class="form-label">Given today:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
+                                    <template x-for="t in SKIN_TREATMENTS_LIST" :key="t.id">
+                                        <button type="button" @click="toggleSkinChip('treatments', t.id, 'none')"
+                                                :style="(newSkin.treatments || []).includes(t.id)
+                                                    ? 'background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;'
+                                                    : 'background:#f8fafc; color:#475569; border:1px solid #e2e8f0;'"
+                                                style="padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; cursor: pointer;"
+                                                x-text="t.label"></button>
+                                    </template>
+                                </div>
+                                <input type="text" x-model="newSkin.treatmentNotes" placeholder="Product, dose or which day of the course…" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    A record of what was used, so the chart shows what was happening at the time. Nothing here is a recommendation.
+                                </p>
+
+                                <label class="form-label">Anything set it off?</label>
+                                <select x-model="newSkin.suspectedTrigger" class="form-select" style="margin-bottom: 4px;">
+                                    <template x-for="t in SKIN_TRIGGERS_LIST" :key="t.id">
+                                        <option :value="t.id" x-text="t.label"></option>
+                                    </template>
+                                </select>
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Your hunch, recorded as a hunch. It's useful to your vet and isn't used to work anything out.
+                                </p>
+
+                                <label class="form-label" style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                                    <input type="checkbox" x-model="newSkin.vetVisit"> Seen by a vet about the skin today
+                                </label>
+
+                                <input type="text" x-model="newSkin.notes" placeholder="Additional notes…" class="form-input" style="margin-bottom: 15px;">
+
+                                <div class="flex-gap-10">
+                                    <button @click="closeSkinForm()" class="btn-secondary">Cancel</button>
+                                    <button @click="saveSkinEntry()" class="btn-primary">
+                                        <i class="fa-solid" :class="hasSkinForDate() ? 'fa-arrows-rotate' : 'fa-check'"></i>
+                                        <span x-text="hasSkinForDate() ? 'Update' : 'Save'"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── The log ────────────────────────────────────────────────────── -->
+                        <div x-show="sortedSkinLog.length === 0" style="text-align: center; color: #94a3b8; font-style: italic; padding: 16px 0;">
+                            No days logged yet. A score once a week — even on the good weeks — is what makes a yearly pattern visible.
+                        </div>
+                        <div style="max-height: 250px; overflow-y: auto;">
+                            <template x-for="e in sortedSkinLog" :key="e.id">
+                                <div class="log-entry">
+                                    <div>
+                                        <strong x-text="e.date" style="color: #1e293b;"></strong>
+                                        <span style="font-weight: bold; margin-left: 8px;"
+                                              :style="e.itchScore === null || e.itchScore === undefined ? 'color:#94a3b8;'
+                                                     : (e.itchScore >= 7 ? 'color:#b91c1c;' : (e.itchScore >= 4 ? 'color:#c2410c;' : 'color:#64748b;'))"
+                                              x-text="skinScoreText(e)"></span>
+                                        <div style="font-size: 0.8rem; color: #64748b;" x-text="skinSummaryLine(e)"></div>
+                                        <div x-show="e.notes" style="font-size: 0.8rem; color: #64748b; white-space: pre-wrap;" x-text="e.notes"></div>
+                                    </div>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button @click="openSkinForm(e.date)" type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button @click="deleteSkinEntry(e.id)" type="button"
+                                                style="padding: 4px 10px; font-size: 0.8rem; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer;">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- ── Yearly pattern ─────────────────────────────────────────────── -->
+                        <!-- Drawn with CSS bars rather than Chart.js on purpose: it needs no canvas
+                             lifecycle, no accordion watcher and no redraw on patient switch, and the
+                             figures are the same ones the written summary is computed from. -->
+                        <div style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 12px;">
+                            <button @click="showSkinPattern = !showSkinPattern" type="button" class="btn-secondary"
+                                    style="padding: 6px 12px; font-size: 0.85rem;">
+                                <i class="fa-solid fa-calendar"></i>
+                                <span x-text="showSkinPattern ? 'Hide yearly pattern' : 'Yearly pattern'"></span>
+                            </button>
+
+                            <div x-show="showSkinPattern" x-cloak style="margin-top: 12px;">
+                                <template x-if="showSkinPattern">
+                                    <div x-data="{ get p() { return skinPattern(); } }">
+                                            <strong style="color: #1e293b; font-size: 0.9rem;" x-text="p.headline"></strong>
+                                            <p style="font-size: 0.82rem; color: #475569; margin: 4px 0 12px;" x-text="p.detail"></p>
+
+                                            <div x-show="p.monthly.length > 0" style="display: flex; align-items: flex-end; gap: 4px; height: 110px; margin-bottom: 4px;">
+                                                <template x-for="m in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="m">
+                                                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%;">
+                                                        <div :style="`height: ${((p.monthly.find(x => x.month === m)?.mean || 0) / 10) * 100}%;
+                                                                      background: ${(p.confidence === 'established' || p.confidence === 'emerging') && p.peakMonths.includes(m) ? '#f59e0b' : '#cbd5e1'};
+                                                                      width: 100%; border-radius: 3px 3px 0 0;`"
+                                                             :title="`${skinMonthName(m)}: ${(p.monthly.find(x => x.month === m)?.mean || 0).toFixed(1)}/10`"></div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div x-show="p.monthly.length > 0" style="display: flex; gap: 4px;">
+                                                <template x-for="m in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="m">
+                                                    <div style="flex: 1; text-align: center; font-size: 0.62rem; color: #94a3b8;" x-text="skinShortMonthName(m)"></div>
+                                                </template>
+                                            </div>
+                                            <p x-show="p.monthly.length > 0" style="font-size: 0.72rem; color: #94a3b8; margin: 6px 0 0;">
+                                                Average itch score in each month, taken year by year so one heavily-logged month can't dominate. Blank months haven't been logged.
+                                            </p>
+
+                                            <p x-show="skinEarSummary()" style="font-size: 0.82rem; color: #475569; margin: 10px 0 0;" x-text="skinEarSummary()"></p>
+
+                                            <template x-if="skinTreatmentDays().length > 0">
+                                                <div style="margin-top: 10px;">
+                                                    <div style="font-size: 0.8rem; font-weight: bold; color: #334155;">What's been given</div>
+                                                    <template x-for="t in skinTreatmentDays()" :key="t.treatment">
+                                                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #475569;">
+                                                            <span x-text="skinTreatmentLabel(t.treatment)"></span>
+                                                            <span x-text="t.days + (t.days === 1 ? ' day' : ' days')"></span>
+                                                        </div>
+                                                    </template>
+                                                    <p style="font-size: 0.72rem; color: #94a3b8; margin: 4px 0 0;">
+                                                        Days on which each was recorded. A record of what was used, not advice.
+                                                    </p>
+                                                </div>
+                                            </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+                                    <!-- ******************************** -->
+                                    <!-- LUMPS                            -->
+                                    <!-- ******************************** -->
+                                    <!-- The standing note appears whether or not anything is flagged.
+                                         An empty prompt list is not a verdict, and the note is what
+                                         stops it reading as one. Do not make it conditional — see the
+                                         safety rule at the top of the LUMPS block in rr-logic.js. -->
+            <template x-if="activePatientProfile?.modules?.lumps">
+                <div id="lumpSection" class="module-card" x-show="patients.length > 0 && isView('monitor')" x-cloak>
+
+                    <div style="margin-bottom: 15px;">
+                        <button @click="showLumpLog = !showLumpLog" :aria-expanded="showLumpLog.toString()" type="button" class="btn-accordion">
+                            <h3><i class="fa-regular fa-circle-dot" style="color:#64748b;"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Lumps' : 'Lumps'"></span></h3>
+                            <i class="fa-solid" :class="showLumpLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+
+                    <div x-show="showLumpLog" x-transition>
+
+                        <p style="font-size: 0.8rem; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin: 0 0 12px;"
+                           x-text="LUMP_STANDING_NOTE_TEXT"></p>
+
+                        <div class="section-header">
+                            <h4 class="section-title" x-text="lumpCountSummary() || 'No lumps recorded'"></h4>
+                            <button @click="openLumpForm()" class="btn-add">
+                                <i class="fa-solid fa-plus"></i> Add lump
+                            </button>
+                        </div>
+
+                        <div x-show="sortedLumps.length === 0" style="text-align: center; color: #94a3b8; font-style: italic; padding: 16px 0;">
+                            Adding a lump lets you measure it over time and keep the history alongside the numbers.
+                        </div>
+
+                        <template x-for="l in sortedLumps" :key="l.id">
+                            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                                    <div style="cursor: pointer;" @click="toggleLumpDetail(l.id)">
+                                        <strong style="color: #1e293b;" x-text="lumpDisplayName(l)"></strong>
+                                        <span x-show="!lumpIsActive(l.status)" style="margin-left: 6px; font-size: 0.7rem; background: #f1f5f9; color: #64748b; padding: 2px 6px; border-radius: 999px;"
+                                              x-text="lumpStatusLabel(l.status)"></span>
+                                        <div x-show="lumpLocationLine(l)" style="font-size: 0.8rem; color: #64748b;" x-text="lumpLocationLine(l)"></div>
+                                        <div style="font-size: 0.8rem; color: #64748b;" x-text="lumpSummaryLine(l)"></div>
+                                        <div x-show="lumpPrompts(l).filter(p => p.clinical).length > 0" style="font-size: 0.78rem; color: #c2410c; margin-top: 2px;">
+                                            <i class="fa-solid fa-circle-exclamation"></i>
+                                            <span x-text="lumpPrompts(l).filter(p => p.clinical).length + (lumpPrompts(l).filter(p => p.clinical).length === 1 ? ' thing to raise with your vet' : ' things to raise with your vet')"></span>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                                        <button @click="openLumpMeasureForm(l.id)" type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">
+                                            <i class="fa-solid fa-ruler"></i> Measure
+                                        </button>
+                                        <button @click="openLumpForm(l.id)" type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button @click="deleteLump(l.id)" type="button"
+                                                style="padding: 4px 10px; font-size: 0.8rem; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer;">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Expanded: prompts, the change summary and the measurement history -->
+                                <div x-show="viewingLumpId === l.id" x-cloak style="margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                                    <template x-for="p in lumpPrompts(l)" :key="p.kind">
+                                        <p style="font-size: 0.82rem; margin: 0 0 6px;"
+                                           :style="p.clinical ? 'color:#9a3412;' : 'color:#64748b;'">
+                                            <i class="fa-solid" :class="p.clinical ? 'fa-circle-exclamation' : 'fa-clock'"></i>
+                                            <span x-text="p.text"></span>
+                                        </p>
+                                    </template>
+
+                                    <p style="font-size: 0.85rem; color: #334155; margin: 8px 0;" x-text="lumpChangeSummary(l)"></p>
+
+                                    <div style="font-size: 0.8rem; color: #475569;">
+                                        <div><strong>With the vet:</strong> <span x-text="lumpVetStageLabel(l.vetStage)"></span></div>
+                                        <div x-show="l.firstNoticed"><strong>First noticed:</strong> <span x-text="allergyDayText(l.firstNoticed)"></span></div>
+                                        <div x-show="l.vetDiagnosis"><strong>Vet's note:</strong> <span x-text="l.vetDiagnosis"></span></div>
+                                        <div x-show="l.notes" style="white-space: pre-wrap;" x-text="l.notes"></div>
+                                    </div>
+
+                                    <!-- Oldest first: read as a history, the sequence is the point. -->
+                                    <div style="margin-top: 10px;">
+                                        <div style="font-size: 0.8rem; font-weight: bold; color: #334155;">Measurements</div>
+                                        <div x-show="lumpMeasurementsFor(l.id).length === 0" style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">
+                                            None yet. The first measurement is what everything afterwards gets compared against.
+                                        </div>
+                                        <template x-for="m in lumpMeasurementsFor(l.id)" :key="m.id">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; font-size: 0.8rem; color: #475569; padding: 4px 0; border-bottom: 1px dashed #f1f5f9;">
+                                                <div>
+                                                    <strong x-text="allergyDayText(m.date)"></strong>
+                                                    <span x-text="' — ' + lumpSizeText(m)"></span>
+                                                    <div x-show="(m.signs || []).length > 0"
+                                                         :style="(m.signs || []).some(s => ['ulcerated','bleeding','weeping','painful'].includes(s)) ? 'color:#c2410c;' : 'color:#94a3b8;'"
+                                                         x-text="lumpSignList(m.signs)"></div>
+                                                    <div x-show="m.notes" style="color: #94a3b8;" x-text="m.notes"></div>
+                                                </div>
+                                                <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                                                    <button @click="openLumpMeasureForm(l.id, m.id)" type="button" class="btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </button>
+                                                    <button @click="deleteLumpMeasurement(m.id)" type="button"
+                                                            style="padding: 2px 8px; font-size: 0.75rem; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer;">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- ── Lump form ──────────────────────────────────────────────────── -->
+                        <div x-show="showLumpForm" x-cloak class="vch-modal">
+                            <div class="form-panel vch-modal-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <strong style="color: #1e293b;" x-text="editingLumpId ? 'Edit lump' : 'Add lump'"></strong>
+                                    <button @click="closeLumpForm()" type="button" style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+
+                                <label class="form-label">What you call it:</label>
+                                <input type="text" x-model="newLump.label" placeholder="e.g. the one on her shoulder" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">Optional. Left blank, it's listed by where it is.</p>
+
+                                <div class="grid-cols-2" style="margin-bottom: 12px;">
+                                    <div>
+                                        <label class="form-label">Where:</label>
+                                        <select x-model="newLump.site" class="form-select">
+                                            <option value="">Not recorded</option>
+                                            <template x-for="s in LUMP_SITES_LIST" :key="s.id">
+                                                <option :value="s.id" x-text="s.label"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Side:</label>
+                                        <select x-model="newLump.side" class="form-select">
+                                            <template x-for="s in LUMP_SIDES_LIST" :key="s.id">
+                                                <option :value="s.id" x-text="s.label"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <input type="text" x-model="newLump.siteDetail" placeholder="Exactly where — &quot;just behind the left elbow&quot;" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Be as specific as you can. In a year's time, with two or three lumps recorded, this is what tells them apart.
+                                </p>
+
+                                <label class="form-label">First noticed:</label>
+                                <input type="date" x-model="newLump.firstNoticed" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Leave blank if you don't know. How long a lump has been there is one of the first things a vet asks — a rough date is far better than none.
+                                </p>
+
+                                <label class="form-label">Where it's got to with the vet:</label>
+                                <select x-model="newLump.vetStage" class="form-select" style="margin-bottom: 12px;">
+                                    <template x-for="v in LUMP_VET_STAGES_LIST" :key="v.id">
+                                        <option :value="v.id" x-text="v.label"></option>
+                                    </template>
+                                </select>
+
+                                <input type="text" x-model="newLump.vetDiagnosis" placeholder="What you were told about it…" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Record what your vet said in your own words. This app never suggests what a lump might be.
+                                </p>
+
+                                <label class="form-label">Status:</label>
+                                <select x-model="newLump.status" class="form-select" style="margin-bottom: 12px;">
+                                    <template x-for="s in LUMP_STATUSES_LIST" :key="s.id">
+                                        <option :value="s.id" x-text="s.label"></option>
+                                    </template>
+                                </select>
+
+                                <div x-show="!lumpIsActive(newLump.status)" style="margin-bottom: 12px;">
+                                    <label class="form-label">Date removed or resolved:</label>
+                                    <input type="date" x-model="newLump.resolvedDate" class="form-input">
+                                </div>
+
+                                <input type="text" x-model="newLump.notes" placeholder="Notes…" class="form-input" style="margin-bottom: 15px;">
+
+                                <div class="flex-gap-10">
+                                    <button @click="closeLumpForm()" class="btn-secondary">Cancel</button>
+                                    <button @click="saveLump()" class="btn-primary"><i class="fa-solid fa-check"></i> Save</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Measurement form ───────────────────────────────────────────── -->
+                        <div x-show="showLumpMeasureForm" x-cloak class="vch-modal">
+                            <div class="form-panel vch-modal-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <strong style="color: #1e293b;" x-text="editingMeasurementId ? 'Edit measurement' : 'New measurement'"></strong>
+                                    <input type="date" x-model="newLumpMeasurement.date" class="form-input" style="width: auto; padding: 4px 8px; font-size: 0.85rem;">
+                                </div>
+
+                                <!-- Everything is STORED in millimetres whatever the owner types in. -->
+                                <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                                    <template x-for="u in ['mm','cm']" :key="u">
+                                        <button type="button" @click="changeLumpUnit(u)"
+                                                :style="newLumpMeasurement.unit === u
+                                                    ? 'background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;'
+                                                    : 'background:#f8fafc; color:#475569; border:1px solid #e2e8f0;'"
+                                                style="padding: 4px 14px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;"
+                                                x-text="u"></button>
+                                    </template>
+                                </div>
+
+                                <div class="grid-cols-2" style="margin-bottom: 4px;">
+                                    <div>
+                                        <label class="form-label">Longest way across:</label>
+                                        <input type="number" step="0.1" x-model="newLumpMeasurement.length" class="form-input" placeholder="—">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Across the other way:</label>
+                                        <input type="number" step="0.1" x-model="newLumpMeasurement.width" class="form-input" placeholder="—">
+                                    </div>
+                                </div>
+                                <label class="form-label">How far it stands out:</label>
+                                <input type="number" step="0.1" x-model="newLumpMeasurement.depth" class="form-input" placeholder="—" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 10px;">
+                                    Fill in what you can — the longest way across matters most. Leave the rest blank rather than guessing; a guessed number looks like a real one on the chart.
+                                </p>
+
+                                <div style="margin-bottom: 12px;">
+                                    <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 4px;">No ruler? Use a rough size:</div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <template x-for="r in LUMP_SIZE_REFERENCES_LIST" :key="r.label">
+                                            <button type="button" @click="useLumpSizeReference(r.mm)"
+                                                    style="padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; cursor: pointer; background:#f8fafc; color:#475569; border:1px solid #e2e8f0;"
+                                                    x-text="r.label"></button>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div class="grid-cols-2" style="margin-bottom: 12px;">
+                                    <div>
+                                        <label class="form-label">What it feels like:</label>
+                                        <select x-model="newLumpMeasurement.consistency" class="form-select">
+                                            <template x-for="c in LUMP_CONSISTENCIES_LIST" :key="c.id">
+                                                <option :value="c.id" x-text="c.label"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Does it move?</label>
+                                        <select x-model="newLumpMeasurement.mobility" class="form-select">
+                                            <template x-for="m in LUMP_MOBILITIES_LIST" :key="m.id">
+                                                <option :value="m.id" x-text="m.label"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <label class="form-label">How it looks:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+                                    <template x-for="s in LUMP_SIGNS_LIST" :key="s.id">
+                                        <button type="button" @click="toggleLumpSign(s.id)"
+                                                :style="(newLumpMeasurement.signs || []).includes(s.id)
+                                                    ? 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa;'
+                                                    : 'background:#f8fafc; color:#475569; border:1px solid #e2e8f0;'"
+                                                style="padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; cursor: pointer;"
+                                                x-text="s.label"></button>
+                                    </template>
+                                </div>
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    If it's broken, bleeding, weeping or sore, that's worth an appointment rather than waiting for the next measurement.
+                                </p>
+
+                                <input type="text" x-model="newLumpMeasurement.notes" placeholder="Anything else about today…" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 15px;">
+                                    Photos are an iOS-app feature — they stay on the device that took them and can't travel in a backup.
+                                </p>
+
+                                <div class="flex-gap-10">
+                                    <button @click="closeLumpMeasureForm()" class="btn-secondary">Cancel</button>
+                                    <button @click="saveLumpMeasurement()" class="btn-primary"><i class="fa-solid fa-check"></i> Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
                                     <!-- ******************************** -->
                                     <!-- Medication History               -->
                                     <!-- ******************************** -->
              <template x-if="activePatientProfile?.modules?.medications"> 
-                <div class="module-card" x-show="patients.length > 0 && isView('meds') && modOn('medications')" x-cloak>
+                <div class="module-card" x-show="patients.length > 0 && isView('medical') && modOn('medications')" x-cloak>
 
                     <!-- ALLERGIES — see ALLERGY_TYPES in rr-logic.js for the three load-bearing
                          rules. Placed ABOVE everything else in this module on purpose: it is the
@@ -2736,7 +3287,7 @@
                                     <!-- DIAGNOSIS SECTION            -->
                                     <!-- ******************************** -->
              <template x-if="activePatientProfile?.modules?.acvimStaging">  
-                 <div class="module-card" x-show="patients.length > 0 && isView('meds') && modOn('acvimStaging')" x-cloak>
+                 <div class="module-card" x-show="patients.length > 0 && isView('medical') && modOn('acvimStaging')" x-cloak>
                     
                     <div style="margin-bottom: 15px;">
                         <button @click="showDiagnosisLog = !showDiagnosisLog" :aria-expanded="showDiagnosisLog.toString()" type="button" class="btn-accordion">
@@ -2954,7 +3505,7 @@
                                     <!-- Sits beside the two diagnosis lists: what has been DONE to a pet
                                          belongs next to what the pet HAS. Deliberately NOT module-gated —
                                          a surgical history is part of the record, not an opt-in tracker. -->
-            <div class="module-card" x-show="patients.length > 0 && isView('meds')" x-cloak>
+            <div class="module-card" x-show="patients.length > 0 && isView('medical')" x-cloak>
 
                 <div style="margin-bottom: 15px;">
                     <button @click="showProcedurePanel = !showProcedurePanel" :aria-expanded="showProcedurePanel.toString()" type="button" class="btn-accordion">
@@ -2992,141 +3543,143 @@
 
                     <!-- ADD / EDIT -->
                     <div x-show="showProcedureForm" x-cloak class="vch-modal">
-                        <h4 style="margin-bottom: 12px;" x-text="editingProcedureId ? 'Edit procedure' : 'Add a procedure'"></h4>
+                        <div class="form-panel vch-modal-card">
+                            <h4 style="margin-bottom: 12px;" x-text="editingProcedureId ? 'Edit procedure' : 'Add a procedure'"></h4>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div>
-                                <label class="form-label">Type</label>
-                                <select x-model="newProcedure.category" @change="onProcedureCategoryChange()" class="form-control">
-                                    <template x-for="c in PROCEDURE_CATEGORIES_LIST" :key="c.id">
-                                        <option :value="c.id" x-text="c.label"></option>
-                                    </template>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label">Area</label>
-                                <select x-model="newProcedure.area" class="form-control">
-                                    <option value="">Not sure</option>
-                                    <template x-for="a in PROCEDURE_AREAS_LIST" :key="a.id">
-                                        <option :value="a.id" x-text="a.label"></option>
-                                    </template>
-                                </select>
-                            </div>
-                        </div>
-
-                        <label class="form-label" style="margin-top: 10px;">What was done</label>
-                        <input type="text" x-model="newProcedure.name" class="form-control" placeholder="e.g. Dental with extractions">
-                        <div x-show="!newProcedure.name" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
-                            <template x-for="s in procedureSuggestions(newProcedure.area)" :key="s">
-                                <button type="button" @click="newProcedure.name = s"
-                                        style="padding: 4px 8px; font-size: 0.75rem; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 999px; cursor: pointer;"
-                                        x-text="s"></button>
-                            </template>
-                        </div>
-                        <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
-                            Use the words on your pet's discharge notes — they are what the next vet will recognise.
-                        </p>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                            <div>
-                                <label class="form-label">Status</label>
-                                <select x-model="newProcedure.status" class="form-control">
-                                    <option value="completed">Already happened</option>
-                                    <option value="scheduled">Booked in</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label" x-text="newProcedure.status === 'scheduled' ? 'Booked for' : 'Date'"></label>
-                                <input type="date" x-model="newProcedure.date"
-                                       :max="newProcedure.status === 'scheduled' ? '' : new Date().toISOString().split('T')[0]"
-                                       class="form-control">
-                            </div>
-                        </div>
-                        <p x-show="newProcedure.status === 'scheduled'" style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
-                            Booked procedures stay on the list as plans until you mark them done, so a date that slips never turns into a record of something that happened.
-                        </p>
-
-                        <label class="form-label" style="margin-top: 10px;">Practice or vet (optional)</label>
-                        <input type="text" x-model="newProcedure.performedBy" class="form-control" placeholder="e.g. Oakwood Vets">
-
-                        <!-- ANAESTHETIC (completed only — a booking has no outcome yet) -->
-                        <div x-show="newProcedure.status !== 'scheduled'" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
-                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155;">
-                                <input type="checkbox" x-model="newProcedure.hadGA"> General anaesthetic
-                            </label>
-                            <div x-show="newProcedure.hadGA" style="margin-top: 8px;">
-                                <label class="form-label">How your pet coped</label>
-                                <input type="text" x-model="newProcedure.recoveryNotes" class="form-control" placeholder="e.g. uneventful, home same day">
-                                <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
-                                    One of the most useful things you can record for a heart patient. When a vet is weighing up the next anaesthetic, knowing how the last one went is real evidence — and only you have it.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- TOOTH CHART (dental only) -->
-                        <div x-show="usesExtractions(newProcedure.category)" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
-                            <label class="form-label">Teeth removed</label>
-                            <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px;">
-                                Tap the numbers from the dental chart your vet gave you. Leave blank if it was only a scale and polish.
-                            </p>
-                            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; margin-bottom: 8px;">
-                                <input type="checkbox" x-model="showDeciduousTeeth"> Baby (deciduous) teeth
-                            </label>
-                            <template x-for="q in dentalChartQuadrants()" :key="q.id">
-                                <div style="margin-bottom: 10px;">
-                                    <div style="font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 4px;" x-text="q.label"></div>
-                                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                                        <template x-for="t in dentalChartQuadrantTeeth(activePatientProfile?.species, q.id, showDeciduousTeeth)" :key="t.triadan">
-                                            <button type="button" @click="toggleTooth(t.triadan)"
-                                                    :title="toothLabel(t.triadan, activePatientProfile?.species)"
-                                                    :style="isToothSelected(t.triadan)
-                                                        ? 'background:#0f766e;color:white;border:1px solid #0f766e;font-weight:bold;'
-                                                        : ('background:#f8fafc;color:#334155;border:1px solid ' + ((t.isCarnassial || t.type === 'canine') ? '#94a3b8' : '#e2e8f0') + ';')"
-                                                    style="min-width: 42px; padding: 6px 4px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;"
-                                                    x-text="t.triadan"></button>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label class="form-label">Type</label>
+                                    <select x-model="newProcedure.category" @change="onProcedureCategoryChange()" class="form-control">
+                                        <template x-for="c in PROCEDURE_CATEGORIES_LIST" :key="c.id">
+                                            <option :value="c.id" x-text="c.label"></option>
                                         </template>
-                                    </div>
+                                    </select>
                                 </div>
-                            </template>
+                                <div>
+                                    <label class="form-label">Area</label>
+                                    <select x-model="newProcedure.area" class="form-control">
+                                        <option value="">Not sure</option>
+                                        <template x-for="a in PROCEDURE_AREAS_LIST" :key="a.id">
+                                            <option :value="a.id" x-text="a.label"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
 
-                            <!-- Chosen teeth, spelled out — where the owner checks they picked the tooth they meant -->
-                            <div x-show="newProcedure.extractions.length > 0" style="margin-top: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
-                                <div style="font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 6px;"
-                                     x-text="newProcedure.extractions.length === 1 ? '1 tooth extracted' : newProcedure.extractions.length + ' teeth extracted'"></div>
-                                <template x-for="t in newProcedure.extractions" :key="t.tooth">
-                                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
-                                        <div style="flex: 1; font-size: 0.85rem; color: #1e293b;" x-text="toothLabel(t.tooth, activePatientProfile?.species)"></div>
-                                        <input type="text" x-model="t.note" class="form-control" style="width: 45%; padding: 4px 6px; font-size: 0.8rem;" placeholder="reason (optional)">
-                                        <button type="button" @click="toggleTooth(t.tooth)" style="background: none; border: none; color: #ef4444; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
-                                    </div>
+                            <label class="form-label" style="margin-top: 10px;">What was done</label>
+                            <input type="text" x-model="newProcedure.name" class="form-control" placeholder="e.g. Dental with extractions">
+                            <div x-show="!newProcedure.name" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                                <template x-for="s in procedureSuggestions(newProcedure.area)" :key="s">
+                                    <button type="button" @click="newProcedure.name = s"
+                                            style="padding: 4px 8px; font-size: 0.75rem; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 999px; cursor: pointer;"
+                                            x-text="s"></button>
                                 </template>
                             </div>
-                        </div>
+                            <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                Use the words on your pet's discharge notes — they are what the next vet will recognise.
+                            </p>
 
-                        <!-- HISTOPATHOLOGY (completed only) -->
-                        <div x-show="newProcedure.status !== 'scheduled'" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
-                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155;">
-                                <input type="checkbox" x-model="newProcedure.histopathSent"> A sample was sent to a laboratory
-                            </label>
-                            <div x-show="newProcedure.histopathSent" style="margin-top: 8px;">
-                                <label class="form-label">Result, once you have it</label>
-                                <input type="text" x-model="newProcedure.histopathResult" class="form-control" placeholder="e.g. Grade II mast cell tumour, margins complete">
-                                <label class="form-label" style="margin-top: 8px;">Result date</label>
-                                <input type="date" x-model="newProcedure.histopathDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
-                                <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
-                                    For lumps and biopsies. Recording the result word for word is worth doing — it is often the single most important line in a pet's history.
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                <div>
+                                    <label class="form-label">Status</label>
+                                    <select x-model="newProcedure.status" class="form-control">
+                                        <option value="completed">Already happened</option>
+                                        <option value="scheduled">Booked in</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label" x-text="newProcedure.status === 'scheduled' ? 'Booked for' : 'Date'"></label>
+                                    <input type="date" x-model="newProcedure.date"
+                                           :max="newProcedure.status === 'scheduled' ? '' : new Date().toISOString().split('T')[0]"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <p x-show="newProcedure.status === 'scheduled'" style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                Booked procedures stay on the list as plans until you mark them done, so a date that slips never turns into a record of something that happened.
+                            </p>
+
+                            <label class="form-label" style="margin-top: 10px;">Practice or vet (optional)</label>
+                            <input type="text" x-model="newProcedure.performedBy" class="form-control" placeholder="e.g. Oakwood Vets">
+
+                            <!-- ANAESTHETIC (completed only — a booking has no outcome yet) -->
+                            <div x-show="newProcedure.status !== 'scheduled'" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155;">
+                                    <input type="checkbox" x-model="newProcedure.hadGA"> General anaesthetic
+                                </label>
+                                <div x-show="newProcedure.hadGA" style="margin-top: 8px;">
+                                    <label class="form-label">How your pet coped</label>
+                                    <input type="text" x-model="newProcedure.recoveryNotes" class="form-control" placeholder="e.g. uneventful, home same day">
+                                    <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                        One of the most useful things you can record for a heart patient. When a vet is weighing up the next anaesthetic, knowing how the last one went is real evidence — and only you have it.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- TOOTH CHART (dental only) -->
+                            <div x-show="usesExtractions(newProcedure.category)" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                                <label class="form-label">Teeth removed</label>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px;">
+                                    Tap the numbers from the dental chart your vet gave you. Leave blank if it was only a scale and polish.
                                 </p>
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; margin-bottom: 8px;">
+                                    <input type="checkbox" x-model="showDeciduousTeeth"> Baby (deciduous) teeth
+                                </label>
+                                <template x-for="q in dentalChartQuadrants()" :key="q.id">
+                                    <div style="margin-bottom: 10px;">
+                                        <div style="font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 4px;" x-text="q.label"></div>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                            <template x-for="t in dentalChartQuadrantTeeth(activePatientProfile?.species, q.id, showDeciduousTeeth)" :key="t.triadan">
+                                                <button type="button" @click="toggleTooth(t.triadan)"
+                                                        :title="toothLabel(t.triadan, activePatientProfile?.species)"
+                                                        :style="isToothSelected(t.triadan)
+                                                            ? 'background:#0f766e;color:white;border:1px solid #0f766e;font-weight:bold;'
+                                                            : ('background:#f8fafc;color:#334155;border:1px solid ' + ((t.isCarnassial || t.type === 'canine') ? '#94a3b8' : '#e2e8f0') + ';')"
+                                                        style="min-width: 42px; padding: 6px 4px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;"
+                                                        x-text="t.triadan"></button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Chosen teeth, spelled out — where the owner checks they picked the tooth they meant -->
+                                <div x-show="newProcedure.extractions.length > 0" style="margin-top: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
+                                    <div style="font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 6px;"
+                                         x-text="newProcedure.extractions.length === 1 ? '1 tooth extracted' : newProcedure.extractions.length + ' teeth extracted'"></div>
+                                    <template x-for="t in newProcedure.extractions" :key="t.tooth">
+                                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                                            <div style="flex: 1; font-size: 0.85rem; color: #1e293b;" x-text="toothLabel(t.tooth, activePatientProfile?.species)"></div>
+                                            <input type="text" x-model="t.note" class="form-control" style="width: 45%; padding: 4px 6px; font-size: 0.8rem;" placeholder="reason (optional)">
+                                            <button type="button" @click="toggleTooth(t.tooth)" style="background: none; border: none; color: #ef4444; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- HISTOPATHOLOGY (completed only) -->
+                            <div x-show="newProcedure.status !== 'scheduled'" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155;">
+                                    <input type="checkbox" x-model="newProcedure.histopathSent"> A sample was sent to a laboratory
+                                </label>
+                                <div x-show="newProcedure.histopathSent" style="margin-top: 8px;">
+                                    <label class="form-label">Result, once you have it</label>
+                                    <input type="text" x-model="newProcedure.histopathResult" class="form-control" placeholder="e.g. Grade II mast cell tumour, margins complete">
+                                    <label class="form-label" style="margin-top: 8px;">Result date</label>
+                                    <input type="date" x-model="newProcedure.histopathDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                    <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                        For lumps and biopsies. Recording the result word for word is worth doing — it is often the single most important line in a pet's history.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <label class="form-label" style="margin-top: 10px;">Notes</label>
+                            <input type="text" x-model="newProcedure.notes" class="form-control" placeholder="Anything else your vet told you">
+
+                            <div style="display: flex; gap: 8px; margin-top: 14px;">
+                                <button @click="saveProcedure()" type="button" class="btn-primary" style="background: #0f766e;">Save</button>
+                                <button @click="closeProcedureForm()" type="button" class="btn-secondary">Cancel</button>
                             </div>
                         </div>
-
-                        <label class="form-label" style="margin-top: 10px;">Notes</label>
-                        <input type="text" x-model="newProcedure.notes" class="form-control" placeholder="Anything else your vet told you">
-
-                        <div style="display: flex; gap: 8px; margin-top: 14px;">
-                            <button @click="saveProcedure()" type="button" class="btn-primary" style="background: #0f766e;">Save</button>
-                            <button @click="closeProcedureForm()" type="button" class="btn-secondary">Cancel</button>
-                        </div>
-                    </div>
+                    </div> <!-- /vch-modal (showProcedureForm) -->
 
                     <!-- BOOKED -->
                     <div x-show="scheduledProcedures().length > 0 && !showProcedureForm" style="margin-bottom: 15px;">
@@ -3192,7 +3745,7 @@
                                     <!-- BLOOD TEST RESULTS               -->
                                     <!-- ******************************** -->
             <template x-if="activePatientProfile?.modules?.acvimStaging">
-                <div class="module-card" x-show="patients.length > 0 && isView('meds') && modOn('acvimStaging')" x-cloak>
+                <div class="module-card" x-show="patients.length > 0 && isView('medical') && modOn('acvimStaging')" x-cloak>
 
                     <div style="margin-bottom: 15px;">
                         <button @click="showBloodPanel = !showBloodPanel" :aria-expanded="showBloodPanel.toString()" type="button" class="btn-accordion">
@@ -3218,135 +3771,139 @@
 
                         <!-- ADD / EDIT ONE RESULT -->
                         <div x-show="showBloodForm" x-cloak class="vch-modal">
-                            <h4 style="margin-bottom: 12px;" x-text="editingBloodId ? 'Edit blood result' : 'Add blood result'"></h4>
+                            <div class="form-panel vch-modal-card">
+                                <h4 style="margin-bottom: 12px;" x-text="editingBloodId ? 'Edit blood result' : 'Add blood result'"></h4>
 
-                            <label class="form-label">Marker</label>
-                            <select x-model="newBloodResult.markerId" @change="onBloodMarkerChange()" class="form-select">
-                                <option value="">Select…</option>
-                                <template x-for="g in bloodMarkerGroups().filter(g => g !== 'Other')" :key="g">
-                                    <optgroup :label="g">
-                                        <template x-for="m in bloodMarkerSearch('').filter(m => m.group === g)" :key="m.id">
-                                            <option :value="m.id" x-text="m.label + ' (' + m.units.join(' · ') + ')'"></option>
-                                        </template>
-                                    </optgroup>
-                                </template>
-                                <option value="other">Other marker…</option>
-                            </select>
+                                <label class="form-label">Marker</label>
+                                <select x-model="newBloodResult.markerId" @change="onBloodMarkerChange()" class="form-select">
+                                    <option value="">Select…</option>
+                                    <template x-for="g in bloodMarkerGroups().filter(g => g !== 'Other')" :key="g">
+                                        <optgroup :label="g">
+                                            <template x-for="m in bloodMarkerSearch('').filter(m => m.group === g)" :key="m.id">
+                                                <option :value="m.id" x-text="m.label + ' (' + m.units.join(' · ') + ')'"></option>
+                                            </template>
+                                        </optgroup>
+                                    </template>
+                                    <option value="other">Other marker…</option>
+                                </select>
 
-                            <div x-show="newBloodResult.markerId === 'other'" x-transition style="margin-top: 10px;">
-                                <label class="form-label">Marker name (as printed on the report)</label>
-                                <input type="text" x-model="newBloodResult.customName" class="form-control" placeholder="e.g. Bile acids">
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                                <div>
-                                    <label class="form-label">Sample date</label>
-                                    <input type="date" x-model="newBloodResult.sampleDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                <div x-show="newBloodResult.markerId === 'other'" x-transition style="margin-top: 10px;">
+                                    <label class="form-label">Marker name (as printed on the report)</label>
+                                    <input type="text" x-model="newBloodResult.customName" class="form-control" placeholder="e.g. Bile acids">
                                 </div>
-                                <div>
-                                    <label class="form-label">Laboratory</label>
-                                    <input type="text" x-model="newBloodResult.labName" class="form-control" placeholder="e.g. IDEXX">
-                                </div>
-                            </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                                <div>
-                                    <label class="form-label">Result</label>
-                                    <input type="number" step="any" x-model="newBloodResult.value" class="form-control">
-                                </div>
-                                <div>
-                                    <label class="form-label">Units</label>
-                                    <input type="text" x-model="newBloodResult.unit" class="form-control" placeholder="e.g. µmol/L">
-                                </div>
-                            </div>
-                            <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
-                                Enter the value and units exactly as your report gives them. The app never converts between units — it keeps each result as measured.
-                            </p>
-
-                            <div class="info-box info-box-amber" style="margin-top: 12px;">
-                                <label class="form-label text-warning">Reference range from your report</label>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="number" step="any" x-model="newBloodResult.refLow" class="form-control" placeholder="low" style="flex: 1;">
-                                    <span style="color: #64748b;">–</span>
-                                    <input type="number" step="any" x-model="newBloodResult.refHigh" class="form-control" placeholder="high" style="flex: 1;">
-                                    <span x-show="newBloodResult.unit" x-text="newBloodResult.unit" style="font-size: 0.8rem; color: #64748b;"></span>
-                                </div>
-                                <p style="font-size: 0.75rem; color: #92400e; margin-top: 6px;">
-                                    Copy the range printed beside the result. Laboratories differ, so every result is judged against the range you enter here — never one of the app's own. Leave a box empty for a one-sided range such as "less than 14".
-                                </p>
-                                <div x-show="newBloodResult.value !== '' && isFinite(Number(newBloodResult.value))" style="margin-top: 8px; font-size: 0.85rem; font-weight: 600;"
-                                     :style="'color:' + bloodStatusColour(bloodStatus(newBloodResult))"
-                                     x-text="bloodStatusLabel(bloodStatus(newBloodResult))"></div>
-                            </div>
-
-                            <label class="form-label" style="margin-top: 10px;">Notes</label>
-                            <textarea x-model="newBloodResult.notes" class="form-control" rows="2" placeholder="Anything your vet mentioned about this result"></textarea>
-
-                            <div class="flex-gap-10" style="margin-top: 15px;">
-                                <button @click="saveBloodResult()" :disabled="!canSaveBloodResult()" class="btn-primary" style="background: #0f766e;">Save result</button>
-                                <button @click="showBloodForm = false; editingBloodId = null;" class="btn-secondary">Cancel</button>
-                            </div>
-                        </div>
-
-                        <!-- PASTE A REPORT -->
-                        <div x-show="showBloodImport" x-cloak class="vch-modal">
-                            <h4 style="margin-bottom: 8px;">Paste a laboratory report</h4>
-                            <p style="font-size: 0.85rem; color: #475569; margin-bottom: 10px;">
-                                Open the PDF your vet sent, select the results table, copy it, and paste it below. Nothing is saved until you have checked it.
-                            </p>
-                            <textarea x-model="bloodPasteText" class="form-control" rows="8" placeholder="Creatinine 74 umol/L 40 - 125&#10;Urea 7.8 mmol/L 2.5 - 9&#10;…"></textarea>
-                            <div class="flex-gap-10" style="margin-top: 10px;">
-                                <button @click="parseBloodPaste()" class="btn-primary" style="background: #0f766e;">Read the report</button>
-                                <button @click="showBloodImport = false; bloodParseRows = [];" class="btn-secondary">Cancel</button>
-                            </div>
-
-                            <div x-show="bloodParseRows.length > 0" style="margin-top: 16px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
                                     <div>
                                         <label class="form-label">Sample date</label>
-                                        <input type="date" x-model="bloodParseMeta.sampleDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                        <input type="date" x-model="newBloodResult.sampleDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
                                     </div>
                                     <div>
                                         <label class="form-label">Laboratory</label>
-                                        <input type="text" x-model="bloodParseMeta.labName" class="form-control">
+                                        <input type="text" x-model="newBloodResult.labName" class="form-control" placeholder="e.g. IDEXX">
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                    <div>
+                                        <label class="form-label">Result</label>
+                                        <input type="number" step="any" x-model="newBloodResult.value" class="form-control">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Units</label>
+                                        <input type="text" x-model="newBloodResult.unit" class="form-control" placeholder="e.g. µmol/L">
                                     </div>
                                 </div>
                                 <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
-                                    The sample date is the day the blood was taken — often different from the date the results were issued. Check it against the report.
+                                    Enter the value and units exactly as your report gives them. The app never converts between units — it keeps each result as measured.
                                 </p>
 
-                                <div x-show="bloodParseDuplicateNames().length > 0" class="info-box info-box-amber" style="margin-top: 10px; font-size: 0.8rem;">
-                                    <i class="fa-solid fa-triangle-exclamation"></i>
-                                    The same marker appears more than once (<span x-text="bloodParseDuplicateNames().join(', ')"></span>).
-                                    Laboratory tables sometimes wrap onto two lines — check which row is the real result and untick the other.
+                                <div class="info-box info-box-amber" style="margin-top: 12px;">
+                                    <label class="form-label text-warning">Reference range from your report</label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="number" step="any" x-model="newBloodResult.refLow" class="form-control" placeholder="low" style="flex: 1;">
+                                        <span style="color: #64748b;">–</span>
+                                        <input type="number" step="any" x-model="newBloodResult.refHigh" class="form-control" placeholder="high" style="flex: 1;">
+                                        <span x-show="newBloodResult.unit" x-text="newBloodResult.unit" style="font-size: 0.8rem; color: #64748b;"></span>
+                                    </div>
+                                    <p style="font-size: 0.75rem; color: #92400e; margin-top: 6px;">
+                                        Copy the range printed beside the result. Laboratories differ, so every result is judged against the range you enter here — never one of the app's own. Leave a box empty for a one-sided range such as "less than 14".
+                                    </p>
+                                    <div x-show="newBloodResult.value !== '' && isFinite(Number(newBloodResult.value))" style="margin-top: 8px; font-size: 0.85rem; font-weight: 600;"
+                                         :style="'color:' + bloodStatusColour(bloodStatus(newBloodResult))"
+                                         x-text="bloodStatusLabel(bloodStatus(newBloodResult))"></div>
                                 </div>
 
-                                <div style="margin-top: 12px; max-height: 420px; overflow-y: auto;">
-                                    <template x-for="(row, idx) in bloodParseRows" :key="idx">
-                                        <div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
-                                            <input type="checkbox" x-model="row.include" style="margin-top: 4px;">
-                                            <div style="flex: 1;">
-                                                <div style="font-weight: 600; color: #1e293b;">
-                                                    <span x-text="row.markerId ? bloodDisplayName(row) : row.printedName"></span>
-                                                    <span x-show="!row.markerId" style="font-size: 0.7rem; font-weight: 400; color: #92400e; margin-left: 6px;">not recognised</span>
-                                                </div>
-                                                <div style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
-                                                    <input type="number" step="any" x-model="row.value" class="form-control" style="width: 90px; padding: 4px 6px; font-size: 0.8rem;">
-                                                    <input type="text" x-model="row.unit" class="form-control" style="width: 90px; padding: 4px 6px; font-size: 0.8rem;" placeholder="units">
-                                                    <input type="number" step="any" x-model="row.refLow" class="form-control" style="width: 70px; padding: 4px 6px; font-size: 0.8rem;" placeholder="low">
-                                                    <input type="number" step="any" x-model="row.refHigh" class="form-control" style="width: 70px; padding: 4px 6px; font-size: 0.8rem;" placeholder="high">
-                                                </div>
-                                                <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 3px;" x-text="row.rawLine"></div>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
+                                <label class="form-label" style="margin-top: 10px;">Notes</label>
+                                <textarea x-model="newBloodResult.notes" class="form-control" rows="2" placeholder="Anything your vet mentioned about this result"></textarea>
 
-                                <button @click="confirmBloodImport()" :disabled="bloodParseSelectedCount() === 0" class="btn-primary" style="background: #0f766e; margin-top: 12px;">
-                                    Import <span x-text="bloodParseSelectedCount()"></span> result<span x-show="bloodParseSelectedCount() !== 1">s</span>
-                                </button>
+                                <div class="flex-gap-10" style="margin-top: 15px;">
+                                    <button @click="saveBloodResult()" :disabled="!canSaveBloodResult()" class="btn-primary" style="background: #0f766e;">Save result</button>
+                                    <button @click="showBloodForm = false; editingBloodId = null;" class="btn-secondary">Cancel</button>
+                                </div>
                             </div>
-                        </div>
+                        </div> <!-- /vch-modal (showBloodForm) -->
+
+                        <!-- PASTE A REPORT -->
+                        <div x-show="showBloodImport" x-cloak class="vch-modal">
+                            <div class="form-panel vch-modal-card">
+                                <h4 style="margin-bottom: 8px;">Paste a laboratory report</h4>
+                                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 10px;">
+                                    Open the PDF your vet sent, select the results table, copy it, and paste it below. Nothing is saved until you have checked it.
+                                </p>
+                                <textarea x-model="bloodPasteText" class="form-control" rows="8" placeholder="Creatinine 74 umol/L 40 - 125&#10;Urea 7.8 mmol/L 2.5 - 9&#10;…"></textarea>
+                                <div class="flex-gap-10" style="margin-top: 10px;">
+                                    <button @click="parseBloodPaste()" class="btn-primary" style="background: #0f766e;">Read the report</button>
+                                    <button @click="showBloodImport = false; bloodParseRows = [];" class="btn-secondary">Cancel</button>
+                                </div>
+
+                                <div x-show="bloodParseRows.length > 0" style="margin-top: 16px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                        <div>
+                                            <label class="form-label">Sample date</label>
+                                            <input type="date" x-model="bloodParseMeta.sampleDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                        </div>
+                                        <div>
+                                            <label class="form-label">Laboratory</label>
+                                            <input type="text" x-model="bloodParseMeta.labName" class="form-control">
+                                        </div>
+                                    </div>
+                                    <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                        The sample date is the day the blood was taken — often different from the date the results were issued. Check it against the report.
+                                    </p>
+
+                                    <div x-show="bloodParseDuplicateNames().length > 0" class="info-box info-box-amber" style="margin-top: 10px; font-size: 0.8rem;">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                        The same marker appears more than once (<span x-text="bloodParseDuplicateNames().join(', ')"></span>).
+                                        Laboratory tables sometimes wrap onto two lines — check which row is the real result and untick the other.
+                                    </div>
+
+                                    <div style="margin-top: 12px; max-height: 420px; overflow-y: auto;">
+                                        <template x-for="(row, idx) in bloodParseRows" :key="idx">
+                                            <div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+                                                <input type="checkbox" x-model="row.include" style="margin-top: 4px;">
+                                                <div style="flex: 1;">
+                                                    <div style="font-weight: 600; color: #1e293b;">
+                                                        <span x-text="row.markerId ? bloodDisplayName(row) : row.printedName"></span>
+                                                        <span x-show="!row.markerId" style="font-size: 0.7rem; font-weight: 400; color: #92400e; margin-left: 6px;">not recognised</span>
+                                                    </div>
+                                                    <div style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
+                                                        <input type="number" step="any" x-model="row.value" class="form-control" style="width: 90px; padding: 4px 6px; font-size: 0.8rem;">
+                                                        <input type="text" x-model="row.unit" class="form-control" style="width: 90px; padding: 4px 6px; font-size: 0.8rem;" placeholder="units">
+                                                        <input type="number" step="any" x-model="row.refLow" class="form-control" style="width: 70px; padding: 4px 6px; font-size: 0.8rem;" placeholder="low">
+                                                        <input type="number" step="any" x-model="row.refHigh" class="form-control" style="width: 70px; padding: 4px 6px; font-size: 0.8rem;" placeholder="high">
+                                                    </div>
+                                                    <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 3px;" x-text="row.rawLine"></div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <button @click="confirmBloodImport()" :disabled="bloodParseSelectedCount() === 0" class="btn-primary" style="background: #0f766e; margin-top: 12px;">
+                                        Import <span x-text="bloodParseSelectedCount()"></span> result<span x-show="bloodParseSelectedCount() !== 1">s</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div> <!-- /vch-modal (showBloodImport) -->
 
                         <!-- VIEW TOGGLE -->
                         <div x-show="patientBloodResults().length > 0 && !showBloodForm && !showBloodImport" style="display: flex; gap: 6px; margin-bottom: 12px;">
@@ -3467,7 +4024,7 @@
                                     <!-- ECHO RESULTS                     -->
                                     <!-- ******************************** -->
             <template x-if="activePatientProfile?.modules?.acvimStaging">
-                <div class="module-card" x-show="patients.length > 0 && isView('meds') && modOn('acvimStaging')" x-cloak>
+                <div class="module-card" x-show="patients.length > 0 && isView('medical') && modOn('acvimStaging')" x-cloak>
 
                     <div style="margin-bottom: 15px;">
                         <button @click="showEchoPanel = !showEchoPanel" :aria-expanded="showEchoPanel.toString()" type="button" class="btn-accordion">
@@ -3490,66 +4047,68 @@
 
                         <!-- ADD / EDIT A STUDY -->
                         <div x-show="showEchoForm" x-cloak class="vch-modal">
-                            <h4 style="margin-bottom: 12px;" x-text="editingEchoKey ? 'Edit echo results' : 'Add echo results'"></h4>
+                            <div class="form-panel vch-modal-card">
+                                <h4 style="margin-bottom: 12px;" x-text="editingEchoKey ? 'Edit echo results' : 'Add echo results'"></h4>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                <div>
-                                    <label class="form-label">Study date</label>
-                                    <input type="date" x-model="newEchoStudy.studyDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div>
+                                        <label class="form-label">Study date</label>
+                                        <input type="date" x-model="newEchoStudy.studyDate" :max="new Date().toISOString().split('T')[0]" class="form-control">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Centre / cardiologist</label>
+                                        <input type="text" x-model="newEchoStudy.centreName" class="form-control" placeholder="optional">
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="form-label">Centre / cardiologist</label>
-                                    <input type="text" x-model="newEchoStudy.centreName" class="form-control" placeholder="optional">
-                                </div>
-                            </div>
-                            <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;"
-                               x-text="echoWeightKgAt(newEchoStudy.studyDate)
-                                        ? 'Measurements will be scaled to ' + echoWeightKgAt(newEchoStudy.studyDate).kg.toFixed(1) + ' kg — the most recent weight on or before this date.'
-                                        : 'No weight recorded yet. The measurements will be saved, but the weight-scaled indices cannot be worked out without one.'"></p>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;"
+                                   x-text="echoWeightKgAt(newEchoStudy.studyDate)
+                                            ? 'Measurements will be scaled to ' + echoWeightKgAt(newEchoStudy.studyDate).kg.toFixed(1) + ' kg — the most recent weight on or before this date.'
+                                            : 'No weight recorded yet. The measurements will be saved, but the weight-scaled indices cannot be worked out without one.'"></p>
 
-                            <div class="info-box info-box-amber" style="margin-top: 12px;">
-                                <label class="form-label text-warning">Measurements</label>
-                                <template x-for="m in ECHO_MEASURES_LIST" :key="m.id">
-                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                                        <div style="flex: 1;">
-                                            <div style="font-weight: 600; font-size: 0.9rem;" x-text="m.short"></div>
-                                            <div style="font-size: 0.7rem; color: #64748b;" x-text="m.label"></div>
+                                <div class="info-box info-box-amber" style="margin-top: 12px;">
+                                    <label class="form-label text-warning">Measurements</label>
+                                    <template x-for="m in ECHO_MEASURES_LIST" :key="m.id">
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 600; font-size: 0.9rem;" x-text="m.short"></div>
+                                                <div style="font-size: 0.7rem; color: #64748b;" x-text="m.label"></div>
+                                            </div>
+                                            <input type="number" step="any" x-model="newEchoStudy.values[m.id].value"
+                                                   class="form-control" style="width: 90px;" placeholder="—">
+                                            <select x-show="m.units.length > 1" x-model="newEchoStudy.values[m.id].unit" class="form-select" style="width: 80px;">
+                                                <template x-for="u in m.units" :key="u"><option :value="u" x-text="u"></option></template>
+                                            </select>
+                                            <span x-show="m.units.length <= 1" style="width: 80px; font-size: 0.8rem; color: #64748b;" x-text="m.units[0]"></span>
                                         </div>
-                                        <input type="number" step="any" x-model="newEchoStudy.values[m.id].value"
-                                               class="form-control" style="width: 90px;" placeholder="—">
-                                        <select x-show="m.units.length > 1" x-model="newEchoStudy.values[m.id].unit" class="form-select" style="width: 80px;">
-                                            <template x-for="u in m.units" :key="u"><option :value="u" x-text="u"></option></template>
-                                        </select>
-                                        <span x-show="m.units.length <= 1" style="width: 80px; font-size: 0.8rem; color: #64748b;" x-text="m.units[0]"></span>
-                                    </div>
-                                </template>
-                                <p style="font-size: 0.75rem; color: #92400e; margin-top: 6px;">
-                                    Enter only what your report gives. Units matter: a measurement in millimetres entered as centimetres would make the heart look ten times larger than it is.
-                                </p>
-                            </div>
+                                    </template>
+                                    <p style="font-size: 0.75rem; color: #92400e; margin-top: 6px;">
+                                        Enter only what your report gives. Units matter: a measurement in millimetres entered as centimetres would make the heart look ten times larger than it is.
+                                    </p>
+                                </div>
 
-                            <div x-show="echoFormPreview().length > 0" class="info-box" style="margin-top: 12px; background: #f0fdf4; border-color: #bbf7d0;">
-                                <label class="form-label" style="color: #14532d;">Works out as</label>
-                                <template x-for="d in echoFormPreview()" :key="d.id">
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 2px 0;">
-                                        <span x-text="d.label"></span>
-                                        <span>
-                                            <strong x-text="echoFormatIndex(d.value)"></strong>
-                                            <span style="font-size: 0.75rem; font-weight: 700; margin-left: 6px;"
-                                                  :style="'color:' + echoBandColour(d.band)" x-text="echoBandLabel(d.band)"></span>
-                                        </span>
-                                    </div>
-                                </template>
-                            </div>
+                                <div x-show="echoFormPreview().length > 0" class="info-box" style="margin-top: 12px; background: #f0fdf4; border-color: #bbf7d0;">
+                                    <label class="form-label" style="color: #14532d;">Works out as</label>
+                                    <template x-for="d in echoFormPreview()" :key="d.id">
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 2px 0;">
+                                            <span x-text="d.label"></span>
+                                            <span>
+                                                <strong x-text="echoFormatIndex(d.value)"></strong>
+                                                <span style="font-size: 0.75rem; font-weight: 700; margin-left: 6px;"
+                                                      :style="'color:' + echoBandColour(d.band)" x-text="echoBandLabel(d.band)"></span>
+                                            </span>
+                                        </div>
+                                    </template>
+                                </div>
 
-                            <label class="form-label" style="margin-top: 10px;">Notes</label>
-                            <textarea x-model="newEchoStudy.notes" class="form-control" rows="2" placeholder="Anything your vet said about this scan"></textarea>
+                                <label class="form-label" style="margin-top: 10px;">Notes</label>
+                                <textarea x-model="newEchoStudy.notes" class="form-control" rows="2" placeholder="Anything your vet said about this scan"></textarea>
 
-                            <div class="flex-gap-10" style="margin-top: 15px;">
-                                <button @click="saveEchoStudy()" :disabled="echoFormEnteredCount() === 0" class="btn-primary" style="background: #0f766e;">Save results</button>
-                                <button @click="showEchoForm = false; editingEchoKey = null;" class="btn-secondary">Cancel</button>
+                                <div class="flex-gap-10" style="margin-top: 15px;">
+                                    <button @click="saveEchoStudy()" :disabled="echoFormEnteredCount() === 0" class="btn-primary" style="background: #0f766e;">Save results</button>
+                                    <button @click="showEchoForm = false; editingEchoKey = null;" class="btn-secondary">Cancel</button>
+                                </div>
                             </div>
-                        </div>
+                        </div> <!-- /vch-modal (showEchoForm) -->
 
                         <!-- STUDIES -->
                         <div x-show="!showEchoForm">
@@ -3904,7 +4463,7 @@
                                     <!-- SYNCOPE SECTION                  -->
                                     <!-- ******************************** -->
             <template x-if="activePatientProfile?.modules?.syncopeLog">                        
-                <div class="module-card" x-show="patients.length > 0 && isView('wellness') && modOn('syncopeLog')" x-cloak>
+                <div class="module-card" x-show="patients.length > 0 && isView('monitor') && modOn('syncopeLog')" x-cloak>
                     
                     <div style="margin-bottom: 15px;">
                         <button @click="showSyncopeLog = !showSyncopeLog" :aria-expanded="showSyncopeLog.toString()" type="button" class="btn-accordion">
@@ -4836,7 +5395,7 @@
                                     <!-- ******************************** -->
                                     <!-- SRR CHART and Analytics          -->
                                     <!-- ******************************** -->
-            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && (isView('count') || isView('trends')) && modOn('srr')" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: box-shadow 0.2s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+            <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && (isView('monitor') || isView('trends')) && modOn('srr')" :class="isChartExpanded ? 'chart-fullscreen-overlay' : ''" style="transition: box-shadow 0.2s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                     <button @click="showAnalytics = !showAnalytics" type="button" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e8eef7; border: 1px solid #c8d6eb; border-radius: 6px; cursor: pointer; font-weight: bold; color: #16325F; transition: background 0.15s ease;" @mouseenter="$el.style.background='#dde6f3'" @mouseleave="$el.style.background='#e8eef7'">
                         <h3 style="margin: 0;">
@@ -4991,7 +5550,7 @@
                                     <!-- MED GRAPH                        -->
                                     <!-- ******************************** -->
             <template x-if="activePatientProfile?.modules?.medications">                                 
-                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && (isView('meds') || isView('trends')) && modOn('medications')" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
+                <div class="bg-white rounded-lg shadow-md p-6" x-show="patients.length > 0 && (isView('medical') || isView('trends')) && modOn('medications')" style="transition: all 0.3s ease; margin-top: 20px; border: 1px solid #adc1ed; background: #fcfdff; border-radius: 4px; padding: 20px;" x-cloak>
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px;">
                         <button @click="showMedGraph = !showMedGraph" type="button" style="
                             width: 100%;
@@ -5712,6 +6271,24 @@
                                 </label>
                             </template>
 
+                            <template x-if="activePatientProfile?.modules?.skinLog">
+                                <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                       :style="vetExportModules.skinLog ? 'background:#fffbeb; color:#b45309; border-color:#fde68a;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                    <input type="checkbox" x-model="vetExportModules.skinLog" style="display:none;">
+                                    <i class="fa-solid" :class="vetExportModules.skinLog ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                    Skin &amp; itch
+                                </label>
+                            </template>
+
+                            <template x-if="activePatientProfile?.modules?.lumps">
+                                <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                       :style="vetExportModules.lumps ? 'background:#f8fafc; color:#475569; border-color:#cbd5e1;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                    <input type="checkbox" x-model="vetExportModules.lumps" style="display:none;">
+                                    <i class="fa-solid" :class="vetExportModules.lumps ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                    Lumps
+                                </label>
+                            </template>
+
                         </div>
                     </div>
 
@@ -5735,6 +6312,103 @@
                     </div>
                 </div>
                 
+                                    <!-- ******************************** -->
+                                    <!-- CARE PROVIDERS                   -->
+                                    <!-- ******************************** -->
+                <!-- Sits directly above the diary because it IS the diary's address book: a
+                     provider added here is one tap away when an appointment is booked. Device-
+                     level rather than per-pet, so it is not gated on patients.length. -->
+                <div class="module-card" x-show="isView('more') && moreSection === 'appointments'" x-cloak
+                     x-data="{ showForm:false, editing:null, form:{ name:'', role:'Primary vet', email:'', phone:'', notes:'', locations:[] },
+                               blank(){ return { name:'', role:'Primary vet', email:'', phone:'', notes:'', locations:[] }; },
+                               openNew(){ this.editing=null; this.form=this.blank(); this.showForm=true; },
+                               openEdit(p){ this.editing=p.id; this.form={ ...p, locations:(p.locations||[]).map(l => ({...l})) }; this.showForm=true; },
+                               reset(){ this.showForm=false; this.editing=null; this.form=this.blank(); },
+                               get valid(){ return this.form.name.trim() && ((this.form.email && /.+@.+\..+/.test(this.form.email)) || (this.form.phone||'').replace(/\D/g,'').length>=5); } }">
+                    <h3 style="margin-top:0; color:#475569; font-size:1.1rem;"><i class="fa-solid fa-user-doctor"></i> Care providers</h3>
+                    <p style="font-size:0.85rem; color:#64748b;">Your vet, cardiologist or emergency clinic — for quick contact, to email reports, and to fill in an appointment&rsquo;s address in one tap. Stored on this device only; never included in pet backups.</p>
+
+                    <template x-for="p in appSettings.careProviders" :key="p.id">
+                        <div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #eef2f7;">
+                            <div style="flex:1;">
+                                <div style="font-weight:600; color:#334155;" x-text="p.name"></div>
+                                <div style="font-size:0.8rem; color:#64748b;">
+                                    <span x-text="p.role"></span>
+                                    <template x-if="p.email"><span> · <a :href="'mailto:'+p.email" x-text="p.email" style="color:#2563eb;"></a></span></template>
+                                    <template x-if="p.phone"><span> · <a :href="'tel:'+p.phone" x-text="p.phone" style="color:#2563eb;"></a></span></template>
+                                </div>
+                                <template x-if="(p.locations || []).length">
+                                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        <span x-text="p.locations.length === 1 ? (p.locations[0].label || '1 address') : p.locations.length + ' branches'"></span>
+                                    </div>
+                                </template>
+                            </div>
+                            <button type="button" x-show="p.email" @click="emailReportTo(p)" class="btn-add-blue" style="padding:6px 10px; font-size:0.8rem;" title="Email report"><i class="fa-solid fa-envelope"></i></button>
+                            <!-- The branches are copied, not referenced (see openEdit): a shallow
+                                 spread would have every keystroke in the branch fields mutate the
+                                 stored provider live, so Cancel would not cancel. -->
+                            <button type="button" @click="openEdit(p)" style="background:none;border:none;color:#64748b;cursor:pointer;" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                            <button type="button" @click="if(confirm('Delete '+p.name+'?')) deleteCareProvider(p.id)" style="background:none;border:none;color:#ef4444;cursor:pointer;" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </template>
+                    <template x-if="!appSettings.careProviders.length"><p style="font-size:0.85rem; color:#94a3b8; padding:8px 0;">No care providers yet.</p></template>
+
+                    <button type="button" @click="openNew()" style="margin-top:14px; width:100%; padding:10px; background:#eff6ff; color:#1e3a8a; border:1px solid #bfdbfe; border-radius:6px; font-weight:bold; cursor:pointer;">
+                        <i class="fa-solid fa-square-plus"></i> Add a care provider
+                    </button>
+
+                    <!-- ADD / EDIT -->
+                    <div x-show="showForm" x-cloak class="vch-modal">
+                        <div class="form-panel vch-modal-card">
+                            <h4 style="margin-top:0; margin-bottom:12px;" x-text="editing ? 'Edit care provider' : 'Add a care provider'"></h4>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                                <input class="form-input" placeholder="Name (clinic or vet)" x-model="form.name">
+                                <select class="form-select" x-model="form.role">
+                                    <template x-for="r in ['Primary vet','Cardiologist','Emergency vet','Referral hospital','Specialist','Other']" :key="r"><option x-text="r"></option></template>
+                                </select>
+                                <input class="form-input" placeholder="Email" type="email" x-model="form.email">
+                                <input class="form-input" placeholder="Phone" type="tel" x-model="form.phone">
+                            </div>
+                            <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">An email address or a phone number is needed — whichever you would actually use to reach them.</p>
+
+                            <!-- BRANCHES. A practice group is one contact with several front doors: the
+                                 owner books with "Oakwood Vets" but is told to attend Taunton this time and
+                                 Exeter the next. Booking an appointment picks a branch and copies its
+                                 address in, so on the day the owner knows exactly where to go. -->
+                            <div style="margin-top:12px;">
+                                <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Addresses &amp; branches</div>
+                                <template x-for="(loc, i) in form.locations" :key="i">
+                                    <div style="border:1px solid #e2e8f0; border-radius:6px; padding:10px; margin-bottom:8px; background:#f8fafc;">
+                                        <div style="display:flex; gap:8px; align-items:center;">
+                                            <input class="form-input" style="flex:1;" placeholder="Branch name — e.g. Exeter branch" x-model="loc.label">
+                                            <button type="button" @click="form.locations.splice(i, 1)" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Remove branch"><i class="fa-solid fa-trash-can"></i></button>
+                                        </div>
+                                        <textarea class="form-input" rows="3" style="margin-top:6px; width:100%;" placeholder="Address" x-model="loc.address"></textarea>
+                                        <input class="form-input" style="margin-top:6px; width:100%;" placeholder="Direct line (optional)" type="tel" x-model="loc.phone">
+                                    </div>
+                                </template>
+                                <button type="button" class="btn-secondary" style="font-size:0.85rem; padding:6px 12px;"
+                                        @click="form.locations.push({ id: generateId(), label:'', address:'', phone:'' })">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span x-text="form.locations.length ? 'Add another branch' : 'Add an address'"></span>
+                                </button>
+                                <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Add each site you might be asked to attend. When you book an appointment you pick the branch, and its address travels with the appointment.</p>
+                            </div>
+
+                            <div style="display:flex; gap:8px; margin-top:14px;">
+                                <button type="button" class="btn-primary" :disabled="!valid"
+                                        :style="!valid ? 'background:#0f766e; opacity:0.45; cursor:not-allowed;' : 'background:#0f766e;'"
+                                        @click="editing ? updateCareProvider({...form, id:editing}) : addCareProvider(form); reset();">
+                                    <i class="fa-solid" :class="editing ? 'fa-check' : 'fa-plus'"></i> <span x-text="editing ? 'Save changes' : 'Add provider'"></span>
+                                </button>
+                                <button type="button" class="btn-secondary" @click="reset()">Cancel</button>
+                            </div>
+                        </div>
+                    </div> <!-- /vch-modal (care provider) -->
+                </div>
+
                                     <!-- ******************************** -->
                                     <!-- APPOINTMENTS                     -->
                                     <!-- ******************************** -->
@@ -5764,128 +6438,130 @@
 
                     <!-- ADD / EDIT -->
                     <div x-show="showAppointmentForm" x-cloak class="vch-modal">
-                        <h4 style="margin-bottom:12px;" x-text="editingAppointmentId ? 'Edit appointment' : 'Add an appointment'"></h4>
+                        <div class="form-panel vch-modal-card">
+                            <h4 style="margin-bottom:12px;" x-text="editingAppointmentId ? 'Edit appointment' : 'Add an appointment'"></h4>
 
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                            <div>
-                                <label class="form-label">Type</label>
-                                <select x-model="newAppointment.type" @change="onAppointmentTypeChange()" class="form-control">
-                                    <template x-for="t in APPOINTMENT_TYPES_LIST" :key="t.id">
-                                        <option :value="t.id" x-text="t.label"></option>
-                                    </template>
-                                </select>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                <div>
+                                    <label class="form-label">Type</label>
+                                    <select x-model="newAppointment.type" @change="onAppointmentTypeChange()" class="form-control">
+                                        <template x-for="t in APPOINTMENT_TYPES_LIST" :key="t.id">
+                                            <option :value="t.id" x-text="t.label"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">Status</label>
+                                    <select x-model="newAppointment.status" class="form-control">
+                                        <template x-for="st in APPOINTMENT_STATUSES_LIST" :key="st.id">
+                                            <option :value="st.id" x-text="st.label"></option>
+                                        </template>
+                                    </select>
+                                </div>
                             </div>
-                            <div>
-                                <label class="form-label">Status</label>
-                                <select x-model="newAppointment.status" class="form-control">
-                                    <template x-for="st in APPOINTMENT_STATUSES_LIST" :key="st.id">
-                                        <option :value="st.id" x-text="st.label"></option>
-                                    </template>
-                                </select>
+
+                            <label class="form-label" style="margin-top:10px;">What it is for</label>
+                            <input type="text" x-model="newAppointment.title" class="form-control" placeholder="e.g. six-month recheck">
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                                <div>
+                                    <label class="form-label">Date</label>
+                                    <input type="date" x-model="newAppointment.date" class="form-control">
+                                </div>
+                                <div>
+                                    <label class="form-label">Time <span style="font-weight:400; color:#94a3b8;">(leave blank if not given one)</span></label>
+                                    <input type="time" x-model="newAppointment.time" class="form-control">
+                                </div>
                             </div>
-                        </div>
 
-                        <label class="form-label" style="margin-top:10px;">What it is for</label>
-                        <input type="text" x-model="newAppointment.title" class="form-control" placeholder="e.g. six-month recheck">
+                            <!-- WHERE — the branch address is the whole reason this feature exists -->
+                            <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
+                                <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Where</div>
 
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                            <div>
-                                <label class="form-label">Date</label>
-                                <input type="date" x-model="newAppointment.date" class="form-control">
+                                <template x-if="careProviderOptions().length > 0">
+                                    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+                                        <template x-for="opt in careProviderOptions()" :key="opt.key">
+                                            <button type="button" @click="applyCareProviderToAppointment(opt)"
+                                                    style="text-align:left; padding:6px 10px; font-size:0.8rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer;">
+                                                <span style="font-weight:600; color:#334155;" x-text="opt.label"></span>
+                                                <template x-if="opt.detail"><span style="display:block; color:#94a3b8; font-size:0.75rem;" x-text="opt.detail"></span></template>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                    <input type="text" x-model="newAppointment.providerName" class="form-control" placeholder="Practice or clinician">
+                                    <input type="text" x-model="newAppointment.locationLabel" class="form-control" placeholder="Branch (optional)">
+                                </div>
+                                <textarea x-model="newAppointment.address" class="form-control" rows="3" style="margin-top:10px;" placeholder="Address"></textarea>
+                                <input type="tel" x-model="newAppointment.phone" class="form-control" style="margin-top:10px;" placeholder="Phone">
+                                <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Add your regular vets under Care providers, just above this diary, with a branch for each site, and they will show up here to tap.</p>
                             </div>
-                            <div>
-                                <label class="form-label">Time <span style="font-weight:400; color:#94a3b8;">(leave blank if not given one)</span></label>
-                                <input type="time" x-model="newAppointment.time" class="form-control">
+
+                            <!-- BEFORE YOU GO -->
+                            <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
+                                <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Before you go</div>
+                                <input type="text" x-model="newAppointment.preparation" class="form-control" placeholder="e.g. no food after 8pm, bring the tablet box">
+                                <template x-if="!newAppointment.preparation && appointmentType(newAppointment.type)?.preparationHint">
+                                    <button type="button" @click="newAppointment.preparation = appointmentType(newAppointment.type).preparationHint"
+                                            style="margin-top:6px; padding:4px 10px; font-size:0.8rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; text-align:left;">
+                                        <i class="fa-solid fa-plus" style="color:#2563eb;"></i>
+                                        <span x-text="appointmentType(newAppointment.type).preparationHint"></span>
+                                    </button>
+                                </template>
+
+                                <label class="form-label" style="margin-top:10px;">Questions to ask <span style="font-weight:400; color:#94a3b8;">(one per line)</span></label>
+                                <textarea x-model="newAppointment.questionsToAsk" class="form-control" rows="3" placeholder="Is the cough worse?&#10;Should we change the dose?"></textarea>
+                                <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Add questions as they occur to you between now and the appointment. Almost everyone remembers what they meant to ask on the way home. Check any fasting instructions with your practice — only they know what this appointment needs.</p>
                             </div>
-                        </div>
 
-                        <!-- WHERE — the branch address is the whole reason this feature exists -->
-                        <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
-                            <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Where</div>
-
-                            <template x-if="careProviderOptions().length > 0">
-                                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                                    <template x-for="opt in careProviderOptions()" :key="opt.key">
-                                        <button type="button" @click="applyCareProviderToAppointment(opt)"
-                                                style="text-align:left; padding:6px 10px; font-size:0.8rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer;">
-                                            <span style="font-weight:600; color:#334155;" x-text="opt.label"></span>
-                                            <template x-if="opt.detail"><span style="display:block; color:#94a3b8; font-size:0.75rem;" x-text="opt.detail"></span></template>
-                                        </button>
+                            <!-- REMINDERS (only while it is still booked) -->
+                            <template x-if="newAppointment.status === 'booked'">
+                                <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
+                                    <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Calendar reminders</div>
+                                    <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155;">
+                                        <input type="checkbox" x-model="newAppointment.reminderEnabled"> Add reminders to the calendar file
+                                    </label>
+                                    <template x-if="newAppointment.reminderEnabled">
+                                        <div style="margin-top:8px;">
+                                            <label class="form-label">Advance notice</label>
+                                            <select x-model.number="newAppointment.reminderLeadDays" class="form-control">
+                                                <option :value="0">None</option>
+                                                <option :value="1">1 day</option>
+                                                <option :value="2">2 days</option>
+                                                <option :value="3">3 days</option>
+                                                <option :value="7">1 week</option>
+                                                <option :value="14">2 weeks</option>
+                                                <option :value="30">1 month</option>
+                                            </select>
+                                            <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155; margin-top:8px;">
+                                                <input type="checkbox" x-model="newAppointment.remindDayBefore"> Also remind me shortly before
+                                            </label>
+                                            <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Anything under “before you go” is included in each reminder, so it reaches you while there is still time to act on it.</p>
+                                        </div>
                                     </template>
                                 </div>
                             </template>
 
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                                <input type="text" x-model="newAppointment.providerName" class="form-control" placeholder="Practice or clinician">
-                                <input type="text" x-model="newAppointment.locationLabel" class="form-control" placeholder="Branch (optional)">
-                            </div>
-                            <textarea x-model="newAppointment.address" class="form-control" rows="3" style="margin-top:10px;" placeholder="Address"></textarea>
-                            <input type="tel" x-model="newAppointment.phone" class="form-control" style="margin-top:10px;" placeholder="Phone">
-                            <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Add your regular vets under Data &amp; Backup → Care providers, with a branch for each site, and they will show up here to tap.</p>
-                        </div>
-
-                        <!-- BEFORE YOU GO -->
-                        <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
-                            <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Before you go</div>
-                            <input type="text" x-model="newAppointment.preparation" class="form-control" placeholder="e.g. no food after 8pm, bring the tablet box">
-                            <template x-if="!newAppointment.preparation && appointmentType(newAppointment.type)?.preparationHint">
-                                <button type="button" @click="newAppointment.preparation = appointmentType(newAppointment.type).preparationHint"
-                                        style="margin-top:6px; padding:4px 10px; font-size:0.8rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; text-align:left;">
-                                    <i class="fa-solid fa-plus" style="color:#2563eb;"></i>
-                                    <span x-text="appointmentType(newAppointment.type).preparationHint"></span>
-                                </button>
+                            <!-- OUTCOME (only once it is no longer booked) -->
+                            <template x-if="newAppointment.status !== 'booked'">
+                                <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
+                                    <label class="form-label">Outcome</label>
+                                    <input type="text" x-model="newAppointment.outcome" class="form-control" placeholder="e.g. murmur unchanged, recheck in six months">
+                                    <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">One line is enough. This is the part you will be glad of later, and the part nobody remembers unless they wrote it down.</p>
+                                </div>
                             </template>
 
-                            <label class="form-label" style="margin-top:10px;">Questions to ask <span style="font-weight:400; color:#94a3b8;">(one per line)</span></label>
-                            <textarea x-model="newAppointment.questionsToAsk" class="form-control" rows="3" placeholder="Is the cough worse?&#10;Should we change the dose?"></textarea>
-                            <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Add questions as they occur to you between now and the appointment. Almost everyone remembers what they meant to ask on the way home. Check any fasting instructions with your practice — only they know what this appointment needs.</p>
-                        </div>
+                            <label class="form-label" style="margin-top:10px;">Notes</label>
+                            <input type="text" x-model="newAppointment.notes" class="form-control" placeholder="Anything else worth remembering">
 
-                        <!-- REMINDERS (only while it is still booked) -->
-                        <template x-if="newAppointment.status === 'booked'">
-                            <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
-                                <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Calendar reminders</div>
-                                <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155;">
-                                    <input type="checkbox" x-model="newAppointment.reminderEnabled"> Add reminders to the calendar file
-                                </label>
-                                <template x-if="newAppointment.reminderEnabled">
-                                    <div style="margin-top:8px;">
-                                        <label class="form-label">Advance notice</label>
-                                        <select x-model.number="newAppointment.reminderLeadDays" class="form-control">
-                                            <option :value="0">None</option>
-                                            <option :value="1">1 day</option>
-                                            <option :value="2">2 days</option>
-                                            <option :value="3">3 days</option>
-                                            <option :value="7">1 week</option>
-                                            <option :value="14">2 weeks</option>
-                                            <option :value="30">1 month</option>
-                                        </select>
-                                        <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155; margin-top:8px;">
-                                            <input type="checkbox" x-model="newAppointment.remindDayBefore"> Also remind me shortly before
-                                        </label>
-                                        <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Anything under “before you go” is included in each reminder, so it reaches you while there is still time to act on it.</p>
-                                    </div>
-                                </template>
+                            <div style="display:flex; gap:8px; margin-top:14px;">
+                                <button @click="saveAppointment()" type="button" class="btn-primary" style="background:#0f766e;">Save</button>
+                                <button @click="closeAppointmentForm()" type="button" class="btn-secondary">Cancel</button>
                             </div>
-                        </template>
-
-                        <!-- OUTCOME (only once it is no longer booked) -->
-                        <template x-if="newAppointment.status !== 'booked'">
-                            <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
-                                <label class="form-label">Outcome</label>
-                                <input type="text" x-model="newAppointment.outcome" class="form-control" placeholder="e.g. murmur unchanged, recheck in six months">
-                                <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">One line is enough. This is the part you will be glad of later, and the part nobody remembers unless they wrote it down.</p>
-                            </div>
-                        </template>
-
-                        <label class="form-label" style="margin-top:10px;">Notes</label>
-                        <input type="text" x-model="newAppointment.notes" class="form-control" placeholder="Anything else worth remembering">
-
-                        <div style="display:flex; gap:8px; margin-top:14px;">
-                            <button @click="saveAppointment()" type="button" class="btn-primary" style="background:#0f766e;">Save</button>
-                            <button @click="closeAppointmentForm()" type="button" class="btn-secondary">Cancel</button>
                         </div>
-                    </div>
+                    </div> <!-- /vch-modal (appointment) -->
 
                     <!-- DID THESE GO AHEAD? -->
                     <div x-show="careAwaitingOutcome().length > 0 && !showAppointmentForm" style="margin-bottom:15px;">
@@ -5996,82 +6672,6 @@
                             No appointments recorded yet.<br>
                             <span style="font-size:0.8rem;">Add the ones already in the diary, and old ones as you remember them.</span>
                         </div>
-                    </div>
-                </div>
-
-                <div class="module-card" x-show="isView('more') && moreSection === 'data'" x-cloak
-                     x-data="{ editing:null, form:{ name:'', role:'Primary vet', email:'', phone:'', notes:'', locations:[] },
-                               reset(){ this.editing=null; this.form={ name:'', role:'Primary vet', email:'', phone:'', notes:'', locations:[] }; },
-                               get valid(){ return this.form.name.trim() && ((this.form.email && /.+@.+\..+/.test(this.form.email)) || (this.form.phone||'').replace(/\D/g,'').length>=5); } }"
-                     style="margin-top:20px; border:1px solid #adc1ed; background:#fcfdff; border-radius:4px; padding:20px;">
-                    <h3 style="margin-top:0; color:#475569; font-size:1.1rem;"><i class="fa-solid fa-user-doctor"></i> Care providers</h3>
-                    <p style="font-size:0.85rem; color:#64748b;">Your vet, cardiologist or emergency clinic — for quick contact and to email reports. Stored on this device only; never included in pet backups.</p>
-                
-                    <template x-for="p in appSettings.careProviders" :key="p.id">
-                        <div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #eef2f7;">
-                            <div style="flex:1;">
-                                <div style="font-weight:600; color:#334155;" x-text="p.name"></div>
-                                <div style="font-size:0.8rem; color:#64748b;">
-                                    <span x-text="p.role"></span>
-                                    <template x-if="p.email"><span> · <a :href="'mailto:'+p.email" x-text="p.email" style="color:#2563eb;"></a></span></template>
-                                    <template x-if="p.phone"><span> · <a :href="'tel:'+p.phone" x-text="p.phone" style="color:#2563eb;"></a></span></template>
-                                </div>
-                                <template x-if="(p.locations || []).length">
-                                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">
-                                        <i class="fa-solid fa-location-dot"></i>
-                                        <span x-text="p.locations.length === 1 ? (p.locations[0].label || '1 address') : p.locations.length + ' branches'"></span>
-                                    </div>
-                                </template>
-                            </div>
-                            <button type="button" x-show="p.email" @click="emailReportTo(p)" class="btn-add-blue" style="padding:6px 10px; font-size:0.8rem;" title="Email report"><i class="fa-solid fa-envelope"></i></button>
-                            <!-- The branches are copied, not referenced: a shallow spread would
-                                 have every keystroke in the branch fields mutate the stored
-                                 provider live, so Cancel would not cancel. -->
-                            <button type="button" @click="editing=p.id; form={...p, locations:(p.locations||[]).map(l => ({...l}))}" style="background:none;border:none;color:#64748b;cursor:pointer;" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                            <button type="button" @click="if(confirm('Delete '+p.name+'?')) deleteCareProvider(p.id)" style="background:none;border:none;color:#ef4444;cursor:pointer;" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </template>
-                    <template x-if="!appSettings.careProviders.length"><p style="font-size:0.85rem; color:#94a3b8; padding:8px 0;">No care providers yet.</p></template>
-                
-                    <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                        <input class="form-input" placeholder="Name (clinic or vet)" x-model="form.name">
-                        <select class="form-select" x-model="form.role">
-                            <template x-for="r in ['Primary vet','Cardiologist','Emergency vet','Referral hospital','Specialist','Other']" :key="r"><option x-text="r"></option></template>
-                        </select>
-                        <input class="form-input" placeholder="Email" type="email" x-model="form.email">
-                        <input class="form-input" placeholder="Phone" type="tel" x-model="form.phone">
-                    </div>
-
-                    <!-- BRANCHES. A practice group is one contact with several front doors: the
-                         owner books with "Oakwood Vets" but is told to attend Taunton this time and
-                         Exeter the next. Booking an appointment picks a branch and copies its
-                         address in, so on the day the owner knows exactly where to go. -->
-                    <div style="margin-top:12px;">
-                        <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Addresses &amp; branches</div>
-                        <template x-for="(loc, i) in form.locations" :key="i">
-                            <div style="border:1px solid #e2e8f0; border-radius:6px; padding:10px; margin-bottom:8px; background:#f8fafc;">
-                                <div style="display:flex; gap:8px; align-items:center;">
-                                    <input class="form-input" style="flex:1;" placeholder="Branch name — e.g. Exeter branch" x-model="loc.label">
-                                    <button type="button" @click="form.locations.splice(i, 1)" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Remove branch"><i class="fa-solid fa-trash-can"></i></button>
-                                </div>
-                                <textarea class="form-input" rows="3" style="margin-top:6px; width:100%;" placeholder="Address" x-model="loc.address"></textarea>
-                                <input class="form-input" style="margin-top:6px; width:100%;" placeholder="Direct line (optional)" type="tel" x-model="loc.phone">
-                            </div>
-                        </template>
-                        <button type="button" class="btn-secondary" style="font-size:0.85rem; padding:6px 12px;"
-                                @click="form.locations.push({ id: generateId(), label:'', address:'', phone:'' })">
-                            <i class="fa-solid fa-plus"></i>
-                            <span x-text="form.locations.length ? 'Add another branch' : 'Add an address'"></span>
-                        </button>
-                        <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Add each site you might be asked to attend. When you book an appointment you pick the branch, and its address travels with the appointment.</p>
-                    </div>
-
-                    <div style="display:flex; gap:8px; margin-top:8px;">
-                        <button type="button" class="btn-add-blue" :disabled="!valid"
-                                @click="editing ? updateCareProvider({...form, id:editing}) : addCareProvider(form); reset();">
-                            <i class="fa-solid" :class="editing ? 'fa-check' : 'fa-plus'"></i> <span x-text="editing ? 'Save changes' : 'Add provider'"></span>
-                        </button>
-                        <button type="button" x-show="editing" class="btn-cancel" @click="reset()">Cancel</button>
                     </div>
                 </div>
                 
