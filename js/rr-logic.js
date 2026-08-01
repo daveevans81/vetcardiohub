@@ -134,6 +134,16 @@ const ECHO_MEASURES = [
       blurb: 'How much blood the main pumping chamber holds when full. Divided by weight it can be compared between visits.' },
 ];
 
+// The echo form's inputs bind with `x-model="newEchoStudy.values[m.id].value"`, and x-show does NOT
+// stop Alpine rendering (and evaluating) that template — so EVERY measure must already have a slot
+// before first paint, not just once openEchoForm() has run. Hence one blank-row builder used by
+// both the initial state and the form.
+function blankEchoValues() {
+    const values = {};
+    ECHO_MEASURES.forEach(m => { values[m.id] = { value: '', unit: m.units[0] || '' }; });
+    return values;
+}
+
 // --- SURGERIES, DENTALS & PROCEDURES (parity with iOS schema V12; see BACKLOG §3l) -----------
 // What has been DONE to a pet, as opposed to what the pet HAS. For a cardiac patient this is not
 // background: a documented, uneventful general anaesthetic is one of the strongest reassurances a
@@ -923,7 +933,7 @@ newEchoStudy: {
     studyDate: new Date().toISOString().split('T')[0],
     centreName: '',
     notes: '',
-    values: {}                 // measureId -> { value, unit }
+    values: blankEchoValues()  // measureId -> { value, unit }; never {} — see blankEchoValues()
 },
 showBloodPanel: false,
 showBloodForm: false,
@@ -6255,8 +6265,7 @@ echoLatestMurmurGrade() {
 // --- Form (a whole study at a time: an echo report always carries the same handful of numbers) ---
 
 openEchoForm(study = null) {
-    const values = {};
-    ECHO_MEASURES.forEach(m => { values[m.id] = { value: '', unit: m.units[0] || '' }; });
+    const values = blankEchoValues();
     if (study) {
         study.rows.forEach(r => { values[r.measureId] = { value: r.value, unit: r.unit || '' }; });
         this.newEchoStudy = {
