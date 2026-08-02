@@ -245,10 +245,24 @@ const PROCEDURE_SUGGESTIONS = {
 const APPOINTMENT_TYPES = [
     { id: 'checkup',     label: 'Health check',             defaultTitle: 'Health check',
       defaultLeadDays: 7,  preparationHint: '' },
+    // The everyday appointment: something is wrong, or the vet asked to see them again. This was
+    // the gap owners hit first — 'Health check' reads as the annual wellness exam, so an ordinary
+    // "she's been off her food" consultation had nowhere obvious to go and ended up as 'Other'.
+    { id: 'consult',     label: 'Vet appointment (problem or recheck)', defaultTitle: 'Vet appointment',
+      defaultLeadDays: 3,  preparationHint: 'Note down when the problem started and anything that makes it better or worse.' },
+    // Nurse clinics are a large share of what an owner actually attends, and are usually cheaper,
+    // shorter and booked separately from a vet consultation.
+    { id: 'nurse',       label: 'Nurse / vet tech appointment', defaultTitle: 'Nurse appointment',
+      defaultLeadDays: 3,  preparationHint: 'Nurse clinics usually cover weight checks, nail clips, anal glands, post-op checks and repeat injections.' },
     { id: 'cardiology',  label: 'Cardiology appointment',   defaultTitle: 'Cardiology recheck',
       defaultLeadDays: 7,  preparationHint: 'Take a week of sleeping breathing rates and the current medication list.' },
     { id: 'vaccination', label: 'Vaccination / booster',    defaultTitle: 'Annual booster',
       defaultLeadDays: 7,  preparationHint: 'Bring the vaccination card.' },
+    // The BOOKING for an operation. `procedureLog` records what was DONE — the surgical history a
+    // vet reads before an anaesthetic — and this is the diary entry that gets the owner and the pet
+    // there on the right morning, having fasted. The two coexist on purpose.
+    { id: 'surgery',     label: 'Surgery / operation',      defaultTitle: 'Surgery',
+      defaultLeadDays: 7,  preparationHint: 'Confirm the fasting instructions, the drop-off time and who to phone for news.' },
     { id: 'postop',      label: 'Post-op check',            defaultTitle: 'Post-operative check',
       defaultLeadDays: 2,  preparationHint: 'Keep the wound dry and the buster collar on until seen.' },
     { id: 'specialist',  label: 'Specialist referral',      defaultTitle: 'Specialist appointment',
@@ -261,6 +275,11 @@ const APPOINTMENT_TYPES = [
       defaultLeadDays: 7,  preparationHint: 'Confirm the fasting instructions and the drop-off time.' },
     { id: 'physio',      label: 'Physiotherapy / rehab',    defaultTitle: 'Physiotherapy session',
       defaultLeadDays: 2,  preparationHint: '' },
+    // Not veterinary, but it is in the same diary and it is where a lump or a sore ear is most
+    // often first noticed — and for a cardiac patient, whether a groom went well is a real
+    // observation about exercise tolerance.
+    { id: 'grooming',    label: 'Grooming appointment',     defaultTitle: 'Grooming',
+      defaultLeadDays: 3,  preparationHint: '' },
     // An emergency is logged after the fact far more often than it is booked ahead; there is
     // nothing to give notice of.
     { id: 'emergency',   label: 'Emergency / out-of-hours', defaultTitle: 'Emergency visit',
@@ -272,6 +291,17 @@ const APPOINTMENT_TYPES = [
 // Only 'booked' is open. Everything else belongs to the history — including 'cancelled', which is
 // kept on purpose: "we cancelled because she was too unwell to travel" is a clinical fact.
 const APPOINTMENT_STATUSES = [
+    // "The vet said come back in about six months" — and nobody gave you a slot. This is the single
+    // most common way an appointment gets lost, and until 2026-08 there was nowhere to put it: an
+    // owner could only record a booking that existed. Told to return in six months with no date,
+    // they either invented one (and got a reminder for an appointment that was never made) or
+    // recorded nothing (and remembered in month nine).
+    //
+    // A to-book record carries the date the pet should be SEEN BY, not a slot. `time` stays empty
+    // and its reminders say "time to book this" rather than "your appointment is tomorrow". It is
+    // OPEN: the whole point is that it stays in front of the owner. Leads the list because it comes
+    // first in life — you are told to come back, then you book, then you attend.
+    { id: 'toBook',    label: 'Still to book' },
     { id: 'booked',    label: 'Booked' },
     { id: 'attended',  label: 'Attended' },
     { id: 'cancelled', label: 'Cancelled' },
@@ -556,6 +586,173 @@ const LUMP_STANDING_NOTE = 'Measurements and photos help your vet see how a lump
     + "but they can't show what it is. Only your vet can tell you that, usually with a needle sample.";
 
 
+// --- ORTHOPAEDICS: LAMENESS & JOINTS (parity with iOS schema V17) ------------------------------
+// Two tables, the same shape as lumps: `orthoConditions` holds the standing facts about a PROBLEM
+// (which legs, what the vet said, how long it has been going on, the pain-relief plan) and
+// `orthoLog` holds one row per DAY per problem. Flattened into one table, "cruciate disease in the
+// left hind, diagnosed in March, on meloxicam" would exist only as a string repeated on every row —
+// one typo would split a single condition into two, and there would be nowhere for the facts that
+// belong to the condition rather than to a Tuesday.
+//
+// ══ THE SAFETY RULE, WHICH IS THE WHOLE POINT ═══════════════════════════════════════════════
+// NOTHING IN THIS MODULE EVER SAYS WHAT IS WRONG WITH THE ANIMAL, AND NOTHING EVER REASSURES.
+//
+// Lameness has a long differential — a strain, a cruciate, elbow dysplasia, a foreign body in a
+// pad, an immune arthropathy, a bone tumour — and telling them apart needs a lame animal on a
+// consulting-room table plus imaging. It cannot be done from a number typed into a phone, and an
+// app that implied otherwise would do harm in both directions: an owner reassured out of an
+// appointment, or frightened into one at 2am by a chart.
+//
+// So every sentence this module produces is a statement about THE RECORD ("scored 3 or worse on 6
+// of the last 14 days"), never a diagnosis ("his arthritis is flaring") and never a judgement
+// ("improving nicely"). `ORTHO_STANDING_NOTE` is printed unconditionally on every screen and in
+// every export, for the same reason `LUMP_STANDING_NOTE` is.
+//
+// `ORTHO_CAUSES` records WHAT A VET SAID. Nothing reads it, ranks it or infers from it.
+//
+// Ids below are PERSISTED — add new ones, never rename. Hand-kept identical with
+// `OrthoCatalogue.swift`; change both together.
+
+const ORTHO_LEGS = [
+    { id: 'lf',    label: 'Left front' },
+    { id: 'rf',    label: 'Right front' },
+    { id: 'lh',    label: 'Left back' },
+    { id: 'rh',    label: 'Right back' },
+    // Not a leg, but back pain presents as a gait problem and owners reach for this module for it.
+    // Refusing it would push those records into "notes" where nothing can chart them.
+    { id: 'spine', label: 'Back / spine' },
+];
+
+// The 0–4 scale vets use, worded for an owner as what can be SEEN — "won't put the foot down"
+// rather than "non-weight-bearing". An owner cannot measure pain; they can judge whether the foot
+// is going down, and that is the only thing they can honestly report.
+const ORTHO_LAMENESS_SCALE = [
+    { score: 0, label: 'Sound',
+      detail: "Walking and trotting normally — you can't pick out a bad leg." },
+    { score: 1, label: 'Only just noticeable',
+      detail: 'Something is slightly off, and only some of the time. You might only see it at a trot, or after a long walk.' },
+    { score: 2, label: 'Obvious, but using the leg',
+      detail: 'You can see which leg it is and you can see it every time, but they are still putting weight on it.' },
+    { score: 3, label: 'Barely using the leg',
+      detail: 'Touching the ground lightly or now and then, taking most of the weight on the others.' },
+    { score: 4, label: 'Not using the leg at all',
+      detail: 'Holding it up, hopping, or refusing to move on it.' },
+];
+
+// Morning stiffness that walks off is a different observation from lameness that persists, and it
+// is one vets ask about by name.
+const ORTHO_STIFFNESS = [
+    { id: 'none',      label: 'Gets up normally' },
+    { id: 'slow',      label: 'Slow to get going, then fine' },
+    { id: 'stiff',     label: 'Stiff for the first few minutes' },
+    { id: 'struggles', label: 'Struggles to get up' },
+    { id: 'needsHelp', label: 'Needs helping up' },
+    { id: 'unsure',    label: "Didn't notice" },
+];
+
+// Often more useful than the score itself: "worse after rest" and "worse after exercise" point in
+// genuinely different directions, and it is something an owner is uniquely placed to notice.
+const ORTHO_AGGRAVATORS = [
+    { id: 'rest',      label: 'After lying down / resting' },
+    { id: 'exercise',  label: 'After a walk or exercise' },
+    { id: 'morning',   label: 'First thing in the morning' },
+    { id: 'evening',   label: 'Later in the day' },
+    { id: 'cold',      label: 'Cold or damp weather' },
+    { id: 'stairs',    label: 'Stairs or jumping' },
+    { id: 'slippery',  label: 'Slippery floors' },
+    { id: 'car',       label: 'Getting in or out of the car' },
+];
+
+// What was actually GIVEN. Generic groups, not brands — the medication ledger holds the real
+// product, and this is the "was he covered today?" answer. "Nothing today" is explicit because a
+// blank row cannot tell the difference between "nothing" and "didn't record".
+const ORTHO_PAIN_RELIEF = [
+    { id: 'none',        label: 'Nothing today' },
+    { id: 'nsaid',       label: 'Anti-inflammatory (e.g. meloxicam, carprofen)' },
+    { id: 'gabapentin',  label: 'Gabapentin' },
+    { id: 'paracetamol', label: 'Paracetamol (as prescribed)' },
+    { id: 'opioid',      label: 'Stronger painkiller (e.g. tramadol)' },
+    { id: 'amantadine',  label: 'Amantadine' },
+    { id: 'monoclonal',  label: 'Monthly pain injection (e.g. Librela, Solensia)' },
+    { id: 'joint',       label: 'Joint supplement' },
+    { id: 'other',       label: 'Something else' },
+];
+
+// The things owners are asked to do and then forget they were asked to do.
+const ORTHO_MANAGEMENTS = [
+    { id: 'leadOnly',    label: 'Lead exercise only' },
+    { id: 'shortWalks',  label: 'Shorter, more frequent walks' },
+    { id: 'restricted',  label: 'Strict rest' },
+    { id: 'weight',      label: 'Weight loss plan' },
+    { id: 'physio',      label: 'Physiotherapy' },
+    { id: 'hydro',       label: 'Hydrotherapy' },
+    { id: 'ramps',       label: 'Ramps / no stairs or jumping' },
+    { id: 'flooring',    label: 'Non-slip flooring or rugs' },
+    { id: 'bedding',     label: 'Orthopaedic bedding' },
+    { id: 'harness',     label: 'Support harness' },
+];
+
+// WHAT THE OWNER WAS TOLD — never a menu of possibilities for them to pick from, and never read by
+// anything. "Not been told yet" leads because it is the honest answer for most lameness.
+const ORTHO_CAUSES = [
+    { id: 'unknown',        label: 'Not been told yet' },
+    { id: 'arthritis',      label: 'Arthritis / degenerative joint disease' },
+    { id: 'cruciate',       label: 'Cruciate ligament' },
+    { id: 'hipDysplasia',   label: 'Hip dysplasia' },
+    { id: 'elbowDysplasia', label: 'Elbow dysplasia' },
+    { id: 'patella',        label: 'Slipping kneecap (luxating patella)' },
+    { id: 'softTissue',     label: 'Soft-tissue strain or sprain' },
+    { id: 'fracture',       label: 'Fracture' },
+    { id: 'spinal',         label: 'Back or disc problem' },
+    { id: 'paw',            label: 'Paw, pad or nail' },
+    { id: 'postop',         label: 'Recovering from surgery' },
+    { id: 'growth',         label: 'Growing-pain condition (e.g. panosteitis)' },
+    { id: 'other',          label: 'Something else — see the note' },
+];
+
+// Stored rather than inferred from how long the log has run: a condition of several years'
+// standing can be entered today, and a fortnight of records would otherwise call it acute.
+const ORTHO_CHRONICITIES = [
+    { id: 'acute',        label: 'Came on suddenly',
+      detail: 'Days rather than weeks — he was fine, then he wasn\'t.' },
+    { id: 'intermittent', label: 'Comes and goes',
+      detail: 'Good spells and bad spells, often for months.' },
+    { id: 'chronic',      label: 'There all the time, much the same',
+      detail: 'Long-standing and fairly steady.' },
+    { id: 'worsening',    label: 'There all the time, and getting worse',
+      detail: 'Long-standing and slowly going downhill.' },
+    { id: 'unsure',       label: 'Not sure', detail: '' },
+];
+
+const ORTHO_VET_STAGES = [
+    { id: 'notSeen',  label: 'Not seen by a vet yet' },
+    { id: 'seen',     label: 'A vet has examined it' },
+    { id: 'imaging',  label: 'X-rays or a scan done' },
+    { id: 'referred', label: 'Referred to a specialist' },
+    { id: 'surgery',  label: 'Surgery done' },
+    { id: 'managed',  label: 'Being managed long-term' },
+];
+
+const ORTHO_STATUSES = [
+    { id: 'active',   label: 'Being monitored' },
+    { id: 'postop',   label: 'Recovering from surgery' },
+    { id: 'improved', label: 'Much improved' },
+    { id: 'resolved', label: 'Resolved' },
+];
+
+// How many days count as "recently"; the score at which a day counts as a bad one; and how many bad
+// days before the read mentions it at all. Two prevents a single bad day after a long walk from
+// generating an alert — the whole module is about the pattern.
+const ORTHO_RECENT_WINDOW_DAYS = 14;
+const ORTHO_BAD_DAY_SCORE = 3;
+const ORTHO_BAD_DAY_FLOOR = 2;
+
+const ORTHO_STANDING_NOTE =
+    'These scores are a record of what you have seen, not a diagnosis. Lameness has many causes '
+    + 'and telling them apart needs a vet to examine your pet — but a fortnight of scores, and what '
+    + 'you noticed made it worse, is exactly what makes that examination more useful.';
+
+
 // --- MODIFIED TRIADAN DENTAL CHART ------------------------------------------------------------
 // Three digits. The FIRST is the quadrant seen from the front of the animal:
 //     1 = upper right   2 = upper left   3 = lower left   4 = lower right   (permanent)
@@ -594,12 +791,36 @@ showOnboarding: false,
 onboardingStep: 0, // 0 = Welcome, 1 = Demographics, 2 = Clinical, 3 = Recommendations
 isExistingPatientEdit: false, // Flag to bypass wizard when editing later
 speciesOther: '',
+// `concerns` is MULTI-SELECT and is the real answer to the step-2 question (2026-08). A pet is
+// not one problem: a cardiac patient can just as easily have a lump and itchy skin, and the old
+// single-choice radio forced the owner to pick which of their pet's problems counted. Every tick
+// simply ADDS to the recommended module set — see `generateModuleRecommendations`.
+//
+// 'wellness' leads and starts ticked: it is the floor everyone stands on, and the specific
+// concerns are things a pet has AS WELL, not instead. Pre-ticking 'cardiac' would be the
+// cardiac-first assumption this question dropped.
+//
+// `hasCardiacIssue` is KEPT as a derived mirror ('yes' | 'seizure' | 'no') because it is the
+// parity contract with iOS's `PrimaryConcern` raw values and is still read by the diagnosis
+// guard in `saveOnboardedPatient`. Never set it directly — `toggleOnboardingConcern` keeps it
+// in step with `concerns`.
 onboardingData: {
+    concerns: ['wellness'],
     hasCardiacIssue: 'no',
     murmurGrade: '',
     diagnosis: '',
     acvimStage: ''
 },
+
+// The step-2 tick list, in display order. Ids are UI-only — nothing persists them; the modules
+// they seed are what gets saved.
+ONBOARDING_CONCERNS: [
+    { id: 'wellness', label: 'General health and wellness' },
+    { id: 'cardiac',  label: 'A heart condition or murmur' },
+    { id: 'seizure',  label: 'Collapse, fainting or seizures' },
+    { id: 'skin',     label: 'Skin problems or itching' },
+    { id: 'lump',     label: 'A lump or growth' },
+],
 
 // --- PWA install nudge ---
 showInstallOverlay: false,
@@ -638,7 +859,10 @@ defaultModules: {
     // flags on the patient itself (`skinLogEnabled` / `lumpTrackingEnabled`) but carries them
     // here, under `modules`, in the backup — so the JSON shape matches on both platforms.
     skinLog: false,
-    lumps: false
+    lumps: false,
+    // Opt-in for the same reason: most pets are not lame, and an empty lameness panel on the
+    // Monitor view is clutter for the majority to buy discoverability for the minority.
+    ortho: false
 },
 
 showProgressionBanner: false,
@@ -721,7 +945,8 @@ vetExportModules: {
     vaccinations: true,
     antiparasitics: true,
     skinLog: true,
-    lumps: true
+    lumps: true,
+    ortho: true
 },
 
 
@@ -879,6 +1104,54 @@ newSkin: {
 // than to a Tuesday (when it was first noticed, whether a vet has seen it, whether it is out).
 lumpLog: [],
 lumpMeasurements: [],
+
+// ── Orthopaedics (see the ORTHO_* block near the top of this file for the safety rule) ──
+orthoConditions: [],
+orthoLog: [],
+ORTHO_LEGS_LIST: ORTHO_LEGS,
+ORTHO_LAMENESS_SCALE_LIST: ORTHO_LAMENESS_SCALE,
+ORTHO_STIFFNESS_LIST: ORTHO_STIFFNESS,
+ORTHO_AGGRAVATORS_LIST: ORTHO_AGGRAVATORS,
+ORTHO_PAIN_RELIEF_LIST: ORTHO_PAIN_RELIEF,
+ORTHO_MANAGEMENTS_LIST: ORTHO_MANAGEMENTS,
+ORTHO_CAUSES_LIST: ORTHO_CAUSES,
+ORTHO_CHRONICITIES_LIST: ORTHO_CHRONICITIES,
+ORTHO_VET_STAGES_LIST: ORTHO_VET_STAGES,
+ORTHO_STATUSES_LIST: ORTHO_STATUSES,
+ORTHO_STANDING_NOTE_TEXT: ORTHO_STANDING_NOTE,
+showOrthoLog: false,
+showOrthoConditionForm: false,
+showOrthoEntryForm: false,
+editingOrthoConditionId: null,
+editingOrthoEntryId: null,
+viewingOrthoConditionId: null,   // the condition whose day-by-day history is open
+scoringOrthoConditionId: null,   // the condition the daily form is attached to
+newOrthoCondition: {
+    label: '',
+    legs: [],
+    suspectedCause: 'unknown',
+    vetDiagnosis: '',
+    chronicity: 'unsure',
+    firstNoticed: '',            // '' = the owner does not know; never today
+    vetStage: 'notSeen',
+    painReliefPlan: '',
+    management: [],
+    status: 'active',
+    notes: ''
+},
+newOrthoEntry: {
+    date: new Date().toISOString().split('T')[0],
+    // '' means the day was logged WITHOUT being scored, which is not the same as 0 (sound). Every
+    // consumer skips it rather than reading it as zero — see `_orthoIsScored`.
+    lamenessScore: '',
+    legs: [],
+    stiffnessOnRising: 'unsure',
+    worseAfter: [],
+    painReliefGiven: [],
+    painReliefNotes: '',
+    vetVisit: false,
+    notes: ''
+},
 LUMP_SITES_LIST: LUMP_SITES,
 LUMP_SIDES_LIST: LUMP_SIDES,
 LUMP_CONSISTENCIES_LIST: LUMP_CONSISTENCIES,
@@ -905,7 +1178,14 @@ newLump: {
     vetStage: 'notSeen',
     vetDiagnosis: '',
     resolvedDate: '',
-    notes: ''
+    notes: '',
+    // The FIRST measurement, taken inline while the lump is being added (2026-08). Measuring used
+    // to live only behind the lump's history panel and owners did not find it, which left the
+    // module recording that a lump exists and nothing about its size — when the size over time is
+    // the entire point. Optional: a lump added from the sofa with no ruler to hand is still worth
+    // recording, so nothing is created unless a dimension is typed. Ignored when EDITING — the
+    // full measurement form is where consistency, signs and notes belong.
+    firstMeasure: { unit: 'mm', length: '', width: '', depth: '' }
 },
 newLumpMeasurement: {
     date: new Date().toISOString().split('T')[0],
@@ -1218,10 +1498,14 @@ moduleMeta: [
   // Skin and lumps sit at the end because they are opt-in and newer than the rest of this table.
   // Amber for skin (the register the app uses for irritation) and a deliberately neutral slate for
   // lumps — a lump chip must not look like a verdict. Kept identical with `ModuleCatalogue.all`.
-  { key:'skinLog',        label:'Skin',           icon:'fa-hand-dots',       c:'#b45309', bg:'#fffbeb', bd:'#fde68a', glossary:'',
+  { key:'skinLog',        label:'Skin',           icon:'fa-hand-dots',       c:'#b45309', bg:'#fffbeb', bd:'#fde68a', glossary:'module_skin',
     desc:'Score itching day by day and spot a yearly pattern.' },
-  { key:'lumps',          label:'Lumps',          icon:'fa-circle-dot',      c:'#475569', bg:'#f8fafc', bd:'#e2e8f0', glossary:'',
+  { key:'lumps',          label:'Lumps',          icon:'fa-circle-dot',      c:'#475569', bg:'#f8fafc', bd:'#e2e8f0', glossary:'module_lumps',
     desc:'Measure lumps over time and keep the history.' },
+  // Indigo — distinct from the cardiac greens and the skin amber, and deliberately not a warning
+  // colour: a lameness chip must not look like an alert.
+  { key:'ortho',          label:'Lameness',       icon:'fa-dog',             c:'#4338ca', bg:'#eef2ff', bd:'#c7d2fe', glossary:'module_ortho',
+    desc:'Score lameness day by day against how much they walked.' },
 ],
 
 moduleMetaByKey(key) {
@@ -1262,8 +1546,10 @@ enableModuleFromPill(key) {
 learnModuleFromPill(key) {
   const g = this.moduleMetaByKey(key).glossary;
   this.modulePopover.open = false;
-  // Skin and lumps have no glossary entry yet, so their `glossary` is ''. Opening the glossary on
-  // an empty key would show an empty panel — better to do nothing than to open a blank drawer.
+  // Every module now has an entry, but the guard stays: a NEW module added to `moduleMeta` before
+  // its glossary term is written would otherwise open a blank drawer, and doing nothing is better.
+  // (Skin, lumps and lameness sat on '' here for a while after their entries existed — the pill's
+  // "Learn more" silently did nothing. Set `glossary` when you add the term.)
   if (!g) return;
   this.openGlossary(g);
 },
@@ -1278,7 +1564,7 @@ activeView: 'monitor',        // ← first run lands on the counter (was the ret
 // The old 'all' view — every section in one scroll — was retired in the same change: it was
 // already the longest page in the app, and a three-way split made it longer still.
 navItems: [
-    { id: 'monitor',  label: 'Monitor',  icon: 'fa-heart-pulse',  modules: ['srr','coughLog','syncopeLog','skinLog','lumps'] },
+    { id: 'monitor',  label: 'Monitor',  icon: 'fa-heart-pulse',  modules: ['srr','coughLog','syncopeLog','skinLog','lumps','ortho'] },
     { id: 'wellness', label: 'Wellness', icon: 'fa-paw',          modules: ['weightDiet','activityLog','vaccinations','antiparasitics'] },
     { id: 'medical',  label: 'Medical',  icon: 'fa-stethoscope',  modules: null },
     { id: 'trends',   label: 'Trends',   icon: 'fa-chart-line',   modules: ['srr','medications','acvimStaging','weightDiet','antiparasitics','vaccinations'] },
@@ -1881,6 +2167,8 @@ init() {
     this.skinLog = loadKey('vch_skinLog') || [];
     this.lumpLog = loadKey('vch_lumpLog') || [];
     this.lumpMeasurements = loadKey('vch_lumpMeasurements') || [];
+    this.orthoConditions = loadKey('vch_orthoConditions') || [];
+    this.orthoLog = loadKey('vch_orthoLog') || [];
 
     // Backfill module flags for legacy / restored profiles
     this.patients.forEach(p => { p.modules = { ...this.defaultModules, ...(p.modules || {}) }; });
@@ -2033,7 +2321,7 @@ startNewPatientOnboarding() {
         notes: 'Initial Baseline via Onboarding'
     };
     
-    this.onboardingData = { hasCardiacIssue: 'no' }; 
+    this.onboardingData = { concerns: ['wellness'], hasCardiacIssue: 'no' };
     this.isExistingPatientEdit = false;
     this.onboardingStep = this.patients.length === 0 ? 0 : 1; 
     this.showOnboarding = true;
@@ -2045,29 +2333,69 @@ startNewPatientOnboarding() {
         backupPreview: null,      // parsed backup file awaiting confirmation
         backupSelection: [],      // patient IDs ticked for import
 
+// Is this step-2 concern ticked? Ids are from `ONBOARDING_CONCERNS`.
+hasOnboardingConcern(id) {
+    return (this.onboardingData.concerns || []).includes(id);
+},
+
+// Tick / untick one concern. NOTHING here is exclusive — 'wellness' used to clear the others,
+// which forced an owner with a cardiac patient to choose between watching the heart and doing the
+// routine care, when in reality they are doing both.
+toggleOnboardingConcern(id) {
+    const current = this.onboardingData.concerns || [];
+    this.onboardingData.concerns = current.includes(id)
+        ? current.filter(c => c !== id)
+        : [...current, id];
+    // Keep the legacy single-value mirror in step. Cardiac wins over seizure because it is the
+    // one that opens the diagnosis panel and saves a baseline diagnosis.
+    this.onboardingData.hasCardiacIssue =
+        this.hasOnboardingConcern('cardiac') ? 'yes'
+      : this.hasOnboardingConcern('seizure') ? 'seizure'
+      : 'no';
+},
+
+// Mirrors `OnboardingRecommendations.modules(for:acvimStage:)` on iOS — change both together.
+//
+// The rule is a plain UNION: a module is recommended if ANY ticked concern recommends it, and
+// nothing cancels anything else out. Under-recommending is a module the owner has to go and find
+// later; over-recommending is one toggle on the very next screen.
 generateModuleRecommendations() {
-    // Reset to baseline
-    let recs = { srr: false, medications: false, coughLog: false, activityLog: false, syncopeLog: false, acvimStaging: false, vaccinations: true, weightDiet: true, antiparasitics: true };
-    
-    if (this.onboardingData.hasCardiacIssue === 'yes') {
+    // Baseline every pet gets, whatever brought the owner here.
+    //
+    // `medications` and `acvimStaging` joined that baseline in 2026-08. Both used to wait for a
+    // cardiac tick, which read as "this app is for heart patients", and both are wrong to withhold:
+    // the medication module is also where SUPPLEMENTS are recorded, and a joint supplement belongs
+    // in a perfectly well pet's record; the diagnosis module takes ANY diagnosis, not only a staged
+    // cardiac one. Both are cheap when unused — an empty ledger, not a wall of prompts.
+    let recs = { srr: false, medications: true, coughLog: false, activityLog: false,
+                 syncopeLog: false, acvimStaging: true, vaccinations: true, weightDiet: true,
+                 antiparasitics: true, skinLog: false, lumps: false };
+
+    const has = (id) => this.hasOnboardingConcern(id);
+    // No tick at all still has to produce a usable pet, not an app with everything switched off.
+    const none = (this.onboardingData.concerns || []).length === 0;
+
+    if (none || has('wellness')) {
+        recs.activityLog = true;
+    }
+    if (has('cardiac')) {
         recs.srr = true;
-        recs.acvimStaging = true;
-        
-        // If they specify Stage B2, C, or D in the actual diagnosis object
+        // An escalating stage only escalates a CARDIAC patient — a leftover stage from a
+        // half-filled form must not switch on cough for a skin case.
         if (['Stage B2', 'Stage C', 'Stage D'].includes(this.newDiagnosis.acvimStage)) {
-            recs.medications = true;
-            recs.coughLog = true;      
-            recs.activityLog = true; 
+            recs.coughLog = true;
+            recs.activityLog = true;
         }
-    } else if (this.onboardingData.hasCardiacIssue === 'seizure') {
+    }
+    if (has('seizure')) {
         recs.syncopeLog = true;
         recs.activityLog = true;
         recs.srr = true; // useful for collapse context
-    } else {
-        // General wellness
-        recs.coughLog = false;     
-        recs.activityLog = true; 
     }
+    // Neither skin nor a lump implies a heart problem, so SRR stays off — switching on a
+    // breathing-rate counter for a pet with an itchy ear is exactly the assumption this dropped.
+    if (has('skin')) { recs.activityLog = true; recs.skinLog = true; }
+    if (has('lump')) { recs.activityLog = true; recs.lumps = true; }
 
     this.editingPatient.modules = { ...recs };
     this.onboardingStep = 3;
@@ -2086,7 +2414,9 @@ saveOnboardedPatient() {
         this.logWeight(patientIdToSave, weightValue);
     }
 
-    if (this.onboardingData.hasCardiacIssue === 'yes' && this.newDiagnosis.diagnosis) {
+    // A baseline diagnosis is only saved when the CARDIAC concern was actually ticked and a
+    // diagnosis chosen — matches iOS's `concerns.contains(.cardiac), !diagnosis.isEmpty` guard.
+    if (this.hasOnboardingConcern('cardiac') && this.newDiagnosis.diagnosis) {
         this.newDiagnosis.patientId = patientIdToSave; // ensure correct ID
         this.diagnosisLog.push({ ...this.newDiagnosis, timestamp: Date.now() });
         this.saveToStorage('vch_diagnosisLog', this.diagnosisLog);
@@ -2166,6 +2496,10 @@ deletePatient(patientId) {
             // Both lump tables go together: a measurement whose lump has been deleted is a size
             // with nothing to be the size OF.
             this.lumpMeasurements = (this.lumpMeasurements || []).filter(m => m.patientId !== patientId);
+            // Both orthopaedics tables go together — a day's score whose condition has gone is a
+            // lameness grade with nothing to be a grade of.
+            this.orthoLog = (this.orthoLog || []).filter(e => e.patientId !== patientId);
+            this.orthoConditions = (this.orthoConditions || []).filter(c => c.patientId !== patientId);
             this.lumpLog = (this.lumpLog || []).filter(l => l.patientId !== patientId);
 
             // 2. Persist the flushed arrays to local storage
@@ -2190,6 +2524,8 @@ deletePatient(patientId) {
             this.saveToStorage('vch_skinLog', this.skinLog);
             this.saveToStorage('vch_lumpLog', this.lumpLog);
             this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
+            this.saveToStorage('vch_orthoConditions', this.orthoConditions);
+            this.saveToStorage('vch_orthoLog', this.orthoLog);
 
             // 3. Reset application state
             if (this.patients.length > 0) {
@@ -2362,6 +2698,10 @@ mergePatients(targetId, sourceId) {
             // measurements to another animal's lump.
             this.lumpLog = (this.lumpLog || []).map(l => l.patientId === sourceId ? { ...l, patientId: targetId } : l);
             this.lumpMeasurements = (this.lumpMeasurements || []).map(m => m.patientId === sourceId ? { ...m, patientId: targetId } : m);
+            // Same rule as the lump pair: `conditionId` is untouched, so each day's score stays
+            // attached to the problem it describes.
+            this.orthoConditions = (this.orthoConditions || []).map(c => c.patientId === sourceId ? { ...c, patientId: targetId } : c);
+            this.orthoLog = (this.orthoLog || []).map(e => e.patientId === sourceId ? { ...e, patientId: targetId } : e);
 
             // Dedupe identical SRR readings created by merging an imported copy
             const seen = new Set();
@@ -2411,6 +2751,8 @@ mergePatients(targetId, sourceId) {
             this.saveToStorage('vch_skinLog', this.skinLog);
             this.saveToStorage('vch_lumpLog', this.lumpLog);
             this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
+            this.saveToStorage('vch_orthoConditions', this.orthoConditions);
+            this.saveToStorage('vch_orthoLog', this.orthoLog);
 
             this.activePatientId = targetId;
             alert("Patient records successfully merged.");
@@ -4560,7 +4902,23 @@ appointmentStatusLabel(status) {
     return s ? s.label : 'Booked';
 },
 
-appointmentIsOpen(a) { return (a?.status || 'booked') === 'booked'; },
+// A to-book record is OPEN. It is the one thing on the list that still needs an ACTION from the
+// owner, so treating it as history would defeat the entire feature.
+appointmentIsOpen(a) {
+    const st = a?.status || 'booked';
+    return st === 'booked' || st === 'toBook';
+},
+
+// Is this a REMINDER TO BOOK rather than a confirmed appointment? Callers use it to change the
+// wording — "time to book" instead of "your appointment is" — and to leave out anything that
+// assumes a slot exists (a clock time, an evening-before fasting alert, a calendar entry pinned to
+// an hour). Mirrors `AppointmentCatalogue.needsBooking` on iOS.
+appointmentNeedsBooking(a) { return (a?.status || 'booked') === 'toBook'; },
+
+// Days of notice for a TO-BOOK record, which is a different quantity from the lead on a real
+// booking. A week is fine for "your appointment is on Tuesday"; it is not enough to get a slot at a
+// busy practice, so the nudge to phone lands a fortnight before the pet is due to be seen.
+APPOINTMENT_BOOKING_LEAD_DAYS: 14,
 
 // --- Filtering & ordering (status-driven, NEVER date-driven) ---
 
@@ -4589,13 +4947,29 @@ appointmentHistory() {
 },
 
 // Booked, but the day has gone. These get ASKED about — "did you go?" — never assumed either way.
+//
+// A to-book record is EXCLUDED however overdue it is: there was no appointment, so "did you go?"
+// cannot be answered and marking it attended would file a visit that never happened.
+// `appointmentsOverdueToBook` asks the right question instead.
 appointmentNeedsOutcome(a) {
     if (!this.appointmentIsOpen(a)) return false;
+    if (this.appointmentNeedsBooking(a)) return false;
+    return (a.date || '') < new Date().toISOString().split('T')[0];
+},
+
+// A to-book record the pet is now due for — "you were told to go back by now, and it still isn't
+// booked". The counterpart to `appointmentNeedsOutcome`, and the reason the status exists.
+appointmentBookingOverdue(a) {
+    if (!this.appointmentNeedsBooking(a)) return false;
     return (a.date || '') < new Date().toISOString().split('T')[0];
 },
 
 appointmentsNeedingOutcome() {
     return this.upcomingAppointments().filter(a => this.appointmentNeedsOutcome(a));
+},
+
+appointmentsOverdueToBook() {
+    return this.upcomingAppointments().filter(a => this.appointmentBookingOverdue(a));
 },
 
 // The merged diary: appointments PLUS booked procedures, so "what is coming up" is one list.
@@ -4609,12 +4983,15 @@ upcomingCare() {
         id: 'appointment.' + a.id, kind: 'appointment', sourceId: a.id,
         date: a.date, time: a.time || '',
         title: this.appointmentTitle(a), subtitle: this.appointmentSubtitle(a),
-        needsOutcome: this.appointmentNeedsOutcome(a)
+        needsOutcome: this.appointmentNeedsOutcome(a),
+        needsBooking: this.appointmentNeedsBooking(a),
+        bookingOverdue: this.appointmentBookingOverdue(a)
     })).concat(this.scheduledProcedures().map(pr => ({
         id: 'procedure.' + pr.id, kind: 'procedure', sourceId: pr.id,
         date: pr.date, time: '',
         title: this.procedureTitle(pr), subtitle: this.procedureSubtitle(pr),
-        needsOutcome: !!this.procedureNeedsOutcome(pr)
+        needsOutcome: !!this.procedureNeedsOutcome(pr),
+        needsBooking: false, bookingOverdue: false
     })));
     return items.sort((a, b) => {
         if (a.needsOutcome !== b.needsOutcome) return a.needsOutcome ? -1 : 1;
@@ -4624,8 +5001,11 @@ upcomingCare() {
     });
 },
 
-futureCare()          { return this.upcomingCare().filter(i => !i.needsOutcome); },
+// Excludes overdue to-book items, which get their own section for the same reason slipped bookings
+// do: buried among future dates is exactly where they stop being dealt with.
+futureCare()          { return this.upcomingCare().filter(i => !i.needsOutcome && !i.bookingOverdue); },
 careAwaitingOutcome() { return this.upcomingCare().filter(i => i.needsOutcome); },
+careOverdueToBook()   { return this.upcomingCare().filter(i => i.bookingOverdue); },
 
 // --- Wording ---
 
@@ -4666,6 +5046,47 @@ appointmentWhenText(a) {
     const day = new Date(a.date + 'T12:00:00Z').toLocaleDateString(undefined,
         { weekday: 'long', day: 'numeric', month: 'long' });
     return a.time ? `${day} at ${a.time}` : day;
+},
+
+// "Due by Tuesday 12 August — not booked yet" for a to-book record, otherwise the usual line.
+// A to-book record's date is when the pet should be SEEN BY, not a slot, and printing it the same
+// way as a confirmed booking is exactly the confusion this status exists to remove.
+appointmentWhenLine(a) {
+    const when = this.appointmentWhenText(a);
+    return this.appointmentNeedsBooking(a) ? `Due by ${when} — not booked yet` : when;
+},
+
+// "In about six months" → a due date that many months from today. The quick answers for a to-book
+// record, because "come back in about six months" is exactly how this is said in the consulting
+// room and typing it should be that quick.
+setAppointmentDueInMonths(months) {
+    const d = new Date();
+    d.setMonth(d.getMonth() + months);
+    this.newAppointment.date = d.toISOString().split('T')[0];
+},
+
+// Switching to "still to book" clears the time (there is no slot) and widens the notice period —
+// a week is not enough to get a slot at a busy practice.
+onAppointmentStatusChange() {
+    if (this.appointmentNeedsBooking(this.newAppointment)) {
+        this.newAppointment.time = '';
+        this.newAppointment.reminderLeadDays = this.APPOINTMENT_BOOKING_LEAD_DAYS;
+        this.newAppointment.remindDayBefore = false;
+    }
+},
+
+// "I've booked it now" — promotes a to-book note into a real appointment.
+//
+// Deliberately does NOT touch the date. The stored date is when the pet was DUE to be seen, and
+// the slot the practice gave is almost never that day. Guessing one would put a wrong date in the
+// diary; the owner puts the real date and time in on the form that opens.
+markAppointmentBooked(id) {
+    const a = (this.appointmentLog || []).find(x => x.id === id);
+    if (!a) return;
+    a.status = 'booked';
+    a.reminderLeadDays = this.appointmentType(a.type)?.defaultLeadDays ?? 7;
+    this.saveToStorage('vch_appointmentLog', this.appointmentLog);
+    this.openAppointmentForm(id);
 },
 
 // --- Form & CRUD ---
@@ -4817,8 +5238,13 @@ deleteAppointment(id) {
 // hardcodes the word "due", and an appointment described as due reads like a lapsed treatment —
 // the opposite of the truth. This one says "booked", and carries the real slot time when there is
 // one instead of pretending an all-day event.
+// A to-book record goes into the calendar too, but as "Book: …" and never "booked": putting an
+// appointment nobody made into the owner's real calendar as a confirmed booking is precisely the
+// mistake the 'toBook' status exists to prevent. It also never carries a clock time — there is no
+// slot — so it always renders as an all-day entry.
 _buildAppointmentVevent(a, patientName) {
-    const title = this.appointmentTitle(a);
+    const toBook = this.appointmentNeedsBooking(a);
+    const title = toBook ? `Book: ${this.appointmentTitle(a)}` : this.appointmentTitle(a);
     const pad = n => String(n).padStart(2, '0');
     const ymd = a.date.replace(/-/g, '');
 
@@ -4829,7 +5255,7 @@ _buildAppointmentVevent(a, patientName) {
     // With a known slot: a one-hour local-time event, so it lands in the right place in the day.
     // Without one: an all-day event, which is the honest rendering of "we have not been told yet".
     let dtstart, dtend;
-    if (a.time) {
+    if (a.time && !toBook) {
         const [h, m] = a.time.split(':').map(Number);
         dtstart = `DTSTART:${ymd}T${pad(h)}${pad(m)}00`;
         dtend   = `DTEND:${ymd}T${pad((h + 1) % 24)}${pad(m)}00`;
@@ -4843,7 +5269,9 @@ _buildAppointmentVevent(a, patientName) {
     const desc = [
         `Pet: ${patientName}`,
         `Appointment: ${title}`,
-        `Booked: ${new Date(a.date + 'T12:00:00Z').toLocaleDateString('en-GB')}${a.time ? ' at ' + a.time : ''}`,
+        toBook
+            ? `Due by: ${new Date(a.date + 'T12:00:00Z').toLocaleDateString('en-GB')} — not booked yet`
+            : `Booked: ${new Date(a.date + 'T12:00:00Z').toLocaleDateString('en-GB')}${a.time ? ' at ' + a.time : ''}`,
     ];
     const place = this.appointmentPlaceName(a);
     if (place) desc.push(`Where: ${place}`);
@@ -4859,8 +5287,12 @@ _buildAppointmentVevent(a, patientName) {
     const alarms = [];
     if (lead > 0) {
         alarms.push('BEGIN:VALARM', 'ACTION:DISPLAY',
-            `DESCRIPTION:${this._escapeIcs(`${patientName}'s ${title} is booked in ${lead} day${lead === 1 ? '' : 's'}`
-                + (a.preparation ? ` — ${a.preparation}` : ''))}`,
+            `DESCRIPTION:${this._escapeIcs(
+                (toBook
+                    ? `Time to book ${patientName}'s ${this.appointmentTitle(a)} — due in ${lead} day${lead === 1 ? '' : 's'}`
+                      + (a.phone ? ` · ${a.phone}` : '')
+                    : `${patientName}'s ${title} is booked in ${lead} day${lead === 1 ? '' : 's'}`
+                      + (a.preparation ? ` — ${a.preparation}` : '')))}`,
             `TRIGGER:-P${lead}D`, 'END:VALARM');
     }
     if (a.remindDayBefore !== false) {
@@ -5892,6 +6324,20 @@ lumpPrompts(l) {
     return out;
 },
 
+// One export line for one measurement — "3 May 2026 — 24 × 18 mm — firm — moves freely".
+// Mirrors `LumpLogic.measurementReportLine` on iOS. Shared by the CSV and the PDF so the two
+// cannot describe the same measurement differently.
+lumpMeasurementReportLine(m) {
+    let line = `${this.allergyDayText(m.date)} — ${this.lumpSizeText(m)}`;
+    if (m.consistency && m.consistency !== 'unsure') line += ` — ${this.lumpConsistencyLabel(m.consistency)}`;
+    if (m.mobility && m.mobility !== 'unsure') line += ` — ${this.lumpMobilityLabel(m.mobility)}`;
+    if ((m.signs || []).length) line += ` — ${this.lumpSignList(m.signs)}`;
+    // Photos are iOS-only, but an imported record can carry one — say so rather than losing it.
+    if (m.photoFilename) line += ' — photo taken';
+    if (m.notes) line += ` — ${m.notes}`;
+    return line;
+},
+
 lumpCountSummary() {
     const lumps = this.patientLumps();
     if (!lumps.length) return '';
@@ -5901,6 +6347,40 @@ lumpCountSummary() {
     if (active) parts.push(`${active} being monitored`);
     if (inactive) parts.push(`${inactive} removed or resolved`);
     return parts.join(' · ');
+},
+
+// One short line per lump for the collapsed Monitor card: what it is called and how big it was
+// last measured. Mirrors `LumpLogic.cardLines` on iOS — change both together.
+//
+// The card used to show only "2 being monitored", which answers a question nobody has. The size is
+// what an owner is checking the app FOR, and having to expand the panel and open a lump to see it
+// is what made the measurements feel hidden.
+//
+// Deliberately NO growth phrase: on a summary line, stripped of the dates it was computed from,
+// "grown 6 mm" reads as a verdict. That belongs on the row, next to the numbers it came from.
+// Active lumps only — a removed lump's last size is history, not something to keep watching.
+lumpCardLines(limit = 4) {
+    return this.patientLumps()
+        .filter(l => this.lumpIsActive(l.status))
+        .slice()
+        .sort((a, b) => ((b.firstNoticed || b.createdAt || '')
+            .localeCompare(a.firstNoticed || a.createdAt || '')))
+        .slice(0, limit)
+        .map(l => {
+            const mine = this.lumpMeasurementsFor(l.id);
+            const last = mine.length ? mine[mine.length - 1] : null;
+            if (!last || this.lumpGreatestMm(last) === null) {
+                return `${this.lumpDisplayName(l)} — not measured yet`;
+            }
+            return `${this.lumpDisplayName(l)} — ${this.lumpGreatestText(last)}, `
+                 + `${this.allergyDayText(last.date)}`;
+        });
+},
+
+// "+ 2 more in the lump log" when there are more active lumps than the card shows, else ''.
+lumpCardOverflowText(limit = 4) {
+    const active = this.patientLumps().filter(l => this.lumpIsActive(l.status)).length;
+    return active > limit ? `+ ${active - limit} more in the lump log` : '';
 },
 
 // --- Lump forms -----------------------------------------------------------------------------------
@@ -5913,10 +6393,33 @@ openLumpForm(id = null) {
             siteDetail: existing.siteDetail || '', firstNoticed: existing.firstNoticed || '',
             status: existing.status || 'monitoring', vetStage: existing.vetStage || 'notSeen',
             vetDiagnosis: existing.vetDiagnosis || '', resolvedDate: existing.resolvedDate || '',
-            notes: existing.notes || '' }
+            notes: existing.notes || '',
+            firstMeasure: { unit: 'mm', length: '', width: '', depth: '' } }
         : { label: '', site: '', side: '', siteDetail: '', firstNoticed: '', status: 'monitoring',
-            vetStage: 'notSeen', vetDiagnosis: '', resolvedDate: '', notes: '' };
+            vetStage: 'notSeen', vetDiagnosis: '', resolvedDate: '', notes: '',
+            firstMeasure: { unit: 'mm', length: '', width: '', depth: '' } };
     this.showLumpForm = true;
+},
+
+// mm ↔ cm on the inline first measurement. RE-EXPRESSES what has been typed rather than
+// reinterpreting it, so flipping to cm and back cannot silently turn 24 mm into 24 cm. Same rule
+// as `setLumpMeasurementUnit` on the full form.
+setNewLumpMeasureUnit(unit) {
+    const fm = this.newLump.firstMeasure;
+    if (!fm || unit === fm.unit) return;
+    const factor = unit === 'cm' ? 0.1 : 10;
+    ['length', 'width', 'depth'].forEach(k => {
+        const v = Number(fm[k]);
+        if (Number.isFinite(v) && fm[k] !== '') fm[k] = Math.round(v * factor * 100) / 100;
+    });
+    fm.unit = unit;
+},
+
+// Tap-to-fill a rough size ("about the size of a pea") into the inline first measurement.
+setNewLumpMeasureReference(mm) {
+    const fm = this.newLump.firstMeasure;
+    if (!fm) return;
+    fm.length = fm.unit === 'cm' ? mm / 10 : mm;
 },
 
 closeLumpForm() { this.showLumpForm = false; this.editingLumpId = null; },
@@ -5944,10 +6447,38 @@ saveLump() {
         notes: (l.notes || '').trim(),
         createdAt: (existing && existing.createdAt) || new Date().toISOString()
     };
+    const isNew = !this.editingLumpId;
     this.lumpLog = this.editingLumpId
         ? this.lumpLog.map(x => x.id === this.editingLumpId ? record : x)
         : [...(this.lumpLog || []), record];
     this.saveToStorage('vch_lumpLog', this.lumpLog);
+
+    // The first measurement, if one was taken on the add form. Dated TODAY rather than
+    // `firstNoticed`: the owner measured it now, and back-dating today's number to whenever they
+    // first spotted it would invent a size for a day nobody measured.
+    const fm = l.firstMeasure || {};
+    const toMm = v => {
+        const n = Number(v);
+        if (!Number.isFinite(n) || n <= 0) return null;
+        return fm.unit === 'cm' ? n * 10 : n;
+    };
+    const dims = { lengthMm: toMm(fm.length), widthMm: toMm(fm.width), depthMm: toMm(fm.depth) };
+    if (isNew && (dims.lengthMm || dims.widthMm || dims.depthMm)) {
+        this.lumpMeasurements = [...(this.lumpMeasurements || []), {
+            id: this.generateId(),
+            patientId: this.activePatientId,
+            lumpId: record.id,
+            date: new Date().toISOString().split('T')[0],
+            ...dims,
+            consistency: 'unsure',
+            mobility: 'unsure',
+            signs: [],
+            photoFilename: '',
+            notes: '',
+            createdAt: new Date().toISOString()
+        }];
+        this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
+    }
     this.closeLumpForm();
 },
 
@@ -6051,6 +6582,411 @@ deleteLumpMeasurement(id) {
     if (!window.confirm('Delete this measurement?')) return;
     this.lumpMeasurements = (this.lumpMeasurements || []).filter(m => m.id !== id);
     this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
+},
+
+// ══ ORTHOPAEDICS: LAMENESS & JOINTS ═══════════════════════════════════════════════════════════
+// Mirrors `OrthoLogic.swift` on iOS — change both together. Read the safety rule in the ORTHO_*
+// block near the top of this file before touching a single sentence any of this produces.
+
+// --- Catalogue lookups ---
+
+orthoLegLabel(id)         { return (ORTHO_LEGS.find(x => x.id === id) || {}).label || id; },
+orthoStiffnessLabel(id)   { return (ORTHO_STIFFNESS.find(x => x.id === id) || {}).label || id; },
+orthoAggravatorLabel(id)  { return (ORTHO_AGGRAVATORS.find(x => x.id === id) || {}).label || id; },
+orthoPainReliefLabel(id)  { return (ORTHO_PAIN_RELIEF.find(x => x.id === id) || {}).label || id; },
+orthoManagementLabel(id)  { return (ORTHO_MANAGEMENTS.find(x => x.id === id) || {}).label || id; },
+orthoCauseLabel(id)       { return (ORTHO_CAUSES.find(x => x.id === id) || {}).label || id; },
+orthoChronicityLabel(id)  { return (ORTHO_CHRONICITIES.find(x => x.id === id) || {}).label || id; },
+orthoVetStageLabel(id)    { return (ORTHO_VET_STAGES.find(x => x.id === id) || {}).label || id; },
+orthoStatusLabel(id)      { return (ORTHO_STATUSES.find(x => x.id === id) || {}).label || id; },
+
+orthoLamenessLabel(score) {
+    const g = ORTHO_LAMENESS_SCALE.find(x => x.score === Number(score));
+    return g ? g.label : 'Not scored';
+},
+
+orthoLamenessDetail(score) {
+    const g = ORTHO_LAMENESS_SCALE.find(x => x.score === Number(score));
+    return g ? g.detail : '';
+},
+
+// "2 — obvious, but using the leg". The one place the score and the words are joined, so screen,
+// CSV and PDF cannot describe the same day differently.
+orthoLamenessText(score) {
+    if (score === null || score === undefined || score === '') return 'Not scored';
+    return `${score} — ${this.orthoLamenessLabel(score).toLowerCase()}`;
+},
+
+// "Left back and Right back", or '' when none were ticked.
+orthoLegList(ids) {
+    const names = (ids || []).map(id => (ORTHO_LEGS.find(x => x.id === id) || {}).label).filter(Boolean);
+    if (!names.length) return '';
+    if (names.length === 1) return names[0];
+    return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+},
+
+orthoAggravatorList(ids) { return (ids || []).map(id => this.orthoAggravatorLabel(id)).join('; '); },
+orthoPainReliefList(ids) { return (ids || []).map(id => this.orthoPainReliefLabel(id)).join('; '); },
+orthoManagementList(ids) { return (ids || []).map(id => this.orthoManagementLabel(id)).join('; '); },
+
+orthoIsActive(status) { return status !== 'resolved'; },
+
+// A day that was actually SCORED. '' / null means logged-but-unscored, which is NOT 0 (sound) —
+// treating them alike would invent good days out of missing ones and flatten the trend.
+_orthoIsScored(e) {
+    return e && e.lamenessScore !== null && e.lamenessScore !== undefined && e.lamenessScore !== '';
+},
+
+// --- Filtering & ordering ---
+
+patientOrthoConditions() {
+    return (this.orthoConditions || []).filter(c => c.patientId === this.activePatientId);
+},
+
+patientOrthoLog() {
+    return (this.orthoLog || []).filter(e => e.patientId === this.activePatientId);
+},
+
+// Active problems first, then by when they were first noticed (most recent first); resolved last.
+//
+// Deliberately NOT ordered by how bad the app thinks each one is — a ranking like that would be the
+// app forming an opinion about which of a pet's problems matters.
+get sortedOrthoConditions() {
+    return this.patientOrthoConditions().slice().sort((a, b) => {
+        const aa = this.orthoIsActive(a.status), ba = this.orthoIsActive(b.status);
+        if (aa !== ba) return aa ? -1 : 1;
+        const da = a.firstNoticed || a.createdAt || '';
+        const db = b.firstNoticed || b.createdAt || '';
+        return db.localeCompare(da);
+    });
+},
+
+// One condition's days, oldest first — chart order, and the order every comparison assumes.
+orthoEntriesFor(conditionId) {
+    return this.patientOrthoLog()
+        .filter(e => e.conditionId === conditionId)
+        .sort((a, b) => (a.date || '').localeCompare(b.date || '')
+                     || (a.createdAt || '').localeCompare(b.createdAt || ''));
+},
+
+orthoLatestEntry(conditionId) {
+    const mine = this.orthoEntriesFor(conditionId);
+    return mine.length ? mine[mine.length - 1] : null;
+},
+
+// Scored days only. Unscored days are ABSENT rather than plotted as zero.
+orthoScoreSeries(conditionId) {
+    return this.orthoEntriesFor(conditionId)
+        .filter(e => this._orthoIsScored(e))
+        .map(e => ({ date: e.date, score: Number(e.lamenessScore) }));
+},
+
+// The days a given pain relief was recorded as GIVEN — what makes "he was only comfortable while
+// he was on the anti-inflammatory" visible. "Nothing today" is an answer, not a treatment.
+orthoPainReliefDays(conditionId) {
+    const counts = {};
+    this.orthoEntriesFor(conditionId).forEach(e => {
+        (e.painReliefGiven || []).forEach(t => {
+            if (t !== 'none') counts[t] = (counts[t] || 0) + 1;
+        });
+    });
+    return Object.keys(counts)
+        .map(t => ({ treatment: t, days: counts[t] }))
+        .sort((a, b) => b.days - a.days || a.treatment.localeCompare(b.treatment));
+},
+
+// The lameness score and that day's walking, paired for the chart.
+//
+// Days with a score but no activity record are KEPT with `mins` null — the score is still a real
+// observation. Days with activity but no score are dropped: there is nothing to plot them against.
+//
+// This does NOT, and must not, adjust the score for the activity.
+orthoActivityPairs(conditionId) {
+    const byDay = {};
+    (this.activityLog || [])
+        .filter(a => a.patientId === this.activePatientId)
+        .forEach(a => { byDay[(a.date || '').split('T')[0]] = a.durationMins ?? null; });
+    return this.orthoScoreSeries(conditionId).map(p => ({
+        date: p.date, score: p.score, mins: byDay[(p.date || '').split('T')[0]] ?? null
+    }));
+},
+
+// --- The recent read ---
+//
+// States what was RECORDED. Nothing more. Note what it deliberately does NOT do: it does not
+// compare with the previous fortnight and announce an improvement. "Better than last week" is a
+// clinical judgement about an animal from a handful of numbers an owner eyeballed, and getting it
+// wrong in the reassuring direction is the failure that keeps a limping dog at home.
+orthoRecentRead(conditionId) {
+    const cutoff = new Date(Date.now() - ORTHO_RECENT_WINDOW_DAYS * 864e5)
+        .toISOString().split('T')[0];
+    const scored = this.orthoEntriesFor(conditionId)
+        .filter(e => (e.date || '') >= cutoff && this._orthoIsScored(e))
+        .map(e => Number(e.lamenessScore));
+
+    if (!scored.length) {
+        return { scoredDays: 0, badDays: 0, mean: null, worthRaising: false,
+                 text: `No lameness scores in the last ${ORTHO_RECENT_WINDOW_DAYS} days.` };
+    }
+
+    const bad = scored.filter(v => v >= ORTHO_BAD_DAY_SCORE).length;
+    const mean = scored.reduce((n, v) => n + v, 0) / scored.length;
+    const dayWord = scored.length === 1 ? 'day' : 'days';
+    let text = `Scored on ${scored.length} ${dayWord} in the last ${ORTHO_RECENT_WINDOW_DAYS}, `
+             + `averaging ${this.orthoScoreText(mean)} out of 4.`;
+    let raise = false;
+    if (bad >= ORTHO_BAD_DAY_FLOOR) {
+        text += ` ${bad} of those were ${ORTHO_BAD_DAY_SCORE} or worse — worth showing your vet.`;
+        raise = true;
+    }
+    return { scoredDays: scored.length, badDays: bad, mean, worthRaising: raise, text };
+},
+
+// "2" / "2.4" — one decimal place, no trailing ".0".
+orthoScoreText(value) {
+    const rounded = Math.round(value * 10) / 10;
+    return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+},
+
+// --- Wording ---
+
+orthoDisplayName(c) {
+    const label = (c.label || '').trim();
+    if (label) return label;
+    const legs = this.orthoLegList(c.legs);
+    return legs || 'Lameness';
+},
+
+orthoSubtitle(c) {
+    return [this.orthoLegList(c.legs),
+            c.chronicity === 'unsure' ? '' : this.orthoChronicityLabel(c.chronicity)]
+        .filter(Boolean).join(' · ');
+},
+
+orthoSummaryLine(c) {
+    const last = this.orthoLatestEntry(c.id);
+    if (!last) return 'No days logged yet';
+    const scorePart = this._orthoIsScored(last)
+        ? this.orthoLamenessText(last.lamenessScore) : 'logged, not scored';
+    return `${scorePart} · ${this.allergyDayText(last.date)}`;
+},
+
+// One short line per problem for the collapsed Monitor card.
+//
+// Active problems only, and deliberately NO trend phrase: on a summary card, stripped of the dates
+// it came from, "getting worse" reads as a verdict. The recent read lives on the log panel where
+// the numbers behind it are visible.
+orthoCardLines(limit = 3) {
+    return this.sortedOrthoConditions
+        .filter(c => this.orthoIsActive(c.status))
+        .slice(0, limit)
+        .map(c => `${this.orthoDisplayName(c)} — ${this.orthoSummaryLine(c)}`);
+},
+
+orthoCountSummary() {
+    const list = this.patientOrthoConditions();
+    if (!list.length) return '';
+    const active = list.filter(c => this.orthoIsActive(c.status)).length;
+    const inactive = list.length - active;
+    const parts = [];
+    if (active) parts.push(`${active} being monitored`);
+    if (inactive) parts.push(`${inactive} resolved`);
+    return parts.join(' · ');
+},
+
+// One export line for a condition — its own facts only, no interpretation.
+orthoConditionReportLine(c) {
+    let line = this.orthoDisplayName(c);
+    const legs = this.orthoLegList(c.legs);
+    // Only when the name is NOT already the legs. An unnamed condition falls back to its legs
+    // (`orthoDisplayName`), and appending them again gave "Left back and Right back — Left back and
+    // Right back" on every row of the export.
+    if (legs && line !== legs) line += ` — ${legs}`;
+    line += ` — ${this.orthoStatusLabel(c.status)}`;
+    line += ` — ${this.orthoChronicityLabel(c.chronicity)}`;
+    line += ` — ${this.orthoVetStageLabel(c.vetStage)}`;
+    // Worded as what the owner was TOLD, so a vet reading the export cannot mistake it for the
+    // app's own conclusion.
+    if (c.suspectedCause && c.suspectedCause !== 'unknown') {
+        line += ` — recorded as: ${this.orthoCauseLabel(c.suspectedCause)}`;
+    }
+    if (c.firstNoticed) line += ` — first noticed ${this.allergyDayText(c.firstNoticed)}`;
+    if (c.vetDiagnosis) line += ` — vet's note: ${c.vetDiagnosis}`;
+    if (c.painReliefPlan) line += ` — pain relief: ${c.painReliefPlan}`;
+    if ((c.management || []).length) line += ` — ${this.orthoManagementList(c.management)}`;
+    if (c.notes) line += ` — ${c.notes}`;
+    return line;
+},
+
+// One export line for one day.
+orthoEntryReportLine(e) {
+    let line = `${this.allergyDayText(e.date)} — ${this.orthoLamenessText(this._orthoIsScored(e) ? e.lamenessScore : null)}`;
+    const legs = this.orthoLegList(e.legs);
+    if (legs) line += ` — ${legs}`;
+    if (e.stiffnessOnRising && e.stiffnessOnRising !== 'unsure') {
+        line += ` — ${this.orthoStiffnessLabel(e.stiffnessOnRising)}`;
+    }
+    if ((e.worseAfter || []).length) line += ` — worse ${this.orthoAggravatorList(e.worseAfter)}`;
+    if ((e.painReliefGiven || []).length) line += ` — given: ${this.orthoPainReliefList(e.painReliefGiven)}`;
+    if (e.painReliefNotes) line += ` (${e.painReliefNotes})`;
+    if (e.vetVisit) line += ' — seen by a vet';
+    if (e.notes) line += ` — ${e.notes}`;
+    return line;
+},
+
+// --- Forms & CRUD ---
+
+openOrthoConditionForm(id = null) {
+    const existing = id ? this.patientOrthoConditions().find(c => c.id === id) : null;
+    this.editingOrthoConditionId = id;
+    this.newOrthoCondition = existing
+        ? { label: existing.label || '', legs: [...(existing.legs || [])],
+            suspectedCause: existing.suspectedCause || 'unknown',
+            vetDiagnosis: existing.vetDiagnosis || '', chronicity: existing.chronicity || 'unsure',
+            firstNoticed: existing.firstNoticed || '', vetStage: existing.vetStage || 'notSeen',
+            painReliefPlan: existing.painReliefPlan || '',
+            management: [...(existing.management || [])],
+            status: existing.status || 'active', notes: existing.notes || '' }
+        : { label: '', legs: [], suspectedCause: 'unknown', vetDiagnosis: '', chronicity: 'unsure',
+            firstNoticed: '', vetStage: 'notSeen', painReliefPlan: '', management: [],
+            status: 'active', notes: '' };
+    this.showOrthoConditionForm = true;
+},
+
+closeOrthoConditionForm() {
+    this.showOrthoConditionForm = false;
+    this.editingOrthoConditionId = null;
+},
+
+toggleOrthoConditionLeg(id) {
+    const list = this.newOrthoCondition.legs || [];
+    this.newOrthoCondition.legs = list.includes(id) ? list.filter(x => x !== id) : [...list, id];
+},
+
+toggleOrthoManagement(id) {
+    const list = this.newOrthoCondition.management || [];
+    this.newOrthoCondition.management = list.includes(id) ? list.filter(x => x !== id) : [...list, id];
+},
+
+saveOrthoCondition() {
+    if (!this.activePatientId) return;
+    const c = this.newOrthoCondition;
+    const existing = this.editingOrthoConditionId
+        ? (this.orthoConditions || []).find(x => x.id === this.editingOrthoConditionId) : null;
+    const record = {
+        id: this.editingOrthoConditionId || this.generateId(),
+        patientId: this.activePatientId,
+        label: (c.label || '').trim(),
+        legs: (c.legs || []).filter(id => ORTHO_LEGS.some(l => l.id === id)),
+        suspectedCause: ORTHO_CAUSES.some(x => x.id === c.suspectedCause) ? c.suspectedCause : 'unknown',
+        vetDiagnosis: (c.vetDiagnosis || '').trim(),
+        chronicity: ORTHO_CHRONICITIES.some(x => x.id === c.chronicity) ? c.chronicity : 'unsure',
+        // '' stays '' — plenty of arthritis has no start date, and defaulting to today would
+        // fabricate how long it has been going on.
+        firstNoticed: c.firstNoticed || '',
+        vetStage: ORTHO_VET_STAGES.some(x => x.id === c.vetStage) ? c.vetStage : 'notSeen',
+        painReliefPlan: (c.painReliefPlan || '').trim(),
+        management: (c.management || []).filter(id => ORTHO_MANAGEMENTS.some(m => m.id === id)),
+        status: ORTHO_STATUSES.some(x => x.id === c.status) ? c.status : 'active',
+        notes: (c.notes || '').trim(),
+        createdAt: (existing && existing.createdAt) || new Date().toISOString()
+    };
+    this.orthoConditions = this.editingOrthoConditionId
+        ? this.orthoConditions.map(x => x.id === this.editingOrthoConditionId ? record : x)
+        : [...(this.orthoConditions || []), record];
+    this.saveToStorage('vch_orthoConditions', this.orthoConditions);
+    this.closeOrthoConditionForm();
+},
+
+deleteOrthoCondition(id) {
+    if (!window.confirm('Delete this problem and all of its daily scores? This cannot be undone.')) return;
+    // The days go with it: a score whose condition has been deleted is a lameness grade with
+    // nothing to be a grade of.
+    this.orthoLog = (this.orthoLog || []).filter(e => e.conditionId !== id);
+    this.orthoConditions = (this.orthoConditions || []).filter(c => c.id !== id);
+    this.saveToStorage('vch_orthoLog', this.orthoLog);
+    this.saveToStorage('vch_orthoConditions', this.orthoConditions);
+    if (this.viewingOrthoConditionId === id) this.viewingOrthoConditionId = null;
+},
+
+toggleOrthoConditionDetail(id) {
+    this.viewingOrthoConditionId = this.viewingOrthoConditionId === id ? null : id;
+},
+
+openOrthoEntryForm(conditionId, entryId = null) {
+    const condition = this.patientOrthoConditions().find(c => c.id === conditionId);
+    if (!condition) return;
+    this.scoringOrthoConditionId = conditionId;
+    this.editingOrthoEntryId = entryId;
+    const existing = entryId ? (this.orthoLog || []).find(e => e.id === entryId) : null;
+    this.newOrthoEntry = existing
+        ? { date: existing.date, lamenessScore: this._orthoIsScored(existing) ? existing.lamenessScore : '',
+            legs: [...(existing.legs || [])],
+            stiffnessOnRising: existing.stiffnessOnRising || 'unsure',
+            worseAfter: [...(existing.worseAfter || [])],
+            painReliefGiven: [...(existing.painReliefGiven || [])],
+            painReliefNotes: existing.painReliefNotes || '',
+            vetVisit: !!existing.vetVisit, notes: existing.notes || '' }
+        // A new day starts with the condition's own legs pre-ticked: on most days it is the same
+        // leg, and re-ticking it every time is the friction that stops people logging.
+        : { date: new Date().toISOString().split('T')[0], lamenessScore: '',
+            legs: [...(condition.legs || [])], stiffnessOnRising: 'unsure', worseAfter: [],
+            painReliefGiven: [], painReliefNotes: '', vetVisit: false, notes: '' };
+    this.showOrthoEntryForm = true;
+},
+
+closeOrthoEntryForm() {
+    this.showOrthoEntryForm = false;
+    this.editingOrthoEntryId = null;
+    this.scoringOrthoConditionId = null;
+},
+
+toggleOrthoEntryField(field, id) {
+    const list = this.newOrthoEntry[field] || [];
+    this.newOrthoEntry[field] = list.includes(id) ? list.filter(x => x !== id) : [...list, id];
+},
+
+saveOrthoEntry() {
+    if (!this.activePatientId || !this.scoringOrthoConditionId) return;
+    const e = this.newOrthoEntry;
+    // An unscored day stays unscored. Writing 0 would turn "logged, not scored" into "sound".
+    const raw = Number(e.lamenessScore);
+    const score = (e.lamenessScore === '' || e.lamenessScore === null || !Number.isFinite(raw)
+                   || raw < 0 || raw > 4) ? null : raw;
+
+    // One record per day PER CONDITION — saving over an existing day replaces it, the same upsert
+    // the cough, activity and skin logs use.
+    const existing = this.editingOrthoEntryId
+        ? (this.orthoLog || []).find(x => x.id === this.editingOrthoEntryId)
+        : (this.orthoLog || []).find(x => x.patientId === this.activePatientId
+                                       && x.conditionId === this.scoringOrthoConditionId
+                                       && x.date === e.date);
+    const record = {
+        id: (existing && existing.id) || this.generateId(),
+        patientId: this.activePatientId,
+        conditionId: this.scoringOrthoConditionId,
+        date: e.date,
+        lamenessScore: score,
+        legs: (e.legs || []).filter(id => ORTHO_LEGS.some(l => l.id === id)),
+        stiffnessOnRising: ORTHO_STIFFNESS.some(x => x.id === e.stiffnessOnRising) ? e.stiffnessOnRising : 'unsure',
+        worseAfter: (e.worseAfter || []).filter(id => ORTHO_AGGRAVATORS.some(a => a.id === id)),
+        painReliefGiven: (e.painReliefGiven || []).filter(id => ORTHO_PAIN_RELIEF.some(p => p.id === id)),
+        painReliefNotes: (e.painReliefNotes || '').trim(),
+        vetVisit: !!e.vetVisit,
+        notes: (e.notes || '').trim(),
+        createdAt: (existing && existing.createdAt) || new Date().toISOString()
+    };
+    this.orthoLog = existing
+        ? this.orthoLog.map(x => x.id === existing.id ? record : x)
+        : [...(this.orthoLog || []), record];
+    this.saveToStorage('vch_orthoLog', this.orthoLog);
+    this.closeOrthoEntryForm();
+},
+
+deleteOrthoEntry(id) {
+    if (!window.confirm('Delete this day?')) return;
+    this.orthoLog = (this.orthoLog || []).filter(e => e.id !== id);
+    this.saveToStorage('vch_orthoLog', this.orthoLog);
 },
 
 echoDisplayName(r) {
@@ -8823,7 +9759,8 @@ resetData() {
                   'vch_diagnosisLog','vch_syncopeLog','vch_coughLog','vch_activityLog',
                   'vch_vaccinationLog','vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog',
                   'vch_bloodResults', 'vch_echoMeasurements', 'vch_procedureLog', 'vch_allergyLog',
-                  'vch_appointmentLog', 'vch_skinLog', 'vch_lumpLog', 'vch_lumpMeasurements'];
+                  'vch_appointmentLog', 'vch_skinLog', 'vch_lumpLog', 'vch_lumpMeasurements',
+                  'vch_orthoConditions', 'vch_orthoLog'];
     keys.forEach(k => localStorage.removeItem(k));
 
     this.patients = []; this.weightLog = []; this.srrHistory = []; this.medLedger = []; this.suppLedger = [];
@@ -8831,6 +9768,7 @@ resetData() {
     this.vaccinationLog = []; this.antiparasiticLog = []; this.injectionLog = []; this.medDoseLog = [];
     this.bloodResults = []; this.echoMeasurements = []; this.procedureLog = []; this.allergyLog = [];
     this.appointmentLog = []; this.skinLog = []; this.lumpLog = []; this.lumpMeasurements = [];
+    this.orthoConditions = []; this.orthoLog = [];
     this.activePatientId = null;
 
     [this.$refs.rrrChartCanvas, this.$refs.medChartCanvas, this.$refs.weightChartCanvas, this.$refs.injectionChartCanvas]
@@ -9068,7 +10006,207 @@ _weightChartExportDataUrl(startDate, endDate) {
     chart.destroy();
     return out.toDataURL('image/jpeg', 0.92);
 },
-                
+
+// ── Offscreen chart helpers for the SKIN and LUMP PDF sections ───────────────────────────────
+//
+// Same offscreen-canvas pattern as `_weightChartExportDataUrl` above: build the chart in a
+// detached canvas so it cannot pick up a hidden/stale on-screen one, flatten onto white, destroy.
+
+// Shared tail of every helper here: flatten `canvas` onto white and return a JPEG data URL.
+_flattenChartToJpeg(canvas, chart) {
+    const out = document.createElement('canvas');
+    out.width = canvas.width; out.height = canvas.height;
+    const ctx = out.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(canvas, 0, 0);
+    chart.destroy();
+    return out.toDataURL('image/jpeg', 0.92);
+},
+
+// Twelve bars, one per calendar month — the yearly pattern.
+//
+// Deliberately computed from EVERYTHING ever logged and NOT from the export date range: a seasonal
+// read taken from a 90-day window is not a seasonal read. Peak months are only picked out in colour
+// once `skinPattern()` is willing to name them ('emerging' / 'established'), so the picture can
+// never imply more than the words beside it do. Mirrors `MonthlyItchChart` on iOS.
+_skinMonthlyChartExportDataUrl() {
+    const pattern = this.skinPattern();
+    if (!pattern || !pattern.monthly || !pattern.monthly.length) return null;
+
+    const namesPeaks = pattern.confidence === 'emerging' || pattern.confidence === 'established';
+    const months = [];
+    const values = [];
+    const colours = [];
+    for (let m = 1; m <= 12; m++) {
+        const stat = pattern.monthly.find(x => x.month === m);
+        months.push(this.skinShortMonthName(m));
+        values.push(stat ? Math.round(stat.mean * 10) / 10 : null);
+        colours.push(namesPeaks && pattern.peakMonths.includes(m) ? '#f59e0b' : 'rgba(100,116,139,0.5)');
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200; canvas.height = 480;
+    const chart = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: { labels: months, datasets: [{ label: 'Average itch score', data: values,
+                                             backgroundColor: colours, borderWidth: 0 }] },
+        options: {
+            responsive: false, animation: false, devicePixelRatio: 2,
+            plugins: { legend: { display: false } },
+            scales: { y: { min: 0, max: 10, title: { display: true, text: 'average score' } } }
+        }
+    });
+    return this._flattenChartToJpeg(canvas, chart);
+},
+
+// The day-by-day itch line. Unlike the monthly bars this DOES honour the export range, like every
+// other dated chart in the report. Days logged without a score are absent rather than plotted as 0
+// — a nil score is "not scored", which is not the same claim as "no itching".
+_skinScoreChartExportDataUrl(startDate, endDate) {
+    const data = this.patientSkinLog()
+        .filter(e => {
+            if (!this._skinIsScored(e)) return false;
+            if (!startDate) return true;
+            const d = this.parseDateSafe(e.date);
+            return d >= startDate && d <= endDate;
+        })
+        .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    if (data.length < 2) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200; canvas.height = 420;
+    const chart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: data.map(e => new Date(e.date).toLocaleDateString('en-GB',
+                { day: 'numeric', month: 'short', year: '2-digit' })),
+            datasets: [{ label: 'Itch score', data: data.map(e => Number(e.itchScore)),
+                         borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)',
+                         tension: 0.25, pointRadius: 3, fill: true, spanGaps: true }]
+        },
+        options: {
+            responsive: false, animation: false, devicePixelRatio: 2,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { maxRotation: 0, maxTicksLimit: 12 } },
+                y: { min: 0, max: 10, title: { display: true, text: 'itch score (0–10)' } }
+            }
+        }
+    });
+    return this._flattenChartToJpeg(canvas, chart);
+},
+
+// One line per orthopaedic problem, plotted on the 0–4 scale a vet uses.
+//
+// NOT date-filtered, for the same reason the table is not. The y-axis is FIXED at 0–4 rather than
+// scaled to the data: a fortnight that ran 0–1 would otherwise be drawn as a full-height climb,
+// which on a document read for exactly this question would be alarming and wrong.
+_orthoChartExportDataUrl() {
+    const palette = ['#4338ca', '#0f766e', '#b45309', '#be123c', '#1d4ed8', '#166534'];
+    const series = [];
+    this.sortedOrthoConditions.forEach(c => {
+        const points = this.orthoScoreSeries(c.id).map(p => ({ date: (p.date || '').split('T')[0], score: p.score }));
+        if (points.length) series.push({ name: this.orthoDisplayName(c), points });
+    });
+    if (!series.length) return null;
+
+    // Every scored date across every problem becomes a shared category axis, so two problems
+    // scored on different days still line up against the same timeline.
+    const labels = [...new Set(series.flatMap(x => x.points.map(p => p.date)))].sort();
+    const datasets = series.map((x, i) => {
+        const byDate = {};
+        x.points.forEach(p => { byDate[p.date] = p.score; });
+        return {
+            label: x.name,
+            data: labels.map(d => (d in byDate ? byDate[d] : null)),
+            borderColor: palette[i % palette.length],
+            backgroundColor: palette[i % palette.length],
+            tension: 0.25, pointRadius: 3, fill: false, spanGaps: true
+        };
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200; canvas.height = 460;
+    const chart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: labels.map(d => new Date(`${d}T12:00:00`).toLocaleDateString('en-GB',
+                { day: 'numeric', month: 'short', year: '2-digit' })),
+            datasets
+        },
+        options: {
+            responsive: false, animation: false, devicePixelRatio: 2,
+            plugins: { legend: { display: true, position: 'bottom' } },
+            scales: {
+                x: { ticks: { maxRotation: 0, maxTicksLimit: 12 } },
+                y: { min: 0, max: 4, ticks: { stepSize: 1 },
+                     title: { display: true, text: 'lameness (0–4)' } }
+            }
+        }
+    });
+    return this._flattenChartToJpeg(canvas, chart);
+},
+
+// One line per lump, on shared axes, plotted as the longest way across — the measurement a vet
+// records and the one least affected by which way round the owner measured.
+//
+// NOT date-filtered, for the same reason the lump TABLE is not: a size series only means anything
+// whole. Clipping it to the report window would show a vet the last three months of a two-year
+// record and invite exactly the wrong comparison. The y-axis is always anchored at zero: a chart
+// auto-scaled to a 1 mm span turns measurement noise into a dramatic-looking climb, which on a
+// document read for precisely this question would be alarming and wrong.
+_lumpSizeChartExportDataUrl() {
+    const palette = ['#0f766e', '#b45309', '#6d28d9', '#be123c', '#1d4ed8', '#166534'];
+
+    // Every measurement date across every lump becomes a shared category axis, so two lumps
+    // measured on different days still line up against the same timeline instead of each being
+    // stretched across the full width.
+    const series = [];
+    this.sortedLumps.forEach(l => {
+        const points = this.lumpMeasurementsFor(l.id)
+            .map(m => ({ date: (m.date || '').split('T')[0], mm: this.lumpGreatestMm(m) }))
+            .filter(p => p.mm !== null && p.date);
+        if (points.length) series.push({ name: this.lumpDisplayName(l), points });
+    });
+    if (!series.length) return null;
+
+    const labels = [...new Set(series.flatMap(s => s.points.map(p => p.date)))].sort();
+    let maxMm = 0;
+    const datasets = series.map((s, i) => {
+        const byDate = {};
+        s.points.forEach(p => { byDate[p.date] = p.mm; if (p.mm > maxMm) maxMm = p.mm; });
+        return {
+            label: s.name,
+            data: labels.map(d => (d in byDate ? byDate[d] : null)),
+            borderColor: palette[i % palette.length],
+            backgroundColor: palette[i % palette.length],
+            tension: 0.25, pointRadius: 3, fill: false, spanGaps: true
+        };
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200; canvas.height = 460;
+    const chart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: labels.map(d => new Date(`${d}T12:00:00`).toLocaleDateString('en-GB',
+                { day: 'numeric', month: 'short', year: '2-digit' })),
+            datasets
+        },
+        options: {
+            responsive: false, animation: false, devicePixelRatio: 2,
+            plugins: { legend: { display: true, position: 'bottom' } },
+            scales: {
+                x: { ticks: { maxRotation: 0, maxTicksLimit: 12 } },
+                y: { min: 0, suggestedMax: Math.max(maxMm * 1.2, 10),
+                     title: { display: true, text: 'mm across' } }
+            }
+        }
+    });
+    return this._flattenChartToJpeg(canvas, chart);
+},
+
 renderChart() {
     if (this.chartRenderTimeout) clearTimeout(this.chartRenderTimeout);
     this.chartRenderTimeout = setTimeout(() => {
@@ -11978,6 +13116,8 @@ exportCompleteBackup(patientId = null) {
         vch_skinLog: scoped(this.skinLog),
         vch_lumpLog: scoped(this.lumpLog),
         vch_lumpMeasurements: scoped(this.lumpMeasurements),
+        vch_orthoConditions: scoped(this.orthoConditions),
+        vch_orthoLog: scoped(this.orthoLog),
         exportDate: new Date().toISOString(),
         exportScope: patientId ? 'single' : 'all'
     };
@@ -12084,7 +13224,8 @@ backupLogCount(pid) {
             'vch_coughLog', 'vch_activityLog', 'vch_weightLog', 'vch_vaccinationLog',
             'vch_antiparasiticLog','vch_injectionLog','vch_medDoseLog','vch_bloodResults','vch_echoMeasurements',
             'vch_procedureLog', 'vch_allergyLog', 'vch_appointmentLog',
-            'vch_skinLog', 'vch_lumpLog', 'vch_lumpMeasurements']
+            'vch_skinLog', 'vch_lumpLog', 'vch_lumpMeasurements',
+            'vch_orthoConditions', 'vch_orthoLog']
         .reduce((n, k) => n + (d[k] || []).filter(e => e.patientId === pid).length, 0);
 },
 
@@ -12168,6 +13309,28 @@ confirmBackupImport() {
                      photoFilename: '' }));
     this.lumpMeasurements = (this.lumpMeasurements || []).concat(incomingMeasurements);
     this.saveToStorage('vch_lumpMeasurements', this.lumpMeasurements);
+
+    // Orthopaedics follows the lump rule exactly, and for the same reason: every record gets a
+    // fresh local id, so a day's score still holding the FILE's condition id would either dangle
+    // or attach itself to an unrelated problem and corrupt that problem's trend. A score whose
+    // condition is not in the map is DROPPED.
+    const orthoIdMap = {};
+    const incomingConditions = (data.vch_orthoConditions || [])
+        .filter(c => idMap[c.patientId] !== undefined)
+        .map(c => {
+            const newId = this.generateId();
+            orthoIdMap[c.id] = newId;
+            return { ...c, id: newId, patientId: idMap[c.patientId] };
+        });
+    this.orthoConditions = (this.orthoConditions || []).concat(incomingConditions);
+    this.saveToStorage('vch_orthoConditions', this.orthoConditions);
+
+    const incomingOrthoDays = (data.vch_orthoLog || [])
+        .filter(e => idMap[e.patientId] !== undefined && orthoIdMap[e.conditionId] !== undefined)
+        .map(e => ({ ...e, id: this.generateId(), patientId: idMap[e.patientId],
+                     conditionId: orthoIdMap[e.conditionId] }));
+    this.orthoLog = (this.orthoLog || []).concat(incomingOrthoDays);
+    this.saveToStorage('vch_orthoLog', this.orthoLog);
 
     this.saveToStorage('vch_patients', this.patients);
 
@@ -12879,6 +14042,214 @@ async generatePDF() {
         }
     }
 
+    // ── 14. Skin & itch — the yearly pattern first, then the day-by-day record ─────────────
+    //
+    // Order is the point. A seasonal rhythm is the finding this module exists for and it is what a
+    // vet reading this page wants BEFORE the daily rows, which are the working behind it. The
+    // monthly chart is computed from the WHOLE record and deliberately ignores the export range —
+    // a seasonal read from a 90-day window is not a seasonal read — while the score line honours
+    // the range like every other dated chart here. The captions say which is which.
+    if (mods.skinLog) {
+        const skinAll = this.patientSkinLog();
+        const skinRows = skinAll
+            .filter(e => inRange(e.date))
+            .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+        if (skinAll.length > 0) {
+            const pattern = this.skinPattern();
+            const monthlyImg = this._skinMonthlyChartExportDataUrl();
+            if (monthlyImg) {
+                const pdfH = Math.round(180 * 480 / 1200);
+                if (Y + pdfH > 265) { doc.addPage(); Y = 20; }
+                sectionHeader('Skin — Yearly Pattern (whole record)', 180, 83, 9);
+                // The written read travels WITH the bars. The headline alone can sound settled;
+                // the detail is where the hedge and the hand-off to the vet live, and the two must
+                // never be separated. Mirrors `SkinPatternSummary` on iOS.
+                doc.setFontSize(9);
+                const headLines = doc.splitTextToSize(pattern.headline, 180);
+                headLines.forEach(line => { doc.text(line, 14, Y + 4); Y += 4.4; });
+                doc.setFontSize(8);
+                doc.setTextColor(90);
+                doc.splitTextToSize(pattern.detail, 180).forEach(line => { doc.text(line, 14, Y + 4); Y += 4; });
+                doc.setTextColor(20, 20, 20);
+                Y += 6;
+                if (Y + pdfH > 280) { doc.addPage(); Y = 20; }
+                doc.addImage(monthlyImg, 'JPEG', 14, Y, 180, pdfH);
+                Y += pdfH + 4;
+                doc.setFontSize(7.5);
+                doc.setTextColor(120);
+                doc.text('Average itch score per calendar month, across every year recorded — not limited to this report\'s date range.', 14, Y);
+                doc.setTextColor(20, 20, 20);
+                Y += 10;
+            }
+
+            const scoreImg = this._skinScoreChartExportDataUrl(startDate, endDate);
+            if (scoreImg) {
+                const pdfH = Math.round(180 * 420 / 1200);
+                if (Y + pdfH > 280) { doc.addPage(); Y = 20; }
+                sectionHeader('Skin — Itch Score Over This Period', 180, 83, 9);
+                doc.addImage(scoreImg, 'JPEG', 14, Y, 180, pdfH);
+                Y += pdfH + 4;
+                doc.setFontSize(7.5);
+                doc.setTextColor(120);
+                doc.text('Days logged without a score are absent rather than plotted as 0.', 14, Y);
+                doc.setTextColor(20, 20, 20);
+                Y += 10;
+            }
+
+            if (skinRows.length > 0) {
+                if (Y > 240) { doc.addPage(); Y = 20; }
+                sectionHeader('Skin & Itch Log', 180, 83, 9);
+                doc.autoTable({
+                    startY: Y,
+                    head: [['Date', 'Itch', 'Band', 'Where', 'Ears', 'Given', 'Notes']],
+                    body: skinRows.map(e => [
+                        (e.date || '').split('T')[0],
+                        // Empty, not "0", when the day was logged unscored — a nil score is "not
+                        // scored", which is a different claim from "no itching", and the two must
+                        // stay visibly different on the vet's copy.
+                        this._skinIsScored(e) ? String(e.itchScore) : '—',
+                        this._skinIsScored(e) ? this.skinScoreBand(e.itchScore) : '—',
+                        this.skinSiteList(e.sites) || '—',
+                        this.skinEarLabel(e.earStatus) || '—',
+                        this.skinTreatmentList(e.treatments) || '—',
+                        e.notes || '—'
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [180, 83, 9] },
+                    columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 12 }, 2: { cellWidth: 20 },
+                                    3: { cellWidth: 32 }, 4: { cellWidth: 24 }, 5: { cellWidth: 32 },
+                                    6: { cellWidth: 'auto' } },
+                    styles: { fontSize: 8 }
+                });
+                Y = doc.lastAutoTable.finalY + 12;
+            }
+        }
+    }
+
+    // ── 15. Lumps ─────────────────────────────────────────────────────────────────────────
+    //
+    // The size chart, then one row per lump with its measurement history folded into a column of
+    // its own. A row per MEASUREMENT would scatter one lump's readings down the page and make the
+    // comparison the vet is actually making — this lump, then versus now — harder, not easier.
+    if (mods.lumps) {
+        const lumpRows = this.sortedLumps;
+        if (lumpRows.length > 0) {
+            const lumpImg = this._lumpSizeChartExportDataUrl();
+            if (lumpImg) {
+                const pdfH = Math.round(180 * 460 / 1200);
+                if (Y + pdfH > 280) { doc.addPage(); Y = 20; }
+                sectionHeader('Lumps — Size Over Time (whole record)', 71, 85, 105);
+                doc.addImage(lumpImg, 'JPEG', 14, Y, 180, pdfH);
+                Y += pdfH + 4;
+                doc.setFontSize(7.5);
+                doc.setTextColor(120);
+                doc.text('Longest way across, every measurement ever recorded — not limited to this report\'s date range.', 14, Y);
+                doc.setTextColor(20, 20, 20);
+                Y += 10;
+            }
+
+            if (Y > 235) { doc.addPage(); Y = 20; }
+            sectionHeader('Lumps', 71, 85, 105);
+            doc.autoTable({
+                startY: Y,
+                head: [['Lump', 'Location', 'Status', 'With the vet', 'Latest', 'Change', 'History', 'To raise']],
+                body: lumpRows.map(l => {
+                    const mine = this.lumpMeasurementsFor(l.id);
+                    const last = mine.length ? mine[mine.length - 1] : null;
+                    const vet = [this.lumpVetStageLabel(l.vetStage), l.vetDiagnosis]
+                        .filter(x => x).join('\n');
+                    return [
+                        this.lumpDisplayName(l),
+                        this.lumpLocationLine(l) || '—',
+                        this.lumpStatusLabel(l.status),
+                        vet || '—',
+                        last ? this.lumpSizeText(last) : '—',
+                        this.lumpChangeSummary(l),
+                        mine.map(m => this.lumpMeasurementReportLine(m)).join(' | ') || '—',
+                        this.lumpPrompts(l).map(p => p.text).join(' | ') || '—'
+                    ];
+                }),
+                theme: 'striped',
+                headStyles: { fillColor: [71, 85, 105] },
+                styles: { fontSize: 7 }
+            });
+            Y = doc.lastAutoTable.finalY + 6;
+
+            // Printed under the table for the same reason it is on every lump screen: an empty
+            // "to raise" column is not a statement that a lump is fine.
+            doc.setFontSize(7.5);
+            doc.setTextColor(120);
+            doc.splitTextToSize(LUMP_STANDING_NOTE, 180).forEach(line => { doc.text(line, 14, Y); Y += 3.6; });
+            doc.setTextColor(20, 20, 20);
+            Y += 10;
+        }
+    }
+
+    // ── 16. Lameness & joints ─────────────────────────────────────────────────────────────
+    //
+    // The 0–4 line first, then one row per PROBLEM with the daily scores folded into a column of
+    // their own — the same shape as the lump table, for the same reason: a row per day would
+    // scatter one leg's scores down the page and bury the comparison the vet is making.
+    if (mods.ortho) {
+        const orthoRows = this.sortedOrthoConditions;
+        if (orthoRows.length > 0) {
+            const orthoImg = this._orthoChartExportDataUrl();
+            if (orthoImg) {
+                const pdfH = Math.round(180 * 460 / 1200);
+                if (Y + pdfH > 280) { doc.addPage(); Y = 20; }
+                sectionHeader('Lameness Score Over Time (whole record)', 67, 56, 202);
+                doc.addImage(orthoImg, 'JPEG', 14, Y, 180, pdfH);
+                Y += pdfH + 4;
+                doc.setFontSize(7.5);
+                doc.setTextColor(120);
+                doc.text('0 = sound, 4 = not using the leg at all. Days logged without a score are absent rather than plotted as 0.', 14, Y);
+                doc.setTextColor(20, 20, 20);
+                Y += 10;
+            }
+
+            if (Y > 235) { doc.addPage(); Y = 20; }
+            sectionHeader('Lameness & Joints', 67, 56, 202);
+            doc.autoTable({
+                startY: Y,
+                head: [['Problem', 'Legs', 'How long', 'With the vet', 'Recorded cause',
+                        'Latest', 'Last 14 days', 'Pain relief', 'Day by day']],
+                body: orthoRows.map(c => {
+                    const last = this.orthoLatestEntry(c.id);
+                    const vet = [this.orthoVetStageLabel(c.vetStage), c.vetDiagnosis]
+                        .filter(Boolean).join('\n');
+                    const plan = [c.painReliefPlan, this.orthoManagementList(c.management)]
+                        .filter(Boolean).join('\n');
+                    return [
+                        this.orthoDisplayName(c),
+                        this.orthoLegList(c.legs) || '—',
+                        this.orthoChronicityLabel(c.chronicity),
+                        vet || '—',
+                        // Prefixed so a vet cannot mistake it for the app's own conclusion.
+                        c.suspectedCause && c.suspectedCause !== 'unknown'
+                            ? `Owner told: ${this.orthoCauseLabel(c.suspectedCause)}` : '—',
+                        last ? this.orthoLamenessText(this._orthoIsScored(last) ? last.lamenessScore : null) : '—',
+                        this.orthoRecentRead(c.id).text,
+                        plan || '—',
+                        this.orthoEntriesFor(c.id).map(e => this.orthoEntryReportLine(e)).join(' | ') || '—'
+                    ];
+                }),
+                theme: 'striped',
+                headStyles: { fillColor: [67, 56, 202] },
+                styles: { fontSize: 7 }
+            });
+            Y = doc.lastAutoTable.finalY + 6;
+
+            // Unconditional, for the same reason the lump note is: a table of scores with no flag
+            // on it is not a statement that the animal is comfortable.
+            doc.setFontSize(7.5);
+            doc.setTextColor(120);
+            doc.splitTextToSize(ORTHO_STANDING_NOTE, 180).forEach(line => { doc.text(line, 14, Y); Y += 3.6; });
+            doc.setTextColor(20, 20, 20);
+            Y += 10;
+        }
+    }
+
     doc.save(`${profile.name.replace(/\s+/g, '_')}_Clinical_Report_${new Date().toISOString().split('T')[0]}.pdf`);
 },
 
@@ -13358,14 +14729,7 @@ generateCSV() {
         lumpDataCSV.forEach(l => {
             const mine = this.lumpMeasurementsFor(l.id);
             const last = mine.length ? mine[mine.length - 1] : null;
-            const history = mine.map(m => {
-                let line = `${this.allergyDayText(m.date)} — ${this.lumpSizeText(m)}`;
-                if (m.consistency && m.consistency !== 'unsure') line += ` — ${this.lumpConsistencyLabel(m.consistency)}`;
-                if (m.mobility && m.mobility !== 'unsure') line += ` — ${this.lumpMobilityLabel(m.mobility)}`;
-                if ((m.signs || []).length) line += ` — ${this.lumpSignList(m.signs)}`;
-                if (m.notes) line += ` — ${m.notes}`;
-                return line;
-            }).join(' | ');
+            const history = mine.map(m => this.lumpMeasurementReportLine(m)).join(' | ');
             csv += [
                 q(this.lumpDisplayName(l)),
                 q(this.lumpLocationLine(l)),
@@ -13383,6 +14747,43 @@ generateCSV() {
         // Printed under the table for the same reason it is on every lump screen: an empty
         // "to raise" column is not a statement that a lump is fine.
         csv += `${q('Note')},${q(LUMP_STANDING_NOTE)}\n`;
+        csv += '\n';
+    }
+
+    // ── LAMENESS & JOINTS ───────────────────────────────────────────────────
+    // NOT date-filtered, for the same reason lumps are not: a dog that has limped on the same leg
+    // for two years does not stop limping because the report covers ninety days, and the daily
+    // scores inside each row carry their own dates.
+    const orthoDataCSV = !mods.ortho ? [] : this.sortedOrthoConditions;
+    if (orthoDataCSV.length > 0) {
+        csv += 'LAMENESS & JOINTS\n';
+        csv += 'Problem,Legs,Status,How Long,With The Vet,Recorded Cause,Vet\'s Note,First Noticed,Latest Score,Last 14 Days,Pain Relief Plan,Other Management,Day-By-Day,Notes\n';
+        orthoDataCSV.forEach(c => {
+            const last = this.orthoLatestEntry(c.id);
+            const history = this.orthoEntriesFor(c.id)
+                .map(e => this.orthoEntryReportLine(e)).join(' | ');
+            csv += [
+                q(this.orthoDisplayName(c)),
+                q(this.orthoLegList(c.legs)),
+                q(this.orthoStatusLabel(c.status)),
+                q(this.orthoChronicityLabel(c.chronicity)),
+                q(this.orthoVetStageLabel(c.vetStage)),
+                // Prefixed so a vet reading the column cannot mistake it for the app's own view.
+                q(c.suspectedCause && c.suspectedCause !== 'unknown'
+                    ? `Owner told: ${this.orthoCauseLabel(c.suspectedCause)}` : ''),
+                q(c.vetDiagnosis || ''),
+                q(c.firstNoticed || ''),
+                q(last ? this.orthoLamenessText(this._orthoIsScored(last) ? last.lamenessScore : null) : ''),
+                q(this.orthoRecentRead(c.id).text),
+                q(c.painReliefPlan || ''),
+                q(this.orthoManagementList(c.management)),
+                q(history),
+                q(c.notes || '')
+            ].join(',') + '\n';
+        });
+        // Printed under the table for the same reason the lump note is: a table of scores with no
+        // flag on it is not a statement that the animal is comfortable.
+        csv += `${q('Note')},${q(ORTHO_STANDING_NOTE)}\n`;
         csv += '\n';
     }
 
@@ -13911,6 +15312,46 @@ _buildReportText() {
             });
             // Unconditional. An empty "to raise" list is not a verdict.
             out += `${indent}${LUMP_STANDING_NOTE}${nl}${nl}`;
+        }
+    }
+
+    // ── Lameness & Joints ─────────────────────────────────────────────────
+    // NOT date-filtered, for the same reason lumps are not. Every sentence here is a statement
+    // about the RECORD — see the safety rule in the ORTHO_* block near the top of this file.
+    if (mods.ortho) {
+        const conditions = this.sortedOrthoConditions;
+        if (conditions.length > 0) {
+            out += `LAMENESS & JOINTS (${conditions.length})${nl}`;
+            out += rule() + nl;
+            conditions.forEach(c => {
+                const name = this.orthoDisplayName(c);
+                out += name;
+                // Only when the name is NOT already the legs — an unnamed condition falls back to
+                // them, and repeating them reads as two different problems on one line.
+                const legs = this.orthoLegList(c.legs);
+                if (legs && legs !== name) out += `  |  ${legs}`;
+                out += `  |  ${this.orthoStatusLabel(c.status)}  |  ${this.orthoChronicityLabel(c.chronicity)}`;
+                out += `  |  ${this.orthoVetStageLabel(c.vetStage)}${nl}`;
+                if (c.firstNoticed) out += `${indent}First noticed: ${this.allergyDayText(c.firstNoticed)}${nl}`;
+                // Worded as what the owner was TOLD, never as the app's conclusion.
+                if (c.suspectedCause && c.suspectedCause !== 'unknown') {
+                    out += `${indent}Recorded as: ${this.orthoCauseLabel(c.suspectedCause)}${nl}`;
+                }
+                if (c.vetDiagnosis) out += `${indent}Vet's note: ${c.vetDiagnosis}${nl}`;
+                out += `${indent}${this.orthoRecentRead(c.id).text}${nl}`;
+                if (c.painReliefPlan) out += `${indent}Pain relief plan: ${c.painReliefPlan}${nl}`;
+                if ((c.management || []).length) {
+                    out += `${indent}Also: ${this.orthoManagementList(c.management)}${nl}`;
+                }
+                this.orthoEntriesFor(c.id).forEach(e => {
+                    out += `${indent}${this.orthoEntryReportLine(e)}${nl}`;
+                });
+                if (c.notes) out += `${indent}Notes: ${c.notes}${nl}`;
+                out += nl;
+            });
+            // Unconditional. A table of scores with no flag on it is not a statement that the
+            // animal is comfortable.
+            out += `${indent}${ORTHO_STANDING_NOTE}${nl}${nl}`;
         }
     }
 

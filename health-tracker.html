@@ -835,24 +835,26 @@
                     <!-- STEP 2: Clinical Baseline (Diagnosis) -->
                     <div x-show="onboardingStep === 2" x-cloak class="onboarding-step-body">
                         <h2 class="text-primary mb-15">Clinical Baseline</h2>
-                        <p class="mb-15">What best describes <strong x-text="editingPatient.name || 'this patient'"></strong>'s primary health concern?</p>
+                        <p class="mb-15">What brings you to the app for <strong x-text="editingPatient.name || 'this pet'"></strong>?</p>
+                        <p class="text-sm text-muted mb-15">Tick everything that applies.</p>
 
-                        <div class="onboarding-group" style="display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 20px;">
-                            <label class="onboarding-label">
-                                <input type="radio" x-model="onboardingData.hasCardiacIssue" value="yes"> 
-                                Known cardiac condition or heart murmur
-                            </label>
-                            <label class="onboarding-label">
-                                <input type="radio" x-model="onboardingData.hasCardiacIssue" value="seizure"> 
-                                Episodes of collapse, seizure, or syncope (no cardiac diagnosis)
-                            </label>
-                            <label class="onboarding-label">
-                                <input type="radio" x-model="onboardingData.hasCardiacIssue" value="no"> 
-                                No specific diagnosis — general wellness monitoring
-                            </label>
+                        <!-- Multi-select, not a radio group: a pet can have a heart condition AND a lump
+                             AND itchy skin, and the old single choice made the owner pick which of their
+                             pet's problems counted. Nothing here is exclusive — see
+                             `toggleOnboardingConcern`. Whatever is ticked only PRE-SELECTS the modules on
+                             the next step; everything stays adjustable. -->
+                        <div class="onboarding-group" style="display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 12px;">
+                            <template x-for="concern in ONBOARDING_CONCERNS" :key="concern.id">
+                                <label class="onboarding-label">
+                                    <input type="checkbox" :checked="hasOnboardingConcern(concern.id)"
+                                           @change="toggleOnboardingConcern(concern.id)">
+                                    <span x-text="concern.label"></span>
+                                </label>
+                            </template>
                         </div>
-                    
-                        <div x-show="onboardingData.hasCardiacIssue === 'yes'" x-collapse class="info-box info-box-blue mb-20 text-left">
+                        <p class="text-sm text-muted mb-20 text-left">This just sets a sensible starting point — you can switch any tracking tool on or off on the next step, and change your mind later.</p>
+
+                        <div x-show="hasOnboardingConcern('cardiac')" x-collapse class="info-box info-box-blue mb-20 text-left">
                             
                             <label class="form-label text-primary">Primary Cardiac Diagnosis</label>
                             <select x-model="newDiagnosis.diagnosis" class="form-control mb-15" style="border-color: #93c5fd;">
@@ -976,6 +978,17 @@
                                     </div>
                                 </div>
                                 <input type="checkbox" x-model="editingPatient.modules.lumps" style="width: 20px; height: 20px; accent-color: #64748b;">
+                            </label>
+
+                            <label class="module-selector" :class="{'active-sky': editingPatient.modules.ortho}">
+                                <div class="flex-center gap-10">
+                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-dog" style="font-size: 1.4rem; color: #4338ca;"></i></div>
+                                    <div>
+                                        <strong style="color: #1e293b; font-size: 0.95rem;">Lameness &amp; Joints</strong>
+                                        <span class="text-muted text-sm block">Score how lame your pet is day by day, record which legs, what makes it worse and what pain relief was given — plotted against how much they walked</span>
+                                    </div>
+                                </div>
+                                <input type="checkbox" x-model="editingPatient.modules.ortho" style="width: 20px; height: 20px; accent-color: #4338ca;">
                             </label>
 
                             <label class="module-selector" :class="{'active-sky': editingPatient.modules.acvimStaging}">
@@ -2275,6 +2288,17 @@
                         </button>
                     </div>
 
+                    <!-- At-a-glance summary while the panel is shut: the count, then each lump with
+                         the size it was last measured at. The count alone answers a question nobody
+                         has — see `lumpCardLines`. -->
+                    <div x-show="!showLumpLog" style="font-size: 0.8rem; color: #1e293b; background: #f8fafc; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+                        <div x-text="lumpCountSummary() || 'No lumps being tracked.'" style="font-weight: 600; margin-bottom: 2px;"></div>
+                        <template x-for="line in lumpCardLines()" :key="line">
+                            <div x-text="line" style="color: #475569;"></div>
+                        </template>
+                        <div x-show="lumpCardOverflowText()" x-text="lumpCardOverflowText()" style="color: #94a3b8;"></div>
+                    </div>
+
                     <div x-show="showLumpLog" x-transition>
 
                         <p style="font-size: 0.8rem; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin: 0 0 12px;"
@@ -2409,6 +2433,51 @@
                                     Be as specific as you can. In a year's time, with two or three lumps recorded, this is what tells them apart.
                                 </p>
 
+                                <!-- Measure it NOW, on the screen where the lump is created. Measuring
+                                     used to live only behind the lump's history panel and owners did not
+                                     find it, which left the module recording that a lump exists and
+                                     nothing about its size. Optional — see `newLump.firstMeasure`. -->
+                                <div x-show="!editingLumpId" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 12px; background: #f8fafc;">
+                                    <label class="form-label" style="margin-top: 0;">Measure it now:</label>
+                                    <div class="flex-gap-10" style="margin-bottom: 10px;">
+                                        <button type="button"
+                                                @click="setNewLumpMeasureUnit('mm')"
+                                                :class="newLump.firstMeasure.unit === 'mm' ? 'btn-primary' : 'btn-secondary'"
+                                                style="padding: 4px 14px;">mm</button>
+                                        <button type="button"
+                                                @click="setNewLumpMeasureUnit('cm')"
+                                                :class="newLump.firstMeasure.unit === 'cm' ? 'btn-primary' : 'btn-secondary'"
+                                                style="padding: 4px 14px;">cm</button>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                        <div>
+                                            <label style="font-size: 0.72rem; color: #64748b;">Longest across</label>
+                                            <input type="number" step="0.1" min="0" x-model="newLump.firstMeasure.length" class="form-input" placeholder="—">
+                                        </div>
+                                        <div>
+                                            <label style="font-size: 0.72rem; color: #64748b;">Other way</label>
+                                            <input type="number" step="0.1" min="0" x-model="newLump.firstMeasure.width" class="form-input" placeholder="—">
+                                        </div>
+                                        <div>
+                                            <label style="font-size: 0.72rem; color: #64748b;">Stands out</label>
+                                            <input type="number" step="0.1" min="0" x-model="newLump.firstMeasure.depth" class="form-input" placeholder="—">
+                                        </div>
+                                    </div>
+                                    <details style="margin-bottom: 6px;">
+                                        <summary style="font-size: 0.78rem; color: #0f766e; cursor: pointer;">No ruler? Use a rough size</summary>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                                            <template x-for="ref in LUMP_SIZE_REFERENCES_LIST" :key="ref.label">
+                                                <button type="button" class="btn-secondary" style="padding: 3px 10px; font-size: 0.78rem;"
+                                                        @click="setNewLumpMeasureReference(ref.mm)"
+                                                        x-text="ref.label + ' (~' + ref.mm + ' mm)'"></button>
+                                            </template>
+                                        </div>
+                                    </details>
+                                    <p style="font-size: 0.78rem; color: #64748b; margin: 0;">
+                                        Optional, but this is the measurement everything later gets compared against. Leave a box blank rather than guessing — a guessed number looks like a real one on the chart.
+                                    </p>
+                                </div>
+
                                 <label class="form-label">First noticed:</label>
                                 <input type="date" x-model="newLump.firstNoticed" class="form-input" style="margin-bottom: 4px;">
                                 <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
@@ -2537,6 +2606,289 @@
                                 <div class="flex-gap-10">
                                     <button @click="closeLumpMeasureForm()" class="btn-secondary">Cancel</button>
                                     <button @click="saveLumpMeasurement()" class="btn-primary"><i class="fa-solid fa-check"></i> Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+                                    <!-- ******************************** -->
+                                    <!-- LAMENESS & JOINTS                -->
+                                    <!-- ******************************** -->
+                                    <!-- The standing note appears whether or not anything is
+                                         flagged. An empty flag list is not a clean bill of health,
+                                         and the note is what stops it reading as one. Do not make
+                                         it conditional — see the safety rule at the top of the
+                                         ORTHO_* block in rr-logic.js. -->
+            <template x-if="activePatientProfile?.modules?.ortho">
+                <div id="orthoSection" class="module-card" x-show="patients.length > 0 && isView('monitor')" x-cloak>
+
+                    <div style="margin-bottom: 15px;">
+                        <button @click="showOrthoLog = !showOrthoLog" :aria-expanded="showOrthoLog.toString()" type="button" class="btn-accordion">
+                            <h3><i class="fa-solid fa-dog" style="color:#4338ca;"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Lameness &amp; Joints' : 'Lameness &amp; Joints'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_ortho')"></i></h3>
+                            <i class="fa-solid" :class="showOrthoLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+
+                    <!-- At-a-glance summary while the panel is shut. -->
+                    <div x-show="!showOrthoLog" style="font-size: 0.8rem; color: #1e293b; background: #f8fafc; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+                        <div x-text="orthoCountSummary() || 'Nothing being tracked yet.'" style="font-weight: 600; margin-bottom: 2px;"></div>
+                        <template x-for="line in orthoCardLines()" :key="line">
+                            <div x-text="line" style="color: #475569;"></div>
+                        </template>
+                    </div>
+
+                    <div x-show="showOrthoLog" x-transition>
+
+                        <p style="font-size: 0.8rem; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin: 0 0 12px;"
+                           x-text="ORTHO_STANDING_NOTE_TEXT"></p>
+
+                        <div class="section-header">
+                            <h4 class="section-title" x-text="orthoCountSummary() || 'Nothing recorded'"></h4>
+                            <button @click="openOrthoConditionForm()" class="btn-add">
+                                <i class="fa-solid fa-plus"></i> Add a problem
+                            </button>
+                        </div>
+
+                        <div x-show="sortedOrthoConditions.length === 0" style="text-align: center; color: #94a3b8; font-style: italic; padding: 16px 0;">
+                            Adding the problem you are keeping an eye on lets you score it day by day and see how it tracks against how much they are walking.
+                        </div>
+
+                        <template x-for="c in sortedOrthoConditions" :key="c.id">
+                            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                                    <div style="cursor: pointer; flex: 1;" @click="toggleOrthoConditionDetail(c.id)">
+                                        <strong style="color: #1e293b;" x-text="orthoDisplayName(c)"></strong>
+                                        <span x-show="!orthoIsActive(c.status)" class="text-sm"
+                                              style="margin-left: 6px; padding: 1px 6px; background: #f1f5f9; border-radius: 999px; color: #64748b;"
+                                              x-text="orthoStatusLabel(c.status)"></span>
+                                        <div style="font-size: 0.8rem; color: #64748b;" x-text="orthoSubtitle(c)"></div>
+                                        <div style="font-size: 0.8rem; color: #64748b;" x-text="orthoSummaryLine(c)"></div>
+                                        <!-- Amber, never red: this says a run of bad days was
+                                             RECORDED and a vet should see it. Not an emergency
+                                             alert, and not a diagnosis. -->
+                                        <div x-show="orthoRecentRead(c.id).worthRaising"
+                                             style="font-size: 0.78rem; color: #b45309; margin-top: 3px;">
+                                            <i class="fa-solid fa-circle-exclamation"></i>
+                                            <span x-text="orthoRecentRead(c.id).badDays + ' bad days recently — worth showing your vet'"></span>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button @click="openOrthoEntryForm(c.id)" style="background:none; border:none; color:#4338ca; cursor:pointer;" title="Score today"><i class="fa-solid fa-plus-circle"></i></button>
+                                        <button @click="openOrthoConditionForm(c.id)" style="background:none; border:none; color:#64748b; cursor:pointer;" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                        <button @click="deleteOrthoCondition(c.id)" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+
+                                <div x-show="viewingOrthoConditionId === c.id" x-transition
+                                     style="margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
+                                    <p style="font-size: 0.82rem; color: #334155; margin: 0 0 8px;" x-text="orthoRecentRead(c.id).text"></p>
+
+                                    <div style="font-size: 0.8rem; color: #475569; margin-bottom: 8px;">
+                                        <div x-show="c.painReliefPlan"><strong>Pain relief plan:</strong> <span x-text="c.painReliefPlan"></span></div>
+                                        <div x-show="(c.management || []).length"><strong>Also:</strong> <span x-text="orthoManagementList(c.management)"></span></div>
+                                        <div x-show="c.suspectedCause && c.suspectedCause !== 'unknown'"><strong>Recorded as:</strong> <span x-text="orthoCauseLabel(c.suspectedCause)"></span></div>
+                                        <div x-show="c.vetDiagnosis"><strong>Vet's note:</strong> <span x-text="c.vetDiagnosis"></span></div>
+                                        <div x-show="c.firstNoticed"><strong>First noticed:</strong> <span x-text="allergyDayText(c.firstNoticed)"></span></div>
+                                        <div x-show="c.notes" style="white-space: pre-wrap;" x-text="c.notes"></div>
+                                    </div>
+
+                                    <template x-for="e in orthoEntriesFor(c.id).slice().reverse()" :key="e.id">
+                                        <div style="display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                                            <div style="font-size: 0.82rem; color: #334155;">
+                                                <strong x-text="allergyDayText(e.date)"></strong>
+                                                <span style="color: #64748b;" x-text="' — ' + orthoLamenessText(_orthoIsScored(e) ? e.lamenessScore : null)"></span>
+                                                <div style="color: #64748b; font-size: 0.78rem;" x-text="orthoLegList(e.legs)"></div>
+                                                <div x-show="(e.worseAfter || []).length" style="color: #64748b; font-size: 0.78rem;"
+                                                     x-text="'Worse ' + orthoAggravatorList(e.worseAfter).toLowerCase()"></div>
+                                                <div x-show="(e.painReliefGiven || []).length" style="color: #64748b; font-size: 0.78rem;"
+                                                     x-text="orthoPainReliefList(e.painReliefGiven)"></div>
+                                                <div x-show="e.notes" style="color: #64748b; font-size: 0.78rem;" x-text="e.notes"></div>
+                                            </div>
+                                            <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                                <button @click="openOrthoEntryForm(c.id, e.id)" style="background:none; border:none; color:#64748b; cursor:pointer;" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                                <button @click="deleteOrthoEntry(e.id)" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div x-show="orthoEntriesFor(c.id).length === 0" style="font-size: 0.82rem; color: #94a3b8; font-style: italic;">
+                                        Nothing scored yet. Even a couple of scores a week is enough to show a pattern.
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- ── Condition form ─────────────────────────────────────────────── -->
+                        <div x-show="showOrthoConditionForm" x-cloak class="vch-modal">
+                            <div class="form-panel vch-modal-card">
+                                <strong style="color: #1e293b;" x-text="editingOrthoConditionId ? 'Edit problem' : 'Add a problem'"></strong>
+
+                                <label class="form-label" style="margin-top: 10px;">Name:</label>
+                                <input type="text" x-model="newOrthoCondition.label" placeholder="e.g. the dodgy back leg" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Optional — left blank, it is listed by the legs involved.
+                                </p>
+
+                                <label class="form-label">Which legs:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+                                    <template x-for="l in ORTHO_LEGS_LIST" :key="l.id">
+                                        <button type="button" @click="toggleOrthoConditionLeg(l.id)"
+                                                :style="(newOrthoCondition.legs || []).includes(l.id)
+                                                    ? 'padding:4px 10px; border-radius:999px; border:1px solid #4338ca; background:#eef2ff; color:#4338ca; font-size:0.8rem; cursor:pointer;'
+                                                    : 'padding:4px 10px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:0.8rem; cursor:pointer;'"
+                                                x-text="l.label"></button>
+                                    </template>
+                                </div>
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Both back legs is common — it is easy to miss when they are equally bad, because there is no good leg to compare against.
+                                </p>
+
+                                <label class="form-label">How long it has been going on:</label>
+                                <select x-model="newOrthoCondition.chronicity" class="form-select" style="margin-bottom: 4px;">
+                                    <template x-for="c in ORTHO_CHRONICITIES_LIST" :key="c.id">
+                                        <option :value="c.id" x-text="c.label"></option>
+                                    </template>
+                                </select>
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;"
+                                   x-text="(ORTHO_CHRONICITIES_LIST.find(x => x.id === newOrthoCondition.chronicity) || {}).detail || ''"></p>
+
+                                <label class="form-label">First noticed:</label>
+                                <input type="date" x-model="newOrthoCondition.firstNoticed" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Leave blank if you don't know. Whether a limp came on overnight or has crept up over two years changes what a vet looks for.
+                                </p>
+
+                                <label class="form-label">Where it has got to with the vet:</label>
+                                <select x-model="newOrthoCondition.vetStage" class="form-select" style="margin-bottom: 12px;">
+                                    <template x-for="v in ORTHO_VET_STAGES_LIST" :key="v.id">
+                                        <option :value="v.id" x-text="v.label"></option>
+                                    </template>
+                                </select>
+
+                                <label class="form-label">What you were told it is:</label>
+                                <select x-model="newOrthoCondition.suspectedCause" class="form-select" style="margin-bottom: 4px;">
+                                    <template x-for="c in ORTHO_CAUSES_LIST" :key="c.id">
+                                        <option :value="c.id" x-text="c.label"></option>
+                                    </template>
+                                </select>
+                                <input type="text" x-model="newOrthoCondition.vetDiagnosis" placeholder="The vet's words, as you remember them…" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Record what you were told, in your own words. This app never suggests what a limp might be — there are too many possibilities and telling them apart needs an examination.
+                                </p>
+
+                                <label class="form-label">Pain relief plan:</label>
+                                <input type="text" x-model="newOrthoCondition.painReliefPlan" placeholder="e.g. meloxicam every morning, gabapentin on bad days" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    The plan as you understand it. What was actually given on a given day is recorded with that day's score, and the gap between the two is often the explanation for a bad week.
+                                </p>
+
+                                <label class="form-label">Anything else you were asked to do:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                                    <template x-for="m in ORTHO_MANAGEMENTS_LIST" :key="m.id">
+                                        <button type="button" @click="toggleOrthoManagement(m.id)"
+                                                :style="(newOrthoCondition.management || []).includes(m.id)
+                                                    ? 'padding:4px 10px; border-radius:999px; border:1px solid #0f766e; background:#f0fdfa; color:#0f766e; font-size:0.8rem; cursor:pointer;'
+                                                    : 'padding:4px 10px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:0.8rem; cursor:pointer;'"
+                                                x-text="m.label"></button>
+                                    </template>
+                                </div>
+
+                                <label class="form-label">Status:</label>
+                                <select x-model="newOrthoCondition.status" class="form-select" style="margin-bottom: 12px;">
+                                    <template x-for="st in ORTHO_STATUSES_LIST" :key="st.id">
+                                        <option :value="st.id" x-text="st.label"></option>
+                                    </template>
+                                </select>
+
+                                <input type="text" x-model="newOrthoCondition.notes" placeholder="Notes…" class="form-input" style="margin-bottom: 15px;">
+
+                                <div class="flex-gap-10">
+                                    <button @click="closeOrthoConditionForm()" class="btn-secondary">Cancel</button>
+                                    <button @click="saveOrthoCondition()" class="btn-primary"><i class="fa-solid fa-check"></i> Save</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── One day's score ────────────────────────────────────────────── -->
+                        <div x-show="showOrthoEntryForm" x-cloak class="vch-modal">
+                            <div class="form-panel vch-modal-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <strong style="color: #1e293b;" x-text="editingOrthoEntryId ? 'Edit day' : 'Score today'"></strong>
+                                    <input type="date" x-model="newOrthoEntry.date" class="form-input" style="width: auto; padding: 4px 8px; font-size: 0.85rem;">
+                                </div>
+
+                                <label class="form-label">How lame:</label>
+                                <select x-model="newOrthoEntry.lamenessScore" class="form-select" style="margin-bottom: 4px;">
+                                    <option value="">Don't score today</option>
+                                    <template x-for="g in ORTHO_LAMENESS_SCALE_LIST" :key="g.score">
+                                        <option :value="g.score" x-text="g.score + ' — ' + g.label"></option>
+                                    </template>
+                                </select>
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;"
+                                   x-text="newOrthoEntry.lamenessScore === ''
+                                        ? 'A day logged without a score is not the same as a good day, and nothing here will treat it as one.'
+                                        : orthoLamenessDetail(newOrthoEntry.lamenessScore)"></p>
+
+                                <label class="form-label">Which legs today:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+                                    <template x-for="l in ORTHO_LEGS_LIST" :key="l.id">
+                                        <button type="button" @click="toggleOrthoEntryField('legs', l.id)"
+                                                :style="(newOrthoEntry.legs || []).includes(l.id)
+                                                    ? 'padding:4px 10px; border-radius:999px; border:1px solid #4338ca; background:#eef2ff; color:#4338ca; font-size:0.8rem; cursor:pointer;'
+                                                    : 'padding:4px 10px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:0.8rem; cursor:pointer;'"
+                                                x-text="l.label"></button>
+                                    </template>
+                                </div>
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Often the same leg, but not always — a pet taking the weight off a bad back leg will start favouring a front one, and noticing that shift is genuinely useful.
+                                </p>
+
+                                <label class="form-label">Getting up:</label>
+                                <select x-model="newOrthoEntry.stiffnessOnRising" class="form-select" style="margin-bottom: 12px;">
+                                    <template x-for="st in ORTHO_STIFFNESS_LIST" :key="st.id">
+                                        <option :value="st.id" x-text="st.label"></option>
+                                    </template>
+                                </select>
+
+                                <label class="form-label">What made it worse:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+                                    <template x-for="a in ORTHO_AGGRAVATORS_LIST" :key="a.id">
+                                        <button type="button" @click="toggleOrthoEntryField('worseAfter', a.id)"
+                                                :style="(newOrthoEntry.worseAfter || []).includes(a.id)
+                                                    ? 'padding:4px 10px; border-radius:999px; border:1px solid #b45309; background:#fffbeb; color:#b45309; font-size:0.8rem; cursor:pointer;'
+                                                    : 'padding:4px 10px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:0.8rem; cursor:pointer;'"
+                                                x-text="a.label"></button>
+                                    </template>
+                                </div>
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    Often more useful than the score itself. Worse after resting and worse after exercise point in quite different directions, and you are the only one who can see it.
+                                </p>
+
+                                <label class="form-label">Pain relief given today:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;">
+                                    <template x-for="pr in ORTHO_PAIN_RELIEF_LIST" :key="pr.id">
+                                        <button type="button" @click="toggleOrthoEntryField('painReliefGiven', pr.id)"
+                                                :style="(newOrthoEntry.painReliefGiven || []).includes(pr.id)
+                                                    ? 'padding:4px 10px; border-radius:999px; border:1px solid #0f766e; background:#f0fdfa; color:#0f766e; font-size:0.8rem; cursor:pointer;'
+                                                    : 'padding:4px 10px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:0.8rem; cursor:pointer;'"
+                                                x-text="pr.label"></button>
+                                    </template>
+                                </div>
+                                <input type="text" x-model="newOrthoEntry.painReliefNotes" placeholder="Dose, product, anything else…" class="form-input" style="margin-bottom: 4px;">
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 12px;">
+                                    What actually happened, not what was prescribed. “Nothing today” is worth ticking — it is what makes the good and bad days readable against the treatment.
+                                </p>
+
+                                <label class="onboarding-label" style="margin-bottom: 12px;">
+                                    <input type="checkbox" x-model="newOrthoEntry.vetVisit"> Seen by a vet about this today
+                                </label>
+
+                                <input type="text" x-model="newOrthoEntry.notes" placeholder="Notes…" class="form-input" style="margin-bottom: 15px;">
+
+                                <div class="flex-gap-10">
+                                    <button @click="closeOrthoEntryForm()" class="btn-secondary">Cancel</button>
+                                    <button @click="saveOrthoEntry()" class="btn-primary"><i class="fa-solid fa-check"></i> Save</button>
                                 </div>
                             </div>
                         </div>
@@ -6289,6 +6641,15 @@
                                 </label>
                             </template>
 
+                            <template x-if="activePatientProfile?.modules?.ortho">
+                                <label style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.15s;"
+                                       :style="vetExportModules.ortho ? 'background:#eef2ff; color:#4338ca; border-color:#c7d2fe;' : 'background:#f8fafc; color:#94a3b8; border-color:#e2e8f0;'">
+                                    <input type="checkbox" x-model="vetExportModules.ortho" style="display:none;">
+                                    <i class="fa-solid" :class="vetExportModules.ortho ? 'fa-square-check' : 'fa-square'" style="font-size: 0.85rem;"></i>
+                                    Lameness
+                                </label>
+                            </template>
+
                         </div>
                     </div>
 
@@ -6452,7 +6813,7 @@
                                 </div>
                                 <div>
                                     <label class="form-label">Status</label>
-                                    <select x-model="newAppointment.status" class="form-control">
+                                    <select x-model="newAppointment.status" @change="onAppointmentStatusChange()" class="form-control">
                                         <template x-for="st in APPOINTMENT_STATUSES_LIST" :key="st.id">
                                             <option :value="st.id" x-text="st.label"></option>
                                         </template>
@@ -6465,14 +6826,30 @@
 
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
                                 <div>
-                                    <label class="form-label">Date</label>
+                                    <label class="form-label" x-text="appointmentNeedsBooking(newAppointment) ? 'Due by' : 'Date'"></label>
                                     <input type="date" x-model="newAppointment.date" class="form-control">
                                 </div>
-                                <div>
+                                <!-- A to-book record has no slot, so it has no time. It gets the
+                                     answers people are actually given instead — "come back in about
+                                     six months". -->
+                                <div x-show="!appointmentNeedsBooking(newAppointment)">
                                     <label class="form-label">Time <span style="font-weight:400; color:#94a3b8;">(leave blank if not given one)</span></label>
                                     <input type="time" x-model="newAppointment.time" class="form-control">
                                 </div>
+                                <div x-show="appointmentNeedsBooking(newAppointment)">
+                                    <label class="form-label">Come back in</label>
+                                    <div style="display:flex; gap:6px;">
+                                        <template x-for="m in [3, 6, 12]" :key="m">
+                                            <button type="button" class="btn-secondary" style="flex:1; padding:6px 0;"
+                                                    @click="setAppointmentDueInMonths(m)"
+                                                    x-text="m + ' months'"></button>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
+                            <p x-show="appointmentNeedsBooking(newAppointment)" style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">
+                                For when you have been told to come back in a few months but not given a date. Change the status to “Booked” once you have a slot.
+                            </p>
 
                             <!-- WHERE — the branch address is the whole reason this feature exists -->
                             <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
@@ -6517,11 +6894,12 @@
                             </div>
 
                             <!-- REMINDERS (only while it is still booked) -->
-                            <template x-if="newAppointment.status === 'booked'">
+                            <template x-if="appointmentIsOpen(newAppointment)">
                                 <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
                                     <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Calendar reminders</div>
                                     <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155;">
-                                        <input type="checkbox" x-model="newAppointment.reminderEnabled"> Add reminders to the calendar file
+                                        <input type="checkbox" x-model="newAppointment.reminderEnabled">
+                                        <span x-text="appointmentNeedsBooking(newAppointment) ? 'Remind me to book it' : 'Add reminders to the calendar file'"></span>
                                     </label>
                                     <template x-if="newAppointment.reminderEnabled">
                                         <div style="margin-top:8px;">
@@ -6535,17 +6913,18 @@
                                                 <option :value="14">2 weeks</option>
                                                 <option :value="30">1 month</option>
                                             </select>
-                                            <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155; margin-top:8px;">
+                                            <label x-show="!appointmentNeedsBooking(newAppointment)" style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155; margin-top:8px;">
                                                 <input type="checkbox" x-model="newAppointment.remindDayBefore"> Also remind me shortly before
                                             </label>
-                                            <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Anything under “before you go” is included in each reminder, so it reaches you while there is still time to act on it.</p>
+                                            <p x-show="!appointmentNeedsBooking(newAppointment)" style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Anything under “before you go” is included in each reminder, so it reaches you while there is still time to act on it.</p>
+                                            <p x-show="appointmentNeedsBooking(newAppointment)" style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">You will be nudged this far before your pet is due to be seen, so there is time to get a slot.</p>
                                         </div>
                                     </template>
                                 </div>
                             </template>
 
                             <!-- OUTCOME (only once it is no longer booked) -->
-                            <template x-if="newAppointment.status !== 'booked'">
+                            <template x-if="!appointmentIsOpen(newAppointment)">
                                 <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #e2e8f0;">
                                     <label class="form-label">Outcome</label>
                                     <input type="text" x-model="newAppointment.outcome" class="form-control" placeholder="e.g. murmur unchanged, recheck in six months">
@@ -6584,6 +6963,32 @@
                         <p style="font-size:0.75rem; color:#94a3b8;">Nothing is recorded as having happened until you say so.</p>
                     </div>
 
+                    <!-- TIME TO RING AND BOOK THESE ─────────────────────────────────────────
+                         Its own section, above "coming up", for the same reason slipped bookings
+                         get one: an item that needs a phone call, sorted in among dates that need
+                         nothing, is an item that never gets dealt with. See the note on the
+                         'toBook' status in rr-logic.js. -->
+                    <div x-show="careOverdueToBook().length > 0 && !showAppointmentForm" style="margin-bottom:15px;">
+                        <div style="font-size:0.8rem; font-weight:bold; color:#b45309; text-transform:uppercase; margin-bottom:6px;">
+                            <i class="fa-solid fa-phone"></i> Time to ring and book these
+                        </div>
+                        <template x-for="item in careOverdueToBook()" :key="item.id">
+                            <div style="position:relative; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:12px; margin-bottom:8px;">
+                                <div style="font-weight:bold; color:#1e293b;" x-text="item.title"></div>
+                                <div style="font-size:0.8rem; color:#b45309; font-weight:600; margin-top:2px;">
+                                    Was due by <span x-text="new Date(item.date + 'T12:00:00Z').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })"></span>
+                                    — still not booked
+                                </div>
+                                <div x-show="item.subtitle" style="font-size:0.85rem; color:#475569; margin-top:2px;" x-text="item.subtitle"></div>
+                                <div style="margin-top:8px; display:flex; gap:8px;">
+                                    <button type="button" @click="markAppointmentBooked(item.sourceId)" style="padding:2px 8px; font-size:0.75rem; background:#2563eb; color:white; border:none; border-radius:4px; cursor:pointer;">I've booked it</button>
+                                    <button type="button" @click="openCareItem(item)" style="padding:2px 8px; font-size:0.75rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer;">Push the date back</button>
+                                </div>
+                            </div>
+                        </template>
+                        <p style="font-size:0.75rem; color:#94a3b8;">Nothing here is in the diary yet — these are the “come back in a few months” ones.</p>
+                    </div>
+
                     <!-- COMING UP (appointments + booked surgeries, one list) -->
                     <div x-show="futureCare().length > 0 && !showAppointmentForm" style="margin-bottom:15px;">
                         <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Coming up</div>
@@ -6591,8 +6996,15 @@
                             <div style="position:relative; background:#f0fdfa; border:1px solid #99f6e4; border-radius:8px; padding:12px; margin-bottom:8px;">
                                 <div style="font-weight:bold; color:#1e293b;" x-text="item.title"></div>
                                 <div style="font-size:0.8rem; color:#0f766e; font-weight:600; margin-top:2px;">
+                                    <template x-if="item.needsBooking"><span>Due by </span></template>
                                     <span x-text="new Date(item.date + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })"></span>
                                     <template x-if="item.time"><span x-text="' at ' + item.time"></span></template>
+                                </div>
+                                <!-- A to-book row must never look like a booking: it is the one row
+                                     here that still needs the owner to do something. -->
+                                <div x-show="item.needsBooking" style="font-size:0.75rem; color:#b45309; margin-top:4px;">
+                                    <i class="fa-solid fa-phone"></i> Still to book
+                                    <button type="button" @click="markAppointmentBooked(item.sourceId)" style="margin-left:8px; padding:1px 8px; font-size:0.72rem; background:#2563eb; color:white; border:none; border-radius:4px; cursor:pointer;">I've booked it</button>
                                 </div>
                                 <div x-show="item.subtitle" style="font-size:0.85rem; color:#475569; margin-top:2px;" x-text="item.subtitle"></div>
                                 <div x-show="item.kind === 'procedure'" style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">
@@ -6607,8 +7019,8 @@
                     </div>
 
                     <!-- THE NEXT ONE, IN FULL -->
-                    <template x-if="!showAppointmentForm && upcomingAppointments().filter(a => !appointmentNeedsOutcome(a))[0]">
-                        <div x-data="{ get next(){ return upcomingAppointments().filter(a => !appointmentNeedsOutcome(a))[0]; } }"
+                    <template x-if="!showAppointmentForm && upcomingAppointments().filter(a => !appointmentNeedsOutcome(a) && !appointmentNeedsBooking(a))[0]">
+                        <div x-data="{ get next(){ return upcomingAppointments().filter(a => !appointmentNeedsOutcome(a) && !appointmentNeedsBooking(a))[0]; } }"
                              style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:15px;">
                             <div style="font-size:0.8rem; font-weight:bold; color:#1e3a8a; text-transform:uppercase;">Next appointment</div>
                             <div style="font-weight:bold; color:#1e293b; margin-top:4px;" x-text="appointmentWhenText(next)"></div>
