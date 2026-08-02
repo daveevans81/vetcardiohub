@@ -982,7 +982,7 @@
 
                             <label class="module-selector" :class="{'active-sky': editingPatient.modules.ortho}">
                                 <div class="flex-center gap-10">
-                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-dog" style="font-size: 1.4rem; color: #4338ca;"></i></div>
+                                    <div style="width: 32px; text-align: center;"><i class="fa-solid fa-bone" style="font-size: 1.4rem; color: #4338ca;"></i></div>
                                     <div>
                                         <strong style="color: #1e293b; font-size: 0.95rem;">Lameness &amp; Joints</strong>
                                         <span class="text-muted text-sm block">Score how lame your pet is day by day, record which legs, what makes it worse and what pain relief was given — plotted against how much they walked</span>
@@ -2626,7 +2626,7 @@
 
                     <div style="margin-bottom: 15px;">
                         <button @click="showOrthoLog = !showOrthoLog" :aria-expanded="showOrthoLog.toString()" type="button" class="btn-accordion">
-                            <h3><i class="fa-solid fa-dog" style="color:#4338ca;"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Lameness &amp; Joints' : 'Lameness &amp; Joints'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_ortho')"></i></h3>
+                            <h3><i class="fa-solid fa-bone" style="color:#4338ca;"></i><span x-text="activePatientProfile?.name ? activePatientProfile.name + '\'s Lameness &amp; Joints' : 'Lameness &amp; Joints'"></span><i class="fa-solid fa-circle-info" style="color: #94a3b8; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#94a3b8'" @click.stop="openGlossary('module_ortho')"></i></h3>
                             <i class="fa-solid" :class="showOrthoLog ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </button>
                     </div>

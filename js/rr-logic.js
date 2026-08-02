@@ -820,6 +820,7 @@ ONBOARDING_CONCERNS: [
     { id: 'seizure',  label: 'Collapse, fainting or seizures' },
     { id: 'skin',     label: 'Skin problems or itching' },
     { id: 'lump',     label: 'A lump or growth' },
+    { id: 'ortho',    label: 'Limping, stiffness or arthritis' },
 ],
 
 // --- PWA install nudge ---
@@ -1504,7 +1505,7 @@ moduleMeta: [
     desc:'Measure lumps over time and keep the history.' },
   // Indigo — distinct from the cardiac greens and the skin amber, and deliberately not a warning
   // colour: a lameness chip must not look like an alert.
-  { key:'ortho',          label:'Lameness',       icon:'fa-dog',             c:'#4338ca', bg:'#eef2ff', bd:'#c7d2fe', glossary:'module_ortho',
+  { key:'ortho',          label:'Lameness',       icon:'fa-bone',             c:'#4338ca', bg:'#eef2ff', bd:'#c7d2fe', glossary:'module_ortho',
     desc:'Score lameness day by day against how much they walked.' },
 ],
 
@@ -2392,10 +2393,13 @@ generateModuleRecommendations() {
         recs.activityLog = true;
         recs.srr = true; // useful for collapse context
     }
-    // Neither skin nor a lump implies a heart problem, so SRR stays off — switching on a
-    // breathing-rate counter for a pet with an itchy ear is exactly the assumption this dropped.
+    // None of these implies a heart problem, so SRR stays off — switching on a breathing-rate
+    // counter for a pet with an itchy ear is exactly the assumption this dropped.
     if (has('skin')) { recs.activityLog = true; recs.skinLog = true; }
     if (has('lump')) { recs.activityLog = true; recs.lumps = true; }
+    // Activity is not optional for a lame pet: the lameness chart is plotted AGAINST how far they
+    // walked, and with the activity log off half of that picture is simply missing.
+    if (has('ortho')) { recs.activityLog = true; recs.ortho = true; }
 
     this.editingPatient.modules = { ...recs };
     this.onboardingStep = 3;
@@ -6631,8 +6635,13 @@ orthoManagementList(ids) { return (ids || []).map(id => this.orthoManagementLabe
 
 orthoIsActive(status) { return status !== 'resolved'; },
 
-// A day that was actually SCORED. '' / null means logged-but-unscored, which is NOT 0 (sound) —
-// treating them alike would invent good days out of missing ones and flatten the trend.
+// A day that was actually SCORED. '' / null / absent means logged-but-unscored, which is NOT 0
+// (sound) — treating them alike would invent good days out of missing ones and flatten the trend.
+//
+// All THREE spellings are checked on purpose. This app writes an explicit `null`; iOS omits the key
+// entirely, because Swift's JSONEncoder drops a nil optional — so a backup restored from an iPhone
+// arrives with `lamenessScore` UNDEFINED, not null. `''` is the unsaved form value. Verified against
+// real exports from both platforms, 2026-08-02. Never coerce a missing score to a number.
 _orthoIsScored(e) {
     return e && e.lamenessScore !== null && e.lamenessScore !== undefined && e.lamenessScore !== '';
 },
