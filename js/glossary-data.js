@@ -1,11 +1,11 @@
+
 // Bump this whenever the glossary content changes. The iOS apps (VCH Vitals, EchoCalc) adopt a
 // fetched glossary only when this date is NEWER than the copy they already hold (ISO yyyy-MM-dd, so
 // plain string comparison is chronological). Same mechanism as med-data's VCH_FORMULARY_REVIEWED.
-const VET_GLOSSARY_REVIEWED = "2026-07-13";
-
+const VET_GLOSSARY_REVIEWED = "2026-08-02";
 
 const VET_GLOSSARY_DB = {
-    
+
     // ==========================================
     // GROUP: DISEASES & CONDITIONS
     // ==========================================
@@ -79,6 +79,26 @@ module_srr: {
     difficulty: 1,
     textOwner: "The SRR module is the heart of the tracker. It lets you record your pet's resting breathing rate in two ways: using the live 30-second tap counter (simply tap the button once with each breath and the app counts and doubles it for you), or by entering a reading manually with any date and time so you can add historical or backdated entries. Every reading is stored in a logbook that you can filter by date range, and you can attach a written note to any entry. A summary panel shows the average rate, upper reference, and full range for whatever period is selected.",
     textClinical: "The SRR module provides two data-entry pathways: a real-time 30-second tap counter (doubles automatically to give breaths/min) and a backdated manual entry with custom datetime. Each reading is stored with date, time, rate, equivocal flag, and an optional free-text clinical note. The paginated logbook supports date-range filtering (preset periods or custom range). A statistical summary panel computes mean, mean+2SD (upper reference), and range for the filtered window — values update dynamically as the date range changes. Individual readings can be deleted."
+},
+
+module_skin: {
+    title: "Skin & Itch Log",
+    group: "Tracker",
+    category: "Modules",
+    audience: ["vet", "owner"],
+    difficulty: 2,
+    textOwner: "This module is a daily diary for itchy, sore or irritated skin. Each day you can score how much your pet has been scratching, licking or chewing from 0 to 10, note where on the body it is happening, what they are doing about it, and anything you have given or applied. Scoring even on the good days matters as much as on the bad ones — it is the contrast that reveals a pattern. Many skin problems follow the seasons, and that only becomes visible once a year or more of scores exists. Bring the record to appointments: a chart of the year is far more useful to your vet than trying to remember when the itching was at its worst.",
+    textClinical: "Longitudinal pruritus diary: daily 0–10 owner-scored pruritus severity, affected body regions, behavioural manifestations (scratching, licking, chewing, head-shaking), ear involvement, and interventions applied. Supports seasonal-pattern detection across years, flare-day counting, and treatment-response review. Intended to distinguish perennial from seasonal atopic disease and to provide objective serial data where recall bias is otherwise substantial."
+},
+
+module_lumps: {
+    title: "Lump Tracking",
+    group: "Tracker",
+    category: "Modules",
+    audience: ["vet", "owner"],
+    difficulty: 2,
+    textOwner: "This module tracks any lumps or masses you find, one record per lump, with its location and a series of measurements over time. Measure in the same way each time — the same axis, ideally with the same ruler or calipers — because it is the change between measurements that carries the meaning, not any single number. Photographs alongside the measurements help show changes in colour or surface that numbers alone miss. This record does not tell you whether a lump is harmless or serious, and it is not a substitute for having one examined: only your vet can determine that, usually with a needle sample. What it does give them is an accurate history of how a lump has behaved, which is often the deciding factor in what to do next.",
+    textClinical: "Per-mass record with anatomical location and serial measurements (length, width, depth where taken), yielding growth rate and change-in-character notes over time. Photographic attachment supports morphological comparison. Explicitly non-diagnostic: intended to document mass behaviour between consultations and to inform decisions on cytology, excision or monitoring intervals. Rapid interval growth or change in character should prompt re-examination rather than continued monitoring."
 },
 
 module_syncope: {
@@ -252,6 +272,17 @@ parasite_protection_plan: {
         textClinical: "An equivocal RRR (typically 30-40 bpm) represents a diagnostic grey zone. Elevations in this range may be physiological artifacts caused by REM sleep, thermoregulation, anxiety, or primary respiratory disease, rather than pathological cardiogenic pulmonary edema. Standard clinical protocol requires reassessing the SRR after 2-4 hours of acclimatization to establish a true baseline before initiating or adjusting diuretic therapy."
     },
     
+    breathing_effort: {
+        title: "Breathing Effort (1–5 Scale)",
+        group: "Monitoring",
+        category: "Home Care",
+        audience: ["vet", "owner"],
+        difficulty: 1,
+        textOwner: "As well as counting how FAST your pet breathes, it is useful to note how HARD they are working to breathe. Record this on a simple 1 to 5 scale each time you take a resting breathing count:\n\n1 — Imperceptible: barely any movement, the chest is almost still.\n2 — Very gentle: soft, shallow breaths that take very little effort.\n3 — Normal: easy, regular rise and fall of the chest.\n4 — Mildly increased: deeper or faster breaths with a little more visible movement.\n5 — Marked effort: deep movements with an obvious push from the belly (abdominal effort).\n\nA rising effort score over several days — especially alongside a resting rate above 30 — is an early warning sign worth reporting to your vet, even if the number of breaths still looks normal.",
+        textClinical: "A subjective owner-scored index of respiratory effort recorded alongside the sleeping respiratory rate (SRR). Increased effort — particularly a marked abdominal/expiratory push (grade 5) — reflects increased work of breathing and may precede or accompany overt tachypnoea in cardiogenic pulmonary oedema or concurrent respiratory disease. It is intended as a trend-monitoring adjunct to the SRR, not a standalone diagnostic, and complements auscultation and imaging.",
+        method: "At each resting/sleeping breath count, grade the depth and effort of chest and abdominal movement from 1 (imperceptible) to 5 (marked abdominal effort). Record the effort score with the rate so both can be trended over time."
+    },
+
     cough_types: {
         title: "Understanding Your Dog's Cough",
         group: "Symptoms",
