@@ -263,7 +263,10 @@ sessionScore: { correct: 0, review: 0 },
     },
     get rpadi() {
         if(!this.rpamax || !this.rpamin|| parseFloat(this.rpamax) === 0) return 0;
-        return ((this.rpamax - this.rpamin ) / this.rpamax).toFixed(3);
+        // Expressed as a PERCENTAGE to match the published reference interval (31.2-54.2%)
+        // and the '%' suffix shown in the results panel. Reduced distensibility (< ~30%)
+        // supports pulmonary hypertension (ACVIM 2020, PA site).
+        return (((this.rpamax - this.rpamin ) / this.rpamax) * 100).toFixed(1);
     },
     get paaola() {
         if(!this.rvotd || !this.aola || parseFloat(this.aola) === 0) return 0;
@@ -383,7 +386,7 @@ get changScoreResults() {
     breakdown.push({ name: 'IVS Flattening', val: ivsPts, desc: ivsPts === 4 ? 'Moderate-Severe' : (ivsPts === 2 ? 'Subtle-Mild' : 'Normal') });
 
     // 5. PA Enlargement (PA/Ao) -> Fallback to mpaAo if paaola not set
-    const paRatio = parseFloat( this.mpaAo || 0);
+    const paRatio = parseFloat(this.paaola) || parseFloat(this.mpaAo) || 0;
     let paPts = 0;
     if (paRatio >= 2.0) paPts = 6;
     else if (paRatio >= 1.5) paPts = 4;
@@ -741,7 +744,9 @@ get phClassification() {
 // --- 3. Evaluate ACVIM Site 2: Pulmonary Artery ---
     if (this.mpaAo > 0) addMetric('site2', 'MPA:Ao', this.mpaAo, parseFloat(this.mpaAo) > 1.0, '> 1.0', 'mpaAo');
     if (this.paaola > 0) addMetric('site2', 'PA:Ao(LA)', this.paaola, parseFloat(this.paaola) > 1.0, '> 1.0', 'paaola');
-    if (this.rpaIndex > 0) addMetric('site2', 'RPA Index', this.rpaIndex, this.rpaIndex >= 3.0, '≥ 3.0', 'rpadi');
+    // RPAD index is REDUCED in pulmonary hypertension, so the abnormal direction is low.
+    // Threshold matches the reference interval displayed in the results panel (31.2-54.2%).
+    if (this.rpadi > 0) addMetric('site2', 'RPAD Index', `${this.rpadi} %`, parseFloat(this.rpadi) < 31.2, '< 31.2% (Reduced)', 'rpadi');
     
     if (this.mpamin > 0 && this.rightAllometricResults?.mpamin?.available) {
         addMetric('site2', 'MPA min', `${this.mpamin} mm`, parseFloat(this.mpamin) > this.rightAllometricResults.mpamin.max, `> ${this.rightAllometricResults.mpamin.max} (Allo Max)`, 'mpamin');
@@ -1311,6 +1316,41 @@ get calculatedMineScore() {
         };
     },
 
+    /* Resets every measurement + patient field.
+       Replaces the old inline @click expression, in which 28 of the 38 fields were written
+       `field: ''` (a labelled statement) instead of `field = ''` and so never actually cleared.
+       Also clears the Chang subjective inputs and the manual MINE entries — stale values there
+       silently contaminated the next patient's scores.
+       Model selections (allometric / right-heart / MINE) are intentionally left alone: they are
+       user preferences, and re-picking a breed re-triggers the auto-switch. */
+    clearAll() {
+        const measurementFields = [
+            'weight',
+            // Left ventricle
+            'lvidd', 'lvids', 'ivsd', 'lvpwd', 'lvidd2', 'lvedv', 'lvesv',
+            // Left atrium
+            'la', 'ao', 'lad', 'aola',
+            // Spectral Doppler
+            'eVel', 'aVel', 'ivrt', 'mdt', 'ePrime', 'aovmax', 'pavmax',
+            // Outflow / shunt
+            'lvotd', 'rvotd', 'lvotvti', 'rvotvti',
+            // Right heart
+            'trMax', 'prMax', 'tapse', 'rvwt', 'rveda', 'rvesa', 'rvd1', 'rvd2',
+            'rad', 'rad2', 'mpamin', 'rpamin', 'rpamax', 'cvc',
+            // MINE manual-entry mode
+            'manualLaAo', 'manualLviddn', 'manualFs',
+            // Patient metadata + free text
+            'patientName', 'ownerName', 'breed', 'selectedBreed',
+            'clinicalComments', 'rawEchoText'
+        ];
+        measurementFields.forEach(field => { this[field] = ''; });
+
+        // Chang subjective inputs are booleans/enums, not blank strings
+        this.ivsFlatteningChang = '0';
+        this.rvotNotching = false;
+        this.parseMessage = '';
+    },
+
     getTag(val, minOrObj, max, high = '[ENLARGED]', low = '[SMALL]') {
         const n = parseFloat(val);
         if (isNaN(n) || n === 0) return '';
@@ -1410,7 +1450,7 @@ if (this.mrFraction > 0) {
 if (this.isDog) {
         if (this.lan > 0)    text += `LA Normalized: ${this.lan} (Ref: <1.17)${this.getTag(this.lan, null, 1.17)}\n`;
         if (this.ladao > 0)  text += `LAD:Ao Ratio: ${this.ladao} (Ref: <2.10)${this.getTag(this.ladao, null, 2.10)}\n`;
-        if (this.ladaola > 0)  text += `LAD:Ao(lax) Ratio: ${this.ladao} (Ref: <2.40)${this.getTag(this.ladaola, null, 2.40)}\n`;        
+        if (this.ladaola > 0)  text += `LAD:Ao(lax) Ratio: ${this.ladaola} (Ref: <2.40)${this.getTag(this.ladaola, null, 2.40)}\n`;
         if (this.ladn > 0)   text += `LADN: ${this.ladn} (Ref: <1.60)${this.getTag(this.ladn, null, 1.60)}\n`;
     }
 
@@ -1434,13 +1474,13 @@ if (this.eivrt > 0) {
     text += `E:IVRT Ratio: ${this.eivrt} (Ref: <2.5)${this.eivrt >= 2.5 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
 }
 if (this.ePrime > 0) {
-    text += `Eprime: ${this.ePrime} (Ref: 0.95-1.6)${this.ear >= 1.6 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+    text += `Eprime: ${this.ePrime} cm/s\n`;
 }
 if (this.eePrime > 0) {
-    text += `E:Eprime Ratio: ${this.eePrime} (Ref: <12)${this.ear >= 12 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+    text += `E:Eprime Ratio: ${this.eePrime} (Ref: <12)${this.eePrime >= 12 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
 }
 if (this.lveio > 0) {
-    text += `LVEIO: ${this.lveio} (Ref: <11.85)${this.ear >= 11.85 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
+    text += `LVEIO: ${this.lveio} (Ref: <11.85)${this.lveio >= 11.85 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
 }
 
 // --- OUTFLOW TRACT & STENOSIS EVALUATION ---
@@ -1539,11 +1579,11 @@ const addMeasure = (label, val, refKey, unit = '', isHighOnly = false) => {
   if (this.rpamaxao) text += `RPA:Ao: ${this.rpamaxao}(Ref: 0.53-0.98)${this.rpamaxao > 0.98 ? ' [Dilated]' :  ''}\n`;
     addMeasure('RPA min', this.rpamin, 'rpamin', ' mm');
     if (this.rpaminao) text += `RPA:Ao: ${this.rpaminao}(Ref: 0.29-0.61)${this.rpaminao > 0.61 ? ' [Dilated]' :  ''}\n`;
-    if (this.rpadi) text += `RPAD Index: ${this.rpadi}(Ref: 31.2-54.2)${this.rpadi < 31 ? ' [Reduced]' :  ''}\n`;
+    if (this.rpadi) text += `RPAD Index: ${this.rpadi}% (Ref: 31.2-54.2)${parseFloat(this.rpadi) < 31.2 ? ' [Reduced]' :  ''}\n`;
 
     // 5. Advanced PHT Metrics
     if (this.lvei) text += `LVEI: ${this.lvei}\n`;
-   if (this.IVSFlatteningChang > 0) text += `IVS flattening seen\n`;
+   if (parseInt(this.ivsFlatteningChang) > 0) text += `IVS flattening seen\n`;
      if (this.rvotNotching) text += `RVOT notch seen\n`;
     if (this.eplar > 0) text += `ePLAR: ${this.eplar} ${this.eplar >= 0.28 ? '[Pre-Capillary PH Pattern]' : '[Post-Capillary Backup]'}\n`;
 

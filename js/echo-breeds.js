@@ -742,8 +742,10 @@ const diastolicRules = {
         { min: 0, max: 59.99, category: 'Severe Restrictive Acceleration', grade: 'Grade III', points: 3 }
     ],
     trMax: [
-        { min: 0, max: 2.79, category: 'Normal Pulmonary Velocity', grade: 'Normal', points: 0 },
-        { min: 2.8, max: 3.4, category: 'Pulmonary Hypertension / High LAP', grade: 'Grade II', points: 3 },
+        // Bands aligned to the ACVIM (2020) PH probability thresholds used in phClassification:
+        // <= 2.8 m/s low probability, 2.9-3.4 intermediate, > 3.4 high.
+        { min: 0, max: 2.89, category: 'Normal Pulmonary Velocity', grade: 'Normal', points: 0 },
+        { min: 2.9, max: 3.4, category: 'Pulmonary Hypertension / High LAP', grade: 'Grade II', points: 3 },
         { min: 3.41, max: Infinity, category: 'Severe Pulmonary Hypertension', grade: 'Grade III', points: 4 }
     ]
 };
