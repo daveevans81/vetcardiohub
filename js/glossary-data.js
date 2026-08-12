@@ -2,7 +2,7 @@
 // Bump this whenever the glossary content changes. The iOS apps (VCH Vitals, EchoCalc) adopt a
 // fetched glossary only when this date is NEWER than the copy they already hold (ISO yyyy-MM-dd, so
 // plain string comparison is chronological). Same mechanism as med-data's VCH_FORMULARY_REVIEWED.
-const VET_GLOSSARY_REVIEWED = "2026-08-02";
+const VET_GLOSSARY_REVIEWED = "2026-08-11";
 
 const VET_GLOSSARY_DB = {
 
@@ -1898,8 +1898,104 @@ cvcAo: {
         category: "Right Heart",
         difficulty: 4
     },
+    // ── Added 2026-08-11 ─────────────────────────────────────────────────────────────────────
+    // Nine terms the EchoCalc iOS app already wires an info button to, but which had no entry —
+    // the button simply did not appear. Three entry fields (weight, rvd2, cvc), the whole shunt
+    // block (qs, qp, qpqs), two pressure gradients (aoGradient, prPG — trPG already had one) and
+    // mrVol (mrFraction already had one). PLEASE REVIEW THE WORDING BEFORE PUSHING TO THE SITE.
+    weight: {
+        audience: ["vet"],
+        title: "Body Weight",
+        view: "Patient Measurement",
+        description: "The single input every allometric reference interval depends on. Body surface area, LVIDdn, LADn, the right-heart intervals and both Wess volumetric tables are all functions of it, so a weight error propagates into every normalised value on the report.",
+        group: "echo",
+        method: "Weigh on a calibrated scale at the time of the study, in kilograms, and use that same weight throughout. Because the scaling exponents are fractional (LVIDdn divides by W^0.294), a 10% weight error shifts LVIDdn by roughly 3% — small, but enough to move a borderline patient across the 1.7 EPIC cut-off. Estimated or historical weights should be treated with caution, and severe ascites or cachexia makes scaled indices harder to interpret in either direction.",
+        category: "General",
+        difficulty: 1
+    },
+    rvd2: {
+        audience: ["vet"],
+        title: "RVD Mid-cavity (RVD2)",
+        view: "Left Apical 4-Chamber (RV-optimised)",
+        description: "The mid-cavity right ventricular internal diameter, recorded alongside the basal diameter (RVD1) to describe the shape of the RV rather than just its size.",
+        group: "echo",
+        method: "From an RV-focused left apical 4-chamber view, measure the internal diameter at end-diastole at the mid-cavity level — roughly midway between the tricuspid annulus and the apex — perpendicular to the RV long axis. Read it together with RVD1: a chamber that is dilated basally but not at mid-cavity suggests a different pattern of remodelling from one that is dilated throughout.",
+        category: "Right Heart",
+        difficulty: 3
+    },
+    cvc: {
+        audience: ["vet"],
+        title: "Caudal Vena Cava Diameter (CVC)",
+        view: "Subxiphoid / Right Hepatic View",
+        description: "The absolute diameter of the caudal vena cava. Rarely interpreted alone — it is the numerator for the CVC:Ao ratio and the basis of the collapsibility index, both of which are far more robust indicators of raised central venous pressure.",
+        group: "echo",
+        method: "From a subxiphoid or right intercostal hepatic view, measure the CVC diameter just caudal to the diaphragm, perpendicular to the vessel wall, at the same point in the respiratory cycle each time. Record the maximal diameter for the CVC:Ao ratio, and both maximal and minimal for collapsibility. Positive-pressure ventilation, fluid loading and the depth of respiration all move this number, so document the conditions.",
+        reference: "Darnis et al. Establishment of reference values of the caudal vena cava by fast-stroke echocardiography.",
+        category: "Right Heart",
+        difficulty: 3
+    },
+    qs: {
+        audience: ["vet"],
+        title: "Systemic Stroke Volume (Qs)",
+        view: "Derived Index",
+        description: "The volume of blood leaving the left ventricle through the aortic outflow tract each beat. The systemic half of the Qp:Qs shunt calculation, and the reference volume that mitral regurgitant volume is measured against.",
+        group: "echo",
+        method: "Calculated as: LVOT VTI × π × (LVOT diameter / 20)². The divisor of 20 halves the diameter to a radius and converts millimetres to centimetres in one step, so the product is in millilitres. Accuracy is dominated by the diameter, which is squared: a 10% error in LVOT diameter is a 21% error in Qs. Measure the diameter in mid-systole at the annulus and align the Doppler beam with flow.",
+        category: "Doppler",
+        difficulty: 4
+    },
+    qp: {
+        audience: ["vet"],
+        title: "Pulmonary Stroke Volume (Qp)",
+        view: "Derived Index",
+        description: "The volume of blood leaving the right ventricle through the pulmonary outflow tract each beat. The pulmonary half of the Qp:Qs shunt calculation.",
+        group: "echo",
+        method: "Calculated as: RVOT VTI × π × (RVOT diameter / 20)², exactly as for Qs but from the right-sided outflow. The same squared-diameter sensitivity applies. Measure the RVOT diameter at the pulmonic annulus in mid-systole from a right parasternal short-axis or left cranial view.",
+        category: "Doppler",
+        difficulty: 4
+    },
+    qpqs: {
+        audience: ["vet"],
+        title: "Qp:Qs Shunt Ratio",
+        view: "Derived Index",
+        description: "The ratio of pulmonary to systemic flow, and the standard quantification of shunt magnitude in congenital disease such as PDA, VSD and ASD.",
+        group: "echo",
+        method: "Calculated as: Qp / Qs. A ratio of roughly 1.0 is normal; values above 1.5 indicate a haemodynamically significant left-to-right shunt; a ratio below 1.0 raises the possibility of right-to-left shunting. Both volumes are squared-diameter dependent, so treat the ratio as a magnitude estimate rather than a precise figure, and interpret it alongside chamber size and the direction of colour flow. Significant valvular regurgitation on either side invalidates the corresponding stroke volume.",
+        category: "Doppler",
+        difficulty: 4
+    },
+    aoGradient: {
+        audience: ["vet"],
+        title: "Aortic Pressure Gradient (Ao PG)",
+        view: "Derived Index",
+        description: "The peak instantaneous pressure difference across the left ventricular outflow tract, used to grade subaortic stenosis and other causes of outflow obstruction.",
+        group: "echo",
+        method: "Calculated using the modified Bernoulli equation: 4 × (Ao Vmax²). This is the PEAK INSTANTANEOUS gradient and is systematically higher than the peak-to-peak gradient a catheter records, so the two are not interchangeable. Velocity is angle-dependent and rises with sympathetic tone, anaemia and anaesthesia, so interrogate from multiple windows (including subcostal) and take the highest well-aligned signal. Grade from the velocity, not the gradient alone.",
+        category: "Doppler",
+        difficulty: 2
+    },
+    prPG: {
+        audience: ["vet"],
+        title: "Pulmonic Regurgitation Pressure Gradient (PR PG)",
+        view: "Derived Index",
+        description: "The pressure difference between the pulmonary artery and the right ventricle across a pulmonic regurgitant jet. With an estimate of right atrial pressure it gives a non-invasive estimate of pulmonary artery pressure, and is the main alternative route when no tricuspid regurgitant jet is measurable.",
+        group: "echo",
+        method: "Calculated using the modified Bernoulli equation: 4 × (PR Vmax²). The PEAK (early-diastolic) gradient plus estimated right atrial pressure approximates MEAN pulmonary artery pressure; the END-DIASTOLIC PR velocity, measured separately, estimates pulmonary artery diastolic pressure. A trivial jet is common in normal animals — the velocity, not the presence of the jet, is what matters. Beam alignment errors underestimate, never overestimate.",
+        category: "Doppler",
+        difficulty: 3
+    },
+    mrVol: {
+        audience: ["vet"],
+        title: "Mitral Regurgitant Volume (MR Vol)",
+        view: "Derived Index",
+        description: "The volume of blood returning into the left atrium each beat, by the volumetric method: everything the left ventricle ejects that does not leave through the aorta.",
+        group: "echo",
+        method: "Calculated as: total LV stroke volume (LVEDV − LVESV, modified Simpson's) − systemic stroke volume (Qs), floored at zero. It therefore requires both Simpson's volumes and an LVOT diameter and VTI from the same study, and it silently assumes there is no significant aortic regurgitation — if there is, the aortic 'forward' volume is overstated and the regurgitant volume underestimated. Expressed as a proportion of total stroke volume it becomes the regurgitant fraction.",
+        category: "Left Heart",
+        difficulty: 4
+    },
     changScore: {
-        audience: ["vet"], 
+        audience: ["vet"],
         title: "Chang (2026) PH Predictive Score",
         view: "Derived Multi-parametric Index",
         description: "A 25-point echocardiographic scoring system designed to assess the probability of moderate-to-severe pulmonary hypertension in dogs lacking a measurable tricuspid regurgitation (TR) jet. It integrates right and left heart structural ratios with subjective visual findings.",
