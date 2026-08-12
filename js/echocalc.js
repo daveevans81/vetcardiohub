@@ -385,8 +385,13 @@ get changScoreResults() {
     score += ivsPts;
     breakdown.push({ name: 'IVS Flattening', val: ivsPts, desc: ivsPts === 4 ? 'Moderate-Severe' : (ivsPts === 2 ? 'Subtle-Mild' : 'Normal') });
 
-    // 5. PA Enlargement (PA/Ao) -> Fallback to mpaAo if paaola not set
-    const paRatio = parseFloat(this.paaola) || parseFloat(this.mpaAo) || 0;
+    // 5. PA Enlargement (PA:Ao).
+    //    Chang measures PA:Ao in the SHORT axis, so mpaAo (mpamin/ao) is the score's ratio and
+    //    takes precedence wherever it is available. paaola (rvotd/aola) is the long-axis RVOT
+    //    ratio and is used only as a fallback, so a study with just the long-axis pair still
+    //    scores rather than silently contributing 0.
+    //    (Confirmed against the paper 2026-08-11; this reverses the 2026-08-10 ordering.)
+    const paRatio = parseFloat(this.mpaAo) || parseFloat(this.paaola) || 0;
     let paPts = 0;
     if (paRatio >= 2.0) paPts = 6;
     else if (paRatio >= 1.5) paPts = 4;

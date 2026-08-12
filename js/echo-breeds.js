@@ -1,3 +1,10 @@
+// Reference-constant review date for VetCardioHub EchoCalc.
+// Bump this ISO yyyy-MM-dd date whenever ANY constant in this file changes, then
+// regenerate Resources/echo-reference.json (Tools/generate-echo-reference-json.js).
+// The iOS app adopts a fetched reference set only when this date is NEWER than the
+// copy it already holds. Same mechanism as glossary-data.js VET_GLOSSARY_REVIEWED.
+const VCH_ECHO_REF_REVIEWED = "2026-08-10";
+
     const breedSpecificReferenceRanges = {
   "Afghan Hound": {
     "is_deviant": true,

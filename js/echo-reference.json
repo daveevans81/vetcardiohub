@@ -1,0 +1,4286 @@
+{
+ "_meta": {
+  "source": "echo-breeds.js",
+  "generator": "generate-echo-reference-json.js",
+  "note": "GENERATED FILE — do not edit by hand. Regenerate from echo-breeds.js.",
+  "infinityEncoding": "A null `max` in mineModels.ranges / diastolicRules means +Infinity."
+ },
+ "reviewedDate": "2026-08-10",
+ "allometricModels": {
+  "cornell_standard": {
+   "breed": null,
+   "clinicalNote": "Original allometric dataset. Included sighthound breeds so this skews dataset somewhat as they are outliers typically. LAD included from Marchesotti et al. (2019)",
+   "isCm": true,
+   "label": "Standard Canine (Cornell)",
+   "multiplier": null,
+   "params": {
+    "ao": {
+     "a": 0.78,
+     "b": 0.292,
+     "normMax": 0.96,
+     "normMin": 0.63,
+     "type": "norm"
+    },
+    "ivsd": {
+     "a": 0.41,
+     "b": 0.241,
+     "normMax": 0.59,
+     "normMin": 0.29,
+     "type": "norm"
+    },
+    "ivss": {
+     "a": 0.58,
+     "b": 0.24,
+     "normMax": 0.79,
+     "normMin": 0.43,
+     "type": "norm"
+    },
+    "la": {
+     "a": 0.76,
+     "b": 0.355,
+     "normMax": 0.97,
+     "normMin": 0.59,
+     "type": "norm"
+    },
+    "lad": {
+     "a": 1.1,
+     "b": 0.309,
+     "normMax": 1.6,
+     "normMin": 0.89,
+     "type": "norm"
+    },
+    "lvidd": {
+     "a": 1.53,
+     "b": 0.294,
+     "normMax": 1.85,
+     "normMin": 1.27,
+     "type": "norm"
+    },
+    "lvids": {
+     "a": 0.95,
+     "b": 0.315,
+     "normMax": 1.26,
+     "normMin": 0.71,
+     "type": "norm"
+    },
+    "lvpwd": {
+     "a": 0.42,
+     "b": 0.232,
+     "normMax": 0.6,
+     "normMin": 0.29,
+     "type": "norm"
+    },
+    "lvpws": {
+     "a": 0.64,
+     "b": 0.222,
+     "normMax": 0.87,
+     "normMin": 0.48,
+     "type": "norm"
+    }
+   },
+   "pmid": "15188817",
+   "reference": "Cornell et al. (2004)",
+   "species": "canine"
+  },
+  "esser_non_sighthound": {
+   "breed": null,
+   "clinicalNote": "Revision of Cornell allometric dataset. Deliberately excluded sighthound breeds so this doesn't skew the dataset. LAD included from Marchesotti et al. (2019)",
+   "isCm": true,
+   "label": "Non-Sighthound (Esser)",
+   "multiplier": null,
+   "params": {
+    "ao": {
+     "a": 0.78,
+     "b": 0.292,
+     "normMax": 0.96,
+     "normMin": 0.63,
+     "type": "norm"
+    },
+    "ivsd": {
+     "a": 0.36,
+     "b": 0.289,
+     "normMax": 0.49,
+     "normMin": 0.27,
+     "type": "norm"
+    },
+    "ivss": {
+     "a": 0.51,
+     "b": 0.276,
+     "normMax": 0.68,
+     "normMin": 0.38,
+     "type": "norm"
+    },
+    "la": {
+     "a": 0.76,
+     "b": 0.355,
+     "normMax": 0.97,
+     "normMin": 0.59,
+     "type": "norm"
+    },
+    "lad": {
+     "a": 1.1,
+     "b": 0.309,
+     "normMax": 1.6,
+     "normMin": 0.89,
+     "type": "norm"
+    },
+    "lvidd": {
+     "a": 1.38,
+     "b": 0.322,
+     "normMax": 1.63,
+     "normMin": 1.17,
+     "type": "norm"
+    },
+    "lvids": {
+     "a": 0.87,
+     "b": 0.346,
+     "normMax": 1.09,
+     "normMin": 0.7,
+     "type": "norm"
+    },
+    "lvpwd": {
+     "a": 0.4,
+     "b": 0.261,
+     "normMax": 0.53,
+     "normMin": 0.3,
+     "type": "norm"
+    },
+    "lvpws": {
+     "a": 0.6,
+     "b": 0.247,
+     "normMax": 0.78,
+     "normMin": 0.46,
+     "type": "norm"
+    }
+   },
+   "pmid": "33009675",
+   "reference": "Esser et al. (2020)",
+   "species": "canine"
+  },
+  "isayama_toy_breed_2022": {
+   "breed": null,
+   "clinicalNote": "Specific to toy breeds (e.g., Chihuahua, Yorkie, Toy Poodle). These breeds often have smaller heart dimensions relative to BW compared to standard models. Study was specific to dogs <5kg.",
+   "isCm": true,
+   "label": "Toy Breed (Isayama)",
+   "multiplier": null,
+   "params": {
+    "ao": {
+     "a": 0.91,
+     "b": 0.183,
+     "normMax": 1.18,
+     "normMin": 0.7,
+     "type": "norm"
+    },
+    "ivsd": {
+     "a": 0.34,
+     "b": 0.486,
+     "normMax": 0.77,
+     "normMin": 0.15,
+     "type": "norm"
+    },
+    "ivss": {
+     "a": 0.62,
+     "b": 0.238,
+     "normMax": 0.83,
+     "normMin": 0.46,
+     "type": "norm"
+    },
+    "la": {
+     "a": 0.92,
+     "b": 0.345,
+     "normMax": 1.3,
+     "normMin": 0.65,
+     "type": "norm"
+    },
+    "lvidd": {
+     "a": 1.26,
+     "b": 0.332,
+     "normMax": 1.57,
+     "normMin": 1.02,
+     "type": "norm"
+    },
+    "lvids": {
+     "a": 0.78,
+     "b": 0.263,
+     "normMax": 1.15,
+     "normMin": 0.54,
+     "type": "norm"
+    },
+    "lvpwd": {
+     "a": 0.43,
+     "b": 0.275,
+     "normMax": 0.57,
+     "normMin": 0.33,
+     "type": "norm"
+    },
+    "lvpws": {
+     "a": 0.57,
+     "b": 0.31,
+     "normMax": 0.75,
+     "normMin": 0.43,
+     "type": "norm"
+    }
+   },
+   "pmid": "35812853",
+   "reference": "Isayama et al. (2022)",
+   "species": "canine"
+  },
+  "karsten_adult_cat": {
+   "breed": null,
+   "clinicalNote": "Applicable to adult cats. Measurements are 2D-derived. Ventricular data (LVDd, IVSd, LVPWd) uses Short-axis 2D measurements; Max LAD uses Long-axis 2D.",
+   "isCm": false,
+   "label": "Adult Cat (Karsten)",
+   "multiplier": null,
+   "params": {
+    "ivsd": {
+     "a": 3.73,
+     "b": 0.177,
+     "normMax": 5.01,
+     "normMin": 2.77,
+     "type": "norm"
+    },
+    "lad": {
+     "a": 11.23,
+     "b": 0.177,
+     "normMax": 13.65,
+     "normMin": 9.24,
+     "type": "norm"
+    },
+    "lvidd": {
+     "a": 9.96,
+     "b": 0.247,
+     "normMax": 12.82,
+     "normMin": 7.74,
+     "type": "norm"
+    },
+    "lvpwd": {
+     "a": 3.21,
+     "b": 0.212,
+     "normMax": 3.97,
+     "normMin": 2.59,
+     "type": "norm"
+    }
+   },
+   "pmid": "28993567",
+   "reference": "Karsten et al. (2017)",
+   "species": "feline"
+  },
+  "sisson_puppy_1991": {
+   "breed": null,
+   "clinicalNote": "Applicable to growing puppies (1wk–1yr). **CARE - OLDER PAPER BASED ON SMALL SAMPLE SIZE OF ENGLISH POINTERS.** Puppy measurements should always be interpreted with great care, and very few studies have reported on allometric scaling as yet. Note: Reference ranges calculated using Natural Log SEE (base e) from Table 2 in paper.",
+   "isCm": false,
+   "label": "Puppy (Sisson)",
+   "multiplier": null,
+   "params": {
+    "ao": {
+     "a": 7.28,
+     "b": 0.401,
+     "normMax": 8.45,
+     "normMin": 6.27,
+     "type": "norm"
+    },
+    "ivsd": {
+     "a": 2.36,
+     "b": 0.367,
+     "normMax": 3.19,
+     "normMin": 1.74,
+     "type": "norm"
+    },
+    "ivss": {
+     "a": 4.13,
+     "b": 0.319,
+     "normMax": 4.97,
+     "normMin": 3.43,
+     "type": "norm"
+    },
+    "la": {
+     "a": 7.22,
+     "b": 0.38,
+     "normMax": 8.65,
+     "normMin": 6.02,
+     "type": "norm"
+    },
+    "lvidd": {
+     "a": 11.63,
+     "b": 0.409,
+     "normMax": 13.6,
+     "normMin": 9.94,
+     "type": "norm"
+    },
+    "lvids": {
+     "a": 6.76,
+     "b": 0.445,
+     "normMax": 8.6,
+     "normMin": 5.32,
+     "type": "norm"
+    },
+    "lvpwd": {
+     "a": 2.47,
+     "b": 0.348,
+     "normMax": 3.18,
+     "normMin": 1.92,
+     "type": "norm"
+    },
+    "lvpws": {
+     "a": 4.5,
+     "b": 0.313,
+     "normMax": 5.53,
+     "normMin": 3.66,
+     "type": "norm"
+    }
+   },
+   "pmid": "1767977",
+   "reference": "Sisson and Schaeffer (1991)",
+   "species": "canine"
+  },
+  "stepien_sighthound": {
+   "breed": "Whippet",
+   "clinicalNote": "Specific to North American Whippets. Higher ranges account for 'Athletic Heart' phenotype in conditioned dogs. Apply to other sighthounds with care.",
+   "isCm": true,
+   "label": "Sighthound/Whippet (Stepien)",
+   "multiplier": null,
+   "params": {
+    "ivsd": {
+     "a": 0.55,
+     "b": 0.222,
+     "normMax": 0.86,
+     "normMin": 0.35,
+     "type": "norm"
+    },
+    "lad": {
+     "a": 1.2,
+     "b": 0.391,
+     "normMax": 1.58,
+     "normMin": 0.91,
+     "type": "norm"
+    },
+    "lvidd": {
+     "a": 1.51,
+     "b": 0.332,
+     "normMax": 2.01,
+     "normMin": 1.13,
+     "type": "norm"
+    },
+    "lvids": {
+     "a": 0.89,
+     "b": 0.433,
+     "normMax": 1.33,
+     "normMin": 0.6,
+     "type": "norm"
+    },
+    "lvpwd": {
+     "a": 0.35,
+     "b": 0.335,
+     "normMax": 0.57,
+     "normMin": 0.21,
+     "type": "norm"
+    }
+   },
+   "pmid": "36975003",
+   "reference": "Stepien et al. (2023)",
+   "species": "canine"
+  },
+  "visser_kitten": {
+   "breed": null,
+   "clinicalNote": "Applicable to growing kittens (6–16 weeks). Calibrated for pediatric feline heart development. Discrepancy Note: Values here are 95% intervals, the paper published a table that seemingly uses 90% intervals and mislabelled.",
+   "isCm": true,
+   "label": "Kitten Growth (Visser)",
+   "multiplier": null,
+   "params": {
+    "ao": {
+     "a": -0.235,
+     "b": 0.292,
+     "see": 0.037,
+     "type": "log_direct"
+    },
+    "ivsd": {
+     "a": -0.51,
+     "b": 0.274,
+     "see": 0.0672,
+     "type": "log_direct"
+    },
+    "la": {
+     "a": -0.099,
+     "b": 0.275,
+     "see": 0.0422,
+     "type": "log_direct"
+    },
+    "lad": {
+     "a": -0.077,
+     "b": 0.289,
+     "see": 0.0461,
+     "type": "log_direct"
+    },
+    "lvidd": {
+     "a": 0.046,
+     "b": 0.278,
+     "see": 0.0509,
+     "type": "log_direct"
+    },
+    "lvids": {
+     "a": -0.296,
+     "b": 0.376,
+     "see": 0.0989,
+     "type": "log_direct"
+    },
+    "lvpwd": {
+     "a": -0.507,
+     "b": 0.213,
+     "see": 0.0758,
+     "type": "log_direct"
+    },
+    "rad": {
+     "a": -0.016,
+     "b": 0.316,
+     "see": 0.0498,
+     "type": "log_direct"
+    },
+    "rvidd": {
+     "a": -0.328,
+     "b": 0.255,
+     "see": 0.109,
+     "type": "log_direct"
+    }
+   },
+   "pmid": "32812464",
+   "reference": "Visser et al. (2022)",
+   "species": "feline"
+  }
+ },
+ "rightHeartModels": {
+  "feldhutter_2022": {
+   "clinicalNote": null,
+   "label": "Feldhutter (2022) 3D & Functional Model",
+   "params": {
+    "mpamin": {
+     "a": -0.084,
+     "b": 0.306,
+     "multiplier": 10,
+     "see": 0.042,
+     "type": "log_direct"
+    },
+    "rad": {
+     "a": 1.12,
+     "b": 0.341,
+     "multiplier": 10,
+     "see": 0.18
+    },
+    "rpamax": {
+     "a": -0.201,
+     "b": 0.335,
+     "multiplier": 10,
+     "see": 0.061,
+     "type": "log_direct"
+    },
+    "rpamin": {
+     "a": -0.439,
+     "b": 0.364,
+     "multiplier": 10,
+     "see": 0.079,
+     "type": "log_direct"
+    },
+    "rvSPrime": {
+     "a": -1.076,
+     "b": 0.186,
+     "see": 0.113,
+     "type": "log_direct"
+    },
+    "rvd1": {
+     "a": 0.92,
+     "b": 0.298,
+     "multiplier": 10,
+     "see": 0.19
+    },
+    "rveda": {
+     "a": -0.004,
+     "b": 0.665,
+     "see": 0.094,
+     "type": "log_direct"
+    },
+    "rvedv": {
+     "a": 0.235,
+     "b": 0.942,
+     "see": 0.109,
+     "type": "log_direct"
+    },
+    "rvesa": {
+     "a": -0.296,
+     "b": 0.695,
+     "see": 0.126,
+     "type": "log_direct"
+    },
+    "rvesv": {
+     "a": -0.095,
+     "b": 0.962,
+     "see": 0.118,
+     "type": "log_direct"
+    },
+    "tapse": {
+     "a": 0.79,
+     "b": 0.285,
+     "see": 0.087,
+     "type": "log_direct"
+    }
+   },
+   "pmid": "34874066",
+   "reference": null,
+   "species": "canine"
+  },
+  "gentile_solomon_2016": {
+   "clinicalNote": null,
+   "label": "Gentile-Solomon Functional Metrics",
+   "params": {
+    "ao": {
+     "a": 6.64,
+     "b": 0.356,
+     "normMax": 7.62,
+     "normMin": 5.79,
+     "type": "norm"
+    },
+    "cvc": {
+     "a": 3.9,
+     "b": 0.25,
+     "normMax": 5.04,
+     "normMin": 3.02,
+     "type": "norm"
+    },
+    "mpamin": {
+     "a": -0.084,
+     "b": 0.306,
+     "multiplier": 10,
+     "see": 0.042,
+     "type": "log_direct"
+    },
+    "pv": {
+     "a": 6.68,
+     "b": 0.301,
+     "normMax": 7.78,
+     "normMin": 5.74,
+     "type": "norm"
+    },
+    "raArea": {
+     "a": 58.63,
+     "b": 0.71,
+     "normMax": 76.27,
+     "normMin": 45.07,
+     "type": "norm"
+    },
+    "raMajor": {
+     "a": 9.49,
+     "b": 0.32,
+     "normMax": 11.12,
+     "normMin": 8.09,
+     "type": "norm"
+    },
+    "rad": {
+     "a": 7.43,
+     "b": 0.39,
+     "normMax": 9.02,
+     "normMin": 6.12,
+     "type": "norm"
+    },
+    "rpamax": {
+     "a": -0.201,
+     "b": 0.335,
+     "multiplier": 10,
+     "see": 0.061,
+     "type": "log_direct"
+    },
+    "rpamin": {
+     "a": -0.439,
+     "b": 0.364,
+     "multiplier": 10,
+     "see": 0.079,
+     "type": "log_direct"
+    },
+    "rvMajorDiastole": {
+     "a": 14.26,
+     "b": 0.3,
+     "normMax": 18,
+     "normMin": 11.3,
+     "type": "norm"
+    },
+    "rvMinorSystole": {
+     "a": 5.44,
+     "b": 0.31,
+     "normMax": 7.68,
+     "normMin": 3.86,
+     "type": "norm"
+    },
+    "rvWdApicalDiastole": {
+     "a": 3.15,
+     "b": 0.25,
+     "normMax": 3.86,
+     "normMin": 2.58,
+     "type": "norm"
+    },
+    "rvWsApicalSystole": {
+     "a": 3.3,
+     "b": 0.29,
+     "normMax": 4.1,
+     "normMin": 2.67,
+     "type": "norm"
+    },
+    "rvd1": {
+     "a": 7.02,
+     "b": 0.33,
+     "normMax": 9.35,
+     "normMin": 5.27,
+     "type": "norm"
+    },
+    "rveda": {
+     "a": 91.6,
+     "b": 0.62,
+     "normMax": 132.9,
+     "normMin": 63.13,
+     "type": "norm"
+    },
+    "rvesv": {
+     "a": 52.9,
+     "b": 0.63,
+     "normMax": 83.42,
+     "normMin": 33.54,
+     "type": "norm"
+    },
+    "rvwt": {
+     "a": 0.22,
+     "b": 0.284,
+     "multiplier": 10,
+     "see": 0.05
+    },
+    "tapse": {
+     "a": 3.98,
+     "b": 0.352,
+     "see": 1.08
+    },
+    "tvAnnulusD": {
+     "a": 5.11,
+     "b": 0.35,
+     "normMax": 6.57,
+     "normMin": 3.97,
+     "type": "norm"
+    },
+    "tvAnnulusS": {
+     "a": 4.88,
+     "b": 0.32,
+     "normMax": 6.33,
+     "normMin": 3.78,
+     "type": "norm"
+    }
+   },
+   "pmid": "27453517",
+   "reference": null,
+   "species": "canine"
+  }
+ },
+ "leftHeartModels": {
+  "wess_2021_smod_nonsighthound": {
+   "data": [
+    {
+     "edvMax": 4.7,
+     "edvMin": 1.4,
+     "esvMax": 1.5,
+     "esvMin": 0.4,
+     "weight": 1
+    },
+    {
+     "edvMax": 7.2,
+     "edvMin": 2.8,
+     "esvMax": 2.3,
+     "esvMin": 0.9,
+     "weight": 2
+    },
+    {
+     "edvMax": 10.1,
+     "edvMin": 4,
+     "esvMax": 3.5,
+     "esvMin": 1.4,
+     "weight": 3
+    },
+    {
+     "edvMax": 13.3,
+     "edvMin": 5.4,
+     "esvMax": 4.8,
+     "esvMin": 1.9,
+     "weight": 4
+    },
+    {
+     "edvMax": 16.8,
+     "edvMin": 6.8,
+     "esvMax": 6.2,
+     "esvMin": 2.5,
+     "weight": 5
+    },
+    {
+     "edvMax": 20.1,
+     "edvMin": 8.1,
+     "esvMax": 7.6,
+     "esvMin": 3.1,
+     "weight": 6
+    },
+    {
+     "edvMax": 23.1,
+     "edvMin": 9.3,
+     "esvMax": 9,
+     "esvMin": 3.6,
+     "weight": 7
+    },
+    {
+     "edvMax": 25.8,
+     "edvMin": 10.4,
+     "esvMax": 10.1,
+     "esvMin": 4.1,
+     "weight": 8
+    },
+    {
+     "edvMax": 28.2,
+     "edvMin": 11.4,
+     "esvMax": 11,
+     "esvMin": 4.4,
+     "weight": 9
+    },
+    {
+     "edvMax": 30.8,
+     "edvMin": 12.4,
+     "esvMax": 11.8,
+     "esvMin": 4.8,
+     "weight": 10
+    },
+    {
+     "edvMax": 33.8,
+     "edvMin": 13.6,
+     "esvMax": 13,
+     "esvMin": 5.2,
+     "weight": 11
+    },
+    {
+     "edvMax": 37.3,
+     "edvMin": 15,
+     "esvMax": 14.4,
+     "esvMin": 5.8,
+     "weight": 12
+    },
+    {
+     "edvMax": 41.2,
+     "edvMin": 16.6,
+     "esvMax": 16.2,
+     "esvMin": 6.5,
+     "weight": 13
+    },
+    {
+     "edvMax": 45.5,
+     "edvMin": 18.4,
+     "esvMax": 18.2,
+     "esvMin": 7.3,
+     "weight": 14
+    },
+    {
+     "edvMax": 50.1,
+     "edvMin": 20.2,
+     "esvMax": 20.3,
+     "esvMin": 8.2,
+     "weight": 15
+    },
+    {
+     "edvMax": 54.6,
+     "edvMin": 22,
+     "esvMax": 22.5,
+     "esvMin": 9.1,
+     "weight": 16
+    },
+    {
+     "edvMax": 59,
+     "edvMin": 23.8,
+     "esvMax": 24.7,
+     "esvMin": 9.9,
+     "weight": 17
+    },
+    {
+     "edvMax": 63.4,
+     "edvMin": 25.6,
+     "esvMax": 26.9,
+     "esvMin": 10.8,
+     "weight": 18
+    },
+    {
+     "edvMax": 67.6,
+     "edvMin": 27.3,
+     "esvMax": 29.1,
+     "esvMin": 11.7,
+     "weight": 19
+    },
+    {
+     "edvMax": 71.8,
+     "edvMin": 29,
+     "esvMax": 31.2,
+     "esvMin": 12.5,
+     "weight": 20
+    },
+    {
+     "edvMax": 81.4,
+     "edvMin": 32.9,
+     "esvMax": 35.8,
+     "esvMin": 14.4,
+     "weight": 22.5
+    },
+    {
+     "edvMax": 89.6,
+     "edvMin": 36.2,
+     "esvMax": 39.7,
+     "esvMin": 16,
+     "weight": 25
+    },
+    {
+     "edvMax": 96.1,
+     "edvMin": 38.8,
+     "esvMax": 42.9,
+     "esvMin": 17.3,
+     "weight": 27.5
+    },
+    {
+     "edvMax": 101.6,
+     "edvMin": 41.1,
+     "esvMax": 45.6,
+     "esvMin": 18.4,
+     "weight": 30
+    },
+    {
+     "edvMax": 107.1,
+     "edvMin": 43.3,
+     "esvMax": 48.2,
+     "esvMin": 19.5,
+     "weight": 32.5
+    },
+    {
+     "edvMax": 112.6,
+     "edvMin": 45.5,
+     "esvMax": 50.8,
+     "esvMin": 20.5,
+     "weight": 35
+    },
+    {
+     "edvMax": 118.3,
+     "edvMin": 47.8,
+     "esvMax": 53.3,
+     "esvMin": 21.5,
+     "weight": 37.5
+    },
+    {
+     "edvMax": 124,
+     "edvMin": 50.1,
+     "esvMax": 56,
+     "esvMin": 22.5,
+     "weight": 40
+    },
+    {
+     "edvMax": 129.9,
+     "edvMin": 52.4,
+     "esvMax": 58.7,
+     "esvMin": 23.6,
+     "weight": 42.5
+    },
+    {
+     "edvMax": 135.8,
+     "edvMin": 54.8,
+     "esvMax": 61.5,
+     "esvMin": 24.8,
+     "weight": 45
+    },
+    {
+     "edvMax": 142,
+     "edvMin": 57.3,
+     "esvMax": 64.5,
+     "esvMin": 26,
+     "weight": 47.5
+    },
+    {
+     "edvMax": 148.5,
+     "edvMin": 59.9,
+     "esvMax": 67.8,
+     "esvMin": 27.2,
+     "weight": 50
+    },
+    {
+     "edvMax": 155.4,
+     "edvMin": 62.7,
+     "esvMax": 71.3,
+     "esvMin": 28.6,
+     "weight": 52.5
+    },
+    {
+     "edvMax": 162.8,
+     "edvMin": 65.6,
+     "esvMax": 75,
+     "esvMin": 30.1,
+     "weight": 55
+    },
+    {
+     "edvMax": 170.7,
+     "edvMin": 68.7,
+     "esvMax": 79,
+     "esvMin": 31.6,
+     "weight": 57.5
+    },
+    {
+     "edvMax": 179,
+     "edvMin": 72.1,
+     "esvMax": 83.3,
+     "esvMin": 33.3,
+     "weight": 60
+    },
+    {
+     "edvMax": 187.9,
+     "edvMin": 75.6,
+     "esvMax": 87.8,
+     "esvMin": 35.1,
+     "weight": 62.5
+    },
+    {
+     "edvMax": 197.4,
+     "edvMin": 79.3,
+     "esvMax": 92.7,
+     "esvMin": 37,
+     "weight": 65
+    },
+    {
+     "edvMax": 207.4,
+     "edvMin": 83.3,
+     "esvMax": 98,
+     "esvMin": 39,
+     "weight": 67.5
+    },
+    {
+     "edvMax": 218.1,
+     "edvMin": 87.4,
+     "esvMax": 103.6,
+     "esvMin": 41.1,
+     "weight": 70
+    },
+    {
+     "edvMax": 229.4,
+     "edvMin": 91.7,
+     "esvMax": 109.7,
+     "esvMin": 43.2,
+     "weight": 72.5
+    },
+    {
+     "edvMax": 241.6,
+     "edvMin": 96.1,
+     "esvMax": 116.3,
+     "esvMin": 45.4,
+     "weight": 75
+    },
+    {
+     "edvMax": 254.6,
+     "edvMin": 100.6,
+     "esvMax": 123.6,
+     "esvMin": 47.6,
+     "weight": 77.5
+    },
+    {
+     "edvMax": 268.6,
+     "edvMin": 105.2,
+     "esvMax": 131.6,
+     "esvMin": 49.8,
+     "weight": 80
+    }
+   ],
+   "label": "Wess SMOD Volumetric RIs (Non-Sighthound)",
+   "pmid": "33675121",
+   "species": "canine",
+   "type": "interpolation_table"
+  },
+  "wess_2021_smod_sighthound": {
+   "data": [
+    {
+     "edvMax": 12.9,
+     "edvMin": 2.4,
+     "esvMax": 5.1,
+     "esvMin": 0.9,
+     "weight": 1
+    },
+    {
+     "edvMax": 14.7,
+     "edvMin": 3.4,
+     "esvMax": 5.9,
+     "esvMin": 1.3,
+     "weight": 2
+    },
+    {
+     "edvMax": 16.9,
+     "edvMin": 4.9,
+     "esvMax": 6.9,
+     "esvMin": 1.9,
+     "weight": 3
+    },
+    {
+     "edvMax": 19.7,
+     "edvMin": 6.7,
+     "esvMax": 8.3,
+     "esvMin": 2.7,
+     "weight": 4
+    },
+    {
+     "edvMax": 23.7,
+     "edvMin": 9.1,
+     "esvMax": 10.1,
+     "esvMin": 3.8,
+     "weight": 5
+    },
+    {
+     "edvMax": 29,
+     "edvMin": 11.8,
+     "esvMax": 12.5,
+     "esvMin": 5,
+     "weight": 6
+    },
+    {
+     "edvMax": 35.3,
+     "edvMin": 14.7,
+     "esvMax": 15.4,
+     "esvMin": 6.3,
+     "weight": 7
+    },
+    {
+     "edvMax": 41.6,
+     "edvMin": 17.5,
+     "esvMax": 18.3,
+     "esvMin": 7.6,
+     "weight": 8
+    },
+    {
+     "edvMax": 47.3,
+     "edvMin": 20.1,
+     "esvMax": 21,
+     "esvMin": 8.9,
+     "weight": 9
+    },
+    {
+     "edvMax": 52.5,
+     "edvMin": 22.4,
+     "esvMax": 23.5,
+     "esvMin": 10,
+     "weight": 10
+    },
+    {
+     "edvMax": 65.4,
+     "edvMin": 28.3,
+     "esvMax": 29.8,
+     "esvMin": 12.8,
+     "weight": 12.5
+    },
+    {
+     "edvMax": 78,
+     "edvMin": 33.8,
+     "esvMax": 35.9,
+     "esvMin": 15.5,
+     "weight": 15
+    },
+    {
+     "edvMax": 89.5,
+     "edvMin": 38.8,
+     "esvMax": 41.6,
+     "esvMin": 18,
+     "weight": 17.5
+    },
+    {
+     "edvMax": 99.9,
+     "edvMin": 43.3,
+     "esvMax": 46.8,
+     "esvMin": 20.2,
+     "weight": 20
+    },
+    {
+     "edvMax": 109.1,
+     "edvMin": 47.4,
+     "esvMax": 51.5,
+     "esvMin": 22.3,
+     "weight": 22.5
+    },
+    {
+     "edvMax": 117.2,
+     "edvMin": 50.9,
+     "esvMax": 55.7,
+     "esvMin": 24.2,
+     "weight": 25
+    },
+    {
+     "edvMax": 124.3,
+     "edvMin": 54.1,
+     "esvMax": 59.5,
+     "esvMin": 25.8,
+     "weight": 27.5
+    },
+    {
+     "edvMax": 131.3,
+     "edvMin": 57.2,
+     "esvMax": 63.1,
+     "esvMin": 27.5,
+     "weight": 30
+    },
+    {
+     "edvMax": 139.2,
+     "edvMin": 60.6,
+     "esvMax": 67.1,
+     "esvMin": 29.2,
+     "weight": 32.5
+    },
+    {
+     "edvMax": 147.7,
+     "edvMin": 64.3,
+     "esvMax": 71.2,
+     "esvMin": 30.9,
+     "weight": 35
+    },
+    {
+     "edvMax": 156.5,
+     "edvMin": 68.1,
+     "esvMax": 75.4,
+     "esvMin": 32.7,
+     "weight": 37.5
+    },
+    {
+     "edvMax": 165,
+     "edvMin": 71.6,
+     "esvMax": 79.4,
+     "esvMin": 34.4,
+     "weight": 40
+    },
+    {
+     "edvMax": 172.4,
+     "edvMin": 74.7,
+     "esvMax": 82.9,
+     "esvMin": 35.8,
+     "weight": 42.5
+    },
+    {
+     "edvMax": 178.8,
+     "edvMin": 77.4,
+     "esvMax": 85.9,
+     "esvMin": 37.1,
+     "weight": 45
+    },
+    {
+     "edvMax": 184.5,
+     "edvMin": 79.8,
+     "esvMax": 88.6,
+     "esvMin": 38.2,
+     "weight": 47.5
+    },
+    {
+     "edvMax": 189.9,
+     "edvMin": 82.1,
+     "esvMax": 91.1,
+     "esvMin": 39.3,
+     "weight": 50
+    },
+    {
+     "edvMax": 195.4,
+     "edvMin": 84.4,
+     "esvMax": 93.8,
+     "esvMin": 40.3,
+     "weight": 52.5
+    },
+    {
+     "edvMax": 201,
+     "edvMin": 86.7,
+     "esvMax": 96.5,
+     "esvMin": 41.4,
+     "weight": 55
+    },
+    {
+     "edvMax": 206.7,
+     "edvMin": 89,
+     "esvMax": 99.3,
+     "esvMin": 42.6,
+     "weight": 57.5
+    },
+    {
+     "edvMax": 212.6,
+     "edvMin": 91.4,
+     "esvMax": 102.3,
+     "esvMin": 43.7,
+     "weight": 60
+    },
+    {
+     "edvMax": 218.7,
+     "edvMin": 93.7,
+     "esvMax": 105.4,
+     "esvMin": 44.9,
+     "weight": 62.5
+    },
+    {
+     "edvMax": 224.9,
+     "edvMin": 96.1,
+     "esvMax": 108.6,
+     "esvMin": 46,
+     "weight": 65
+    },
+    {
+     "edvMax": 231.4,
+     "edvMin": 98.4,
+     "esvMax": 112,
+     "esvMin": 47.2,
+     "weight": 67.5
+    },
+    {
+     "edvMax": 238.2,
+     "edvMin": 100.7,
+     "esvMax": 115.6,
+     "esvMin": 48.3,
+     "weight": 70
+    },
+    {
+     "edvMax": 245.3,
+     "edvMin": 102.9,
+     "esvMax": 119.4,
+     "esvMin": 49.5,
+     "weight": 72.5
+    },
+    {
+     "edvMax": 252.8,
+     "edvMin": 105.1,
+     "esvMax": 123.5,
+     "esvMin": 50.6,
+     "weight": 75
+    },
+    {
+     "edvMax": 260.7,
+     "edvMin": 107.1,
+     "esvMax": 127.9,
+     "esvMin": 51.7,
+     "weight": 77.5
+    },
+    {
+     "edvMax": 269.2,
+     "edvMin": 109,
+     "esvMax": 132.6,
+     "esvMin": 52.7,
+     "weight": 80
+    }
+   ],
+   "label": "Wess SMOD Volumetric RIs (Sighthound)",
+   "pmid": "33675121",
+   "species": "canine",
+   "type": "interpolation_table"
+  }
+ },
+ "mineModels": {
+  "mine_1": {
+   "label": "MINE 1 (Vezzosi 2021 - 4 Parameter)",
+   "ranges": {
+    "eVel": [
+     {
+      "max": 1.2,
+      "pts": 1
+     },
+     {
+      "max": 1.5,
+      "pts": 2
+     },
+     {
+      "max": null,
+      "pts": 3
+     }
+    ],
+    "fs": [
+     {
+      "max": 45,
+      "pts": 1
+     },
+     {
+      "max": 50,
+      "pts": 2
+     },
+     {
+      "max": null,
+      "pts": 3
+     }
+    ],
+    "laAo": [
+     {
+      "max": 1.7,
+      "pts": 1
+     },
+     {
+      "max": 1.9,
+      "pts": 2
+     },
+     {
+      "max": 2.5,
+      "pts": 3
+     },
+     {
+      "max": null,
+      "pts": 4
+     }
+    ],
+    "lviddn": [
+     {
+      "max": 1.7,
+      "pts": 1
+     },
+     {
+      "max": 2,
+      "pts": 2
+     },
+     {
+      "max": 2.3,
+      "pts": 3
+     },
+     {
+      "max": null,
+      "pts": 4
+     }
+    ]
+   },
+   "tiers": [
+    {
+     "label": "Mild Severity",
+     "max": 5,
+     "min": 4,
+     "mst": "2344 days",
+     "severityClass": "mild"
+    },
+    {
+     "label": "Moderate Severity",
+     "max": 7,
+     "min": 6,
+     "mst": "1882 days",
+     "severityClass": "moderate"
+    },
+    {
+     "label": "Severe Severity",
+     "max": 12,
+     "min": 8,
+     "mst": "623 days",
+     "severityClass": "severe"
+    },
+    {
+     "label": "Late Stage Severity",
+     "max": 14,
+     "min": 13,
+     "mst": "157 days",
+     "severityClass": "late"
+    }
+   ],
+   "variables": [
+    "laAo",
+    "lviddn",
+    "fs",
+    "eVel"
+   ]
+  },
+  "mine_2": {
+   "label": "MINE 2 (Vezzosi 2025 - 3 Parameter Simplified)",
+   "ranges": {
+    "eVel": [
+     {
+      "max": 1.2,
+      "pts": 1
+     },
+     {
+      "max": 1.5,
+      "pts": 2
+     },
+     {
+      "max": null,
+      "pts": 3
+     }
+    ],
+    "laAo": [
+     {
+      "max": 1.7,
+      "pts": 1
+     },
+     {
+      "max": 1.9,
+      "pts": 2
+     },
+     {
+      "max": 2.5,
+      "pts": 3
+     },
+     {
+      "max": null,
+      "pts": 4
+     }
+    ],
+    "lviddn": [
+     {
+      "max": 1.7,
+      "pts": 1
+     },
+     {
+      "max": 2,
+      "pts": 2
+     },
+     {
+      "max": 2.3,
+      "pts": 3
+     },
+     {
+      "max": null,
+      "pts": 4
+     }
+    ]
+   },
+   "tiers": [
+    {
+     "label": "Mild Risk / Lower Progression",
+     "max": 4,
+     "min": 3,
+     "mst": "2604 days",
+     "severityClass": "mild"
+    },
+    {
+     "label": "Moderate Risk / Intermediate Progression",
+     "max": 6,
+     "min": 5,
+     "mst": "1216 days",
+     "severityClass": "moderate"
+    },
+    {
+     "label": "Severe Risk (Advanced B2 Status)",
+     "max": 10,
+     "min": 7,
+     "mst": "718 days",
+     "severityClass": "severe"
+    },
+    {
+     "label": "Late Stage C / D",
+     "max": 12,
+     "min": 11,
+     "mst": "152 days (estimated)",
+     "severityClass": "late"
+    }
+   ],
+   "variables": [
+    "laAo",
+    "lviddn",
+    "eVel"
+   ]
+  }
+ },
+ "diastolicRules": {
+  "ear": [
+   {
+    "category": "Impaired Relaxation",
+    "grade": "Grade I",
+    "max": 0.99,
+    "min": 0,
+    "points": 3
+   },
+   {
+    "category": "Normal / Pseudonormal Overlap",
+    "grade": "Normal",
+    "max": 1.99,
+    "min": 1,
+    "points": 0
+   },
+   {
+    "category": "Restrictive Filling",
+    "grade": "Grade III",
+    "max": null,
+    "min": 2,
+    "points": 4
+   }
+  ],
+  "eePrime": [
+   {
+    "category": "Normal Basal Velocity",
+    "grade": "Normal",
+    "max": 7.99,
+    "min": 0,
+    "points": 0
+   },
+   {
+    "category": "Elevated Filling Pressure",
+    "grade": "Grade II",
+    "max": 12,
+    "min": 8,
+    "points": 3
+   },
+   {
+    "category": "Severe Left Atrial Pressure",
+    "grade": "Grade III",
+    "max": null,
+    "min": 12.01,
+    "points": 4
+   }
+  ],
+  "eivrt": [
+   {
+    "category": "Normal Flow Timing",
+    "grade": "Normal",
+    "max": 1.49,
+    "min": 0,
+    "points": 0
+   },
+   {
+    "category": "Elevated Filling Pressure",
+    "grade": "Grade II",
+    "max": 2.49,
+    "min": 1.5,
+    "points": 2
+   },
+   {
+    "category": "Severe Left Atrial Pressure",
+    "grade": "Grade III",
+    "max": null,
+    "min": 2.5,
+    "points": 4
+   }
+  ],
+  "ivrt": [
+   {
+    "category": "Prolonged Relaxation",
+    "grade": "Grade I",
+    "max": null,
+    "min": 80.01,
+    "points": 2
+   },
+   {
+    "category": "Normal / Pseudonormal Overlap",
+    "grade": "Normal",
+    "max": 80,
+    "min": 50,
+    "points": 0
+   },
+   {
+    "category": "Severe Restrictive Blunting",
+    "grade": "Grade III",
+    "max": 49.99,
+    "min": 0,
+    "points": 3
+   }
+  ],
+  "laAo": [
+   {
+    "category": "Normal Atrial Size",
+    "grade": "Normal",
+    "max": 1.59,
+    "min": 0,
+    "points": 0
+   },
+   {
+    "category": "Mild-Moderate Atrial Enlargement",
+    "grade": "Grade II",
+    "max": 1.99,
+    "min": 1.6,
+    "points": 2
+   },
+   {
+    "category": "Severe Atrial Enlargement",
+    "grade": "Grade III",
+    "max": null,
+    "min": 2,
+    "points": 3
+   }
+  ],
+  "lveio": [
+   {
+    "category": "Normal Outflow Ratio",
+    "grade": "Normal",
+    "max": 7.99,
+    "min": 0,
+    "points": 0
+   },
+   {
+    "category": "Elevated Filling Pressure",
+    "grade": "Grade II",
+    "max": 11.84,
+    "min": 8,
+    "points": 3
+   },
+   {
+    "category": "Severe Left Atrial Pressure",
+    "grade": "Grade III",
+    "max": null,
+    "min": 11.85,
+    "points": 4
+   }
+  ],
+  "mdt": [
+   {
+    "category": "Prolonged Deceleration",
+    "grade": "Grade I",
+    "max": null,
+    "min": 100.01,
+    "points": 2
+   },
+   {
+    "category": "Normal / Pseudonormal Overlap",
+    "grade": "Normal",
+    "max": 100,
+    "min": 60,
+    "points": 0
+   },
+   {
+    "category": "Severe Restrictive Acceleration",
+    "grade": "Grade III",
+    "max": 59.99,
+    "min": 0,
+    "points": 3
+   }
+  ],
+  "trMax": [
+   {
+    "category": "Normal Pulmonary Velocity",
+    "grade": "Normal",
+    "max": 2.89,
+    "min": 0,
+    "points": 0
+   },
+   {
+    "category": "Pulmonary Hypertension / High LAP",
+    "grade": "Grade II",
+    "max": 3.4,
+    "min": 2.9,
+    "points": 3
+   },
+   {
+    "category": "Severe Pulmonary Hypertension",
+    "grade": "Grade III",
+    "max": null,
+    "min": 3.41,
+    "points": 4
+   }
+  ]
+ },
+ "breedReferences": {
+  "Afghan Hound": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": true,
+   "isToy": false,
+   "name": "Afghan Hound",
+   "sources": [
+    {
+     "clinicalNote": "Sighthound phenotype; naturally larger dimensions than general populations.",
+     "extras": {},
+     "metrics": {
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 12,
+       "min": 8,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 52,
+       "min": 33,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 37,
+       "min": 20,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 11,
+       "min": 7,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "37760386",
+     "reference": "Cerbu et al. (2023)"
+    }
+   ]
+  },
+  "American Staffordshire Terrier": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "American Staffordshire Terrier",
+   "sources": [
+    {
+     "clinicalNote": "Naturally higher LVIDdN (mean 1.62 vs standard 1.53). Heart is more rounded than deep-chested breeds.",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 2.45,
+       "mean": 1.77,
+       "min": 1.17,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "edvim2": {
+       "key": "edvim2",
+       "label": "EDVI (SMOD)",
+       "max": 86.7,
+       "min": 37.1,
+       "sourceKey": "edvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 82.5,
+       "min": 40.5,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 35.3,
+       "min": 9.5,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 56.4,
+       "min": 20.1,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 14.3,
+       "min": 5.9,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.75,
+       "mean": 1.37,
+       "min": 1,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 51.2,
+       "min": 34.4,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lviddn": {
+       "key": "lviddn",
+       "label": "LVIDdN",
+       "max": 1.87,
+       "mean": 1.62,
+       "min": 1.27,
+       "sourceKey": "lvidd_n",
+       "unit": null
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 36.9,
+       "min": 17.6,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 12.1,
+       "min": 6.2,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "33563862",
+     "reference": "Vezzosi et al. (2021)"
+    }
+   ]
+  },
+  "Beagle": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Beagle",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 10.5,
+       "min": 7.7,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 30,
+       "min": 25.2,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 19.1,
+       "min": 12.9,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 9.2,
+       "min": 7.8,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "37760386",
+     "reference": "Cerbu et al. (2023)"
+    }
+   ]
+  },
+  "Bengal": {
+   "isDeviant": false,
+   "isFeline": true,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Bengal",
+   "sources": [
+    {
+     "clinicalNote": "Higher raw LVIDd than DSH but aligns with allometry. Unique sex-based reference intervals are recommended.",
+     "extras": {},
+     "metrics": {
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "mean": 1.18,
+       "sourceKey": "la_ao",
+       "unit": null
+      }
+     },
+     "pmid": "26526189",
+     "reference": null
+    }
+   ]
+  },
+  "Border Collie": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Border Collie",
+   "sources": [
+    {
+     "clinicalNote": "Higher than average LVIDd and low FS compared to general population.",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 1.55,
+       "min": 1.31,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 29.73,
+       "min": 25.28,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 10.41,
+       "min": 8.96,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.29,
+       "min": 1.12,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 38.32,
+       "min": 35.03,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 28.17,
+       "min": 25.06,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 9.49,
+       "min": 8.46,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "23643817",
+     "reference": "Jacobson et al. (2013)"
+    }
+   ]
+  },
+  "Borzoi": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Borzoi",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 2.07,
+       "min": 0.85,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 83.95,
+       "min": 47.95,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 35.95,
+       "min": 20.85,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 13.3,
+       "min": 8.3,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.44,
+       "min": 1.1,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lad": {
+       "key": "lad",
+       "label": "LAD",
+       "max": 52.1,
+       "min": 36.2,
+       "sourceKey": "lad",
+       "unit": "mm"
+      },
+      "lvedvbw": {
+       "key": "lvedvbw",
+       "label": "EDV (SMOD)/BW",
+       "max": 3.33,
+       "min": 1.16,
+       "sourceKey": "edvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvesvbw": {
+       "key": "lvesvbw",
+       "label": "ESV (SMOD)/BW",
+       "max": 1.55,
+       "min": 0.3,
+       "sourceKey": "esvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 51.2,
+       "min": 38.7,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 38.3,
+       "min": 26.5,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 14.9,
+       "min": 8.8,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      },
+      "tapse": {
+       "key": "tapse",
+       "label": "TAPSE",
+       "max": 22.4,
+       "min": 9.8,
+       "sourceKey": "TAPSE_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "38154250",
+     "reference": "Wesselowski et al. (2024) Male dogs"
+    },
+    {
+     "clinicalNote": "Echocardiographic screening for DCM in Borzoi should be considered",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 2.09,
+       "min": 0.9,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 76.8,
+       "min": 50.02,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 36.61,
+       "min": 21.12,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 12.4,
+       "min": 7.1,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.51,
+       "min": 1.06,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lad": {
+       "key": "lad",
+       "label": "LAD",
+       "max": 48.5,
+       "min": 34.4,
+       "sourceKey": "lad",
+       "unit": "mm"
+      },
+      "lvedvbw": {
+       "key": "lvedvbw",
+       "label": "EDV (SMOD)/BW",
+       "max": 3.42,
+       "min": 1.1,
+       "sourceKey": "edvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvesvbw": {
+       "key": "lvesvbw",
+       "label": "ESV (SMOD)/BW",
+       "max": 1.6,
+       "min": 0.36,
+       "sourceKey": "esvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 50.6,
+       "min": 37,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 37.5,
+       "min": 24.6,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 13.3,
+       "min": 7.1,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      },
+      "tapse": {
+       "key": "tapse",
+       "label": "TAPSE",
+       "max": 18.7,
+       "min": 9.7,
+       "sourceKey": "TAPSE_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "38154250",
+     "reference": "Wesselowski et al. (2024) Female dogs"
+    }
+   ]
+  },
+  "Boxer": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Boxer",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 16.1,
+       "min": 8.3,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 48,
+       "min": 29,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 33,
+       "min": 16.7,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 15.5,
+       "min": 9,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "37760386",
+     "reference": "Cerbu et al. (2023)"
+    },
+    {
+     "clinicalNote": "Aortic velocities up to 2.4 m/s are physiological. ESVI limit for systolic dysfunction is 50 ml/m2, significantly higher than the standard 30 limit.",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 2.34,
+       "min": 1.26,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "edvim2": {
+       "key": "edvim2",
+       "label": "EDVI (SMOD)",
+       "max": 93,
+       "median": 71,
+       "min": 49,
+       "sourceKey": "edvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 63,
+       "min": 35,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 50,
+       "median": 36,
+       "min": 22,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 44.1,
+       "min": 18.5,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "lvedvbw": {
+       "key": "lvedvbw",
+       "label": "EDV (SMOD)/BW",
+       "max": 4.38,
+       "min": 2.42,
+       "sourceKey": "edvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvesv": {
+       "key": "lvesv",
+       "label": "ESV (SMOD)",
+       "max": 50,
+       "sourceKey": "esv_smod",
+       "unit": "ml"
+      },
+      "lvesvbw": {
+       "key": "lvesvbw",
+       "label": "ESV (SMOD)/BW",
+       "max": 2.19,
+       "min": 0.47,
+       "sourceKey": "esvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 46.4,
+       "min": 32.8,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 34.7,
+       "min": 19.9,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "24428317",
+     "reference": "Smets et al. (2014)"
+    }
+   ]
+  },
+  "Cavalier King Charles Spaniel": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Cavalier King Charles Spaniel",
+   "sources": [
+    {
+     "clinicalNote": "Flatter mitral annulus. Up to 10% of healthy CKCS exceed the standard Stage B2 LVIDdN limit of 1.7. VHS up to 11.9 can be normal.",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 1.62,
+       "min": 0.8,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 50.8,
+       "min": 31,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 8.8,
+       "min": 4.8,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 41.1,
+       "min": 21.4,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 24.6,
+       "min": 10.9,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 8.5,
+       "min": 4.9,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "24834861",
+     "reference": "Misbach et al. (2013)"
+    }
+   ]
+  },
+  "Dachshund": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Dachshund",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 10.9,
+       "min": 4.5,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 34.7,
+       "min": 17.6,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 22.1,
+       "min": 7.2,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 11.4,
+       "min": 3.9,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "30605275",
+     "reference": "Garncarz et al. (2018)"
+    },
+    {
+     "clinicalNote": "Narrower PIs than multi-breed standards. Thicker septum and smaller LVIDd than generic dogs of similar weight.",
+     "extras": {},
+     "metrics": {
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 51.6,
+       "min": 31.2,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 7.9,
+       "min": 4.8,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.66,
+       "min": 1.14,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 34.5,
+       "min": 20.8,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 22.2,
+       "min": 10.4,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 8.4,
+       "min": 4.9,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "27027836",
+     "reference": "Lim et al. (2016)"
+    }
+   ]
+  },
+  "Doberman Pinscher": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Doberman Pinscher",
+   "sources": [
+    {
+     "clinicalNote": "SMOD is the gold standard for detecting early eccentric remodelling in this breed. >300 VPCs/24h is diagnostic of occult DCM.",
+     "extras": {
+      "VPC_24h_limit": {
+       "label": "VPC limit (24 h Holter)",
+       "value": 300
+      }
+     },
+     "metrics": {
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "min": 40,
+       "sourceKey": "EF",
+       "unit": "%"
+      }
+     },
+     "pmid": null,
+     "reference": "Wess et al. (2010/2022)"
+    },
+    {
+     "clinicalNote": "Brazilian Police Dog population, limited study population",
+     "extras": {},
+     "metrics": {
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 77.3,
+       "min": 66.9,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 34.4,
+       "min": 29.1,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 10.7,
+       "min": 5.9,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.39,
+       "min": 1,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 48.4,
+       "min": 34.8,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 33.6,
+       "min": 23.6,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 10.4,
+       "min": 5.3,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "35775866",
+     "reference": "de Lima et al. (2006)"
+    }
+   ]
+  },
+  "Dogue de Bordeaux": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Dogue de Bordeaux",
+   "sources": [
+    {
+     "clinicalNote": "Naturally thicker myocardial walls; measurements frequently exceed multi-breed nonsighthound prediction intervals.",
+     "extras": {},
+     "metrics": {
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 13.1,
+       "min": 10.1,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 13.2,
+       "min": 10.8,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "37760386",
+     "reference": "Cerbu et al. (2023)"
+    }
+   ]
+  },
+  "English Setter": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "English Setter",
+   "sources": [
+    {
+     "clinicalNote": "The upper limits of the intervals for left-atrial-to-aortic ratios and normalised left ventricular volumes exceeded those of various, previously published studies of other breeds.",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 2.1,
+       "min": 1.1,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "edvim2": {
+       "key": "edvim2",
+       "label": "EDVI (SMOD)",
+       "max": 136.5,
+       "min": 64.9,
+       "sourceKey": "edvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 68.7,
+       "min": 36.2,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "eivrt": {
+       "key": "eivrt",
+       "label": "E:IVRT",
+       "max": 1.4,
+       "min": 0.4,
+       "sourceKey": "eivrt",
+       "unit": null
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 71.9,
+       "min": 23.1,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 34.5,
+       "min": 15.9,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 12.5,
+       "min": 7,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.7,
+       "min": 1.2,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lad": {
+       "key": "lad",
+       "label": "LAD",
+       "max": 47.9,
+       "min": 30.2,
+       "sourceKey": "lad",
+       "unit": "mm"
+      },
+      "ladn": {
+       "key": "ladn",
+       "label": "LADN",
+       "max": 1.8,
+       "min": 1.3,
+       "sourceKey": "lad_n",
+       "unit": null
+      },
+      "lvedvbw": {
+       "key": "lvedvbw",
+       "label": "EDV (SMOD)/BW",
+       "max": 4.8,
+       "min": 2.4,
+       "sourceKey": "edvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvesvbw": {
+       "key": "lvesvbw",
+       "label": "ESV (SMOD)/BW",
+       "max": 2.7,
+       "min": 0.8,
+       "sourceKey": "esvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 55.6,
+       "min": 32.7,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lviddn": {
+       "key": "lviddn",
+       "label": "LVIDdN",
+       "max": 2,
+       "min": 1.4,
+       "sourceKey": "lvidd_n",
+       "unit": null
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 40.5,
+       "min": 21.6,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvidsn": {
+       "key": "lvidsn",
+       "label": "LVIDsN",
+       "max": 1.5,
+       "min": 0.9,
+       "sourceKey": "lvids_n",
+       "unit": null
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 11.2,
+       "min": 7.1,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      },
+      "tapse": {
+       "key": "tapse",
+       "label": "TAPSE",
+       "max": 23.7,
+       "min": 13.9,
+       "sourceKey": "TAPSE_mm",
+       "unit": "mm"
+      },
+      "tapseaola": {
+       "key": "tapseaola",
+       "label": "TAPSE:Ao",
+       "max": 1,
+       "min": 0.6,
+       "sourceKey": "TAPSE_Ao",
+       "unit": null
+      }
+     },
+     "pmid": "34517274",
+     "reference": "Vatne et al. (2021)"
+    }
+   ]
+  },
+  "English Springer Spaniel": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "English Springer Spaniel",
+   "sources": [
+    {
+     "clinicalNote": "Large globoid heart and low resting FS and EF mean that DCM is potentially overdiagnosed in the breed.",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 1.87,
+       "min": 1.05,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "edvim2": {
+       "key": "edvim2",
+       "label": "EDVI (SMOD)",
+       "max": 114,
+       "median": 77.7,
+       "min": 58.1,
+       "sourceKey": "edvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 68.2,
+       "min": 36,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 68.1,
+       "min": 20.6,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 35.9,
+       "min": 16,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 12.2,
+       "min": 7.7,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.65,
+       "min": 1.06,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lad": {
+       "key": "lad",
+       "label": "LAD",
+       "max": 42.5,
+       "min": 30.7,
+       "sourceKey": "lad",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 47.8,
+       "median": 43.8,
+       "min": 35,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 39,
+       "min": 22.6,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 10.9,
+       "min": 6.5,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "27492994",
+     "reference": "Dickson et al. (2016)"
+    }
+   ]
+  },
+  "German Shepherd": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "German Shepherd",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 41.6,
+       "min": 15.6,
+       "sourceKey": "FS",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 11.4,
+       "min": 7.8,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 51.7,
+       "min": 31.7,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 41.2,
+       "min": 20.8,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 11,
+       "min": 6.6,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "16645347",
+     "reference": "Muzzi et al. (2006)"
+    },
+    {
+     "clinicalNote": "Dogs split into ages and sexes, overall min and max confidence intervals for whole group quoted here.",
+     "extras": {},
+     "metrics": {
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 12.8,
+       "min": 6.6,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 60.6,
+       "min": 40.4,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 42.2,
+       "min": 27.1,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 12.1,
+       "min": 6.8,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "17009513",
+     "reference": "Kayar et al. (2006)"
+    },
+    {
+     "clinicalNote": "Brazilian Police Dog population",
+     "extras": {},
+     "metrics": {
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 14.1,
+       "min": 7.3,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 50.1,
+       "min": 32.1,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 36,
+       "min": 16.8,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 11.3,
+       "min": 7.3,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "35775866",
+     "reference": "de Lima et al. (2006)"
+    }
+   ]
+  },
+  "Golden Retriever": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Golden Retriever",
+   "sources": [
+    {
+     "clinicalNote": "Naturally larger ventricular volumes and higher aortic velocities. Classed as a deviant breed compared to multi-breed nonsighthound PIs.",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 2.2,
+       "median": 0.66,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "edvim2": {
+       "key": "edvim2",
+       "label": "EDVI (SMOD)",
+       "max": 97.04,
+       "median": 66.81,
+       "min": 45.14,
+       "sourceKey": "edvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 78.11,
+       "median": 59.55,
+       "min": 38.64,
+       "sourceKey": "ef",
+       "unit": "%"
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 45.05,
+       "median": 26.1,
+       "min": 12.09,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.63,
+       "median": 1.35,
+       "min": 1.03,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvedvbw": {
+       "key": "lvedvbw",
+       "label": "EDV (SMOD)/BW",
+       "max": 3.1,
+       "median": 1.8,
+       "min": 0.5,
+       "sourceKey": "edvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvesvbw": {
+       "key": "lvesvbw",
+       "label": "ESV (SMOD)/BW",
+       "max": 1.6,
+       "median": 0.7,
+       "min": 0.3,
+       "sourceKey": "esvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 50.8,
+       "median": 42.45,
+       "min": 34.6,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lviddn": {
+       "key": "lviddn",
+       "label": "LVIDdN",
+       "max": 1.82,
+       "median": 1.56,
+       "min": 1.28,
+       "sourceKey": "lvidd_n",
+       "unit": null
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 36.3,
+       "median": 28.75,
+       "min": 20.2,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "39938895",
+     "reference": "Bagardi et al. (2025)"
+    }
+   ]
+  },
+  "Great Dane": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Great Dane",
+   "sources": [
+    {
+     "clinicalNote": "ESVI is more reliable for identifying preclinical DCM than FS in this breed.",
+     "extras": {},
+     "metrics": {
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 63.9,
+       "min": 42.1,
+       "sourceKey": "EF",
+       "unit": "%"
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 47,
+       "min": 21.9,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 37,
+       "min": 20,
+       "sourceKey": "FS",
+       "unit": "%"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.41,
+       "min": 0.91,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 58.7,
+       "min": 42.7,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lviddn": {
+       "key": "lviddn",
+       "label": "LVIDdN",
+       "max": 1.64,
+       "min": 1.3,
+       "sourceKey": "lvidd_n",
+       "unit": null
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 41.9,
+       "min": 28.8,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "22882627",
+     "reference": "Stephenson et al. (2012)"
+    }
+   ]
+  },
+  "Healthy Kitten (6-16 weeks)": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": true,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Healthy Kitten (6-16 weeks)",
+   "sources": [
+    {
+     "clinicalNote": "TR and low-grade murmurs are common and often benign. Median VHS is 9.5, significantly higher than the adult baseline.",
+     "extras": {
+      "tr_prevalence": {
+       "label": "TR prevalence",
+       "value": "37.5%"
+      }
+     },
+     "metrics": {
+      "ntProBnp": {
+       "key": "ntProBnp",
+       "label": "NT-proBNP",
+       "max": 75,
+       "median": 31,
+       "sourceKey": "nt_probnp",
+       "unit": null
+      },
+      "vhs": {
+       "key": "vhs",
+       "label": "VHS",
+       "max": 10.9,
+       "median": 9.5,
+       "min": 8,
+       "sourceKey": "vhs",
+       "unit": null
+      }
+     },
+     "pmid": "32812464",
+     "reference": null
+    }
+   ]
+  },
+  "Hungarian Greyhound": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": true,
+   "isToy": false,
+   "name": "Hungarian Greyhound",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "median": 65.8,
+       "sd": 8.3,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "median": 36.8,
+       "sd": 6.3,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "median": 11.8,
+       "sd": 1.7,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "median": 1.2,
+       "sd": 0.1,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lad": {
+       "key": "lad",
+       "label": "LAD",
+       "median": 41.7,
+       "sd": 2.7,
+       "sourceKey": "lad",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "median": 45.3,
+       "sd": 3,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "median": 28.9,
+       "sd": 3.8,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "median": 12.3,
+       "sd": 1.5,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "19584035",
+     "reference": "Vörös et al. (2009)"
+    }
+   ]
+  },
+  "Hungarian Mudi": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Hungarian Mudi",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "median": 67,
+       "sd": 5.8,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "median": 36.3,
+       "sd": 4.6,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "median": 8.4,
+       "sd": 1,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "median": 1.3,
+       "sd": 0.1,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lad": {
+       "key": "lad",
+       "label": "LAD",
+       "median": 27.4,
+       "sd": 3,
+       "sourceKey": "lad",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "median": 33.6,
+       "sd": 2.8,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "median": 21.4,
+       "sd": 2.1,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "median": 9.2,
+       "sd": 1.1,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "19584035",
+     "reference": "Vörös et al. (2009)"
+    }
+   ]
+  },
+  "Hungarian Vizsla": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Hungarian Vizsla",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "median": 68.8,
+       "sd": 6.5,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "median": 38.6,
+       "sd": 5.1,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "median": 10.6,
+       "sd": 1.4,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "median": 1.2,
+       "sd": 0.1,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lad": {
+       "key": "lad",
+       "label": "LAD",
+       "median": 36.8,
+       "sd": 4.4,
+       "sourceKey": "lad",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "median": 42.9,
+       "sd": 4.9,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "median": 26.7,
+       "sd": 4.3,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "median": 11.1,
+       "sd": 1.6,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "19584035",
+     "reference": "Vörös et al. (2009)"
+    }
+   ]
+  },
+  "Irish Wolfhound": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Irish Wolfhound",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 48.8,
+       "min": 26.8,
+       "sourceKey": "FS",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 13.5,
+       "min": 5.6,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.36,
+       "min": 0.88,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 60.1,
+       "min": 44.4,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "32112595",
+     "reference": "Tyrrell et al. (2020)"
+    }
+   ]
+  },
+  "Labrador Retriever": {
+   "isDeviant": false,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Labrador Retriever",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 13.5,
+       "min": 5.6,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 45.3,
+       "min": 27,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 36.8,
+       "min": 14.5,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 11.3,
+       "min": 6.8,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "37760386",
+     "reference": "Cerbu et al. (2023)"
+    }
+   ]
+  },
+  "Maine Coon": {
+   "isDeviant": false,
+   "isFeline": true,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Maine Coon",
+   "sources": [
+    {
+     "clinicalNote": "Despite larger raw measurements, healthy Maine Coons follow feline allometric scaling. Wall thickness <5mm is typical for average weights.",
+     "extras": {},
+     "metrics": {
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 53.35,
+       "min": 50.35,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 4.1,
+       "min": 3.9,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.26,
+       "min": 1.2,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 18.9,
+       "min": 18.1,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 9.3,
+       "min": 8.5,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 4.4,
+       "min": 4.2,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "15776945",
+     "reference": "Drourr et al. (2005)"
+    }
+   ]
+  },
+  "Pug": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Pug",
+   "sources": [
+    {
+     "clinicalNote": "Thoracic conformation affects windows. Measurements are influenced by intrathoracic pressure fluctuations from BOAS.",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 1.75,
+       "min": 0.94,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "edvim2": {
+       "key": "edvim2",
+       "label": "EDVI (SMOD)",
+       "max": 57.69,
+       "median": 43.27,
+       "min": 27.57,
+       "sourceKey": "edvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 75.3,
+       "min": 45.4,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 28.46,
+       "min": 8.61,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 43.8,
+       "min": 18.7,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 10.9,
+       "min": 5.5,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.63,
+       "median": 1.3,
+       "min": 0.97,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvedvbw": {
+       "key": "lvedvbw",
+       "label": "EDV (SMOD)/BW",
+       "max": 2.79,
+       "min": 1.32,
+       "sourceKey": "edvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvesvbw": {
+       "key": "lvesvbw",
+       "label": "ESV (SMOD)/BW",
+       "max": 1.43,
+       "min": 0.43,
+       "sourceKey": "esvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 32.1,
+       "median": 26.6,
+       "min": 21.1,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 23.4,
+       "min": 14.6,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 9.9,
+       "min": 6.6,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "35854376",
+     "reference": "Wiegel et al. (2022)"
+    }
+   ]
+  },
+  "Saluki": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": true,
+   "isToy": false,
+   "name": "Saluki",
+   "sources": [
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 1.96,
+       "min": 0.97,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "edvim2": {
+       "key": "edvim2",
+       "label": "EDVI (SMOD)",
+       "max": 127,
+       "min": 68,
+       "sourceKey": "edvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 64,
+       "min": 41,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 65,
+       "min": 26,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 34,
+       "min": 12,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 13.5,
+       "median": 10.5,
+       "min": 7.3,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.49,
+       "median": 1.33,
+       "min": 1.18,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvedv": {
+       "key": "lvedv",
+       "label": "EDV (SMOD)",
+       "max": 103,
+       "min": 49,
+       "sourceKey": "edv_smod",
+       "unit": "ml"
+      },
+      "lvesv": {
+       "key": "lvesv",
+       "label": "ESV (SMOD)",
+       "max": 53,
+       "min": 20,
+       "sourceKey": "esv_smod",
+       "unit": "ml"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 47.8,
+       "median": 40.8,
+       "min": 33.9,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 38.8,
+       "median": 31.3,
+       "min": 24,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 12.3,
+       "median": 10.4,
+       "min": 8.4,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "26476964",
+     "reference": "Seckerdieck et al. (2015)"
+    }
+   ]
+  },
+  "Sphynx": {
+   "isDeviant": true,
+   "isFeline": true,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": false,
+   "name": "Sphynx",
+   "sources": [
+    {
+     "clinicalNote": "Naturally higher LA dimensions and LA:Ao ratios compared to DSH. High prevalence of MVD and HCM reported.",
+     "extras": {},
+     "metrics": {
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.45,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 18.7,
+       "min": 10.1,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "23131204",
+     "reference": null
+    }
+   ]
+  },
+  "Toy Breeds (<5kg)": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": false,
+   "isToy": true,
+   "name": "Toy Breeds (<5kg)",
+   "sources": [
+    {
+     "clinicalNote": "Standard 1.7 LVIDdN threshold is too high for dogs <5kg. Use 1.6 limit and 0.332 exponent for more accurate MMVD staging.",
+     "extras": {
+      "exponent": {
+       "label": "Allometric exponent",
+       "value": 0.332
+      }
+     },
+     "metrics": {
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "median": 5.9,
+       "scaledFromSourceUnit": "cm",
+       "sourceKey": "ivsd_cm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "median": 17.8,
+       "scaledFromSourceUnit": "cm",
+       "sourceKey": "lvidd_cm",
+       "unit": "mm"
+      },
+      "lviddn": {
+       "key": "lviddn",
+       "label": "LVIDdN",
+       "max": 1.6,
+       "sourceKey": "lviddn",
+       "unit": null
+      }
+     },
+     "pmid": "35812853",
+     "reference": "Isayama et al. (2022)"
+    }
+   ]
+  },
+  "Whippet": {
+   "isDeviant": true,
+   "isFeline": false,
+   "isKitten": false,
+   "isSighthound": true,
+   "isToy": false,
+   "name": "Whippet",
+   "sources": [
+    {
+     "clinicalNote": "Athletic Heart phenotype. Conditioned agility/racing dogs show eccentric hypertrophy; standard multi-breed PIs will over-diagnose DCM.",
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 1.99,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 12.8,
+       "median": 10,
+       "min": 7.2,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.62,
+       "median": 1.27,
+       "min": 0.95,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lad": {
+       "key": "lad",
+       "label": "LAD",
+       "max": 41.4,
+       "min": 28.1,
+       "sourceKey": "LAD_mm",
+       "unit": "mm"
+      },
+      "lvedvbw": {
+       "key": "lvedvbw",
+       "label": "EDV (SMOD)/BW",
+       "max": 4.38,
+       "min": 2.42,
+       "sourceKey": "edvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvesvbw": {
+       "key": "lvesvbw",
+       "label": "ESV (SMOD)/BW",
+       "max": 2.19,
+       "min": 0.47,
+       "sourceKey": "esvi_smod_kg",
+       "unit": "ml/kg"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 44.4,
+       "median": 37.5,
+       "min": 30.2,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lviddn": {
+       "key": "lviddn",
+       "label": "LVIDdN",
+       "max": 1.77,
+       "min": 1.28,
+       "sourceKey": "lvidd_n",
+       "unit": null
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 36.3,
+       "median": 28.4,
+       "min": 21,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 11.3,
+       "min": 6.1,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "36975003",
+     "reference": "Stepien et al. (2023)"
+    },
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 1.89,
+       "mean": 1.39,
+       "min": 0.9,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 77.5,
+       "min": 45.1,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 76.6,
+       "min": 21.1,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 38.1,
+       "min": 17.4,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 11.8,
+       "median": 9.4,
+       "min": 7,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.7,
+       "median": 1.4,
+       "min": 1.1,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lad": {
+       "key": "lad",
+       "label": "LAD",
+       "max": 37.6,
+       "min": 26.5,
+       "sourceKey": "LAD_mm",
+       "unit": "mm"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 44.8,
+       "median": 37.3,
+       "min": 29.7,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 34.1,
+       "median": 26.9,
+       "min": 19.8,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 10.9,
+       "min": 6.6,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "17508509",
+     "reference": "Bavegems et al. (2007)"
+    },
+    {
+     "clinicalNote": null,
+     "extras": {},
+     "metrics": {
+      "aovmax": {
+       "key": "aovmax",
+       "label": "Ao Vmax",
+       "max": 2.23,
+       "mean": 1.72,
+       "min": 1.2,
+       "sourceKey": "ao_vmax",
+       "unit": "m/s"
+      },
+      "edvim2": {
+       "key": "edvim2",
+       "label": "EDVI (SMOD)",
+       "max": 109,
+       "min": 59,
+       "sourceKey": "edvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "ef": {
+       "key": "ef",
+       "label": "EF",
+       "max": 70,
+       "min": 45,
+       "sourceKey": "EF_PCT",
+       "unit": "%"
+      },
+      "esvim2": {
+       "key": "esvim2",
+       "label": "ESVI (SMOD)",
+       "max": 55,
+       "min": 16,
+       "sourceKey": "esvi_smod_m2",
+       "unit": "ml/m²"
+      },
+      "fs": {
+       "key": "fs",
+       "label": "FS",
+       "max": 38,
+       "min": 16,
+       "sourceKey": "FS_PCT",
+       "unit": "%"
+      },
+      "ivsd": {
+       "key": "ivsd",
+       "label": "IVSd",
+       "max": 12.2,
+       "median": 9.4,
+       "min": 6.7,
+       "sourceKey": "ivsd_mm",
+       "unit": "mm"
+      },
+      "laAo": {
+       "key": "laAo",
+       "label": "LA:Ao",
+       "max": 1.64,
+       "median": 1.35,
+       "min": 1.15,
+       "sourceKey": "la_ao",
+       "unit": null
+      },
+      "lvedv": {
+       "key": "lvedv",
+       "label": "EDV (SMOD)",
+       "max": 67,
+       "min": 27,
+       "sourceKey": "edv_smod",
+       "unit": "ml"
+      },
+      "lvesv": {
+       "key": "lvesv",
+       "label": "ESV (SMOD)",
+       "max": 33,
+       "min": 7,
+       "sourceKey": "esv_smod",
+       "unit": "ml"
+      },
+      "lvidd": {
+       "key": "lvidd",
+       "label": "LVIDd",
+       "max": 41.5,
+       "median": 35,
+       "min": 28.2,
+       "sourceKey": "lvidd_mm",
+       "unit": "mm"
+      },
+      "lvids": {
+       "key": "lvids",
+       "label": "LVIDs",
+       "max": 32.6,
+       "median": 25.5,
+       "min": 18,
+       "sourceKey": "lvids_mm",
+       "unit": "mm"
+      },
+      "lvpwd": {
+       "key": "lvpwd",
+       "label": "LVFWd",
+       "max": 10.9,
+       "median": 9.1,
+       "min": 6.6,
+       "sourceKey": "lvfwd_mm",
+       "unit": "mm"
+      }
+     },
+     "pmid": "26476964",
+     "reference": "Seckerdieck et al. (2015)"
+    }
+   ]
+  }
+ }
+}
