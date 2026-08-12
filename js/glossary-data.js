@@ -1909,7 +1909,7 @@ cvcAo: {
         view: "Patient Measurement",
         description: "The single input every allometric reference interval depends on. Body surface area, LVIDdn, LADn, the right-heart intervals and both Wess volumetric tables are all functions of it, so a weight error propagates into every normalised value on the report.",
         group: "echo",
-        method: "Weigh on a calibrated scale at the time of the study, in kilograms, and use that same weight throughout. Because the scaling exponents are fractional (LVIDdn divides by W^0.294), a 10% weight error shifts LVIDdn by roughly 3% — small, but enough to move a borderline patient across the 1.7 EPIC cut-off. Estimated or historical weights should be treated with caution, and severe ascites or cachexia makes scaled indices harder to interpret in either direction.",
+        method: "Weigh on a calibrated scale at the time of the study, in kilograms, and use that same weight throughout. Because the scaling exponents are fractional (LVIDdn divides by W^0.294), a 10% weight error shifts LVIDdn by roughly 3% — small, but enough to move a borderline patient across the 1.7 EPIC cut-off. Estimated or historical weights should be treated with caution, and severe obesity, ascites or cachexia makes scaled indices harder to interpret in either direction.",
         category: "General",
         difficulty: 1
     },
