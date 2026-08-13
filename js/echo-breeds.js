@@ -3,7 +3,7 @@
 // regenerate Resources/echo-reference.json (Tools/generate-echo-reference-json.js).
 // The iOS app adopts a fetched reference set only when this date is NEWER than the
 // copy it already holds. Same mechanism as glossary-data.js VET_GLOSSARY_REVIEWED.
-const VCH_ECHO_REF_REVIEWED = "2026-08-10";
+const VCH_ECHO_REF_REVIEWED = "2026-08-13";
 
     const breedSpecificReferenceRanges = {
   "Afghan Hound": {
@@ -718,10 +718,20 @@ const diastolicRules = {
         { min: 1.0, max: 1.99, category: 'Normal / Pseudonormal Overlap', grade: 'Normal', points: 0 },
         { min: 2.0, max: Infinity, category: 'Restrictive Filling', grade: 'Grade III', points: 4 }
     ],
+    // E/IVRT (E in cm/s over IVRT in ms). Revised 2026-08-13: the Normal band previously ended at
+    // 1.49, so an E:IVRT of 1.5 scored 2 Grade II points and — because any non-zero high-LAP score
+    // forecloses Normal and Grade I — returned "Pseudonormal Pattern (Elevated LAP Suspected)" on a
+    // study that was otherwise entirely normal. That contradicted this app's own report line, which
+    // prints "(Ref: <2.5)" and flags nothing below 2.5. No source was ever recorded for 1.5; the
+    // only comparable figure in this file is the English Setter normal interval (max 1.4, Vatne
+    // 2021), a single-breed ceiling rather than a general cut-off.
+    // NOTE: 2.5 is the supported canine cut-off for elevated filling pressure. The 3.0 boundary
+    // between Grade II and Grade III is a severity split, NOT a published threshold — collapse the
+    // two bands into one Grade II band at >= 2.5 if that is preferred to an unsourced boundary.
     eivrt: [
-        { min: 0, max: 1.49, category: 'Normal Flow Timing', grade: 'Normal', points: 0 },
-        { min: 1.5, max: 2.49, category: 'Elevated Filling Pressure', grade: 'Grade II', points: 2 },
-        { min: 2.5, max: Infinity, category: 'Severe Left Atrial Pressure', grade: 'Grade III', points: 4 }
+        { min: 0, max: 2.49, category: 'Normal Flow Timing', grade: 'Normal', points: 0 },
+        { min: 2.5, max: 2.99, category: 'Elevated Filling Pressure', grade: 'Grade II', points: 2 },
+        { min: 3.0, max: Infinity, category: 'Severe Left Atrial Pressure', grade: 'Grade III', points: 4 }
     ],
     eePrime: [
         { min: 0, max: 7.99, category: 'Normal Basal Velocity', grade: 'Normal', points: 0 },
