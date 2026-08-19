@@ -1,5 +1,75 @@
+/* ---------------------------------------------------------------------------------------------
+ * EVIDENCE TIERING
+ *
+ * The five interpretive engines below are not equally supported, and presenting them in the same
+ * visual language implies a parity of evidence that does not exist.
+ *
+ *   EPIC, MINE and the Chang score were each derived and validated in a published study.
+ *   The diastolic grade and the ACVIM probability use published *thresholds*, but the schemes that
+ *   combine those thresholds into a single grade were devised for this tool and have never been
+ *   tested against outcome.
+ *
+ * Every engine declares its tier, the tier is shown wherever the result is shown, and the
+ * interpretive ones carry a caveat saying plainly what they are. Kept in step with
+ * VCHEchoCalc/Logic/EvidenceGrade.swift -- change one, change the other.
+ * ------------------------------------------------------------------------------------------- */
+const EVIDENCE_GRADES = {
+    validated: {
+        badge: 'Published model',
+        summary: 'Derived and validated in a published study, and applied here as published.',
+        tone: 'validated'
+    },
+    interpretive: {
+        badge: 'Interpretive',
+        summary: 'Published thresholds combined by an unvalidated scheme. Not experimentally verified.',
+        tone: 'interpretive'
+    }
+};
+
+const EVIDENCE = {
+    epic: {
+        grade: 'validated',
+        citation: 'EPIC trial entry criteria (Boswood et al., 2016).',
+        caveat: null
+    },
+    mine: {
+        grade: 'validated',
+        citation: 'MINE score, as published.',
+        caveat: 'Derived in myxomatous mitral valve disease. A median survival time quoted at any '
+            + 'other diagnosis is not supported by the model.'
+    },
+    chang: {
+        grade: 'validated',
+        citation: 'Chang et al. (2026) predictive score.',
+        caveat: null
+    },
+    pulmonaryHypertension: {
+        grade: 'interpretive',
+        citation: 'Thresholds from the ACVIM (2020) pulmonary hypertension consensus statement.',
+        caveat: 'The consensus supplies the threshold values and the anatomic-site framework. The '
+            + 'way this tool weights and combines them into a single probability is an '
+            + 'interpretation of that guidance, not a validated scoring system, and has not been '
+            + 'tested against outcome. The Chang (2026) score shown alongside is the only '
+            + 'published predictive score here. Read the evidence table, not just the verdict.'
+    },
+    diastolic: {
+        grade: 'interpretive',
+        citation: 'Bands from published canine reference intervals; TR aligned to the ACVIM (2020) consensus.',
+        caveat: 'No validated diastolic grading scheme has been published for the dog. The '
+            + 'individual bands are drawn from published reference intervals, but the points-based '
+            + 'scheme that combines them into a single grade was devised for this tool and has not '
+            + 'been experimentally verified. Treat the grade as a prompt for expert review, not as '
+            + 'a diagnosis.'
+    },
+    expertReview: 'Expert echocardiographic assessment is recommended to resolve a discordant profile.'
+};
+
 function advancedEchoSuite() {
     return {
+
+    /* 0b. EVIDENCE TIERING (exposed to the template) */
+    evidence: EVIDENCE,
+    evidenceGrades: EVIDENCE_GRADES,
 
     /* 0. GLOSSARY LOGIC */  
     ...glossaryEngine,   
@@ -1052,6 +1122,20 @@ get diastolicClassification() {
     if (conflictCount > 0) confidenceLabel = 'Mixed Profile (Minor Discrepancy)';
     if (conflictCount >= evaluatedCount / 2) confidenceLabel = 'Equivocal (High Contradiction)';
 
+    // Discordance is surfaced as a first-class field rather than left to be inferred from the
+    // breakdown. A grade reached over the objection of some of its own inputs is exactly the case
+    // where the single number should not be read alone, and the scheme resolving the disagreement
+    // is not a validated one -- see EVIDENCE.diastolic.
+    const isDiscordant = conflictCount > 0;
+    const isEquivocal = conflictCount >= evaluatedCount / 2 && conflictCount > 0;
+    const discordantNames = finalizedBreakdown.filter(i => i.conflicts).map(i => i.name);
+    let discordanceSummary = null;
+    if (isDiscordant) {
+        const noun = conflictCount === 1 ? 'parameter disagrees' : 'parameters disagree';
+        discordanceSummary = (isEquivocal ? 'The profile is equivocal: ' : 'The profile is mixed: ')
+            + `${conflictCount} of ${evaluatedCount} ${noun} with this grade.`;
+    }
+
     return {
         grade: finalGrade,
         stepIndex: stepIndex,
@@ -1060,7 +1144,12 @@ get diastolicClassification() {
         evaluatedCount: evaluatedCount,
         breakdown: finalizedBreakdown,
         pointsSummary: { I: grade1Points, II: grade2Points, III: grade3Points },
-        confidence: confidenceLabel
+        confidence: confidenceLabel,
+        conflictCount: conflictCount,
+        isDiscordant: isDiscordant,
+        isEquivocal: isEquivocal,
+        discordantNames: discordantNames,
+        discordanceSummary: discordanceSummary
     };
 },
 
@@ -1598,6 +1687,9 @@ const addMeasure = (label, val, refKey, unit = '', isHighOnly = false) => {
     }
     if (this.phClassification) {
         text += `ACVIM PH Probability: ${this.phClassification.probability} (${this.phClassification.anatomicSites}/3 sites)\n`;
+        // The probability is an interpretation of the consensus, not a validated score. It does
+        // not leave this app without saying so.
+        text += `NOTE (ACVIM probability): ${EVIDENCE.pulmonaryHypertension.caveat}\n`;
     }
         if (this.isDog && this.lviddn > 0 && this.laAo > 0) {
             text += `\nCANINE CLINICAL ASSESSMENT (EPIC B2):\n`;
@@ -1623,9 +1715,19 @@ text += `\n (Applicable to Degenerative Mitral Valve Disease Cases Only)\n`;
 
 // --- DIASTOLIC FUNCTION REPORT LINE ---
 if (this.diastolicClassification && this.diastolicClassification.evaluatedCount >= 2) {
+    const dia = this.diastolicClassification;
     text += `\nDIASTOLIC FUNCTIONAL PROFILE:\n`;
-    text += `Classification: ${this.diastolicClassification.grade} (${this.diastolicClassification.label})\n`;
-    text += `Analysis Confidence: ${this.diastolicClassification.confidence}\n`;
+    text += `Classification: ${dia.grade} (${dia.label})\n`;
+    text += `Analysis Confidence: ${dia.confidence}\n`;
+    // Discordance is the case where the single grade is least safe to read alone, so it goes into
+    // the record rather than staying on screen.
+    if (dia.isDiscordant) {
+        text += `DISCORDANT: ${dia.discordanceSummary} ${EVIDENCE.expertReview}\n`;
+        if (dia.discordantNames.length) {
+            text += `Disagreeing parameters: ${dia.discordantNames.join(', ')}\n`;
+        }
+    }
+    text += `NOTE (diastolic grade): ${EVIDENCE.diastolic.caveat}\n`;
 }
 
         if (this.isCat) {
@@ -1870,7 +1972,8 @@ copyPHTAudit() {
     // ACVIM Topline
     text += `[ ACVIM (2020) PROBABILITY ]\n`;
     text += `Assessment: ${this.phClassification.probability}\n`;
-    text += `Anatomic Sites Positive: ${this.phClassification.anatomicSites}/3\n\n`;
+    text += `Anatomic Sites Positive: ${this.phClassification.anatomicSites}/3\n`;
+    text += `Evidence: ${EVIDENCE_GRADES.interpretive.badge} — ${EVIDENCE_GRADES.interpretive.summary}\n\n`;
 
     // Granular Evidence Grouping
     text += `[ CLINICAL EVIDENCE BREAKDOWN ]\n`;
@@ -1899,6 +2002,9 @@ copyPHTAudit() {
         const breakdownStr = this.changScoreResults.breakdown.map(item => `${item.name} (+${item.val})`).join(', ');
         text += `Breakdown: ${breakdownStr}\n\n`;
     }
+
+    text += `[ HOW TO READ THIS ]\n`;
+    text += `${EVIDENCE.pulmonaryHypertension.caveat}\n\n`;
 
     text += `Generated via VetCardioHub.com`;
 
