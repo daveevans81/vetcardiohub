@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="/js/global-head.js" defer></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Get the VCH Vitals App — Free Pet Heart &amp; Health Tracker | VetCardioHub</title>
+    <meta name="description" content="Download VCH Vitals free for iPhone and iPad, or use it in any browser. Count your pet's sleeping respiratory rate, log medications, and spot changes early in dogs and cats with heart disease.">
+    <link rel="canonical" href="https://vetcardiohub.com/app">
+
+    <meta property="og:title" content="Get the VCH Vitals App">
+    <meta property="og:description" content="Free sleeping respiratory rate tracking, medication logging and trend charts for dogs and cats. On the App Store, or in any browser.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vetcardiohub.com/app">
+    <meta property="og:image" content="https://vetcardiohub.com/images/og-health-tracker.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Get the VCH Vitals App">
+    <meta name="twitter:description" content="Free sleeping respiratory rate tracking, medication logging and trend charts for dogs and cats.">
+    <meta name="twitter:image" content="https://vetcardiohub.com/images/og-health-tracker.png">
+
+    <!-- Native iOS app: Apple Smart App Banner (Safari on iOS only; auto-hides once installed) -->
+    <meta name="apple-itunes-app" content="app-id=6791313344, affiliate-data=pt=129166263&amp;ct=app-page, app-argument=https://vetcardiohub.com/app">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "VCH Vitals",
+  "operatingSystem": "iOS 17.0 or later",
+  "applicationCategory": "HealthApplication",
+  "description": "Home monitoring for dogs and cats. Sleeping respiratory rate counting, medication and symptom logging, weight and parasite records, and trend charts to share with your veterinary surgeon.",
+  "url": "https://vetcardiohub.com/app",
+  "installUrl": "https://apps.apple.com/app/id6791313344",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+  "publisher": { "@type": "Organization", "name": "VetCardioHub", "url": "https://vetcardiohub.com" }
+}
+</script>
+
+<style>
+/* ── /app landing page ─────────────────────────────────────────────────── */
+/* The site stylesheet centres body text, which suits the hero but not the
+   prose blocks — everything below the hero is realigned explicitly. */
+.appx { max-width: 980px; margin: 0 auto; padding: 0 20px 80px; text-align: left; }
+.appx-card, .appx-card p,
+.appx-steps li, .appx-notice p,
+.appx-section-title, .appx-section-sub,
+.appx-faq summary, .appx-faq p { text-align: left; }
+
+.appx-hero {
+    background: linear-gradient(160deg, #16325F 0%, #1e3a6f 60%, #24528f 100%);
+    color: #fff; border-radius: 16px;
+    padding: 44px 32px; margin: 32px 0 44px; text-align: center;
+}
+.appx-hero h1 { color: #fff; font-size: 2.2rem; margin: 0 0 12px; line-height: 1.2; }
+.appx-hero .appx-lede {
+    max-width: 620px; margin: 0 auto 8px;
+    font-size: 1.05rem; line-height: 1.6; color: rgba(255,255,255,0.82);
+}
+.appx-free {
+    display: inline-block; margin-bottom: 22px; padding: 4px 12px;
+    background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 99px; font-size: 0.78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+}
+.appx-cta-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; flex-wrap: wrap; margin-top: 6px;
+}
+.appx-web-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 22px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.4); color: #fff;
+    text-decoration: none; font-weight: 600; font-size: 0.95rem;
+    transition: background 0.2s;
+}
+.appx-web-link:hover { background: rgba(255,255,255,0.12); }
+.appx-platform-note {
+    margin: 18px 0 0; font-size: 0.82rem; color: rgba(255,255,255,0.65);
+}
+
+.appx-grid {
+    /* 380px min gives a clean 2x2 at page width rather than an orphaned fourth card.
+       min() lets the track shrink below that on narrow screens, which a bare
+       minmax(380px, 1fr) will not do — it overflows the viewport instead. */
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
+    gap: 20px; margin-bottom: 48px;
+}
+.appx-card {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px;
+}
+.appx-card h3 {
+    margin: 0 0 8px; font-size: 1.02rem; color: #16325F;
+    display: flex; align-items: center; gap: 10px;
+}
+.appx-card h3 i { color: #0ea5e9; }
+.appx-card p { margin: 0; font-size: 0.9rem; line-height: 1.6; color: #475569; }
+
+.appx-section-title {
+    font-size: 1.4rem; color: #16325F; margin: 0 0 6px;
+}
+.appx-section-sub {
+    font-size: 0.92rem; color: #64748b; margin: 0 0 22px; line-height: 1.6;
+}
+
+.appx-steps {
+    counter-reset: appx; list-style: none; margin: 0; padding: 0;
+}
+.appx-steps li {
+    position: relative; padding: 0 0 14px 40px;
+    font-size: 0.92rem; line-height: 1.6; color: #334155;
+}
+.appx-steps li::before {
+    counter-increment: appx; content: counter(appx);
+    position: absolute; left: 0; top: 0;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #16325F; color: #fff;
+    font-size: 0.78rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.appx-notice {
+    border-left: 3px solid #d97706; background: #fffbeb;
+    border-radius: 8px; padding: 16px 18px; margin-bottom: 44px;
+}
+.appx-notice p { margin: 0; font-size: 0.9rem; line-height: 1.6; color: #78350f; }
+.appx-notice p + p { margin-top: 10px; }
+
+/* Share / QR block */
+.appx-share {
+    border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px;
+    background: #f8fafc; margin-bottom: 40px;
+}
+.appx-share-inner {
+    display: flex; gap: 28px; align-items: center; flex-wrap: wrap;
+}
+.appx-qr-frame {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 10px; flex-shrink: 0;
+}
+.appx-qr { display: block; width: 160px; height: 160px; }
+.appx-share-text { flex: 1 1 280px; text-align: left; }
+.appx-share-text h2 { margin: 0 0 8px; font-size: 1.25rem; color: #16325F; }
+.appx-share-text p { margin: 0 0 12px; font-size: 0.9rem; line-height: 1.6; color: #475569; }
+.appx-url {
+    display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9rem; background: #fff; border: 1px solid #cbd5e1;
+    border-radius: 6px; padding: 8px 12px; color: #16325F;
+}
+
+.appx-faq { border-top: 1px solid #e2e8f0; padding-top: 32px; }
+.appx-faq details {
+    border-bottom: 1px solid #e2e8f0; padding: 14px 0;
+}
+.appx-faq summary {
+    cursor: pointer; font-weight: 700; color: #16325F; font-size: 0.95rem;
+    list-style: none; display: flex; align-items: center; gap: 10px;
+}
+.appx-faq summary::-webkit-details-marker { display: none; }
+.appx-faq summary::before {
+    content: "\f078"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+    font-size: 0.7rem; color: #0ea5e9; flex-shrink: 0;
+    transition: transform 0.2s;
+}
+.appx-faq details[open] summary::before { transform: rotate(180deg); }
+.appx-faq p {
+    margin: 10px 0 0; font-size: 0.9rem; line-height: 1.65; color: #475569;
+}
+
+@media (max-width: 640px) {
+    .appx-hero { padding: 32px 20px; margin: 20px 0 32px; }
+    .appx-hero h1 { font-size: 1.7rem; }
+    .appx-share-inner { flex-direction: column; text-align: center; }
+    .appx-share-text { text-align: center; }
+}
+
+/* Printing this page gives a clean waiting-room / discharge handout */
+@media print {
+    #site-header, #site-footer, .appx-faq, .appx-web-link, .appx-platform-note { display: none !important; }
+    .appx-hero {
+        background: none !important; color: #000 !important;
+        border: 2px solid #000; border-radius: 0; padding: 20px;
+    }
+    .appx-hero h1, .appx-hero .appx-lede { color: #000 !important; }
+    .appx-free { border-color: #000; color: #000; background: none; }
+    .appx-share { page-break-inside: avoid; background: none; }
+    .appx-qr { width: 220px; height: 220px; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="appx">
+
+    <section class="appx-hero">
+        <span class="appx-free">Free · No account needed</span>
+        <h1>VCH Vitals for your pet</h1>
+        <p class="appx-lede">
+            Count your pet's sleeping respiratory rate, log medications and symptoms, and see the trend
+            over time — so a change is something you notice early, not something you find out about late.
+            Built by a veterinary cardiologist for dogs and cats with heart disease, and useful for any pet you want to keep an eye on.
+        </p>
+
+        <div class="appx-cta-row">
+            <a href="https://apps.apple.com/app/apple-store/id6791313344?pt=129166263&amp;ct=app-page&amp;mt=8"
+               class="appstore-cta" data-appstore
+               aria-label="Download VCH Vitals on the App Store">
+                <img src="/images/app-store-badge.svg" alt="Download on the App Store" class="appstore-badge"
+                     onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                <span class="appstore-fallback">Download on the App Store</span>
+            </a>
+
+            <a href="/health-tracker.html" class="appx-web-link">
+                <i class="fa-solid fa-globe"></i> Or use it in your browser
+            </a>
+        </div>
+
+        <p class="appx-platform-note" data-platform-note>
+            The iPhone and iPad app needs iOS 17 or later. On Android and desktop, use the browser version — it does the same job.
+        </p>
+    </section>
+
+    <div class="appx-grid">
+        <div class="appx-card">
+            <h3><i class="fa-solid fa-lungs"></i> Sleeping respiratory rate</h3>
+            <p>A guided breath counter with a built-in timer, plus the trend chart and threshold alerts that make a rising rate obvious.</p>
+        </div>
+        <div class="appx-card">
+            <h3><i class="fa-solid fa-pills"></i> Medications &amp; symptoms</h3>
+            <p>Record doses, changes and missed tablets, alongside cough, syncope, appetite and activity — all on one timeline.</p>
+        </div>
+        <div class="appx-card">
+            <h3><i class="fa-solid fa-file-arrow-down"></i> Reports for your vet</h3>
+            <p>Export a clear summary as a PDF or spreadsheet, so your appointment starts with data rather than recollection.</p>
+        </div>
+        <div class="appx-card">
+            <h3><i class="fa-solid fa-lock"></i> Private by design</h3>
+            <p>Records stay on your own device. There is no account, no sign-in, and nothing is uploaded to us.</p>
+        </div>
+    </div>
+
+    <h2 class="appx-section-title">Already using it in your browser?</h2>
+    <p class="appx-section-sub">
+        The iPhone app keeps its own records, so your existing entries do not appear automatically. Moving them across takes about a minute.
+    </p>
+    <div class="appx-notice">
+        <ol class="appx-steps">
+            <li>In the browser version, go to <strong>More → Data &amp; Export</strong> and choose <strong>Export Backup</strong>.</li>
+            <li>Install the app from the App Store and open it.</li>
+            <li>On the welcome screen, choose <strong>Import patient(s) from backup</strong> and pick the file you just saved.</li>
+        </ol>
+        <p style="margin-top: 4px;">
+            Keep the backup file somewhere safe afterwards. It is the only copy of your history outside the app.
+        </p>
+    </div>
+
+    <section class="appx-share">
+        <div class="appx-share-inner">
+            <div class="appx-qr-frame">
+                <svg class="appx-qr " viewBox="0 0 296 296" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="QR code linking to vetcardiohub.com/app"><rect width="296" height="296" fill="#ffffff"/><path fill="#0f172a" d="M32 32h56v8h-56zM96 32h8v8h-8zM112 32h48v8h-48zM184 32h8v8h-8zM208 32h56v8h-56zM32 40h8v8h-8zM80 40h8v8h-8zM96 40h16v8h-16zM120 40h24v8h-24zM152 40h8v8h-8zM168 40h24v8h-24zM208 40h8v8h-8zM256 40h8v8h-8zM32 48h8v8h-8zM48 48h24v8h-24zM80 48h8v8h-8zM96 48h8v8h-8zM120 48h8v8h-8zM144 48h24v8h-24zM176 48h8v8h-8zM192 48h8v8h-8zM208 48h8v8h-8zM224 48h24v8h-24zM256 48h8v8h-8zM32 56h8v8h-8zM48 56h24v8h-24zM80 56h8v8h-8zM96 56h8v8h-8zM112 56h16v8h-16zM136 56h8v8h-8zM160 56h8v8h-8zM176 56h24v8h-24zM208 56h8v8h-8zM224 56h24v8h-24zM256 56h8v8h-8zM32 64h8v8h-8zM48 64h24v8h-24zM80 64h8v8h-8zM96 64h24v8h-24zM136 64h24v8h-24zM176 64h16v8h-16zM208 64h8v8h-8zM224 64h24v8h-24zM256 64h8v8h-8zM32 72h8v8h-8zM80 72h8v8h-8zM120 72h16v8h-16zM144 72h16v8h-16zM168 72h8v8h-8zM184 72h16v8h-16zM208 72h8v8h-8zM256 72h8v8h-8zM32 80h56v8h-56zM96 80h8v8h-8zM112 80h8v8h-8zM128 80h8v8h-8zM144 80h8v8h-8zM160 80h8v8h-8zM176 80h8v8h-8zM192 80h8v8h-8zM208 80h56v8h-56zM96 88h16v8h-16zM128 88h16v8h-16zM160 88h16v8h-16zM184 88h16v8h-16zM40 96h16v8h-16zM64 96h8v8h-8zM80 96h16v8h-16zM112 96h48v8h-48zM176 96h8v8h-8zM208 96h8v8h-8zM224 96h40v8h-40zM64 104h8v8h-8zM96 104h16v8h-16zM120 104h8v8h-8zM136 104h16v8h-16zM160 104h16v8h-16zM192 104h24v8h-24zM232 104h16v8h-16zM256 104h8v8h-8zM40 112h8v8h-8zM64 112h24v8h-24zM96 112h16v8h-16zM120 112h16v8h-16zM168 112h16v8h-16zM216 112h8v8h-8zM240 112h24v8h-24zM64 120h8v8h-8zM96 120h24v8h-24zM144 120h16v8h-16zM168 120h24v8h-24zM200 120h24v8h-24zM248 120h8v8h-8zM40 128h16v8h-16zM64 128h8v8h-8zM80 128h8v8h-8zM120 128h8v8h-8zM136 128h8v8h-8zM152 128h8v8h-8zM168 128h8v8h-8zM192 128h8v8h-8zM208 128h16v8h-16zM232 128h8v8h-8zM32 136h16v8h-16zM56 136h8v8h-8zM96 136h24v8h-24zM152 136h16v8h-16zM192 136h32v8h-32zM248 136h16v8h-16zM48 144h8v8h-8zM72 144h16v8h-16zM104 144h16v8h-16zM128 144h24v8h-24zM168 144h8v8h-8zM192 144h16v8h-16zM216 144h8v8h-8zM240 144h24v8h-24zM40 152h16v8h-16zM88 152h8v8h-8zM160 152h8v8h-8zM192 152h8v8h-8zM208 152h16v8h-16zM256 152h8v8h-8zM32 160h40v8h-40zM80 160h16v8h-16zM104 160h16v8h-16zM136 160h8v8h-8zM152 160h8v8h-8zM192 160h24v8h-24zM232 160h8v8h-8zM248 160h8v8h-8zM56 168h16v8h-16zM88 168h56v8h-56zM152 168h8v8h-8zM168 168h8v8h-8zM192 168h24v8h-24zM248 168h16v8h-16zM32 176h8v8h-8zM72 176h16v8h-16zM96 176h8v8h-8zM112 176h16v8h-16zM136 176h8v8h-8zM176 176h8v8h-8zM200 176h8v8h-8zM232 176h32v8h-32zM40 184h16v8h-16zM72 184h8v8h-8zM96 184h16v8h-16zM136 184h24v8h-24zM168 184h16v8h-16zM192 184h8v8h-8zM208 184h8v8h-8zM224 184h8v8h-8zM248 184h8v8h-8zM32 192h8v8h-8zM56 192h8v8h-8zM80 192h24v8h-24zM112 192h8v8h-8zM136 192h8v8h-8zM160 192h16v8h-16zM184 192h48v8h-48zM248 192h8v8h-8zM96 200h8v8h-8zM112 200h16v8h-16zM144 200h8v8h-8zM160 200h24v8h-24zM192 200h8v8h-8zM224 200h8v8h-8zM248 200h16v8h-16zM32 208h56v8h-56zM96 208h8v8h-8zM120 208h24v8h-24zM160 208h8v8h-8zM176 208h24v8h-24zM208 208h8v8h-8zM224 208h8v8h-8zM240 208h24v8h-24zM32 216h8v8h-8zM80 216h8v8h-8zM104 216h32v8h-32zM144 216h40v8h-40zM192 216h8v8h-8zM224 216h8v8h-8zM32 224h8v8h-8zM48 224h24v8h-24zM80 224h8v8h-8zM96 224h8v8h-8zM112 224h8v8h-8zM128 224h24v8h-24zM160 224h8v8h-8zM176 224h8v8h-8zM192 224h48v8h-48zM32 232h8v8h-8zM48 232h24v8h-24zM80 232h8v8h-8zM112 232h16v8h-16zM152 232h32v8h-32zM192 232h16v8h-16zM224 232h16v8h-16zM32 240h8v8h-8zM48 240h24v8h-24zM80 240h8v8h-8zM96 240h8v8h-8zM112 240h24v8h-24zM152 240h40v8h-40zM216 240h16v8h-16zM256 240h8v8h-8zM32 248h8v8h-8zM80 248h8v8h-8zM96 248h8v8h-8zM120 248h32v8h-32zM160 248h16v8h-16zM184 248h16v8h-16zM208 248h16v8h-16zM232 248h8v8h-8zM248 248h8v8h-8zM32 256h56v8h-56zM112 256h8v8h-8zM144 256h32v8h-32zM192 256h24v8h-24zM224 256h8v8h-8zM248 256h16v8h-16z"/></svg>
+            </div>
+            <div class="appx-share-text">
+                <h2>Share it with an owner</h2>
+                <p>
+                    If you are a veterinary surgeon or nurse sending a patient home with instructions to
+                    monitor breathing, this code takes the owner straight here. Print this page for a
+                    ready-made discharge handout.
+                </p>
+                <span class="appx-url">vetcardiohub.com/app</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="appx-faq">
+        <h2 class="appx-section-title">Common questions</h2>
+
+        <details>
+            <summary>Is it really free?</summary>
+            <p>Yes. There is no charge, no subscription, no advertising and no in-app purchase. The project is funded by voluntary <a href="/support.html">support</a>.</p>
+        </details>
+
+        <details>
+            <summary>Is there an Android app?</summary>
+            <p>Not yet. Android and desktop users should use the <a href="/health-tracker.html">browser version</a>, which has the same features. On Android you can add it to your home screen and it will behave much like an installed app, including offline breath counting.</p>
+        </details>
+
+        <details>
+            <summary>Where is my pet's data stored?</summary>
+            <p>On your device only. Nothing is sent to VetCardioHub or to any third party. That also means the records are not backed up for you — export a backup periodically, and keep it somewhere safe.</p>
+        </details>
+
+        <details>
+            <summary>Does this replace veterinary advice?</summary>
+            <p>No. It is a monitoring and record-keeping tool that helps you and your veterinary surgeon see patterns clearly. It does not diagnose, and it is not a substitute for professional assessment. If your pet's breathing rate or effort rises, or you are worried, contact your veterinary practice.</p>
+        </details>
+
+        <details>
+            <summary>What is a sleeping respiratory rate, and why does it matter?</summary>
+            <p>It is the number of breaths your pet takes per minute while genuinely asleep. In dogs and cats with heart disease it is one of the earliest and most reliable signs that fluid is beginning to accumulate in the lungs, often rising before any outward change you would notice. Our <a href="/monitoring.html">monitoring guide</a> explains how to measure it properly.</p>
+        </details>
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+// Campaign attribution: /app?src=youtube tags the App Store link so downloads are
+// attributed in App Store Connect. Whitelisted so a stray parameter cannot inject
+// arbitrary campaign names into the analytics.
+(function () {
+    var ALLOWED = ['youtube', 'clinic', 'email', 'social', 'qr', 'instagram', 'app-page'];
+    var src = new URLSearchParams(location.search).get('src');
+    var ct  = ALLOWED.indexOf(src) !== -1 ? src : 'app-page';
+    var url = 'https://apps.apple.com/app/apple-store/id6791313344?pt=129166263&ct=' + ct + '&mt=8';
+    document.querySelectorAll('[data-appstore]').forEach(function (a) { a.href = url; });
+
+    // On Android, lead with the browser version rather than an app they cannot install.
+    if (/Android/.test(navigator.userAgent)) {
+        var note = document.querySelector('[data-platform-note]');
+        if (note) note.textContent = 'There is no Android app yet — tap "Or use it in your browser", then use your browser menu to add it to your home screen.';
+    }
+})();
+</script>
+<script src="/js/load-partials.js"></script>
+</body>
+</html>

@@ -17,6 +17,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="VCH Vitals">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Native iOS app: Apple Smart App Banner (Safari on iOS only; auto-hides once installed).
+         affiliate-data carries the App Store Connect campaign token so these downloads are attributed. -->
+    <meta name="apple-itunes-app" content="app-id=6791313344, affiliate-data=pt=129166263&amp;ct=website-app, app-argument=https://vetcardiohub.com/health-tracker.html">
+
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="icon" sizes="192x192" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -371,6 +376,20 @@
                     <div class="hero-pill"><i class="fa-solid fa-bug-slash" style="color: #fca5a5;"></i> Anti-Parasitics</div>
                     
                 </div>
+
+                <!-- Native iOS app -->
+                <div class="appstore-hero-row" x-show="!isStandalone">
+                    <p>
+                        <strong style="color: #fff;">Now on iPhone &amp; iPad.</strong>
+                        The free VCH Vitals app gives you offline breath counting, reminders and faster charts.
+                    </p>
+                    <a :href="appStoreUrl('website-app')" target="_blank" rel="noopener" class="appstore-cta"
+                       aria-label="Download VCH Vitals on the App Store">
+                                <img src="/images/app-store-badge.svg" alt="Download on the App Store" class="appstore-badge"
+                                     onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                <span class="appstore-fallback">Download on the App Store</span>
+                    </a>
+                </div>
             </div>
         
         </header>
@@ -464,26 +483,42 @@
                 </div>
             </div>
             
-                    <!-- PWA INSTALL OVERLAY -->
+                    <!-- APP INSTALL OVERLAY (iOS → App Store, Android → PWA) -->
             <div x-show="showInstallOverlay" class="modal-overlay" style="background: rgba(0,0,0,0.75); z-index: 11000;" x-cloak>
                 <div class="onboarding-modal-inner" style="max-width: 420px; max-height: 85vh; display: flex; flex-direction: column;">
                     <div class="onboarding-scroll" style="padding: 24px; text-align: center;">
                         <div style="font-size: 2.2rem; color: #16325F; margin-bottom: 10px;">
                             <i class="fa-solid fa-mobile-screen-button"></i>
                         </div>
-                        <h2 style="color: #16325F; margin: 0 0 8px; font-size: 1.2rem;">Use this tracker as an app</h2>
-                        <p class="text-sm text-muted" style="margin-bottom: 16px;">
-                            Install the free app to your home screen for one-tap access, full-screen use, and offline breath counting — no app store required.
-                        </p>
+
+                        <!-- iOS heading -->
+                        <template x-if="installPlatform === 'ios'">
+                            <div>
+                                <h2 style="color: #16325F; margin: 0 0 8px; font-size: 1.2rem;">Get the free iPhone &amp; iPad app</h2>
+                                <p class="text-sm text-muted" style="margin-bottom: 16px;">
+                                    VCH Vitals is now on the App Store — a native app with offline breath counting, reminders, and faster charts. Free, and no account needed.
+                                </p>
+                            </div>
+                        </template>
+
+                        <!-- Android heading -->
+                        <template x-if="installPlatform !== 'ios'">
+                            <div>
+                                <h2 style="color: #16325F; margin: 0 0 8px; font-size: 1.2rem;">Use this tracker as an app</h2>
+                                <p class="text-sm text-muted" style="margin-bottom: 16px;">
+                                    Install the free app to your home screen for one-tap access, full-screen use, and offline breath counting — no app store required.
+                                </p>
+                            </div>
+                        </template>
         
-                        <!-- iOS warning: install BEFORE entering data -->
+                        <!-- iOS warning: download BEFORE entering data -->
                         <div x-show="installPlatform === 'ios' && patients.length === 0" class="info-box" style="text-align: left; margin-bottom: 16px; border-left: 3px solid #d97706;">
-                            <p class="mt-0 mb-0" style="font-size: 0.82rem;"><strong>Install first, then register your pet.</strong> On iPhone and iPad the app keeps its own separate records — anything entered here in the browser will not transfer across automatically.</p>
+                            <p class="mt-0 mb-0" style="font-size: 0.82rem;"><strong>Download first, then register your pet.</strong> On iPhone and iPad the app keeps its own separate records — anything entered here in the browser will not transfer across automatically.</p>
                         </div>
         
                         <!-- iOS with existing data: backup route -->
                         <div x-show="installPlatform === 'ios' && patients.length > 0" class="info-box" style="text-align: left; margin-bottom: 16px; border-left: 3px solid #d97706;">
-                            <p class="mt-0 mb-0" style="font-size: 0.82rem;"><strong>You already have records in this browser.</strong> Export a backup (Data &amp; Export → Export Backup), install the app, then use <em>Import patient(s) from backup</em> on the app's welcome screen.</p>
+                            <p class="mt-0 mb-0" style="font-size: 0.82rem;"><strong>You already have records in this browser.</strong> Export a backup (Data &amp; Export → Export Backup), download the app, then use <em>Import patient(s) from backup</em> on the app's welcome screen.</p>
                         </div>
         
                         <!-- ANDROID: one-tap native install -->
@@ -500,20 +535,35 @@
                             </div>
                         </template>
         
-                        <!-- iOS: Safari instructions -->
+                        <!-- iOS: App Store download (the home-screen route is kept as a secondary option) -->
                         <template x-if="installPlatform === 'ios'">
                             <div>
-                                <div x-show="iosIsSafari()" class="install-steps">
-                                    <div class="install-step"><span class="install-step-num">1</span>
-                                        <span>Tap the Share button <i class="fa-solid fa-arrow-up-from-bracket" style="color: #0ea5e9;"></i> — usually at the bottom of Safari. <br>
-                                        <em style="font-size: 0.78rem; color: #64748b;">Can't see it? In newer Safari, tap the <i class="fa-solid fa-ellipsis"></i> menu in the address bar first — Share is in there.</em></span>
-                                    </div>
-                                    <div class="install-step"><span class="install-step-num">2</span> <span>Scroll down and tap <strong>"Add to Home Screen"</strong> <i class="fa-solid fa-square-plus" style="color: #0ea5e9;"></i></span></div>
-                                    <div class="install-step"><span class="install-step-num">3</span> <span>Tap <strong>Add</strong>, then open the tracker from your home screen</span></div>
+                                <div class="appstore-cta-wrap">
+                                    <a :href="appStoreUrl('website-app')" target="_blank" rel="noopener"
+                                       @click="dismissInstallOverlay()" class="appstore-cta"
+                                       aria-label="Download VCH Vitals on the App Store">
+                                        <img src="/images/app-store-badge.svg" alt="Download on the App Store" class="appstore-badge"
+                                             onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                        <span class="appstore-fallback">Download on the App Store</span>
+                                    </a>
                                 </div>
-                                <div x-show="!iosIsSafari()" class="install-steps">
-                                    <div class="install-step"><span class="install-step-num">1</span> Open this page in <strong>Safari</strong> (installing works best there)</div>
-                                    <div class="install-step"><span class="install-step-num">2</span> Tap Share <i class="fa-solid fa-arrow-up-from-bracket"></i> → <strong>"Add to Home Screen"</strong></div>
+
+                                <button type="button" @click="showIosPwaSteps = !showIosPwaSteps" class="appstore-alt-link"
+                                        x-text="showIosPwaSteps ? 'Hide home-screen instructions' : 'Prefer not to use the App Store? Add to Home Screen instead'"></button>
+
+                                <div x-show="showIosPwaSteps" x-collapse>
+                                    <div x-show="iosIsSafari()" class="install-steps" style="margin-top: 10px;">
+                                        <div class="install-step"><span class="install-step-num">1</span>
+                                            <span>Tap the Share button <i class="fa-solid fa-arrow-up-from-bracket" style="color: #0ea5e9;"></i> — usually at the bottom of Safari. <br>
+                                            <em style="font-size: 0.78rem; color: #64748b;">Can't see it? In newer Safari, tap the <i class="fa-solid fa-ellipsis"></i> menu in the address bar first — Share is in there.</em></span>
+                                        </div>
+                                        <div class="install-step"><span class="install-step-num">2</span> <span>Scroll down and tap <strong>"Add to Home Screen"</strong> <i class="fa-solid fa-square-plus" style="color: #0ea5e9;"></i></span></div>
+                                        <div class="install-step"><span class="install-step-num">3</span> <span>Tap <strong>Add</strong>, then open the tracker from your home screen</span></div>
+                                    </div>
+                                    <div x-show="!iosIsSafari()" class="install-steps" style="margin-top: 10px;">
+                                        <div class="install-step"><span class="install-step-num">1</span> Open this page in <strong>Safari</strong> (installing works best there)</div>
+                                        <div class="install-step"><span class="install-step-num">2</span> Tap Share <i class="fa-solid fa-arrow-up-from-bracket"></i> → <strong>"Add to Home Screen"</strong></div>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -667,7 +717,12 @@
                           <div class="onboarding-footer">
                             <button x-show="!isStandalone && installPlatform !== 'other'" @click="showInstallOverlay = true"
                                     class="hero-pill" style="display: block; margin: 0 auto 16px; color: #16325F; background: #eff6ff; border-color: #bfdbfe; font-size: 0.8rem; cursor: pointer;">
-                                <i class="fa-solid fa-download"></i> Prefer an app? Install first — recommended
+                                <template x-if="installPlatform === 'ios'">
+                                    <span><i class="fa-solid fa-mobile-screen-button"></i> Get the free iPhone app first — recommended</span>
+                                </template>
+                                <template x-if="installPlatform !== 'ios'">
+                                    <span><i class="fa-solid fa-download"></i> Prefer an app? Install first — recommended</span>
+                                </template>
                             </button>
                             <label :class="{ 'terms-nudge': termsError }" style="display:flex;align-items:flex-start;gap:8px;font-size:0.78rem;color:#475569;margin:4px 0 12px;text-align:left;cursor:pointer;">
                                   <input type="checkbox" x-model="termsAgreed" @change="termsError = false" style="width:16px;height:16px;margin-top:1px;accent-color:#16325F;flex-shrink:0;">
@@ -7437,7 +7492,21 @@
                     </div>
                 </div>
                 
-                <section id="install-nudge-static" class="install-footer-box" x-show="isView('more') && moreSection === 'help'" x-cloak style="margin-top: 40px; text-align: left;">
+                <section id="app-store-nudge-static" class="install-footer-box" x-show="isView('more') && moreSection === 'help'" x-cloak style="margin-top: 40px; text-align: left;">
+                    <div class="nudge-icon" style="color: #0f172a; background: #e2e8f0;"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                    <div class="nudge-text">
+                        <h4>VCH Vitals for iPhone &amp; iPad</h4>
+                        <p>The native app is free on the App Store — offline breath counting, reminders, and faster charts. Records are kept separately from this browser, so export a backup first and import it into the app.</p>
+                    </div>
+                    <a :href="appStoreUrl('website-app')" target="_blank" rel="noopener" class="appstore-cta appstore-cta--sm"
+                       aria-label="Download VCH Vitals on the App Store">
+                                <img src="/images/app-store-badge.svg" alt="Download on the App Store" class="appstore-badge"
+                                     onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                <span class="appstore-fallback">Download on the App Store</span>
+                    </a>
+                </section>
+
+                <section id="install-nudge-static" class="install-footer-box" x-show="isView('more') && moreSection === 'help' && installPlatform !== 'ios'" x-cloak style="margin-top: 20px; text-align: left;">
                     <div class="nudge-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
                     <div class="nudge-text">
                         <h4>Save as a Pet App</h4>

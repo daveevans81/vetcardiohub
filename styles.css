@@ -5042,3 +5042,96 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 @media (max-width: 768px) {
     .banner-cta { position: static; display: flex; justify-content: center; margin: .75rem auto; width: fit-content; }
 } */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   App Store CTA — native iOS app (VCH Vitals)
+   The <img> is Apple's official "Download on the App Store" badge, which must not
+   be recreated or restyled. `.appstore-fallback` only appears if that asset is
+   missing, so the CTA is never a broken image.
+   ───────────────────────────────────────────────────────────────────────────── */
+.appstore-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;                /* Apple clear-space requirement around the badge */
+    border-radius: 10px;
+    text-decoration: none;
+    line-height: 0;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+}
+.appstore-cta:hover { opacity: 0.85; }
+
+/* Specificity note: a site-wide `.content img { height: auto }` rule sits above this,
+   so the badge sizing must be scoped through .appstore-cta to win. */
+.appstore-cta .appstore-badge {
+    height: 48px;                /* Apple's minimum for web is 40px */
+    width: auto;
+    display: block;
+}
+.appstore-cta.appstore-cta--sm .appstore-badge { height: 40px; }
+
+.appstore-fallback {
+    display: none;               /* flipped to inline-flex by the img onerror handler */
+    align-items: center;
+    gap: 8px;
+    background: #000;
+    color: #fff;
+    border-radius: 8px;
+    padding: 11px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.appstore-cta-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 2px;
+}
+
+.appstore-alt-link {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 0;
+    font-size: 0.78rem;
+    color: #64748b;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.appstore-alt-link:hover { color: #0ea5e9; }
+
+/* Badge row inside the dark hero header */
+.appstore-hero-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+.appstore-hero-row p {
+    margin: 0;
+    max-width: 340px;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: left;
+}
+@media (max-width: 600px) {
+    .appstore-hero-row { flex-direction: column; }
+    .appstore-hero-row p { text-align: center; }
+}
+
+/* Already running as an installed app — nothing to advertise */
+@media all and (display-mode: standalone) {
+    #app-store-nudge-static { display: none; }
+}
+@media print {
+    .appstore-hero-row, #app-store-nudge-static { display: none !important; }
+}

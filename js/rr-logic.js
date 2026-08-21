@@ -828,6 +828,7 @@ showInstallOverlay: false,
 installPlatform: 'other',      // 'ios' | 'android' | 'other'
 canNativeInstall: false,       // beforeinstallprompt captured (Android)
 isStandalone: false,
+showIosPwaSteps: false,        // iOS: reveal the secondary Add-to-Home-Screen route
 
 // --- Terms gate (hard, first-use, versioned) ---
 termsVersion: '2026-07-01',   // bump this string when terms materially change
@@ -1782,6 +1783,22 @@ get formularyReviewedLabel() {
     } catch (e) { return VCH_FORMULARY_REVIEWED; }
 },
 
+// Native iOS app on the App Store.
+// Campaign links are generated in App Store Connect -> App Analytics -> Campaigns;
+// `pt` is the provider token, `ct` is the free-text campaign name that downloads
+// are attributed to. No country code in the path so Apple routes each visitor to
+// their own storefront.
+appStoreUrl(campaign) {
+    const ct = encodeURIComponent(campaign || 'website-app');
+    return `https://apps.apple.com/app/apple-store/id6791313344?pt=129166263&ct=${ct}&mt=8`;
+},
+
+// localStorage flag for the auto-firing nudge. iOS uses its own key so owners who
+// dismissed the old Add-to-Home-Screen prompt are still told once about the App Store app.
+installPromptKey() {
+    return this.installPlatform === 'ios' ? 'vch_ios_app_prompt_seen' : 'vch_install_prompt_seen';
+},
+
 initInstallNudge() {
     this.isStandalone = window.matchMedia('(display-mode: standalone)').matches
         || window.navigator.standalone === true;
@@ -1794,10 +1811,14 @@ initInstallNudge() {
     window.addEventListener('vch-installable', () => { this.canNativeInstall = true; });
     window.addEventListener('appinstalled', () => { this.showInstallOverlay = false; });
 
-    // Auto-offer once: mobile browser tab, no patient data yet, not previously dismissed
+    // Auto-offer once: mobile browser tab, not previously dismissed.
+    // Android is still a home-screen install, so it keeps the "no data yet" gate — installing
+    // after data exists gains nothing there. iOS is a separate native app, so owners who already
+    // have records are told once too, and the overlay shows them the export/import route.
+    const isIos = this.installPlatform === 'ios';
     if (!this.isStandalone && this.installPlatform !== 'other'
-        && this.patients.length === 0
-        && !localStorage.getItem('vch_install_prompt_seen')) {
+        && (isIos || this.patients.length === 0)
+        && !localStorage.getItem(this.installPromptKey())) {
         setTimeout(() => { this.showInstallOverlay = true; }, 800);
     }
 },
@@ -1805,8 +1826,9 @@ iosIsSafari() {
     return this.installPlatform === 'ios' && !/CriOS|FxiOS|EdgiOS|OPT\//.test(navigator.userAgent);
 },
 dismissInstallOverlay() {
-    localStorage.setItem('vch_install_prompt_seen', '1');
+    localStorage.setItem(this.installPromptKey(), '1');
     this.showInstallOverlay = false;
+    this.showIosPwaSteps = false;
 },
 async triggerNativeInstall() {
     const p = window.vchDeferredInstall;
