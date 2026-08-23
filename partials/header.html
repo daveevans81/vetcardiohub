@@ -9,7 +9,13 @@
 </div>
 
 <div class="header-container" x-data="{ open: false }"> 
-    
+
+    <!-- Mobile only: the banner pill and the whole nav are hidden under 768px,
+         so without this a phone visitor sees no app CTA until they open the menu. -->
+    <a href="/app" class="header-app-cta" title="VCH Vitals — free on the App Store or in any browser">
+        <i class="fa-solid fa-heart-pulse"></i> Get the App
+    </a>
+
     <button class="menu-toggle" @click="open = !open">
         ☰
     </button>

@@ -5203,3 +5203,64 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
     .htp-actions .htp-btn-primary { justify-content: center; }
     .htp-secondary-links { flex-direction: column; align-items: flex-start; gap: 0; }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Mobile header app CTA
+   Under 768px the banner pill is display:none and `.nav-links-container` is
+   hidden until Alpine adds .is-open — so the red "Health Tracker" nav pill is
+   behind the hamburger too, leaving a phone visitor with no app CTA at all and
+   an empty teal strip beside the ☰. This fills that strip, and points at /app
+   so an iPhone visitor lands on the App Store rather than the browser version.
+   Desktop keeps the quiet banner pill and hides this one.
+   ───────────────────────────────────────────────────────────────────────────── */
+.header-app-cta { display: none; }
+
+@media (max-width: 768px) {
+    .header-app-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-left: 12px;
+        padding: 0.5rem 0.9rem;
+        background: #e63946;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.85rem;
+        line-height: 1;
+        white-space: nowrap;
+        border-radius: 999px;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .header-app-cta:hover,
+    .header-app-cta:focus { color: #fff; background: #cf2f3c; }
+
+    /* Very narrow phones: shrink rather than crowd the hamburger. */
+    @media (max-width: 340px) {
+        .header-app-cta { font-size: 0.78rem; padding: 0.45rem 0.7rem; }
+    }
+}
+
+/* Already running as an installed app — nothing to advertise. */
+@media all and (display-mode: standalone) {
+    .header-app-cta { display: none !important; }
+}
+@media print {
+    .header-app-cta { display: none !important; }
+}
+
+@media (max-width: 768px) {
+    /* The bar CTA above is the one loud pill on mobile. Inside the opened
+       hamburger menu the tracker link becomes a normal row (like Support,
+       which also carries an icon) rather than a second red pill stacked
+       directly under the first. Same selector as the base `.nav-item--cta a`
+       rule, so it wins on source order. */
+    .nav-item--cta a {
+        background: transparent;
+        color: #fff !important;
+        font-weight: 700;
+        border-radius: 0;
+        margin-top: 0;
+        padding: 10px 5px;
+    }
+}
