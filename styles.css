@@ -5135,3 +5135,71 @@ body{ padding-bottom:calc(var(--vch-bottomnav-h) + env(safe-area-inset-bottom));
 @media print {
     .appstore-hero-row, #app-store-nudge-static { display: none !important; }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Header CTA — quiet variant
+   With the app on the App Store as well as the web, the banner pill points at
+   /app (which routes by platform) rather than straight at the browser version.
+   It steps back visually so the red nav pill is the single loud CTA in the
+   header instead of the two competing red pills we had before.
+   Appended after `.banner-cta` / `.banner-cta:hover` so equal specificity wins.
+   ───────────────────────────────────────────────────────────────────────────── */
+.banner-cta--quiet {
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 0.5rem 1rem;
+    box-shadow: none;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+.banner-cta--quiet:hover {
+    background: rgba(255, 255, 255, 0.20);
+    border-color: #fff;
+    box-shadow: none;
+    transform: translateY(-1px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Homepage Vitals CTA — dual platform (App Store badge + browser version)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* The badge is 48px tall inside 6px of Apple-mandated clear space (60px total).
+   Match the browser button to that so the two CTAs read as one row rather than
+   a tall thing next to a short thing. */
+.htp-actions .htp-btn-primary {
+    box-sizing: border-box;
+    min-height: 60px;
+}
+
+/* `.indexscroll .htp-cta a { color: inherit }` sits above this and would drain
+   the fallback pill's white text, so restate it here. Only ever visible if the
+   badge SVG fails to load. */
+.indexscroll .htp-cta .appstore-fallback { color: #fff; }
+
+.htp-platform-note {
+    max-width: 580px;
+    margin: 16px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #9fb0cb;
+}
+
+.htp-secondary-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 24px;
+    margin-top: 2px;
+}
+
+@media (max-width: 700px) {
+    /* Stack the two CTAs full-width rather than letting the badge and the
+       button sit awkwardly side by side on a narrow screen. */
+    .htp-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+    .htp-actions .appstore-cta { justify-content: center; }
+    .htp-actions .htp-btn-primary { justify-content: center; }
+    .htp-secondary-links { flex-direction: column; align-items: flex-start; gap: 0; }
+}
