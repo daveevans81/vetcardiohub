@@ -937,6 +937,10 @@ footer a:hover {
 
 #home-search {
     width: 100%;
+    /* Without this the 25px padding and 2px border are added on top of the
+       100% width, overrunning the wrapper by 54px and pushing the box past
+       the right edge of a phone screen. */
+    box-sizing: border-box;
     padding: 18px 25px;
     border-radius: 50px;
     border: 2px solid #e2e8f0;

@@ -318,24 +318,7 @@
 
 <div id="site-footer"></div>
 
-<script>
-// Campaign attribution: /app?src=youtube tags the App Store link so downloads are
-// attributed in App Store Connect. Whitelisted so a stray parameter cannot inject
-// arbitrary campaign names into the analytics.
-(function () {
-    var ALLOWED = ['youtube', 'clinic', 'email', 'social', 'qr', 'instagram', 'app-page'];
-    var src = new URLSearchParams(location.search).get('src');
-    var ct  = ALLOWED.indexOf(src) !== -1 ? src : 'app-page';
-    var url = 'https://apps.apple.com/app/apple-store/id6791313344?pt=129166263&ct=' + ct + '&mt=8';
-    document.querySelectorAll('[data-appstore]').forEach(function (a) { a.href = url; });
-
-    // On Android, lead with the browser version rather than an app they cannot install.
-    if (/Android/.test(navigator.userAgent)) {
-        var note = document.querySelector('[data-platform-note]');
-        if (note) note.textContent = 'There is no Android app yet — tap "Or use it in your browser", then use your browser menu to add it to your home screen.';
-    }
-})();
-</script>
+<script src="/js/app-cta.js" data-default-campaign="app-page" defer></script>
 <script src="/js/load-partials.js"></script>
 </body>
 </html>
