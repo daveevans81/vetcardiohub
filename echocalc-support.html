@@ -17,6 +17,34 @@
 <meta name="apple-mobile-web-app-title" content="VCH EchoCalc" />
 <link rel="manifest" href="/site.webmanifest" />
 
+<!-- Native iOS app: Apple Smart App Banner. On a support page this earns its place —
+     for a visitor who already has the app it shows OPEN rather than an install prompt. -->
+<meta name="apple-itunes-app" content="app-id=6800325282, affiliate-data=pt=129166263&amp;ct=echocalc-support, app-argument=https://vetcardiohub.com/echocalc-support.html">
+
+<style>
+/* Get-the-app row. Kept in this page rather than styles.css, which is shared and
+   changes often. .appstore-cta / .appstore-badge / .appstore-fallback come from styles.css. */
+.support-app-row {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    margin-top: 4px;
+}
+.support-web-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 18px; border-radius: 8px;
+    border: 1px solid #cbd5e1; background: #fff; color: #16325F;
+    text-decoration: none; font-weight: 600; font-size: 0.92rem;
+    transition: border-color 0.2s, background 0.2s;
+}
+.support-web-link:hover { border-color: #16325F; background: #f8fafc; }
+.support-share-line {
+    margin-top: 14px; font-size: 0.88rem; color: #475569;
+}
+.support-share-line code {
+    background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 5px;
+    padding: 2px 7px; font-size: 0.9em; color: #16325F;
+}
+@media print { #get-the-app-section { display: none !important; } }
+</style>
 
 </head>
 
@@ -270,6 +298,31 @@
             </section>
 
 
+            <!-- GET THE APP — deliberately last. The contact details are required to be
+                 the first thing on this page, so nothing promotional goes above them. -->
+            <section class="card" id="get-the-app-section" style="text-align: left;">
+                <h2 id="get-the-app">Get VCH EchoCalc</h2>
+                <p>If you have reached this page without the app, or want it on a second device, it is free on the App Store and works offline once installed. The web calculator runs the same models in any browser, which is often the easier option at a desk.</p>
+
+                <div class="support-app-row">
+                    <a href="https://apps.apple.com/app/apple-store/id6800325282?pt=129166263&amp;ct=echocalc-support&amp;mt=8"
+                       class="appstore-cta" data-appstore
+                       aria-label="Download VCH EchoCalc on the App Store">
+                        <img src="/images/app-store-badge.svg" alt="Download on the App Store" class="appstore-badge"
+                             onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                        <span class="appstore-fallback">Download on the App Store</span>
+                    </a>
+
+                    <!-- No icon: this page does not load FontAwesome, unlike the rest of the site. -->
+                    <a href="/echocalc.html" class="support-web-link">Open the web calculator</a>
+                </div>
+
+                <p class="support-share-line">
+                    Passing it on to a colleague? <code>vetcardiohub.com/echo-app</code> covers both the app and the web version.
+                </p>
+            </section>
+
+
             <!-- DISCLAIMER / LINKS — always visible -->
             <section class="card" style="text-align: left;">
                 <h2 id="important">Important — clinical disclaimer</h2>
@@ -284,6 +337,12 @@
 
 <div id="site-footer"></div>
 
+<script src="/js/app-cta.js"
+        data-app-id="6800325282"
+        data-default-campaign="echocalc-support"
+        data-banner-cta="Get the EchoCalc App"
+        data-banner-cta-icon="fa-solid fa-wave-square"
+        defer></script>
 <script src="/js/load-partials.js"></script>
 </body>
 </html>
