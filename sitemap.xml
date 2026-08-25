@@ -201,8 +201,13 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://vetcardiohub.com/echo-app</loc>
+    <lastmod>2026-08-25</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://vetcardiohub.com/echocalc</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
