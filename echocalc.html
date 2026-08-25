@@ -41,6 +41,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="VetCardioHub EchoCalc">
 
+<!-- Native iOS app: Apple Smart App Banner (Safari on iOS only; auto-hides once installed).
+     Note the app id differs from VCH Vitals; the provider token is shared. -->
+<meta name="apple-itunes-app" content="app-id=6800325282, affiliate-data=pt=129166263&amp;ct=echocalc-web, app-argument=https://vetcardiohub.com/echocalc.html">
+
 <link rel="canonical" href="https://vetcardiohub.com/echocalc.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 
@@ -162,6 +166,46 @@
 </script>
 
 <style type="text/css">
+/* ── EchoCalc app CTA ────────────────────────────────────────────────────────
+   Deliberately an inline banner and NOT a modal. This page earns organic search
+   traffic from vets, and an app-install interstitial covering the content on
+   mobile is precisely what Google's page-experience guidance treats as an
+   intrusive interstitial. A modest inline banner and Apple's own Smart App
+   Banner are the sanctioned alternatives.
+   The .appstore-cta / .appstore-badge / .appstore-fallback classes come from
+   the shared styles.css. */
+.echo-app-cta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 0 0 18px;
+    padding: 14px 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #16325F;
+    border-radius: 10px;
+}
+/* The site stylesheet centres body text; this banner reads better ranged left. */
+.echo-app-cta__text { flex: 1 1 300px; min-width: 0; text-align: left; }
+.echo-app-cta__title {
+    margin: 0 0 3px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #16325F;
+}
+.echo-app-cta__body {
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: #475569;
+}
+@media (max-width: 560px) {
+    .echo-app-cta { gap: 12px; }
+    .echo-app-cta__text { flex-basis: 100%; }
+}
+
 @media print {
     /* 1. Global Reset - Ensures padding doesn't push width over 100% */
     * {
@@ -174,7 +218,8 @@
     #site-header, #site-footer, .hero, .input-group, .measurements,
     .export-actions, #breed-selector, .placeholder-text,
     button, nav, aside, .app-branding, .small, .smart-paste-box,
-    .install-footer-box, #allometric-card, .Lead, .btn-text {
+    .install-footer-box, #allometric-card, .Lead, .btn-text,
+    .echo-app-cta {
         display: none !important;
     }
 
@@ -268,6 +313,20 @@
           <h1>Echo Calculator</h1>
           <p class="lead">Enter your echo measurements here to calculate normalised values and see reference ranges.</p>
         </header>
+
+        <aside class="echo-app-cta">
+          <div class="echo-app-cta__text">
+            <p class="echo-app-cta__title">EchoCalc on iPhone and iPad</p>
+            <p class="echo-app-cta__body">The same allometric models and reference intervals, working offline at the scanner. Free, and nothing leaves your device.</p>
+          </div>
+          <a href="https://apps.apple.com/app/apple-store/id6800325282?pt=129166263&amp;ct=echocalc-web&amp;mt=8"
+             class="appstore-cta appstore-cta--sm" data-appstore
+             aria-label="Download VCH EchoCalc on the App Store">
+            <img src="/images/app-store-badge.svg" alt="Download on the App Store" class="appstore-badge"
+                 onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+            <span class="appstore-fallback">Download on the App Store</span>
+          </a>
+        </aside>
 
         <!-- 2. TWO-COLUMN RESPONSIVE VIEWPORT GRID -->
         <div class="grid">
@@ -2419,6 +2478,12 @@
 
   <div id="site-footer"></div>
 
+  <script src="/js/app-cta.js"
+          data-app-id="6800325282"
+          data-default-campaign="echocalc-web"
+          data-banner-cta="Get the EchoCalc App"
+          data-banner-cta-icon="fa-solid fa-wave-square"
+          defer></script>
   <script src="/js/load-partials.js"></script>
 </body>
 </html>

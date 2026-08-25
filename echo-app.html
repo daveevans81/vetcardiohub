@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="/js/global-head.js" defer></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VCH EchoCalc for iPhone &amp; iPad | Veterinary Echo Calculator | VetCardioHub</title>
+    <meta name="description" content="VCH EchoCalc is a free veterinary echocardiography calculator for iPhone and iPad. Allometric scaling, breed-specific reference intervals, MINE scoring and diastolic grading. Works offline; nothing leaves the device.">
+    <link rel="canonical" href="https://vetcardiohub.com/echo-app">
+
+    <meta property="og:title" content="VCH EchoCalc for iPhone &amp; iPad">
+    <meta property="og:description" content="Free veterinary echo calculator. Allometric scaling, breed normals, MINE scoring and diastolic grading, offline at the scanner.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vetcardiohub.com/echo-app">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="VCH EchoCalc for iPhone &amp; iPad">
+    <meta name="twitter:description" content="Free veterinary echo calculator. Allometric scaling, breed normals, MINE scoring and diastolic grading, offline at the scanner.">
+
+    <!-- Native iOS app: Apple Smart App Banner (Safari on iOS only; auto-hides once installed) -->
+    <meta name="apple-itunes-app" content="app-id=6800325282, affiliate-data=pt=129166263&amp;ct=echo-app, app-argument=https://vetcardiohub.com/echo-app">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "VCH EchoCalc",
+  "operatingSystem": "iOS 17.0 or later",
+  "applicationCategory": "MedicalApplication",
+  "description": "Veterinary echocardiography calculator. Allometric scaling against published reference intervals, breed-specific normals, MINE prognostic scoring, Qp:Qs and diastolic function grading.",
+  "url": "https://vetcardiohub.com/echo-app",
+  "installUrl": "https://apps.apple.com/app/id6800325282",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+  "audience": { "@type": "MedicalAudience", "audienceType": "Veterinary Professionals" },
+  "publisher": { "@type": "Organization", "name": "VetCardioHub", "url": "https://vetcardiohub.com" }
+}
+</script>
+
+<style>
+/* ── /echo-app ─────────────────────────────────────────────────────────────
+   A short share page for a professional audience. Deliberately terse: a vet
+   sent this link by a colleague wants to know what it is and install it, not
+   read a pitch. */
+.eca { max-width: 860px; margin: 0 auto; padding: 0 20px 72px; text-align: left; }
+
+.eca-hero {
+    background: linear-gradient(160deg, #16325F 0%, #1e3a6f 60%, #24528f 100%);
+    color: #fff; border-radius: 16px;
+    padding: 40px 32px; margin: 32px 0 40px; text-align: center;
+}
+.eca-hero h1 { color: #fff; font-size: 2rem; margin: 0 0 10px; line-height: 1.2; }
+.eca-lede {
+    max-width: 620px; margin: 0 auto 22px;
+    font-size: 1rem; line-height: 1.6; color: rgba(255,255,255,0.82);
+}
+.eca-tag {
+    display: inline-block; margin-bottom: 18px; padding: 4px 12px;
+    background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 99px; font-size: 0.74rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+}
+.eca-cta-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; flex-wrap: wrap;
+}
+.eca-web-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 22px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.4); color: #fff;
+    text-decoration: none; font-weight: 600; font-size: 0.95rem;
+    transition: background 0.2s;
+}
+.eca-web-link:hover { background: rgba(255,255,255,0.12); }
+.eca-note { margin: 18px 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.62); }
+
+.eca-list { list-style: none; margin: 0 0 40px; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 14px 28px; }
+.eca-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 0.9rem; line-height: 1.55; color: #334155; text-align: left;
+}
+.eca-list i { color: #0ea5e9; margin-top: 3px; flex-shrink: 0; width: 18px; }
+.eca-list strong { color: #16325F; }
+
+.eca-share {
+    display: flex; gap: 26px; align-items: center; flex-wrap: wrap;
+    border: 1px solid #e2e8f0; border-radius: 12px;
+    background: #f8fafc; padding: 24px; margin-bottom: 36px;
+}
+.eca-qr-frame { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; flex-shrink: 0; }
+.eca-qr { display: block; width: 150px; height: 150px; }
+.eca-share-text { flex: 1 1 260px; text-align: left; }
+.eca-share-text h2 { margin: 0 0 6px; font-size: 1.15rem; color: #16325F; text-align: left; }
+.eca-share-text p { margin: 0 0 12px; font-size: 0.88rem; line-height: 1.6; color: #475569; text-align: left; }
+.eca-url {
+    display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.92rem; background: #fff; border: 1px solid #cbd5e1;
+    border-radius: 6px; padding: 8px 12px; color: #16325F;
+}
+
+.eca-foot {
+    border-top: 1px solid #e2e8f0; padding-top: 22px;
+    font-size: 0.84rem; line-height: 1.6; color: #64748b; text-align: left;
+}
+
+@media (max-width: 620px) {
+    .eca-hero { padding: 30px 20px; margin: 20px 0 30px; }
+    .eca-hero h1 { font-size: 1.6rem; }
+    .eca-share { flex-direction: column; text-align: center; }
+    .eca-share-text, .eca-share-text h2, .eca-share-text p { text-align: center; }
+}
+
+@media print {
+    #site-header, #site-footer, .eca-web-link, .eca-note { display: none !important; }
+    .eca-hero { background: none !important; color: #000 !important; border: 2px solid #000; border-radius: 0; }
+    .eca-hero h1, .eca-lede { color: #000 !important; }
+    .eca-tag { background: none; color: #000; border-color: #000; }
+    .eca-share { page-break-inside: avoid; background: none; }
+    .eca-qr { width: 210px; height: 210px; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="eca">
+
+    <section class="eca-hero">
+        <span class="eca-tag">Free · No account · Offline</span>
+        <h1>VCH EchoCalc for iPhone &amp; iPad</h1>
+        <p class="eca-lede">
+            Enter a study, get every scaled index against its published reference interval.
+            Built for use at the scanner, where the measurements are taken.
+        </p>
+
+        <div class="eca-cta-row">
+            <a href="https://apps.apple.com/app/apple-store/id6800325282?pt=129166263&amp;ct=echo-app&amp;mt=8"
+               class="appstore-cta" data-appstore
+               aria-label="Download VCH EchoCalc on the App Store">
+                <img src="/images/app-store-badge.svg" alt="Download on the App Store" class="appstore-badge"
+                     onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                <span class="appstore-fallback">Download on the App Store</span>
+            </a>
+
+            <a href="/echocalc.html" class="eca-web-link">
+                <i class="fa-solid fa-calculator"></i> Or use the web calculator
+            </a>
+        </div>
+
+        <p class="eca-note" data-platform-note>Requires iOS 17 or later. On Android or desktop, the web calculator has the same reference models.</p>
+    </section>
+
+    <ul class="eca-list">
+        <li><i class="fa-solid fa-ruler-combined"></i><span><strong>Allometric scaling.</strong> Normalised dimensions against published reference intervals, with the model stated rather than assumed.</span></li>
+        <li><i class="fa-solid fa-dog"></i><span><strong>Breed-specific normals.</strong> Where breed data exist, they are used in preference to a generic canine model.</span></li>
+        <li><i class="fa-solid fa-chart-line"></i><span><strong>MINE prognostic score.</strong> Derived and validated against survival in a published MMVD cohort.</span></li>
+        <li><i class="fa-solid fa-wave-square"></i><span><strong>Diastolic grading and Qp:Qs.</strong> With the interpretive caveats shown alongside the grade, not buried.</span></li>
+        <li><i class="fa-solid fa-wifi"></i><span><strong>Works offline.</strong> No connection needed in the echo room, and nothing leaves the device.</span></li>
+        <li><i class="fa-solid fa-user-doctor"></i><span><strong>Written for clinicians.</strong> Citations and reference sources are shown, so you can check the basis of any number.</span></li>
+    </ul>
+
+    <section class="eca-share">
+        <div class="eca-qr-frame">
+            <svg class="eca-qr" viewBox="0 0 328 328" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="QR code linking to vetcardiohub.com/echo-app"><rect width="328" height="328" fill="#ffffff"/><path fill="#0f172a" d="M32 32h56v8h-56zM128 32h8v8h-8zM144 32h16v8h-16zM176 32h8v8h-8zM208 32h16v8h-16zM240 32h56v8h-56zM32 40h8v8h-8zM80 40h8v8h-8zM128 40h8v8h-8zM152 40h8v8h-8zM176 40h24v8h-24zM240 40h8v8h-8zM288 40h8v8h-8zM32 48h8v8h-8zM48 48h24v8h-24zM80 48h8v8h-8zM96 48h8v8h-8zM112 48h8v8h-8zM128 48h16v8h-16zM168 48h40v8h-40zM216 48h8v8h-8zM240 48h8v8h-8zM256 48h24v8h-24zM288 48h8v8h-8zM32 56h8v8h-8zM48 56h24v8h-24zM80 56h8v8h-8zM112 56h16v8h-16zM144 56h32v8h-32zM184 56h8v8h-8zM200 56h24v8h-24zM240 56h8v8h-8zM256 56h24v8h-24zM288 56h8v8h-8zM32 64h8v8h-8zM48 64h24v8h-24zM80 64h8v8h-8zM96 64h8v8h-8zM112 64h8v8h-8zM144 64h8v8h-8zM184 64h8v8h-8zM208 64h8v8h-8zM240 64h8v8h-8zM256 64h24v8h-24zM288 64h8v8h-8zM32 72h8v8h-8zM80 72h8v8h-8zM96 72h16v8h-16zM120 72h8v8h-8zM144 72h16v8h-16zM168 72h16v8h-16zM192 72h16v8h-16zM216 72h16v8h-16zM240 72h8v8h-8zM288 72h8v8h-8zM32 80h56v8h-56zM96 80h8v8h-8zM112 80h8v8h-8zM128 80h8v8h-8zM144 80h8v8h-8zM160 80h8v8h-8zM176 80h8v8h-8zM192 80h8v8h-8zM208 80h8v8h-8zM224 80h8v8h-8zM240 80h56v8h-56zM104 88h8v8h-8zM136 88h8v8h-8zM152 88h64v8h-64zM224 88h8v8h-8zM40 96h8v8h-8zM64 96h8v8h-8zM80 96h8v8h-8zM96 96h8v8h-8zM112 96h32v8h-32zM152 96h24v8h-24zM192 96h48v8h-48zM248 96h16v8h-16zM272 96h8v8h-8zM40 104h16v8h-16zM64 104h8v8h-8zM104 104h8v8h-8zM120 104h16v8h-16zM144 104h16v8h-16zM168 104h16v8h-16zM192 104h16v8h-16zM216 104h8v8h-8zM232 104h8v8h-8zM264 104h24v8h-24zM40 112h32v8h-32zM80 112h24v8h-24zM112 112h8v8h-8zM128 112h8v8h-8zM144 112h8v8h-8zM160 112h8v8h-8zM176 112h8v8h-8zM216 112h16v8h-16zM264 112h8v8h-8zM280 112h8v8h-8zM32 120h24v8h-24zM72 120h8v8h-8zM104 120h8v8h-8zM128 120h8v8h-8zM184 120h8v8h-8zM208 120h8v8h-8zM232 120h8v8h-8zM280 120h16v8h-16zM40 128h8v8h-8zM64 128h8v8h-8zM80 128h16v8h-16zM112 128h16v8h-16zM136 128h8v8h-8zM152 128h16v8h-16zM184 128h8v8h-8zM208 128h8v8h-8zM240 128h8v8h-8zM256 128h16v8h-16zM32 136h8v8h-8zM48 136h16v8h-16zM96 136h8v8h-8zM120 136h8v8h-8zM152 136h8v8h-8zM168 136h32v8h-32zM224 136h8v8h-8zM248 136h8v8h-8zM264 136h16v8h-16zM56 144h8v8h-8zM80 144h8v8h-8zM104 144h24v8h-24zM136 144h16v8h-16zM160 144h8v8h-8zM192 144h16v8h-16zM216 144h32v8h-32zM256 144h8v8h-8zM280 144h8v8h-8zM32 152h8v8h-8zM112 152h24v8h-24zM168 152h8v8h-8zM200 152h24v8h-24zM232 152h16v8h-16zM32 160h16v8h-16zM56 160h8v8h-8zM80 160h8v8h-8zM104 160h8v8h-8zM128 160h16v8h-16zM168 160h48v8h-48zM224 160h8v8h-8zM240 160h8v8h-8zM256 160h8v8h-8zM280 160h8v8h-8zM40 168h16v8h-16zM72 168h8v8h-8zM88 168h8v8h-8zM112 168h16v8h-16zM136 168h16v8h-16zM160 168h24v8h-24zM216 168h8v8h-8zM264 168h24v8h-24zM80 176h32v8h-32zM128 176h8v8h-8zM152 176h8v8h-8zM168 176h16v8h-16zM192 176h32v8h-32zM248 176h8v8h-8zM264 176h8v8h-8zM32 184h8v8h-8zM48 184h8v8h-8zM96 184h8v8h-8zM120 184h8v8h-8zM136 184h16v8h-16zM160 184h16v8h-16zM192 184h16v8h-16zM216 184h16v8h-16zM248 184h8v8h-8zM280 184h8v8h-8zM32 192h16v8h-16zM56 192h16v8h-16zM80 192h8v8h-8zM96 192h24v8h-24zM144 192h8v8h-8zM168 192h32v8h-32zM224 192h8v8h-8zM240 192h8v8h-8zM256 192h16v8h-16zM32 200h8v8h-8zM64 200h8v8h-8zM96 200h24v8h-24zM144 200h32v8h-32zM184 200h8v8h-8zM200 200h16v8h-16zM272 200h16v8h-16zM56 208h16v8h-16zM80 208h8v8h-8zM120 208h8v8h-8zM144 208h8v8h-8zM168 208h8v8h-8zM184 208h8v8h-8zM200 208h16v8h-16zM232 208h8v8h-8zM272 208h16v8h-16zM72 216h8v8h-8zM104 216h8v8h-8zM120 216h16v8h-16zM144 216h8v8h-8zM160 216h8v8h-8zM184 216h24v8h-24zM224 216h8v8h-8zM240 216h8v8h-8zM280 216h8v8h-8zM32 224h16v8h-16zM56 224h32v8h-32zM96 224h8v8h-8zM120 224h16v8h-16zM144 224h16v8h-16zM200 224h64v8h-64zM280 224h16v8h-16zM96 232h8v8h-8zM112 232h8v8h-8zM152 232h8v8h-8zM168 232h16v8h-16zM200 232h8v8h-8zM216 232h16v8h-16zM256 232h8v8h-8zM272 232h16v8h-16zM32 240h56v8h-56zM104 240h8v8h-8zM136 240h24v8h-24zM176 240h8v8h-8zM224 240h8v8h-8zM240 240h8v8h-8zM256 240h16v8h-16zM280 240h8v8h-8zM32 248h8v8h-8zM80 248h8v8h-8zM112 248h40v8h-40zM160 248h8v8h-8zM176 248h8v8h-8zM208 248h8v8h-8zM224 248h8v8h-8zM256 248h8v8h-8zM280 248h16v8h-16zM32 256h8v8h-8zM48 256h24v8h-24zM80 256h8v8h-8zM96 256h16v8h-16zM128 256h24v8h-24zM160 256h8v8h-8zM208 256h8v8h-8zM224 256h48v8h-48zM32 264h8v8h-8zM48 264h24v8h-24zM80 264h8v8h-8zM112 264h8v8h-8zM168 264h40v8h-40zM216 264h16v8h-16zM240 264h24v8h-24zM280 264h8v8h-8zM32 272h8v8h-8zM48 272h24v8h-24zM80 272h8v8h-8zM104 272h8v8h-8zM128 272h24v8h-24zM160 272h24v8h-24zM192 272h8v8h-8zM240 272h32v8h-32zM32 280h8v8h-8zM80 280h8v8h-8zM96 280h16v8h-16zM120 280h8v8h-8zM136 280h8v8h-8zM160 280h8v8h-8zM176 280h8v8h-8zM200 280h8v8h-8zM216 280h8v8h-8zM32 288h56v8h-56zM104 288h8v8h-8zM144 288h8v8h-8zM184 288h32v8h-32zM224 288h24v8h-24zM288 288h8v8h-8z"/></svg>
+        </div>
+        <div class="eca-share-text">
+            <h2>Share it with a colleague</h2>
+            <p>
+                One short link for both the app and the web calculator. Scan it from a slide,
+                or send the address on.
+            </p>
+            <span class="eca-url">vetcardiohub.com/echo-app</span>
+        </div>
+    </section>
+
+    <p class="eca-foot">
+        VCH EchoCalc is a calculation and reference aid for qualified veterinary professionals.
+        It does not make a diagnosis, and every result should be read alongside the clinical picture
+        and the quality of the images the measurements came from. Questions or corrections are
+        welcome at <a href="mailto:info@vetcardiohub.com">info@vetcardiohub.com</a>.
+    </p>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/app-cta.js"
+        data-app-id="6800325282"
+        data-default-campaign="echo-app"
+        data-banner-cta="Get the EchoCalc App"
+        data-banner-cta-icon="fa-solid fa-wave-square"
+        defer></script>
+<script src="/js/load-partials.js"></script>
+</body>
+</html>
