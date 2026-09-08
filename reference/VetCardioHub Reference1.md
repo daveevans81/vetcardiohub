@@ -4,7 +4,7 @@
 
 ### 1.1 Mission Statement
 
-VetCardioHub is a specialized veterinary cardiology education platform dedicated to providing evidence-based information to pet owners and veterinary professionals worldwide. Founded and operated by Dr. Dave Evans, a board-certified veterinary cardiologist with over 20 years of clinical experience, our mission is to bridge the knowledge gap in veterinary cardiology through accessible, accurate, and comprehensive content.
+VetCardioHub is a specialized veterinary cardiology education platform dedicated to providing evidence-based information to pet owners and veterinary professionals worldwide. Founded and operated by Dr. Dave Evans (MA VetMB PgC(SADI) PgC(SAC) MRCVS), a veterinary cardiologist with over 20 years of clinical experience, our mission is to bridge the knowledge gap in veterinary cardiology through accessible, accurate, and comprehensive content.
 
 ### 1.2 Target Audiences
 
