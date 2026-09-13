@@ -429,6 +429,9 @@ for (const [key, model] of Object.entries(data.mineModels)) {
   }
   mineModels[key] = {
     label: model.label,
+    // The paper each score was derived in. Optional in the JS; null here means the panel says so.
+    reference: model.reference !== undefined ? String(model.reference) : null,
+    pmid: model.pmid !== undefined ? String(model.pmid) : null,
     variables: model.variables.slice(),
     ranges,
     tiers: model.tiers.map((t) => ({

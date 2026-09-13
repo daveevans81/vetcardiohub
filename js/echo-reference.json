@@ -5,7 +5,7 @@
   "note": "GENERATED FILE — do not edit by hand. Regenerate from echo-breeds.js.",
   "infinityEncoding": "A null `max` in mineModels.ranges / diastolicRules means +Infinity."
  },
- "reviewedDate": "2026-08-13",
+ "reviewedDate": "2026-09-13",
  "allometricModels": {
   "cornell_standard": {
    "breed": null,
@@ -1268,6 +1268,7 @@
  "mineModels": {
   "mine_1": {
    "label": "MINE 1 (Vezzosi 2021 - 4 Parameter)",
+   "pmid": "33951235",
    "ranges": {
     "eVel": [
      {
@@ -1334,6 +1335,7 @@
      }
     ]
    },
+   "reference": "Vezzosi et al. (2021) The Mitral INsufficiency Echocardiographic score: a severity classification of myxomatous mitral valve disease in dogs. J Vet Intern Med.",
    "tiers": [
     {
      "label": "Mild Severity",
@@ -1373,6 +1375,7 @@
   },
   "mine_2": {
    "label": "MINE 2 (Vezzosi 2025 - 3 Parameter Simplified)",
+   "pmid": "40865020",
    "ranges": {
     "eVel": [
      {
@@ -1425,6 +1428,7 @@
      }
     ]
    },
+   "reference": "Vezzosi et al. (2025) Risk stratification using Mitral INsufficiency Echocardiographic score 2 in dogs with preclinical mitral valve disease. J Vet Intern Med.",
    "tiers": [
     {
      "label": "Mild Risk / Lower Progression",
@@ -1961,7 +1965,7 @@
    "isDeviant": false,
    "isFeline": false,
    "isKitten": false,
-   "isSighthound": false,
+   "isSighthound": true,
    "isToy": false,
    "name": "Borzoi",
    "sources": [

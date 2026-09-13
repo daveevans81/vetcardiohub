@@ -29,7 +29,8 @@ const EVIDENCE_GRADES = {
 const EVIDENCE = {
     epic: {
         grade: 'validated',
-        citation: 'EPIC trial entry criteria (Boswood et al., 2016).',
+        citation: 'EPIC trial entry criteria (Boswood et al., 2016). J Vet Intern Med.',
+        pmid: '27678080',
         caveat: null
     },
     mine: {
@@ -40,12 +41,14 @@ const EVIDENCE = {
     },
     chang: {
         grade: 'validated',
-        citation: 'Chang et al. (2026) predictive score.',
+        citation: 'Chang et al. (2026) composite echocardiographic score for predicting pulmonary hypertension severity in dogs. J Vet Intern Med.',
+        pmid: '41742574',
         caveat: null
     },
     pulmonaryHypertension: {
         grade: 'interpretive',
-        citation: 'Thresholds from the ACVIM (2020) pulmonary hypertension consensus statement.',
+        citation: 'Thresholds from the ACVIM (2020) pulmonary hypertension consensus statement (Reinero et al.). J Vet Intern Med.',
+        pmid: '32065428',
         caveat: 'The consensus supplies the threshold values and the anatomic-site framework. The '
             + 'way this tool weights and combines them into a single probability is an '
             + 'interpretation of that guidance, not a validated scoring system, and has not been '
@@ -54,7 +57,8 @@ const EVIDENCE = {
     },
     diastolic: {
         grade: 'interpretive',
-        citation: 'Bands from published canine reference intervals; TR aligned to the ACVIM (2020) consensus.',
+        citation: 'Not experimentally validated. Bands from published canine reference intervals; TR aligned to the ACVIM (2020) consensus; the grading scheme was devised for this tool.',
+        pmid: null,
         caveat: 'No validated diastolic grading scheme has been published for the dog. The '
             + 'individual bands are drawn from published reference intervals, but the points-based '
             + 'scheme that combines them into a single grade was devised for this tool and has not '
@@ -227,8 +231,11 @@ sessionScore: { correct: 0, review: 0 },
       return parseFloat(((parseFloat(this.eVel) * 100) / parseFloat(this.ivrt)).toFixed(2));
     },
     get vtir() {
-        if (!this.lvotvti || !this.rvotvti || parseFloat(this.rvotvti) === 0) return 0;
-        return (this.lvotvti / this.rvotvti).toFixed(2);
+        // Pulmonary : systemic, as the label "VTI Ratio P:S" and the glossary say, so a
+        // left-to-right shunt reads HIGH. Was lvotvti / rvotvti (systemic : pulmonary) until
+        // 2026-09-13, which flagged the wrong side.
+        if (!this.lvotvti || !this.rvotvti || parseFloat(this.lvotvti) === 0) return 0;
+        return (this.rvotvti / this.lvotvti).toFixed(2);
     },
     get qp() {
         if (!this.rvotvti || !this.rvotd || parseFloat(this.rvotvti) === 0) return 0;

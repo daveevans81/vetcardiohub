@@ -3,7 +3,7 @@
 // regenerate Resources/echo-reference.json (Tools/generate-echo-reference-json.js).
 // The iOS app adopts a fetched reference set only when this date is NEWER than the
 // copy it already holds. Same mechanism as glossary-data.js VET_GLOSSARY_REVIEWED.
-const VCH_ECHO_REF_REVIEWED = "2026-08-13";
+const VCH_ECHO_REF_REVIEWED = "2026-09-13";
 
     const breedSpecificReferenceRanges = {
   "Afghan Hound": {
@@ -61,6 +61,9 @@ const VCH_ECHO_REF_REVIEWED = "2026-08-13";
   },
   "Borzoi": {
     "is_deviant": false,
+    // Sighthound (2026-09-13): selecting Borzoi now auto-switches to the Stepien sighthound model
+    // and the Wess sighthound volumetric table, as Afghan Hound, Saluki and Whippet already did.
+    "isSighthound": true,
     "sources": [
       {
         "pmid": "38154250", 
@@ -681,6 +684,8 @@ params: {
 const mineModels = {
     mine_1: {
         label: "MINE 1 (Vezzosi 2021 - 4 Parameter)",
+        reference: "Vezzosi et al. (2021) The Mitral INsufficiency Echocardiographic score: a severity classification of myxomatous mitral valve disease in dogs. J Vet Intern Med.",
+        pmid: "33951235",
         variables: ['laAo', 'lviddn', 'fs', 'eVel'],
         ranges: {
             laAo: [ { max: 1.7, pts: 1 }, { max: 1.9, pts: 2 }, { max: 2.5, pts: 3 }, { max: Infinity, pts: 4 } ],
@@ -697,6 +702,8 @@ const mineModels = {
     },
     mine_2: {
         label: "MINE 2 (Vezzosi 2025 - 3 Parameter Simplified)",
+        reference: "Vezzosi et al. (2025) Risk stratification using Mitral INsufficiency Echocardiographic score 2 in dogs with preclinical mitral valve disease. J Vet Intern Med.",
+        pmid: "40865020",
         variables: ['laAo', 'lviddn', 'eVel'],
         ranges: {
             laAo: [ { max: 1.7, pts: 1 }, { max: 1.9, pts: 2 }, { max: 2.5, pts: 3 }, { max: Infinity, pts: 4 } ],
