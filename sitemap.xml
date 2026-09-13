@@ -27,7 +27,12 @@
   </url>
   <url>
     <loc>https://vetcardiohub.com/blog-posts/post1</loc>
-    <lastmod>2026-05-04</lastmod>
+    <lastmod>2026-09-09</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/blog-posts/post1-old</loc>
+    <lastmod>2026-09-09</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -82,7 +87,12 @@
   </url>
   <url>
     <loc>https://vetcardiohub.com/blog-posts/post2</loc>
-    <lastmod>2026-05-04</lastmod>
+    <lastmod>2026-09-09</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/blog-posts/post2-old</loc>
+    <lastmod>2026-09-09</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -102,7 +112,12 @@
   </url>
   <url>
     <loc>https://vetcardiohub.com/blog-posts/post23</loc>
-    <lastmod>2026-06-05</lastmod>
+    <lastmod>2026-09-09</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/blog-posts/post23-old</loc>
+    <lastmod>2026-09-09</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -147,7 +162,12 @@
   </url>
   <url>
     <loc>https://vetcardiohub.com/blog-posts/post4</loc>
-    <lastmod>2026-05-04</lastmod>
+    <lastmod>2026-09-09</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vetcardiohub.com/blog-posts/post4-old</loc>
+    <lastmod>2026-09-09</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
