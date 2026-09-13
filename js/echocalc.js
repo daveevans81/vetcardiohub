@@ -1566,7 +1566,7 @@ if (this.ivrt > 0) {
     text += `IVRT: ${this.ivrt} ms (Ref: 50-80)\n`;
 }
 if (this.mdt > 0) {
-    text += `E wave DT: ${this.mdt} m/s (Ref: 60-100)\n`;
+    text += `E wave DT: ${this.mdt} ms (Ref: 60-100)\n`; // was 'm/s' until 2026-09-13; a time, not a velocity
 }
 if (this.ear > 0) {
     text += `E:A Ratio: ${this.ear} (Ref: 0.95-1.6)${this.ear >= 1.6 ? ' [HIGH FILLING PRESSURE]' : ''}\n`;
