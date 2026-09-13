@@ -1925,14 +1925,22 @@ for (const line of lines.slice(0, 5)) { // Only scan the first 5 lines of the re
                 if (pattern.test(trimmedLine)) {
                     const matchObj = trimmedLine.match(pattern);
                     if (matchObj) {
-                        const labelSegment = trimmedLine.substring(0, trimmedLine.indexOf(matchObj[0]) + matchObj[0].length);
-                        
-                        if (labelSegment.includes(':') || labelSegment.includes('/') || skipLabelPatterns.some(p => p.test(labelSegment))) {
-                            continue; 
+                        const labelEnd = trimmedLine.indexOf(matchObj[0]) + matchObj[0].length;
+                        const remainder = trimmedLine.substring(labelEnd);
+                        const numMatch = remainder.match(/-?[0-9]+(?:\.[0-9]+)?/);
+
+                        // Test EVERYTHING before the value, not just the label. "LAD:Ao 1.808",
+                        // "LVEDV RPLA/BW 3.790" and "MV E/A Ratio 1.62" are ratios whose separator
+                        // falls AFTER the matched label; the old label-only test let them through
+                        // and wrote the ratio into a measurement field (fixed 2026-09-13).
+                        // A ':' or '/' followed by a letter marks a ratio partner. "IVSd: 8" and a
+                        // unit fraction such as "(m/s)" do not, and still parse.
+                        const prefix = numMatch ? trimmedLine.substring(0, labelEnd + numMatch.index) : trimmedLine;
+                        const prefixSansUnits = prefix.replace(/\b(?:mm|cm|m|ml|l|g|kg)\s*\/\s*(?:s|min|kg|m2|m²|m|cm)(?![A-Za-z])/gi, ' ');
+                        if (/[:\/]\s*[A-Za-z]/.test(prefixSansUnits) || skipLabelPatterns.some(p => p.test(prefix))) {
+                            continue;
                         }
 
-                        const remainder = trimmedLine.substring(labelSegment.length);
-                        const numMatch = remainder.match(/-?[0-9]+(?:\.[0-9]+)?/);
 
                         if (numMatch) {
                             const numericValue = parseFloat(numMatch[0]);

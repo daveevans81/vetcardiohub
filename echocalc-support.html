@@ -88,18 +88,19 @@
                     <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How is the app laid out?</summary>
                     <p>Five tabs along the bottom of the screen:</p>
                     <ul>
-                        <li><strong>Measure</strong> — patient details, weight, model selection and every measurement field, grouped into collapsible sections.</li>
-                        <li><strong>Results</strong> — the derived indices, each with its reference interval and a normal / borderline / abnormal marker.</li>
-                        <li><strong>Assess</strong> — the scoring engines: diastolic function, pulmonary hypertension, MINE, and the species-specific assessments.</li>
-                        <li><strong>Report</strong> — the full text report and the PH audit, with share, copy and PDF export.</li>
+                        <li><strong>Measure</strong> — weight and model selection first, then every measurement field grouped into collapsible sections, with patient details and clinical observations at the foot of the form.</li>
+                        <li><strong>Results</strong> — the derived indices, each with its reference interval and a normal / borderline / abnormal marker. The <strong>Report &amp; export</strong> button at the top of this tab opens the full report, the single-tool documents and the PDF, text and copy exports.</li>
+                        <li><strong>Assess</strong> — the scoring engines: diastolic function, pulmonary hypertension, MINE, and the species-specific assessments, plus the breed reference tables and the models' provenance.</li>
+                        <li><strong>More</strong> — the focused calculators from the website (breed normals, diastolic function, MINE, Qp:Qs and pulmonary hypertension), the models and their citations, and About.</li>
                         <li><strong>Studies</strong> — saved studies, practice branding, and About with the clinical disclaimer and legal documents.</li>
                     </ul>
+                    <p>The calculators under <strong>More</strong> are shortcuts into the same study: anything entered there appears on the Measure tab and in the report.</p>
                 </details></div>
 
                 <div class="faq-item"><details>
                     <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Does it cost anything, and does it need an account or the internet?</summary>
                     <p>The app is free. There is no account to create, no sign-in and no subscription. It works fully offline — every calculation, reference interval and score is computed on your device from data built into the app.</p>
-                    <p>The only thing it ever fetches is an updated glossary from vetcardiohub.com. That request sends us nothing about you, your practice or any patient, and if it fails the app carries on with its built-in copy.</p>
+                    <p>The only thing it ever fetches is updated reference data and glossary text from vetcardiohub.com. Those requests send us nothing about you, your practice or any patient, and if they fail the app carries on with its built-in copies.</p>
                 </details></div>
 
                 <div class="faq-item"><details>
@@ -144,7 +145,7 @@
 
                 <div class="faq-item"><details>
                     <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Which allometric model should I choose?</summary>
-                    <p>The model is yours to choose, and it changes the answer — the same measurements scored against a different model can cross a clinical threshold in either direction. The app defaults to the standard canine (Cornell) model and offers non-sighthound, sighthound, toy-breed, puppy, adult cat and kitten alternatives. Each one shows its reference and PMID on screen, under <strong>Assess ▸ Models and provenance</strong>.</p>
+                    <p>The model is yours to choose, and it changes the answer — the same measurements scored against a different model can cross a clinical threshold in either direction. The app defaults to the standard canine (Cornell) model and offers non-sighthound, sighthound, toy-breed, puppy, adult cat and kitten alternatives. Each one shows its reference and PMID on screen, under <strong>Assess ▸ Models and provenance</strong> or <strong>More ▸ Models and provenance</strong>.</p>
                     <p>Pick the model whose published cohort your patient actually resembles, and be cautious applying any interval to a patient of different signalment, body condition or training status from that cohort.</p>
                 </details></div>
 
@@ -211,13 +212,13 @@
 
                 <div class="faq-item"><details>
                     <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">How do I get the report out of the app?</summary>
-                    <p>The <strong>Report</strong> tab builds it as you go. The share button offers <strong>Share as text</strong> (into an email, a note or your practice management system), <strong>Share as PDF</strong>, and <strong>Copy text</strong>. The text is also selectable on screen if you want to lift a single section.</p>
-                    <p>Where the pulmonary hypertension engine has something to report, a second segment gives the full PH audit as a separate document.</p>
+                    <p>The report builds itself as you go. Open it with <strong>Report &amp; export</strong> at the top of the <strong>Results</strong> tab. The export button offers <strong>Share as PDF</strong>, <strong>Share as text</strong> (into an email, a note or your practice management system), and <strong>Copy text</strong>. The text is also selectable on screen if you want to lift a single section.</p>
+                    <p>Where an engine has something to report, the document picker on that screen also offers it as a standalone document — the pulmonary hypertension audit, the EPIC stage B2 assessment, the MINE score and the diastolic profile — and each of those can be exported from its own panel on the Assess tab too. <strong>Report sections</strong> lets you leave a section out of the full report, and remembers the choice.</p>
                 </details></div>
 
                 <div class="faq-item"><details>
                     <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">Can I put my practice letterhead on the PDF?</summary>
-                    <p>Yes — <strong>Studies ▸ About ▸ Practice branding</strong>. You can set a practice name and address line, add a logo (placed top-right of the first page and scaled to fit), and add a signature image with a name and qualifications. These are stored on your device and applied to every PDF you export.</p>
+                    <p>Yes — <strong>Studies ▸ About ▸ Practice branding</strong>, or the <strong>Practice letterhead and signature</strong> link on the report screen. You can set a practice name and address line, add a logo (placed top-right of the first page and scaled to fit), and add a signature image with a name and qualifications. These are stored on your device and applied to every PDF you export.</p>
                     <p>A <strong>signature image is applied by whoever is holding the device.</strong> It records who the report is from; it does not verify who prepared or approved it. On a shared practice iPad, turn the signature block off.</p>
                 </details></div>
 
@@ -255,8 +256,10 @@
 
                 <div class="faq-item"><details>
                     <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">What updates by itself, and what needs an app update?</summary>
-                    <p>The <strong>glossary</strong> refreshes over the air: the app checks vetcardiohub.com occasionally, adopts a newer copy on the next launch, and falls back to its built-in version if it cannot connect.</p>
-                    <p>The <strong>reference set</strong> — every allometric model, breed table, volumetric table and scoring rule — is built into the app and changes only with an app update. The same is true of the Terms and Privacy Policy. You can see the version of each under <strong>Studies ▸ About</strong>.</p>
+                    <p>Two things refresh over the air: the <strong>glossary</strong>, and the <strong>reference set</strong> — the allometric models, breed tables, volumetric tables and scoring rules. The app checks vetcardiohub.com occasionally and falls back to its built-in copies if it cannot connect.</p>
+                    <p>An update is only ever adopted the next time the app starts, never part-way through a study — a study in progress must not have its reference intervals change underneath you. <strong>Studies ▸ About</strong> shows the date of each, and whether the reference set is the one bundled with this version or a later download.</p>
+                    <p>A downloaded reference set is refused unless it is complete: if it were missing a model the app can offer, it is discarded and the bundled set is kept. If an update ever looks wrong, <strong>About ▸ Revert to the bundled reference set</strong> returns you to the one that shipped with your installed version.</p>
+                    <p>The Terms and Privacy Policy are built into the app and change only with an app update.</p>
                 </details></div>
 
                 <div class="faq-item"><details>
@@ -293,7 +296,7 @@
 
                 <div class="faq-item"><details>
                     <summary style="font-weight: bold; cursor: pointer; color: #1e40af;">The PDF will not export, or the letterhead is missing.</summary>
-                    <p>The report has to contain something first — enter at least a weight or a patient name. If the letterhead is missing, check that a practice name or logo is set under <strong>Studies ▸ About ▸ Practice branding</strong>; if the signature block is missing, check that the signature switch is on. The text report is always available as a fallback.</p>
+                    <p>The report has to contain something first — enter at least a weight or a patient name. If the letterhead is missing, check that a practice name or logo is set under <strong>Studies ▸ About ▸ Practice branding</strong> (also linked from the report screen); if the signature block is missing, check that the signature switch is on. The text report is always available as a fallback.</p>
                 </details></div>
             </section>
 

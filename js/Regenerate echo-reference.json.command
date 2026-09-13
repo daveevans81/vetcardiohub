@@ -2,14 +2,22 @@
 #
 # Regenerate echo-reference.json.command
 #
-# Double-click this file to rebuild med-data.json from med-data.js.
+# Double-click this file to rebuild echo-reference.json from echo-breeds.js AND SIGN IT.
 #
-# SETUP (once): keep these three files together in ONE folder —
+# SETUP (once): keep these four files together in ONE folder —
 #   • Regenerate echo-reference.json.command   (this file)
 #   • generate-echo-reference-json.js          (the generator)
-#   • echo-breeds.js                        (your source of truth)
-# Double-click whenever you've edited med-data.js. It writes med-data.json next to them;
-# then push both echo-breeds.js and echo-reference.json to the web.
+#   • sign-echo-reference.js                   (the signer)
+#   • echo-breeds.js                           (your source of truth)
+# and the private signing key at ~/.vetcardiohub/echo-reference-signing.pem.
+#
+# Double-click whenever you've edited echo-breeds.js (and bumped VCH_ECHO_REF_REVIEWED). It writes
+# echo-reference.json and echo-reference.json.sig next to them; then push ALL THREE of
+# echo-breeds.js, echo-reference.json and echo-reference.json.sig to the web.
+#
+# THIS IS A LIVE CLINICAL ACTION. Every installed copy of VCH EchoCalc adopts the new set from its
+# next launch. The app refuses a set whose .sig is missing or stale, so an upload without the
+# signature changes nothing — which is the safe failure, but also why the .sig must go up too.
 #
 # (If macOS blocks it the first time: right-click → Open, or run
 #  `chmod +x "Regenerate echo-reference.json.command"` in Terminal once.)
@@ -40,6 +48,7 @@ if [ -z "$NODE" ]; then
 fi
 
 SCRIPT="$DIR/generate-echo-reference-json.js"
+SIGNER="$DIR/sign-echo-reference.js"
 INPUT="$DIR/echo-breeds.js"
 OUTPUT="$DIR/echo-reference.json"
 
@@ -55,6 +64,12 @@ if [ ! -f "$INPUT" ]; then
   echo "  Put your echo-breeds.js in the same folder as this launcher."
   pause_and_exit 1
 fi
+if [ ! -f "$SIGNER" ]; then
+  echo "✖ Can't find sign-echo-reference.js in this folder:"
+  echo "  $DIR"
+  echo "  Copy it from the VCHEchoCalc repo's Tools/ folder."
+  pause_and_exit 1
+fi
 
 echo "Node:   $("$NODE" --version)"
 echo "Folder: $DIR"
@@ -64,9 +79,16 @@ STATUS=$?
 echo "--------------------------------------------------------------"
 
 if [ "$STATUS" -eq 0 ]; then
-  echo "✅ Done. echo-reference.json is up to date."
-  echo "   Push BOTH echo-breeds.js and echo-reference.json to the web."
+  "$NODE" "$SIGNER" sign "$OUTPUT"
+  STATUS=$?
+  echo "--------------------------------------------------------------"
+fi
+
+if [ "$STATUS" -eq 0 ]; then
+  echo "✅ Done. echo-reference.json is up to date and signed."
+  echo "   Push ALL THREE of echo-breeds.js, echo-reference.json and echo-reference.json.sig to the web."
 else
-  echo "✖ Generation failed (see messages above). echo-reference.json was NOT changed."
+  echo "✖ Generation or signing failed (see messages above)."
+  echo "  Do NOT upload echo-reference.json without a matching .sig — the app will refuse it."
 fi
 pause_and_exit "$STATUS"

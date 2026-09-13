@@ -5,7 +5,7 @@
   "note": "GENERATED FILE — do not edit by hand. Regenerate from echo-breeds.js.",
   "infinityEncoding": "A null `max` in mineModels.ranges / diastolicRules means +Infinity."
  },
- "reviewedDate": "2026-08-10",
+ "reviewedDate": "2026-08-13",
  "allometricModels": {
   "cornell_standard": {
    "breed": null,
@@ -1513,22 +1513,22 @@
    {
     "category": "Normal Flow Timing",
     "grade": "Normal",
-    "max": 1.49,
+    "max": 2.49,
     "min": 0,
     "points": 0
    },
    {
     "category": "Elevated Filling Pressure",
     "grade": "Grade II",
-    "max": 2.49,
-    "min": 1.5,
+    "max": 2.99,
+    "min": 2.5,
     "points": 2
    },
    {
     "category": "Severe Left Atrial Pressure",
     "grade": "Grade III",
     "max": null,
-    "min": 2.5,
+    "min": 3,
     "points": 4
    }
   ],
